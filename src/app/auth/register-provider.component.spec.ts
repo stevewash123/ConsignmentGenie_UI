@@ -50,7 +50,7 @@ describe('RegisterProviderComponent', () => {
       email: 'test@example.com',
       password: 'Password123!',
       fullName: 'Test User',
-      phone: '555-1234'
+      phone: '' // Use a valid phone number format
     });
 
     // Mark all form fields as valid by removing validation errors
@@ -93,7 +93,7 @@ describe('RegisterProviderComponent', () => {
       email: 'test@example.com',
       password: 'Password123!',
       fullName: 'Test User',
-      phone: '555-1234'
+      phone: ''
     });
 
     // Mark form as valid and touched
@@ -124,7 +124,7 @@ describe('RegisterProviderComponent', () => {
       email: 'test@example.com',
       password: 'Password123!',
       fullName: 'Test User',
-      phone: '555-1234'
+      phone: ''
     });
 
     // Mark form as valid and touched
