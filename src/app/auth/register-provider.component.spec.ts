@@ -1,6 +1,7 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { RegisterProviderComponent } from './register-provider.component';
 import { AuthService } from '../services/auth.service';
@@ -13,21 +14,23 @@ describe('RegisterProviderComponent', () => {
 
   beforeEach(async () => {
     // ✅ Create proper router spy
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['registerProvider']);
+    mockAuthService = jasmine.createSpyObj('AuthService', ['registerProvider', 'validateStoreCode']);
 
     await TestBed.configureTestingModule({
-      declarations: [ RegisterProviderComponent ],
-      imports: [ ReactiveFormsModule ],
+      imports: [ RegisterProviderComponent, ReactiveFormsModule, RouterTestingModule.withRoutes([]) ],
       providers: [
-        { provide: AuthService, useValue: mockAuthService },
-        { provide: Router, useValue: mockRouter }  // ✅ Provide router spy
+        { provide: AuthService, useValue: mockAuthService }
       ]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(RegisterProviderComponent);
     component = fixture.componentInstance;
+
+    // Get the router after TestBed is configured
+    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    spyOn(mockRouter, 'navigate');
+
     fixture.detectChanges();
   });
 
@@ -36,103 +39,117 @@ describe('RegisterProviderComponent', () => {
   });
 
   it('should initialize with invalid form', () => {
-    expect(component.registerForm.valid).toBeFalsy();
+    expect(component.registrationForm.valid).toBeFalsy();
   });
 
-  // ✅ Fix the hanging test with fakeAsync + tick
   it('should navigate on successful registration', fakeAsync(() => {
-    // Setup mock to return successful observable
-    mockAuthService.registerProvider.and.returnValue(of({ success: true }));
-    
+    // Setup mock to return successful promise
+    mockAuthService.registerProvider.and.returnValue(Promise.resolve({ success: true }));
+
     // Fill form
-    component.registerForm.patchValue({
+    component.registrationForm.patchValue({
       email: 'test@example.com',
       password: 'Password123!',
       fullName: 'Test User',
-      phone: '555-1234',
-      storeCode: 'ABC123'
+      phone: '555-1234'
     });
 
-    // Submit
+    // Set store code as validated and shop name
+    component.storeCodeValidated = true;
+    component.shopName = 'Test Shop';
+    component.storeCodeForm.patchValue({ storeCode: 'ABC123' });
+
+    // Submit and wait for async operation to complete
     component.onSubmit();
-    
-    // ✅ Tick to process async operations
-    tick();
+    flushMicrotasks(); // Wait for promise to resolve
 
     // Verify navigation was called
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/auth/pending-approval']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/success'], {
+      queryParams: {
+        type: 'provider',
+        shopName: 'Test Shop',
+        email: 'test@example.com',
+        fullName: 'Test User'
+      }
+    });
   }));
 
   it('should display error on registration failure', fakeAsync(() => {
-    const errorResponse = { 
-      error: { 
-        message: 'Email already exists' 
-      } 
+    const errorResponse = {
+      success: false,
+      message: 'Email already exists',
+      errors: ['Email is already in use']
     };
-    
-    mockAuthService.registerProvider.and.returnValue(
-      throwError(() => errorResponse)
-    );
-    
-    component.registerForm.patchValue({
+
+    mockAuthService.registerProvider.and.returnValue(Promise.resolve(errorResponse));
+
+    component.registrationForm.patchValue({
       email: 'test@example.com',
       password: 'Password123!',
       fullName: 'Test User',
-      phone: '555-1234',
-      storeCode: 'ABC123'
+      phone: '555-1234'
     });
 
-    component.onSubmit();
-    tick();
+    component.storeCodeValidated = true;
+    component.shopName = 'Test Shop';
+    component.storeCodeForm.patchValue({ storeCode: 'ABC123' });
 
-    expect(component.errorMessage).toBe('Email already exists');
+    component.onSubmit();
+    flushMicrotasks(); // Wait for promise to resolve
+
+    expect(component.registrationError).toBe('Email already exists');
     expect(mockRouter.navigate).not.toHaveBeenCalled();
   }));
 
-  it('should show generic error when no message provided', fakeAsync(() => {
+  it('should show generic error when exception occurs', fakeAsync(() => {
     mockAuthService.registerProvider.and.returnValue(
-      throwError(() => ({ error: {} }))
+      Promise.reject(new Error('Network error'))
     );
-    
-    component.registerForm.patchValue({
+
+    component.registrationForm.patchValue({
       email: 'test@example.com',
       password: 'Password123!',
       fullName: 'Test User',
-      phone: '555-1234',
-      storeCode: 'ABC123'
+      phone: '555-1234'
     });
 
-    component.onSubmit();
-    tick();
+    component.storeCodeValidated = true;
+    component.shopName = 'Test Shop';
+    component.storeCodeForm.patchValue({ storeCode: 'ABC123' });
 
-    expect(component.errorMessage).toBe('Registration failed');
+    component.onSubmit();
+    flushMicrotasks(); // Wait for promise to reject
+
+    expect(component.registrationError).toBe('Network error');
   }));
 
   it('should validate required fields', () => {
-    const form = component.registerForm;
-    
+    const form = component.registrationForm;
+
     expect(form.get('email')?.hasError('required')).toBeTruthy();
     expect(form.get('password')?.hasError('required')).toBeTruthy();
     expect(form.get('fullName')?.hasError('required')).toBeTruthy();
-    expect(form.get('storeCode')?.hasError('required')).toBeTruthy();
+
+    const storeCodeForm = component.storeCodeForm;
+    expect(storeCodeForm.get('storeCode')?.hasError('required')).toBeTruthy();
   });
 
   it('should validate email format', () => {
-    const emailControl = component.registerForm.get('email');
-    
+    const emailControl = component.registrationForm.get('email');
+
     emailControl?.setValue('invalid-email');
     expect(emailControl?.hasError('email')).toBeTruthy();
-    
+
     emailControl?.setValue('valid@email.com');
     expect(emailControl?.hasError('email')).toBeFalsy();
   });
 
   it('should validate password minimum length', () => {
-    const passwordControl = component.registerForm.get('password');
-    
+    const passwordControl = component.registrationForm.get('password');
+
     passwordControl?.setValue('short');
     expect(passwordControl?.hasError('minlength')).toBeTruthy();
-    
+
     passwordControl?.setValue('LongEnough123!');
     expect(passwordControl?.hasError('minlength')).toBeFalsy();
   });
