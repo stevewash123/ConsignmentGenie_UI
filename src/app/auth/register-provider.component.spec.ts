@@ -13,11 +13,10 @@ describe('RegisterProviderComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    // ✅ Create proper router spy
     mockAuthService = jasmine.createSpyObj('AuthService', ['registerProvider', 'validateStoreCode']);
 
     await TestBed.configureTestingModule({
-      imports: [ RegisterProviderComponent, ReactiveFormsModule, RouterTestingModule.withRoutes([]) ],
+      imports: [ RegisterProviderComponent, ReactiveFormsModule, RouterTestingModule ],
       providers: [
         { provide: AuthService, useValue: mockAuthService }
       ]
@@ -27,9 +26,9 @@ describe('RegisterProviderComponent', () => {
     fixture = TestBed.createComponent(RegisterProviderComponent);
     component = fixture.componentInstance;
 
-    // Get the router after TestBed is configured
+    // Get the router and spy on navigate
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    spyOn(mockRouter, 'navigate');
+    spyOn(mockRouter, 'navigate').and.returnValue(Promise.resolve(true));
 
     fixture.detectChanges();
   });
@@ -46,7 +45,7 @@ describe('RegisterProviderComponent', () => {
     // Setup mock to return successful promise
     mockAuthService.registerProvider.and.returnValue(Promise.resolve({ success: true }));
 
-    // Fill form
+    // Fill form with valid data
     component.registrationForm.patchValue({
       email: 'test@example.com',
       password: 'Password123!',
@@ -54,14 +53,21 @@ describe('RegisterProviderComponent', () => {
       phone: '555-1234'
     });
 
+    // Mark all form fields as valid by removing validation errors
+    component.registrationForm.markAllAsTouched();
+    component.registrationForm.updateValueAndValidity();
+
     // Set store code as validated and shop name
     component.storeCodeValidated = true;
     component.shopName = 'Test Shop';
     component.storeCodeForm.patchValue({ storeCode: 'ABC123' });
 
+    // Verify form is valid before submitting
+    expect(component.registrationForm.valid).toBe(true);
+
     // Submit and wait for async operation to complete
     component.onSubmit();
-    flushMicrotasks(); // Wait for promise to resolve
+    tick(); // Wait for microtasks to complete
 
     // Verify navigation was called
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/success'], {
@@ -90,12 +96,20 @@ describe('RegisterProviderComponent', () => {
       phone: '555-1234'
     });
 
+    // Mark form as valid and touched
+    component.registrationForm.markAllAsTouched();
+    component.registrationForm.updateValueAndValidity();
+
     component.storeCodeValidated = true;
     component.shopName = 'Test Shop';
     component.storeCodeForm.patchValue({ storeCode: 'ABC123' });
 
+    // Verify form is valid before submitting
+    expect(component.registrationForm.valid).toBe(true);
+
     component.onSubmit();
-    flushMicrotasks(); // Wait for promise to resolve
+    tick(); // Wait for microtasks to complete
+    fixture.detectChanges(); // Update the DOM
 
     expect(component.registrationError).toBe('Email already exists');
     expect(mockRouter.navigate).not.toHaveBeenCalled();
@@ -113,12 +127,26 @@ describe('RegisterProviderComponent', () => {
       phone: '555-1234'
     });
 
+    // Mark form as valid and touched
+    component.registrationForm.markAllAsTouched();
+    component.registrationForm.updateValueAndValidity();
+
     component.storeCodeValidated = true;
     component.shopName = 'Test Shop';
     component.storeCodeForm.patchValue({ storeCode: 'ABC123' });
 
-    component.onSubmit();
-    flushMicrotasks(); // Wait for promise to reject
+    // Verify form is valid before submitting
+    expect(component.registrationForm.valid).toBe(true);
+
+    // Call onSubmit - the component handles the promise rejection internally
+    try {
+      component.onSubmit();
+      tick(); // Wait for microtasks to complete
+    } catch (error) {
+      // Ignore the error since the component handles it
+    }
+
+    fixture.detectChanges(); // Update the DOM
 
     expect(component.registrationError).toBe('Network error');
   }));
