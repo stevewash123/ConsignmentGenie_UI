@@ -42,8 +42,8 @@ describe('RegisterProviderComponent', () => {
   });
 
   it('should navigate on successful registration', fakeAsync(() => {
-    // Setup mock to return successful promise
-    mockAuthService.registerProvider.and.returnValue(Promise.resolve({ success: true }));
+    // Setup mock to return successful observable
+    mockAuthService.registerProvider.and.returnValue(of({ success: true }));
 
     // Fill form with valid data
     component.registrationForm.patchValue({
@@ -87,7 +87,7 @@ describe('RegisterProviderComponent', () => {
       errors: ['Email is already in use']
     };
 
-    mockAuthService.registerProvider.and.returnValue(Promise.resolve(errorResponse));
+    mockAuthService.registerProvider.and.returnValue(of(errorResponse));
 
     component.registrationForm.patchValue({
       email: 'test@example.com',
@@ -117,7 +117,7 @@ describe('RegisterProviderComponent', () => {
 
   it('should show generic error when exception occurs', fakeAsync(() => {
     mockAuthService.registerProvider.and.returnValue(
-      Promise.reject(new Error('Network error'))
+      throwError(() => new Error('Network error'))
     );
 
     component.registrationForm.patchValue({

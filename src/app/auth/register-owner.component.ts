@@ -333,7 +333,7 @@ export class RegisterOwnerComponent {
     return null;
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.registrationForm.invalid) {
       this.markAllFieldsTouched();
       return;
@@ -342,35 +342,36 @@ export class RegisterOwnerComponent {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    try {
-      const formValue = this.registrationForm.value;
-      const request = {
-        fullName: formValue.fullName,
-        email: formValue.email,
-        phone: formValue.phone,
-        password: formValue.password,
-        shopName: formValue.shopName
-      };
+    const formValue = this.registrationForm.value;
+    const request = {
+      fullName: formValue.fullName,
+      email: formValue.email,
+      phone: formValue.phone,
+      password: formValue.password,
+      shopName: formValue.shopName
+    };
 
-      const result = await this.authService.registerOwner(request);
-
-      if (result.success) {
-        // Navigate to success page
-        this.router.navigate(['/register/success'], {
-          queryParams: {
-            type: 'owner',
-            shopName: formValue.shopName,
-            email: formValue.email
-          }
-        });
-      } else {
-        this.errorMessage.set(result.message || 'Registration failed');
+    this.authService.registerOwner(request).subscribe({
+      next: (result) => {
+        if (result.success) {
+          // Navigate to success page
+          this.router.navigate(['/register/success'], {
+            queryParams: {
+              type: 'owner',
+              shopName: formValue.shopName,
+              email: formValue.email
+            }
+          });
+        } else {
+          this.errorMessage.set(result.message || 'Registration failed');
+        }
+        this.isSubmitting.set(false);
+      },
+      error: (error: any) => {
+        this.errorMessage.set(error.message || 'An unexpected error occurred');
+        this.isSubmitting.set(false);
       }
-    } catch (error: any) {
-      this.errorMessage.set(error.message || 'An unexpected error occurred');
-    } finally {
-      this.isSubmitting.set(false);
-    }
+    });
   }
 
   private markAllFieldsTouched() {

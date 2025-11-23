@@ -87,7 +87,7 @@ describe('AuthService', () => {
 
     mockHttpClient.post.and.returnValue(of(mockResponse));
 
-    service.registerOwner(ownerRequest).then(result => {
+    service.registerOwner(ownerRequest).subscribe(result => {
       expect(result).toEqual(mockResponse);
     });
 
@@ -113,7 +113,7 @@ describe('AuthService', () => {
       }))
     );
 
-    service.registerOwner(ownerRequest).then(result => {
+    service.registerOwner(ownerRequest).subscribe(result => {
       expect(result.success).toBeFalse();
       expect(result.message).toBe('Email already exists');
       expect(result.errors).toEqual(['Email is already in use']);
@@ -133,7 +133,7 @@ describe('AuthService', () => {
 
     mockHttpClient.post.and.returnValue(of(mockResponse));
 
-    service.registerProvider(providerRequest).then(result => {
+    service.registerProvider(providerRequest).subscribe(result => {
       expect(result).toEqual(mockResponse);
     });
 
@@ -151,7 +151,7 @@ describe('AuthService', () => {
 
     mockHttpClient.get.and.returnValue(of(mockResponse));
 
-    service.validateStoreCode(storeCode).then(result => {
+    service.validateStoreCode(storeCode).subscribe(result => {
       expect(result).toEqual(mockResponse);
     });
 
@@ -169,7 +169,7 @@ describe('AuthService', () => {
 
     mockHttpClient.get.and.returnValue(of(mockResponse));
 
-    service.validateStoreCode(storeCode).then(result => {
+    service.validateStoreCode(storeCode).subscribe(result => {
       expect(result.isValid).toBeFalse();
       expect(result.errorMessage).toBe('Invalid store code');
     });
