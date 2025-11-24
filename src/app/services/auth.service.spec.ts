@@ -178,21 +178,27 @@ describe('AuthService', () => {
   }));
 
   it('should logout successfully', () => {
-    // Set up some stored data
-    localStorage.setItem('token', 'test-token');
-    localStorage.setItem('user', JSON.stringify({ id: 1, email: 'test@test.com' }));
+    // ✅ Use correct localStorage keys that match the service
+    localStorage.setItem('auth_token', 'test-token');
+    localStorage.setItem('user_data', JSON.stringify({ id: 1, email: 'test@test.com' }));
+    localStorage.setItem('refreshToken', 'test-refresh-token');
+    localStorage.setItem('tokenExpiry', new Date(Date.now() + 3600000).toISOString());
     service.isLoggedIn.set(true);
 
     service.logout();
 
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(localStorage.getItem('user')).toBeNull();
+    // ✅ Check the correct keys are removed
+    expect(localStorage.getItem('auth_token')).toBeNull();
+    expect(localStorage.getItem('user_data')).toBeNull();
+    expect(localStorage.getItem('refreshToken')).toBeNull();
+    expect(localStorage.getItem('tokenExpiry')).toBeNull();
     expect(service.isLoggedIn()).toBeFalse();
     expect(service.getCurrentUser()).toBeNull();
   });
 
   it('should get token from localStorage', () => {
-    localStorage.setItem('token', 'test-token');
+    // ✅ Use correct key 'auth_token'
+    localStorage.setItem('auth_token', 'test-token');
     expect(service.getToken()).toBe('test-token');
   });
 

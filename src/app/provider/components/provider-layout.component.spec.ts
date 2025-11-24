@@ -41,105 +41,118 @@ describe('ProviderLayoutComponent', () => {
     mockProviderService.getUnreadNotificationCount.and.returnValue(of({ count: 5 }));
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    if (fixture) {
+      fixture.destroy();
+    }
   });
 
-  it('should load unread notification count on init', fakeAsync(() => {
-    fixture.detectChanges();
-    tick();
-
-    expect(mockProviderService.getUnreadNotificationCount).toHaveBeenCalled();
-    expect(component.unreadCount).toBe(5);
-  }));
-
-  it('should handle error when loading unread count', fakeAsync(() => {
-    mockProviderService.getUnreadNotificationCount.and.returnValue(throwError(() => new Error('API Error')));
-    spyOn(console, 'error');
-
-    fixture.detectChanges();
-    tick();
-
-    expect(console.error).toHaveBeenCalledWith('Error loading unread notification count:', jasmine.any(Error));
-    expect(component.unreadCount).toBe(0);
-  }));
-
-  it('should display notification badge when unreadCount > 0', fakeAsync(() => {
-    mockProviderService.getUnreadNotificationCount.and.returnValue(of({ count: 3 }));
-
-    fixture.detectChanges();
-    tick();
-
-    const badge = fixture.nativeElement.querySelector('.notification-badge');
-    expect(badge).toBeTruthy();
-    expect(badge.textContent.trim()).toBe('3');
-  }));
-
-  it('should display 99+ when unreadCount > 99', fakeAsync(() => {
-    mockProviderService.getUnreadNotificationCount.and.returnValue(of({ count: 150 }));
-
-    fixture.detectChanges();
-    tick();
-
-    const badge = fixture.nativeElement.querySelector('.notification-badge');
-    expect(badge.textContent.trim()).toBe('99+');
-    expect(badge.getAttribute('data-count')).toBe('99+');
-  }));
-
-  it('should not display notification badge when unreadCount is 0', fakeAsync(() => {
-    mockProviderService.getUnreadNotificationCount.and.returnValue(of({ count: 0 }));
-
-    fixture.detectChanges();
-    tick();
-
-    const badge = fixture.nativeElement.querySelector('.notification-badge');
-    expect(badge).toBeFalsy();
-  }));
-
-  it('should toggle user menu when clicked', () => {
-    expect(component.userMenuOpen).toBeFalse();
-
-    const userMenu = fixture.nativeElement.querySelector('.user-menu');
-    userMenu.click();
-
-    expect(component.userMenuOpen).toBeTrue();
-
-    userMenu.click();
-
-    expect(component.userMenuOpen).toBeFalse();
-  });
-
-  it('should close user menu when closeUserMenu is called', () => {
-    component.userMenuOpen = true;
-    component.closeUserMenu();
-
-    expect(component.userMenuOpen).toBeFalse();
-  });
-
-  it('should display navigation links', () => {
-    fixture.detectChanges();
-
-    const navLinks = fixture.nativeElement.querySelectorAll('.nav-link');
-    const expectedLinks = ['Dashboard', 'My Items', 'Sales', 'Payouts', 'Statements'];
-
-    navLinks.forEach((link: HTMLElement, index: number) => {
-      expect(link.textContent?.trim()).toBe(expectedLinks[index]);
-    });
-  });
-
-  it('should call logout and clear token', () => {
-    spyOn(localStorage, 'removeItem');
-
-    // Spy on the component's logout method to prevent actual navigation
-    const originalLogout = component.logout;
-    spyOn(component, 'logout').and.callFake(() => {
-      localStorage.removeItem('token');
-      // Don't actually navigate during test
+  describe('Component Initialization', () => {
+    it('should create', () => {
+      expect(component).toBeTruthy();
     });
 
-    component.logout();
+    it('should load unread notification count on init', fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
 
-    expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+      expect(mockProviderService.getUnreadNotificationCount).toHaveBeenCalled();
+      expect(component.unreadCount).toBe(5);
+    }));
+
+    it('should handle error when loading unread count', fakeAsync(() => {
+      mockProviderService.getUnreadNotificationCount.and.returnValue(throwError(() => new Error('API Error')));
+      spyOn(console, 'error');
+
+      fixture.detectChanges();
+      tick();
+
+      expect(console.error).toHaveBeenCalledWith('Error loading unread notification count:', jasmine.any(Error));
+      expect(component.unreadCount).toBe(0);
+    }));
+  });
+
+  describe('Notification Badge Display', () => {
+    it('should display notification badge when unreadCount > 0', fakeAsync(() => {
+      mockProviderService.getUnreadNotificationCount.and.returnValue(of({ count: 3 }));
+
+      fixture.detectChanges();
+      tick();
+
+      const badge = fixture.nativeElement.querySelector('.notification-badge');
+      expect(badge).toBeTruthy();
+      expect(badge.textContent.trim()).toBe('3');
+    }));
+
+    it('should display 99+ when unreadCount > 99', fakeAsync(() => {
+      mockProviderService.getUnreadNotificationCount.and.returnValue(of({ count: 150 }));
+
+      fixture.detectChanges();
+      tick();
+
+      const badge = fixture.nativeElement.querySelector('.notification-badge');
+      expect(badge.textContent.trim()).toBe('99+');
+      expect(badge.getAttribute('data-count')).toBe('99+');
+    }));
+
+    it('should not display notification badge when unreadCount is 0', fakeAsync(() => {
+      mockProviderService.getUnreadNotificationCount.and.returnValue(of({ count: 0 }));
+
+      fixture.detectChanges();
+      tick();
+
+      const badge = fixture.nativeElement.querySelector('.notification-badge');
+      expect(badge).toBeFalsy();
+    }));
+  });
+
+  describe('UI Interactions', () => {
+    it('should toggle user menu when clicked', () => {
+      expect(component.userMenuOpen).toBeFalse();
+      fixture.detectChanges();
+
+      const userMenu = fixture.nativeElement.querySelector('.user-menu');
+      userMenu.click();
+
+      expect(component.userMenuOpen).toBeTrue();
+
+      userMenu.click();
+
+      expect(component.userMenuOpen).toBeFalse();
+    });
+
+    it('should close user menu when closeUserMenu is called', () => {
+      component.userMenuOpen = true;
+      component.closeUserMenu();
+
+      expect(component.userMenuOpen).toBeFalse();
+    });
+
+    it('should display navigation links', () => {
+      fixture.detectChanges();
+
+      const navLinks = fixture.nativeElement.querySelectorAll('.nav-link');
+      const expectedLinks = ['Dashboard', 'My Items', 'Sales', 'Payouts', 'Statements'];
+
+      navLinks.forEach((link: HTMLElement, index: number) => {
+        expect(link.textContent?.trim()).toBe(expectedLinks[index]);
+      });
+    });
+
+    it('should call logout and clear token', () => {
+      spyOn(localStorage, 'removeItem');
+
+      // Spy on the component's logout method to prevent actual navigation
+      const originalLogout = component.logout;
+      spyOn(component, 'logout').and.callFake(() => {
+        localStorage.removeItem('token');
+        // Don't actually navigate during test
+      });
+
+      component.logout();
+
+      expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+    });
   });
 
   it('should close user menu when clicking outside', () => {

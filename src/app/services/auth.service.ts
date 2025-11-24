@@ -129,9 +129,9 @@ export class AuthService {
   }
 
   private setAuthData(response: AuthResponse): void {
-    localStorage.setItem('token', response.token);
+    localStorage.setItem('auth_token', response.token);
     localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('user_data', JSON.stringify(response.user));
     localStorage.setItem('tokenExpiry', response.expiresAt);
 
     this.currentUserSubject.next(response.user);
