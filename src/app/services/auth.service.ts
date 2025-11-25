@@ -143,12 +143,20 @@ export class AuthService {
   }
 
   private setAuthData(response: AuthResponse): void {
+    // Create user object from response data
+    const userData = {
+      userId: response.userId,
+      email: response.email,
+      role: response.role,
+      organizationId: response.organizationId,
+      organizationName: response.organizationName
+    };
+
     localStorage.setItem('auth_token', response.token);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('user_data', JSON.stringify(response.user));
+    localStorage.setItem('user_data', JSON.stringify(userData));
     localStorage.setItem('tokenExpiry', response.expiresAt);
 
-    this.currentUserSubject.next(response.user);
+    this.currentUserSubject.next(userData as any);
     this.tokenInfo.set({
       token: response.token,
       expiresAt: new Date(response.expiresAt)
