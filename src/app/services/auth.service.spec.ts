@@ -213,4 +213,145 @@ describe('AuthService', () => {
     service['tokenInfo'].set({ token: 'token', expiresAt: futureDate });
     expect(service.isTokenExpired()).toBeFalsy();
   });
+
+  it('should load stored authentication on init', () => {
+    const futureDate = new Date(Date.now() + 3600000);
+    const userData = { id: 1, email: 'test@test.com', businessName: 'Test Business', ownerName: 'Test Owner', organizationId: 1, role: 'Owner' };
+
+    localStorage.setItem('auth_token', 'stored-token');
+    localStorage.setItem('user_data', JSON.stringify(userData));
+    localStorage.setItem('tokenExpiry', futureDate.toISOString());
+
+    service.loadStoredAuth();
+
+    expect(service.isLoggedIn()).toBeTruthy();
+    expect(service.getCurrentUser()).toEqual(userData);
+    expect(service.getToken()).toBe('stored-token');
+  });
+
+  it('should logout if stored token is expired', () => {
+    const pastDate = new Date(Date.now() - 3600000);
+    const userData = { id: 1, email: 'test@test.com', businessName: 'Test Business', ownerName: 'Test Owner', organizationId: 1, role: 'Owner' };
+
+    localStorage.setItem('auth_token', 'expired-token');
+    localStorage.setItem('user_data', JSON.stringify(userData));
+    localStorage.setItem('tokenExpiry', pastDate.toISOString());
+
+    service.loadStoredAuth();
+
+    expect(service.isLoggedIn()).toBeFalsy();
+    expect(service.getCurrentUser()).toBeNull();
+    expect(service.getToken()).toBeNull();
+  });
+
+  it('should not load auth if no stored data', () => {
+    localStorage.clear();
+
+    service.loadStoredAuth();
+
+    expect(service.isLoggedIn()).toBeFalsy();
+    expect(service.getCurrentUser()).toBeNull();
+    expect(service.getToken()).toBeNull();
+  });
+
+  it('should handle partial stored data gracefully', () => {
+    localStorage.setItem('auth_token', 'token');
+    // Missing user_data and tokenExpiry
+
+    service.loadStoredAuth();
+
+    expect(service.isLoggedIn()).toBeFalsy();
+    expect(service.getCurrentUser()).toBeNull();
+  });
+
+  it('should refresh token successfully', fakeAsync(() => {
+    const refreshToken = 'refresh-token';
+    const mockResponse = {
+      token: 'new-token',
+      refreshToken: 'new-refresh-token',
+      user: { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' },
+      expiresAt: new Date(Date.now() + 3600000).toISOString()
+    };
+
+    localStorage.setItem('refreshToken', refreshToken);
+    mockHttpClient.post.and.returnValue(of(mockResponse));
+
+    service.refreshToken().subscribe(response => {
+      expect(response).toEqual(mockResponse);
+      expect(service.getToken()).toBe('new-token');
+    });
+
+    tick();
+
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/auth/refresh', { refreshToken });
+  }));
+
+  it('should handle provider registration errors gracefully', fakeAsync(() => {
+    const providerRequest = {
+      storeCode: '1234',
+      fullName: 'Provider Name',
+      email: 'provider@test.com',
+      password: 'password123'
+    };
+
+    mockHttpClient.post.and.returnValue(
+      throwError(() => ({
+        error: {
+          message: 'Store code not found',
+          errors: ['Invalid store code']
+        }
+      }))
+    );
+
+    service.registerProvider(providerRequest).subscribe(result => {
+      expect(result.success).toBeFalse();
+      expect(result.message).toBe('Store code not found');
+      expect(result.errors).toEqual(['Invalid store code']);
+    });
+
+    tick();
+  }));
+
+  it('should handle store code validation errors', fakeAsync(() => {
+    const storeCode = '9999';
+
+    mockHttpClient.get.and.returnValue(
+      throwError(() => ({ message: 'Network error' }))
+    );
+
+    service.validateStoreCode(storeCode).subscribe(result => {
+      expect(result.isValid).toBeFalse();
+      expect(result.errorMessage).toBe('Unable to validate store code');
+    });
+
+    tick();
+  }));
+
+  it('should return current user observable', () => {
+    const userData = { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' };
+
+    service['currentUserSubject'].next(userData);
+
+    service.currentUser$.subscribe(user => {
+      expect(user).toEqual(userData);
+    });
+  });
+
+  it('should set auth data correctly', () => {
+    const authResponse = {
+      token: 'new-token',
+      refreshToken: 'new-refresh-token',
+      user: { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' },
+      expiresAt: new Date(Date.now() + 3600000).toISOString()
+    };
+
+    service['setAuthData'](authResponse);
+
+    expect(localStorage.getItem('auth_token')).toBe('new-token');
+    expect(localStorage.getItem('refreshToken')).toBe('new-refresh-token');
+    expect(JSON.parse(localStorage.getItem('user_data')!)).toEqual(authResponse.user);
+    expect(localStorage.getItem('tokenExpiry')).toBe(authResponse.expiresAt);
+    expect(service.isLoggedIn()).toBeTruthy();
+    expect(service.getCurrentUser()).toEqual(authResponse.user);
+  });
 });
