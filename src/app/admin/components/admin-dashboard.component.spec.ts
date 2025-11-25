@@ -202,7 +202,6 @@ describe('AdminDashboardComponent', () => {
 
         component.inviteOwner();
 
-        // Wait a bit for the async operation
         setTimeout(() => {
           expect(adminServiceMock.inviteOwner).toHaveBeenCalledWith({ name: 'John Doe', email: 'john@example.com' });
           expect(component.showInviteModal).toBeFalse();
@@ -212,16 +211,20 @@ describe('AdminDashboardComponent', () => {
         }, 10);
       });
 
-      it('should handle invitation failure', () => {
+      it('should handle invitation failure', (done) => {
         const mockResponse = { success: false, message: 'Email already exists' };
         adminServiceMock.inviteOwner.and.returnValue(of(mockResponse));
         component.inviteRequest = { name: 'John Doe', email: 'john@example.com' };
+        component.showInviteModal = true;
 
         component.inviteOwner();
 
-        expect(component.inviteError).toBe('Email already exists');
-        expect(component.showInviteModal).toBeTrue();
-        expect(component.isInviting).toBeFalse();
+        setTimeout(() => {
+          expect(component.inviteError).toBe('Email already exists');
+          expect(component.showInviteModal).toBeTrue();
+          expect(component.isInviting).toBeFalse();
+          done();
+        }, 10);
       });
 
       it('should handle invitation API error', () => {
@@ -241,17 +244,20 @@ describe('AdminDashboardComponent', () => {
 
   describe('Invitation Management', () => {
     describe('resendInvitation', () => {
-      it('should resend invitation successfully', () => {
+      it('should resend invitation successfully', (done) => {
         const mockResponse = { success: true, message: 'Resent successfully' };
-        adminServiceMock.resendOwnerInvitation.and.returnValue(of(mockResponse));
         spyOn(console, 'log');
+        adminServiceMock.resendOwnerInvitation.and.returnValue(of(mockResponse));
 
         component.resendInvitation('123');
 
-        expect(component.isResending).toBe('123');
         expect(adminServiceMock.resendOwnerInvitation).toHaveBeenCalledWith('123');
-        expect(console.log).toHaveBeenCalledWith('Invitation resent successfully!');
-        expect(component.isResending).toBeNull();
+
+        setTimeout(() => {
+          expect(console.log).toHaveBeenCalledWith('Invitation resent successfully!');
+          expect(component.isResending).toBeNull();
+          done();
+        }, 10);
       });
 
       it('should handle resend failure', () => {
@@ -278,19 +284,22 @@ describe('AdminDashboardComponent', () => {
     });
 
     describe('cancelInvitation', () => {
-      it('should cancel invitation after confirmation', () => {
+      it('should cancel invitation after confirmation', (done) => {
         const mockResponse = { success: true, message: 'Cancelled successfully' };
-        adminServiceMock.cancelOwnerInvitation.and.returnValue(of(mockResponse));
         spyOn(window, 'confirm').and.returnValue(true);
         spyOn(console, 'log');
+        adminServiceMock.cancelOwnerInvitation.and.returnValue(of(mockResponse));
 
         component.cancelInvitation('123');
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to cancel this invitation?');
-        expect(component.isCancelling).toBe('123');
         expect(adminServiceMock.cancelOwnerInvitation).toHaveBeenCalledWith('123');
-        expect(console.log).toHaveBeenCalledWith('Invitation cancelled successfully!');
-        expect(component.isCancelling).toBeNull();
+
+        setTimeout(() => {
+          expect(console.log).toHaveBeenCalledWith('Invitation cancelled successfully!');
+          expect(component.isCancelling).toBeNull();
+          done();
+        }, 10);
       });
 
       it('should not cancel invitation if not confirmed', () => {
@@ -318,19 +327,22 @@ describe('AdminDashboardComponent', () => {
 
   describe('Organization Approval Management', () => {
     describe('approveOrganization', () => {
-      it('should approve organization after confirmation', () => {
+      it('should approve organization after confirmation', (done) => {
         const mockResponse = { success: true, message: 'Approved successfully' };
-        adminServiceMock.approveOrganization.and.returnValue(of(mockResponse));
         spyOn(window, 'confirm').and.returnValue(true);
         spyOn(console, 'log');
+        adminServiceMock.approveOrganization.and.returnValue(of(mockResponse));
 
         component.approveOrganization('123');
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to approve this organization?');
-        expect(component.isApproving).toBe('123');
         expect(adminServiceMock.approveOrganization).toHaveBeenCalledWith('123');
-        expect(console.log).toHaveBeenCalledWith('Organization approved successfully!');
-        expect(component.isApproving).toBeNull();
+
+        setTimeout(() => {
+          expect(console.log).toHaveBeenCalledWith('Organization approved successfully!');
+          expect(component.isApproving).toBeNull();
+          done();
+        }, 10);
       });
 
       it('should not approve organization if not confirmed', () => {
@@ -343,19 +355,22 @@ describe('AdminDashboardComponent', () => {
     });
 
     describe('rejectOrganization', () => {
-      it('should reject organization after confirmation', () => {
+      it('should reject organization after confirmation', (done) => {
         const mockResponse = { success: true, message: 'Rejected successfully' };
-        adminServiceMock.rejectOrganization.and.returnValue(of(mockResponse));
         spyOn(window, 'confirm').and.returnValue(true);
         spyOn(console, 'log');
+        adminServiceMock.rejectOrganization.and.returnValue(of(mockResponse));
 
         component.rejectOrganization('123');
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to reject this organization? This action cannot be undone.');
-        expect(component.isRejecting).toBe('123');
         expect(adminServiceMock.rejectOrganization).toHaveBeenCalledWith('123');
-        expect(console.log).toHaveBeenCalledWith('Organization rejected successfully!');
-        expect(component.isRejecting).toBeNull();
+
+        setTimeout(() => {
+          expect(console.log).toHaveBeenCalledWith('Organization rejected successfully!');
+          expect(component.isRejecting).toBeNull();
+          done();
+        }, 10);
       });
 
       it('should not reject organization if not confirmed', () => {

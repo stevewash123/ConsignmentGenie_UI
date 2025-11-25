@@ -366,7 +366,7 @@ export class LoginSimpleComponent {
       //   this.router.navigate(['/owner/dashboard']);
       //   break;
       case 'Provider':
-        this.router.navigate(['/customer/dashboard']); // For now, redirect to customer area
+        this.router.navigate(['/provider/dashboard']);
         break;
       case 'Customer':
         this.router.navigate(['/customer/dashboard']);
