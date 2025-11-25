@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Provider, CreateProviderRequest, UpdateProviderRequest } from '../models/provider.model';
+import { environment } from '../../environments/environment';
 
 export interface ProviderInvitationRequest {
   name: string;
@@ -42,8 +43,8 @@ export interface RegistrationResult {
   providedIn: 'root'
 })
 export class ProviderService {
-  private readonly apiUrl = 'http://localhost:5000/api/providers';
-  private readonly authUrl = 'http://localhost:5000/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/api/providers`;
+  private readonly authUrl = `${environment.apiUrl}/api/auth`;
 
   constructor(private http: HttpClient) {}
 
