@@ -30,12 +30,11 @@ export interface WrappedAuthResponse {
 export type LoginResponse = AuthResponse | WrappedAuthResponse;
 
 export interface User {
-  id: number;
+  userId: string;
   email: string;
-  businessName: string;
-  ownerName: string;
-  organizationId: number;
-  role: string | number;
+  role: number;
+  organizationId: string;
+  organizationName: string;
 }
 
 export interface TokenInfo {

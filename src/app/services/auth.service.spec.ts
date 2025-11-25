@@ -33,8 +33,11 @@ describe('AuthService', () => {
     const loginRequest = { email: 'test@test.com', password: 'password' };
     const authData = {
       token: 'mock-token',
-      refreshToken: 'mock-refresh',
-      user: { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' },
+      userId: 'user-123',
+      email: 'test@test.com',
+      role: 1,
+      organizationId: 'org-123',
+      organizationName: 'Test Organization',
       expiresAt: new Date(Date.now() + 3600000).toISOString()
     };
     const mockResponse = {
@@ -59,8 +62,11 @@ describe('AuthService', () => {
     const loginRequest = { email: 'test@test.com', password: 'password' };
     const mockResponse = {
       token: 'mock-token',
-      refreshToken: 'mock-refresh',
-      user: { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' },
+      userId: 'user-123',
+      email: 'test@test.com',
+      role: 1,
+      organizationId: 'org-123',
+      organizationName: 'Test Organization',
       expiresAt: new Date(Date.now() + 3600000).toISOString()
     };
 
@@ -85,8 +91,11 @@ describe('AuthService', () => {
     };
     const mockResponse = {
       token: 'mock-token',
-      refreshToken: 'mock-refresh',
-      user: { id: 1, email: 'test@test.com', businessName: 'Test Business', ownerName: 'Test User', organizationId: 1, role: 'Owner' },
+      userId: 'user-123',
+      email: 'test@test.com',
+      role: 1,
+      organizationId: 'org-123',
+      organizationName: 'Test Organization',
       expiresAt: new Date(Date.now() + 3600000).toISOString()
     };
 
@@ -242,7 +251,7 @@ describe('AuthService', () => {
 
   it('should load stored authentication on init', () => {
     const futureDate = new Date(Date.now() + 3600000);
-    const userData = { id: 1, email: 'test@test.com', businessName: 'Test Business', ownerName: 'Test Owner', organizationId: 1, role: 'Owner' };
+    const userData = { userId: 'user-123', email: 'test@test.com', role: 1, organizationId: 'org-123', organizationName: 'Test Organization' };
 
     localStorage.setItem('auth_token', 'stored-token');
     localStorage.setItem('user_data', JSON.stringify(userData));
@@ -257,7 +266,7 @@ describe('AuthService', () => {
 
   it('should logout if stored token is expired', () => {
     const pastDate = new Date(Date.now() - 3600000);
-    const userData = { id: 1, email: 'test@test.com', businessName: 'Test Business', ownerName: 'Test Owner', organizationId: 1, role: 'Owner' };
+    const userData = { userId: 'user-123', email: 'test@test.com', role: 1, organizationId: 'org-123', organizationName: 'Test Organization' };
 
     localStorage.setItem('auth_token', 'expired-token');
     localStorage.setItem('user_data', JSON.stringify(userData));
@@ -294,8 +303,11 @@ describe('AuthService', () => {
     const refreshToken = 'refresh-token';
     const mockResponse = {
       token: 'new-token',
-      refreshToken: 'new-refresh-token',
-      user: { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' },
+      userId: 'user-123',
+      email: 'test@test.com',
+      role: 1,
+      organizationId: 'org-123',
+      organizationName: 'Test Organization',
       expiresAt: new Date(Date.now() + 3600000).toISOString()
     };
 
@@ -354,7 +366,7 @@ describe('AuthService', () => {
   }));
 
   it('should return current user observable', () => {
-    const userData = { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' };
+    const userData = { userId: 'user-123', email: 'test@test.com', role: 1, organizationId: 'org-123', organizationName: 'Test Organization' };
 
     service['currentUserSubject'].next(userData);
 
@@ -366,18 +378,27 @@ describe('AuthService', () => {
   it('should set auth data correctly', () => {
     const authResponse = {
       token: 'new-token',
-      refreshToken: 'new-refresh-token',
-      user: { id: 1, email: 'test@test.com', businessName: 'Test', ownerName: 'Test User', organizationId: 1, role: 'Owner' },
+      userId: 'user-123',
+      email: 'test@test.com',
+      role: 1,
+      organizationId: 'org-123',
+      organizationName: 'Test Organization',
       expiresAt: new Date(Date.now() + 3600000).toISOString()
     };
 
     service['setAuthData'](authResponse);
 
     expect(localStorage.getItem('auth_token')).toBe('new-token');
-    expect(localStorage.getItem('refreshToken')).toBe('new-refresh-token');
-    expect(JSON.parse(localStorage.getItem('user_data')!)).toEqual(authResponse.user);
+    const expectedUserData = {
+      userId: authResponse.userId,
+      email: authResponse.email,
+      role: authResponse.role,
+      organizationId: authResponse.organizationId,
+      organizationName: authResponse.organizationName
+    };
+    expect(JSON.parse(localStorage.getItem('user_data')!)).toEqual(expectedUserData);
     expect(localStorage.getItem('tokenExpiry')).toBe(authResponse.expiresAt);
     expect(service.isLoggedIn()).toBeTruthy();
-    expect(service.getCurrentUser()).toEqual(authResponse.user);
+    expect(service.getCurrentUser()).toEqual(expectedUserData);
   });
 });

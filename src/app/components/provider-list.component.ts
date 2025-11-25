@@ -5,160 +5,187 @@ import { FormsModule } from '@angular/forms';
 import { ProviderService } from '../services/provider.service';
 import { Provider } from '../models/provider.model';
 import { ProviderInvitationModalComponent } from './provider-invitation-modal.component';
+import { OwnerLayoutComponent } from '../owner/components/owner-layout.component';
 
 @Component({
   selector: 'app-provider-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ProviderInvitationModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, ProviderInvitationModalComponent, OwnerLayoutComponent],
   template: `
-    <div class="provider-list-container">
-      <div class="header">
-        <h2>Providers</h2>
-        <div class="header-actions">
-          <button class="btn-secondary" (click)="showInviteModal()">
-            Invite Provider
-          </button>
-          <button class="btn-primary" routerLink="/providers/new">
-            Add New Provider
-          </button>
+    <app-owner-layout>
+      <div class="provider-list-container">
+        <div class="header">
+          <h2>Providers</h2>
+          <div class="header-actions">
+            <button class="btn-secondary" (click)="showInviteModal()">
+              Invite Provider
+            </button>
+            <button class="btn-primary" routerLink="/providers/new">
+              Add New Provider
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Stats Dashboard -->
-      <div class="stats-dashboard" *ngIf="!isLoading()">
-        <div class="stat-card">
-          <div class="stat-number">{{ getStats().total }}</div>
-          <div class="stat-label">Total Providers</div>
+        <!-- Stats Dashboard -->
+        <div class="stats-dashboard" *ngIf="!isLoading()">
+          <div class="stat-card">
+            <div class="stat-number">{{ getStats().total }}</div>
+            <div class="stat-label">Total Providers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ getStats().active }}</div>
+            <div class="stat-label">Active</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ getStats().inactive }}</div>
+            <div class="stat-label">Inactive</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ getStats().avgCommission }}%</div>
+            <div class="stat-label">Avg Commission</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">{{ getStats().active }}</div>
-          <div class="stat-label">Active</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">{{ getStats().inactive }}</div>
-          <div class="stat-label">Inactive</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">{{ getStats().avgCommission }}%</div>
-          <div class="stat-label">Avg Commission</div>
-        </div>
-      </div>
 
-      <div class="filters">
-        <div class="filter-group">
-          <label>
+        <div class="filters">
+          <div class="filter-group">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="showActiveOnly()"
+                (change)="toggleActiveFilter()"
+              >
+              Show Active Only
+            </label>
+          </div>
+          <div class="sort-group">
+            <label for="sortBy">Sort by:</label>
+            <select
+              id="sortBy"
+              [(ngModel)]="sortBy"
+              (change)="onSortChange()"
+              class="sort-select"
+            >
+              <option value="name">Name</option>
+              <option value="email">Email</option>
+              <option value="commissionRate">Commission Rate</option>
+              <option value="createdAt">Date Added</option>
+            </select>
+            <button
+              class="sort-direction-btn"
+              (click)="toggleSortDirection()"
+              [title]="sortDirection === 'asc' ? 'Sort Descending' : 'Sort Ascending'"
+            >
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </button>
+          </div>
+          <div class="search-group">
             <input
-              type="checkbox"
-              [checked]="showActiveOnly()"
-              (change)="toggleActiveFilter()"
+              type="text"
+              placeholder="Search providers..."
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange()"
+              class="search-input"
             >
-            Show Active Only
-          </label>
+          </div>
         </div>
-        <div class="sort-group">
-          <label for="sortBy">Sort by:</label>
-          <select
-            id="sortBy"
-            [(ngModel)]="sortBy"
-            (change)="onSortChange()"
-            class="sort-select"
-          >
-            <option value="name">Name</option>
-            <option value="email">Email</option>
-            <option value="commissionRate">Commission Rate</option>
-            <option value="createdAt">Date Added</option>
-          </select>
-          <button
-            class="sort-direction-btn"
-            (click)="toggleSortDirection()"
-            [title]="sortDirection === 'asc' ? 'Sort Descending' : 'Sort Ascending'"
-          >
-            {{ sortDirection === 'asc' ? '↑' : '↓' }}
-          </button>
+
+        <div class="provider-grid" *ngIf="!isLoading(); else loading">
+          <div class="provider-card" *ngFor="let provider of filteredProviders(); trackBy: trackByProvider">
+            <div class="provider-header">
+              <h3>{{ provider.name }}</h3>
+              <div class="status" [class.active]="provider.isActive" [class.inactive]="!provider.isActive">
+                {{ provider.isActive ? 'Active' : 'Inactive' }}
+              </div>
+            </div>
+
+            <div class="provider-details">
+              <div class="detail" *ngIf="provider.email">
+                <strong>Email:</strong> {{ provider.email }}
+              </div>
+              <div class="detail" *ngIf="provider.phone">
+                <strong>Phone:</strong> {{ provider.phone }}
+              </div>
+              <div class="detail">
+                <strong>Commission:</strong> {{ provider.commissionRate }}%
+              </div>
+            </div>
+
+            <div class="provider-actions">
+              <button class="btn-secondary" [routerLink]="['/providers', provider.id]">
+                View Details
+              </button>
+              <button class="btn-secondary" [routerLink]="['/providers', provider.id, 'edit']">
+                Edit
+              </button>
+              <button
+                class="btn-secondary"
+                *ngIf="provider.isActive"
+                (click)="deactivateProvider(provider)"
+              >
+                Deactivate
+              </button>
+              <button
+                class="btn-success"
+                *ngIf="!provider.isActive"
+                (click)="activateProvider(provider)"
+              >
+                Activate
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="search-group">
-          <input
-            type="text"
-            placeholder="Search providers..."
-            [(ngModel)]="searchTerm"
-            (input)="onSearchChange()"
-            class="search-input"
-          >
+
+        <ng-template #loading>
+          <div class="loading">Loading providers...</div>
+        </ng-template>
+
+        <div class="no-providers" *ngIf="!isLoading() && filteredProviders().length === 0">
+          <p>No providers found. <a routerLink="/providers/new">Add your first provider</a></p>
         </div>
       </div>
 
-      <div class="provider-grid" *ngIf="!isLoading(); else loading">
-        <div class="provider-card" *ngFor="let provider of filteredProviders(); trackBy: trackByProvider">
-          <div class="provider-header">
-            <h3>{{ provider.name }}</h3>
-            <div class="status" [class.active]="provider.isActive" [class.inactive]="!provider.isActive">
-              {{ provider.isActive ? 'Active' : 'Inactive' }}
-            </div>
-          </div>
-
-          <div class="provider-details">
-            <div class="detail" *ngIf="provider.email">
-              <strong>Email:</strong> {{ provider.email }}
-            </div>
-            <div class="detail" *ngIf="provider.phone">
-              <strong>Phone:</strong> {{ provider.phone }}
-            </div>
-            <div class="detail">
-              <strong>Commission:</strong> {{ provider.commissionRate }}%
-            </div>
-          </div>
-
-          <div class="provider-actions">
-            <button class="btn-secondary" [routerLink]="['/providers', provider.id]">
-              View Details
-            </button>
-            <button class="btn-secondary" [routerLink]="['/providers', provider.id, 'edit']">
-              Edit
-            </button>
-            <button
-              class="btn-secondary"
-              *ngIf="provider.isActive"
-              (click)="deactivateProvider(provider)"
-            >
-              Deactivate
-            </button>
-            <button
-              class="btn-success"
-              *ngIf="!provider.isActive"
-              (click)="activateProvider(provider)"
-            >
-              Activate
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <ng-template #loading>
-        <div class="loading">Loading providers...</div>
-      </ng-template>
-
-      <div class="no-providers" *ngIf="!isLoading() && filteredProviders().length === 0">
-        <p>No providers found. <a routerLink="/providers/new">Add your first provider</a></p>
-      </div>
-    </div>
-
-    <!-- Provider Invitation Modal -->
-    <app-provider-invitation-modal
-      [isVisible]="isInviteModalVisible"
-      (close)="hideInviteModal()"
-      (invitationSent)="onInvitationSent()">
-    </app-provider-invitation-modal>
+      <!-- Provider Invitation Modal -->
+      <app-provider-invitation-modal
+        [isVisible]="isInviteModalVisible"
+        (close)="hideInviteModal()"
+        (invitationSent)="onInvitationSent()">
+      </app-provider-invitation-modal>
+    </app-owner-layout>
   `,
   styles: [`
     .provider-list-container {
-      padding: 1.5rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: calc(100vh - 140px);
+      border-radius: 20px;
+      margin: 1rem;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2rem;
+      margin-bottom: 3rem;
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .header h2 {
+      color: #047857;
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header h2::before {
+      content: "👥";
+      font-size: 2rem;
     }
 
     .header-actions {
@@ -168,121 +195,246 @@ import { ProviderInvitationModalComponent } from './provider-invitation-modal.co
 
     .stats-dashboard {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
     }
 
     .stat-card {
-      background: white;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      padding: 1.5rem;
+      background: linear-gradient(135deg, white 0%, #f8fafc 100%);
+      border: 1px solid rgba(6, 182, 212, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
       text-align: center;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #047857, #10b981, #06b6d4);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
     }
 
     .stat-number {
-      font-size: 2rem;
-      font-weight: 600;
-      color: #007bff;
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #047857, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 0.5rem;
+      line-height: 1.2;
     }
 
     .stat-label {
-      color: #6c757d;
-      font-size: 0.875rem;
+      color: #64748b;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
     }
 
     .filters {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
       align-items: center;
       flex-wrap: wrap;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .filter-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .filter-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #047857;
     }
 
     .sort-group {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+    }
+
+    .sort-group label {
+      font-weight: 600;
+      color: #374151;
     }
 
     .sort-select {
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
       font-size: 0.875rem;
+      font-weight: 500;
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .sort-select:focus {
+      outline: none;
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
     }
 
     .sort-direction-btn {
-      background: #f8f9fa;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      width: 32px;
-      height: 32px;
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
-      transition: background-color 0.15s ease-in-out;
+      font-size: 1.2rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      color: #047857;
     }
 
     .sort-direction-btn:hover {
-      background: #e9ecef;
+      background: linear-gradient(135deg, #047857, #10b981);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .search-group {
+      margin-left: auto;
     }
 
     .search-input {
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      width: 300px;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      width: 320px;
+      font-size: 0.875rem;
+      background: white;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="%23047857"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>');
+      background-size: 20px;
+      background-position: 12px center;
+      background-repeat: no-repeat;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
     }
 
     .provider-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 2rem;
     }
 
     .provider-card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 1.5rem;
-      background: white;
+      background: linear-gradient(135deg, white 0%, #f8fafc 100%);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .provider-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #8b5cf6, #06b6d4, #10b981);
+    }
+
+    .provider-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      border-color: rgba(4, 120, 87, 0.2);
     }
 
     .provider-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .status {
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    .status.active {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .status.inactive {
-      background: #f8d7da;
-      color: #721c24;
-    }
-
-    .provider-details {
+      align-items: flex-start;
       margin-bottom: 1.5rem;
     }
 
+    .provider-header h3 {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .status {
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .status.active {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #047857;
+      border: 1px solid #10b981;
+    }
+
+    .status.inactive {
+      background: linear-gradient(135deg, #fef2f2, #fecaca);
+      color: #dc2626;
+      border: 1px solid #f87171;
+    }
+
+    .provider-details {
+      margin-bottom: 2rem;
+      space-y: 0.75rem;
+    }
+
     .detail {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+
+    .detail strong {
+      color: #1f2937;
+      font-weight: 600;
+      min-width: 80px;
+      margin-right: 0.5rem;
     }
 
     .provider-actions {
@@ -292,35 +444,103 @@ import { ProviderInvitationModalComponent } from './provider-invitation-modal.co
     }
 
     .btn-primary, .btn-secondary, .btn-success {
-      padding: 0.5rem 1rem;
+      padding: 0.75rem 1.25rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
       text-align: center;
       font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .btn-primary {
-      background: #007bff;
+      background: linear-gradient(135deg, #047857, #10b981);
       color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #065f46, #047857);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(4, 120, 87, 0.3);
     }
 
     .btn-secondary {
-      background: #6c757d;
+      background: linear-gradient(135deg, #6b7280, #9ca3af);
       color: white;
     }
 
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #4b5563, #6b7280);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
+    }
+
     .btn-success {
-      background: #28a745;
+      background: linear-gradient(135deg, #10b981, #34d399);
       color: white;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #047857, #10b981);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
     }
 
     .loading, .no-providers {
       text-align: center;
-      padding: 2rem;
-      color: #6c757d;
+      padding: 4rem;
+      color: #64748b;
+      font-size: 1.125rem;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      margin: 2rem 0;
+    }
+
+    .no-providers a {
+      color: #047857;
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: border-color 0.2s ease;
+    }
+
+    .no-providers a:hover {
+      border-bottom-color: #047857;
+    }
+
+    @media (max-width: 768px) {
+      .provider-list-container {
+        padding: 1rem;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+      }
+
+      .stats-dashboard {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .provider-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `]
 })

@@ -1,103 +1,200 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AdminLayoutComponent } from './admin-layout.component';
+import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, PendingApproval } from '../../services/admin.service';
 
-interface OrganizationSummary {
-  id: string;
-  name: string;
-  subdomain: string;
-  ownerEmail: string;
-  subscriptionTier: string;
-  subscriptionStatus: string;
-  userCount: number;
-  itemCount: number;
-  transactionCount: number;
-  monthlyRevenue: number;
-  createdAt: Date;
-  lastActivity: Date;
-}
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, AdminLayoutComponent],
+  imports: [CommonModule, FormsModule, AdminLayoutComponent],
   template: `
     <app-admin-layout>
       <div class="admin-dashboard">
       <header class="dashboard-header">
-        <h1>System Administrator Dashboard</h1>
-        <p class="subtitle">ConsignmentGenie Platform Overview</p>
+        <div class="header-content">
+          <div class="header-text">
+            <h1>System Administrator Dashboard</h1>
+            <p class="subtitle">ConsignmentGenie Platform Overview</p>
+          </div>
+          <button class="invite-btn" (click)="showInviteModal = true">
+            + Invite Owner
+          </button>
+        </div>
       </header>
 
       <div class="stats-grid">
         <div class="stat-card">
-          <h3>Total Organizations</h3>
-          <div class="stat-value">{{ totalOrgs() }}</div>
-        </div>
-        <div class="stat-card">
           <h3>Active Organizations</h3>
-          <div class="stat-value">{{ activeOrgs() }}</div>
+          <div class="stat-value">{{ metrics().activeOrganizations }}</div>
         </div>
         <div class="stat-card">
-          <h3>Total Users</h3>
-          <div class="stat-value">{{ totalUsers() }}</div>
+          <h3>Pending Approvals</h3>
+          <div class="stat-value">{{ metrics().pendingApprovals }}</div>
         </div>
         <div class="stat-card">
-          <h3>Monthly Revenue</h3>
-          <div class="stat-value">\${{ monthlyRevenue().toLocaleString() }}</div>
+          <h3>Pending Invitations</h3>
+          <div class="stat-value">{{ metrics().pendingInvitations }}</div>
         </div>
       </div>
 
-      <div class="recent-activity">
-        <h2>Recent Organizations</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Organization</th>
-                <th>Owner</th>
-                <th>Subdomain</th>
-                <th>Subscription</th>
-                <th>Status</th>
-                <th>Users</th>
-                <th>Items</th>
-                <th>Revenue</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (org of organizations(); track org.id) {
+      <!-- Pending Invitations Section -->
+      <div class="dashboard-section">
+        <h2>Pending Invitations</h2>
+
+        @if (pendingInvitations().length === 0) {
+          <div class="empty-state">
+            <p>No pending invitations</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
                 <tr>
-                  <td class="org-name">{{ org.name }}</td>
-                  <td>{{ org.ownerEmail }}</td>
-                  <td class="subdomain">{{ org.subdomain }}</td>
-                  <td>
-                    <span class="tier-badge" [class]="'tier-' + org.subscriptionTier.toLowerCase()">
-                      {{ org.subscriptionTier }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="status-badge" [class]="'status-' + org.subscriptionStatus.toLowerCase()">
-                      {{ org.subscriptionStatus }}
-                    </span>
-                  </td>
-                  <td class="text-center">{{ org.userCount }}</td>
-                  <td class="text-center">{{ org.itemCount }}</td>
-                  <td class="text-right">\${{ org.monthlyRevenue.toLocaleString() }}</td>
-                  <td>{{ org.createdAt | date:'short' }}</td>
-                  <td class="actions">
-                    <button class="btn-action" title="View Details">👁️</button>
-                    <button class="btn-action" title="Login As Owner">🔐</button>
-                    <button class="btn-action" title="Manage Subscription">💳</button>
-                  </td>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Sent</th>
+                  <th>Expires</th>
+                  <th>Actions</th>
                 </tr>
+              </thead>
+              <tbody>
+                @for (invitation of pendingInvitations(); track invitation.id) {
+                  <tr>
+                    <td class="font-medium">{{ invitation.name }}</td>
+                    <td>{{ invitation.email }}</td>
+                    <td>{{ invitation.sentAt | date:'short' }}</td>
+                    <td>{{ invitation.expiresAt | date:'short' }}</td>
+                    <td class="actions">
+                      <button
+                        class="btn-action resend"
+                        (click)="resendInvitation(invitation.id)"
+                        [disabled]="isResending === invitation.id"
+                        title="Resend invitation">
+                        {{ isResending === invitation.id ? '⏳' : '📧' }}
+                      </button>
+                      <button
+                        class="btn-action cancel"
+                        (click)="cancelInvitation(invitation.id)"
+                        [disabled]="isCancelling === invitation.id"
+                        title="Cancel invitation">
+                        {{ isCancelling === invitation.id ? '⏳' : '❌' }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Pending Approvals Section -->
+      <div class="dashboard-section">
+        <h2>Pending Approvals</h2>
+
+        @if (pendingApprovals().length === 0) {
+          <div class="empty-state">
+            <p>No pending approvals</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Owner</th>
+                  <th>Email</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (approval of pendingApprovals(); track approval.id) {
+                  <tr>
+                    <td class="font-medium">{{ approval.organization }}</td>
+                    <td>{{ approval.owner }}</td>
+                    <td>{{ approval.email }}</td>
+                    <td>{{ approval.submittedAt | date:'short' }}</td>
+                    <td class="actions">
+                      <button
+                        class="btn-action approve"
+                        (click)="approveOrganization(approval.id)"
+                        [disabled]="isApproving === approval.id"
+                        title="Approve organization">
+                        {{ isApproving === approval.id ? '⏳' : '✅' }}
+                      </button>
+                      <button
+                        class="btn-action reject"
+                        (click)="rejectOrganization(approval.id)"
+                        [disabled]="isRejecting === approval.id"
+                        title="Reject organization">
+                        {{ isRejecting === approval.id ? '⏳' : '❌' }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      </div>
+
+      <!-- Invite Owner Modal -->
+      @if (showInviteModal) {
+        <div class="modal-overlay" (click)="closeInviteModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2>Invite Owner</h2>
+              <button class="modal-close" (click)="closeInviteModal()">&times;</button>
+            </div>
+
+            <form (ngSubmit)="inviteOwner()" #inviteForm="ngForm" class="modal-form">
+              <div class="form-group">
+                <label for="ownerName">Name *</label>
+                <input
+                  type="text"
+                  id="ownerName"
+                  name="ownerName"
+                  [(ngModel)]="inviteRequest.name"
+                  required
+                  [disabled]="isInviting"
+                  placeholder="Enter owner's full name"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="ownerEmail">Email *</label>
+                <input
+                  type="email"
+                  id="ownerEmail"
+                  name="ownerEmail"
+                  [(ngModel)]="inviteRequest.email"
+                  required
+                  [disabled]="isInviting"
+                  placeholder="Enter owner's email address"
+                >
+              </div>
+
+              @if (inviteError) {
+                <div class="error-message">{{ inviteError }}</div>
               }
-            </tbody>
-          </table>
+
+              <div class="modal-actions">
+                <button type="button" class="btn-secondary" (click)="closeInviteModal()" [disabled]="isInviting">
+                  Cancel
+                </button>
+                <button type="submit" class="btn-primary" [disabled]="inviteForm.invalid || isInviting">
+                  {{ isInviting ? 'Sending...' : 'Send Invitation' }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-      </div>
+      }
     </app-admin-layout>
   `,
   styles: [`
@@ -109,7 +206,19 @@ interface OrganizationSummary {
 
     .dashboard-header {
       margin-bottom: 3rem;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-text {
       text-align: center;
+      flex: 1;
     }
 
     .dashboard-header h1 {
@@ -123,11 +232,34 @@ interface OrganizationSummary {
       font-size: 1.1rem;
     }
 
+    .invite-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .invite-btn:hover {
+      background: #2563eb;
+    }
+
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
       margin-bottom: 3rem;
+    }
+
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .stat-card {
@@ -152,12 +284,179 @@ interface OrganizationSummary {
       color: #1f2937;
     }
 
-    .recent-activity h2 {
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #1f2937;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #374151;
+    }
+
+    .modal-form {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-group input:disabled {
+      background: #f9fafb;
+      color: #6b7280;
+    }
+
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #2563eb;
+    }
+
+    .btn-primary:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #6b7280;
+      border: 1px solid #d1d5db;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Dashboard Sections */
+    .dashboard-section {
+      margin-top: 3rem;
+    }
+
+    .dashboard-section h2 {
       font-size: 1.5rem;
       color: #1f2937;
       margin-bottom: 1.5rem;
     }
 
+    .empty-state {
+      background: white;
+      border-radius: 12px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e5e7eb;
+    }
+
+    .empty-state p {
+      color: #6b7280;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    /* Data Tables */
     .table-container {
       background: white;
       border-radius: 12px;
@@ -166,22 +465,23 @@ interface OrganizationSummary {
       border: 1px solid #e5e7eb;
     }
 
-    table {
+    .data-table {
       width: 100%;
       border-collapse: collapse;
     }
 
-    thead {
+    .data-table thead {
       background: #f9fafb;
     }
 
-    th, td {
+    .data-table th,
+    .data-table td {
       padding: 1rem;
       text-align: left;
       border-bottom: 1px solid #e5e7eb;
     }
 
-    th {
+    .data-table th {
       font-weight: 600;
       color: #374151;
       font-size: 0.875rem;
@@ -189,43 +489,22 @@ interface OrganizationSummary {
       letter-spacing: 0.05em;
     }
 
-    tbody tr:hover {
+    .data-table tbody tr:hover {
       background: #f9fafb;
     }
 
-    .org-name {
-      font-weight: 600;
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .font-medium {
+      font-weight: 500;
       color: #1f2937;
     }
 
-    .subdomain {
-      font-family: monospace;
-      color: #6b7280;
-    }
-
-    .tier-badge, .status-badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .tier-basic { background: #dbeafe; color: #1e40af; }
-    .tier-pro { background: #dcfce7; color: #166534; }
-    .tier-enterprise { background: #fef3c7; color: #92400e; }
-
-    .status-active { background: #dcfce7; color: #166534; }
-    .status-trial { background: #fef3c7; color: #92400e; }
-    .status-suspended { background: #fee2e2; color: #dc2626; }
-    .status-cancelled { background: #f3f4f6; color: #6b7280; }
-
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-
     .actions {
       text-align: center;
+      white-space: nowrap;
     }
 
     .btn-action {
@@ -236,77 +515,293 @@ interface OrganizationSummary {
       margin: 0 0.25rem;
       padding: 0.5rem;
       border-radius: 6px;
-      transition: background-color 0.2s;
+      transition: all 0.2s;
+      min-width: 2.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .btn-action:hover {
+    .btn-action:hover:not(:disabled) {
       background: #f3f4f6;
     }
+
+    .btn-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-action.resend:hover:not(:disabled) {
+      background: #dbeafe;
+    }
+
+    .btn-action.cancel:hover:not(:disabled) {
+      background: #fee2e2;
+    }
+
+    .btn-action.approve:hover:not(:disabled) {
+      background: #dcfce7;
+    }
+
+    .btn-action.reject:hover:not(:disabled) {
+      background: #fee2e2;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .header-text {
+        text-align: center;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .data-table {
+        font-size: 0.875rem;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .btn-action {
+        font-size: 1rem;
+        padding: 0.375rem;
+        margin: 0 0.125rem;
+        min-width: 2rem;
+      }
+    }
+
   `]
 })
 export class AdminDashboardComponent implements OnInit {
-  organizations = signal<OrganizationSummary[]>([]);
+  metrics = signal<AdminMetrics>({
+    activeOrganizations: 0,
+    pendingApprovals: 0,
+    pendingInvitations: 0
+  });
 
-  totalOrgs = signal(0);
-  activeOrgs = signal(0);
-  totalUsers = signal(0);
-  monthlyRevenue = signal(0);
+  // Data
+  pendingInvitations = signal<OwnerInvitation[]>([]);
+  pendingApprovals = signal<PendingApproval[]>([]);
+
+  // Invite Modal State
+  showInviteModal = false;
+  isInviting = false;
+  inviteError = '';
+  inviteRequest: InviteOwnerRequest = {
+    name: '',
+    email: ''
+  };
+
+  // Action States
+  isResending: string | null = null;
+  isCancelling: string | null = null;
+  isApproving: string | null = null;
+  isRejecting: string | null = null;
+
+  constructor(private adminService: AdminService) {}
 
   ngOnInit() {
     this.loadDashboardData();
   }
 
   private loadDashboardData() {
-    // Mock data for now - replace with actual API calls
-    const mockOrgs: OrganizationSummary[] = [
-      {
-        id: '1',
-        name: 'Demo Consignment Shop',
-        subdomain: 'demo-shop',
-        ownerEmail: 'admin@demoshop.com',
-        subscriptionTier: 'Pro',
-        subscriptionStatus: 'Active',
-        userCount: 4,
-        itemCount: 150,
-        transactionCount: 45,
-        monthlyRevenue: 1250,
-        createdAt: new Date('2024-01-15'),
-        lastActivity: new Date()
+    // Load metrics from API
+    this.adminService.getMetrics().subscribe({
+      next: (metrics) => {
+        this.metrics.set(metrics);
       },
-      {
-        id: '2',
-        name: 'Vintage Treasures',
-        subdomain: 'vintage-treasures',
-        ownerEmail: 'sarah@vintagetreasures.com',
-        subscriptionTier: 'Basic',
-        subscriptionStatus: 'Active',
-        userCount: 2,
-        itemCount: 89,
-        transactionCount: 23,
-        monthlyRevenue: 750,
-        createdAt: new Date('2024-02-01'),
-        lastActivity: new Date(Date.now() - 86400000) // 1 day ago
-      },
-      {
-        id: '3',
-        name: 'Artisan Marketplace',
-        subdomain: 'artisan-market',
-        ownerEmail: 'mike@artisanmarket.com',
-        subscriptionTier: 'Enterprise',
-        subscriptionStatus: 'Trial',
-        userCount: 8,
-        itemCount: 300,
-        transactionCount: 120,
-        monthlyRevenue: 2800,
-        createdAt: new Date('2024-11-01'),
-        lastActivity: new Date(Date.now() - 3600000) // 1 hour ago
+      error: (error) => {
+        console.error('Error loading admin metrics:', error);
+        // Fall back to mock data for development
+        this.metrics.set({
+          activeOrganizations: 3,
+          pendingApprovals: 0,
+          pendingInvitations: 0
+        });
       }
-    ];
+    });
 
-    this.organizations.set(mockOrgs);
-    this.totalOrgs.set(mockOrgs.length);
-    this.activeOrgs.set(mockOrgs.filter(org => org.subscriptionStatus === 'Active').length);
-    this.totalUsers.set(mockOrgs.reduce((sum, org) => sum + org.userCount, 0));
-    this.monthlyRevenue.set(mockOrgs.reduce((sum, org) => sum + org.monthlyRevenue, 0));
+    // Load pending invitations and approvals
+    this.loadPendingInvitations();
+    this.loadPendingApprovals();
+  }
+
+  private loadPendingInvitations() {
+    this.adminService.getOwnerInvitations().subscribe({
+      next: (invitations) => {
+        this.pendingInvitations.set(invitations);
+      },
+      error: (error) => {
+        console.error('Error loading pending invitations:', error);
+        // Fall back to empty array for development
+        this.pendingInvitations.set([]);
+      }
+    });
+  }
+
+  private loadPendingApprovals() {
+    this.adminService.getPendingApprovals().subscribe({
+      next: (approvals) => {
+        this.pendingApprovals.set(approvals);
+      },
+      error: (error) => {
+        console.error('Error loading pending approvals:', error);
+        // Fall back to empty array for development
+        this.pendingApprovals.set([]);
+      }
+    });
+  }
+
+  closeInviteModal() {
+    this.showInviteModal = false;
+    this.inviteError = '';
+    this.inviteRequest = { name: '', email: '' };
+  }
+
+  inviteOwner() {
+    if (!this.inviteRequest.name.trim() || !this.inviteRequest.email.trim()) {
+      this.inviteError = 'Please fill in all required fields.';
+      return;
+    }
+
+    this.isInviting = true;
+    this.inviteError = '';
+
+    this.adminService.inviteOwner(this.inviteRequest).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.closeInviteModal();
+          // Refresh data to update pending invitations
+          this.loadDashboardData();
+          // TODO: Show success toast
+          console.log('Invitation sent successfully!');
+        } else {
+          this.inviteError = response.message || 'Failed to send invitation.';
+        }
+        this.isInviting = false;
+      },
+      error: (error) => {
+        console.error('Error sending invitation:', error);
+        this.inviteError = error.error?.message || 'Failed to send invitation. Please try again.';
+        this.isInviting = false;
+      }
+    });
+  }
+
+  resendInvitation(id: string) {
+    this.isResending = id;
+
+    this.adminService.resendOwnerInvitation(id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Refresh data
+          this.loadPendingInvitations();
+          // TODO: Show success toast
+          console.log('Invitation resent successfully!');
+        } else {
+          // TODO: Show error toast
+          console.error('Failed to resend invitation:', response.message);
+        }
+        this.isResending = null;
+      },
+      error: (error) => {
+        console.error('Error resending invitation:', error);
+        // TODO: Show error toast
+        this.isResending = null;
+      }
+    });
+  }
+
+  cancelInvitation(id: string) {
+    if (!confirm('Are you sure you want to cancel this invitation?')) {
+      return;
+    }
+
+    this.isCancelling = id;
+
+    this.adminService.cancelOwnerInvitation(id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Refresh data
+          this.loadDashboardData();
+          // TODO: Show success toast
+          console.log('Invitation cancelled successfully!');
+        } else {
+          // TODO: Show error toast
+          console.error('Failed to cancel invitation:', response.message);
+        }
+        this.isCancelling = null;
+      },
+      error: (error) => {
+        console.error('Error cancelling invitation:', error);
+        // TODO: Show error toast
+        this.isCancelling = null;
+      }
+    });
+  }
+
+  approveOrganization(id: string) {
+    if (!confirm('Are you sure you want to approve this organization?')) {
+      return;
+    }
+
+    this.isApproving = id;
+
+    this.adminService.approveOrganization(id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Refresh data
+          this.loadDashboardData();
+          // TODO: Show success toast
+          console.log('Organization approved successfully!');
+        } else {
+          // TODO: Show error toast
+          console.error('Failed to approve organization:', response.message);
+        }
+        this.isApproving = null;
+      },
+      error: (error) => {
+        console.error('Error approving organization:', error);
+        // TODO: Show error toast
+        this.isApproving = null;
+      }
+    });
+  }
+
+  rejectOrganization(id: string) {
+    if (!confirm('Are you sure you want to reject this organization? This action cannot be undone.')) {
+      return;
+    }
+
+    this.isRejecting = id;
+
+    this.adminService.rejectOrganization(id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Refresh data
+          this.loadDashboardData();
+          // TODO: Show success toast
+          console.log('Organization rejected successfully!');
+        } else {
+          // TODO: Show error toast
+          console.error('Failed to reject organization:', response.message);
+        }
+        this.isRejecting = null;
+      },
+      error: (error) => {
+        console.error('Error rejecting organization:', error);
+        // TODO: Show error toast
+        this.isRejecting = null;
+      }
+    });
   }
 }
