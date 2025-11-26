@@ -20,7 +20,7 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
             <button class="btn-secondary" (click)="showInviteModal()">
               Invite Provider
             </button>
-            <button class="btn-primary" routerLink="/providers/new">
+            <button class="btn-primary" routerLink="/owner/providers/new">
               Add New Provider
             </button>
           </div>
@@ -111,10 +111,10 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
             </div>
 
             <div class="provider-actions">
-              <button class="btn-secondary" [routerLink]="['/providers', provider.id]">
+              <button class="btn-secondary" [routerLink]="['/owner/providers', provider.id]">
                 View Details
               </button>
-              <button class="btn-secondary" [routerLink]="['/providers', provider.id, 'edit']">
+              <button class="btn-secondary" [routerLink]="['/owner/providers', provider.id, 'edit']">
                 Edit
               </button>
               <button
@@ -140,7 +140,7 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
         </ng-template>
 
         <div class="no-providers" *ngIf="!isLoading() && filteredProviders().length === 0">
-          <p>No providers found. <a routerLink="/providers/new">Add your first provider</a></p>
+          <p>No providers found. <a routerLink="/owner/providers/new">Add your first provider</a></p>
         </div>
       </div>
 

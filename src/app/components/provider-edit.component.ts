@@ -13,7 +13,7 @@ import { Provider, UpdateProviderRequest } from '../models/provider.model';
     <div class="provider-edit-container">
       <div class="edit-header">
         <div class="breadcrumb">
-          <a [routerLink]="['/providers', providerId()]">← Back to Provider</a>
+          <a [routerLink]="['/owner/providers', providerId()]">← Back to Provider</a>
         </div>
         <h1>Edit Provider</h1>
       </div>
@@ -175,7 +175,7 @@ import { Provider, UpdateProviderRequest } from '../models/provider.model';
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-secondary" [routerLink]="['/providers', providerId()]">
+            <button type="button" class="btn-secondary" [routerLink]="['/owner/providers', providerId()]">
               Cancel
             </button>
             <button
@@ -455,7 +455,7 @@ export class ProviderEditComponent implements OnInit {
         this.successMessage.set('Provider updated successfully!');
         // Auto-redirect after 2 seconds
         setTimeout(() => {
-          this.router.navigate(['/providers', this.providerId()]);
+          this.router.navigate(['/owner/providers', this.providerId()]);
         }, 2000);
       },
       error: (error) => {

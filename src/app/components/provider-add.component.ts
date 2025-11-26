@@ -13,7 +13,7 @@ import { CreateProviderRequest } from '../models/provider.model';
     <div class="provider-add-container">
       <div class="add-header">
         <div class="breadcrumb">
-          <a routerLink="/providers">← Back to Providers</a>
+          <a routerLink="/owner/providers">← Back to Providers</a>
         </div>
         <h1>Add New Provider</h1>
         <p class="subtitle">Create a new provider account or consider using <strong>Invite Provider</strong> to send them a registration link instead.</p>
@@ -164,7 +164,7 @@ import { CreateProviderRequest } from '../models/provider.model';
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-secondary" routerLink="/providers">
+            <button type="button" class="btn-secondary" routerLink="/owner/providers">
               Cancel
             </button>
             <button
@@ -191,7 +191,7 @@ import { CreateProviderRequest } from '../models/provider.model';
             Instead of manually creating accounts, you can invite providers to register themselves.
             This ensures they have access to their login credentials and receive welcome emails.
           </p>
-          <button class="btn-outline" routerLink="/providers">
+          <button class="btn-outline" routerLink="/owner/providers">
             Go back and use "Invite Provider"
           </button>
         </div>
@@ -433,7 +433,7 @@ export class ProviderAddComponent {
         this.successMessage.set('Provider created successfully!');
         // Auto-redirect after 2 seconds
         setTimeout(() => {
-          this.router.navigate(['/providers', created.id]);
+          this.router.navigate(['/owner/providers', created.id]);
         }, 2000);
       },
       error: (error) => {

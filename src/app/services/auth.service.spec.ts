@@ -116,7 +116,8 @@ describe('AuthService', () => {
       fullName: 'Shop Owner',
       email: 'owner@test.com',
       password: 'password123',
-      shopName: 'Test Shop'
+      shopName: 'Test Shop',
+      address: '123 Test Street, Test City, TS 12345'
     };
     const mockResponse = { success: true, message: 'Owner registered successfully' };
 
@@ -136,7 +137,8 @@ describe('AuthService', () => {
       fullName: 'Shop Owner',
       email: 'owner@test.com',
       password: 'password123',
-      shopName: 'Test Shop'
+      shopName: 'Test Shop',
+      address: '123 Test Street, Test City, TS 12345'
     };
 
     mockHttpClient.post.and.returnValue(

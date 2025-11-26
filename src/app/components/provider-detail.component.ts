@@ -12,10 +12,10 @@ import { Provider } from '../models/provider.model';
     <div class="provider-detail-container" *ngIf="!isLoading(); else loading">
       <div class="detail-header">
         <div class="breadcrumb">
-          <a routerLink="/providers">← Back to Providers</a>
+          <a routerLink="/owner/providers">← Back to Providers</a>
         </div>
         <div class="header-actions">
-          <button class="btn-secondary" [routerLink]="['/providers', providerId(), 'edit']">
+          <button class="btn-secondary" [routerLink]="['/owner/providers', providerId(), 'edit']">
             Edit Provider
           </button>
           <button
