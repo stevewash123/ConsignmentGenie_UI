@@ -155,22 +155,21 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
   styles: [`
     .provider-list-container {
       padding: 2rem;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      min-height: calc(100vh - 140px);
-      border-radius: 20px;
-      margin: 1rem;
+      margin: 1rem 2rem;
+      min-height: calc(100vh - 200px);
     }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 3rem;
-      background: white;
-      padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
     }
 
     .header h2 {
@@ -201,14 +200,15 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
     }
 
     .stat-card {
-      background: linear-gradient(135deg, white 0%, #f8fafc 100%);
+      background: rgba(255, 255, 255, 0.6);
       border: 1px solid rgba(6, 182, 212, 0.1);
-      border-radius: 16px;
-      padding: 2rem;
+      border-radius: 12px;
+      padding: 1.5rem;
       text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
       transition: all 0.3s ease;
       position: relative;
+      backdrop-filter: blur(10px);
       overflow: hidden;
     }
 
@@ -353,14 +353,15 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
     }
 
     .provider-card {
-      background: linear-gradient(135deg, white 0%, #f8fafc 100%);
+      background: rgba(255, 255, 255, 0.7);
       border: 1px solid rgba(148, 163, 184, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(10px);
     }
 
     .provider-card::before {
@@ -374,8 +375,8 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
     }
 
     .provider-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
       border-color: rgba(4, 120, 87, 0.2);
     }
 
