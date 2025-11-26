@@ -40,7 +40,7 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   getMetrics(): Observable<AdminMetrics> {
-    return this.http.get<AdminMetrics>(`${this.apiUrl}/metrics`);
+    return this.http.get<AdminMetrics>(`${this.apiUrl}/invitations/owner/metrics`);
   }
 
   // Owner Invitation Management
@@ -62,7 +62,7 @@ export class AdminService {
 
   // Approval Management
   getPendingApprovals(): Observable<PendingApproval[]> {
-    return this.http.get<PendingApproval[]>(`${this.apiUrl}/approvals/pending`);
+    return this.http.get<PendingApproval[]>(`${this.apiUrl}/pending-owners`);
   }
 
   approveOrganization(id: string): Observable<{ success: boolean; message: string }> {
