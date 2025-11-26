@@ -32,7 +32,8 @@ describe('ProviderEditComponent', () => {
     paymentDetails: 'Account: 123456',
     notes: 'Test notes',
     isActive: true,
-    joinedAt: '2023-11-26T10:00:00Z',
+    createdAt: new Date('2023-11-26T10:00:00Z'),
+    updatedAt: new Date('2023-11-26T10:00:00Z'),
     organizationId: 1
   };
 
@@ -126,7 +127,8 @@ describe('ProviderEditComponent', () => {
       commissionRate: 50,
       preferredPaymentMethod: 'Bank Transfer',
       paymentDetails: 'Account: 123456',
-      notes: 'Test notes'
+      notes: 'Test notes',
+      isActive: true
     });
 
     expect(component.successMessage()).toBe('Provider updated successfully!');
@@ -198,7 +200,8 @@ describe('ProviderEditComponent', () => {
       commissionRate: 50,
       preferredPaymentMethod: undefined,
       paymentDetails: undefined,
-      notes: undefined
+      notes: undefined,
+      isActive: true
     });
   });
 

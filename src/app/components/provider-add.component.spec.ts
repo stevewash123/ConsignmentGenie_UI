@@ -85,7 +85,8 @@ describe('ProviderAddComponent', () => {
       paymentDetails: 'Account: 123456',
       notes: 'Test notes',
       isActive: true,
-      joinedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       organizationId: 1
     };
 
@@ -189,7 +190,8 @@ describe('ProviderAddComponent', () => {
       paymentDetails: undefined,
       notes: undefined,
       isActive: true,
-      joinedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       organizationId: 1
     };
 
