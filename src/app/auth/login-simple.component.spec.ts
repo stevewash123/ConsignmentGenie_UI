@@ -200,10 +200,10 @@ describe('LoginSimpleComponent', () => {
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
     });
 
-    it('should redirect provider role to customer dashboard', () => {
+    it('should redirect provider role to provider dashboard', () => {
       const userData = { email: 'provider@example.com', role: 2 };
       (component as any).redirectBasedOnUser(userData);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/provider/dashboard']);
     });
 
     it('should redirect customer role to customer dashboard', () => {
