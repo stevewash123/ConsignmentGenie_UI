@@ -36,7 +36,7 @@ interface Transaction {
     <app-owner-layout>
       <div class="owner-dashboard">
         <div class="dashboard-header">
-          <h1>{{ getCurrentUser()?.businessName || 'Shop' }} Dashboard</h1>
+          <h1>{{ getCurrentUser()?.organizationName || 'Shop' }} Dashboard</h1>
           <p>Welcome back, {{ getCurrentUser()?.email?.split('@')[0] || 'Owner' }}! Here's what's happening in your consignment shop.</p>
         </div>
 
