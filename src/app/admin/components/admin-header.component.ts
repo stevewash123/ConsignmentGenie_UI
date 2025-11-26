@@ -1,6 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 interface UserData {
   userId: string;
@@ -289,21 +291,43 @@ interface UserData {
     }
   `]
 })
-export class AdminHeaderComponent implements OnInit {
+export class AdminHeaderComponent implements OnInit, OnDestroy {
   currentUser = signal<UserData | null>(null);
   showUserMenu = signal(false);
+  private authSubscription?: Subscription;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.loadUserData();
   }
 
-  private loadUserData() {
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      this.currentUser.set(JSON.parse(userData));
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
     }
+  }
+
+  private loadUserData() {
+    // First try to get current user from AuthService
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.currentUser.set(currentUser as any);
+    }
+
+    // Subscribe to user changes
+    this.authSubscription = this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.currentUser.set(user as any);
+      } else {
+        this.currentUser.set(null);
+        // If no user is logged in, redirect to login
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   getInitials(email?: string): string {
@@ -311,13 +335,21 @@ export class AdminHeaderComponent implements OnInit {
     return email.substring(0, 2).toUpperCase();
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.user-menu')) {
+      this.showUserMenu.set(false);
+    }
+  }
+
   toggleUserMenu() {
     this.showUserMenu.update(show => !show);
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
+    this.showUserMenu.set(false);
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }
