@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -271,16 +271,27 @@ import { AuthService } from '../services/auth.service';
     }
   `]
 })
-export class LoginSimpleComponent {
+export class LoginSimpleComponent implements OnInit {
   email = '';
   password = '';
   isLoading = signal(false);
   errorMessage = signal('');
+  returnUrl = signal<string>('');
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService
   ) {}
+
+  ngOnInit() {
+    // Check for return URL parameter
+    this.route.queryParams.subscribe(params => {
+      if (params['returnUrl']) {
+        this.returnUrl.set(params['returnUrl']);
+      }
+    });
+  }
 
   quickLogin(email: string) {
     this.email = email;
@@ -344,16 +355,27 @@ export class LoginSimpleComponent {
   private redirectBasedOnUser(userData: any) {
     const email = userData?.email || '';
     const role = this.normalizeRole(userData?.role);
+    const returnUrl = this.returnUrl();
 
-    console.log('Redirecting user:', { email, role, rawRole: userData?.role });
+    console.log('Redirecting user:', { email, role, returnUrl, rawRole: userData?.role });
 
-    // Admin always goes to admin dashboard
+    // Admin always goes to admin dashboard (unless specific return URL)
     if (email === 'admin@microsaasbuilders.com' || role === 'Admin') {
-      this.router.navigate(['/admin/dashboard']);
+      if (returnUrl && returnUrl.startsWith('/admin/')) {
+        this.router.navigateByUrl(returnUrl);
+      } else {
+        this.router.navigate(['/admin/dashboard']);
+      }
       return;
     }
 
-    // Role-based routing
+    // Check for return URL from shop context
+    if (returnUrl && this.isShopUrl(returnUrl)) {
+      this.redirectShopContextUser(role, returnUrl);
+      return;
+    }
+
+    // Standard role-based routing
     switch (role) {
       case 'Admin':
         this.router.navigate(['/admin/dashboard']);
@@ -361,10 +383,6 @@ export class LoginSimpleComponent {
       case 'Owner':
         this.router.navigate(['/owner/dashboard']);
         break;
-      // case 'Manager':
-      //   // Managers get owner dashboard access (planned feature)
-      //   this.router.navigate(['/owner/dashboard']);
-      //   break;
       case 'Provider':
         this.router.navigate(['/provider/dashboard']);
         break;
@@ -372,8 +390,64 @@ export class LoginSimpleComponent {
         this.router.navigate(['/customer/dashboard']);
         break;
       default:
-        // Default to owner dashboard
         console.warn('Unknown role:', role);
+        this.router.navigate(['/owner/dashboard']);
+    }
+  }
+
+  private isShopUrl(url: string): boolean {
+    return url.startsWith('/shop/');
+  }
+
+  private redirectShopContextUser(role: string, returnUrl: string) {
+    // Extract shop slug from return URL
+    const shopSlugMatch = returnUrl.match(/^\/shop\/([^\/]+)/);
+    const shopSlug = shopSlugMatch?.[1];
+
+    if (!shopSlug) {
+      // Invalid shop URL, fallback to standard redirect
+      this.redirectToStandardDashboard(role);
+      return;
+    }
+
+    switch (role) {
+      case 'Customer':
+        // Customer: return to the shop they were viewing
+        this.router.navigateByUrl(returnUrl);
+        break;
+
+      case 'Provider':
+        // Provider: go to their dashboard (TODO: shop-specific provider view)
+        this.router.navigate(['/provider/dashboard']);
+        break;
+
+      case 'Owner':
+        // Owner: check if they own this shop (TODO: implement ownership check)
+        // For now, redirect to owner dashboard
+        this.router.navigate(['/owner/dashboard']);
+        break;
+
+      default:
+        // Unknown role: treat as customer and return to shop
+        this.router.navigate(['/shop', shopSlug]);
+    }
+  }
+
+  private redirectToStandardDashboard(role: string) {
+    switch (role) {
+      case 'Admin':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'Owner':
+        this.router.navigate(['/owner/dashboard']);
+        break;
+      case 'Provider':
+        this.router.navigate(['/provider/dashboard']);
+        break;
+      case 'Customer':
+        this.router.navigate(['/customer/dashboard']);
+        break;
+      default:
         this.router.navigate(['/owner/dashboard']);
     }
   }

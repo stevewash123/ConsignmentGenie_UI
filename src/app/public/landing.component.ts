@@ -1,0 +1,169 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+@Component({
+  selector: 'app-landing',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <div class="landing-page">
+      <!-- Header -->
+      <header class="header">
+        <div class="container">
+          <h1 class="logo">Consignment Genie</h1>
+          <nav class="nav">
+            <a routerLink="/login" class="nav-link">Sign In</a>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Hero Section -->
+      <main class="hero">
+        <div class="container">
+          <div class="hero-content">
+            <h2 class="hero-title">The simple way to run your consignment shop</h2>
+            <p class="hero-subtitle">
+              Manage providers, track inventory, process sales, and generate payouts all in one place.
+            </p>
+
+            <div class="cta-section">
+              <a routerLink="/signup" class="btn btn-primary">Get Started</a>
+              <p class="login-link">
+                Already have an account? <a routerLink="/login">Log in</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  `,
+  styles: [`
+    .landing-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .header {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 1rem 0;
+    }
+
+    .header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      color: #047857;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .nav-link {
+      color: #6b7280;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #047857;
+    }
+
+    .hero {
+      padding: 4rem 0 6rem;
+      text-align: center;
+    }
+
+    .hero-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: #6b7280;
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+
+    .cta-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.125rem;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #047857;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #065f46;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(4, 120, 87, 0.15);
+    }
+
+    .login-link {
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .login-link a {
+      color: #047857;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.25rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.125rem;
+      }
+
+      .btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+      }
+    }
+  `]
+})
+export class LandingComponent {}

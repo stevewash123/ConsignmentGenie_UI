@@ -161,7 +161,7 @@ describe('AdminService', () => {
         expect(approvals).toEqual(mockApprovals);
       });
 
-      const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/approvals/pending`);
+      const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/pending-owners`);
       expect(req.request.method).toBe('GET');
       req.flush(mockApprovals);
     });

@@ -5,9 +5,15 @@ import { ProviderGuard } from './guards/provider.guard';
 import { CustomerGuard } from './guards/customer.guard';
 
 export const routes: Routes = [
-  // Shopper storefront routes (/shop/{storeSlug}) - Phase 1
+  // Shop-first URL pattern for customers/providers (/shop/{shop-slug})
   {
-    path: 'shop/:storeSlug',
+    path: 'shop/:shopSlug',
+    loadChildren: () => import('./shop/shop.routes').then(m => m.shopRoutes)
+  },
+
+  // Legacy shopper storefront routes (/shop/{storeSlug}) - Phase 1
+  {
+    path: 'shopper/:storeSlug',
     loadChildren: () => import('./shopper/shopper.routes').then(m => m.shopperRoutes)
   },
 
@@ -45,6 +51,25 @@ export const routes: Routes = [
     loadChildren: () => import('./customer/customer.routes').then(m => m.customerRoutes)
   },
 
+  // Public landing pages (no auth required)
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./public/landing.component').then(m => m.LandingComponent)
+  },
+  {
+    path: 'signup',
+    loadComponent: () => import('./public/role-selection.component').then(m => m.RoleSelectionComponent)
+  },
+  {
+    path: 'signup/owner',
+    loadComponent: () => import('./public/owner-signup.component').then(m => m.OwnerSignupComponent)
+  },
+  {
+    path: 'signup/provider',
+    loadComponent: () => import('./public/provider-signup.component').then(m => m.ProviderSignupComponent)
+  },
+
   // Authentication routes (no auth required)
   {
     path: 'login',
@@ -73,16 +98,9 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/unauthorized.component').then(m => m.UnauthorizedComponent)
   },
 
-  // Default redirects
-  {
-    path: '',
-    redirectTo: '/login',
-    pathMatch: 'full'
-  },
-
   // Catch-all route
   {
     path: '**',
-    redirectTo: '/login'
+    redirectTo: '/'
   }
 ];

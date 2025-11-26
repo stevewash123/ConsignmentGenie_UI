@@ -40,7 +40,7 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   getMetrics(): Observable<AdminMetrics> {
-    return this.http.get<AdminMetrics>(`${this.apiUrl}/invitations/owner/metrics`);
+    return this.http.get<AdminMetrics>(`${this.apiUrl}/metrics`);
   }
 
   // Owner Invitation Management
