@@ -117,6 +117,7 @@ describe('AuthService', () => {
       email: 'owner@test.com',
       password: 'password123',
       shopName: 'Test Shop',
+      subdomain: 'testshop',
       address: '123 Test Street, Test City, TS 12345'
     };
     const mockResponse = { success: true, message: 'Owner registered successfully' };
@@ -138,6 +139,7 @@ describe('AuthService', () => {
       email: 'owner@test.com',
       password: 'password123',
       shopName: 'Test Shop',
+      subdomain: 'testshop',
       address: '123 Test Street, Test City, TS 12345'
     };
 

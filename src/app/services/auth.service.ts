@@ -52,7 +52,8 @@ export class AuthService {
     phone?: string;
     password: string;
     shopName: string;
-    address: string;
+    subdomain: string;
+    address?: string;
   }): Observable<{ success: boolean; message?: string; errors?: string[] }> {
     return this.http.post<{ success: boolean; message?: string; errors?: string[] }>(
       `${this.apiUrl}/auth/register/owner`,

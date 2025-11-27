@@ -30,9 +30,70 @@ import { AuthService } from '../services/auth.service';
             </div>
 
             <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="signup-form">
-              <!-- Account Information Section -->
+              <!-- Shop Information Section -->
               <div class="form-section">
-                <h3>Account Information</h3>
+                <h3>Shop Information</h3>
+
+                <div class="form-group">
+                  <label for="shopName">Business/Shop Name *</label>
+                  <input
+                    type="text"
+                    id="shopName"
+                    formControlName="shopName"
+                    [class.error]="signupForm.get('shopName')?.touched && signupForm.get('shopName')?.invalid"
+                    placeholder="Enter your business or shop name"
+                  />
+                  <div class="error-message" *ngIf="signupForm.get('shopName')?.touched && signupForm.get('shopName')?.invalid">
+                    Business/Shop name is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="subdomain">Shop URL *</label>
+                  <div class="subdomain-input" [class.error]="signupForm.get('subdomain')?.touched && signupForm.get('subdomain')?.invalid">
+                    <input
+                      type="text"
+                      id="subdomain"
+                      formControlName="subdomain"
+                      placeholder="yourshop"
+                    />
+                    <span class="subdomain-suffix">.consignmentgenie.com</span>
+                  </div>
+                  <small class="form-hint">This will be your shop's web address</small>
+                  <div class="error-message" *ngIf="signupForm.get('subdomain')?.touched && signupForm.get('subdomain')?.invalid">
+                    <span *ngIf="signupForm.get('subdomain')?.errors?.['required']">Shop URL is required</span>
+                    <span *ngIf="signupForm.get('subdomain')?.errors?.['pattern']">Only letters, numbers, and dashes allowed</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="businessAddress">Business Address *</label>
+                  <input
+                    type="text"
+                    id="businessAddress"
+                    formControlName="businessAddress"
+                    [class.error]="signupForm.get('businessAddress')?.touched && signupForm.get('businessAddress')?.invalid"
+                    placeholder="123 Main Street, City, State 12345"
+                  />
+                  <div class="error-message" *ngIf="signupForm.get('businessAddress')?.touched && signupForm.get('businessAddress')?.invalid">
+                    Business address is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="poBox">PO Box (Optional)</label>
+                  <input
+                    type="text"
+                    id="poBox"
+                    formControlName="poBox"
+                    placeholder="PO Box 123"
+                  />
+                </div>
+              </div>
+
+              <!-- Contact Information Section -->
+              <div class="form-section">
+                <h3>Contact Information</h3>
 
                 <div class="form-group">
                   <label for="name">Full Name *</label>
@@ -65,6 +126,16 @@ import { AuthService } from '../services/auth.service';
                 </div>
 
                 <div class="form-group">
+                  <label for="phone">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    formControlName="phone"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+
+                <div class="form-group">
                   <label for="password">Password *</label>
                   <input
                     type="password"
@@ -76,53 +147,6 @@ import { AuthService } from '../services/auth.service';
                   />
                   <div class="error-message" *ngIf="signupForm.get('password')?.touched && signupForm.get('password')?.invalid">
                     Password must be at least 8 characters long
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="phone">Phone Number *</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    formControlName="phone"
-                    [class.error]="signupForm.get('phone')?.touched && signupForm.get('phone')?.invalid"
-                    placeholder="Enter your phone number"
-                  />
-                  <div class="error-message" *ngIf="signupForm.get('phone')?.touched && signupForm.get('phone')?.invalid">
-                    Phone number is required
-                  </div>
-                </div>
-              </div>
-
-              <!-- Shop Information Section -->
-              <div class="form-section">
-                <h3>Shop Information</h3>
-
-                <div class="form-group">
-                  <label for="shopName">Shop/Business Name *</label>
-                  <input
-                    type="text"
-                    id="shopName"
-                    formControlName="shopName"
-                    [class.error]="signupForm.get('shopName')?.touched && signupForm.get('shopName')?.invalid"
-                    placeholder="Enter your shop or business name"
-                  />
-                  <div class="error-message" *ngIf="signupForm.get('shopName')?.touched && signupForm.get('shopName')?.invalid">
-                    Shop/Business name is required
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="businessAddress">Business Address *</label>
-                  <textarea
-                    id="businessAddress"
-                    formControlName="businessAddress"
-                    [class.error]="signupForm.get('businessAddress')?.touched && signupForm.get('businessAddress')?.invalid"
-                    placeholder="Enter your complete business address"
-                    rows="3"
-                  ></textarea>
-                  <div class="error-message" *ngIf="signupForm.get('businessAddress')?.touched && signupForm.get('businessAddress')?.invalid">
-                    Business address is required
                   </div>
                 </div>
               </div>
@@ -292,6 +316,48 @@ import { AuthService } from '../services/auth.service';
       font-weight: 500;
     }
 
+    .subdomain-input {
+      display: flex;
+      align-items: center;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .subdomain-input:focus-within {
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
+    }
+
+    .subdomain-input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .subdomain-input input {
+      border: none !important;
+      box-shadow: none !important;
+      flex: 1;
+      padding: 0.875rem;
+      font-size: 1rem;
+    }
+
+    .subdomain-suffix {
+      background: #f8fafc;
+      padding: 0.875rem;
+      color: #6b7280;
+      font-size: 1rem;
+      border-left: 1px solid #e5e7eb;
+    }
+
+    .form-hint {
+      color: #6b7280;
+      font-size: 0.825rem;
+      margin-top: 0.25rem;
+    }
+
     .form-actions {
       display: flex;
       flex-direction: column;
@@ -393,9 +459,11 @@ export class OwnerSignupComponent {
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      phone: ['', [Validators.required, Validators.minLength(10)]],
+      phone: [''],
       shopName: ['', [Validators.required, Validators.minLength(2)]],
-      businessAddress: ['', [Validators.required, Validators.minLength(10)]]
+      subdomain: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+      businessAddress: ['', [Validators.required, Validators.minLength(10)]],
+      poBox: ['']
     });
   }
 
@@ -408,9 +476,10 @@ export class OwnerSignupComponent {
         fullName: this.signupForm.value.name,
         email: this.signupForm.value.email,
         password: this.signupForm.value.password,
-        phone: this.signupForm.value.phone,
+        phone: this.signupForm.value.phone || undefined,
         shopName: this.signupForm.value.shopName,
-        address: this.signupForm.value.businessAddress
+        subdomain: this.signupForm.value.subdomain,
+        address: this.signupForm.value.businessAddress + (this.signupForm.value.poBox ? `\nPO Box: ${this.signupForm.value.poBox}` : '')
       };
 
       this.authService.registerOwner(formData).subscribe({
