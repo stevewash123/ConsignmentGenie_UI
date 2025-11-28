@@ -29,7 +29,7 @@ describe('AdminService', () => {
       const mockMetrics: AdminMetrics = {
         activeOrganizations: 5,
         newSignups: 2,
-        pendingInvitations: 3
+        monthlyRevenue: 15420
       };
 
       service.getMetrics().subscribe(metrics => {
