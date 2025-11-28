@@ -63,7 +63,11 @@ export const routes: Routes = [
   },
   {
     path: 'signup/owner',
-    loadComponent: () => import('./public/owner-signup.component').then(m => m.OwnerSignupComponent)
+    loadComponent: () => import('./auth/owner-signup-step1.component').then(m => m.OwnerSignupStep1Component)
+  },
+  {
+    path: 'signup/owner/profile',
+    loadComponent: () => import('./auth/owner-signup-step2.component').then(m => m.OwnerSignupStep2Component)
   },
   {
     path: 'signup/provider',
@@ -81,7 +85,7 @@ export const routes: Routes = [
   },
   {
     path: 'register/owner',
-    loadComponent: () => import('./auth/register-owner.component').then(m => m.RegisterOwnerComponent)
+    loadComponent: () => import('./auth/owner-signup-step1.component').then(m => m.OwnerSignupStep1Component)
   },
   {
     path: 'register/provider',
