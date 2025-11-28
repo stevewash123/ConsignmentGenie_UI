@@ -297,11 +297,58 @@ describe('OwnerSignupStep2Component', () => {
       // No detectChanges() here - we control it in each test
     });
 
-    it('should successfully submit registration with valid form data', (done) => {
+    it('should auto-login and redirect to dashboard when token is provided', (done) => {
+      const mockResponse = {
+        success: true,
+        role: 'owner',
+        message: 'Registration successful',
+        token: 'jwt-token-123'
+      };
+      // Use a delayed observable to test the loading state
+      mockAuthService.registerOwner.and.returnValue(
+        of(mockResponse).pipe(delay(1))
+      );
+
+      // Fill form with valid data
+      component.profileForm.patchValue({
+        fullName: 'John Doe',
+        shopName: 'Test Shop',
+        subdomain: 'testshop',
+        phone: '555-1234',
+        streetAddress: '123 Main St',
+        city: 'Test City',
+        state: 'CA',
+        zipCode: '12345'
+      });
+
+      component.onSubmit();
+
+      expect(component.isSubmitting()).toBeTrue();
+
+      // Wait for the observable to complete
+      setTimeout(() => {
+        expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
+          fullName: 'John Doe',
+          email: 'test@example.com',
+          phone: '555-1234',
+          password: 'password123',
+          shopName: 'Test Shop',
+          subdomain: 'testshop',
+          address: '123 Main St, Test City, CA 12345'
+        }));
+
+        expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+        done();
+      }, 10);
+    });
+
+    it('should redirect to success page when no token (approval required)', (done) => {
       const mockResponse = {
         success: true,
         role: 'owner',
         message: 'Registration successful'
+        // No token - approval required
       };
       // Use a delayed observable to test the loading state
       mockAuthService.registerOwner.and.returnValue(

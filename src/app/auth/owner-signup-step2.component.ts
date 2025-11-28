@@ -535,13 +535,21 @@ export class OwnerSignupStep2Component implements OnInit {
           console.log('User logged in with role:', result.role);
           // Clear the temporary auth data
           sessionStorage.removeItem('ownerAuthData');
-          this.router.navigate(['/register/success'], {
-            queryParams: {
-              type: 'owner',
-              shopName: formValue.shopName,
-              email: authData.email
-            }
-          });
+
+          // If we have a token, user was auto-logged in - redirect to dashboard
+          if (result.token) {
+            console.log('Auto-login successful, redirecting to owner dashboard');
+            this.router.navigate(['/owner/dashboard']);
+          } else {
+            // No token means approval required - show success page
+            this.router.navigate(['/register/success'], {
+              queryParams: {
+                type: 'owner',
+                shopName: formValue.shopName,
+                email: authData.email
+              }
+            });
+          }
         } else {
           this.errorMessage.set(result.message || 'Registration failed');
         }
