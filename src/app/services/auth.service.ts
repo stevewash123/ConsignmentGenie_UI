@@ -54,11 +54,26 @@ export class AuthService {
     shopName: string;
     subdomain: string;
     address?: string;
-  }): Observable<{ success: boolean; message?: string; errors?: string[] }> {
-    return this.http.post<{ success: boolean; message?: string; errors?: string[] }>(
+  }): Observable<{ success: boolean; message?: string; errors?: string[]; token?: string; userId?: string; email?: string; role?: any; organizationId?: string; organizationName?: string; expiresAt?: string }> {
+    return this.http.post<any>(
       `${this.apiUrl}/auth/register/owner`,
       request
     ).pipe(
+      tap(response => {
+        // If registration successful and we have token data, log the user in
+        if (response.success && response.token) {
+          const authData = {
+            token: response.token,
+            userId: response.userId,
+            email: response.email,
+            role: response.role,
+            organizationId: response.organizationId,
+            organizationName: response.organizationName,
+            expiresAt: response.expiresAt
+          };
+          this.setAuthData(authData);
+        }
+      }),
       catchError((error: any) => {
         return of({
           success: false,

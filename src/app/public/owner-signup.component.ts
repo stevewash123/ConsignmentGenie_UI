@@ -484,8 +484,9 @@ export class OwnerSignupComponent {
 
       this.authService.registerOwner(formData).subscribe({
         next: (response) => {
-          console.log('Registration successful:', response);
+          console.log('Registration response:', response);
           if (response.success) {
+            console.log('User logged in with role:', response.role);
             this.router.navigate(['/owner/dashboard']);
           } else {
             this.errorMessage.set(response.message || 'Registration failed. Please try again.');

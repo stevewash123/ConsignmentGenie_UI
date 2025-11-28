@@ -397,7 +397,9 @@ export class RegisterOwnerComponent {
 
     this.authService.registerOwner(request).subscribe({
       next: (result) => {
+        console.log('Owner registration response:', result);
         if (result.success) {
+          console.log('User logged in with role:', result.role);
           this.router.navigate(['/register/success'], {
             queryParams: {
               type: 'owner',
