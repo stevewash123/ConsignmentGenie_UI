@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 import { OwnerSignupStep2Component } from './owner-signup-step2.component';
 import { AuthService } from '../services/auth.service';
@@ -38,122 +39,83 @@ describe('OwnerSignupStep2Component', () => {
     spyOn(mockRouter, 'navigate');
   });
 
-  beforeEach(() => {
-    // Mock sessionStorage with valid auth data for most tests
-    spyOn(sessionStorage, 'getItem').and.returnValue(
-      JSON.stringify({ email: 'test@example.com', password: 'password123' })
-    );
-    spyOn(sessionStorage, 'removeItem');
+  // ===========================================
+  // WITH detectChanges in beforeEach
+  // ===========================================
+  describe('with detectChanges', () => {
+    beforeEach(() => {
+      // Mock sessionStorage with valid auth data for most tests
+      spyOn(sessionStorage, 'getItem').and.returnValue(
+        JSON.stringify({ email: 'test@example.com', password: 'password123' })
+      );
+      spyOn(sessionStorage, 'removeItem');
 
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should initialize with default values', () => {
-    expect(component.isSubmitting()).toBeFalse();
-    expect(component.errorMessage()).toBe('');
-    expect(component.profileForm.get('fullName')?.value).toBe('');
-    expect(component.profileForm.get('shopName')?.value).toBe('');
-    expect(component.profileForm.get('subdomain')?.value).toBe('');
-    expect(component.profileForm.get('phone')?.value).toBe('');
-    expect(component.profileForm.get('streetAddress')?.value).toBe('');
-    expect(component.profileForm.get('city')?.value).toBe('');
-    expect(component.profileForm.get('state')?.value).toBe('');
-    expect(component.profileForm.get('zipCode')?.value).toBe('');
-  });
-
-  it('should validate required fields', () => {
-    const form = component.profileForm;
-
-    expect(form.valid).toBeFalse();
-    expect(form.get('fullName')?.hasError('required')).toBeTrue();
-    expect(form.get('shopName')?.hasError('required')).toBeTrue();
-    expect(form.get('subdomain')?.hasError('required')).toBeTrue();
-    expect(form.get('streetAddress')?.hasError('required')).toBeTrue();
-    expect(form.get('city')?.hasError('required')).toBeTrue();
-    expect(form.get('state')?.hasError('required')).toBeTrue();
-    expect(form.get('zipCode')?.hasError('required')).toBeTrue();
-  });
-
-  it('should validate subdomain pattern', () => {
-    const subdomainControl = component.profileForm.get('subdomain');
-
-    subdomainControl?.setValue('Invalid_Subdomain!');
-    expect(subdomainControl?.hasError('pattern')).toBeTrue();
-
-    subdomainControl?.setValue('valid-subdomain123');
-    expect(subdomainControl?.hasError('pattern')).toBeFalse();
-  });
-
-  it('should validate ZIP code pattern', () => {
-    const zipCodeControl = component.profileForm.get('zipCode');
-
-    zipCodeControl?.setValue('invalid');
-    expect(zipCodeControl?.hasError('pattern')).toBeTrue();
-
-    zipCodeControl?.setValue('12345');
-    expect(zipCodeControl?.hasError('pattern')).toBeFalse();
-
-    zipCodeControl?.setValue('12345-6789');
-    expect(zipCodeControl?.hasError('pattern')).toBeFalse();
-  });
-
-  it('should redirect to step 1 if no auth data on init', () => {
-    // Override the spy to return null (no auth data)
-    (sessionStorage.getItem as jasmine.Spy).and.returnValue(null);
-
-    component.ngOnInit();
-
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/signup/owner']);
-  });
-
-  it('should successfully submit registration with valid form data', () => {
-    const mockResponse = {
-      success: true,
-      role: 'owner',
-      message: 'Registration successful'
-    };
-    mockAuthService.registerOwner.and.returnValue(of(mockResponse));
-
-    // Fill form with valid data
-    component.profileForm.patchValue({
-      fullName: 'John Doe',
-      shopName: 'Test Shop',
-      subdomain: 'testshop',
-      phone: '555-1234',
-      streetAddress: '123 Main St',
-      city: 'Test City',
-      state: 'CA',
-      zipCode: '12345'
+      fixture.detectChanges();
     });
 
-    component.onSubmit();
-
-    expect(component.isSubmitting()).toBeTrue();
-    expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
-      fullName: 'John Doe',
-      email: 'test@example.com',
-      phone: '555-1234',
-      password: 'password123',
-      shopName: 'Test Shop',
-      subdomain: 'testshop',
-      address: '123 Main St, Test City, CA 12345'
-    }));
-
-    expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/success'], {
-      queryParams: {
-        type: 'owner',
-        shopName: 'Test Shop',
-        email: 'test@example.com'
-      }
+    it('should create', () => {
+      expect(component).toBeTruthy();
     });
-  });
 
-  it('should handle registration failure', () => {
+    it('should initialize with default values', () => {
+      expect(component.isSubmitting()).toBeFalse();
+      expect(component.errorMessage()).toBe('');
+      expect(component.profileForm.get('fullName')?.value).toBe('');
+      expect(component.profileForm.get('shopName')?.value).toBe('');
+      expect(component.profileForm.get('subdomain')?.value).toBe('');
+      expect(component.profileForm.get('phone')?.value).toBe('');
+      expect(component.profileForm.get('streetAddress')?.value).toBe('');
+      expect(component.profileForm.get('city')?.value).toBe('');
+      expect(component.profileForm.get('state')?.value).toBe('');
+      expect(component.profileForm.get('zipCode')?.value).toBe('');
+    });
+
+    it('should validate required fields', () => {
+      const form = component.profileForm;
+
+      expect(form.valid).toBeFalse();
+      expect(form.get('fullName')?.hasError('required')).toBeTrue();
+      expect(form.get('shopName')?.hasError('required')).toBeTrue();
+      expect(form.get('subdomain')?.hasError('required')).toBeTrue();
+      expect(form.get('streetAddress')?.hasError('required')).toBeTrue();
+      expect(form.get('city')?.hasError('required')).toBeTrue();
+      expect(form.get('state')?.hasError('required')).toBeTrue();
+      expect(form.get('zipCode')?.hasError('required')).toBeTrue();
+    });
+
+    it('should validate subdomain pattern', () => {
+      const subdomainControl = component.profileForm.get('subdomain');
+
+      subdomainControl?.setValue('Invalid_Subdomain!');
+      expect(subdomainControl?.hasError('pattern')).toBeTrue();
+
+      subdomainControl?.setValue('valid-subdomain123');
+      expect(subdomainControl?.hasError('pattern')).toBeFalse();
+    });
+
+    it('should validate ZIP code pattern', () => {
+      const zipCodeControl = component.profileForm.get('zipCode');
+
+      zipCodeControl?.setValue('invalid');
+      expect(zipCodeControl?.hasError('pattern')).toBeTrue();
+
+      zipCodeControl?.setValue('12345');
+      expect(zipCodeControl?.hasError('pattern')).toBeFalse();
+
+      zipCodeControl?.setValue('12345-6789');
+      expect(zipCodeControl?.hasError('pattern')).toBeFalse();
+    });
+
+    it('should redirect to step 1 if no auth data on init', () => {
+      // Override the spy to return null (no auth data)
+      (sessionStorage.getItem as jasmine.Spy).and.returnValue(null);
+
+      component.ngOnInit();
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/signup/owner']);
+    });
+
+    it('should handle registration failure', () => {
     const mockResponse = {
       success: false,
       message: 'Shop name already exists'
@@ -304,20 +266,86 @@ describe('OwnerSignupStep2Component', () => {
     );
   });
 
-  describe('State Dropdown', () => {
-    it('should have all US states as options', () => {
-      const stateSelect = fixture.nativeElement.querySelector('#state');
-      const options = stateSelect.querySelectorAll('option');
+    describe('State Dropdown', () => {
+      it('should have all US states as options', () => {
+        const stateSelect = fixture.nativeElement.querySelector('#state');
+        const options = stateSelect.querySelectorAll('option');
 
-      // Should have 51 options (empty option + 50 states)
-      expect(options.length).toBe(51);
+        // Should have 51 options (empty option + 50 states)
+        expect(options.length).toBe(51);
 
-      // Check for a few specific states
-      const optionValues = Array.from(options).map((option: any) => option.value);
-      expect(optionValues).toContain('CA');
-      expect(optionValues).toContain('NY');
-      expect(optionValues).toContain('TX');
-      expect(optionValues).toContain('FL');
+        // Check for a few specific states
+        const optionValues = Array.from(options).map((option: any) => option.value);
+        expect(optionValues).toContain('CA');
+        expect(optionValues).toContain('NY');
+        expect(optionValues).toContain('TX');
+        expect(optionValues).toContain('FL');
+      });
+    });
+  });
+
+  // ===========================================
+  // WITHOUT detectChanges in beforeEach (for submission state tests)
+  // ===========================================
+  describe('without detectChanges', () => {
+    beforeEach(() => {
+      // Mock sessionStorage with valid auth data for most tests
+      spyOn(sessionStorage, 'getItem').and.returnValue(
+        JSON.stringify({ email: 'test@example.com', password: 'password123' })
+      );
+      spyOn(sessionStorage, 'removeItem');
+      // No detectChanges() here - we control it in each test
+    });
+
+    it('should successfully submit registration with valid form data', (done) => {
+      const mockResponse = {
+        success: true,
+        role: 'owner',
+        message: 'Registration successful'
+      };
+      // Use a delayed observable to test the loading state
+      mockAuthService.registerOwner.and.returnValue(
+        of(mockResponse).pipe(delay(1))
+      );
+
+      // Fill form with valid data
+      component.profileForm.patchValue({
+        fullName: 'John Doe',
+        shopName: 'Test Shop',
+        subdomain: 'testshop',
+        phone: '555-1234',
+        streetAddress: '123 Main St',
+        city: 'Test City',
+        state: 'CA',
+        zipCode: '12345'
+      });
+
+      component.onSubmit();
+
+      expect(component.isSubmitting()).toBeTrue();
+
+      // Wait for the observable to complete
+      setTimeout(() => {
+        expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
+          fullName: 'John Doe',
+          email: 'test@example.com',
+          phone: '555-1234',
+          password: 'password123',
+          shopName: 'Test Shop',
+          subdomain: 'testshop',
+          address: '123 Main St, Test City, CA 12345'
+        }));
+
+        expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/success'], {
+          queryParams: {
+            type: 'owner',
+            shopName: 'Test Shop',
+            email: 'test@example.com'
+          }
+        });
+        done();
+      }, 10);
     });
   });
 });

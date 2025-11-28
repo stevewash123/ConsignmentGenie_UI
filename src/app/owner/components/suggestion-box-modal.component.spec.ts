@@ -234,8 +234,8 @@ describe('SuggestionBoxModalComponent', () => {
   });
 
   it('should show loading state during submission', async () => {
-    spyOn(component.submit, 'emit');
-    spyOn(component.close, 'emit');
+    spyOn(component.submit, 'emit').and.stub();
+    spyOn(component.close, 'emit').and.stub();
 
     component.isVisible = true;
     component.formData.set({
