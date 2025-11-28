@@ -6,6 +6,8 @@ import { takeUntil } from 'rxjs/operators';
 import { ShopperAuthService } from '../../services/shopper-auth.service';
 import { ShopperStoreService, StoreInfoDto } from '../../services/shopper-store.service';
 import { ShopperCartService, Cart, CartItem } from '../../services/shopper-cart.service';
+import { LoadingService } from '../../../shared/services/loading.service';
+import { LOADING_KEYS } from '../../constants/loading-keys';
 
 @Component({
   selector: 'app-cart',
@@ -19,7 +21,13 @@ import { ShopperCartService, Cart, CartItem } from '../../services/shopper-cart.
           <p class="store-name" *ngIf="storeInfo">{{ storeInfo.name }}</p>
         </div>
 
-        <div class="cart-content" *ngIf="cart && cart.items.length > 0; else emptyCartTemplate">
+        <!-- Loading State -->
+        <div *ngIf="loadingService.isLoading(KEYS.CART_LOAD)" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Loading cart...</p>
+        </div>
+
+        <div class="cart-content" *ngIf="!loadingService.isLoading(KEYS.CART_LOAD) && cart && cart.items.length > 0; else emptyCartTemplate">
           <div class="cart-items">
             <div class="cart-item" *ngFor="let item of cart.items; trackBy: trackByItemId" data-cy="cart-item">
               <div class="item-image">
@@ -140,7 +148,7 @@ import { ShopperCartService, Cart, CartItem } from '../../services/shopper-cart.
         </div>
 
         <ng-template #emptyCartTemplate>
-          <div class="empty-cart">
+          <div class="empty-cart" *ngIf="!loadingService.isLoading(KEYS.CART_LOAD)">
             <div class="empty-icon">🛒</div>
             <h2>Your cart is empty</h2>
             <p>Looks like you haven't added anything to your cart yet.</p>
@@ -551,6 +559,26 @@ import { ShopperCartService, Cart, CartItem } from '../../services/shopper-cart.
       }
     }
 
+    .loading-container {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     @media (max-width: 480px) {
       .cart-header h1 {
         font-size: 2rem;
@@ -567,7 +595,9 @@ export class CartComponent implements OnInit, OnDestroy {
   storeSlug = '';
   isAuthenticated = false;
   cart: Cart | null = null;
-  isLoading = true;
+
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
 
   private destroy$ = new Subject<void>();
 
@@ -576,7 +606,8 @@ export class CartComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: ShopperAuthService,
     private storeService: ShopperStoreService,
-    private cartService: ShopperCartService
+    private cartService: ShopperCartService,
+    public loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -604,13 +635,21 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   private initializeCart(): void {
+    this.loadingService.start(LOADING_KEYS.CART_LOAD);
     this.cartService.setCurrentStore(this.storeSlug);
 
     this.cartService.getCurrentCart$().pipe(
       takeUntil(this.destroy$)
-    ).subscribe(cart => {
-      this.cart = cart;
-      this.isLoading = false;
+    ).subscribe({
+      next: cart => {
+        this.cart = cart;
+      },
+      error: error => {
+        console.error('Error loading cart:', error);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.CART_LOAD);
+      }
     });
   }
 
@@ -619,16 +658,25 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   updateQuantity(itemId: string, newQuantity: number): void {
+    this.loadingService.start(LOADING_KEYS.CART_UPDATE);
     this.cartService.updateItemQuantity(itemId, newQuantity);
+    // Note: This completes immediately since updateItemQuantity is synchronous
+    this.loadingService.stop(LOADING_KEYS.CART_UPDATE);
   }
 
   removeItem(itemId: string): void {
+    this.loadingService.start(LOADING_KEYS.CART_REMOVE);
     this.cartService.removeItem(itemId);
+    // Note: This completes immediately since removeItem is synchronous
+    this.loadingService.stop(LOADING_KEYS.CART_REMOVE);
   }
 
   clearCart(): void {
     if (confirm('Are you sure you want to clear your entire cart?')) {
+      this.loadingService.start(LOADING_KEYS.CART_CLEAR);
       this.cartService.clearCart();
+      // Note: This completes immediately since clearCart is synchronous
+      this.loadingService.stop(LOADING_KEYS.CART_CLEAR);
     }
   }
 

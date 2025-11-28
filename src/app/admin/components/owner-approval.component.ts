@@ -7,6 +7,7 @@ import { AdminLayoutComponent } from './admin-layout.component';
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
 import { InviteOwnerModalComponent } from './invite-owner-modal.component';
 import { OwnerInvitationsListComponent } from './owner-invitations-list.component';
+import { LoadingService } from '../../shared/services/loading.service';
 
 interface PendingOwner {
   userId: string;
@@ -71,7 +72,7 @@ interface ApiResponse<T> {
           <!-- Pending Approvals Tab -->
           @if (activeTab() === 'approvals') {
             <div class="tab-panel">
-              @if (isLoading()) {
+              @if (isComponentLoading()) {
                 <div class="loading-state">
                   <div class="spinner"></div>
                   <p>Loading pending approvals...</p>
@@ -87,13 +88,13 @@ interface ApiResponse<T> {
                   <div class="empty-icon">✅</div>
                   <h3>No Pending Approvals</h3>
                   <p>All owner registrations have been reviewed. Check back later for new submissions.</p>
-                  <button class="refresh-btn" (click)="loadPendingOwners()">Refresh</button>
+                  <button class="refresh-btn" (click)="loadPendingOwners()" [disabled]="isComponentLoading()">Refresh</button>
                 </div>
               } @else {
                 <div class="approvals-container">
                   <div class="approvals-header">
                     <h2>Pending Approvals ({{ pendingOwners().length }})</h2>
-                    <button class="refresh-btn" (click)="loadPendingOwners()">
+                    <button class="refresh-btn" (click)="loadPendingOwners()" [disabled]="isComponentLoading()">
                       <span class="refresh-icon">🔄</span>
                       Refresh
                     </button>
@@ -595,7 +596,6 @@ interface ApiResponse<T> {
 })
 export class OwnerApprovalComponent implements OnInit {
   pendingOwners = signal<PendingOwner[]>([]);
-  isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
 
@@ -611,15 +611,20 @@ export class OwnerApprovalComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private confirmationService: ConfirmationDialogService
+    private confirmationService: ConfirmationDialogService,
+    private loadingService: LoadingService
   ) {}
+
+  isComponentLoading(): boolean {
+    return this.loadingService.isLoading('owner-approval');
+  }
 
   ngOnInit() {
     this.loadPendingOwners();
   }
 
   async loadPendingOwners() {
-    this.isLoading.set(true);
+    this.loadingService.start('owner-approval');
     this.errorMessage.set('');
 
     try {
@@ -637,7 +642,7 @@ export class OwnerApprovalComponent implements OnInit {
       console.error('Failed to load pending owners:', error);
       this.errorMessage.set('Failed to load pending approvals. Please try again.');
     } finally {
-      this.isLoading.set(false);
+      this.loadingService.stop('owner-approval');
     }
   }
 

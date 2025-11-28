@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
+import { LoadingService } from '../shared/services/loading.service';
 import { environment } from '../../environments/environment';
 
 interface LoginRequest {
@@ -59,7 +60,7 @@ interface LoginResponse {
               required
               email
               placeholder="Enter your email"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
               #emailInput="ngModel"
             >
             @if (emailInput.invalid && emailInput.touched) {
@@ -84,14 +85,14 @@ interface LoginResponse {
                 [(ngModel)]="credentials.password"
                 required
                 placeholder="Enter your password"
-                [disabled]="isLoading()"
+                [disabled]="isAuthLoading()"
                 #passwordInput="ngModel"
               >
               <button
                 type="button"
                 class="password-toggle"
                 (click)="togglePassword()"
-                [disabled]="isLoading()"
+                [disabled]="isAuthLoading()"
               >
                 {{ showPassword() ? '🙈' : '👁️' }}
               </button>
@@ -106,9 +107,9 @@ interface LoginResponse {
           <button
             type="submit"
             class="login-btn"
-            [disabled]="loginForm.invalid || isLoading()"
+            [disabled]="loginForm.invalid || isAuthLoading()"
           >
-            @if (isLoading()) {
+            @if (isAuthLoading()) {
               <span class="spinner"></span>
               Signing in...
             } @else {
@@ -123,7 +124,7 @@ interface LoginResponse {
             <button
               class="test-account-btn admin"
               (click)="useTestAccount('admin@microsaasbuilders.com')"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
             >
               <div class="account-role">System Admin</div>
               <div class="account-email">admin@microsaasbuilders.com</div>
@@ -131,7 +132,7 @@ interface LoginResponse {
             <button
               class="test-account-btn owner"
               (click)="useTestAccount('owner1@microsaasbuilders.com')"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
             >
               <div class="account-role">Shop Owner</div>
               <div class="account-email">owner1@microsaasbuilders.com</div>
@@ -139,7 +140,7 @@ interface LoginResponse {
             <button
               class="test-account-btn provider"
               (click)="useTestAccount('provider1@microsaasbuilders.com')"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
             >
               <div class="account-role">Provider</div>
               <div class="account-email">provider1@microsaasbuilders.com</div>
@@ -147,7 +148,7 @@ interface LoginResponse {
             <button
               class="test-account-btn customer"
               (click)="useTestAccount('customer1@microsaasbuilders.com')"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
             >
               <div class="account-role">Customer</div>
               <div class="account-email">customer1@microsaasbuilders.com</div>
@@ -409,15 +410,19 @@ export class LoginComponent {
     password: ''
   };
 
-  isLoading = signal(false);
   showPassword = signal(false);
   errorMessage = signal('');
 
   constructor(
     private router: Router,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private loadingService: LoadingService
   ) {}
+
+  isAuthLoading(): boolean {
+    return this.loadingService.isLoading('auth-login');
+  }
 
   togglePassword() {
     this.showPassword.update(show => !show);
@@ -434,7 +439,7 @@ export class LoginComponent {
       return;
     }
 
-    this.isLoading.set(true);
+    this.loadingService.start('auth-login');
     this.errorMessage.set('');
 
     try {
@@ -501,7 +506,7 @@ export class LoginComponent {
         this.errorMessage.set('Login failed. Please try again later.');
       }
     } finally {
-      this.isLoading.set(false);
+      this.loadingService.stop('auth-login');
     }
   }
 

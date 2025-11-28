@@ -2,13 +2,14 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 import { ProviderService } from '../services/provider.service';
 import { CreateProviderRequest } from '../models/provider.model';
 
 @Component({
   selector: 'app-provider-add',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
   template: `
     <div class="provider-add-container">
       <div class="add-header">

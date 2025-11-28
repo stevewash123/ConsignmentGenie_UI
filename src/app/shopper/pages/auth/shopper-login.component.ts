@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ShopperAuthService, ShopperLoginRequest } from '../../services/shopper-auth.service';
 import { ShopperStoreService, StoreInfoDto } from '../../services/shopper-store.service';
+import { LoadingService } from '../../../shared/services/loading.service';
 
 @Component({
   selector: 'app-shopper-login',
@@ -87,9 +88,9 @@ import { ShopperStoreService, StoreInfoDto } from '../../services/shopper-store.
           <button
             type="submit"
             class="btn btn-primary btn-block"
-            [disabled]="loginForm.invalid || isLoading">
-            <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            {{ isLoading ? 'Signing In...' : 'Sign In' }}
+            [disabled]="loginForm.invalid || isShopperLoading()">
+            <span *ngIf="isShopperLoading()" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            {{ isShopperLoading() ? 'Signing In...' : 'Sign In' }}
           </button>
         </form>
 
@@ -412,7 +413,6 @@ import { ShopperStoreService, StoreInfoDto } from '../../services/shopper-store.
 })
 export class ShopperLoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
-  isLoading = false;
   errorMessage = '';
   showPassword = false;
   storeSlug = '';
@@ -426,7 +426,8 @@ export class ShopperLoginComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private shopperAuthService: ShopperAuthService,
-    private storeService: ShopperStoreService
+    private storeService: ShopperStoreService,
+    private loadingService: LoadingService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -468,13 +469,17 @@ export class ShopperLoginComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  isShopperLoading(): boolean {
+    return this.loadingService.isLoading('shopper-login');
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.markAllFieldsAsTouched();
       return;
     }
 
-    this.isLoading = true;
+    this.loadingService.start('shopper-login');
     this.errorMessage = '';
 
     const loginRequest: ShopperLoginRequest = {
@@ -486,7 +491,7 @@ export class ShopperLoginComponent implements OnInit, OnDestroy {
     this.shopperAuthService.login(this.storeSlug, loginRequest).pipe(
       takeUntil(this.destroy$),
       finalize(() => {
-        this.isLoading = false;
+        this.loadingService.stop('shopper-login');
       })
     ).subscribe({
       next: (result) => {

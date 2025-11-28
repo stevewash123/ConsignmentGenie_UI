@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -13,6 +13,7 @@ import {
 } from '../../models/payout.model';
 import { ProviderService } from '../../services/provider.service';
 import { Provider } from '../../models/provider.model';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-owner-payouts',
@@ -102,13 +103,13 @@ import { Provider } from '../../models/provider.model';
           </div>
         </div>
 
-        <div *ngIf="loading()" class="loading">Loading payouts...</div>
+        <div *ngIf="isComponentLoading()" class="loading">Loading payouts...</div>
 
-        <div *ngIf="!loading() && payouts().length === 0" class="empty-state">
+        <div *ngIf="!isComponentLoading() && payouts().length === 0" class="empty-state">
           No payouts found.
         </div>
 
-        <table *ngIf="!loading() && payouts().length > 0" class="payouts-table">
+        <table *ngIf="!isComponentLoading() && payouts().length > 0" class="payouts-table">
           <thead>
             <tr>
               <th (click)="sort('payoutNumber')" class="sortable">
@@ -820,7 +821,6 @@ export class OwnerPayoutsComponent implements OnInit {
   payouts = signal<PayoutListDto[]>([]);
   pendingPayouts = signal<PendingPayoutData[]>([]);
   providers = signal<Provider[]>([]);
-  loading = signal(true);
   selectedPayout = signal<PayoutDto | null>(null);
 
   // Pagination
@@ -867,6 +867,12 @@ export class OwnerPayoutsComponent implements OnInit {
     return pages;
   });
 
+  private loadingService = inject(LoadingService);
+
+  isComponentLoading(): boolean {
+    return this.loadingService.isLoading('owner-payouts');
+  }
+
   constructor(
     private payoutService: PayoutService,
     private providerService: ProviderService,
@@ -900,7 +906,7 @@ export class OwnerPayoutsComponent implements OnInit {
   }
 
   async loadPayouts() {
-    this.loading.set(true);
+    this.loadingService.start('owner-payouts');
 
     try {
       const request: PayoutSearchRequest = {
@@ -926,7 +932,7 @@ export class OwnerPayoutsComponent implements OnInit {
       console.error('Error loading payouts:', error);
       this.toastr.error('Failed to load payouts');
     } finally {
-      this.loading.set(false);
+      this.loadingService.stop('owner-payouts');
     }
   }
 

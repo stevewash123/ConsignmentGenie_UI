@@ -2,15 +2,17 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { ProviderService } from '../services/provider.service';
 import { Provider } from '../models/provider.model';
 import { ProviderInvitationModalComponent } from './provider-invitation-modal.component';
 import { OwnerLayoutComponent } from '../owner/components/owner-layout.component';
+import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
   selector: 'app-provider-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ProviderInvitationModalComponent, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule, ProviderInvitationModalComponent, OwnerLayoutComponent],
   template: `
     <app-owner-layout>
       <div class="provider-list-container">
@@ -27,7 +29,7 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
         </div>
 
         <!-- Stats Dashboard -->
-        <div class="stats-dashboard" *ngIf="!isLoading()">
+        <div class="stats-dashboard" *ngIf="!isProvidersLoading()">
           <div class="stat-card">
             <div class="stat-number">{{ getStats().total }}</div>
             <div class="stat-label">Total Providers</div>
@@ -89,7 +91,7 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
           </div>
         </div>
 
-        <div class="provider-grid" *ngIf="!isLoading(); else loading">
+        <div class="provider-grid" *ngIf="!isProvidersLoading(); else loading">
           <div class="provider-card" *ngFor="let provider of filteredProviders(); trackBy: trackByProvider">
             <div class="provider-header">
               <h3>{{ provider.name }}</h3>
@@ -139,7 +141,7 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
           <div class="loading">Loading providers...</div>
         </ng-template>
 
-        <div class="no-providers" *ngIf="!isLoading() && filteredProviders().length === 0">
+        <div class="no-providers" *ngIf="!isProvidersLoading() && filteredProviders().length === 0">
           <p>No providers found. <a routerLink="/owner/providers/new">Add your first provider</a></p>
         </div>
       </div>
@@ -548,21 +550,24 @@ import { OwnerLayoutComponent } from '../owner/components/owner-layout.component
 export class ProviderListComponent implements OnInit {
   providers = signal<Provider[]>([]);
   filteredProviders = signal<Provider[]>([]);
-  isLoading = signal(true);
   showActiveOnly = signal(true);
   searchTerm = '';
   sortBy = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
   isInviteModalVisible = signal(false);
 
-  constructor(private providerService: ProviderService) {}
+  isProvidersLoading(): boolean {
+    return this.loadingService.isLoading('providers-list');
+  }
+
+  constructor(private providerService: ProviderService, private loadingService: LoadingService) {}
 
   ngOnInit(): void {
     this.loadProviders();
   }
 
   loadProviders(): void {
-    this.isLoading.set(true);
+    this.loadingService.start('providers-list');
     this.providerService.getProviders().subscribe({
       next: (providers) => {
         console.log('Providers API response:', providers);
@@ -604,7 +609,7 @@ export class ProviderListComponent implements OnInit {
         console.error('Error loading providers:', error);
       },
       complete: () => {
-        this.isLoading.set(false);
+        this.loadingService.stop('providers-list');
       }
     });
   }

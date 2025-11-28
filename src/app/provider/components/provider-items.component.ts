@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProviderPortalService } from '../services/provider-portal.service';
 import { ProviderItem, PagedResult, ProviderItemQuery } from '../models/provider.models';
+import { LoadingService } from '../../shared/services/loading.service';
+import { LOADING_KEYS } from '../constants/loading-keys';
 
 @Component({
   selector: 'app-provider-items',
@@ -137,7 +139,7 @@ import { ProviderItem, PagedResult, ProviderItemQuery } from '../models/provider
       </div>
 
       <!-- Loading State -->
-      <div class="loading" *ngIf="loading">
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.ITEMS_LIST)">
         <p>Loading items...</p>
       </div>
 
@@ -470,8 +472,10 @@ import { ProviderItem, PagedResult, ProviderItemQuery } from '../models/provider
 })
 export class ProviderItemsComponent implements OnInit {
   itemsResult: PagedResult<ProviderItem> | null = null;
-  loading = false;
   error: string | null = null;
+
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
 
   selectedStatus: string | null = null;
   currentPage = 1;
@@ -484,7 +488,10 @@ export class ProviderItemsComponent implements OnInit {
   soldCount = 0;
   removedCount = 0;
 
-  constructor(private providerService: ProviderPortalService) {}
+  constructor(
+    private providerService: ProviderPortalService,
+    public loadingService: LoadingService
+  ) {}
 
   ngOnInit() {
     this.loadItems();
@@ -492,7 +499,7 @@ export class ProviderItemsComponent implements OnInit {
   }
 
   loadItems() {
-    this.loading = true;
+    this.loadingService.start(LOADING_KEYS.ITEMS_LIST);
     this.error = null;
 
     const query: ProviderItemQuery = {
@@ -507,12 +514,13 @@ export class ProviderItemsComponent implements OnInit {
     this.providerService.getMyItems(query).subscribe({
       next: (result) => {
         this.itemsResult = result;
-        this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load items. Please try again.';
-        this.loading = false;
         console.error('Items error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.ITEMS_LIST);
       }
     });
   }

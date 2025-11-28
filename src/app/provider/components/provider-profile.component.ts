@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ProviderPortalService } from '../services/provider-portal.service';
 import { ProviderProfile, UpdateProviderProfile } from '../models/provider.models';
+import { LoadingService } from '../../shared/services/loading.service';
+import { LOADING_KEYS } from '../constants/loading-keys';
 
 @Component({
   selector: 'app-provider-profile',
@@ -176,7 +178,7 @@ import { ProviderProfile, UpdateProviderProfile } from '../models/provider.model
       </div>
 
       <!-- Loading State -->
-      <div class="loading" *ngIf="loading">
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.PROFILE)">
         <p>Loading profile...</p>
       </div>
 
@@ -485,10 +487,12 @@ import { ProviderProfile, UpdateProviderProfile } from '../models/provider.model
 })
 export class ProviderProfileComponent implements OnInit {
   profile: ProviderProfile | null = null;
-  loading = false;
   saving = false;
   error: string | null = null;
   successMessage: string | null = null;
+
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
 
   formData: UpdateProviderProfile = {
     fullName: '',
@@ -500,26 +504,30 @@ export class ProviderProfileComponent implements OnInit {
 
   payoutNotifications = true;
 
-  constructor(private providerService: ProviderPortalService) {}
+  constructor(
+    private providerService: ProviderPortalService,
+    public loadingService: LoadingService
+  ) {}
 
   ngOnInit() {
     this.loadProfile();
   }
 
   loadProfile() {
-    this.loading = true;
+    this.loadingService.start(LOADING_KEYS.PROFILE);
     this.error = null;
 
     this.providerService.getProfile().subscribe({
       next: (profile) => {
         this.profile = profile;
         this.populateForm(profile);
-        this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load profile. Please try again.';
-        this.loading = false;
         console.error('Profile error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.PROFILE);
       }
     });
   }

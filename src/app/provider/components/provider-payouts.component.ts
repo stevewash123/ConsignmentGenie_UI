@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProviderPortalService } from '../services/provider-portal.service';
 import { ProviderPayout, PagedResult } from '../models/provider.models';
+import { LoadingService } from '../../shared/services/loading.service';
+import { LOADING_KEYS } from '../constants/loading-keys';
 
 @Component({
   selector: 'app-provider-payouts',
@@ -96,7 +98,7 @@ import { ProviderPayout, PagedResult } from '../models/provider.models';
       </div>
 
       <!-- Loading State -->
-      <div class="loading" *ngIf="loading">
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.PAYOUTS_LIST)">
         <p>Loading payouts...</p>
       </div>
 
@@ -409,33 +411,39 @@ import { ProviderPayout, PagedResult } from '../models/provider.models';
 })
 export class ProviderPayoutsComponent implements OnInit {
   payoutsResult: PagedResult<ProviderPayout> | null = null;
-  loading = false;
   error: string | null = null;
+
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
 
   currentBalance = 487.50;
   pendingItemCount = 12;
   totalPaidOut = 735.50;
 
-  constructor(private providerService: ProviderPortalService) {}
+  constructor(
+    private providerService: ProviderPortalService,
+    public loadingService: LoadingService
+  ) {}
 
   ngOnInit() {
     this.loadPayouts();
   }
 
   loadPayouts() {
-    this.loading = true;
+    this.loadingService.start(LOADING_KEYS.PAYOUTS_LIST);
     this.error = null;
 
     this.providerService.getMyPayouts().subscribe({
       next: (result) => {
         this.payoutsResult = result;
         this.calculateTotals();
-        this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load payouts. Please try again.';
-        this.loading = false;
         console.error('Payouts error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.PAYOUTS_LIST);
       }
     });
   }

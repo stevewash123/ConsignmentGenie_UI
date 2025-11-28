@@ -1,15 +1,17 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 import { ProviderService } from '../services/provider.service';
 import { Provider } from '../models/provider.model';
+import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
   selector: 'app-provider-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, HttpClientModule],
   template: `
-    <div class="provider-detail-container" *ngIf="!isLoading(); else loading">
+    <div class="provider-detail-container" *ngIf="!isProviderLoading(); else loading">
       <div class="detail-header">
         <div class="breadcrumb">
           <a routerLink="/owner/providers">← Back to Providers</a>
@@ -387,7 +389,6 @@ import { Provider } from '../models/provider.model';
 export class ProviderDetailComponent implements OnInit {
   provider = signal<Provider | null>(null);
   providerId = signal<number>(0);
-  isLoading = signal(true);
   isSubmitting = signal(false);
   errorMessage = signal('');
 
@@ -401,10 +402,15 @@ export class ProviderDetailComponent implements OnInit {
 
   recentActivity = signal<any[]>([]);
 
+  isProviderLoading(): boolean {
+    return this.loadingService.isLoading('provider-detail');
+  }
+
   constructor(
     private providerService: ProviderService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -418,7 +424,7 @@ export class ProviderDetailComponent implements OnInit {
   }
 
   loadProvider(): void {
-    this.isLoading.set(true);
+    this.loadingService.start('provider-detail');
     this.providerService.getProvider(this.providerId()).subscribe({
       next: (provider) => {
         this.provider.set(provider);
@@ -428,7 +434,7 @@ export class ProviderDetailComponent implements OnInit {
         this.errorMessage.set('Failed to load provider details');
       },
       complete: () => {
-        this.isLoading.set(false);
+        this.loadingService.stop('provider-detail');
       }
     });
   }

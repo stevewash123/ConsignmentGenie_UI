@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ShopperAuthService, ShopperRegisterRequest } from '../../services/shopper-auth.service';
 import { ShopperStoreService, StoreInfoDto } from '../../services/shopper-store.service';
+import { LoadingService } from '../../../shared/services/loading.service';
 
 @Component({
   selector: 'app-shopper-register',
@@ -146,9 +147,9 @@ import { ShopperStoreService, StoreInfoDto } from '../../services/shopper-store.
           <button
             type="submit"
             class="btn btn-primary btn-block"
-            [disabled]="registerForm.invalid || isLoading">
-            <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+            [disabled]="registerForm.invalid || isShopperRegisterLoading()">
+            <span *ngIf="isShopperRegisterLoading()" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            {{ isShopperRegisterLoading() ? 'Creating Account...' : 'Create Account' }}
           </button>
         </form>
 
@@ -431,7 +432,6 @@ import { ShopperStoreService, StoreInfoDto } from '../../services/shopper-store.
 })
 export class ShopperRegisterComponent implements OnInit, OnDestroy {
   registerForm: FormGroup;
-  isLoading = false;
   errorMessage = '';
   showPassword = false;
   showConfirmPassword = false;
@@ -445,7 +445,8 @@ export class ShopperRegisterComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private shopperAuthService: ShopperAuthService,
-    private storeService: ShopperStoreService
+    private storeService: ShopperStoreService,
+    private loadingService: LoadingService
   ) {
     this.registerForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.maxLength(200)]],
@@ -486,13 +487,17 @@ export class ShopperRegisterComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  isShopperRegisterLoading(): boolean {
+    return this.loadingService.isLoading('shopper-register');
+  }
+
   onSubmit(): void {
     if (this.registerForm.invalid) {
       this.markAllFieldsAsTouched();
       return;
     }
 
-    this.isLoading = true;
+    this.loadingService.start('shopper-register');
     this.errorMessage = '';
 
     const registerRequest: ShopperRegisterRequest = {
@@ -506,7 +511,7 @@ export class ShopperRegisterComponent implements OnInit, OnDestroy {
     this.shopperAuthService.register(this.storeSlug, registerRequest).pipe(
       takeUntil(this.destroy$),
       finalize(() => {
-        this.isLoading = false;
+        this.loadingService.stop('shopper-register');
       })
     ).subscribe({
       next: (result) => {

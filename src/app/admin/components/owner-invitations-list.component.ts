@@ -9,6 +9,7 @@ import {
   OwnerInvitationMetricsDto
 } from '../../models/owner-invitation.model';
 import { PagedResult } from '../../shared/models/api.models';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-owner-invitations-list',
@@ -71,7 +72,7 @@ import { PagedResult } from '../../shared/models/api.models';
         </div>
 
         <div class="actions-section">
-          <button class="refresh-btn" (click)="loadInvitations()" [disabled]="isLoading()">
+          <button class="refresh-btn" (click)="loadInvitations()" [disabled]="isComponentLoading()">
             <span class="refresh-icon">🔄</span>
             Refresh
           </button>
@@ -79,7 +80,7 @@ import { PagedResult } from '../../shared/models/api.models';
       </div>
 
       <!-- Loading State -->
-      @if (isLoading()) {
+      @if (isComponentLoading()) {
         <div class="loading-state">
           <div class="spinner"></div>
           <p>Loading invitations...</p>
@@ -575,7 +576,6 @@ import { PagedResult } from '../../shared/models/api.models';
 export class OwnerInvitationsListComponent implements OnInit {
   invitations = signal<OwnerInvitationListDto[]>([]);
   metrics = signal<OwnerInvitationMetricsDto | null>(null);
-  isLoading = signal(false);
   errorMessage = signal('');
   processingInvitations = signal(new Set<string>());
 
@@ -590,7 +590,11 @@ export class OwnerInvitationsListComponent implements OnInit {
   statusFilter = '';
   private searchTimeout?: number;
 
-  constructor(private ownerInvitationService: OwnerInvitationService) {}
+  constructor(private ownerInvitationService: OwnerInvitationService, private loadingService: LoadingService) {}
+
+  isComponentLoading(): boolean {
+    return this.loadingService.isLoading('owner-invitations-list');
+  }
 
   ngOnInit() {
     this.loadInvitations();
@@ -598,7 +602,7 @@ export class OwnerInvitationsListComponent implements OnInit {
   }
 
   loadInvitations() {
-    this.isLoading.set(true);
+    this.loadingService.start('owner-invitations-list');
     this.errorMessage.set('');
 
     const queryParams: OwnerInvitationQueryParams = {
@@ -612,7 +616,6 @@ export class OwnerInvitationsListComponent implements OnInit {
 
     this.ownerInvitationService.getInvitations(queryParams).subscribe({
       next: (response) => {
-        this.isLoading.set(false);
         if (response.success && response.data) {
           this.invitations.set(response.data.items || []);
           this.totalCount.set(response.data.totalCount);
@@ -622,8 +625,10 @@ export class OwnerInvitationsListComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.isLoading.set(false);
         this.errorMessage.set(error.error?.message || 'Failed to load invitations');
+      },
+      complete: () => {
+        this.loadingService.stop('owner-invitations-list');
       }
     });
   }

@@ -35,61 +35,11 @@ import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, NewSig
           <div class="stat-value">{{ metrics().newSignups }}</div>
         </div>
         <div class="stat-card">
-          <h3>Pending Invitations</h3>
-          <div class="stat-value">{{ metrics().pendingInvitations }}</div>
+          <h3>Monthly Revenue</h3>
+          <div class="stat-value">{{ (metrics().monthlyRevenue || 0) | currency:'USD':'symbol':'1.0-0' }}</div>
         </div>
       </div>
 
-      <!-- Pending Invitations Section -->
-      <div class="dashboard-section">
-        <h2>Pending Invitations</h2>
-
-        @if (pendingInvitations().length === 0) {
-          <div class="empty-state">
-            <p>No pending invitations</p>
-          </div>
-        } @else {
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Sent</th>
-                  <th>Expires</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (invitation of pendingInvitations(); track invitation.id) {
-                  <tr>
-                    <td class="font-medium">{{ invitation.name }}</td>
-                    <td>{{ invitation.email }}</td>
-                    <td>{{ invitation.sentAt | date:'short' }}</td>
-                    <td>{{ invitation.expiresAt | date:'short' }}</td>
-                    <td class="actions">
-                      <button
-                        class="btn-action resend"
-                        (click)="resendInvitation(invitation.id)"
-                        [disabled]="isResending === invitation.id"
-                        title="Resend invitation">
-                        {{ isResending === invitation.id ? '⏳' : '📧' }}
-                      </button>
-                      <button
-                        class="btn-action cancel"
-                        (click)="cancelInvitation(invitation.id)"
-                        [disabled]="isCancelling === invitation.id"
-                        title="Cancel invitation">
-                        {{ isCancelling === invitation.id ? '⏳' : '❌' }}
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      </div>
 
       <!-- Pending Approvals Section -->
       <div class="dashboard-section">
@@ -571,11 +521,10 @@ export class AdminDashboardComponent implements OnInit {
   metrics = signal<AdminMetrics>({
     activeOrganizations: 0,
     newSignups: 0,
-    pendingInvitations: 0
+    monthlyRevenue: 0
   });
 
   // Data
-  pendingInvitations = signal<OwnerInvitation[]>([]);
   recentSignups = signal<NewSignup[]>([]);
 
   // Invite Modal State
@@ -587,9 +536,7 @@ export class AdminDashboardComponent implements OnInit {
     email: ''
   };
 
-  // Action States
-  isResending: string | null = null;
-  isCancelling: string | null = null;
+  // Action States (for invite functionality)
 
   constructor(private adminService: AdminService) {}
 
@@ -607,30 +554,17 @@ export class AdminDashboardComponent implements OnInit {
         console.error('Error loading admin metrics:', error);
         // Fall back to mock data for development
         this.metrics.set({
-          activeOrganizations: 3,
-          newSignups: 1,
-          pendingInvitations: 0
+          activeOrganizations: 8,
+          newSignups: 3,
+          monthlyRevenue: 15420
         });
       }
     });
 
-    // Load pending invitations and recent signups
-    this.loadPendingInvitations();
+    // Load recent signups
     this.loadRecentSignups();
   }
 
-  private loadPendingInvitations() {
-    this.adminService.getOwnerInvitations().subscribe({
-      next: (invitations) => {
-        this.pendingInvitations.set(invitations);
-      },
-      error: (error) => {
-        console.error('Error loading pending invitations:', error);
-        // Fall back to empty array for development
-        this.pendingInvitations.set([]);
-      }
-    });
-  }
 
   private loadRecentSignups() {
     this.adminService.getRecentSignups().subscribe({
@@ -639,8 +573,33 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading recent signups:', error);
-        // Fall back to empty array for development
-        this.recentSignups.set([]);
+        // Fall back to mock data for development
+        this.recentSignups.set([
+          {
+            id: '1',
+            shopName: 'Main Street Consignment',
+            ownerName: 'Sarah Johnson',
+            email: 'sarah@mainstreetconsignment.com',
+            registeredAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+            subdomain: 'mainstreet'
+          },
+          {
+            id: '2',
+            shopName: 'Vintage Treasures',
+            ownerName: 'Mike Chen',
+            email: 'mike@vintagetreasures.com',
+            registeredAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+            subdomain: 'vintage-treasures'
+          },
+          {
+            id: '3',
+            shopName: 'Second Chance Fashion',
+            ownerName: 'Emma Rodriguez',
+            email: 'emma@secondchancefashion.com',
+            registeredAt: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+            subdomain: 'secondchance'
+          }
+        ]);
       }
     });
   }
@@ -664,9 +623,7 @@ export class AdminDashboardComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.closeInviteModal();
-          // Refresh data to update pending invitations
-          this.loadDashboardData();
-          // TODO: Show success toast
+          // TODO: Show success toast/notification
           console.log('Invitation sent successfully!');
         } else {
           this.inviteError = response.message || 'Failed to send invitation.';
@@ -681,56 +638,5 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  resendInvitation(id: string) {
-    this.isResending = id;
-
-    this.adminService.resendOwnerInvitation(id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Refresh data
-          this.loadPendingInvitations();
-          // TODO: Show success toast
-          console.log('Invitation resent successfully!');
-        } else {
-          // TODO: Show error toast
-          console.error('Failed to resend invitation:', response.message);
-        }
-        this.isResending = null;
-      },
-      error: (error) => {
-        console.error('Error resending invitation:', error);
-        // TODO: Show error toast
-        this.isResending = null;
-      }
-    });
-  }
-
-  cancelInvitation(id: string) {
-    if (!confirm('Are you sure you want to cancel this invitation?')) {
-      return;
-    }
-
-    this.isCancelling = id;
-
-    this.adminService.cancelOwnerInvitation(id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Refresh data
-          this.loadDashboardData();
-          // TODO: Show success toast
-          console.log('Invitation cancelled successfully!');
-        } else {
-          // TODO: Show error toast
-          console.error('Failed to cancel invitation:', response.message);
-        }
-        this.isCancelling = null;
-      },
-      error: (error) => {
-        console.error('Error cancelling invitation:', error);
-        // TODO: Show error toast
-        this.isCancelling = null;
-      }
-    });
-  }
 
 }

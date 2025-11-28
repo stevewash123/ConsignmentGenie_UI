@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { ProviderPortalService } from '../services/provider-portal.service';
 import { ProviderPayoutDetail } from '../models/provider.models';
+import { LoadingService } from '../../shared/services/loading.service';
+import { LOADING_KEYS } from '../constants/loading-keys';
 
 @Component({
   selector: 'app-provider-payout-detail',
@@ -119,7 +121,7 @@ import { ProviderPayoutDetail } from '../models/provider.models';
       </div>
 
       <!-- Loading State -->
-      <div class="loading" *ngIf="loading">
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.PAYOUT_DETAIL)">
         <p>Loading payout details...</p>
       </div>
 
@@ -464,13 +466,16 @@ import { ProviderPayoutDetail } from '../models/provider.models';
 })
 export class ProviderPayoutDetailComponent implements OnInit {
   payoutDetail: ProviderPayoutDetail | null = null;
-  loading = false;
   error: string | null = null;
   payoutId: string;
 
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
+
   constructor(
     private providerService: ProviderPortalService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    public loadingService: LoadingService
   ) {
     this.payoutId = this.route.snapshot.paramMap.get('id') || '';
   }
@@ -482,18 +487,19 @@ export class ProviderPayoutDetailComponent implements OnInit {
   }
 
   loadPayoutDetail() {
-    this.loading = true;
+    this.loadingService.start(LOADING_KEYS.PAYOUT_DETAIL);
     this.error = null;
 
     this.providerService.getMyPayout(this.payoutId).subscribe({
       next: (detail) => {
         this.payoutDetail = detail;
-        this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load payout details. Please try again.';
-        this.loading = false;
         console.error('Payout detail error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.PAYOUT_DETAIL);
       }
     });
   }

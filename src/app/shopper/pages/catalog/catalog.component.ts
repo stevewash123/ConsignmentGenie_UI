@@ -12,6 +12,8 @@ import {
   CatalogRequest
 } from '../../services/shopper-catalog.service';
 import { ShopperCartService } from '../../services/shopper-cart.service';
+import { LoadingService } from '../../../shared/services/loading.service';
+import { LOADING_KEYS } from '../../constants/loading-keys';
 
 @Component({
   selector: 'app-catalog',
@@ -61,14 +63,14 @@ import { ShopperCartService } from '../../services/shopper-cart.service';
           </div>
         </div>
 
-        <div class="error-message" *ngIf="error && !isLoading">
+        <div class="error-message" *ngIf="error && !loadingService.isLoading(KEYS.CATALOG_ITEMS) && !loadingService.isLoading(KEYS.CATALOG_SEARCH)">
           <div class="alert alert-danger">
             {{ error }}
             <button class="btn btn-outline-primary btn-sm ms-2" (click)="loadCatalogData()">Retry</button>
           </div>
         </div>
 
-        <div class="catalog-content" *ngIf="!isLoading && !error; else loadingTemplate">
+        <div class="catalog-content" *ngIf="!loadingService.isLoading(KEYS.CATALOG_ITEMS) && !loadingService.isLoading(KEYS.CATALOG_SEARCH) && !error; else loadingTemplate">
           <div class="items-grid" *ngIf="items.length > 0; else noItemsTemplate">
             <div class="item-card" *ngFor="let item of items" data-cy="item-card">
               <div class="item-image" (click)="viewItemDetail(item)" style="cursor: pointer;">
@@ -124,7 +126,8 @@ import { ShopperCartService } from '../../services/shopper-cart.service';
             <div class="spinner-border" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
-            <p>Loading items...</p>
+            <p *ngIf="loadingService.isLoading(KEYS.CATALOG_SEARCH)">Searching items...</p>
+            <p *ngIf="loadingService.isLoading(KEYS.CATALOG_ITEMS) && !loadingService.isLoading(KEYS.CATALOG_SEARCH)">Loading items...</p>
           </div>
         </ng-template>
 
@@ -524,8 +527,10 @@ export class CatalogComponent implements OnInit, OnDestroy {
   itemsPerPage = 20;
   totalCount = 0;
   totalPages = 1;
-  isLoading = true;
   error: string | null = null;
+
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
 
   // Search debouncing
   private searchSubject = new Subject<string>();
@@ -536,7 +541,8 @@ export class CatalogComponent implements OnInit, OnDestroy {
     private router: Router,
     private storeService: ShopperStoreService,
     private catalogService: ShopperCatalogService,
-    private cartService: ShopperCartService
+    private cartService: ShopperCartService,
+    public loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -577,7 +583,8 @@ export class CatalogComponent implements OnInit, OnDestroy {
   }
 
   loadCatalogData(): void {
-    this.isLoading = true;
+    const loadingKey = this.searchTerm ? LOADING_KEYS.CATALOG_SEARCH : LOADING_KEYS.CATALOG_ITEMS;
+    this.loadingService.start(loadingKey);
     this.error = null;
 
     const request: CatalogRequest = {
@@ -609,13 +616,14 @@ export class CatalogComponent implements OnInit, OnDestroy {
           this.error = response.message || 'Failed to load catalog items';
           this.items = [];
         }
-        this.isLoading = false;
       },
       error: (err) => {
         this.error = 'An error occurred while loading catalog items';
         this.items = [];
-        this.isLoading = false;
         console.error('Catalog load error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(loadingKey);
       }
     });
   }

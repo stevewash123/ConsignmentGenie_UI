@@ -2,13 +2,15 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 import { ProviderService } from '../services/provider.service';
 import { Provider, UpdateProviderRequest } from '../models/provider.model';
+import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
   selector: 'app-provider-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
   template: `
     <div class="provider-edit-container">
       <div class="edit-header">
@@ -18,7 +20,7 @@ import { Provider, UpdateProviderRequest } from '../models/provider.model';
         <h1>Edit Provider</h1>
       </div>
 
-      <div class="edit-card" *ngIf="!isLoading(); else loading">
+      <div class="edit-card" *ngIf="!isProviderLoading(); else loading">
         <form (ngSubmit)="onSubmit()" #providerForm="ngForm">
           <div class="form-section">
             <h3>Basic Information</h3>
@@ -370,7 +372,6 @@ import { Provider, UpdateProviderRequest } from '../models/provider.model';
 })
 export class ProviderEditComponent implements OnInit {
   providerId = signal<number>(0);
-  isLoading = signal(true);
   isSubmitting = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
@@ -387,10 +388,15 @@ export class ProviderEditComponent implements OnInit {
     isActive: true
   };
 
+  isProviderLoading(): boolean {
+    return this.loadingService.isLoading('provider-edit');
+  }
+
   constructor(
     private providerService: ProviderService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -402,7 +408,7 @@ export class ProviderEditComponent implements OnInit {
   }
 
   loadProvider(): void {
-    this.isLoading.set(true);
+    this.loadingService.start('provider-edit');
     this.providerService.getProvider(this.providerId()).subscribe({
       next: (provider) => {
         this.populateEditData(provider);
@@ -412,7 +418,7 @@ export class ProviderEditComponent implements OnInit {
         this.errorMessage.set('Failed to load provider details');
       },
       complete: () => {
-        this.isLoading.set(false);
+        this.loadingService.stop('provider-edit');
       }
     });
   }

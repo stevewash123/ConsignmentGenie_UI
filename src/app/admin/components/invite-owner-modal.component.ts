@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OwnerInvitationService } from '../../services/owner-invitation.service';
 import { CreateOwnerInvitationRequest } from '../../models/owner-invitation.model';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-invite-owner-modal',
@@ -43,7 +44,7 @@ import { CreateOwnerInvitationRequest } from '../../models/owner-invitation.mode
                   required
                   maxlength="100"
                   placeholder="Enter the owner's full name"
-                  [disabled]="isLoading()"
+                  [disabled]="isComponentLoading()"
                   #nameInput="ngModel"
                 />
                 @if (nameInput.invalid && nameInput.touched) {
@@ -61,7 +62,7 @@ import { CreateOwnerInvitationRequest } from '../../models/owner-invitation.mode
                   required
                   maxlength="254"
                   placeholder="Enter the owner's email address"
-                  [disabled]="isLoading()"
+                  [disabled]="isComponentLoading()"
                   #emailInput="ngModel"
                 />
                 @if (emailInput.invalid && emailInput.touched) {
@@ -90,15 +91,15 @@ import { CreateOwnerInvitationRequest } from '../../models/owner-invitation.mode
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="cancel-btn" (click)="closeModal()" [disabled]="isLoading()">
+              <button type="button" class="cancel-btn" (click)="closeModal()" [disabled]="isComponentLoading()">
                 Cancel
               </button>
               <button
                 type="submit"
                 class="invite-btn"
-                [disabled]="inviteForm.invalid || isLoading()"
+                [disabled]="inviteForm.invalid || isComponentLoading()"
               >
-                @if (isLoading()) {
+                @if (isComponentLoading()) {
                   <span class="spinner"></span>
                   Sending Invitation...
                 } @else {
@@ -333,7 +334,6 @@ export class InviteOwnerModalComponent {
   @Output() invitationSent = new EventEmitter<void>();
   @Output() modalClosed = new EventEmitter<void>();
 
-  isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
 
@@ -342,27 +342,30 @@ export class InviteOwnerModalComponent {
     email: ''
   };
 
-  constructor(private ownerInvitationService: OwnerInvitationService) {}
+  constructor(private ownerInvitationService: OwnerInvitationService, private loadingService: LoadingService) {}
+
+  isComponentLoading(): boolean {
+    return this.loadingService.isLoading('invite-owner-modal');
+  }
 
   closeModal() {
-    if (!this.isLoading()) {
+    if (!this.isComponentLoading()) {
       this.resetForm();
       this.modalClosed.emit();
     }
   }
 
   onSubmit() {
-    if (this.isLoading()) {
+    if (this.isComponentLoading()) {
       return;
     }
 
-    this.isLoading.set(true);
+    this.loadingService.start('invite-owner-modal');
     this.errorMessage.set('');
     this.successMessage.set('');
 
     this.ownerInvitationService.createInvitation(this.formData).subscribe({
       next: (response) => {
-        this.isLoading.set(false);
         if (response.success) {
           this.successMessage.set('Invitation sent successfully! The owner will receive an email with registration instructions.');
           this.invitationSent.emit();
@@ -375,8 +378,10 @@ export class InviteOwnerModalComponent {
         }
       },
       error: (error) => {
-        this.isLoading.set(false);
         this.errorMessage.set(error.error?.message || 'An error occurred while sending the invitation. Please try again.');
+      },
+      complete: () => {
+        this.loadingService.stop('invite-owner-modal');
       }
     });
   }
@@ -388,6 +393,6 @@ export class InviteOwnerModalComponent {
     };
     this.errorMessage.set('');
     this.successMessage.set('');
-    this.isLoading.set(false);
+    this.loadingService.stop('invite-owner-modal');
   }
 }

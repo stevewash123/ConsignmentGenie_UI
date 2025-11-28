@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-shop-login',
@@ -30,7 +31,7 @@ import { AuthService } from '../../services/auth.service';
               name="email"
               [(ngModel)]="email"
               required
-              [disabled]="isLoading()"
+              [disabled]="isShopLoading()"
               placeholder="Enter your email"
               class="form-input"
             >
@@ -44,7 +45,7 @@ import { AuthService } from '../../services/auth.service';
               name="password"
               [(ngModel)]="password"
               required
-              [disabled]="isLoading()"
+              [disabled]="isShopLoading()"
               placeholder="Enter your password"
               class="form-input"
             >
@@ -53,9 +54,9 @@ import { AuthService } from '../../services/auth.service';
           <button
             type="submit"
             class="login-btn"
-            [disabled]="loginForm.invalid || isLoading()"
+            [disabled]="loginForm.invalid || isShopLoading()"
           >
-            {{ isLoading() ? 'Signing in...' : 'Sign In' }}
+            {{ isShopLoading() ? 'Signing in...' : 'Sign In' }}
           </button>
         </form>
 
@@ -283,14 +284,14 @@ import { AuthService } from '../../services/auth.service';
 export class ShopLoginComponent implements OnInit {
   email = '';
   password = '';
-  isLoading = signal(false);
   errorMessage = signal('');
   shopSlug = signal<string>('');
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -300,6 +301,10 @@ export class ShopLoginComponent implements OnInit {
         this.shopSlug.set(params['shopSlug']);
       }
     });
+  }
+
+  isShopLoading(): boolean {
+    return this.loadingService.isLoading('shop-login');
   }
 
   getShopDisplayName(): string {
@@ -319,7 +324,7 @@ export class ShopLoginComponent implements OnInit {
       return;
     }
 
-    this.isLoading.set(true);
+    this.loadingService.start('shop-login');
     this.errorMessage.set('');
 
     const loginRequest = { email: this.email, password: this.password };
@@ -340,10 +345,10 @@ export class ShopLoginComponent implements OnInit {
         } else {
           this.errorMessage.set('Login failed. Please try again.');
         }
-        this.isLoading.set(false);
+        this.loadingService.stop('shop-login');
       },
       complete: () => {
-        this.isLoading.set(false);
+        this.loadingService.stop('shop-login');
       }
     });
   }

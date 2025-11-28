@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InventoryService } from '../../services/inventory.service';
+import { LoadingService } from '../../shared/services/loading.service';
 import {
   ItemListDto,
   ItemQueryParams,
@@ -118,7 +119,7 @@ import {
       </div>
 
       <!-- Loading State -->
-      @if (loading()) {
+      @if (isInventoryLoading()) {
         <div class="loading-state">
           <i class="fas fa-spinner fa-spin"></i> Loading inventory...
         </div>
@@ -134,7 +135,7 @@ import {
       }
 
       <!-- Items Table -->
-      @if (!loading() && !error() && itemsResult()) {
+      @if (!isInventoryLoading() && !error() && itemsResult()) {
         <div class="items-table-container">
           <table class="table table-striped table-hover">
             <thead>
@@ -532,12 +533,16 @@ import {
 export class InventoryListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private router = inject(Router);
+  private loadingService = inject(LoadingService);
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
   categories = signal<CategoryDto[]>([]);
-  loading = signal(false);
   error = signal<string | null>(null);
+
+  isInventoryLoading(): boolean {
+    return this.loadingService.isLoading('inventory-list');
+  }
 
   // Filter state
   searchQuery = '';
@@ -587,7 +592,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   loadItems() {
-    this.loading.set(true);
+    this.loadingService.start('inventory-list');
     this.error.set(null);
 
     const params: ItemQueryParams = {
@@ -607,12 +612,13 @@ export class InventoryListComponent implements OnInit {
     this.inventoryService.getItems(params).subscribe({
       next: (result) => {
         this.itemsResult.set(result);
-        this.loading.set(false);
       },
       error: (err) => {
         this.error.set('Failed to load inventory items. Please try again.');
-        this.loading.set(false);
         console.error('Error loading items:', err);
+      },
+      complete: () => {
+        this.loadingService.stop('inventory-list');
       }
     });
   }

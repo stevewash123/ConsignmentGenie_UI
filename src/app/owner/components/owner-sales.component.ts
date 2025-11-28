@@ -10,6 +10,7 @@ import { ItemService, ItemFilters } from '../../services/item.service';
 import { ProviderService } from '../../services/provider.service';
 import { Item, ItemStatus } from '../../models/item.model';
 import { Provider } from '../../models/provider.model';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-owner-sales',
@@ -108,7 +109,7 @@ import { Provider } from '../../models/provider.model';
             </div>
           </div>
 
-          <div class="table-container" *ngIf="pagedResult(); else loadingTransactions">
+          <div class="table-container" *ngIf="!isComponentLoading() && pagedResult(); else loadingTransactions">
             <table class="transactions-table">
               <thead>
                 <tr>
@@ -212,9 +213,12 @@ import { Provider } from '../../models/provider.model';
           </div>
 
           <ng-template #loadingTransactions>
-            <div class="loading-state">
+            <div class="loading-state" *ngIf="isComponentLoading()">
               <div class="loading-spinner"></div>
               <p>Loading transactions...</p>
+            </div>
+            <div class="empty-state" *ngIf="!isComponentLoading() && (!pagedResult() || pagedResult()!.items.length === 0)">
+              <p>No transactions found.</p>
             </div>
           </ng-template>
         </div>
@@ -1624,7 +1628,6 @@ import { Provider } from '../../models/provider.model';
 export class OwnerSalesComponent implements OnInit {
   pagedResult = signal<PagedResult<Transaction> | null>(null);
   summary = signal<any>(null);
-  loading = signal(false);
 
   // Filters
   filters = {
@@ -1684,6 +1687,11 @@ export class OwnerSalesComponent implements OnInit {
   calculatedShopAmount = signal(0);
 
   private toastr = inject(ToastrService);
+  private loadingService = inject(LoadingService);
+
+  isComponentLoading(): boolean {
+    return this.loadingService.isLoading('owner-sales');
+  }
 
   constructor(
     private transactionService: TransactionService,
@@ -1712,16 +1720,17 @@ export class OwnerSalesComponent implements OnInit {
   }
 
   loadTransactions() {
-    this.loading.set(true);
+    this.loadingService.start('owner-sales');
 
     this.transactionService.getTransactions(this.buildQueryParams()).subscribe({
       next: (result) => {
         this.pagedResult.set(result);
-        this.loading.set(false);
       },
       error: (error) => {
         console.error('Failed to load transactions:', error);
-        this.loading.set(false);
+      },
+      complete: () => {
+        this.loadingService.stop('owner-sales');
       }
     });
   }

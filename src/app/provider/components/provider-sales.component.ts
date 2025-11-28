@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProviderPortalService } from '../services/provider-portal.service';
 import { ProviderSale, PagedResult, ProviderSaleQuery } from '../models/provider.models';
+import { LoadingService } from '../../shared/services/loading.service';
+import { LOADING_KEYS } from '../constants/loading-keys';
 
 @Component({
   selector: 'app-provider-sales',
@@ -129,7 +131,7 @@ import { ProviderSale, PagedResult, ProviderSaleQuery } from '../models/provider
       </div>
 
       <!-- Loading State -->
-      <div class="loading" *ngIf="loading">
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.SALES_LIST)">
         <p>Loading sales...</p>
       </div>
 
@@ -455,8 +457,10 @@ import { ProviderSale, PagedResult, ProviderSaleQuery } from '../models/provider
 })
 export class ProviderSalesComponent implements OnInit {
   salesResult: PagedResult<ProviderSale> | null = null;
-  loading = false;
   error: string | null = null;
+
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
 
   selectedDateRange = 'all';
   selectedPayoutStatus = 'all';
@@ -468,14 +472,17 @@ export class ProviderSalesComponent implements OnInit {
   pendingItemCount = 0;
   totalShownEarnings = 0;
 
-  constructor(private providerService: ProviderPortalService) {}
+  constructor(
+    private providerService: ProviderPortalService,
+    public loadingService: LoadingService
+  ) {}
 
   ngOnInit() {
     this.loadSales();
   }
 
   loadSales() {
-    this.loading = true;
+    this.loadingService.start(LOADING_KEYS.SALES_LIST);
     this.error = null;
 
     const query: ProviderSaleQuery = {
@@ -497,12 +504,13 @@ export class ProviderSalesComponent implements OnInit {
       next: (result) => {
         this.salesResult = result;
         this.calculateSummary();
-        this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load sales. Please try again.';
-        this.loading = false;
         console.error('Sales error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.SALES_LIST);
       }
     });
   }

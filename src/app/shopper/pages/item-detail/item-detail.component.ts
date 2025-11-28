@@ -11,6 +11,8 @@ import {
   ShopperItemList
 } from '../../services/shopper-catalog.service';
 import { ShopperCartService } from '../../services/shopper-cart.service';
+import { LoadingService } from '../../../shared/services/loading.service';
+import { LOADING_KEYS } from '../../constants/loading-keys';
 
 @Component({
   selector: 'app-item-detail',
@@ -32,7 +34,7 @@ import { ShopperCartService } from '../../services/shopper-cart.service';
         </div>
 
         <!-- Loading State -->
-        <div class="loading-state" *ngIf="isLoading">
+        <div class="loading-state" *ngIf="loadingService.isLoading(KEYS.ITEM_DETAIL)">
           <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
@@ -40,7 +42,7 @@ import { ShopperCartService } from '../../services/shopper-cart.service';
         </div>
 
         <!-- Error State -->
-        <div class="error-message" *ngIf="error && !isLoading">
+        <div class="error-message" *ngIf="error && !loadingService.isLoading(KEYS.ITEM_DETAIL)">
           <div class="alert alert-danger">
             {{ error }}
             <button class="btn btn-outline-primary btn-sm ms-2" (click)="loadItemDetail()">Retry</button>
@@ -48,7 +50,7 @@ import { ShopperCartService } from '../../services/shopper-cart.service';
         </div>
 
         <!-- Item Detail Content -->
-        <div class="item-detail-content" *ngIf="item && !isLoading && !error">
+        <div class="item-detail-content" *ngIf="item && !loadingService.isLoading(KEYS.ITEM_DETAIL) && !error">
           <div class="item-detail-grid">
             <!-- Image Gallery -->
             <div class="image-section">
@@ -573,8 +575,10 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
   itemId = '';
   item: ShopperItemDetail | null = null;
   selectedImage: ShopperItemImage | null = null;
-  isLoading = true;
   error: string | null = null;
+
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
 
   private destroy$ = new Subject<void>();
 
@@ -583,7 +587,8 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private storeService: ShopperStoreService,
     private catalogService: ShopperCatalogService,
-    private cartService: ShopperCartService
+    private cartService: ShopperCartService,
+    public loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -611,7 +616,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
   }
 
   loadItemDetail(): void {
-    this.isLoading = true;
+    this.loadingService.start(LOADING_KEYS.ITEM_DETAIL);
     this.error = null;
 
     this.catalogService.getItemDetail(this.storeSlug, this.itemId).pipe(
@@ -625,13 +630,14 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
           this.error = response.message || 'Failed to load item details';
           this.item = null;
         }
-        this.isLoading = false;
       },
       error: (err) => {
         this.error = 'An error occurred while loading item details';
         this.item = null;
-        this.isLoading = false;
         console.error('Item detail load error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.ITEM_DETAIL);
       }
     });
   }

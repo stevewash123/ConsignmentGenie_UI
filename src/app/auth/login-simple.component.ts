@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
   selector: 'app-login-simple',
@@ -31,7 +32,7 @@ import { AuthService } from '../services/auth.service';
               name="email"
               [(ngModel)]="email"
               required
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
               placeholder="Enter your email"
             >
           </div>
@@ -44,7 +45,7 @@ import { AuthService } from '../services/auth.service';
               name="password"
               [(ngModel)]="password"
               required
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
               placeholder="Enter your password"
             >
           </div>
@@ -52,9 +53,9 @@ import { AuthService } from '../services/auth.service';
           <button
             type="submit"
             class="login-btn"
-            [disabled]="loginForm.invalid || isLoading()"
+            [disabled]="loginForm.invalid || isAuthLoading()"
           >
-            {{ isLoading() ? 'Signing in...' : 'Sign In' }}
+            {{ isAuthLoading() ? 'Signing in...' : 'Sign In' }}
           </button>
         </form>
 
@@ -65,7 +66,7 @@ import { AuthService } from '../services/auth.service';
             <button
               class="quick-btn admin"
               (click)="quickLogin('admin@microsaasbuilders.com')"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
             >
               <span class="role">Admin</span>
               <span class="email">admin@microsaasbuilders.com</span>
@@ -74,7 +75,7 @@ import { AuthService } from '../services/auth.service';
             <button
               class="quick-btn owner"
               (click)="quickLogin('owner1@microsaasbuilders.com')"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
             >
               <span class="role">Shop Owner</span>
               <span class="email">owner1@microsaasbuilders.com</span>
@@ -83,7 +84,7 @@ import { AuthService } from '../services/auth.service';
             <button
               class="quick-btn provider"
               (click)="quickLogin('provider1@microsaasbuilders.com')"
-              [disabled]="isLoading()"
+              [disabled]="isAuthLoading()"
             >
               <span class="role">Provider</span>
               <span class="email">provider1@microsaasbuilders.com</span>
@@ -274,14 +275,14 @@ import { AuthService } from '../services/auth.service';
 export class LoginSimpleComponent implements OnInit {
   email = '';
   password = '';
-  isLoading = signal(false);
   errorMessage = signal('');
   returnUrl = signal<string>('');
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -291,6 +292,10 @@ export class LoginSimpleComponent implements OnInit {
         this.returnUrl.set(params['returnUrl']);
       }
     });
+  }
+
+  isAuthLoading(): boolean {
+    return this.loadingService.isLoading('auth-login');
   }
 
   quickLogin(email: string) {
@@ -305,7 +310,7 @@ export class LoginSimpleComponent implements OnInit {
       return;
     }
 
-    this.isLoading.set(true);
+    this.loadingService.start('auth-login');
     this.errorMessage.set('');
 
     const loginRequest = { email: this.email, password: this.password };
@@ -327,10 +332,10 @@ export class LoginSimpleComponent implements OnInit {
         } else {
           this.errorMessage.set('Login failed. Please try again.');
         }
-        this.isLoading.set(false);
+        this.loadingService.stop('auth-login');
       },
       complete: () => {
-        this.isLoading.set(false);
+        this.loadingService.stop('auth-login');
       }
     });
   }

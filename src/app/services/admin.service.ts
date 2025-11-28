@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 export interface AdminMetrics {
   activeOrganizations: number;
   newSignups: number;
-  pendingInvitations: number;
+  monthlyRevenue: number;
 }
 
 export interface OwnerInvitation {

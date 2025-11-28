@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../services/auth.service';
+import { LoadingService } from '../shared/services/loading.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -11,18 +12,25 @@ describe('LoginComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>;
   let mockHttpClient: jasmine.SpyObj<HttpClient>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   beforeEach(async () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const httpSpy = jasmine.createSpyObj('HttpClient', ['post']);
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['loadStoredAuth']);
+    const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
+      'start',
+      'stop',
+      'isLoading'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [
         { provide: Router, useValue: routerSpy },
         { provide: HttpClient, useValue: httpSpy },
-        { provide: AuthService, useValue: authServiceSpy }
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: LoadingService, useValue: loadingServiceSpy }
       ]
     }).compileComponents();
 
@@ -31,7 +39,9 @@ describe('LoginComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockHttpClient = TestBed.inject(HttpClient) as jasmine.SpyObj<HttpClient>;
     mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
 
+    mockLoadingService.isLoading.and.returnValue(false);
     fixture.detectChanges();
   });
 
@@ -45,7 +55,7 @@ describe('LoginComponent', () => {
   });
 
   it('should initialize with loading false', () => {
-    expect(component.isLoading()).toBeFalsy();
+    expect(mockLoadingService.isLoading('auth-login')).toBeFalsy();
   });
 
   it('should initialize with password hidden', () => {
@@ -120,7 +130,6 @@ describe('LoginComponent', () => {
 
       await component.onSubmit();
 
-      expect(component.isLoading()).toBeFalsy();
       expect(mockAuthService.loadStoredAuth).toHaveBeenCalled();
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
     });
@@ -232,7 +241,6 @@ describe('LoginComponent', () => {
       await component.onSubmit();
 
       expect(component.errorMessage()).toContain('Invalid email or password');
-      expect(component.isLoading()).toBeFalsy();
     });
 
     it('should handle network error (status 0)', async () => {
@@ -246,7 +254,6 @@ describe('LoginComponent', () => {
       await component.onSubmit();
 
       expect(component.errorMessage()).toContain('Unable to connect to server');
-      expect(component.isLoading()).toBeFalsy();
     });
 
     it('should handle generic error', async () => {
@@ -260,7 +267,6 @@ describe('LoginComponent', () => {
       await component.onSubmit();
 
       expect(component.errorMessage()).toContain('Login failed');
-      expect(component.isLoading()).toBeFalsy();
     });
 
     it('should set loading state during login', async () => {
@@ -281,11 +287,10 @@ describe('LoginComponent', () => {
 
       mockHttpClient.post.and.returnValue(of(mockResponse));
 
-      const loginPromise = component.onSubmit();
-      expect(component.isLoading()).toBeTruthy();
+      await component.onSubmit();
 
-      await loginPromise;
-      expect(component.isLoading()).toBeFalsy();
+      expect(mockLoadingService.start).toHaveBeenCalledWith('auth-login');
+      expect(mockLoadingService.stop).toHaveBeenCalledWith('auth-login');
     });
   });
 

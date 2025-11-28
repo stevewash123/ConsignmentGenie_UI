@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { ProviderPortalService } from '../services/provider-portal.service';
 import { ProviderItemDetail } from '../models/provider.models';
+import { LoadingService } from '../../shared/services/loading.service';
+import { LOADING_KEYS } from '../constants/loading-keys';
 
 @Component({
   selector: 'app-provider-item-detail',
@@ -131,7 +133,7 @@ import { ProviderItemDetail } from '../models/provider.models';
       </div>
 
       <!-- Loading State -->
-      <div class="loading" *ngIf="loading">
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.ITEM_DETAIL)">
         <p>Loading item details...</p>
       </div>
 
@@ -488,14 +490,17 @@ import { ProviderItemDetail } from '../models/provider.models';
 })
 export class ProviderItemDetailComponent implements OnInit {
   item: ProviderItemDetail | null = null;
-  loading = false;
   error: string | null = null;
   itemId: string;
   selectedImageUrl: string = '';
 
+  // Expose for template
+  readonly KEYS = LOADING_KEYS;
+
   constructor(
     private providerService: ProviderPortalService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    public loadingService: LoadingService
   ) {
     this.itemId = this.route.snapshot.paramMap.get('id') || '';
   }
@@ -507,19 +512,20 @@ export class ProviderItemDetailComponent implements OnInit {
   }
 
   loadItem() {
-    this.loading = true;
+    this.loadingService.start(LOADING_KEYS.ITEM_DETAIL);
     this.error = null;
 
     this.providerService.getMyItem(this.itemId).subscribe({
       next: (item) => {
         this.item = item;
         this.selectedImageUrl = item.primaryImageUrl;
-        this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load item details. Please try again.';
-        this.loading = false;
         console.error('Item detail error:', err);
+      },
+      complete: () => {
+        this.loadingService.stop(LOADING_KEYS.ITEM_DETAIL);
       }
     });
   }

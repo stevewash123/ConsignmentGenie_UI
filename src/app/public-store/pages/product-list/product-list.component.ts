@@ -4,6 +4,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PublicStoreService } from '../../services/public-store.service';
 import { ShoppingCartService } from '../../../customer/services/shopping-cart.service';
+import { LoadingService } from '../../../shared/services/loading.service';
 import { PublicItem, PagedResult } from '../../../shared/models/api.models';
 
 @Component({
@@ -110,7 +111,7 @@ import { PublicItem, PagedResult } from '../../../shared/models/api.models';
         </div>
 
         <!-- Loading State -->
-        @if (loading()) {
+        @if (isProductsLoading()) {
           <div class="loading-state">
             <div class="loading-spinner"></div>
             <p>Loading products...</p>
@@ -118,7 +119,7 @@ import { PublicItem, PagedResult } from '../../../shared/models/api.models';
         }
 
         <!-- Empty State -->
-        @else if (products().length === 0 && !loading()) {
+        @else if (products().length === 0 && !isProductsLoading()) {
           <div class="empty-state">
             <h3>No products found</h3>
             <p>Try adjusting your filters or search criteria.</p>
@@ -252,16 +253,21 @@ export class ProductListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly storeService = inject(PublicStoreService);
   protected readonly cartService = inject(ShoppingCartService);
+  private readonly loadingService = inject(LoadingService);
 
   // Signals
   protected orgSlug = signal<string>('');
   protected products = signal<PublicItem[]>([]);
   protected categories = signal<any[]>([]);
-  protected loading = signal(false);
   protected totalItems = signal(0);
   protected totalPages = signal(0);
   protected currentPage = signal(1);
   protected viewMode = signal<'grid' | 'list'>('grid');
+
+  // Loading state via LoadingService
+  protected isProductsLoading(): boolean {
+    return this.loadingService.isLoading('public-product-list');
+  }
 
   // Filter state
   protected selectedCategory = '';
@@ -306,7 +312,7 @@ export class ProductListComponent implements OnInit {
   }
 
   private loadData(): void {
-    this.loading.set(true);
+    this.loadingService.start('public-product-list');
 
     const request = {
       orgSlug: this.orgSlug(),
@@ -326,11 +332,12 @@ export class ProductListComponent implements OnInit {
           this.totalItems.set(result.totalCount);
           this.totalPages.set(result.totalPages);
         }
-        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading products:', error);
-        this.loading.set(false);
+      },
+      complete: () => {
+        this.loadingService.stop('public-product-list');
       }
     });
   }
