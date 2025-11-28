@@ -56,6 +56,7 @@ import { AuthService } from '../services/auth.service';
                     formControlName="email"
                     [class.error]="signupForm.get('email')?.touched && signupForm.get('email')?.invalid"
                     placeholder="Enter your email address"
+                    autocomplete="username"
                   />
                   <div class="error-message" *ngIf="signupForm.get('email')?.touched && signupForm.get('email')?.invalid">
                     <span *ngIf="signupForm.get('email')?.errors?.['required']">Email address is required</span>
@@ -71,6 +72,7 @@ import { AuthService } from '../services/auth.service';
                     formControlName="password"
                     [class.error]="signupForm.get('password')?.touched && signupForm.get('password')?.invalid"
                     placeholder="Create a strong password"
+                    autocomplete="new-password"
                   />
                   <div class="error-message" *ngIf="signupForm.get('password')?.touched && signupForm.get('password')?.invalid">
                     Password must be at least 8 characters long
