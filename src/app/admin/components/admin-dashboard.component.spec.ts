@@ -6,7 +6,7 @@ import { of, throwError } from 'rxjs';
 
 import { AdminDashboardComponent } from './admin-dashboard.component';
 import { AdminLayoutComponent } from './admin-layout.component';
-import { AdminService, AdminMetrics, OwnerInvitation, PendingApproval } from '../../services/admin.service';
+import { AdminService, AdminMetrics, OwnerInvitation, NewSignup } from '../../services/admin.service';
 
 describe('AdminDashboardComponent', () => {
   let component: AdminDashboardComponent;
@@ -15,7 +15,7 @@ describe('AdminDashboardComponent', () => {
 
   const mockMetrics: AdminMetrics = {
     activeOrganizations: 5,
-    pendingApprovals: 2,
+    newSignups: 2,
     pendingInvitations: 3
   };
 
@@ -30,13 +30,14 @@ describe('AdminDashboardComponent', () => {
     }
   ];
 
-  const mockApprovals: PendingApproval[] = [
+  const mockRecentSignups: NewSignup[] = [
     {
       id: '1',
-      organization: 'Test Shop',
-      owner: 'John Owner',
+      shopName: 'Test Shop',
+      ownerName: 'John Owner',
       email: 'owner@testshop.com',
-      submittedAt: '2023-11-25T10:00:00Z'
+      registeredAt: '2023-11-25T10:00:00Z',
+      subdomain: 'testshop'
     }
   ];
 
@@ -47,9 +48,7 @@ describe('AdminDashboardComponent', () => {
       'inviteOwner',
       'resendOwnerInvitation',
       'cancelOwnerInvitation',
-      'getPendingApprovals',
-      'approveOrganization',
-      'rejectOrganization'
+      'getRecentSignups'
     ]);
 
     await TestBed.configureTestingModule({
@@ -68,7 +67,7 @@ describe('AdminDashboardComponent', () => {
     // Set up default mock responses
     adminServiceMock.getMetrics.and.returnValue(of(mockMetrics));
     adminServiceMock.getOwnerInvitations.and.returnValue(of(mockInvitations));
-    adminServiceMock.getPendingApprovals.and.returnValue(of(mockApprovals));
+    adminServiceMock.getRecentSignups.and.returnValue(of(mockRecentSignups));
   });
 
   it('should create', () => {
@@ -82,8 +81,6 @@ describe('AdminDashboardComponent', () => {
     expect(component.inviteRequest).toEqual({ name: '', email: '' });
     expect(component.isResending).toBeNull();
     expect(component.isCancelling).toBeNull();
-    expect(component.isApproving).toBeNull();
-    expect(component.isRejecting).toBeNull();
   });
 
   describe('ngOnInit', () => {
@@ -92,7 +89,7 @@ describe('AdminDashboardComponent', () => {
 
       expect(adminServiceMock.getMetrics).toHaveBeenCalled();
       expect(adminServiceMock.getOwnerInvitations).toHaveBeenCalled();
-      expect(adminServiceMock.getPendingApprovals).toHaveBeenCalled();
+      expect(adminServiceMock.getRecentSignups).toHaveBeenCalled();
     });
 
     it('should set metrics data on successful load', () => {
@@ -107,10 +104,10 @@ describe('AdminDashboardComponent', () => {
       expect(component.pendingInvitations()).toEqual(mockInvitations);
     });
 
-    it('should set pending approvals on successful load', () => {
+    it('should set recent signups on successful load', () => {
       component.ngOnInit();
 
-      expect(component.pendingApprovals()).toEqual(mockApprovals);
+      expect(component.recentSignups()).toEqual(mockRecentSignups);
     });
 
     it('should handle metrics loading error gracefully', () => {
@@ -122,7 +119,7 @@ describe('AdminDashboardComponent', () => {
       expect(console.error).toHaveBeenCalledWith('Error loading admin metrics:', jasmine.any(Error));
       expect(component.metrics()).toEqual({
         activeOrganizations: 3,
-        pendingApprovals: 0,
+        newSignups: 1,
         pendingInvitations: 0
       });
     });
@@ -137,14 +134,14 @@ describe('AdminDashboardComponent', () => {
       expect(component.pendingInvitations()).toEqual([]);
     });
 
-    it('should handle approvals loading error gracefully', () => {
-      adminServiceMock.getPendingApprovals.and.returnValue(throwError(() => new Error('API Error')));
+    it('should handle recent signups loading error gracefully', () => {
+      adminServiceMock.getRecentSignups.and.returnValue(throwError(() => new Error('API Error')));
       spyOn(console, 'error');
 
       component.ngOnInit();
 
-      expect(console.error).toHaveBeenCalledWith('Error loading pending approvals:', jasmine.any(Error));
-      expect(component.pendingApprovals()).toEqual([]);
+      expect(console.error).toHaveBeenCalledWith('Error loading recent signups:', jasmine.any(Error));
+      expect(component.recentSignups()).toEqual([]);
     });
   });
 
@@ -325,61 +322,4 @@ describe('AdminDashboardComponent', () => {
     });
   });
 
-  describe('Organization Approval Management', () => {
-    describe('approveOrganization', () => {
-      it('should approve organization after confirmation', (done) => {
-        const mockResponse = { success: true, message: 'Approved successfully' };
-        spyOn(window, 'confirm').and.returnValue(true);
-        spyOn(console, 'log');
-        adminServiceMock.approveOrganization.and.returnValue(of(mockResponse));
-
-        component.approveOrganization('123');
-
-        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to approve this organization?');
-        expect(adminServiceMock.approveOrganization).toHaveBeenCalledWith('123');
-
-        setTimeout(() => {
-          expect(console.log).toHaveBeenCalledWith('Organization approved successfully!');
-          expect(component.isApproving).toBeNull();
-          done();
-        }, 10);
-      });
-
-      it('should not approve organization if not confirmed', () => {
-        spyOn(window, 'confirm').and.returnValue(false);
-
-        component.approveOrganization('123');
-
-        expect(adminServiceMock.approveOrganization).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('rejectOrganization', () => {
-      it('should reject organization after confirmation', (done) => {
-        const mockResponse = { success: true, message: 'Rejected successfully' };
-        spyOn(window, 'confirm').and.returnValue(true);
-        spyOn(console, 'log');
-        adminServiceMock.rejectOrganization.and.returnValue(of(mockResponse));
-
-        component.rejectOrganization('123');
-
-        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to reject this organization? This action cannot be undone.');
-        expect(adminServiceMock.rejectOrganization).toHaveBeenCalledWith('123');
-
-        setTimeout(() => {
-          expect(console.log).toHaveBeenCalledWith('Organization rejected successfully!');
-          expect(component.isRejecting).toBeNull();
-          done();
-        }, 10);
-      });
-
-      it('should not reject organization if not confirmed', () => {
-        spyOn(window, 'confirm').and.returnValue(false);
-
-        component.rejectOrganization('123');
-
-        expect(adminServiceMock.rejectOrganization).not.toHaveBeenCalled();
-      });
-    });
-  });
 });

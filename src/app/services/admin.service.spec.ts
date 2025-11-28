@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { AdminService, AdminMetrics, OwnerInvitation, InviteOwnerRequest, PendingApproval } from './admin.service';
+import { AdminService, AdminMetrics, OwnerInvitation, InviteOwnerRequest, NewSignup } from './admin.service';
 import { environment } from '../../environments/environment';
 
 describe('AdminService', () => {
@@ -28,7 +28,7 @@ describe('AdminService', () => {
     it('should return admin metrics', () => {
       const mockMetrics: AdminMetrics = {
         activeOrganizations: 5,
-        pendingApprovals: 2,
+        newSignups: 2,
         pendingInvitations: 3
       };
 
@@ -145,72 +145,27 @@ describe('AdminService', () => {
     });
   });
 
-  describe('getPendingApprovals', () => {
-    it('should return pending approvals', () => {
-      const mockApprovals: PendingApproval[] = [
+  describe('getRecentSignups', () => {
+    it('should return recent signups', () => {
+      const mockSignups: NewSignup[] = [
         {
           id: '1',
-          organization: 'Test Shop',
-          owner: 'John Owner',
+          shopName: 'Test Shop',
+          ownerName: 'John Owner',
           email: 'owner@testshop.com',
-          submittedAt: '2023-11-25T10:00:00Z'
+          registeredAt: '2023-11-25T10:00:00Z',
+          subdomain: 'testshop'
         }
       ];
 
-      service.getPendingApprovals().subscribe(approvals => {
-        expect(approvals).toEqual(mockApprovals);
+      service.getRecentSignups().subscribe(signups => {
+        expect(signups).toEqual(mockSignups);
       });
 
-      const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/pending-owners`);
+      const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/recent-signups`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockApprovals);
+      req.flush(mockSignups);
     });
   });
 
-  describe('approveOrganization', () => {
-    it('should approve organization', () => {
-      const organizationId = '123';
-      const mockResponse = { success: true, message: 'Organization approved successfully' };
-
-      service.approveOrganization(organizationId).subscribe(response => {
-        expect(response).toEqual(mockResponse);
-      });
-
-      const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/approvals/${organizationId}/approve`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({});
-      req.flush(mockResponse);
-    });
-  });
-
-  describe('rejectOrganization', () => {
-    it('should reject organization without reason', () => {
-      const organizationId = '123';
-      const mockResponse = { success: true, message: 'Organization rejected successfully' };
-
-      service.rejectOrganization(organizationId).subscribe(response => {
-        expect(response).toEqual(mockResponse);
-      });
-
-      const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/approvals/${organizationId}/reject`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ reason: undefined });
-      req.flush(mockResponse);
-    });
-
-    it('should reject organization with reason', () => {
-      const organizationId = '123';
-      const reason = 'Inappropriate content';
-      const mockResponse = { success: true, message: 'Organization rejected successfully' };
-
-      service.rejectOrganization(organizationId, reason).subscribe(response => {
-        expect(response).toEqual(mockResponse);
-      });
-
-      const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/approvals/${organizationId}/reject`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ reason });
-      req.flush(mockResponse);
-    });
-  });
 });

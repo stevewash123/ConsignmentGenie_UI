@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 
 export interface AdminMetrics {
   activeOrganizations: number;
-  pendingApprovals: number;
+  newSignups: number;
   pendingInvitations: number;
 }
 
@@ -23,12 +23,13 @@ export interface InviteOwnerRequest {
   email: string;
 }
 
-export interface PendingApproval {
+export interface NewSignup {
   id: string;
-  organization: string;
-  owner: string;
+  ownerName: string;
+  shopName: string;
   email: string;
-  submittedAt: string;
+  registeredAt: string;
+  subdomain?: string;
 }
 
 @Injectable({
@@ -60,16 +61,8 @@ export class AdminService {
     return this.http.patch<{ success: boolean; message: string }>(`${this.apiUrl}/invitations/owner/${id}/cancel`, {});
   }
 
-  // Approval Management
-  getPendingApprovals(): Observable<PendingApproval[]> {
-    return this.http.get<PendingApproval[]>(`${this.apiUrl}/pending-owners`);
-  }
-
-  approveOrganization(id: string): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/approvals/${id}/approve`, {});
-  }
-
-  rejectOrganization(id: string, reason?: string): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/approvals/${id}/reject`, { reason });
+  // Recent Signups
+  getRecentSignups(): Observable<NewSignup[]> {
+    return this.http.get<NewSignup[]>(`${this.apiUrl}/recent-signups`);
   }
 }

@@ -1,14 +1,15 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { AdminLayoutComponent } from './admin-layout.component';
-import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, PendingApproval } from '../../services/admin.service';
+import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, NewSignup } from '../../services/admin.service';
 
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminLayoutComponent],
+  imports: [CommonModule, FormsModule, HttpClientModule, AdminLayoutComponent],
   template: `
     <app-admin-layout>
       <div class="admin-dashboard">
@@ -30,8 +31,8 @@ import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, Pendin
           <div class="stat-value">{{ metrics().activeOrganizations }}</div>
         </div>
         <div class="stat-card">
-          <h3>Pending Approvals</h3>
-          <div class="stat-value">{{ metrics().pendingApprovals }}</div>
+          <h3>New Signups (30 days)</h3>
+          <div class="stat-value">{{ metrics().newSignups }}</div>
         </div>
         <div class="stat-card">
           <h3>Pending Invitations</h3>
@@ -92,47 +93,32 @@ import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, Pendin
 
       <!-- Pending Approvals Section -->
       <div class="dashboard-section">
-        <h2>Pending Approvals</h2>
+        <h2>Recent Signups</h2>
 
-        @if (pendingApprovals().length === 0) {
+        @if (recentSignups().length === 0) {
           <div class="empty-state">
-            <p>No pending approvals</p>
+            <p>No new signups in the last 30 days</p>
           </div>
         } @else {
           <div class="table-container">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Organization</th>
+                  <th>Shop Name</th>
                   <th>Owner</th>
                   <th>Email</th>
-                  <th>Submitted</th>
-                  <th>Actions</th>
+                  <th>Subdomain</th>
+                  <th>Registered</th>
                 </tr>
               </thead>
               <tbody>
-                @for (approval of pendingApprovals(); track approval.id) {
+                @for (signup of recentSignups(); track signup.id) {
                   <tr>
-                    <td class="font-medium">{{ approval.organization }}</td>
-                    <td>{{ approval.owner }}</td>
-                    <td>{{ approval.email }}</td>
-                    <td>{{ approval.submittedAt | date:'short' }}</td>
-                    <td class="actions">
-                      <button
-                        class="btn-action approve"
-                        (click)="approveOrganization(approval.id)"
-                        [disabled]="isApproving === approval.id"
-                        title="Approve organization">
-                        {{ isApproving === approval.id ? '⏳' : '✅' }}
-                      </button>
-                      <button
-                        class="btn-action reject"
-                        (click)="rejectOrganization(approval.id)"
-                        [disabled]="isRejecting === approval.id"
-                        title="Reject organization">
-                        {{ isRejecting === approval.id ? '⏳' : '❌' }}
-                      </button>
-                    </td>
+                    <td class="font-medium">{{ signup.shopName }}</td>
+                    <td>{{ signup.ownerName }}</td>
+                    <td>{{ signup.email }}</td>
+                    <td>{{ signup.subdomain || 'N/A' }}</td>
+                    <td>{{ signup.registeredAt | date:'short' }}</td>
                   </tr>
                 }
               </tbody>
@@ -584,13 +570,13 @@ import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, Pendin
 export class AdminDashboardComponent implements OnInit {
   metrics = signal<AdminMetrics>({
     activeOrganizations: 0,
-    pendingApprovals: 0,
+    newSignups: 0,
     pendingInvitations: 0
   });
 
   // Data
   pendingInvitations = signal<OwnerInvitation[]>([]);
-  pendingApprovals = signal<PendingApproval[]>([]);
+  recentSignups = signal<NewSignup[]>([]);
 
   // Invite Modal State
   showInviteModal = false;
@@ -604,8 +590,6 @@ export class AdminDashboardComponent implements OnInit {
   // Action States
   isResending: string | null = null;
   isCancelling: string | null = null;
-  isApproving: string | null = null;
-  isRejecting: string | null = null;
 
   constructor(private adminService: AdminService) {}
 
@@ -624,15 +608,15 @@ export class AdminDashboardComponent implements OnInit {
         // Fall back to mock data for development
         this.metrics.set({
           activeOrganizations: 3,
-          pendingApprovals: 0,
+          newSignups: 1,
           pendingInvitations: 0
         });
       }
     });
 
-    // Load pending invitations and approvals
+    // Load pending invitations and recent signups
     this.loadPendingInvitations();
-    this.loadPendingApprovals();
+    this.loadRecentSignups();
   }
 
   private loadPendingInvitations() {
@@ -648,15 +632,15 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  private loadPendingApprovals() {
-    this.adminService.getPendingApprovals().subscribe({
-      next: (approvals) => {
-        this.pendingApprovals.set(approvals);
+  private loadRecentSignups() {
+    this.adminService.getRecentSignups().subscribe({
+      next: (signups) => {
+        this.recentSignups.set(signups);
       },
       error: (error) => {
-        console.error('Error loading pending approvals:', error);
+        console.error('Error loading recent signups:', error);
         // Fall back to empty array for development
-        this.pendingApprovals.set([]);
+        this.recentSignups.set([]);
       }
     });
   }
@@ -749,59 +733,4 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  approveOrganization(id: string) {
-    if (!confirm('Are you sure you want to approve this organization?')) {
-      return;
-    }
-
-    this.isApproving = id;
-
-    this.adminService.approveOrganization(id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Refresh data
-          this.loadDashboardData();
-          // TODO: Show success toast
-          console.log('Organization approved successfully!');
-        } else {
-          // TODO: Show error toast
-          console.error('Failed to approve organization:', response.message);
-        }
-        this.isApproving = null;
-      },
-      error: (error) => {
-        console.error('Error approving organization:', error);
-        // TODO: Show error toast
-        this.isApproving = null;
-      }
-    });
-  }
-
-  rejectOrganization(id: string) {
-    if (!confirm('Are you sure you want to reject this organization? This action cannot be undone.')) {
-      return;
-    }
-
-    this.isRejecting = id;
-
-    this.adminService.rejectOrganization(id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Refresh data
-          this.loadDashboardData();
-          // TODO: Show success toast
-          console.log('Organization rejected successfully!');
-        } else {
-          // TODO: Show error toast
-          console.error('Failed to reject organization:', response.message);
-        }
-        this.isRejecting = null;
-      },
-      error: (error) => {
-        console.error('Error rejecting organization:', error);
-        // TODO: Show error toast
-        this.isRejecting = null;
-      }
-    });
-  }
 }
