@@ -15,6 +15,9 @@ import { AuthService } from '../services/auth.service';
           <div class="header">
             <a routerLink="/signup/owner" class="back-link">← Back</a>
             <h1>Complete Your Profile</h1>
+            <div class="email-display" *ngIf="userEmail">
+              Email: {{ userEmail }} <a routerLink="/signup/owner" class="change-link">[change]</a>
+            </div>
             <p class="subtitle">Tell us about your business and location</p>
           </div>
 
@@ -23,61 +26,65 @@ import { AuthService } from '../services/auth.service';
             <div class="form-section">
               <h3>Business Information</h3>
 
-              <div class="form-group">
-                <label for="fullName">Full Name *</label>
-                <input
-                  id="fullName"
-                  type="text"
-                  formControlName="fullName"
-                  [class.error]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched"
-                  placeholder="John Smith">
-                <div class="error-message"
-                     *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
-                  Full name is required
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="shopName">Business/Shop Name *</label>
-                <input
-                  id="shopName"
-                  type="text"
-                  formControlName="shopName"
-                  [class.error]="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched"
-                  placeholder="Main Street Consignment">
-                <div class="error-message"
-                     *ngIf="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched">
-                  Business name is required
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="subdomain">Shop URL *</label>
-                <div class="subdomain-input-wrapper">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Owner Name *</label>
                   <input
-                    id="subdomain"
+                    id="fullName"
                     type="text"
-                    formControlName="subdomain"
-                    [class.error]="profileForm.get('subdomain')?.invalid && profileForm.get('subdomain')?.touched"
-                    placeholder="myshop">
-                  <span class="subdomain-suffix">.consignmentgenie.com</span>
+                    formControlName="fullName"
+                    [class.error]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched"
+                    placeholder="John Smith">
+                  <div class="error-message"
+                       *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+                    Owner name is required
+                  </div>
                 </div>
-                <div class="form-hint">This will be your shop's web address</div>
-                <div class="error-message"
-                     *ngIf="profileForm.get('subdomain')?.invalid && profileForm.get('subdomain')?.touched">
-                  <span *ngIf="profileForm.get('subdomain')?.errors?.['required']">Shop URL is required</span>
-                  <span *ngIf="profileForm.get('subdomain')?.errors?.['pattern']">Only letters, numbers, and dashes allowed</span>
+
+                <div class="form-group">
+                  <label for="phone">Phone</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    formControlName="phone"
+                    placeholder="(555) 123-4567">
+                  <div class="form-hint">Optional - for customer contact and support</div>
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="phone">Phone</label>
-                <input
-                  id="phone"
-                  type="tel"
-                  formControlName="phone"
-                  placeholder="(555) 123-4567">
-                <div class="form-hint">Optional - for customer contact and support</div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="shopName">Business/Shop Name *</label>
+                  <input
+                    id="shopName"
+                    type="text"
+                    formControlName="shopName"
+                    [class.error]="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched"
+                    placeholder="Main Street Consignment">
+                  <div class="error-message"
+                       *ngIf="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched">
+                    Business name is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="subdomain">Shop URL *</label>
+                  <div class="subdomain-input-wrapper">
+                    <input
+                      id="subdomain"
+                      type="text"
+                      formControlName="subdomain"
+                      [class.error]="profileForm.get('subdomain')?.invalid && profileForm.get('subdomain')?.touched"
+                      placeholder="myshop">
+                    <span class="subdomain-suffix">.consignmentgenie.com</span>
+                  </div>
+                  <div class="form-hint">This will be your shop's web address</div>
+                  <div class="error-message"
+                       *ngIf="profileForm.get('subdomain')?.invalid && profileForm.get('subdomain')?.touched">
+                    <span *ngIf="profileForm.get('subdomain')?.errors?.['required']">Shop URL is required</span>
+                    <span *ngIf="profileForm.get('subdomain')?.errors?.['pattern']">Only letters, numbers, and dashes allowed</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -265,6 +272,24 @@ import { AuthService } from '../services/auth.service';
       font-weight: 700;
     }
 
+    .email-display {
+      color: #6b7280;
+      font-size: 0.95rem;
+      margin: 0.75rem 0 1rem 0;
+      font-weight: 500;
+    }
+
+    .change-link {
+      color: #047857;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .change-link:hover {
+      text-decoration: underline;
+    }
+
     .subtitle {
       color: #6b7280;
       font-size: 1rem;
@@ -290,8 +315,17 @@ import { AuthService } from '../services/auth.service';
 
     .form-row {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
       gap: 1rem;
+    }
+
+    /* Business Information section - 2 column layout */
+    .form-section .form-row {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Business Address section - 3 column layout for city/state/zip */
+    .form-section:last-of-type .form-row {
+      grid-template-columns: 2fr 1fr 1fr;
     }
 
     label {
@@ -463,6 +497,7 @@ export class OwnerSignupStep2Component implements OnInit {
   profileForm: FormGroup;
   isSubmitting = signal(false);
   errorMessage = signal('');
+  userEmail = '';
 
   constructor(
     private fb: FormBuilder,
@@ -486,10 +521,14 @@ export class OwnerSignupStep2Component implements OnInit {
     window.scrollTo(0, 0);
 
     // Check if user came from step 1
-    const authData = sessionStorage.getItem('ownerAuthData');
-    if (!authData) {
+    const authDataString = sessionStorage.getItem('ownerAuthData');
+    if (!authDataString) {
       // Redirect back to step 1 if no auth data
       this.router.navigate(['/signup/owner']);
+    } else {
+      // Set user email from session data
+      const authData = JSON.parse(authDataString);
+      this.userEmail = authData.email;
     }
   }
 
