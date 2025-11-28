@@ -77,7 +77,7 @@ export class ProviderService {
   }
 
   inviteProvider(invitation: ProviderInvitationRequest): Observable<ProviderInvitationResponse> {
-    return this.http.post<ProviderInvitationResponse>(`${this.apiUrl}/invite`, invitation);
+    return this.http.post<ProviderInvitationResponse>(`${this.apiUrl}/invitations`, invitation);
   }
 
   validateInvitation(token: string): Observable<InvitationValidationResponse> {

@@ -97,8 +97,8 @@ import { ProviderService } from '../services/provider.service';
     .modal {
       background: white;
       border-radius: 8px;
-      max-width: 500px;
-      width: 90%;
+      max-width: 600px;
+      width: 95%;
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -152,6 +152,8 @@ import { ProviderService } from '../services/provider.service';
       border-radius: 4px;
       font-size: 1rem;
       transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     .form-control:focus {
@@ -218,6 +220,32 @@ import { ProviderService } from '../services/provider.service';
       border: 1px solid #c3e6cb;
       border-radius: 4px;
     }
+
+    @media (max-width: 768px) {
+      .modal {
+        max-width: 95%;
+        width: 95%;
+        margin: 1rem;
+      }
+
+      .modal-header {
+        padding: 1rem;
+      }
+
+      .modal-body {
+        padding: 1rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        padding: 0.875rem;
+      }
+    }
   `]
 })
 export class ProviderInvitationModalComponent {
@@ -260,7 +288,20 @@ export class ProviderInvitationModalComponent {
       },
       error: (error) => {
         console.error('Error sending invitation:', error);
-        const errorMsg = error.error?.message || 'Failed to send invitation. Please try again.';
+        let errorMsg = 'Failed to send invitation. Please try again.';
+
+        if (error.status === 405) {
+          errorMsg = 'Provider invitation feature is not currently available. Please contact support.';
+        } else if (error.status === 404) {
+          errorMsg = 'Provider invitation endpoint not found. Please contact support.';
+        } else if (error.status === 400) {
+          errorMsg = error.error?.message || 'Invalid invitation data. Please check the email address.';
+        } else if (error.status === 401) {
+          errorMsg = 'You are not authorized to send invitations. Please log in again.';
+        } else if (error.error?.message) {
+          errorMsg = error.error.message;
+        }
+
         this.errorMessage.set(errorMsg);
       },
       complete: () => {
