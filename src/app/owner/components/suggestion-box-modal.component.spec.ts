@@ -142,6 +142,7 @@ describe('SuggestionBoxModalComponent', () => {
 
   it('should trim whitespace from message when submitting', async () => {
     spyOn(component.submit, 'emit');
+    spyOn(component.close, 'emit');
 
     component.formData.set({
       type: 'BugReport',
@@ -233,6 +234,9 @@ describe('SuggestionBoxModalComponent', () => {
   });
 
   it('should show loading state during submission', async () => {
+    spyOn(component.submit, 'emit');
+    spyOn(component.close, 'emit');
+
     component.isVisible = true;
     component.formData.set({
       type: 'BugReport',
