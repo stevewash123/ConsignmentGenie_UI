@@ -22,7 +22,8 @@ describe('OwnerSignupStep2Component', () => {
         OwnerSignupStep2Component,
         RouterTestingModule.withRoutes([
           { path: 'signup/owner', component: OwnerSignupStep2Component },
-          { path: 'register/success', component: OwnerSignupStep2Component }
+          { path: 'register/success', component: OwnerSignupStep2Component },
+          { path: 'owner/dashboard', component: OwnerSignupStep2Component }
         ])
       ],
       providers: [

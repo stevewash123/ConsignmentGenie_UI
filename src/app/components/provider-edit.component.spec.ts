@@ -191,11 +191,17 @@ describe('ProviderEditComponent', () => {
   });
 
   it('should handle provider loading error', () => {
+    // Create a fresh component instance for this error test
+    const errorFixture = TestBed.createComponent(ProviderEditComponent);
+    const errorComponent = errorFixture.componentInstance;
+
+    // Set up the error condition before component initialization
     providerService.getProvider.and.returnValue(throwError(() => new Error('Provider not found')));
 
-    component.ngOnInit();
+    // Initialize the component which will trigger the error
+    errorFixture.detectChanges();
 
-    expect(component.errorMessage()).toContain('Failed to load provider');
+    expect(errorComponent.errorMessage()).toContain('Failed to load provider');
     expect(loadingService.stop).toHaveBeenCalledWith('provider-edit');
   });
 
