@@ -157,6 +157,9 @@ describe('SuggestionBoxModalComponent', () => {
   });
 
   it('should reset form after submission', async () => {
+    spyOn(component.submit, 'emit');
+    spyOn(component.close, 'emit');
+
     component.formData.set({
       type: 'Improvement',
       message: 'Some improvement suggestion'
