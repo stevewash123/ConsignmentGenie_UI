@@ -16,9 +16,6 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
           <div class="header">
             <a routerLink="/signup/owner" class="back-link">← Back</a>
             <h1>Complete Your Profile</h1>
-            <div class="email-display" *ngIf="userEmail">
-              Email: {{ userEmail }}
-            </div>
           </div>
 
           <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
@@ -207,6 +204,18 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
               </div>
             </div>
 
+            <!-- Email Confirmation -->
+            <div class="form-section">
+              <div class="form-group">
+                <label for="confirmEmail">Confirm email:</label>
+                <input
+                  id="confirmEmail"
+                  type="email"
+                  [value]="userEmail"
+                  readonly
+                  class="readonly-input">
+              </div>
+            </div>
 
             <button
               type="submit"
@@ -237,14 +246,14 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 
     .container {
       width: 100%;
-      max-width: 35%;
-      min-width: 500px;
+      max-width: 45%;
+      min-width: 600px;
     }
 
     .profile-card {
       background: white;
       border-radius: 16px;
-      padding: 3rem;
+      padding: 2.5rem;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
 
@@ -280,20 +289,20 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 
 
     .form-section {
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
 
     .form-section h3 {
       color: #047857;
       font-size: 1.25rem;
       font-weight: 600;
-      margin: 0 0 1.5rem 0;
-      padding-bottom: 0.5rem;
+      margin: 0 0 1.25rem 0;
+      padding-bottom: 0.4rem;
       border-bottom: 2px solid #e5e7eb;
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .form-row {
@@ -370,6 +379,7 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
       border: none !important;
       box-shadow: none !important;
       flex: 1;
+      min-width: 0;
       padding: 0.75rem;
       font-size: 1rem;
     }
@@ -379,7 +389,9 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
       padding: 0.75rem;
       color: #6b7280;
       border-left: 1px solid #e5e7eb;
-      font-size: 1rem;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .error-message {
@@ -470,6 +482,12 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
       background: #fef2f2;
       color: #dc2626;
       border: 1px solid #fecaca;
+    }
+
+    .readonly-input {
+      background-color: #f9fafb !important;
+      color: #6b7280;
+      cursor: not-allowed;
     }
 
     @media (max-width: 768px) {
