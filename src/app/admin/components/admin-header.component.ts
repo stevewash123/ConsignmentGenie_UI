@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, HostListener, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { NotificationBellComponent } from '../../shared/components/notification-bell.component';
 import { Subscription } from 'rxjs';
 
 interface UserData {
@@ -15,7 +16,7 @@ interface UserData {
 @Component({
   selector: 'app-admin-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NotificationBellComponent],
   template: `
     <header class="admin-header">
       <div class="header-container">
@@ -31,11 +32,15 @@ interface UserData {
               <a routerLink="/admin/organizations" routerLinkActive="active">Organizations</a>
               <a routerLink="/admin/users" routerLinkActive="active">Users</a>
               <a routerLink="/admin/billing" routerLinkActive="active">Billing</a>
+              <a routerLink="/admin/notifications" routerLinkActive="active">Notifications</a>
             </div>
           </nav>
         </div>
 
         <div class="header-right" *ngIf="currentUser()">
+          <!-- Notification Bell -->
+          <app-notification-bell role="admin"></app-notification-bell>
+
           <div class="user-info">
             <div class="user-details">
               <div class="user-email">{{ currentUser()?.email }}</div>
@@ -50,6 +55,7 @@ interface UserData {
             </button>
 
             <div class="user-dropdown" [class.show]="showUserMenu()">
+              <a routerLink="/admin/notifications" class="dropdown-item">Notifications</a>
               <a routerLink="/admin/profile" class="dropdown-item">My Profile</a>
               <a routerLink="/admin/system-settings" class="dropdown-item">System Settings</a>
               <hr>

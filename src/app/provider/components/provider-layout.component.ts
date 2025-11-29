@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet } from '@angular/router';
-import { Subject, takeUntil, interval, startWith } from 'rxjs';
-import { ProviderPortalService } from '../services/provider-portal.service';
+import { Subject, takeUntil } from 'rxjs';
+import { NotificationBellComponent } from '../../shared/components/notification-bell.component';
 
 @Component({
   selector: 'app-provider-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterOutlet],
+  imports: [CommonModule, RouterModule, RouterOutlet, NotificationBellComponent],
   template: `
     <div class="provider-layout">
       <!-- Header -->
@@ -51,20 +51,18 @@ import { ProviderPortalService } from '../services/provider-portal.service';
               class="nav-link">
               Statements
             </a>
+            <a
+              routerLink="/provider/notifications"
+              routerLinkActive="active"
+              class="nav-link">
+              Notifications
+            </a>
           </nav>
 
           <!-- User Actions -->
           <div class="user-actions">
             <!-- Notification Bell -->
-            <div class="notification-bell" routerLink="/provider/notifications">
-              <div class="bell-icon">🔔</div>
-              <span
-                *ngIf="unreadCount > 0"
-                class="notification-badge"
-                [attr.data-count]="unreadCount > 99 ? '99+' : unreadCount">
-                {{ unreadCount > 99 ? '99+' : unreadCount }}
-              </span>
-            </div>
+            <app-notification-bell role="provider"></app-notification-bell>
 
             <!-- User Menu -->
             <div class="user-menu" [class.open]="userMenuOpen" (click)="toggleUserMenu()">
@@ -165,40 +163,6 @@ import { ProviderPortalService } from '../services/provider-portal.service';
       gap: 1rem;
     }
 
-    .notification-bell {
-      position: relative;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 50%;
-      transition: background-color 0.2s ease;
-    }
-
-    .notification-bell:hover {
-      background-color: #f3f4f6;
-    }
-
-    .bell-icon {
-      font-size: 1.5rem;
-      color: #6b7280;
-    }
-
-    .notification-badge {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background-color: #ef4444;
-      color: white;
-      font-size: 0.75rem;
-      font-weight: 600;
-      min-width: 1.25rem;
-      height: 1.25rem;
-      border-radius: 0.625rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 0.25rem;
-      transform: translate(25%, -25%);
-    }
 
     .user-menu {
       position: relative;
@@ -297,13 +261,6 @@ import { ProviderPortalService } from '../services/provider-portal.service';
         gap: 0.5rem;
       }
 
-      .notification-bell {
-        padding: 0.25rem;
-      }
-
-      .bell-icon {
-        font-size: 1.25rem;
-      }
     }
 
     /* Mobile Navigation (could be expanded later) */
@@ -327,23 +284,11 @@ import { ProviderPortalService } from '../services/provider-portal.service';
 export class ProviderLayoutComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  unreadCount = 0;
   userMenuOpen = false;
 
-  constructor(private providerService: ProviderPortalService) {}
+  constructor() {}
 
   ngOnInit() {
-    // Load initial unread count
-    this.loadUnreadCount();
-
-    // Auto-refresh unread count every 30 seconds
-    interval(30000)
-      .pipe(
-        startWith(0),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(() => this.loadUnreadCount());
-
     // Close user menu when clicking outside
     document.addEventListener('click', this.onDocumentClick.bind(this));
   }
@@ -354,19 +299,6 @@ export class ProviderLayoutComponent implements OnInit, OnDestroy {
     document.removeEventListener('click', this.onDocumentClick.bind(this));
   }
 
-  private loadUnreadCount() {
-    this.providerService.getUnreadNotificationCount()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.unreadCount = response.count;
-        },
-        error: (error) => {
-          console.error('Error loading unread notification count:', error);
-          // Don't show error to user for this background operation
-        }
-      });
-  }
 
   toggleUserMenu() {
     this.userMenuOpen = !this.userMenuOpen;

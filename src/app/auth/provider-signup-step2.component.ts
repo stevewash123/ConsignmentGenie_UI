@@ -1,11 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 
 @Component({
-  selector: 'app-provider-signup',
+  selector: 'app-provider-signup-step2',
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   template: `
@@ -25,8 +25,9 @@ import { AuthService } from '../services/auth.service';
         <div class="container">
           <div class="signup-card">
             <div class="signup-header">
+              <a routerLink="/signup/provider" class="back-link">← Back</a>
               <h2>Join as a Provider</h2>
-              <p>Create your account to start consigning items at participating shops</p>
+              <p>Complete your provider account to start consigning items at participating shops</p>
             </div>
 
             <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="signup-form">
@@ -45,37 +46,6 @@ import { AuthService } from '../services/auth.service';
                   />
                   <div class="error-message" *ngIf="signupForm.get('name')?.touched && signupForm.get('name')?.invalid">
                     Full name is required
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="email">Email Address *</label>
-                  <input
-                    type="email"
-                    id="email"
-                    formControlName="email"
-                    [class.error]="signupForm.get('email')?.touched && signupForm.get('email')?.invalid"
-                    placeholder="Enter your email address"
-                    autocomplete="username"
-                  />
-                  <div class="error-message" *ngIf="signupForm.get('email')?.touched && signupForm.get('email')?.invalid">
-                    <span *ngIf="signupForm.get('email')?.errors?.['required']">Email address is required</span>
-                    <span *ngIf="signupForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="password">Password *</label>
-                  <input
-                    type="password"
-                    id="password"
-                    formControlName="password"
-                    [class.error]="signupForm.get('password')?.touched && signupForm.get('password')?.invalid"
-                    placeholder="Create a strong password"
-                    autocomplete="new-password"
-                  />
-                  <div class="error-message" *ngIf="signupForm.get('password')?.touched && signupForm.get('password')?.invalid">
-                    Password must be at least 8 characters long
                   </div>
                 </div>
 
@@ -186,6 +156,18 @@ import { AuthService } from '../services/auth.service';
     .signup-header {
       text-align: center;
       margin-bottom: 2rem;
+    }
+
+    .back-link {
+      color: #7c3aed;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
     }
 
     .signup-header h2 {
@@ -369,10 +351,11 @@ import { AuthService } from '../services/auth.service';
     }
   `]
 })
-export class ProviderSignupComponent {
+export class ProviderSignupStep2Component implements OnInit {
   signupForm: FormGroup;
   isSubmitting = signal(false);
   errorMessage = signal('');
+  authData: any = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -381,22 +364,31 @@ export class ProviderSignupComponent {
   ) {
     this.signupForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
       phone: ['', [Validators.required, Validators.minLength(10)]]
     });
   }
 
+  ngOnInit() {
+    // Get the auth data from step 1
+    const authDataStr = sessionStorage.getItem('providerAuthData');
+    if (authDataStr) {
+      this.authData = JSON.parse(authDataStr);
+    } else {
+      // If no auth data, redirect back to step 1
+      this.router.navigate(['/signup/provider']);
+    }
+  }
+
   onSubmit() {
-    if (this.signupForm.valid && !this.isSubmitting()) {
+    if (this.signupForm.valid && !this.isSubmitting() && this.authData) {
       this.isSubmitting.set(true);
       this.errorMessage.set('');
 
       const formData = {
         storeCode: '', // Will be collected later when joining a shop
         fullName: this.signupForm.value.name,
-        email: this.signupForm.value.email,
-        password: this.signupForm.value.password,
+        email: this.authData.email,
+        password: this.authData.password,
         phone: this.signupForm.value.phone
       };
 
@@ -404,6 +396,9 @@ export class ProviderSignupComponent {
         next: (response) => {
           console.log('Provider registration successful:', response);
           if (response.success) {
+            // Clear the temporary auth data
+            sessionStorage.removeItem('providerAuthData');
+
             // For now, redirect to login since providers need to join shops separately
             this.router.navigate(['/login'], {
               queryParams: {

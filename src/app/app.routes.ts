@@ -71,7 +71,11 @@ export const routes: Routes = [
   },
   {
     path: 'signup/provider',
-    loadComponent: () => import('./public/provider-signup.component').then(m => m.ProviderSignupComponent)
+    loadComponent: () => import('./auth/provider-signup-step1.component').then(m => m.ProviderSignupStep1Component)
+  },
+  {
+    path: 'signup/provider/details',
+    loadComponent: () => import('./auth/provider-signup-step2.component').then(m => m.ProviderSignupStep2Component)
   },
 
   // Authentication routes (no auth required)

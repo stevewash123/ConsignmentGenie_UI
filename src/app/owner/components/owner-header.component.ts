@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { NotificationBellComponent } from '../../shared/components/notification-bell.component';
 
 interface UserData {
   userId: string;
@@ -13,7 +14,7 @@ interface UserData {
 @Component({
   selector: 'app-owner-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NotificationBellComponent],
   template: `
     <header class="owner-header">
       <div class="header-container">
@@ -31,11 +32,15 @@ interface UserData {
               <a routerLink="/owner/sales" routerLinkActive="active">Sales</a>
               <a routerLink="/owner/payouts" routerLinkActive="active">Payouts</a>
               <a routerLink="/owner/reports" routerLinkActive="active">Reports</a>
+              <a routerLink="/owner/notifications" routerLinkActive="active">Notifications</a>
             </div>
           </nav>
         </div>
 
         <div class="header-right" *ngIf="currentUser()">
+          <!-- Notification Bell -->
+          <app-notification-bell role="owner"></app-notification-bell>
+
           <div class="user-info">
             <div class="user-details">
               <div class="user-email">{{ currentUser()?.email }}</div>
@@ -50,6 +55,7 @@ interface UserData {
             </button>
 
             <div class="user-dropdown" [class.show]="showUserMenu()">
+              <a routerLink="/owner/notifications" class="dropdown-item">Notifications</a>
               <a routerLink="/owner/settings" class="dropdown-item">Settings</a>
               <hr>
               <button class="dropdown-item logout-btn" (click)="logout()">Logout</button>
