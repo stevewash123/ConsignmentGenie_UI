@@ -107,7 +107,7 @@ describe('OwnerDashboardComponent - Onboarding Integration', () => {
 
       component.ngOnInit();
 
-      expect(console.error).toHaveBeenCalledWith('Failed to load onboarding status:', 'API Error');
+      expect(console.error).toHaveBeenCalledWith('🚨 DASHBOARD: Failed to load onboarding status:', 'API Error');
     });
   });
 

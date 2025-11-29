@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { of } from 'rxjs';
@@ -142,7 +142,7 @@ describe('ProviderSignupStep1Component', () => {
     expect(submitButton.textContent?.trim()).toBe('Creating Account...');
   });
 
-  it('should store auth data and navigate to step 2 on successful submit', (done) => {
+  it('should store auth data and navigate to step 2 on successful submit', fakeAsync(() => {
     spyOn(sessionStorage, 'setItem');
 
     // Fill form with valid data
@@ -155,19 +155,19 @@ describe('ProviderSignupStep1Component', () => {
     component.onSubmit();
 
     expect(component.isSubmitting()).toBeTrue();
+    expect(sessionStorage.setItem).toHaveBeenCalledWith('providerAuthData',
+      JSON.stringify({
+        email: 'test@example.com',
+        password: 'password123'
+      })
+    );
 
-    setTimeout(() => {
-      expect(sessionStorage.setItem).toHaveBeenCalledWith('providerAuthData',
-        JSON.stringify({
-          email: 'test@example.com',
-          password: 'password123'
-        })
-      );
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/signup/provider/details']);
-      expect(component.isSubmitting()).toBeFalse();
-      done();
-    }, 1100);
-  });
+    // Advance time by 1000ms to trigger the setTimeout
+    tick(1000);
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/signup/provider/details']);
+    expect(component.isSubmitting()).toBeFalse();
+  }));
 
   it('should not submit if form is invalid', () => {
     spyOn(component as any, 'markAllFieldsTouched');

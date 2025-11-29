@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { signal } from '@angular/core';
@@ -161,7 +161,7 @@ describe('AdminDashboardComponent', () => {
         expect(component.inviteError).toBe('Please fill in all required fields.');
       });
 
-      it('should send invitation successfully', (done) => {
+      it('should send invitation successfully', fakeAsync(() => {
         const mockResponse = { success: true, message: 'Invitation sent' };
         adminServiceMock.inviteOwner.and.returnValue(of(mockResponse));
         spyOn(console, 'log');
@@ -169,16 +169,16 @@ describe('AdminDashboardComponent', () => {
 
         component.inviteOwner();
 
-        setTimeout(() => {
-          expect(adminServiceMock.inviteOwner).toHaveBeenCalledWith({ name: 'John Doe', email: 'john@example.com' });
-          expect(component.showInviteModal).toBeFalse();
-          expect(console.log).toHaveBeenCalledWith('Invitation sent successfully!');
-          expect(component.isInviting).toBeFalse();
-          done();
-        }, 10);
-      });
+        // Advance time to allow observable to complete
+        tick();
 
-      it('should handle invitation failure', (done) => {
+        expect(adminServiceMock.inviteOwner).toHaveBeenCalledWith({ name: 'John Doe', email: 'john@example.com' });
+        expect(component.showInviteModal).toBeFalse();
+        expect(console.log).toHaveBeenCalledWith('Invitation sent successfully!');
+        expect(component.isInviting).toBeFalse();
+      }));
+
+      it('should handle invitation failure', fakeAsync(() => {
         const mockResponse = { success: false, message: 'Email already exists' };
         adminServiceMock.inviteOwner.and.returnValue(of(mockResponse));
         component.inviteRequest = { name: 'John Doe', email: 'john@example.com' };
@@ -186,13 +186,13 @@ describe('AdminDashboardComponent', () => {
 
         component.inviteOwner();
 
-        setTimeout(() => {
-          expect(component.inviteError).toBe('Email already exists');
-          expect(component.showInviteModal).toBeTrue();
-          expect(component.isInviting).toBeFalse();
-          done();
-        }, 10);
-      });
+        // Advance time to allow observable to complete
+        tick();
+
+        expect(component.inviteError).toBe('Email already exists');
+        expect(component.showInviteModal).toBeTrue();
+        expect(component.isInviting).toBeFalse();
+      }));
 
       it('should handle invitation API error', () => {
         const error = { error: { message: 'Server error' } };

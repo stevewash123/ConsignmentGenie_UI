@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { Component } from '@angular/core';
@@ -82,7 +82,7 @@ describe('ProviderAddComponent', () => {
     expect(breadcrumbLink?.getAttribute('routerLink')).toBe('/owner/providers');
   });
 
-  it('should create provider successfully', (done) => {
+  it('should create provider successfully', fakeAsync(() => {
     const mockProvider: Provider = {
       id: 1,
       name: 'Test Provider',
@@ -100,7 +100,6 @@ describe('ProviderAddComponent', () => {
     };
 
     providerService.createProvider.and.returnValue(of(mockProvider));
-    // router.navigate is already a spy from the mock
 
     // Fill form with valid data
     component.providerData = {
@@ -130,12 +129,11 @@ describe('ProviderAddComponent', () => {
     expect(component.successMessage()).toBe('Provider created successfully!');
     expect(component.isSubmitting()).toBe(false);
 
-    // Check that navigation happens after timeout
-    setTimeout(() => {
-      expect(router.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
-      done();
-    }, 2100);
-  });
+    // Advance time by 2000ms to trigger the setTimeout in component
+    tick(2000);
+
+    expect(router.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
+  }));
 
   xit('should handle creation error', () => {
     // X'd out due to async timing issues with Angular zone.js and observable completion

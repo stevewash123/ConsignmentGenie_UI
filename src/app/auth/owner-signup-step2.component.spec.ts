@@ -1,8 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
 
 import { OwnerSignupStep2Component } from './owner-signup-step2.component';
 import { AuthService } from '../services/auth.service';
@@ -18,6 +17,9 @@ describe('OwnerSignupStep2Component', () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
       events: of({})
     });
+    mockRouter.navigate.and.returnValue(Promise.resolve(true));
+    mockRouter.createUrlTree.and.returnValue({} as any);
+    mockRouter.serializeUrl.and.returnValue('');
     const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
       snapshot: { data: {} },
       params: of({}),
@@ -306,17 +308,14 @@ describe('OwnerSignupStep2Component', () => {
       // No detectChanges() here - we control it in each test
     });
 
-    it('should auto-login and redirect to dashboard when token is provided', (done) => {
+    it('should auto-login and redirect to dashboard when token is provided', fakeAsync(() => {
       const mockResponse = {
         success: true,
         role: 'owner',
         message: 'Registration successful',
         token: 'jwt-token-123'
       };
-      // Use a delayed observable to test the loading state
-      mockAuthService.registerOwner.and.returnValue(
-        of(mockResponse).pipe(delay(1))
-      );
+      mockAuthService.registerOwner.and.returnValue(of(mockResponse));
 
       // Fill form with valid data
       component.profileForm.patchValue({
@@ -331,38 +330,34 @@ describe('OwnerSignupStep2Component', () => {
       });
 
       component.onSubmit();
-
       expect(component.isSubmitting()).toBeTrue();
 
-      // Wait for the observable to complete
-      setTimeout(() => {
-        expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
-          fullName: 'John Doe',
-          email: 'test@example.com',
-          phone: '555-1234',
-          password: 'password123',
-          shopName: 'Test Shop',
-          subdomain: 'testshop',
-          address: '123 Main St, Test City, CA 12345'
-        }));
+      // Advance time to allow observable to complete
+      tick();
 
-        expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
-        done();
-      }, 10);
-    });
+      expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
+        fullName: 'John Doe',
+        email: 'test@example.com',
+        phone: '555-1234',
+        password: 'password123',
+        shopName: 'Test Shop',
+        subdomain: 'testshop',
+        address: '123 Main St, Test City, CA 12345'
+      }));
 
-    it('should redirect to success page when no token (approval required)', (done) => {
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+      expect(component.isSubmitting()).toBeFalse();
+    }));
+
+    it('should redirect to success page when no token (approval required)', fakeAsync(() => {
       const mockResponse = {
         success: true,
         role: 'owner',
         message: 'Registration successful'
         // No token - approval required
       };
-      // Use a delayed observable to test the loading state
-      mockAuthService.registerOwner.and.returnValue(
-        of(mockResponse).pipe(delay(1))
-      );
+      mockAuthService.registerOwner.and.returnValue(of(mockResponse));
 
       // Fill form with valid data
       component.profileForm.patchValue({
@@ -377,31 +372,30 @@ describe('OwnerSignupStep2Component', () => {
       });
 
       component.onSubmit();
-
       expect(component.isSubmitting()).toBeTrue();
 
-      // Wait for the observable to complete
-      setTimeout(() => {
-        expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
-          fullName: 'John Doe',
-          email: 'test@example.com',
-          phone: '555-1234',
-          password: 'password123',
-          shopName: 'Test Shop',
-          subdomain: 'testshop',
-          address: '123 Main St, Test City, CA 12345'
-        }));
+      // Advance time to allow observable to complete
+      tick();
 
-        expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/success'], {
-          queryParams: {
-            type: 'owner',
-            shopName: 'Test Shop',
-            email: 'test@example.com'
-          }
-        });
-        done();
-      }, 10);
-    });
+      expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
+        fullName: 'John Doe',
+        email: 'test@example.com',
+        phone: '555-1234',
+        password: 'password123',
+        shopName: 'Test Shop',
+        subdomain: 'testshop',
+        address: '123 Main St, Test City, CA 12345'
+      }));
+
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/success'], {
+        queryParams: {
+          type: 'owner',
+          shopName: 'Test Shop',
+          email: 'test@example.com'
+        }
+      });
+      expect(component.isSubmitting()).toBeFalse();
+    }));
   });
 });

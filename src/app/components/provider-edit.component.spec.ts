@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
@@ -119,7 +119,7 @@ describe('ProviderEditComponent', () => {
     expect(phoneInput?.value).toBe('1234567890');
   });
 
-  it('should update provider successfully', () => {
+  it('should update provider successfully', fakeAsync(() => {
     const updatedProvider = { ...mockProvider, name: 'Updated Provider' };
     providerService.updateProvider.and.returnValue(of(updatedProvider));
 
@@ -144,11 +144,11 @@ describe('ProviderEditComponent', () => {
     expect(component.successMessage()).toBe('Provider updated successfully!');
     expect(component.isSubmitting()).toBe(false);
 
-    // Check that navigation happens after timeout
-    setTimeout(() => {
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
-    }, 2100);
-  });
+    // Advance time by 2000ms to trigger the setTimeout in component
+    tick(2000);
+
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
+  }));
 
   xit('should handle update error', () => {
     // X'd out due to async timing issues with Angular zone.js and observable completion
