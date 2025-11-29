@@ -5,13 +5,12 @@ import { AuthService } from '../../services/auth.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('AdminHeaderComponent', () => {
   let component: AdminHeaderComponent;
   let fixture: ComponentFixture<AdminHeaderComponent>;
-  let mockRouter: Router;
+  let mockRouter: jasmine.SpyObj<Router>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockCurrentUser$ = new BehaviorSubject<any>(null);
 
@@ -27,18 +26,26 @@ describe('AdminHeaderComponent', () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['getCurrentUser', 'logout'], {
       currentUser$: mockCurrentUser$
     });
+    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of({})
+    });
+    const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { data: {} },
+      params: of({}),
+      queryParams: of({})
+    });
 
     await TestBed.configureTestingModule({
-      imports: [AdminHeaderComponent, RouterTestingModule, HttpClientTestingModule],
+      imports: [AdminHeaderComponent, HttpClientTestingModule],
       providers: [
-        { provide: AuthService, useValue: mockAuthService }
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminHeaderComponent);
     component = fixture.componentInstance;
-    mockRouter = TestBed.inject(Router);
-    spyOn(mockRouter, 'navigate');
   });
 
   beforeEach(() => {

@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -11,33 +10,42 @@ import { AuthService } from '../services/auth.service';
 describe('OwnerSignupStep2Component', () => {
   let component: OwnerSignupStep2Component;
   let fixture: ComponentFixture<OwnerSignupStep2Component>;
-  let mockRouter: Router;
+  let mockRouter: jasmine.SpyObj<Router>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerOwner']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerOwner', 'validateSubdomain']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of({})
+    });
+    const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { data: {} },
+      params: of({}),
+      queryParams: of({})
+    });
 
     await TestBed.configureTestingModule({
       imports: [
-        OwnerSignupStep2Component,
-        RouterTestingModule.withRoutes([
-          { path: 'signup/owner', component: OwnerSignupStep2Component },
-          { path: 'register/success', component: OwnerSignupStep2Component },
-          { path: 'owner/dashboard', component: OwnerSignupStep2Component }
-        ])
+        OwnerSignupStep2Component
       ],
       providers: [
         FormBuilder,
-        { provide: AuthService, useValue: authServiceSpy }
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(OwnerSignupStep2Component);
     component = fixture.componentInstance;
-    mockRouter = TestBed.inject(Router);
     mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
 
-    spyOn(mockRouter, 'navigate');
+    // Set up default return values for AuthService methods
+    mockAuthService.validateSubdomain.and.returnValue(of({
+      success: true,
+      data: { isAvailable: true, subdomain: 'test-subdomain' },
+      message: 'Subdomain is available'
+    }));
   });
 
   // ===========================================

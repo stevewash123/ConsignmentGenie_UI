@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { Component } from '@angular/core';
 import { ProviderAddComponent } from './provider-add.component';
@@ -17,28 +16,38 @@ class MockProviderDetailComponent { }
 describe('ProviderAddComponent', () => {
   let component: ProviderAddComponent;
   let fixture: ComponentFixture<ProviderAddComponent>;
-  let router: Router;
+  let router: jasmine.SpyObj<Router>;
   let providerService: jasmine.SpyObj<ProviderService>;
 
   beforeEach(async () => {
     const providerServiceSpy = jasmine.createSpyObj('ProviderService', ['createProvider']);
+    router = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of({}),
+      routerState: { root: {} }
+    });
+    router.createUrlTree.and.returnValue({} as any);
+    router.serializeUrl.and.returnValue('');
+    router.navigate.and.returnValue(Promise.resolve(true));
+
+    const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { data: {} },
+      params: of({}),
+      queryParams: of({})
+    });
 
     await TestBed.configureTestingModule({
       imports: [
-        ProviderAddComponent,
-        RouterTestingModule.withRoutes([
-          { path: 'owner/providers', component: MockProviderListComponent },
-          { path: 'owner/providers/:id', component: MockProviderDetailComponent }
-        ])
+        ProviderAddComponent
       ],
       providers: [
-        { provide: ProviderService, useValue: providerServiceSpy }
+        { provide: ProviderService, useValue: providerServiceSpy },
+        { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProviderAddComponent);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router);
     providerService = TestBed.inject(ProviderService) as jasmine.SpyObj<ProviderService>;
     fixture.detectChanges();
   });
@@ -91,7 +100,7 @@ describe('ProviderAddComponent', () => {
     };
 
     providerService.createProvider.and.returnValue(of(mockProvider));
-    const navigateSpy = spyOn(router, 'navigate');
+    // router.navigate is already a spy from the mock
 
     // Fill form with valid data
     component.providerData = {
@@ -123,7 +132,7 @@ describe('ProviderAddComponent', () => {
 
     // Check that navigation happens after timeout
     setTimeout(() => {
-      expect(navigateSpy).toHaveBeenCalledWith(['/owner/providers', 1]);
+      expect(router.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
       done();
     }, 2100);
   });

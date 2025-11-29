@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { of } from 'rxjs';
 
@@ -10,31 +9,39 @@ import { AuthService } from '../services/auth.service';
 describe('ProviderSignupStep1Component', () => {
   let component: ProviderSignupStep1Component;
   let fixture: ComponentFixture<ProviderSignupStep1Component>;
-  let mockRouter: Router;
+  let mockRouter: jasmine.SpyObj<Router>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerProvider']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of({}),
+      routerState: { root: {} }
+    });
+    mockRouter.createUrlTree.and.returnValue({} as any);
+    mockRouter.serializeUrl.and.returnValue('');
+    mockRouter.navigate.and.returnValue(Promise.resolve(true));
+    const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { data: {} },
+      params: of({}),
+      queryParams: of({})
+    });
 
     await TestBed.configureTestingModule({
       imports: [
-        ProviderSignupStep1Component,
-        RouterTestingModule.withRoutes([
-          { path: 'signup/provider/details', component: ProviderSignupStep1Component }
-        ])
+        ProviderSignupStep1Component
       ],
       providers: [
         FormBuilder,
-        { provide: AuthService, useValue: authServiceSpy }
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProviderSignupStep1Component);
     component = fixture.componentInstance;
-    mockRouter = TestBed.inject(Router);
     mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-
-    spyOn(mockRouter, 'navigate');
 
     fixture.detectChanges();
   });
