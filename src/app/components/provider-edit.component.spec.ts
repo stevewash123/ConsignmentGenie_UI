@@ -1,26 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { ProviderEditComponent } from './provider-edit.component';
 import { ProviderService } from '../services/provider.service';
 import { Provider } from '../models/provider.model';
 import { LoadingService } from '../shared/services/loading.service';
 
-// Mock components for routing tests
-@Component({ template: '' })
-class MockProviderDetailComponent { }
-
-@Component({ template: '' })
-class MockProviderListComponent { }
-
 describe('ProviderEditComponent', () => {
   let component: ProviderEditComponent;
   let fixture: ComponentFixture<ProviderEditComponent>;
-  let router: Router;
-  let activatedRoute: ActivatedRoute;
+  let routerSpy: jasmine.SpyObj<Router>;
   let providerService: jasmine.SpyObj<ProviderService>;
   let loadingService: jasmine.SpyObj<LoadingService>;
 
@@ -52,17 +42,18 @@ describe('ProviderEditComponent', () => {
       'isLoading'
     ]);
 
+    routerSpy = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of({})
+    });
+
     await TestBed.configureTestingModule({
       imports: [
-        ProviderEditComponent,
-        RouterTestingModule.withRoutes([
-          { path: 'owner/providers/:id', component: MockProviderDetailComponent },
-          { path: 'owner/providers', component: MockProviderListComponent }
-        ])
+        ProviderEditComponent
       ],
       providers: [
         { provide: ProviderService, useValue: providerServiceSpy },
         { provide: LoadingService, useValue: loadingServiceSpy },
+        { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -77,13 +68,15 @@ describe('ProviderEditComponent', () => {
 
     fixture = TestBed.createComponent(ProviderEditComponent);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router);
-    activatedRoute = TestBed.inject(ActivatedRoute);
     providerService = TestBed.inject(ProviderService) as jasmine.SpyObj<ProviderService>;
     loadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
 
     loadingService.isLoading.and.returnValue(false);
     providerService.getProvider.and.returnValue(of(mockProvider));
+    routerSpy.navigate.and.returnValue(Promise.resolve(true));
+    routerSpy.createUrlTree.and.returnValue({} as any);
+    routerSpy.serializeUrl.and.returnValue('/test-url');
+
     fixture.detectChanges();
   });
 
@@ -129,7 +122,6 @@ describe('ProviderEditComponent', () => {
   it('should update provider successfully', () => {
     const updatedProvider = { ...mockProvider, name: 'Updated Provider' };
     providerService.updateProvider.and.returnValue(of(updatedProvider));
-    spyOn(router, 'navigate');
 
     // Update form data
     component.editData.name = 'Updated Provider';
@@ -154,7 +146,7 @@ describe('ProviderEditComponent', () => {
 
     // Check that navigation happens after timeout
     setTimeout(() => {
-      expect(router.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
     }, 2100);
   });
 

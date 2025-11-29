@@ -42,6 +42,12 @@ describe('OwnerSignupStep1Component', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    // Reset all spy calls to ensure test isolation
+    mockRouter.navigate.calls.reset();
+    mockAuthService.registerOwner.calls.reset();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
