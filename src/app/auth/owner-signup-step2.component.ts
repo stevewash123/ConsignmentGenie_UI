@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-owner-signup-step2',
@@ -77,6 +78,12 @@ import { AuthService } from '../services/auth.service';
                     <span class="subdomain-suffix">.consignmentgenie.com</span>
                   </div>
                   <div class="form-hint">This will be your shop's web address</div>
+                  <div class="validation-message" *ngIf="subdomainValidationMessage()"
+                       [class.success]="subdomainValidationMessage().includes('✓')"
+                       [class.error]="subdomainValidationMessage().includes('✗')">
+                    <span *ngIf="isValidatingSubdomain()" class="validation-spinner"></span>
+                    {{ subdomainValidationMessage() }}
+                  </div>
                   <div class="error-message"
                        *ngIf="profileForm.get('subdomain')?.invalid && profileForm.get('subdomain')?.touched">
                     <span *ngIf="profileForm.get('subdomain')?.errors?.['required']">Shop URL is required</span>
@@ -205,6 +212,7 @@ import { AuthService } from '../services/auth.service';
               type="submit"
               class="submit-btn"
               [disabled]="profileForm.invalid || isSubmitting()">
+              <span *ngIf="isSubmitting()" class="spinner"></span>
               {{ isSubmitting() ? 'Creating Shop...' : 'Create Shop' }}
             </button>
           </form>
@@ -381,6 +389,33 @@ import { AuthService } from '../services/auth.service';
       font-weight: 500;
     }
 
+    .validation-message {
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .validation-message.success {
+      color: #10b981;
+    }
+
+    .validation-message.error {
+      color: #ef4444;
+    }
+
+    .validation-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 1px solid #6b7280;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+    }
+
 
     .submit-btn {
       width: 100%;
@@ -408,6 +443,21 @@ import { AuthService } from '../services/auth.service';
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .alert {
@@ -454,6 +504,8 @@ export class OwnerSignupStep2Component implements OnInit {
   isSubmitting = signal(false);
   errorMessage = signal('');
   userEmail = '';
+  subdomainValidationMessage = signal('');
+  isValidatingSubdomain = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -486,6 +538,9 @@ export class OwnerSignupStep2Component implements OnInit {
       const authData = JSON.parse(authDataString);
       this.userEmail = authData.email;
     }
+
+    // Setup real-time subdomain validation
+    this.setupSubdomainValidation();
   }
 
   onSubmit() {
@@ -563,6 +618,44 @@ export class OwnerSignupStep2Component implements OnInit {
   private markAllFieldsTouched() {
     Object.keys(this.profileForm.controls).forEach(key => {
       this.profileForm.get(key)?.markAsTouched();
+    });
+  }
+
+  private setupSubdomainValidation() {
+    const subdomainControl = this.profileForm.get('subdomain');
+    if (subdomainControl) {
+      subdomainControl.valueChanges
+        .pipe(
+          debounceTime(500),
+          distinctUntilChanged(),
+          filter(value => value && value.length >= 3)
+        )
+        .subscribe(subdomain => {
+          this.validateSubdomain(subdomain);
+        });
+    }
+  }
+
+  private validateSubdomain(subdomain: string) {
+    this.isValidatingSubdomain.set(true);
+    this.subdomainValidationMessage.set('');
+
+    this.authService.validateSubdomain(subdomain).subscribe({
+      next: (response) => {
+        if (response.success) {
+          if (response.data.isAvailable) {
+            this.subdomainValidationMessage.set('✓ Subdomain is available');
+          } else {
+            this.subdomainValidationMessage.set('✗ This subdomain is already taken');
+          }
+        }
+        this.isValidatingSubdomain.set(false);
+      },
+      error: (error) => {
+        console.error('Error validating subdomain:', error);
+        this.subdomainValidationMessage.set('Error checking subdomain availability');
+        this.isValidatingSubdomain.set(false);
+      }
     });
   }
 }

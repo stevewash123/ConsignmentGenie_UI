@@ -207,4 +207,8 @@ export class AuthService {
       this.logout();
     }
   }
+
+  validateSubdomain(subdomain: string): Observable<{ success: boolean; data: { isAvailable: boolean; subdomain: string }; message: string }> {
+    return this.http.get<{ success: boolean; data: { isAvailable: boolean; subdomain: string }; message: string }>(`${this.apiUrl}/auth/validate-subdomain/${subdomain}`);
+  }
 }

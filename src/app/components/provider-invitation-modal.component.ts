@@ -30,7 +30,7 @@ import { ProviderService } from '../services/provider.service';
                 [class.error]="nameField.invalid && nameField.touched"
                 placeholder="Enter provider's full name"
               >
-              <div class="error-message" *ngIf="nameField.invalid && nameField.touched">
+              <div class="error-message" *ngIf="nameField.invalid && (nameField.dirty || nameField.touched)">
                 Provider name is required
               </div>
             </div>
@@ -49,7 +49,7 @@ import { ProviderService } from '../services/provider.service';
                 [class.error]="emailField.invalid && emailField.touched"
                 placeholder="Enter provider's email"
               >
-              <div class="error-message" *ngIf="emailField.invalid && emailField.touched">
+              <div class="error-message" *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)">
                 <span *ngIf="emailField.errors?.['required']">Email is required</span>
                 <span *ngIf="emailField.errors?.['email']">Please enter a valid email</span>
               </div>
