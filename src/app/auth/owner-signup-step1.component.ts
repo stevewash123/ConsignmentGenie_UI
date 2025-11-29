@@ -147,7 +147,8 @@ import { AuthService } from '../services/auth.service';
 
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 35%;
+      min-width: 480px;
     }
 
     .auth-card {
@@ -357,6 +358,11 @@ import { AuthService } from '../services/auth.service';
     }
 
     @media (max-width: 768px) {
+      .container {
+        max-width: 90%;
+        min-width: unset;
+      }
+
       .auth-card {
         padding: 2rem;
       }

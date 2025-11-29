@@ -16,9 +16,8 @@ import { AuthService } from '../services/auth.service';
             <a routerLink="/signup/owner" class="back-link">← Back</a>
             <h1>Complete Your Profile</h1>
             <div class="email-display" *ngIf="userEmail">
-              Email: {{ userEmail }} <a routerLink="/signup/owner" class="change-link">[change]</a>
+              Email: {{ userEmail }}
             </div>
-            <p class="subtitle">Tell us about your business and location</p>
           </div>
 
           <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
@@ -48,7 +47,6 @@ import { AuthService } from '../services/auth.service';
                     type="tel"
                     formControlName="phone"
                     placeholder="(555) 123-4567">
-                  <div class="form-hint">Optional - for customer contact and support</div>
                 </div>
               </div>
 
@@ -202,14 +200,6 @@ import { AuthService } from '../services/auth.service';
               </div>
             </div>
 
-            <div class="info-box">
-              <h4>What happens next?</h4>
-              <ul>
-                <li>Your shop will be created immediately</li>
-                <li>You can add commission rates and policies in settings</li>
-                <li>Start adding providers and inventory right away</li>
-              </ul>
-            </div>
 
             <button
               type="submit"
@@ -239,7 +229,8 @@ import { AuthService } from '../services/auth.service';
 
     .container {
       width: 100%;
-      max-width: 600px;
+      max-width: 35%;
+      min-width: 500px;
     }
 
     .profile-card {
@@ -279,22 +270,6 @@ import { AuthService } from '../services/auth.service';
       font-weight: 500;
     }
 
-    .change-link {
-      color: #047857;
-      text-decoration: none;
-      font-weight: 600;
-      margin-left: 0.5rem;
-    }
-
-    .change-link:hover {
-      text-decoration: underline;
-    }
-
-    .subtitle {
-      color: #6b7280;
-      font-size: 1rem;
-      margin: 0 0 2rem 0;
-    }
 
     .form-section {
       margin-bottom: 2.5rem;
@@ -406,30 +381,6 @@ import { AuthService } from '../services/auth.service';
       font-weight: 500;
     }
 
-    .info-box {
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 2rem 0;
-    }
-
-    .info-box h4 {
-      color: #047857;
-      font-size: 1rem;
-      margin: 0 0 1rem 0;
-      font-weight: 600;
-    }
-
-    .info-box ul {
-      margin: 0;
-      padding-left: 1.5rem;
-      color: #374151;
-    }
-
-    .info-box li {
-      margin-bottom: 0.5rem;
-    }
 
     .submit-btn {
       width: 100%;
@@ -472,6 +423,11 @@ import { AuthService } from '../services/auth.service';
     }
 
     @media (max-width: 768px) {
+      .container {
+        max-width: 90%;
+        min-width: unset;
+      }
+
       .profile-card {
         padding: 2rem;
       }
