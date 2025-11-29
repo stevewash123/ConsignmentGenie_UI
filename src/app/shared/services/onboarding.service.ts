@@ -27,10 +27,16 @@ export class OnboardingService {
    * Get current onboarding status for the organization
    */
   getOnboardingStatus(): Observable<OnboardingStatus> {
-    return this.http.get<OnboardingResponse>(`${this.baseUrl}/api/dashboard/organization/onboarding-status`)
+    const url = `${this.baseUrl}/api/dashboard/organization/onboarding-status`;
+    console.log('🔍 SERVICE: Making API call to:', url);
+    return this.http.get<OnboardingResponse>(url)
       .pipe(
+        tap(response => console.log('🔍 SERVICE: Raw API response:', response)),
         map(response => response.data),
-        tap(status => this.onboardingStatusSubject.next(status))
+        tap(status => {
+          console.log('🔍 SERVICE: Processed status:', status);
+          this.onboardingStatusSubject.next(status);
+        })
       );
   }
 
@@ -124,13 +130,19 @@ export class OnboardingService {
    * Check if onboarding should be shown
    */
   shouldShowOnboarding(status: OnboardingStatus): boolean {
+    console.log('🔍 SERVICE: shouldShowOnboarding called with:', status);
+
     if (status.dismissed) {
+      console.log('🔍 SERVICE: Dismissed = true, not showing modal');
       return false;
     }
 
     // Show if not all steps are completed
     const progress = this.getOnboardingProgress(status);
-    return progress.completedSteps < progress.totalSteps;
+    console.log('🔍 SERVICE: Progress:', progress);
+    const shouldShow = progress.completedSteps < progress.totalSteps;
+    console.log('🔍 SERVICE: Final decision - should show:', shouldShow);
+    return shouldShow;
   }
 
   /**

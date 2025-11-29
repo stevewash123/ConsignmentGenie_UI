@@ -378,6 +378,7 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    console.log('🔍 DASHBOARD: Component initialized');
     this.loadDashboardData();
     this.loadOnboardingStatus();
   }
@@ -485,18 +486,25 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadOnboardingStatus() {
+    console.log('🔍 DASHBOARD: Loading onboarding status...');
     this.onboardingService.getOnboardingStatus()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (status) => {
+          console.log('🔍 DASHBOARD: Onboarding status received:', status);
           this.onboardingStatus.set(status);
           // Show modal if onboarding should be shown
-          if (this.onboardingService.shouldShowOnboarding(status)) {
+          const shouldShow = this.onboardingService.shouldShowOnboarding(status);
+          console.log('🔍 DASHBOARD: Should show modal:', shouldShow);
+          if (shouldShow) {
+            console.log('🔍 DASHBOARD: Setting modal visible to TRUE');
             this.showWelcomeModal.set(true);
+          } else {
+            console.log('🔍 DASHBOARD: NOT showing modal. Current modal state:', this.showWelcomeModal());
           }
         },
         error: (error) => {
-          console.error('Failed to load onboarding status:', error);
+          console.error('🚨 DASHBOARD: Failed to load onboarding status:', error);
         }
       });
   }
