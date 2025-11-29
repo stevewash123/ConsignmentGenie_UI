@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
 import { OwnerWelcomeModalComponent } from './owner-welcome-modal.component';
 import { OnboardingService } from '../../shared/services/onboarding.service';
 import { OnboardingStatus, OnboardingStep } from '../../shared/models/onboarding.models';
@@ -286,12 +286,20 @@ describe('OwnerWelcomeModalComponent', () => {
     });
 
     it('should show loading state while dismissing', () => {
-      mockOnboardingService.dismissOnboarding.and.returnValue(of({ success: true }));
+      const dismissSubject = new Subject<{ success: boolean }>();
+      mockOnboardingService.dismissOnboarding.and.returnValue(dismissSubject.asObservable());
 
       component.dontShowAgain = true;
       component['dismissPermanently']();
 
+      // Should be loading immediately after calling dismissPermanently
       expect(component.isDismissing()).toBe(true);
+
+      // Complete the observable and check loading state is reset
+      dismissSubject.next({ success: true });
+      dismissSubject.complete();
+
+      expect(component.isDismissing()).toBe(false);
     });
 
     it('should disable buttons while dismissing', () => {

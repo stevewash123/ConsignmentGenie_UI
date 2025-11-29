@@ -32,13 +32,19 @@ describe('AdminService', () => {
         monthlyRevenue: 15420
       };
 
+      const mockApiResponse = {
+        success: true,
+        data: mockMetrics,
+        message: 'Metrics retrieved successfully'
+      };
+
       service.getMetrics().subscribe(metrics => {
         expect(metrics).toEqual(mockMetrics);
       });
 
       const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/metrics`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockMetrics);
+      req.flush(mockApiResponse);
     });
 
     it('should handle error when getting metrics', () => {
@@ -150,13 +156,30 @@ describe('AdminService', () => {
       const mockSignups: NewSignup[] = [
         {
           id: '1',
-          shopName: 'Test Shop',
-          ownerName: 'John Owner',
+          shopName: 'Test Shop', // Mapped from API name
+          ownerName: 'Test Shop', // Also mapped from API name
           email: 'owner@testshop.com',
           registeredAt: '2023-11-25T10:00:00Z',
           subdomain: 'testshop'
         }
       ];
+
+      // API returns raw organization data that gets transformed
+      const mockApiData = [
+        {
+          id: '1',
+          name: 'Test Shop', // API returns name, gets mapped to both shopName and ownerName
+          email: 'owner@testshop.com',
+          createdAt: '2023-11-25T10:00:00Z',
+          subdomain: 'testshop'
+        }
+      ];
+
+      const mockApiResponse = {
+        success: true,
+        data: mockApiData,
+        message: 'Recent signups retrieved successfully'
+      };
 
       service.getRecentSignups().subscribe(signups => {
         expect(signups).toEqual(mockSignups);
@@ -164,7 +187,7 @@ describe('AdminService', () => {
 
       const req = httpTestingController.expectOne(`${environment.apiUrl}/api/admin/recent-signups`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockSignups);
+      req.flush(mockApiResponse);
     });
   });
 

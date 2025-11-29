@@ -73,7 +73,7 @@ describe('ProviderAddComponent', () => {
     expect(breadcrumbLink?.getAttribute('routerLink')).toBe('/owner/providers');
   });
 
-  it('should create provider successfully', () => {
+  it('should create provider successfully', (done) => {
     const mockProvider: Provider = {
       id: 1,
       name: 'Test Provider',
@@ -91,7 +91,7 @@ describe('ProviderAddComponent', () => {
     };
 
     providerService.createProvider.and.returnValue(of(mockProvider));
-    spyOn(router, 'navigate');
+    const navigateSpy = spyOn(router, 'navigate');
 
     // Fill form with valid data
     component.providerData = {
@@ -123,7 +123,8 @@ describe('ProviderAddComponent', () => {
 
     // Check that navigation happens after timeout
     setTimeout(() => {
-      expect(router.navigate).toHaveBeenCalledWith(['/owner/providers', 1]);
+      expect(navigateSpy).toHaveBeenCalledWith(['/owner/providers', 1]);
+      done();
     }, 2100);
   });
 

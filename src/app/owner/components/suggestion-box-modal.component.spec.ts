@@ -42,11 +42,11 @@ describe('SuggestionBoxModalComponent', () => {
   });
 
   it('should emit close event when onClose is called', () => {
-    spyOn(component.close, 'emit');
+    const closeSpy = spyOn(component.close, 'emit');
 
     component.onClose();
 
-    expect(component.close.emit).toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalled();
     expect(component.formData()).toEqual({
       type: '',
       message: ''
@@ -55,7 +55,7 @@ describe('SuggestionBoxModalComponent', () => {
   });
 
   it('should emit close event when clicking overlay', () => {
-    spyOn(component.close, 'emit');
+    const closeSpy = spyOn(component.close, 'emit');
     const overlayElement = document.createElement('div');
     const mockEvent = {
       target: overlayElement,
@@ -64,11 +64,11 @@ describe('SuggestionBoxModalComponent', () => {
 
     component.onOverlayClick(mockEvent as any);
 
-    expect(component.close.emit).toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalled();
   });
 
   it('should not emit close event when clicking inside modal content', () => {
-    spyOn(component.close, 'emit');
+    const closeSpy = spyOn(component.close, 'emit');
     const element = document.createElement('div');
     const mockEvent = {
       target: element,
@@ -77,11 +77,11 @@ describe('SuggestionBoxModalComponent', () => {
 
     component.onOverlayClick(mockEvent as any);
 
-    expect(component.close.emit).not.toHaveBeenCalled();
+    expect(closeSpy).not.toHaveBeenCalled();
   });
 
   it('should not submit when form is invalid (empty type)', async () => {
-    spyOn(component.submit, 'emit');
+    const submitSpy = spyOn(component.submit, 'emit');
     component.formData.set({
       type: '',
       message: 'Test message'
@@ -89,12 +89,12 @@ describe('SuggestionBoxModalComponent', () => {
 
     await component.onSubmit();
 
-    expect(component.submit.emit).not.toHaveBeenCalled();
+    expect(submitSpy).not.toHaveBeenCalled();
     expect(component.isSubmitting()).toBe(false);
   });
 
   it('should not submit when form is invalid (empty message)', async () => {
-    spyOn(component.submit, 'emit');
+    const submitSpy = spyOn(component.submit, 'emit');
     component.formData.set({
       type: 'BugReport',
       message: ''
@@ -102,12 +102,12 @@ describe('SuggestionBoxModalComponent', () => {
 
     await component.onSubmit();
 
-    expect(component.submit.emit).not.toHaveBeenCalled();
+    expect(submitSpy).not.toHaveBeenCalled();
     expect(component.isSubmitting()).toBe(false);
   });
 
   it('should not submit when form is invalid (whitespace only message)', async () => {
-    spyOn(component.submit, 'emit');
+    const submitSpy = spyOn(component.submit, 'emit');
     component.formData.set({
       type: 'BugReport',
       message: '   \n   \t   '
@@ -115,13 +115,13 @@ describe('SuggestionBoxModalComponent', () => {
 
     await component.onSubmit();
 
-    expect(component.submit.emit).not.toHaveBeenCalled();
+    expect(submitSpy).not.toHaveBeenCalled();
     expect(component.isSubmitting()).toBe(false);
   });
 
   it('should submit form when valid data is provided', async () => {
-    spyOn(component.submit, 'emit');
-    spyOn(component.close, 'emit');
+    const submitSpy = spyOn(component.submit, 'emit');
+    const closeSpy = spyOn(component.close, 'emit');
 
     const formData: SuggestionFormData = {
       type: 'FeatureRequest',
@@ -133,16 +133,16 @@ describe('SuggestionBoxModalComponent', () => {
     await component.onSubmit();
 
     expect(component.isSubmitting()).toBe(false); // Should be false after completion
-    expect(component.submit.emit).toHaveBeenCalledWith({
+    expect(submitSpy).toHaveBeenCalledWith({
       type: 'FeatureRequest',
       message: 'Please add dark mode support'
     });
-    expect(component.close.emit).toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalled();
   });
 
   it('should trim whitespace from message when submitting', async () => {
-    spyOn(component.submit, 'emit');
-    spyOn(component.close, 'emit');
+    const submitSpy = spyOn(component.submit, 'emit');
+    const closeSpy = spyOn(component.close, 'emit');
 
     component.formData.set({
       type: 'BugReport',
@@ -151,7 +151,7 @@ describe('SuggestionBoxModalComponent', () => {
 
     await component.onSubmit();
 
-    expect(component.submit.emit).toHaveBeenCalledWith({
+    expect(submitSpy).toHaveBeenCalledWith({
       type: 'BugReport',
       message: 'Bug description with spaces'
     });
@@ -234,8 +234,8 @@ describe('SuggestionBoxModalComponent', () => {
   });
 
   it('should show loading state during submission', async () => {
-    spyOn(component.submit, 'emit').and.stub();
-    spyOn(component.close, 'emit').and.stub();
+    const submitSpy = spyOn(component.submit, 'emit').and.stub();
+    const closeSpy = spyOn(component.close, 'emit').and.stub();
 
     component.isVisible = true;
     component.formData.set({

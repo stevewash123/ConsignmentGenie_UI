@@ -13,6 +13,10 @@ export const adminRoutes: Routes = [
   {
     path: 'owner-approvals',
     loadComponent: () => import('./components/owner-approval.component').then(m => m.OwnerApprovalComponent)
+  },
+  {
+    path: 'notifications',
+    loadComponent: () => import('./pages/admin-notifications.component').then(m => m.AdminNotificationsComponent)
   }
   // Note: Login is now handled by /login route in main app routing
 ];

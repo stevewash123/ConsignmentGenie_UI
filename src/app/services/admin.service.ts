@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
 
 export interface AdminMetrics {
   activeOrganizations: number;
@@ -41,7 +48,8 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   getMetrics(): Observable<AdminMetrics> {
-    return this.http.get<AdminMetrics>(`${this.apiUrl}/metrics`);
+    return this.http.get<ApiResponse<AdminMetrics>>(`${this.apiUrl}/metrics`)
+      .pipe(map(response => response.data));
   }
 
   // Owner Invitation Management
@@ -63,6 +71,14 @@ export class AdminService {
 
   // Recent Signups
   getRecentSignups(): Observable<NewSignup[]> {
-    return this.http.get<NewSignup[]>(`${this.apiUrl}/recent-signups`);
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/recent-signups`)
+      .pipe(map(response => response.data.map((signup: any) => ({
+        id: signup.id,
+        ownerName: signup.name,
+        shopName: signup.name, // API returns organization name, map to shopName
+        email: signup.email,
+        registeredAt: signup.createdAt,
+        subdomain: signup.subdomain
+      }))));
   }
 }
