@@ -1,12 +1,17 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { OwnerLayoutComponent } from './owner-layout.component';
+import { OwnerWelcomeModalComponent } from './owner-welcome-modal.component';
 import { ProviderService } from '../../services/provider.service';
 import { TransactionService, SalesMetrics, MetricsQueryParams } from '../../services/transaction.service';
 import { PayoutService, PayoutStatus } from '../../services/payout.service';
 import { PendingPayoutData } from '../../models/payout.model';
 import { AuthService } from '../../services/auth.service';
+import { OnboardingService } from '../../shared/services/onboarding.service';
+import { OnboardingStatus, OnboardingStep } from '../../shared/models/onboarding.models';
 
 interface ShopSummary {
   activeProviders: number;
@@ -31,7 +36,7 @@ interface Transaction {
 @Component({
   selector: 'app-owner-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, OwnerLayoutComponent, OwnerWelcomeModalComponent],
   template: `
     <app-owner-layout>
       <div class="owner-dashboard">
@@ -107,6 +112,16 @@ interface Transaction {
           </div>
         </div>
       </div>
+
+      <!-- Onboarding Welcome Modal -->
+      <app-owner-welcome-modal
+        [isVisible]="showWelcomeModal()"
+        [shopName]="getCurrentUser()?.organizationName || 'Your Shop'"
+        [onboardingStatus]="onboardingStatus()"
+        (closed)="closeWelcomeModal()"
+        (dismissed)="dismissWelcomeModal()"
+        (stepClicked)="navigateToStep($event)">
+      </app-owner-welcome-modal>
     </app-owner-layout>
   `,
   styles: [`
@@ -346,19 +361,30 @@ interface Transaction {
     }
   `]
 })
-export class OwnerDashboardComponent implements OnInit {
+export class OwnerDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   summary = signal<ShopSummary | null>(null);
   activeProviderCount = signal<number>(0);
+  onboardingStatus = signal<OnboardingStatus | null>(null);
+  showWelcomeModal = signal<boolean>(false);
 
   constructor(
     private providerService: ProviderService,
     private transactionService: TransactionService,
     private payoutService: PayoutService,
-    private authService: AuthService
+    private authService: AuthService,
+    private onboardingService: OnboardingService
   ) {}
 
   ngOnInit() {
     this.loadDashboardData();
+    this.loadOnboardingStatus();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getCurrentUser() {
@@ -456,5 +482,37 @@ export class OwnerDashboardComponent implements OnInit {
         };
         this.summary.set(mockSummary);
       });
+  }
+
+  private loadOnboardingStatus() {
+    this.onboardingService.getOnboardingStatus()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (status) => {
+          this.onboardingStatus.set(status);
+          // Show modal if onboarding should be shown
+          if (this.onboardingService.shouldShowOnboarding(status)) {
+            this.showWelcomeModal.set(true);
+          }
+        },
+        error: (error) => {
+          console.error('Failed to load onboarding status:', error);
+        }
+      });
+  }
+
+  closeWelcomeModal() {
+    this.showWelcomeModal.set(false);
+  }
+
+  dismissWelcomeModal() {
+    this.showWelcomeModal.set(false);
+    // Refresh status to update the local state
+    this.loadOnboardingStatus();
+  }
+
+  navigateToStep(step: OnboardingStep) {
+    this.closeWelcomeModal();
+    // The router navigation will happen automatically via the routerLink in the modal
   }
 }
