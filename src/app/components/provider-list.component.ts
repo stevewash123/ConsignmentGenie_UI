@@ -5,61 +5,46 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ProviderService } from '../services/provider.service';
 import { Provider } from '../models/provider.model';
-import { ProviderInvitationModalComponent } from './provider-invitation-modal.component';
+import { InviteConsignorModalComponent } from '../shared/components/invite-consignor-modal.component';
+import { StatusBadgeComponent } from '../shared/components/status-badge.component';
+import { ENTITY_LABELS } from '../shared/constants/labels';
+import { ProviderStatus } from '../models/provider.model';
 import { OwnerLayoutComponent } from '../owner/components/owner-layout.component';
 import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
   selector: 'app-provider-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule, ProviderInvitationModalComponent, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule, InviteConsignorModalComponent, StatusBadgeComponent, OwnerLayoutComponent],
   template: `
     <app-owner-layout>
       <div class="provider-list-container">
+        <!-- Page Header -->
         <div class="header">
-          <h2>Providers</h2>
-          <div class="header-actions">
-            <button class="btn-secondary" (click)="showInviteModal()">
-              Invite Provider
-            </button>
-            <button class="btn-primary" routerLink="/owner/providers/new">
-              Add New Provider
-            </button>
-          </div>
+          <h1 class="page-title">👥 {{ labels.providerManagement }}</h1>
+          <button class="btn-primary" (click)="showInviteModal()">
+            {{ labels.inviteProvider }}
+          </button>
         </div>
 
-        <!-- Stats Dashboard -->
-        <div class="stats-dashboard" *ngIf="!isProvidersLoading()">
-          <div class="stat-card">
-            <div class="stat-number">{{ getStats().total }}</div>
-            <div class="stat-label">Total Providers</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">{{ getStats().active }}</div>
-            <div class="stat-label">Active</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">{{ getStats().inactive }}</div>
-            <div class="stat-label">Inactive</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">{{ getStats().avgCommission }}%</div>
-            <div class="stat-label">Avg Commission</div>
-          </div>
-        </div>
-
+        <!-- Filter Bar -->
         <div class="filters">
-          <div class="filter-group">
-            <label>
-              <input
-                type="checkbox"
-                [checked]="showActiveOnly()"
-                (change)="toggleActiveFilter()"
-              >
-              Show Active Only
-            </label>
+          <div class="filter-section">
+            <label for="statusFilter">Show:</label>
+            <select
+              id="statusFilter"
+              [(ngModel)]="statusFilter"
+              (change)="onFilterChange()"
+              class="filter-select"
+            >
+              <option value="all">{{ labels.filterAllProviders }}</option>
+              <option value="active">{{ labels.filterActiveProviders }}</option>
+              <option value="invited">{{ labels.filterInvitedProviders }}</option>
+              <option value="inactive">{{ labels.filterInactiveProviders }}</option>
+            </select>
           </div>
-          <div class="sort-group">
+
+          <div class="sort-section">
             <label for="sortBy">Sort by:</label>
             <select
               id="sortBy"
@@ -68,9 +53,9 @@ import { LoadingService } from '../shared/services/loading.service';
               class="sort-select"
             >
               <option value="name">Name</option>
-              <option value="email">Email</option>
-              <option value="commissionRate">Commission Rate</option>
               <option value="createdAt">Date Added</option>
+              <option value="status">Status</option>
+              <option value="itemCount">Items Count</option>
             </select>
             <button
               class="sort-direction-btn"
@@ -80,10 +65,11 @@ import { LoadingService } from '../shared/services/loading.service';
               {{ sortDirection === 'asc' ? '↑' : '↓' }}
             </button>
           </div>
-          <div class="search-group">
+
+          <div class="search-section">
             <input
               type="text"
-              placeholder="Search providers..."
+              [placeholder]="labels.searchProviders"
               [(ngModel)]="searchTerm"
               (input)="onSearchChange()"
               class="search-input"
@@ -91,67 +77,76 @@ import { LoadingService } from '../shared/services/loading.service';
           </div>
         </div>
 
-        <div class="provider-grid" *ngIf="!isProvidersLoading(); else loading">
-          <div class="provider-card" *ngFor="let provider of filteredProviders(); trackBy: trackByProvider">
-            <div class="provider-header">
-              <h3>{{ provider.name }}</h3>
-              <div class="status" [class.active]="provider.isActive" [class.inactive]="!provider.isActive">
-                {{ provider.isActive ? 'Active' : 'Inactive' }}
-              </div>
-            </div>
+        <!-- Consignor List Table -->
+        <div class="table-container" *ngIf="!isProvidersLoading(); else loading">
+          <table class="consignor-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let provider of filteredProviders(); trackBy: trackByProvider">
+                <td class="name-cell">{{ provider.name }}</td>
+                <td class="email-cell">{{ provider.email }}</td>
+                <td class="status-cell">
+                  <app-status-badge [status]="getProviderStatus(provider)"></app-status-badge>
+                </td>
+                <td class="actions-cell">
+                  <div class="action-buttons">
+                    <!-- Active provider actions -->
+                    <ng-container *ngIf="getProviderStatus(provider) === 'active'">
+                      <button class="btn-view" [routerLink]="['/owner/providers', provider.id]">
+                        View
+                      </button>
+                    </ng-container>
 
-            <div class="provider-details">
-              <div class="detail" *ngIf="provider.email">
-                <strong>Email:</strong> {{ provider.email }}
-              </div>
-              <div class="detail" *ngIf="provider.phone">
-                <strong>Phone:</strong> {{ provider.phone }}
-              </div>
-              <div class="detail">
-                <strong>Commission:</strong> {{ provider.commissionRate }}%
-              </div>
-            </div>
+                    <!-- Invited provider actions -->
+                    <ng-container *ngIf="getProviderStatus(provider) === 'invited'">
+                      <button class="btn-resend" (click)="resendInvite(provider)">
+                        Resend
+                      </button>
+                      <button class="btn-cancel" (click)="cancelInvite(provider)">
+                        Cancel
+                      </button>
+                    </ng-container>
 
-            <div class="provider-actions">
-              <button class="btn-secondary" [routerLink]="['/owner/providers', provider.id]">
-                View Details
-              </button>
-              <button class="btn-secondary" [routerLink]="['/owner/providers', provider.id, 'edit']">
-                Edit
-              </button>
-              <button
-                class="btn-secondary"
-                *ngIf="provider.isActive"
-                (click)="deactivateProvider(provider)"
-              >
-                Deactivate
-              </button>
-              <button
-                class="btn-success"
-                *ngIf="!provider.isActive"
-                (click)="activateProvider(provider)"
-              >
-                Activate
-              </button>
-            </div>
-          </div>
+                    <!-- Inactive provider actions -->
+                    <ng-container *ngIf="getProviderStatus(provider) === 'inactive'">
+                      <button class="btn-view" [routerLink]="['/owner/providers', provider.id]">
+                        View
+                      </button>
+                      <button class="btn-reactivate" (click)="reactivateProvider(provider)">
+                        Reactivate
+                      </button>
+                    </ng-container>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <ng-template #loading>
-          <div class="loading">Loading providers...</div>
+          <div class="loading">Loading {{ labels.providers.toLowerCase() }}...</div>
         </ng-template>
 
-        <div class="no-providers" *ngIf="!isProvidersLoading() && filteredProviders().length === 0">
-          <p>No providers found. <a routerLink="/owner/providers/new">Add your first provider</a></p>
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!isProvidersLoading() && filteredProviders().length === 0">
+          <p>{{ labels.noProvidersFound }}</p>
+          <button class="link-btn" (click)="showInviteModal()">{{ labels.inviteFirstProvider }}</button>
         </div>
       </div>
 
-      <!-- Provider Invitation Modal -->
-      <app-provider-invitation-modal
-        [isVisible]="isInviteModalVisible"
-        (close)="hideInviteModal()"
-        (invitationSent)="onInvitationSent()">
-      </app-provider-invitation-modal>
+      <!-- Invite Consignor Modal -->
+      <app-invite-consignor-modal
+        *ngIf="isInviteModalVisible()"
+        (closed)="hideInviteModal()"
+        (consignorAdded)="onConsignorAdded($event)">
+      </app-invite-consignor-modal>
     </app-owner-layout>
   `,
   styles: [`
@@ -550,11 +545,12 @@ import { LoadingService } from '../shared/services/loading.service';
 export class ProviderListComponent implements OnInit {
   providers = signal<Provider[]>([]);
   filteredProviders = signal<Provider[]>([]);
-  showActiveOnly = signal(true);
   searchTerm = '';
   sortBy = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
+  statusFilter: 'all' | 'active' | 'invited' | 'inactive' = 'all';
   isInviteModalVisible = signal(false);
+  labels = ENTITY_LABELS;
 
   isProvidersLoading(): boolean {
     return this.loadingService.isLoading('providers-list');
@@ -595,10 +591,13 @@ export class ProviderListComponent implements OnInit {
           paymentDetails: apiProvider.paymentDetails,
           notes: apiProvider.notes,
           isActive: apiProvider.status === 'Active' || apiProvider.isActive === true,
+          status: this.mapApiStatusToProviderStatus(apiProvider.status || (apiProvider.isActive ? 'Active' : 'Inactive')),
           organizationId: apiProvider.organizationId,
           providerNumber: apiProvider.providerNumber,
           createdAt: new Date(apiProvider.createdAt),
-          updatedAt: new Date(apiProvider.updatedAt || apiProvider.createdAt)
+          updatedAt: new Date(apiProvider.updatedAt || apiProvider.createdAt),
+          invitedAt: apiProvider.invitedAt ? new Date(apiProvider.invitedAt) : undefined,
+          activatedAt: apiProvider.activatedAt ? new Date(apiProvider.activatedAt) : undefined
         }));
 
         console.log('Transformed providers:', finalProviders);
@@ -614,8 +613,7 @@ export class ProviderListComponent implements OnInit {
     });
   }
 
-  toggleActiveFilter(): void {
-    this.showActiveOnly.update(value => !value);
+  onFilterChange(): void {
     this.applyFilters();
   }
 
@@ -631,10 +629,12 @@ export class ProviderListComponent implements OnInit {
       filtered = [];
     }
 
-    if (this.showActiveOnly()) {
-      filtered = filtered.filter(p => p.isActive);
+    // Apply status filter
+    if (this.statusFilter !== 'all') {
+      filtered = filtered.filter(p => this.getProviderStatus(p) === this.statusFilter);
     }
 
+    // Apply search filter
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(p =>
@@ -685,56 +685,38 @@ export class ProviderListComponent implements OnInit {
     this.applyFilters();
   }
 
-  getStats() {
-    const providers = this.providers();
-    const total = providers.length;
-    const active = providers.filter(p => p.isActive).length;
-    const inactive = total - active;
-
-    const avgCommission = total > 0
-      ? Math.round(providers.reduce((sum, p) => sum + p.commissionRate, 0) / total * 10) / 10
-      : 0;
-
-    return {
-      total,
-      active,
-      inactive,
-      avgCommission
-    };
+  getProviderStatus(provider: Provider): ProviderStatus {
+    return provider.status || (provider.isActive ? 'active' : 'inactive');
   }
 
-  deactivateProvider(provider: Provider): void {
-    this.providerService.deactivateProvider(provider.id).subscribe({
-      next: (updated) => {
-        const providers = this.providers();
-        const index = providers.findIndex(p => p.id === updated.id);
-        if (index >= 0) {
-          providers[index] = updated;
-          this.providers.set([...providers]);
-          this.applyFilters();
-        }
-      },
-      error: (error) => {
-        console.error('Error deactivating provider:', error);
-      }
-    });
+  mapApiStatusToProviderStatus(apiStatus: string): ProviderStatus {
+    switch (apiStatus?.toLowerCase()) {
+      case 'active':
+        return 'active';
+      case 'invited':
+      case 'pending':
+        return 'invited';
+      case 'inactive':
+      case 'disabled':
+        return 'inactive';
+      default:
+        return 'active';
+    }
   }
 
-  activateProvider(provider: Provider): void {
-    this.providerService.activateProvider(provider.id).subscribe({
-      next: (updated) => {
-        const providers = this.providers();
-        const index = providers.findIndex(p => p.id === updated.id);
-        if (index >= 0) {
-          providers[index] = updated;
-          this.providers.set([...providers]);
-          this.applyFilters();
-        }
-      },
-      error: (error) => {
-        console.error('Error activating provider:', error);
-      }
-    });
+  resendInvite(provider: Provider): void {
+    // TODO: Implement resend invitation API call
+    console.log('Resending invitation to:', provider.email);
+  }
+
+  cancelInvite(provider: Provider): void {
+    // TODO: Implement cancel invitation API call
+    console.log('Cancelling invitation for:', provider.email);
+  }
+
+  reactivateProvider(provider: Provider): void {
+    // TODO: Implement reactivate provider API call
+    console.log('Reactivating provider:', provider.name);
   }
 
   trackByProvider(index: number, provider: Provider): number {
@@ -749,9 +731,8 @@ export class ProviderListComponent implements OnInit {
     this.isInviteModalVisible.set(false);
   }
 
-  onInvitationSent(): void {
-    // Optionally reload providers to refresh the list
-    // For now, we'll just hide the modal and show a success message
-    console.log('Provider invitation sent successfully');
+  onConsignorAdded(provider: Provider): void {
+    console.log('Consignor added successfully:', provider);
+    this.loadProviders(); // Refresh the list
   }
 }

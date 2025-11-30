@@ -94,6 +94,7 @@ describe('ProviderAddComponent', () => {
       paymentDetails: 'Account: 123456',
       notes: 'Test notes',
       isActive: true,
+      status: 'active',
       createdAt: new Date(),
       updatedAt: new Date(),
       organizationId: 1
@@ -202,6 +203,7 @@ describe('ProviderAddComponent', () => {
       paymentDetails: undefined,
       notes: undefined,
       isActive: true,
+      status: 'active',
       createdAt: new Date(),
       updatedAt: new Date(),
       organizationId: 1

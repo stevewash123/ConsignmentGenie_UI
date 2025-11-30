@@ -1,3 +1,5 @@
+export type ProviderStatus = 'active' | 'invited' | 'inactive';
+
 export interface Provider {
   id: number;
   name: string;
@@ -9,10 +11,13 @@ export interface Provider {
   paymentDetails?: string;
   notes?: string;
   isActive: boolean;
+  status: ProviderStatus;
   organizationId: number;
   providerNumber?: string;
   createdAt: Date;
   updatedAt: Date;
+  invitedAt?: Date;
+  activatedAt?: Date;
 }
 
 export interface CreateProviderRequest {

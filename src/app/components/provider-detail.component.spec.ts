@@ -35,6 +35,7 @@ describe('ProviderDetailComponent', () => {
     paymentDetails: 'Account: 123456',
     notes: 'Test notes',
     isActive: true,
+    status: 'active',
     createdAt: new Date('2023-11-26T10:00:00Z'),
     updatedAt: new Date('2023-11-26T10:00:00Z'),
     organizationId: 1
