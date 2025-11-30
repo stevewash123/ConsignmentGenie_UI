@@ -40,7 +40,41 @@ export const ownerRoutes: Routes = [
   },
   {
     path: 'settings',
-    loadComponent: () => import('./components/owner-settings.component').then(m => m.OwnerSettingsComponent)
+    loadComponent: () => import('./settings/settings-layout.component').then(m => m.SettingsLayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./settings/hub/settings-hub.component').then(m => m.SettingsHubComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./settings/profile/shop-profile.component').then(m => m.ShopProfileComponent)
+      },
+      {
+        path: 'business',
+        loadComponent: () => import('./settings/business/business-settings.component').then(m => m.BusinessSettingsComponent)
+      },
+      {
+        path: 'storefront',
+        loadComponent: () => import('./settings/storefront/storefront-settings.component').then(m => m.StorefrontSettingsComponent)
+      },
+      {
+        path: 'accounting',
+        loadComponent: () => import('./settings/accounting/accounting-settings.component').then(m => m.AccountingSettingsComponent)
+      },
+      {
+        path: 'consignors',
+        loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
+      },
+      {
+        path: 'subscription',
+        loadComponent: () => import('./settings/subscription/subscription-settings.component').then(m => m.SubscriptionSettingsComponent)
+      },
+      {
+        path: 'account',
+        loadComponent: () => import('./settings/account/account-settings.component').then(m => m.AccountSettingsComponent)
+      }
+    ]
   }
   // Note: Login is now handled by /login route in main app routing
 ];

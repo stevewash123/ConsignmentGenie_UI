@@ -97,7 +97,11 @@ export const routes: Routes = [
   },
   {
     path: 'register/provider/invitation',
-    loadComponent: () => import('./components/provider-registration.component').then(m => m.ProviderRegistrationComponent)
+    loadComponent: () => import('./components/provider-registration-step1.component').then(m => m.ProviderRegistrationStep1Component)
+  },
+  {
+    path: 'register/provider/details',
+    loadComponent: () => import('./components/provider-registration-step2.component').then(m => m.ProviderRegistrationStep2Component)
   },
   {
     path: 'register/success',
