@@ -81,9 +81,9 @@ describe('ProviderSignupStep2Component', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('h2')?.textContent?.trim()).toBe('Join as a Provider');
-    expect(compiled.querySelector('.signup-header p')?.textContent?.trim())
-      .toBe('Complete your provider account to start consigning items at participating shops');
+    expect(compiled.querySelector('h2')?.textContent?.trim()).toBe('Join as a Consignor');
+    // The subtitle paragraph was removed as part of the UI updates
+    expect(compiled.querySelector('.signup-header p')).toBeNull();
   });
 
   it('should require all form fields', () => {
@@ -146,7 +146,7 @@ describe('ProviderSignupStep2Component', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const submitButton = compiled.querySelector('.btn-primary') as HTMLButtonElement;
 
-    expect(submitButton.textContent?.trim()).toBe('Create Provider Account');
+    expect(submitButton.textContent?.trim()).toBe('Create Consignor Account');
 
     component.isSubmitting.set(true);
     fixture.detectChanges();
@@ -274,14 +274,13 @@ describe('ProviderSignupStep2Component', () => {
   });
 
   describe('Information Display', () => {
-    it('should display information note about next steps', () => {
+    it('should not display information note (removed in UI update)', () => {
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       const infoNote = compiled.querySelector('.info-note');
 
-      expect(infoNote).toBeTruthy();
-      expect(infoNote?.textContent).toContain('After creating your account');
-      expect(infoNote?.textContent).toContain('join specific consignment shops');
+      // The info note was removed as part of the UI updates
+      expect(infoNote).toBeNull();
     });
 
     it('should display error messages when API call fails', () => {
