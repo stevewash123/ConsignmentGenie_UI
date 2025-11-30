@@ -39,6 +39,15 @@ export interface RegistrationResult {
   errors?: string[];
 }
 
+export interface PendingInvitation {
+  id: number;
+  email: string;
+  name?: string;
+  sentAt: string;
+  expiresAt: string;
+  status: 'pending' | 'expired' | 'cancelled';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -78,6 +87,18 @@ export class ProviderService {
 
   inviteProvider(invitation: ProviderInvitationRequest): Observable<ProviderInvitationResponse> {
     return this.http.post<ProviderInvitationResponse>(`${this.apiUrl}/invitations`, invitation);
+  }
+
+  getPendingInvitations(): Observable<PendingInvitation[]> {
+    return this.http.get<PendingInvitation[]>(`${this.apiUrl}/invitations`);
+  }
+
+  resendInvitation(invitationId: number): Observable<ProviderInvitationResponse> {
+    return this.http.post<ProviderInvitationResponse>(`${this.apiUrl}/invitations/${invitationId}/resend`, {});
+  }
+
+  cancelInvitation(invitationId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/invitations/${invitationId}`);
   }
 
   validateInvitation(token: string): Observable<InvitationValidationResponse> {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { ProviderService } from '../services/provider.service';
+import { ProviderService, PendingInvitation } from '../services/provider.service';
 import { Provider } from '../models/provider.model';
 import { InviteConsignorModalComponent } from '../shared/components/invite-consignor-modal.component';
 import { StatusBadgeComponent } from '../shared/components/status-badge.component';
@@ -27,116 +27,92 @@ import { LoadingService } from '../shared/services/loading.service';
           </button>
         </div>
 
-        <!-- Filter Bar -->
-        <div class="filters">
-          <div class="filter-section">
-            <label for="statusFilter">Show:</label>
-            <select
-              id="statusFilter"
-              [(ngModel)]="statusFilter"
-              (change)="onFilterChange()"
-              class="filter-select"
-            >
-              <option value="all">{{ labels.filterAllProviders }}</option>
-              <option value="active">{{ labels.filterActiveProviders }}</option>
-              <option value="invited">{{ labels.filterInvitedProviders }}</option>
-              <option value="inactive">{{ labels.filterInactiveProviders }}</option>
-            </select>
-          </div>
-
-          <div class="sort-section">
-            <label for="sortBy">Sort by:</label>
-            <select
-              id="sortBy"
-              [(ngModel)]="sortBy"
-              (change)="onSortChange()"
-              class="sort-select"
-            >
-              <option value="name">Name</option>
-              <option value="createdAt">Date Added</option>
-              <option value="status">Status</option>
-              <option value="itemCount">Items Count</option>
-            </select>
-            <button
-              class="sort-direction-btn"
-              (click)="toggleSortDirection()"
-              [title]="sortDirection === 'asc' ? 'Sort Descending' : 'Sort Ascending'"
-            >
-              {{ sortDirection === 'asc' ? '↑' : '↓' }}
-            </button>
-          </div>
-
-          <div class="search-section">
-            <input
-              type="text"
-              [placeholder]="labels.searchProviders"
-              [(ngModel)]="searchTerm"
-              (input)="onSearchChange()"
-              class="search-input"
-            >
-          </div>
+        <!-- Loading State -->
+        <div *ngIf="isProvidersLoading()" class="loading">
+          Loading consignor data...
         </div>
 
-        <!-- Consignor List Table -->
-        <div class="table-container" *ngIf="!isProvidersLoading(); else loading">
-          <table class="consignor-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let provider of filteredProviders(); trackBy: trackByProvider">
-                <td class="name-cell">{{ provider.name }}</td>
-                <td class="email-cell">{{ provider.email }}</td>
-                <td class="status-cell">
-                  <app-status-badge [status]="getProviderStatus(provider)"></app-status-badge>
-                </td>
-                <td class="actions-cell">
-                  <div class="action-buttons">
-                    <!-- Active provider actions -->
-                    <ng-container *ngIf="getProviderStatus(provider) === 'active'">
-                      <button class="btn-view" [routerLink]="['/owner/providers', provider.id]">
-                        View
-                      </button>
-                    </ng-container>
+        <!-- Content Sections -->
+        <div *ngIf="!isProvidersLoading()" class="content-sections">
 
-                    <!-- Invited provider actions -->
-                    <ng-container *ngIf="getProviderStatus(provider) === 'invited'">
-                      <button class="btn-resend" (click)="resendInvite(provider)">
-                        Resend
-                      </button>
-                      <button class="btn-cancel" (click)="cancelInvite(provider)">
-                        Cancel
-                      </button>
-                    </ng-container>
+          <!-- Active Consignors Section -->
+          <div class="section">
+            <div class="section-header">
+              <h3>ACTIVE CONSIGNORS ({{ providers().length }})</h3>
+            </div>
 
-                    <!-- Inactive provider actions -->
-                    <ng-container *ngIf="getProviderStatus(provider) === 'inactive'">
-                      <button class="btn-view" [routerLink]="['/owner/providers', provider.id]">
-                        View
-                      </button>
-                      <button class="btn-reactivate" (click)="reactivateProvider(provider)">
-                        Reactivate
-                      </button>
-                    </ng-container>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            <div *ngIf="providers().length > 0" class="table-container">
+              <table class="consignor-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Items</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let provider of providers(); trackBy: trackByProvider">
+                    <td class="name-cell">{{ provider.name }}</td>
+                    <td class="email-cell">{{ provider.email }}</td>
+                    <td class="items-cell">{{ getProviderItemCount(provider) }}</td>
+                    <td class="actions-cell">
+                      <div class="action-buttons">
+                        <button class="btn-view" [routerLink]="['/owner/providers', provider.id]">
+                          View
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-        <ng-template #loading>
-          <div class="loading">Loading {{ labels.providers.toLowerCase() }}...</div>
-        </ng-template>
+            <div *ngIf="providers().length === 0" class="empty-section">
+              <p>No active consignors yet</p>
+            </div>
+          </div>
 
-        <!-- Empty State -->
-        <div class="empty-state" *ngIf="!isProvidersLoading() && filteredProviders().length === 0">
-          <p>{{ labels.noProvidersFound }}</p>
+          <!-- Pending Invitations Section -->
+          <div class="section" *ngIf="pendingInvitations().length > 0">
+            <div class="section-header">
+              <h3>PENDING INVITATIONS ({{ pendingInvitations().length }})</h3>
+            </div>
+
+            <div class="table-container">
+              <table class="invitations-table">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Sent</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let invitation of pendingInvitations()">
+                    <td class="email-cell">{{ invitation.email }}</td>
+                    <td class="sent-cell">{{ getRelativeTime(invitation.sentAt) }}</td>
+                    <td class="actions-cell">
+                      <div class="action-buttons">
+                        <button class="btn-resend" (click)="resendInvitation(invitation.id)">
+                          Resend
+                        </button>
+                        <button class="btn-cancel" (click)="cancelInvitation(invitation.id)">
+                          Cancel
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Empty State for No Data -->
+          <div *ngIf="providers().length === 0 && pendingInvitations().length === 0" class="empty-state">
+            <p>No consignors yet. Invite your first consignor to get started.</p>
+          </div>
+
         </div>
       </div>
 
@@ -153,6 +129,65 @@ import { LoadingService } from '../shared/services/loading.service';
       padding: 2rem;
       margin: 1rem 2rem;
       min-height: calc(100vh - 200px);
+    }
+
+    .content-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    .section-header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .section-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #047857;
+      letter-spacing: 0.05em;
+    }
+
+    .empty-section {
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+      padding: 2rem;
+    }
+
+    .invitations-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .invitations-table th,
+    .invitations-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .invitations-table th {
+      background: rgba(4, 120, 87, 0.05);
+      font-weight: 600;
+      color: #047857;
+    }
+
+    .sent-cell {
+      color: #6b7280;
+      font-size: 0.875rem;
     }
 
     .header {
@@ -544,6 +579,7 @@ import { LoadingService } from '../shared/services/loading.service';
 export class ProviderListComponent implements OnInit {
   providers = signal<Provider[]>([]);
   filteredProviders = signal<Provider[]>([]);
+  pendingInvitations = signal<PendingInvitation[]>([]);
   searchTerm = '';
   sortBy = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -558,7 +594,7 @@ export class ProviderListComponent implements OnInit {
   constructor(private providerService: ProviderService, private loadingService: LoadingService) {}
 
   ngOnInit(): void {
-    this.loadProviders();
+    this.loadData();
   }
 
   loadProviders(): void {
@@ -615,6 +651,67 @@ export class ProviderListComponent implements OnInit {
         this.loadingService.stop('providers-list');
       }
     });
+  }
+
+  loadData(): void {
+    this.loadingService.start('providers-list');
+    this.loadProviders();
+    this.loadPendingInvitations();
+  }
+
+  loadPendingInvitations(): void {
+    this.providerService.getPendingInvitations().subscribe({
+      next: (invitations) => {
+        console.log('Pending invitations response:', invitations);
+        const validInvitations = Array.isArray(invitations) ? invitations : [];
+        this.pendingInvitations.set(validInvitations);
+
+        // Auto-show invite modal if no providers exist and no pending invitations
+        if (this.providers().length === 0 && validInvitations.length === 0) {
+          this.showInviteModal();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading pending invitations:', error);
+        this.pendingInvitations.set([]);
+      }
+    });
+  }
+
+  resendInvitation(invitationId: number): void {
+    this.providerService.resendInvitation(invitationId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          console.log('Invitation resent successfully');
+          // Optionally refresh the invitations list to update the sent date
+          this.loadPendingInvitations();
+        } else {
+          console.error('Failed to resend invitation:', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error resending invitation:', error);
+      }
+    });
+  }
+
+  cancelInvitation(invitationId: number): void {
+    if (confirm('Are you sure you want to cancel this invitation?')) {
+      this.providerService.cancelInvitation(invitationId).subscribe({
+        next: (response) => {
+          if (response.success) {
+            console.log('Invitation cancelled successfully');
+            // Remove the cancelled invitation from the list
+            this.loadPendingInvitations();
+          } else {
+            console.error('Failed to cancel invitation:', response.message);
+          }
+        },
+        error: (error) => {
+          console.error('Error cancelling invitation:', error);
+        }
+      });
+    }
   }
 
   onFilterChange(): void {
@@ -727,6 +824,26 @@ export class ProviderListComponent implements OnInit {
     return provider.id;
   }
 
+  getProviderItemCount(provider: Provider): number {
+    // TODO: Implement item count logic when items feature is available
+    return 0;
+  }
+
+  getRelativeTime(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    }
+  }
+
   showInviteModal(): void {
     this.isInviteModalVisible.set(true);
   }
@@ -737,6 +854,6 @@ export class ProviderListComponent implements OnInit {
 
   onConsignorAdded(provider: Provider): void {
     console.log('Consignor added successfully:', provider);
-    this.loadProviders(); // Refresh the list
+    this.loadData(); // Refresh both lists
   }
 }
