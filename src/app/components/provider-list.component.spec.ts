@@ -97,7 +97,12 @@ describe('ProviderListComponent', () => {
   it('should set providers and invitations data', () => {
     component.ngOnInit();
 
-    expect(component.providers()).toEqual(mockProviders);
+    // Check that providers data is set (transformed from API)
+    const providers = component.providers();
+    expect(providers.length).toBe(1);
+    expect(providers[0].name).toBe('John Doe');
+    expect(providers[0].email).toBe('john@example.com');
+
     expect(component.pendingInvitations()).toEqual(mockInvitations);
     expect(mockLoadingService.stop).toHaveBeenCalledWith('providers-list');
   });
@@ -109,7 +114,7 @@ describe('ProviderListComponent', () => {
     component.ngOnInit();
 
     expect(console.error).toHaveBeenCalledWith('Error loading providers:', jasmine.any(Error));
-    // Loading is stopped in the complete handler of the providers call
+    // Loading is stopped in the complete handler of both the providers and invitations calls
     expect(mockLoadingService.stop).toHaveBeenCalledWith('providers-list');
   });
 
@@ -147,11 +152,9 @@ describe('ProviderListComponent', () => {
     mockProviderService.getProviders.and.returnValue(of([]));
     spyOn(component, 'showInviteModal');
 
-    // Set the invitations first so the check in loadProviders won't trigger the modal
-    component.pendingInvitations.set(mockInvitations);
-
     component.ngOnInit();
 
+    // The modal should not be shown because invitations exist in mockInvitations
     expect(component.showInviteModal).not.toHaveBeenCalled();
   });
 

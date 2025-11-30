@@ -586,6 +586,8 @@ export class ProviderListComponent implements OnInit {
   statusFilter: 'all' | 'active' | 'invited' | 'inactive' = 'all';
   isInviteModalVisible = signal(false);
   labels = ENTITY_LABELS;
+  private providersLoaded = false;
+  private invitationsLoaded = false;
 
   isProvidersLoading(): boolean {
     return this.loadingService.isLoading('providers-list');
@@ -638,23 +640,26 @@ export class ProviderListComponent implements OnInit {
         console.log('Transformed providers:', finalProviders);
         this.providers.set(finalProviders);
         this.applyFilters();
+        this.providersLoaded = true;
 
-        // Auto-show invite modal if no providers exist
-        if (finalProviders.length === 0) {
-          this.showInviteModal();
-        }
+        // Check if we should show the invite modal
+        this.checkAndShowInviteModal();
       },
       error: (error) => {
         console.error('Error loading providers:', error);
+        this.providersLoaded = true;
+        this.checkAndShowInviteModal();
       },
       complete: () => {
-        this.loadingService.stop('providers-list');
+        // Loading stop will be handled in checkAndShowInviteModal
       }
     });
   }
 
   loadData(): void {
     this.loadingService.start('providers-list');
+    this.providersLoaded = false;
+    this.invitationsLoaded = false;
     this.loadProviders();
     this.loadPendingInvitations();
   }
@@ -665,15 +670,16 @@ export class ProviderListComponent implements OnInit {
         console.log('Pending invitations response:', invitations);
         const validInvitations = Array.isArray(invitations) ? invitations : [];
         this.pendingInvitations.set(validInvitations);
+        this.invitationsLoaded = true;
 
-        // Auto-show invite modal if no providers exist and no pending invitations
-        if (this.providers().length === 0 && validInvitations.length === 0) {
-          this.showInviteModal();
-        }
+        // Check if we should show the invite modal
+        this.checkAndShowInviteModal();
       },
       error: (error) => {
         console.error('Error loading pending invitations:', error);
         this.pendingInvitations.set([]);
+        this.invitationsLoaded = true;
+        this.checkAndShowInviteModal();
       }
     });
   }
@@ -855,5 +861,18 @@ export class ProviderListComponent implements OnInit {
   onConsignorAdded(provider: Provider): void {
     console.log('Consignor added successfully:', provider);
     this.loadData(); // Refresh both lists
+  }
+
+  private checkAndShowInviteModal(): void {
+    // Only check if both providers and invitations have finished loading
+    if (this.providersLoaded && this.invitationsLoaded) {
+      // Stop the loading service once both calls are complete
+      this.loadingService.stop('providers-list');
+
+      // Show modal if no providers AND no pending invitations
+      if (this.providers().length === 0 && this.pendingInvitations().length === 0) {
+        this.showInviteModal();
+      }
+    }
   }
 }
