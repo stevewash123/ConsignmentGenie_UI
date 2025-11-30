@@ -8,7 +8,9 @@ import { AccountSecurityComponent } from './components/account-security/account-
 @NgModule({
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    AuthMethodSelectorComponent,
+    AccountSecurityComponent
   ],
   exports: [
     AuthMethodSelectorComponent,

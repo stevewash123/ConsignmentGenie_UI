@@ -6,7 +6,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { ProviderService, PendingInvitation } from '../services/provider.service';
 import { Provider } from '../models/provider.model';
 import { InviteConsignorModalComponent } from '../shared/components/invite-consignor-modal.component';
-import { StatusBadgeComponent } from '../shared/components/status-badge.component';
 import { ENTITY_LABELS } from '../shared/constants/labels';
 import { ProviderStatus } from '../models/provider.model';
 import { OwnerLayoutComponent } from '../owner/components/owner-layout.component';
@@ -15,7 +14,7 @@ import { LoadingService } from '../shared/services/loading.service';
 @Component({
   selector: 'app-provider-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule, InviteConsignorModalComponent, StatusBadgeComponent, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule, InviteConsignorModalComponent, OwnerLayoutComponent],
   template: `
     <app-owner-layout>
       <div class="provider-list-container">
