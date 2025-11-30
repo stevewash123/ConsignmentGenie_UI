@@ -5,21 +5,19 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
 interface ShopProfile {
-  id: string;
-  name: string;
-  description?: string;
-  logoUrl?: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  address: {
-    street: string;
-    street2?: string;
-    city: string;
-    state: string;
-    zip: string;
-  };
-  timezone: string;
+  shopName: string;
+  shopDescription?: string;
+  shopLogoUrl?: string;
+  shopPhone?: string;
+  shopEmail?: string;
+  shopWebsite?: string;
+  shopAddress1?: string;
+  shopAddress2?: string;
+  shopCity?: string;
+  shopState?: string;
+  shopZip?: string;
+  shopCountry: string;
+  shopTimezone: string;
 }
 
 @Component({
@@ -39,8 +37,8 @@ interface ShopProfile {
           <h3>Shop Logo</h3>
           <div class="logo-upload">
             <div class="logo-preview">
-              <img *ngIf="profile()?.logoUrl" [src]="profile()?.logoUrl" alt="Shop Logo" />
-              <div *ngIf="!profile()?.logoUrl" class="logo-placeholder">
+              <img *ngIf="profile()?.shopLogoUrl" [src]="profile()?.shopLogoUrl" alt="Shop Logo" />
+              <div *ngIf="!profile()?.shopLogoUrl" class="logo-placeholder">
                 <span>LOGO</span>
               </div>
             </div>
@@ -53,7 +51,7 @@ interface ShopProfile {
                 style="display: none;">
               <button type="button" class="btn-secondary" (click)="logoInput.click()">Upload Logo</button>
               <button
-                *ngIf="profile()?.logoUrl"
+                *ngIf="profile()?.shopLogoUrl"
                 type="button"
                 class="btn-danger-outline"
                 (click)="removeLogo()">
@@ -71,7 +69,7 @@ interface ShopProfile {
             <input
               type="text"
               id="shopName"
-              [(ngModel)]="profile()!.name"
+              [(ngModel)]="profile()!.shopName"
               name="shopName"
               class="form-input"
               placeholder="Your shop name"
@@ -82,7 +80,7 @@ interface ShopProfile {
             <label for="shopDescription">Shop Description</label>
             <textarea
               id="shopDescription"
-              [(ngModel)]="profile()!.description"
+              [(ngModel)]="profile()!.shopDescription"
               name="shopDescription"
               class="form-textarea"
               placeholder="A brief description of your shop..."
@@ -99,7 +97,7 @@ interface ShopProfile {
               <input
                 type="tel"
                 id="phone"
-                [(ngModel)]="profile()!.phone"
+                [(ngModel)]="profile()!.shopPhone"
                 name="phone"
                 class="form-input"
                 placeholder="(555) 123-4567">
@@ -109,7 +107,7 @@ interface ShopProfile {
               <input
                 type="email"
                 id="email"
-                [(ngModel)]="profile()!.email"
+                [(ngModel)]="profile()!.shopEmail"
                 name="email"
                 class="form-input"
                 placeholder="info@yourshop.com">
@@ -121,7 +119,7 @@ interface ShopProfile {
             <input
               type="url"
               id="website"
-              [(ngModel)]="profile()!.website"
+              [(ngModel)]="profile()!.shopWebsite"
               name="website"
               class="form-input"
               placeholder="https://yourshop.com">
@@ -136,7 +134,7 @@ interface ShopProfile {
             <input
               type="text"
               id="street"
-              [(ngModel)]="profile()!.address.street"
+              [(ngModel)]="profile()!.shopAddress1"
               name="street"
               class="form-input"
               placeholder="123 Main Street"
@@ -148,7 +146,7 @@ interface ShopProfile {
             <input
               type="text"
               id="street2"
-              [(ngModel)]="profile()!.address.street2"
+              [(ngModel)]="profile()!.shopAddress2"
               name="street2"
               class="form-input"
               placeholder="Suite 100, Building A, etc.">
@@ -160,7 +158,7 @@ interface ShopProfile {
               <input
                 type="text"
                 id="city"
-                [(ngModel)]="profile()!.address.city"
+                [(ngModel)]="profile()!.shopCity"
                 name="city"
                 class="form-input"
                 placeholder="Austin"
@@ -170,7 +168,7 @@ interface ShopProfile {
               <label for="state">State *</label>
               <select
                 id="state"
-                [(ngModel)]="profile()!.address.state"
+                [(ngModel)]="profile()!.shopState"
                 name="state"
                 class="form-select"
                 required>
@@ -183,7 +181,7 @@ interface ShopProfile {
               <input
                 type="text"
                 id="zip"
-                [(ngModel)]="profile()!.address.zip"
+                [(ngModel)]="profile()!.shopZip"
                 name="zip"
                 class="form-input"
                 placeholder="78701"
@@ -198,7 +196,7 @@ interface ShopProfile {
             <label for="timezone">Timezone *</label>
             <select
               id="timezone"
-              [(ngModel)]="profile()!.timezone"
+              [(ngModel)]="profile()!.shopTimezone"
               name="timezone"
               class="form-select"
               required>
@@ -544,27 +542,12 @@ export class ShopProfileComponent implements OnInit {
 
   async loadProfile() {
     try {
-      // Mock data for now - replace with actual API call
-      const mockProfile: ShopProfile = {
-        id: '1',
-        name: 'Vintage Treasures Consignment',
-        description: 'A curated collection of vintage and antique items from local consignors. We specialize in unique pieces that tell a story.',
-        logoUrl: undefined,
-        phone: '(555) 123-4567',
-        email: 'info@vintage.com',
-        website: 'https://vintagetreasures.com',
-        address: {
-          street: '123 Main Street',
-          street2: 'Suite 100',
-          city: 'Austin',
-          state: 'TX',
-          zip: '78701'
-        },
-        timezone: 'America/Chicago'
-      };
-
-      this.profile.set(mockProfile);
+      const response = await this.http.get<ShopProfile>(`${environment.apiUrl}/organization/profile`).toPromise();
+      if (response) {
+        this.profile.set(response);
+      }
     } catch (error) {
+      console.error('Error loading shop profile:', error);
       this.showError('Failed to load shop profile');
     }
   }
@@ -574,11 +557,10 @@ export class ShopProfileComponent implements OnInit {
 
     this.isSaving.set(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-
+      const response = await this.http.put(`${environment.apiUrl}/organization/profile`, this.profile()).toPromise();
       this.showSuccess('Shop profile saved successfully');
     } catch (error) {
+      console.error('Error saving shop profile:', error);
       this.showError('Failed to save shop profile');
     } finally {
       this.isSaving.set(false);
@@ -594,7 +576,7 @@ export class ShopProfileComponent implements OnInit {
         if (this.profile()) {
           this.profile.set({
             ...this.profile()!,
-            logoUrl: e.target?.result as string
+            shopLogoUrl: e.target?.result as string
           });
         }
       };
@@ -606,7 +588,7 @@ export class ShopProfileComponent implements OnInit {
     if (this.profile()) {
       this.profile.set({
         ...this.profile()!,
-        logoUrl: undefined
+        shopLogoUrl: undefined
       });
     }
   }

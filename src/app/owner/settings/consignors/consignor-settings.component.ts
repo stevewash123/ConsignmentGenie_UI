@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface ConsignorSettings {
   storeCode: string;
@@ -626,33 +627,22 @@ export class ConsignorSettingsComponent implements OnInit {
 
   async loadPendingInvitations() {
     try {
-      // Mock data - replace with actual API call
-      const mockInvitations: PendingInvitation[] = [
-        {
-          id: '1',
-          email: 'sarah@example.com',
-          sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-          status: 'pending'
-        },
-        {
-          id: '2',
-          email: 'mike@example.com',
-          sentAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-          expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-          status: 'pending'
-        },
-        {
-          id: '3',
-          email: 'jane@example.com',
-          sentAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-          expiresAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // expired 3 days ago
-          status: 'expired'
-        }
-      ];
+      const response = await this.http.get<any[]>(`${environment.apiUrl}/providers/invitations`).toPromise();
 
-      this.pendingInvitations.set(mockInvitations);
+      if (response) {
+        // Transform API response to our interface format
+        const invitations: PendingInvitation[] = response.map(inv => ({
+          id: inv.id,
+          email: inv.email,
+          sentAt: new Date(inv.createdAt),
+          expiresAt: new Date(inv.expiresAt),
+          status: inv.status.toLowerCase()
+        }));
+
+        this.pendingInvitations.set(invitations);
+      }
     } catch (error) {
+      console.error('Error loading pending invitations:', error);
       this.showError('Failed to load pending invitations');
     }
   }
@@ -693,16 +683,19 @@ export class ConsignorSettingsComponent implements OnInit {
     }
 
     try {
-      // TODO: Implement actual API call
-      const newCode = this.generateStoreCode();
-      const settings = this.settings();
-      if (settings) {
-        settings.storeCode = newCode;
-        settings.signupUrl = `consignmentgenie.com/join/${newCode}`;
-        this.settings.set({ ...settings });
+      const response = await this.http.post<{newStoreCode: string, generatedAt: string}>(`${environment.apiUrl}/organization/store-code/regenerate`, {}).toPromise();
+
+      if (response) {
+        const settings = this.settings();
+        if (settings) {
+          settings.storeCode = response.newStoreCode;
+          settings.signupUrl = `${window.location.origin}/register/provider/invitation?token=${response.newStoreCode}`;
+          this.settings.set({ ...settings });
+        }
+        this.showSuccess('Store code regenerated successfully');
       }
-      this.showSuccess('Store code regenerated successfully');
     } catch (error) {
+      console.error('Error regenerating store code:', error);
       this.showError('Failed to regenerate store code');
     }
   }
@@ -720,27 +713,38 @@ export class ConsignorSettingsComponent implements OnInit {
 
     this.isSending.set(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+      // Send invitations one by one
+      let successCount = 0;
+      for (const email of emails) {
+        try {
+          const inviteRequest = {
+            email: email,
+            name: email.split('@')[0], // Use email prefix as default name
+            message: this.customMessage
+          };
 
-      // Add new pending invitations to the list
-      const newInvitations: PendingInvitation[] = emails.map((email, index) => ({
-        id: `new_${Date.now()}_${index}`,
-        email,
-        sentAt: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        status: 'pending' as const
-      }));
+          await this.http.post(`${environment.apiUrl}/providers/invitations`, inviteRequest).toPromise();
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to send invitation to ${email}:`, error);
+        }
+      }
 
-      this.pendingInvitations.set([
-        ...newInvitations,
-        ...this.pendingInvitations()
-      ]);
+      // Reload invitations to show updated list
+      await this.loadPendingInvitations();
 
       this.inviteEmailsText = '';
       this.customMessage = '';
-      this.showSuccess(`${emails.length} invitation(s) sent successfully`);
+
+      if (successCount === emails.length) {
+        this.showSuccess(`${emails.length} invitation(s) sent successfully`);
+      } else if (successCount > 0) {
+        this.showSuccess(`${successCount} of ${emails.length} invitation(s) sent successfully`);
+      } else {
+        this.showError('Failed to send invitations');
+      }
     } catch (error) {
+      console.error('Error sending invitations:', error);
       this.showError('Failed to send invitations');
     } finally {
       this.isSending.set(false);
@@ -749,17 +753,11 @@ export class ConsignorSettingsComponent implements OnInit {
 
   async resendInvitation(invitationId: string) {
     try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+      await this.http.post(`${environment.apiUrl}/providers/invitations/${invitationId}/resend`, {}).toPromise();
 
-      const invitations = this.pendingInvitations();
-      const updatedInvitations = invitations.map(inv =>
-        inv.id === invitationId
-          ? { ...inv, sentAt: new Date(), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }
-          : inv
-      );
+      // Reload invitations to show updated data
+      await this.loadPendingInvitations();
 
-      this.pendingInvitations.set(updatedInvitations);
       this.showSuccess('Invitation resent successfully');
     } catch (error) {
       this.showError('Failed to resend invitation');
@@ -772,13 +770,11 @@ export class ConsignorSettingsComponent implements OnInit {
     }
 
     try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+      await this.http.delete(`${environment.apiUrl}/providers/invitations/${invitationId}`).toPromise();
 
-      const invitations = this.pendingInvitations();
-      const updatedInvitations = invitations.filter(inv => inv.id !== invitationId);
+      // Reload invitations to show updated list
+      await this.loadPendingInvitations();
 
-      this.pendingInvitations.set(updatedInvitations);
       this.showSuccess('Invitation removed successfully');
     } catch (error) {
       this.showError('Failed to remove invitation');

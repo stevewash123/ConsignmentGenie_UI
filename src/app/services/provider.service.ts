@@ -102,10 +102,10 @@ export class ProviderService {
   }
 
   validateInvitation(token: string): Observable<InvitationValidationResponse> {
-    return this.http.get<InvitationValidationResponse>(`${this.authUrl}/validate-invitation/${token}`);
+    return this.http.get<InvitationValidationResponse>(`${environment.apiUrl}/invitations/validate/${token}`);
   }
 
   registerFromInvitation(request: ProviderRegistrationRequest): Observable<RegistrationResult> {
-    return this.http.post<RegistrationResult>(`${this.authUrl}/register/provider/invitation`, request);
+    return this.http.post<RegistrationResult>(`${environment.apiUrl}/invitations/register`, request);
   }
 }
