@@ -26,8 +26,7 @@ import { AuthService } from '../services/auth.service';
           <div class="signup-card">
             <div class="signup-header">
               <a routerLink="/signup/provider" class="back-link">← Back</a>
-              <h2>Join as a Provider</h2>
-              <p>Complete your provider account to start consigning items at participating shops</p>
+              <h2>Join as a Consignor</h2>
             </div>
 
             <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="signup-form">
@@ -64,10 +63,6 @@ import { AuthService } from '../services/auth.service';
                 </div>
               </div>
 
-              <!-- Information Note -->
-              <div class="info-note">
-                <p>After creating your account, you'll be able to join specific consignment shops by using their store codes.</p>
-              </div>
 
               <!-- Submit Button -->
               <div class="form-actions">
@@ -76,7 +71,7 @@ import { AuthService } from '../services/auth.service';
                   class="btn btn-primary"
                   [disabled]="signupForm.invalid || isSubmitting()"
                 >
-                  {{ isSubmitting() ? 'Creating Account...' : 'Create Provider Account' }}
+                  {{ isSubmitting() ? 'Creating Account...' : 'Create Consignor Account' }}
                 </button>
 
                 <p class="alternative-links">
@@ -391,12 +386,12 @@ export class ProviderSignupStep2Component implements OnInit {
 
       this.authService.registerProvider(formData).subscribe({
         next: (response) => {
-          console.log('Provider registration successful:', response);
+          console.log('Consignor registration successful:', response);
           if (response.success) {
             // Clear the temporary auth data
             sessionStorage.removeItem('providerAuthData');
 
-            // For now, redirect to login since providers need to join shops separately
+            // For now, redirect to login since consignors need to join shops separately
             this.router.navigate(['/login'], {
               queryParams: {
                 message: 'Account created successfully! Log in to join consignment shops.'
@@ -408,7 +403,7 @@ export class ProviderSignupStep2Component implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Provider registration failed:', error);
+          console.error('Consignor registration failed:', error);
           this.errorMessage.set(error.message || 'Registration failed. Please try again.');
           this.isSubmitting.set(false);
         }

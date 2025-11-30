@@ -1,19 +1,25 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 
 import { ProviderSignupStep1Component } from './provider-signup-step1.component';
 import { AuthService } from '../services/auth.service';
+import { ProviderService } from '../services/provider.service';
 
 describe('ProviderSignupStep1Component', () => {
   let component: ProviderSignupStep1Component;
   let fixture: ComponentFixture<ProviderSignupStep1Component>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockProviderService: jasmine.SpyObj<ProviderService>;
+  let mockHttpClient: jasmine.SpyObj<HttpClient>;
 
   beforeEach(async () => {
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerProvider']);
+    const providerServiceSpy = jasmine.createSpyObj('ProviderService', ['validateInvitation', 'registerFromInvitation']);
+    const httpClientSpy = jasmine.createSpyObj('HttpClient', ['get', 'post']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
       events: of({}),
       routerState: { root: {} }
@@ -22,7 +28,10 @@ describe('ProviderSignupStep1Component', () => {
     mockRouter.serializeUrl.and.returnValue('');
     mockRouter.navigate.and.returnValue(Promise.resolve(true));
     const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
-      snapshot: { data: {} },
+      snapshot: {
+        data: {},
+        queryParams: {}
+      },
       params: of({}),
       queryParams: of({})
     });
@@ -34,6 +43,8 @@ describe('ProviderSignupStep1Component', () => {
       providers: [
         FormBuilder,
         { provide: AuthService, useValue: authServiceSpy },
+        { provide: ProviderService, useValue: providerServiceSpy },
+        { provide: HttpClient, useValue: httpClientSpy },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
@@ -42,6 +53,8 @@ describe('ProviderSignupStep1Component', () => {
     fixture = TestBed.createComponent(ProviderSignupStep1Component);
     component = fixture.componentInstance;
     mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    mockProviderService = TestBed.inject(ProviderService) as jasmine.SpyObj<ProviderService>;
+    mockHttpClient = TestBed.inject(HttpClient) as jasmine.SpyObj<HttpClient>;
 
     fixture.detectChanges();
   });
@@ -313,5 +326,127 @@ describe('ProviderSignupStep1Component', () => {
 
       expect(subtitle?.textContent?.trim()).toBe('Choose your method to log in as a Provider');
     });
+  });
+
+  describe('Invitation Token Detection', () => {
+    it('should not redirect when no invitation parameters are present', () => {
+      // Reset the router navigate spy before this test
+      mockRouter.navigate.calls.reset();
+
+      // This is the default case (no token, no storeCode) - use the existing component
+      component.ngOnInit();
+
+      // Should not redirect
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('ProviderSignupStep1Component - With Invitation Token', () => {
+  let component: ProviderSignupStep1Component;
+  let fixture: ComponentFixture<ProviderSignupStep1Component>;
+  let mockRouter: jasmine.SpyObj<Router>;
+
+  beforeEach(async () => {
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerProvider']);
+    const providerServiceSpy = jasmine.createSpyObj('ProviderService', ['validateInvitation', 'registerFromInvitation']);
+    const httpClientSpy = jasmine.createSpyObj('HttpClient', ['get', 'post']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of({}),
+      routerState: { root: {} }
+    });
+    mockRouter.createUrlTree.and.returnValue({} as any);
+    mockRouter.serializeUrl.and.returnValue('');
+    mockRouter.navigate.and.returnValue(Promise.resolve(true));
+
+    const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: {
+        data: {},
+        queryParams: {
+          token: 'test-invitation-token',
+          storeCode: 'TEST123'
+        }
+      },
+      params: of({}),
+      queryParams: of({})
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [ProviderSignupStep1Component],
+      providers: [
+        FormBuilder,
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: ProviderService, useValue: providerServiceSpy },
+        { provide: HttpClient, useValue: httpClientSpy },
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ProviderSignupStep1Component);
+    component = fixture.componentInstance;
+  });
+
+  it('should redirect to invitation registration when token and storeCode are present', () => {
+    // Trigger ngOnInit
+    component.ngOnInit();
+
+    // Verify it redirects to the invitation registration route
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/provider/invitation'], {
+      queryParams: { token: 'test-invitation-token' }
+    });
+  });
+});
+
+describe('ProviderSignupStep1Component - With Token Only', () => {
+  let component: ProviderSignupStep1Component;
+  let fixture: ComponentFixture<ProviderSignupStep1Component>;
+  let mockRouter: jasmine.SpyObj<Router>;
+
+  beforeEach(async () => {
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerProvider']);
+    const providerServiceSpy = jasmine.createSpyObj('ProviderService', ['validateInvitation', 'registerFromInvitation']);
+    const httpClientSpy = jasmine.createSpyObj('HttpClient', ['get', 'post']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of({}),
+      routerState: { root: {} }
+    });
+    mockRouter.createUrlTree.and.returnValue({} as any);
+    mockRouter.serializeUrl.and.returnValue('');
+    mockRouter.navigate.and.returnValue(Promise.resolve(true));
+
+    const mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: {
+        data: {},
+        queryParams: {
+          token: 'test-invitation-token'
+          // No storeCode
+        }
+      },
+      params: of({}),
+      queryParams: of({})
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [ProviderSignupStep1Component],
+      providers: [
+        FormBuilder,
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: ProviderService, useValue: providerServiceSpy },
+        { provide: HttpClient, useValue: httpClientSpy },
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ProviderSignupStep1Component);
+    component = fixture.componentInstance;
+  });
+
+  it('should not redirect when only token is present', () => {
+    component.ngOnInit();
+
+    // Should not redirect when storeCode is missing
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
 });

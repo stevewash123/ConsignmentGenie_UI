@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { ProviderService } from '../services/provider.service';
 
 @Component({
   selector: 'app-provider-signup-step1',
@@ -377,7 +378,7 @@ import { AuthService } from '../services/auth.service';
     }
   `]
 })
-export class ProviderSignupStep1Component {
+export class ProviderSignupStep1Component implements OnInit {
   authForm: FormGroup;
   isSubmitting = signal(false);
   errorMessage = signal('');
@@ -385,7 +386,9 @@ export class ProviderSignupStep1Component {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private providerService: ProviderService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -394,6 +397,19 @@ export class ProviderSignupStep1Component {
     }, {
       validators: this.passwordMatchValidator
     });
+  }
+
+  ngOnInit(): void {
+    // Check if this is an invitation link
+    const token = this.route.snapshot.queryParams['token'];
+    const storeCode = this.route.snapshot.queryParams['storeCode'];
+
+    if (token && storeCode) {
+      // This is an invitation link - redirect to proper invitation registration
+      this.router.navigate(['/register/provider/invitation'], {
+        queryParams: { token }
+      });
+    }
   }
 
   passwordMatchValidator(form: FormGroup) {
