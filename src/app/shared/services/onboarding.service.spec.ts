@@ -11,6 +11,8 @@ describe('OnboardingService', () => {
 
   const mockOnboardingStatus: OnboardingStatus = {
     dismissed: false,
+    welcomeGuideCompleted: false,
+    showModal: true,
     steps: {
       hasProviders: true,
       storefrontConfigured: false,
@@ -43,7 +45,7 @@ describe('OnboardingService', () => {
         expect(status).toEqual(mockOnboardingStatus);
       });
 
-      const req = httpMock.expectOne(`${baseUrl}/api/dashboard/organization/onboarding-status`);
+      const req = httpMock.expectOne(`${baseUrl}/api/organization/setup-status`);
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });
@@ -56,7 +58,7 @@ describe('OnboardingService', () => {
 
       service.getOnboardingStatus().subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/api/dashboard/organization/onboarding-status`);
+      const req = httpMock.expectOne(`${baseUrl}/api/organization/setup-status`);
       req.flush(mockResponse);
 
       service.onboardingStatus$.subscribe(status => {
@@ -148,6 +150,8 @@ describe('OnboardingService', () => {
     it('should handle 100% completion', () => {
       const completedStatus: OnboardingStatus = {
         dismissed: false,
+        welcomeGuideCompleted: false,
+        showModal: false,
         steps: {
           hasProviders: true,
           storefrontConfigured: true,
@@ -165,6 +169,8 @@ describe('OnboardingService', () => {
     it('should handle 0% completion', () => {
       const incompleteStatus: OnboardingStatus = {
         dismissed: false,
+        welcomeGuideCompleted: false,
+        showModal: true,
         steps: {
           hasProviders: false,
           storefrontConfigured: false,
@@ -180,23 +186,82 @@ describe('OnboardingService', () => {
     });
   });
 
-  describe('shouldShowOnboarding', () => {
-    it('should return false if dismissed', () => {
-      const dismissedStatus: OnboardingStatus = {
-        ...mockOnboardingStatus,
-        dismissed: true
+  describe('dismissWelcomeGuide', () => {
+    it('should send dismiss request to API', () => {
+      const mockResponse = {
+        success: true,
+        welcomeGuideCompleted: true,
+        message: 'Welcome guide dismissed successfully'
       };
 
-      expect(service.shouldShowOnboarding(dismissedStatus)).toBe(false);
+      service.dismissWelcomeGuide().subscribe(response => {
+        expect(response.success).toBe(true);
+        expect(response.welcomeGuideCompleted).toBe(true);
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/api/organization/dismiss-welcome-guide`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({});
+      req.flush(mockResponse);
     });
 
-    it('should return true if not dismissed and steps incomplete', () => {
-      expect(service.shouldShowOnboarding(mockOnboardingStatus)).toBe(true);
+    it('should update onboarding status when dismiss succeeds', () => {
+      // First set an initial status
+      service['onboardingStatusSubject'].next(mockOnboardingStatus);
+
+      const mockResponse = {
+        success: true,
+        welcomeGuideCompleted: true,
+        message: 'Welcome guide dismissed successfully'
+      };
+
+      service.dismissWelcomeGuide().subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/api/organization/dismiss-welcome-guide`);
+      req.flush(mockResponse);
+
+      service.onboardingStatus$.subscribe(status => {
+        expect(status?.welcomeGuideCompleted).toBe(true);
+        expect(status?.showModal).toBe(false);
+      });
+    });
+  });
+
+  describe('shouldShowOnboarding', () => {
+    it('should use server-computed showModal field when available', () => {
+      const statusWithShowModal: OnboardingStatus = {
+        ...mockOnboardingStatus,
+        showModal: false
+      };
+
+      expect(service.shouldShowOnboarding(statusWithShowModal)).toBe(false);
     });
 
-    it('should return false if all steps completed', () => {
+    it('should return false if welcomeGuideCompleted is true (fallback logic)', () => {
+      const completedGuideStatus: OnboardingStatus = {
+        ...mockOnboardingStatus,
+        showModal: undefined as any, // Force fallback
+        welcomeGuideCompleted: true
+      };
+
+      expect(service.shouldShowOnboarding(completedGuideStatus)).toBe(false);
+    });
+
+    it('should return true if welcome guide not completed and steps incomplete (fallback logic)', () => {
+      const incompleteStatus: OnboardingStatus = {
+        ...mockOnboardingStatus,
+        showModal: undefined as any, // Force fallback
+        welcomeGuideCompleted: false
+      };
+
+      expect(service.shouldShowOnboarding(incompleteStatus)).toBe(true);
+    });
+
+    it('should return false if all steps completed (fallback logic)', () => {
       const completedStatus: OnboardingStatus = {
         dismissed: false,
+        welcomeGuideCompleted: false,
+        showModal: undefined as any, // Force fallback
         steps: {
           hasProviders: true,
           storefrontConfigured: true,
@@ -221,6 +286,8 @@ describe('OnboardingService', () => {
     it('should return null if all steps completed', () => {
       const completedStatus: OnboardingStatus = {
         dismissed: false,
+        welcomeGuideCompleted: false,
+        showModal: false,
         steps: {
           hasProviders: true,
           storefrontConfigured: true,
@@ -240,6 +307,8 @@ describe('OnboardingService', () => {
     it('should return welcome message for new users', () => {
       const newUserStatus: OnboardingStatus = {
         dismissed: false,
+        welcomeGuideCompleted: false,
+        showModal: true,
         steps: {
           hasProviders: false,
           storefrontConfigured: false,
@@ -265,6 +334,8 @@ describe('OnboardingService', () => {
     it('should return completion message for completed setup', () => {
       const completedStatus: OnboardingStatus = {
         dismissed: false,
+        welcomeGuideCompleted: false,
+        showModal: false,
         steps: {
           hasProviders: true,
           storefrontConfigured: true,

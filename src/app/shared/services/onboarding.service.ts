@@ -8,6 +8,8 @@ import {
   OnboardingResponse,
   DismissOnboardingRequest,
   DismissOnboardingResponse,
+  DismissWelcomeGuideRequest,
+  DismissWelcomeGuideResponse,
   OnboardingStep,
   OnboardingProgress
 } from '../models/onboarding.models';
@@ -24,10 +26,10 @@ export class OnboardingService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Get current onboarding status for the organization
+   * Get current onboarding/setup status for the organization
    */
   getOnboardingStatus(): Observable<OnboardingStatus> {
-    const url = `${this.baseUrl}/api/dashboard/organization/onboarding-status`;
+    const url = `${this.baseUrl}/api/organization/setup-status`;
     console.log('🔍 SERVICE: Making API call to:', url);
     return this.http.get<OnboardingResponse>(url)
       .pipe(
@@ -65,6 +67,29 @@ export class OnboardingService {
   }
 
   /**
+   * Dismiss the welcome guide permanently (new API endpoint)
+   */
+  dismissWelcomeGuide(): Observable<DismissWelcomeGuideResponse> {
+    return this.http.post<DismissWelcomeGuideResponse>(
+      `${this.baseUrl}/api/organization/dismiss-welcome-guide`,
+      {}
+    ).pipe(
+      tap(response => {
+        if (response.success) {
+          const currentStatus = this.onboardingStatusSubject.value;
+          if (currentStatus) {
+            this.onboardingStatusSubject.next({
+              ...currentStatus,
+              welcomeGuideCompleted: true,
+              showModal: false
+            });
+          }
+        }
+      })
+    );
+  }
+
+  /**
    * Get onboarding steps with completion status and routing information
    */
   getOnboardingSteps(status: OnboardingStatus): OnboardingStep[] {
@@ -80,7 +105,7 @@ export class OnboardingService {
       },
       {
         id: 'storefront',
-        title: 'Choose your storefront',
+        title: 'Change your storefront or use ours',
         description: 'Decide how you\'ll sell: Use our built-in shop or connect Shopify/Square.',
         completed: status.steps.storefrontConfigured,
         actionText: 'Set Up Storefront',
@@ -127,22 +152,31 @@ export class OnboardingService {
   }
 
   /**
-   * Check if onboarding should be shown
+   * Check if onboarding should be shown (updated logic per specification)
    */
   shouldShowOnboarding(status: OnboardingStatus): boolean {
     console.log('🔍 SERVICE: shouldShowOnboarding called with:', status);
 
-    if (status.dismissed) {
-      console.log('🔍 SERVICE: Dismissed = true, not showing modal');
+    // Use server-computed showModal field if available
+    if (status.showModal !== undefined) {
+      console.log('🔍 SERVICE: Using server-computed showModal:', status.showModal);
+      return status.showModal;
+    }
+
+    // Fallback logic: Don't show if welcome guide is completed
+    if (status.welcomeGuideCompleted) {
+      console.log('🔍 SERVICE: Welcome guide completed, not showing modal');
       return false;
     }
 
-    // Show if not all steps are completed
-    const progress = this.getOnboardingProgress(status);
-    console.log('🔍 SERVICE: Progress:', progress);
-    const shouldShow = progress.completedSteps < progress.totalSteps;
-    console.log('🔍 SERVICE: Final decision - should show:', shouldShow);
-    return shouldShow;
+    // Show if any setup steps are incomplete
+    const showModal = !status.steps.hasProviders ||
+                     !status.steps.storefrontConfigured ||
+                     !status.steps.hasInventory ||
+                     !status.steps.quickBooksConnected;
+
+    console.log('🔍 SERVICE: Final decision - should show:', showModal);
+    return showModal;
   }
 
   /**

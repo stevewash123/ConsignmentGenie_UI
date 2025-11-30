@@ -17,6 +17,8 @@ describe('OwnerDashboardComponent - Onboarding Integration', () => {
 
   const mockOnboardingStatus: OnboardingStatus = {
     dismissed: false,
+    welcomeGuideCompleted: false,
+    showModal: true,
     steps: {
       hasProviders: true,
       storefrontConfigured: false,

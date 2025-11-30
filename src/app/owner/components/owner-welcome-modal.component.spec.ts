@@ -14,6 +14,8 @@ describe('OwnerWelcomeModalComponent', () => {
 
   const mockOnboardingStatus: OnboardingStatus = {
     dismissed: false,
+    welcomeGuideCompleted: false,
+    showModal: true,
     steps: {
       hasProviders: true,
       storefrontConfigured: false,
@@ -34,7 +36,7 @@ describe('OwnerWelcomeModalComponent', () => {
     },
     {
       id: 'storefront',
-      title: 'Choose your storefront',
+      title: 'Change your storefront or use ours',
       description: 'Decide how you\'ll sell.',
       completed: false,
       actionText: 'Set Up Storefront',
@@ -49,7 +51,8 @@ describe('OwnerWelcomeModalComponent', () => {
       'getOnboardingProgress',
       'getWelcomeMessage',
       'getNextIncompleteStep',
-      'dismissOnboarding'
+      'dismissOnboarding',
+      'dismissWelcomeGuide'
     ]);
 
     await TestBed.configureTestingModule({
@@ -91,7 +94,7 @@ describe('OwnerWelcomeModalComponent', () => {
       expect(component.isVisible).toBe(false);
       expect(component.shopName).toBe('Your Shop');
       expect(component.onboardingStatus).toBeNull();
-      expect(component.dontShowAgain).toBe(false);
+      expect(component.isManualOpen).toBe(false);
       expect(component.isDismissing()).toBe(false);
     });
 
@@ -175,10 +178,15 @@ describe('OwnerWelcomeModalComponent', () => {
       expect(nextStep).toBeTruthy();
     });
 
-    it('should show correct action text for steps', () => {
+    it('should show correct action text for incomplete steps and done indicator for completed steps', () => {
       const stepButtons = fixture.nativeElement.querySelectorAll('.step-button');
-      expect(stepButtons[0].textContent.trim()).toBe('View'); // Completed step
-      expect(stepButtons[1].textContent.trim()).toBe('Set Up Storefront'); // Incomplete step
+      const completedIndicators = fixture.nativeElement.querySelectorAll('.step-completed');
+
+      expect(stepButtons.length).toBe(1); // Only incomplete steps have buttons
+      expect(stepButtons[0].textContent.trim()).toBe('Set Up Storefront'); // Incomplete step
+
+      expect(completedIndicators.length).toBe(1); // Completed steps have done indicators
+      expect(completedIndicators[0].textContent.trim()).toContain('✓ Done');
     });
   });
 
@@ -223,20 +231,36 @@ describe('OwnerWelcomeModalComponent', () => {
       const stepButton = fixture.nativeElement.querySelector('.step-button');
       stepButton.click();
 
-      expect(component.stepClicked.emit).toHaveBeenCalledWith(mockSteps[0]);
+      // The first step-button will be for the first incomplete step (storefront)
+      expect(component.stepClicked.emit).toHaveBeenCalledWith(mockSteps[1]);
     });
 
-    it('should close modal with Maybe Later button', () => {
+    it('should close modal with dismiss button when manually opened', () => {
+      component.isManualOpen = true;
+      fixture.detectChanges();
       spyOn(component.closed, 'emit');
 
-      const maybeLaterButton = fixture.nativeElement.querySelector('.btn-secondary');
-      maybeLaterButton.click();
+      const dismissButton = fixture.nativeElement.querySelector('.btn-dismiss');
+      dismissButton.click();
 
       expect(component.closed.emit).toHaveBeenCalled();
     });
+
+    it('should dismiss welcome guide when auto-shown and dismiss button is clicked', () => {
+      mockOnboardingService.dismissWelcomeGuide.and.returnValue(of({ success: true, welcomeGuideCompleted: true }));
+      component.isManualOpen = false;
+      fixture.detectChanges();
+      spyOn(component.dismissed, 'emit');
+
+      const dismissButton = fixture.nativeElement.querySelector('.btn-dismiss');
+      dismissButton.click();
+
+      expect(mockOnboardingService.dismissWelcomeGuide).toHaveBeenCalled();
+      expect(component.dismissed.emit).toHaveBeenCalled();
+    });
   });
 
-  describe('Get Started Functionality', () => {
+  describe('Dismiss or Close Functionality', () => {
     beforeEach(() => {
       component.onboardingStatus = mockOnboardingStatus;
       component.isVisible = true;
@@ -244,72 +268,79 @@ describe('OwnerWelcomeModalComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should navigate to next step when Get Started is clicked without dismiss', () => {
-      spyOn(component.stepClicked, 'emit');
-      spyOn(component.closed, 'emit');
+    it('should show "Close" button text when manually opened', () => {
+      component.isManualOpen = true;
+      fixture.detectChanges();
 
-      component.dontShowAgain = false;
-
-      const getStartedButton = fixture.nativeElement.querySelector('.btn-primary');
-      getStartedButton.click();
-
-      expect(component.stepClicked.emit).toHaveBeenCalledWith(mockSteps[1]);
-      expect(component.closed.emit).toHaveBeenCalled();
+      const dismissButton = fixture.nativeElement.querySelector('.btn-dismiss');
+      expect(dismissButton.textContent.trim()).toBe('Close');
     });
 
-    it('should dismiss permanently when dontShowAgain is checked', () => {
-      mockOnboardingService.dismissOnboarding.and.returnValue(of({ success: true }));
+    it('should show "No thanks, I can find my own way" button text when auto-shown', () => {
+      component.isManualOpen = false;
+      fixture.detectChanges();
+
+      const dismissButton = fixture.nativeElement.querySelector('.btn-dismiss');
+      expect(dismissButton.textContent.trim()).toBe('No thanks, I can find my own way');
+    });
+
+    it('should just close when manually opened', () => {
+      spyOn(component.closed, 'emit');
+      component.isManualOpen = true;
+
+      component.dismissOrClose();
+
+      expect(component.closed.emit).toHaveBeenCalled();
+      expect(mockOnboardingService.dismissWelcomeGuide).not.toHaveBeenCalled();
+    });
+
+    it('should dismiss permanently when auto-shown', () => {
+      mockOnboardingService.dismissWelcomeGuide.and.returnValue(of({ success: true, welcomeGuideCompleted: true }));
       spyOn(component.dismissed, 'emit');
+      component.isManualOpen = false;
 
-      component.dontShowAgain = true;
+      component.dismissOrClose();
 
-      const getStartedButton = fixture.nativeElement.querySelector('.btn-primary');
-      getStartedButton.click();
-
-      expect(mockOnboardingService.dismissOnboarding).toHaveBeenCalled();
+      expect(mockOnboardingService.dismissWelcomeGuide).toHaveBeenCalled();
       expect(component.dismissed.emit).toHaveBeenCalled();
     });
 
     it('should handle dismiss error gracefully', () => {
-      mockOnboardingService.dismissOnboarding.and.returnValue(throwError('API Error'));
+      mockOnboardingService.dismissWelcomeGuide.and.returnValue(throwError('API Error'));
       spyOn(component.closed, 'emit');
       spyOn(console, 'error');
+      component.isManualOpen = false;
 
-      component.dontShowAgain = true;
+      component.dismissOrClose();
 
-      const getStartedButton = fixture.nativeElement.querySelector('.btn-primary');
-      getStartedButton.click();
-
-      expect(console.error).toHaveBeenCalledWith('Error dismissing onboarding:', 'API Error');
+      expect(console.error).toHaveBeenCalledWith('Error dismissing welcome guide:', 'API Error');
       expect(component.closed.emit).toHaveBeenCalled();
       expect(component.isDismissing()).toBe(false);
     });
 
     it('should show loading state while dismissing', () => {
-      const dismissSubject = new Subject<{ success: boolean }>();
-      mockOnboardingService.dismissOnboarding.and.returnValue(dismissSubject.asObservable());
+      const dismissSubject = new Subject<{ success: boolean, welcomeGuideCompleted: boolean }>();
+      mockOnboardingService.dismissWelcomeGuide.and.returnValue(dismissSubject.asObservable());
 
-      component.dontShowAgain = true;
+      component.isManualOpen = false;
       component['dismissPermanently']();
 
       // Should be loading immediately after calling dismissPermanently
       expect(component.isDismissing()).toBe(true);
 
       // Complete the observable and check loading state is reset
-      dismissSubject.next({ success: true });
+      dismissSubject.next({ success: true, welcomeGuideCompleted: true });
       dismissSubject.complete();
 
       expect(component.isDismissing()).toBe(false);
     });
 
-    it('should disable buttons while dismissing', () => {
+    it('should disable button while dismissing', () => {
       component.isDismissing.set(true);
       fixture.detectChanges();
 
-      const buttons = fixture.nativeElement.querySelectorAll('.btn-secondary, .btn-primary');
-      buttons.forEach((button: HTMLButtonElement) => {
-        expect(button.disabled).toBe(true);
-      });
+      const dismissButton = fixture.nativeElement.querySelector('.btn-dismiss');
+      expect(dismissButton.disabled).toBe(true);
     });
   });
 

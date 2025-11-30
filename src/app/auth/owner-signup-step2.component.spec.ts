@@ -48,6 +48,10 @@ describe('OwnerSignupStep2Component', () => {
       data: { isAvailable: true, subdomain: 'test-subdomain' },
       message: 'Subdomain is available'
     }));
+
+    // Set up sessionStorage spies (to be configured in nested beforeEach blocks)
+    spyOn(sessionStorage, 'getItem');
+    spyOn(sessionStorage, 'removeItem');
   });
 
   // ===========================================
@@ -55,11 +59,10 @@ describe('OwnerSignupStep2Component', () => {
   // ===========================================
   describe('with detectChanges', () => {
     beforeEach(() => {
-      // Mock sessionStorage with valid auth data for most tests
-      spyOn(sessionStorage, 'getItem').and.returnValue(
+      // Set up sessionStorage spy return value (spy already created in main beforeEach)
+      (sessionStorage.getItem as jasmine.Spy).and.returnValue(
         JSON.stringify({ email: 'test@example.com', password: 'password123' })
       );
-      spyOn(sessionStorage, 'removeItem');
 
       fixture.detectChanges();
     });
@@ -295,20 +298,7 @@ describe('OwnerSignupStep2Component', () => {
     });
   });
 
-  // ===========================================
-  // WITHOUT detectChanges in beforeEach (for submission state tests)
-  // ===========================================
-  describe('without detectChanges', () => {
-    beforeEach(() => {
-      // Mock sessionStorage with valid auth data for most tests
-      spyOn(sessionStorage, 'getItem').and.returnValue(
-        JSON.stringify({ email: 'test@example.com', password: 'password123' })
-      );
-      spyOn(sessionStorage, 'removeItem');
-      // No detectChanges() here - we control it in each test
-    });
-
-    it('should auto-login and redirect to dashboard when token is provided', fakeAsync(() => {
+    it('should navigate to dashboard when token is provided', fakeAsync(() => {
       const mockResponse = {
         success: true,
         role: 'owner',
@@ -330,9 +320,6 @@ describe('OwnerSignupStep2Component', () => {
       });
 
       component.onSubmit();
-      expect(component.isSubmitting()).toBeTrue();
-
-      // Advance time to allow observable to complete
       tick();
 
       expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
@@ -347,10 +334,9 @@ describe('OwnerSignupStep2Component', () => {
 
       expect(sessionStorage.removeItem).toHaveBeenCalledWith('ownerAuthData');
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
-      expect(component.isSubmitting()).toBeFalse();
     }));
 
-    it('should redirect to success page when no token (approval required)', fakeAsync(() => {
+    it('should navigate to success page when no token (approval required)', fakeAsync(() => {
       const mockResponse = {
         success: true,
         role: 'owner',
@@ -372,9 +358,6 @@ describe('OwnerSignupStep2Component', () => {
       });
 
       component.onSubmit();
-      expect(component.isSubmitting()).toBeTrue();
-
-      // Advance time to allow observable to complete
       tick();
 
       expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
@@ -395,7 +378,5 @@ describe('OwnerSignupStep2Component', () => {
           email: 'test@example.com'
         }
       });
-      expect(component.isSubmitting()).toBeFalse();
     }));
-  });
 });

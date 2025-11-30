@@ -10,6 +10,8 @@ export interface OnboardingStep {
 
 export interface OnboardingStatus {
   dismissed: boolean;
+  welcomeGuideCompleted: boolean;
+  showModal: boolean;
   steps: {
     hasProviders: boolean;
     storefrontConfigured: boolean;
@@ -26,6 +28,16 @@ export interface OnboardingResponse {
 
 export interface DismissOnboardingRequest {
   dismissed: boolean;
+}
+
+export interface DismissWelcomeGuideRequest {
+  welcomeGuideCompleted: boolean;
+}
+
+export interface DismissWelcomeGuideResponse {
+  success: boolean;
+  welcomeGuideCompleted: boolean;
+  message?: string;
 }
 
 export interface DismissOnboardingResponse {

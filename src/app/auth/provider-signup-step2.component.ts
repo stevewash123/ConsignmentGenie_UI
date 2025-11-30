@@ -64,6 +64,10 @@ import { AuthService } from '../services/auth.service';
                 </div>
               </div>
 
+              <!-- Information Note -->
+              <div class="info-note">
+                <p>After creating your account, you'll be able to join specific consignment shops by using their store codes.</p>
+              </div>
 
               <!-- Submit Button -->
               <div class="form-actions">

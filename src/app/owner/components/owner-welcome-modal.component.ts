@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -57,14 +57,17 @@ import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shar
               <!-- Action Button -->
               <div class="step-action">
                 <a
+                  *ngIf="!step.completed"
                   [routerLink]="step.routerLink"
-                  class="step-button"
-                  [class.primary]="!step.completed && isNextStep(step)"
-                  [class.secondary]="step.completed"
-                  [class.outlined]="!step.completed && !isNextStep(step)"
+                  class="step-button primary"
                   (click)="onStepClick(step)">
-                  {{ step.completed ? 'View' : step.actionText }}
+                  {{ step.actionText }}
                 </a>
+                <div
+                  *ngIf="step.completed"
+                  class="step-completed">
+                  ✓ Done
+                </div>
               </div>
             </div>
           </div>
@@ -72,29 +75,12 @@ import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shar
 
         <!-- Footer -->
         <div class="modal-footer">
-          <div class="footer-options">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="dontShowAgain"
-                class="dont-show-checkbox">
-              <span class="checkmark"></span>
-              Don't show this again
-            </label>
-          </div>
-
-          <div class="footer-actions">
+          <div class="footer-center">
             <button
-              class="btn-secondary"
-              (click)="closeModal()"
+              class="btn-dismiss"
+              (click)="dismissOrClose()"
               [disabled]="isDismissing()">
-              Maybe Later
-            </button>
-            <button
-              class="btn-primary"
-              (click)="getStarted()"
-              [disabled]="isDismissing()">
-              {{ isDismissing() ? 'Saving...' : 'Get Started' }}
+              {{ isDismissing() ? 'Saving...' : (isManualOpen ? 'Close' : 'No thanks, I can find my own way') }}
             </button>
           </div>
         </div>
@@ -335,35 +321,16 @@ import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shar
       padding: 1.5rem 2rem 2rem 2rem;
       border-top: 1px solid #e5e7eb;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      gap: 1rem;
     }
 
-    .footer-options {
-      flex: 1;
-    }
-
-    .checkbox-label {
+    .footer-center {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      font-size: 0.875rem;
-      color: #6b7280;
+      justify-content: center;
     }
 
-    .dont-show-checkbox {
-      margin: 0;
-    }
-
-    .footer-actions {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .btn-secondary,
-    .btn-primary {
+    .btn-dismiss {
       padding: 0.75rem 1.5rem;
       border-radius: 6px;
       font-size: 0.875rem;
@@ -371,34 +338,26 @@ import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shar
       cursor: pointer;
       transition: all 0.2s;
       border: none;
-    }
-
-    .btn-secondary {
       background-color: #f3f4f6;
       color: #374151;
     }
 
-    .btn-secondary:hover:not(:disabled) {
+    .btn-dismiss:hover:not(:disabled) {
       background-color: #e5e7eb;
     }
 
-    .btn-primary {
-      background-color: #047857;
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background-color: #059669;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(4, 120, 87, 0.2);
-    }
-
-    .btn-secondary:disabled,
-    .btn-primary:disabled {
+    .btn-dismiss:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+    }
+
+    .step-completed {
+      color: #047857;
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
     }
 
     .loading-overlay {
@@ -459,27 +418,17 @@ import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shar
         text-align: center;
       }
 
-      .modal-footer {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-      }
-
-      .footer-actions {
-        flex-direction: column;
-      }
-
-      .btn-secondary,
-      .btn-primary {
+      .btn-dismiss {
         width: 100%;
       }
     }
   `]
 })
-export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
+export class OwnerWelcomeModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isVisible: boolean = false;
   @Input() shopName: string = 'Your Shop';
   @Input() onboardingStatus: OnboardingStatus | null = null;
+  @Input() isManualOpen: boolean = false; // Controls button text ("Close" vs "No thanks...")
   @Output() closed = new EventEmitter<void>();
   @Output() dismissed = new EventEmitter<void>();
   @Output() stepClicked = new EventEmitter<OnboardingStep>();
@@ -489,7 +438,6 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
   steps: OnboardingStep[] = [];
   progress: OnboardingProgress | null = null;
   welcomeMessage: { title: string; subtitle: string } = { title: '', subtitle: '' };
-  dontShowAgain = false;
   isDismissing = signal(false);
 
   constructor(private onboardingService: OnboardingService) {}
@@ -498,60 +446,72 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
     this.setupStaticModal();
   }
 
+  ngOnChanges() {
+    // Refresh modal content when onboarding status changes
+    if (this.onboardingStatus) {
+      this.setupStaticModal();
+    }
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   private setupStaticModal() {
-    // Static welcome message with only shop name being dynamic
-    this.welcomeMessage = {
-      title: `Welcome to ${this.shopName}! 🎉`,
-      subtitle: "Let's get your shop set up. Here's what to do next:"
-    };
+    // Use onboarding service for dynamic content if status is available
+    if (this.onboardingStatus) {
+      this.welcomeMessage = this.onboardingService.getWelcomeMessage(this.onboardingStatus, this.shopName);
+      this.steps = this.onboardingService.getOnboardingSteps(this.onboardingStatus);
+      this.progress = this.onboardingService.getOnboardingProgress(this.onboardingStatus);
+    } else {
+      // Fallback to static content
+      this.welcomeMessage = {
+        title: `Welcome to ${this.shopName}! 🎉`,
+        subtitle: "Let's get your shop set up. Here's what to do next:"
+      };
 
-    // Static steps - all new owners start at step zero
-    this.steps = [
-      {
-        id: 'providers',
-        title: 'Add your providers',
-        description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
-        completed: false,
-        actionText: 'Add Providers',
-        routerLink: '/owner/providers',
-        icon: '1'
-      },
-      {
-        id: 'storefront',
-        title: 'Change your storefront or use ours',
-        description: 'Decide how you\'ll sell: Use our built-in shop or connect Shopify/Square.',
-        completed: false,
-        actionText: 'Set Up Storefront',
-        routerLink: '/owner/settings/storefront',
-        icon: '2'
-      },
-      {
-        id: 'inventory',
-        title: 'Add inventory',
-        description: 'Enter items manually or upload in bulk via CSV.',
-        completed: false,
-        actionText: 'Add Inventory',
-        routerLink: '/owner/inventory',
-        icon: '3'
-      },
-      {
-        id: 'quickbooks',
-        title: 'Connect QuickBooks',
-        description: 'Sync transactions and payouts with your accounting. (optional)',
-        completed: false,
-        actionText: 'Connect QuickBooks',
-        routerLink: '/owner/settings/integrations',
-        icon: '4'
-      }
-    ];
+      this.steps = [
+        {
+          id: 'providers',
+          title: 'Add your providers',
+          description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
+          completed: false,
+          actionText: 'Add Providers',
+          routerLink: '/owner/providers',
+          icon: '1'
+        },
+        {
+          id: 'storefront',
+          title: 'Change your storefront or use ours',
+          description: 'Decide how you\'ll sell: Use our built-in shop or connect Shopify/Square.',
+          completed: false,
+          actionText: 'Set Up Storefront',
+          routerLink: '/owner/settings/storefront',
+          icon: '2'
+        },
+        {
+          id: 'inventory',
+          title: 'Add inventory',
+          description: 'Enter items manually or upload in bulk via CSV.',
+          completed: false,
+          actionText: 'Add Inventory',
+          routerLink: '/owner/inventory',
+          icon: '3'
+        },
+        {
+          id: 'quickbooks',
+          title: 'Connect QuickBooks',
+          description: 'Sync transactions and payouts with your accounting. (optional)',
+          completed: false,
+          actionText: 'Connect QuickBooks',
+          routerLink: '/owner/settings/integrations',
+          icon: '4'
+        }
+      ];
 
-    // No progress bar for simplified version
-    this.progress = null;
+      this.progress = null;
+    }
   }
 
   trackByStepId(index: number, step: OnboardingStep): string {
@@ -559,8 +519,9 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
   }
 
   isNextStep(step: OnboardingStep): boolean {
-    // For simplified static version, first step is always the "next" step
-    return step.id === 'providers';
+    // Find the first incomplete step
+    const firstIncompleteStep = this.steps.find(s => !s.completed);
+    return firstIncompleteStep?.id === step.id;
   }
 
   onBackdropClick(event: Event) {
@@ -579,25 +540,22 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
     // Modal will close when navigation occurs
   }
 
-  getStarted() {
+  dismissOrClose() {
     if (this.isDismissing()) return;
 
-    if (this.dontShowAgain) {
-      this.dismissPermanently();
-    } else {
-      // Navigate to first step (providers)
-      const firstStep = this.steps[0];
-      if (firstStep) {
-        this.stepClicked.emit(firstStep);
-      }
+    if (this.isManualOpen) {
+      // Just close the modal when opened manually
       this.closeModal();
+    } else {
+      // Dismiss permanently when auto-shown
+      this.dismissPermanently();
     }
   }
 
   private dismissPermanently() {
     this.isDismissing.set(true);
 
-    this.onboardingService.dismissOnboarding()
+    this.onboardingService.dismissWelcomeGuide()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -607,7 +565,7 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
           this.isDismissing.set(false);
         },
         error: (error) => {
-          console.error('Error dismissing onboarding:', error);
+          console.error('Error dismissing welcome guide:', error);
           this.isDismissing.set(false);
           // Still close the modal even if dismiss fails
           this.closeModal();
