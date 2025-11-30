@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { OwnerLayoutComponent } from './owner-layout.component';
 import { PayoutService, PayoutStatus } from '../../services/payout.service';
 import {
   PayoutListDto,
@@ -18,9 +19,10 @@ import { LoadingService } from '../../shared/services/loading.service';
 @Component({
   selector: 'app-owner-payouts',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
   template: `
-    <div class="page-container">
+    <app-owner-layout>
+      <div class="page-container">
       <!-- Page Header -->
       <div class="page-header">
         <h1 class="page-title">Payouts Management</h1>
@@ -343,7 +345,8 @@ import { LoadingService } from '../../shared/services/loading.service';
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </app-owner-layout>
   `,
   styles: [`
     .page-container {

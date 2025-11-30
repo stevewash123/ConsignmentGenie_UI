@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { OwnerLayoutComponent } from './owner-layout.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import {
@@ -17,9 +18,10 @@ import {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
   template: `
-    <div class="inventory-container">
+    <app-owner-layout>
+      <div class="inventory-container">
       <!-- Header -->
       <div class="inventory-header">
         <h1>Inventory Management</h1>
@@ -247,7 +249,8 @@ import {
           </nav>
         }
       }
-    </div>
+      </div>
+    </app-owner-layout>
   `,
   styles: [`
     .inventory-container {

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, interval } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
 import {
@@ -427,8 +427,11 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
-    public loadingService: LoadingService
+    public loadingService: LoadingService,
+    private router: Router
   ) {}
+
+  private boundHandleDocumentClick = this.handleDocumentClick.bind(this);
 
   ngOnInit() {
     console.log(`NotificationBell component initialized for role: ${this.role}`);
@@ -453,17 +456,18 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       });
 
     // Close dropdown when clicking outside
-    document.addEventListener('click', this.handleDocumentClick.bind(this));
+    document.addEventListener('click', this.boundHandleDocumentClick, { passive: true });
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    document.removeEventListener('click', this.handleDocumentClick.bind(this));
+    document.removeEventListener('click', this.boundHandleDocumentClick);
   }
 
   private handleDocumentClick(event: Event) {
-    if (!this.bellContainer.nativeElement.contains(event.target)) {
+    const target = event.target as Node;
+    if (target && !this.bellContainer.nativeElement.contains(target)) {
       this.closeDropdown();
     }
   }
@@ -566,8 +570,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     const route = config.getRoute(notification, this.role);
 
     if (route) {
-      // Navigation will be handled by router in the calling component
-      console.log('Navigate to:', route);
+      // Use Angular Router to navigate - prevents page reload
+      this.router.navigate([route]).catch(error => {
+        console.error('Navigation error:', error);
+      });
     }
   }
 
