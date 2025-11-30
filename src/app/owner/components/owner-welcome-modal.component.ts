@@ -495,9 +495,7 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
   constructor(private onboardingService: OnboardingService) {}
 
   ngOnInit() {
-    if (this.onboardingStatus) {
-      this.setupModal(this.onboardingStatus);
-    }
+    this.setupStaticModal();
   }
 
   ngOnDestroy() {
@@ -505,10 +503,55 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private setupModal(status: OnboardingStatus) {
-    this.steps = this.onboardingService.getOnboardingSteps(status);
-    this.progress = this.onboardingService.getOnboardingProgress(status);
-    this.welcomeMessage = this.onboardingService.getWelcomeMessage(status, this.shopName);
+  private setupStaticModal() {
+    // Static welcome message with only shop name being dynamic
+    this.welcomeMessage = {
+      title: `Welcome to ${this.shopName}! 🎉`,
+      subtitle: "Let's get your shop set up. Here's what to do next:"
+    };
+
+    // Static steps - all new owners start at step zero
+    this.steps = [
+      {
+        id: 'providers',
+        title: 'Add your providers',
+        description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
+        completed: false,
+        actionText: 'Add Providers',
+        routerLink: '/owner/providers',
+        icon: '1'
+      },
+      {
+        id: 'storefront',
+        title: 'Change your storefront or use ours',
+        description: 'Decide how you\'ll sell: Use our built-in shop or connect Shopify/Square.',
+        completed: false,
+        actionText: 'Set Up Storefront',
+        routerLink: '/owner/settings/storefront',
+        icon: '2'
+      },
+      {
+        id: 'inventory',
+        title: 'Add inventory',
+        description: 'Enter items manually or upload in bulk via CSV.',
+        completed: false,
+        actionText: 'Add Inventory',
+        routerLink: '/owner/inventory',
+        icon: '3'
+      },
+      {
+        id: 'quickbooks',
+        title: 'Connect QuickBooks',
+        description: 'Sync transactions and payouts with your accounting. (optional)',
+        completed: false,
+        actionText: 'Connect QuickBooks',
+        routerLink: '/owner/settings/integrations',
+        icon: '4'
+      }
+    ];
+
+    // No progress bar for simplified version
+    this.progress = null;
   }
 
   trackByStepId(index: number, step: OnboardingStep): string {
@@ -516,10 +559,8 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
   }
 
   isNextStep(step: OnboardingStep): boolean {
-    const nextStep = this.onboardingStatus ?
-      this.onboardingService.getNextIncompleteStep(this.onboardingStatus) :
-      null;
-    return nextStep?.id === step.id;
+    // For simplified static version, first step is always the "next" step
+    return step.id === 'providers';
   }
 
   onBackdropClick(event: Event) {
@@ -544,12 +585,10 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy {
     if (this.dontShowAgain) {
       this.dismissPermanently();
     } else {
-      // Find next incomplete step and navigate there
-      if (this.onboardingStatus) {
-        const nextStep = this.onboardingService.getNextIncompleteStep(this.onboardingStatus);
-        if (nextStep) {
-          this.stepClicked.emit(nextStep);
-        }
+      // Navigate to first step (providers)
+      const firstStep = this.steps[0];
+      if (firstStep) {
+        this.stepClicked.emit(firstStep);
       }
       this.closeModal();
     }
