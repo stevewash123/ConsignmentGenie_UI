@@ -338,12 +338,12 @@ import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shar
       cursor: pointer;
       transition: all 0.2s;
       border: none;
-      background-color: #f3f4f6;
+      background-color: #d1d5db;
       color: #374151;
     }
 
     .btn-dismiss:hover:not(:disabled) {
-      background-color: #e5e7eb;
+      background-color: #9ca3af;
     }
 
     .btn-dismiss:disabled {
@@ -474,10 +474,10 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy, OnChanges 
       this.steps = [
         {
           id: 'providers',
-          title: 'Add your providers',
+          title: 'Add your consignors',
           description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
           completed: false,
-          actionText: 'Add Providers',
+          actionText: 'Add Consignors',
           routerLink: '/owner/providers',
           icon: '1'
         },

@@ -96,10 +96,10 @@ export class OnboardingService {
     const steps: OnboardingStep[] = [
       {
         id: 'providers',
-        title: 'Add your providers',
+        title: 'Add your consignors',
         description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
         completed: status.steps.hasProviders,
-        actionText: 'Add Providers',
+        actionText: 'Add Consignors',
         routerLink: '/owner/providers',
         icon: '👥'
       },
@@ -205,7 +205,7 @@ export class OnboardingService {
       };
     } else {
       return {
-        title: 'You\'re making progress! 💪',
+        title: 'Almost there! 🎯',
         subtitle: 'Here\'s what\'s left to complete your setup:'
       };
     }

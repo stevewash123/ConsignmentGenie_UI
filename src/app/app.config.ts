@@ -11,7 +11,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(routes, {
+      scrollPositionRestoration: 'top',
+      anchorScrolling: 'enabled'
+    }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
     provideToastr({

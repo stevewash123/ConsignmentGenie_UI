@@ -137,7 +137,6 @@ import { LoadingService } from '../shared/services/loading.service';
         <!-- Empty State -->
         <div class="empty-state" *ngIf="!isProvidersLoading() && filteredProviders().length === 0">
           <p>{{ labels.noProvidersFound }}</p>
-          <button class="link-btn" (click)="showInviteModal()">{{ labels.inviteFirstProvider }}</button>
         </div>
       </div>
 
@@ -603,6 +602,11 @@ export class ProviderListComponent implements OnInit {
         console.log('Transformed providers:', finalProviders);
         this.providers.set(finalProviders);
         this.applyFilters();
+
+        // Auto-show invite modal if no providers exist
+        if (finalProviders.length === 0) {
+          this.showInviteModal();
+        }
       },
       error: (error) => {
         console.error('Error loading providers:', error);

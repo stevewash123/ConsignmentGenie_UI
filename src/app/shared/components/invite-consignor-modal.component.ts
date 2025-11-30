@@ -440,20 +440,27 @@ export class InviteConsignorModalComponent {
       const formData = this.inviteForm.value;
       const inviteData = {
         email: formData.email!,
-        firstName: formData.firstName || undefined,
-        lastName: formData.lastName || undefined,
-        personalMessage: formData.personalMessage || undefined
+        name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || formData.email!
       };
 
-      // TODO: Implement invite API call
-      console.log('Sending invite:', inviteData);
-
-      // Simulate API call
-      setTimeout(() => {
-        this.isSubmitting.set(false);
-        this.close();
-        // TODO: Show success message and refresh provider list
-      }, 1000);
+      // Send invitation via API
+      this.providerService.inviteProvider(inviteData).subscribe({
+        next: (response) => {
+          this.isSubmitting.set(false);
+          if (response.success) {
+            this.close();
+            this.consignorAdded.emit(null); // Trigger refresh of provider list
+          } else {
+            console.error('Invite failed:', response.message);
+            // TODO: Show error message to user
+          }
+        },
+        error: (error) => {
+          this.isSubmitting.set(false);
+          console.error('Invite error:', error);
+          // TODO: Show error message to user
+        }
+      });
     }
   }
 
