@@ -16,7 +16,7 @@ import {
   template: `
     @if (showDialog()) {
       <div class="confirmation-overlay" (click)="onOverlayClick()">
-        <div class="confirmation-dialog" (click)="$event.stopPropagation()" [@slideIn]>
+        <div class="confirmation-dialog" (click)="$event.stopPropagation()">
           <div class="dialog-header" [class.destructive]="dialogData()?.isDestructive">
             <div class="dialog-icon">
               @if (dialogData()?.isDestructive) {
