@@ -296,7 +296,6 @@ describe('OwnerSignupStep2Component', () => {
         expect(optionValues).toContain('FL');
       });
     });
-  });
 
     it('should navigate to dashboard when token is provided', fakeAsync(() => {
       const mockResponse = {
@@ -379,4 +378,5 @@ describe('OwnerSignupStep2Component', () => {
         }
       });
     }));
+  });
 });
