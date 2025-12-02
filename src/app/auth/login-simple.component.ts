@@ -300,7 +300,12 @@ export class LoginSimpleComponent implements OnInit {
 
   quickLogin(email: string) {
     this.email = email;
-    this.password = 'password123';
+    // Use correct passwords for each account type
+    if (email === 'admin@microsaasbuilders.com') {
+      this.password = 'admin123';  // Admin password from AdminController
+    } else {
+      this.password = 'password123';  // Default for other accounts
+    }
     this.errorMessage.set('');
   }
 
