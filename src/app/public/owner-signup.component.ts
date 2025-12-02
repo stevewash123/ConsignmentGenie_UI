@@ -461,7 +461,7 @@ export class OwnerSignupComponent {
       password: ['', [Validators.required, Validators.minLength(8)]],
       phone: [''],
       shopName: ['', [Validators.required, Validators.minLength(2)]],
-      subdomain: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+      subdomain: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9-]+$/)]],
       businessAddress: ['', [Validators.required, Validators.minLength(10)]],
       poBox: ['']
     });

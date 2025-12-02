@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 
@@ -339,26 +339,39 @@ import { AuthService } from '../services/auth.service';
     }
   `]
 })
-export class RegisterOwnerComponent {
+export class RegisterOwnerComponent implements OnInit {
   signupForm: FormGroup;
   isSubmitting = signal(false);
   errorMessage = signal('');
+  invitationToken: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.signupForm = this.fb.group({
       fullName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       shopName: ['', [Validators.required]],
-      subdomain: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+      subdomain: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9-]+$/)]],
       phone: [''],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, {
       validators: this.passwordMatchValidator
+    });
+  }
+
+  ngOnInit() {
+    // Check for invitation token in query parameters
+    this.route.queryParams.subscribe(params => {
+      this.invitationToken = params['token'] || null;
+      if (this.invitationToken) {
+        // Validate the invitation token and pre-fill form if valid
+        this.validateInvitationToken(this.invitationToken);
+      }
     });
   }
 
@@ -375,6 +388,27 @@ export class RegisterOwnerComponent {
     return null;
   }
 
+  private validateInvitationToken(token: string) {
+    this.authService.validateOwnerInvitation(token).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          // Pre-fill the form with invitation data
+          this.signupForm.patchValue({
+            fullName: response.name,
+            email: response.email
+          });
+          // Make email readonly since it's from the invitation
+          this.signupForm.get('email')?.disable();
+        } else {
+          this.errorMessage.set('Invalid or expired invitation: ' + response.errorMessage);
+        }
+      },
+      error: (error) => {
+        this.errorMessage.set('Error validating invitation: ' + error.message);
+      }
+    });
+  }
+
   onSubmit() {
     if (this.signupForm.invalid) {
       this.markAllFieldsTouched();
@@ -387,12 +421,13 @@ export class RegisterOwnerComponent {
     const formValue = this.signupForm.value;
     const request = {
       fullName: formValue.fullName,
-      email: formValue.email,
+      email: this.signupForm.get('email')?.disabled ? this.signupForm.get('email')?.value : formValue.email,
       phone: formValue.phone || '',
       password: formValue.password,
       shopName: formValue.shopName,
       subdomain: formValue.subdomain,
-      address: ''
+      address: '',
+      token: this.invitationToken // Include invitation token if present
     };
 
     this.authService.registerOwner(request).subscribe({

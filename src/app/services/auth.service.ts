@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, BehaviorSubject, catchError, of } from 'rxjs';
+import { Observable, tap, BehaviorSubject, catchError, of, map } from 'rxjs';
 import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse } from '../models/auth.model';
 import { environment } from '../../environments/environment';
 
@@ -54,31 +54,39 @@ export class AuthService {
     shopName: string;
     subdomain: string;
     address?: string;
+    token?: string | null;
   }): Observable<{ success: boolean; message?: string; errors?: string[]; token?: string; userId?: string; email?: string; role?: any; organizationId?: string; organizationName?: string; expiresAt?: string }> {
     return this.http.post<any>(
-      `${this.apiUrl}/auth/register/owner`,
+      `${this.apiUrl}/OwnerRegistration/register`,
       request
     ).pipe(
       tap(response => {
+        // Handle wrapped API response format
+        const data = response.success && response.data ? response.data : response;
+
         // If registration successful and we have token data, log the user in
-        if (response.success && response.token) {
+        if (data.success && data.token) {
           const authData = {
-            token: response.token,
-            userId: response.userId,
-            email: response.email,
-            role: response.role,
-            organizationId: response.organizationId,
-            organizationName: response.organizationName,
-            expiresAt: response.expiresAt
+            token: data.token,
+            userId: data.userId,
+            email: data.email,
+            role: data.role,
+            organizationId: data.organizationId,
+            organizationName: data.organizationName,
+            expiresAt: data.expiresAt
           };
           this.setAuthData(authData);
         }
       }),
+      map(response => {
+        // Unwrap API response format
+        return response.success && response.data ? response.data : response;
+      }),
       catchError((error: any) => {
         return of({
           success: false,
-          message: error.error?.message || 'Registration failed',
-          errors: error.error?.errors || [error.message]
+          message: error.error?.message || error.error?.data?.message || 'Registration failed',
+          errors: error.error?.errors || error.error?.data?.errors || [error.message]
         });
       })
     );
@@ -121,6 +129,32 @@ export class AuthService {
         return of({
           isValid: false,
           errorMessage: 'Unable to validate store code'
+        });
+      })
+    );
+  }
+
+  validateOwnerInvitation(token: string): Observable<{ isValid: boolean; name?: string; email?: string; expiresAt?: Date; errorMessage?: string }> {
+    return this.http.get<any>(
+      `${this.apiUrl}/OwnerRegistration/validate?token=${encodeURIComponent(token)}`
+    ).pipe(
+      map(response => {
+        // Handle wrapped API response format
+        if (response.success && response.data) {
+          return response.data;
+        } else if (response.success === false && response.message) {
+          return {
+            isValid: false,
+            errorMessage: response.message
+          };
+        }
+        // Fallback if response structure is unexpected
+        return response;
+      }),
+      catchError((error: any) => {
+        return of({
+          isValid: false,
+          errorMessage: error.error?.message || error.error?.data?.errorMessage || 'Unable to validate invitation'
         });
       })
     );

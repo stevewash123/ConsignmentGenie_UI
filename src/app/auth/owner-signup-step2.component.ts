@@ -533,7 +533,7 @@ export class OwnerSignupStep2Component implements OnInit {
     this.profileForm = this.fb.group({
       fullName: ['', [Validators.required]],
       shopName: ['', [Validators.required]],
-      subdomain: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+      subdomain: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9-]+$/)]],
       phone: [''],
       streetAddress: ['', [Validators.required]],
       city: ['', [Validators.required]],
