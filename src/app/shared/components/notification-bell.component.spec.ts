@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router, ActivatedRoute } from '@angular/router';
 import { of, BehaviorSubject } from 'rxjs';
 import { NotificationBellComponent } from './notification-bell.component';
 import { NotificationService } from '../services/notification.service';
@@ -38,18 +37,43 @@ describe('NotificationBellComponent', () => {
 
     // Setup LoadingService return values
     mockLoadingService.isLoading.and.returnValue(false);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of() // Observable for navigation events
+    });
+    routerSpy.createUrlTree.and.returnValue({} as any); // Mock UrlTree
+    routerSpy.serializeUrl.and.returnValue(''); // Mock serialized URL
+
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: {},
+      params: of({}),
+      queryParams: of({}),
+      url: of([]),
+      data: of({}),
+      fragment: of(''),
+      outlet: 'primary',
+      component: null,
+      routeConfig: null,
+      root: null as any,
+      parent: null,
+      firstChild: null,
+      children: [],
+      pathFromRoot: []
+    });
 
     await TestBed.configureTestingModule({
-      imports: [NotificationBellComponent, RouterTestingModule.withRoutes([])],
+      imports: [NotificationBellComponent],
       providers: [
         { provide: NotificationService, useValue: mockNotificationService },
-        { provide: LoadingService, useValue: mockLoadingService }
+        { provide: LoadingService, useValue: mockLoadingService },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(NotificationBellComponent);
     component = fixture.componentInstance;
+    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
   it('should create', () => {
@@ -118,5 +142,60 @@ describe('NotificationBellComponent', () => {
 
     expect(component['destroy$'].next).toHaveBeenCalled();
     expect(component['destroy$'].complete).toHaveBeenCalled();
+  });
+
+  it('should close dropdown', () => {
+    component.isDropdownOpen = true;
+    component.closeDropdown();
+    expect(component.isDropdownOpen).toBe(false);
+  });
+
+  it('should return trackBy value', () => {
+    const notification = { notificationId: 'test-123' };
+    const result = component.trackByNotificationId(0, notification as any);
+    expect(result).toBe('test-123');
+  });
+
+  it('should mark notification as read', () => {
+    const notification = { notificationId: 'test-1', isRead: false };
+    const event = new Event('click');
+    mockNotificationService.markAsRead.and.returnValue(of(undefined));
+    component.unreadCount = 5;
+
+    component.markAsRead(notification as any, event);
+
+    expect(mockNotificationService.markAsRead).toHaveBeenCalledWith('provider', 'test-1');
+  });
+
+  it('should mark all notifications as read', () => {
+    component.recentNotifications = [
+      { isRead: false } as any,
+      { isRead: false } as any
+    ];
+    mockNotificationService.markAllAsRead.and.returnValue(of(undefined));
+
+    component.markAllAsRead();
+
+    expect(mockNotificationService.markAllAsRead).toHaveBeenCalledWith('provider');
+  });
+
+  it('should handle notification click', () => {
+    const notification = { notificationId: 'test-1', isRead: true, type: 'welcome' };
+    spyOn(component, 'closeDropdown');
+    mockRouter.navigate.and.returnValue(Promise.resolve(true));
+
+    component.handleNotificationClick(notification as any);
+
+    expect(component.closeDropdown).toHaveBeenCalled();
+  });
+
+  it('should get notification icon', () => {
+    const result = component.getNotificationIcon('welcome');
+    expect(typeof result).toBe('string');
+  });
+
+  it('should get notification icon class', () => {
+    const result = component.getNotificationIconClass('welcome');
+    expect(typeof result).toBe('string');
   });
 });

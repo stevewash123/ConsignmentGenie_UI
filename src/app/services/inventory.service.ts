@@ -68,16 +68,29 @@ export class InventoryService {
     return this.http.get<ApiResponse<string>>(`${this.apiUrl}/items/generate-sku/${prefix}`);
   }
 
-  uploadItemPhoto(itemId: string, file: File): Observable<ApiResponse<string>> {
+  // Photo management endpoints
+  uploadItemImage(itemId: string, file: File): Observable<ApiResponse<any>> {
     const formData = new FormData();
-    formData.append('photo', file);
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/items/${itemId}/photos`, formData);
+    formData.append('file', file);
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/items/${itemId}/images`, formData);
   }
 
-  deleteItemPhoto(itemId: string, photoUrl: string): Observable<ApiResponse<any>> {
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/items/${itemId}/photos`, {
-      body: { photoUrl }
-    });
+  deleteItemImage(itemId: string, imageId: string): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/items/${itemId}/images/${imageId}`);
+  }
+
+  reorderItemImages(itemId: string, images: any[]): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/items/${itemId}/images/reorder`, { images });
+  }
+
+  // Bulk operations
+  bulkUpdateItemStatus(itemIds: string[], status: string, reason?: string): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/items/bulk-status`, { itemIds, status, reason });
+  }
+
+  // Metrics endpoint
+  getInventoryMetrics(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/items/metrics`);
   }
 
   // Categories API

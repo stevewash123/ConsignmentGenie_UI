@@ -355,11 +355,16 @@ describe('OwnerWelcomeModalComponent', () => {
       const trackResult = component.trackByStepId(0, step);
       expect(trackResult).toBe(step.id);
     });
-
+    
     it('should identify next step correctly', () => {
-      const result = component.isNextStep(mockSteps[1]);
-      expect(result).toBe(true);
-      expect(mockOnboardingService.getNextIncompleteStep).toHaveBeenCalledWith(mockOnboardingStatus);
+      // Setup: component needs steps populated
+      component.steps = mockSteps;  // Where mockSteps[0].completed = true, mockSteps[1].completed = false
+      
+      // The first incomplete step should be identified as "next"
+      expect(component.isNextStep(mockSteps[1])).toBe(true);
+      
+      // Completed steps should not be "next"
+      expect(component.isNextStep(mockSteps[0])).toBe(false);
     });
 
     it('should return false for isNextStep when no next step exists', () => {

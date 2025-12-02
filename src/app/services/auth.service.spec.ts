@@ -130,7 +130,7 @@ describe('AuthService', () => {
 
     tick();
 
-    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/auth/register/owner', ownerRequest);
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/OwnerRegistration/register', ownerRequest);
   }));
 
   it('should handle owner registration error', fakeAsync(() => {
@@ -146,8 +146,10 @@ describe('AuthService', () => {
     mockHttpClient.post.and.returnValue(
       throwError(() => ({
         error: {
-          message: 'Email already exists',
-          errors: ['Email is already in use']
+          data: {
+            message: 'Email already exists',
+            errors: ['Email is already in use']
+          }
         }
       }))
     );

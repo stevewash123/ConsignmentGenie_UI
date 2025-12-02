@@ -324,11 +324,11 @@ describe('OnboardingService', () => {
       expect(message.subtitle).toContain('set up');
     });
 
-    it('should return progress message for partial completion', () => {
+    it('should return "almost there" message for partial completion', () => {
       const message = service.getWelcomeMessage(mockOnboardingStatus, shopName);
 
-      expect(message.title).toContain('progress');
-      expect(message.subtitle).toContain('left to complete');
+      expect(message.title).toBe('Almost there! 🎯');
+      expect(message.subtitle).toBe("Here's what's left to complete your setup:");
     });
 
     it('should return completion message for completed setup', () => {

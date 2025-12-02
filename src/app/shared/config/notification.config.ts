@@ -227,7 +227,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
   }
 };
 
-export function getNotificationConfig(type: NotificationType): NotificationTypeConfig {
+export function getNotificationConfig(type: NotificationType): NotificationTypeConfig | undefined {
   return notificationConfig[type];
 }
 

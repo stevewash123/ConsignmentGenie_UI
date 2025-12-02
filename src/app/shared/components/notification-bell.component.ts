@@ -567,13 +567,15 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
     // Navigation will be handled by the action URL if available
     const config = getNotificationConfig(notification.type);
-    const route = config.getRoute(notification, this.role);
+    if (config) {
+      const route = config.getRoute(notification, this.role);
 
-    if (route) {
-      // Use Angular Router to navigate - prevents page reload
-      this.router.navigate([route]).catch(error => {
-        console.error('Navigation error:', error);
-      });
+      if (route) {
+        // Use Angular Router to navigate - prevents page reload
+        this.router.navigate([route]).catch(error => {
+          console.error('Navigation error:', error);
+        });
+      }
     }
   }
 
