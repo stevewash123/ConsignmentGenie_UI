@@ -5,29 +5,29 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
 interface BusinessSettings {
-  commission: {
-    defaultSplit: string;
-    allowCustomSplitsPerConsignor: boolean;
-    allowCustomSplitsPerItem: boolean;
+  Commission: {
+    DefaultSplit: string;
+    AllowCustomSplitsPerConsignor: boolean;
+    AllowCustomSplitsPerItem: boolean;
   };
-  tax: {
-    salesTaxRate: number;
-    taxIncludedInPrices: boolean;
-    chargeTaxOnShipping: boolean;
-    taxIdEin?: string;
+  Tax: {
+    SalesTaxRate: number;
+    TaxIncludedInPrices: boolean;
+    ChargeTaxOnShipping: boolean;
+    TaxIdEin?: string;
   };
-  payouts: {
-    schedule: string;
-    minimumAmount: number;
-    holdPeriodDays: number;
+  Payouts: {
+    Schedule: string;
+    MinimumAmount: number;
+    HoldPeriodDays: number;
   };
-  items: {
-    defaultConsignmentPeriodDays: number;
-    enableAutoMarkdowns: boolean;
-    markdownSchedule: {
-      after30Days: number;
-      after60Days: number;
-      after90DaysAction: 'donate' | 'return';
+  Items: {
+    DefaultConsignmentPeriodDays: number;
+    EnableAutoMarkdowns: boolean;
+    MarkdownSchedule: {
+      After30Days: number;
+      After60Days: number;
+      After90DaysAction: 'donate' | 'return';
     };
   };
 }
@@ -52,7 +52,7 @@ interface BusinessSettings {
             <label for="defaultSplit">Default Split (Shop/Consignor)</label>
             <select
               id="defaultSplit"
-              [(ngModel)]="settings()!.commission.defaultSplit"
+              [(ngModel)]="settings()!.Commission.DefaultSplit"
               name="defaultSplit"
               class="form-select">
               <option value="70/30">70 / 30 - Shop keeps 70%, Consignor gets 30%</option>
@@ -66,7 +66,7 @@ interface BusinessSettings {
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.commission.allowCustomSplitsPerConsignor"
+                [(ngModel)]="settings()!.Commission.AllowCustomSplitsPerConsignor"
                 name="allowCustomConsignor">
               <span class="checkmark"></span>
               Allow custom splits per consignor
@@ -75,7 +75,7 @@ interface BusinessSettings {
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.commission.allowCustomSplitsPerItem"
+                [(ngModel)]="settings()!.Commission.AllowCustomSplitsPerItem"
                 name="allowCustomItem">
               <span class="checkmark"></span>
               Allow custom splits per item
@@ -93,7 +93,7 @@ interface BusinessSettings {
               <input
                 type="number"
                 id="salesTaxRate"
-                [(ngModel)]="settings()!.tax.salesTaxRate"
+                [(ngModel)]="settings()!.Tax.SalesTaxRate"
                 name="salesTaxRate"
                 class="form-input"
                 placeholder="8.25"
@@ -108,7 +108,7 @@ interface BusinessSettings {
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.tax.taxIncludedInPrices"
+                [(ngModel)]="settings()!.Tax.TaxIncludedInPrices"
                 name="taxIncluded">
               <span class="checkmark"></span>
               Tax is included in listed prices
@@ -117,7 +117,7 @@ interface BusinessSettings {
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.tax.chargeTaxOnShipping"
+                [(ngModel)]="settings()!.Tax.ChargeTaxOnShipping"
                 name="taxOnShipping">
               <span class="checkmark"></span>
               Charge tax on shipping
@@ -129,7 +129,7 @@ interface BusinessSettings {
             <input
               type="text"
               id="taxIdEin"
-              [(ngModel)]="settings()!.tax.taxIdEin"
+              [(ngModel)]="settings()!.Tax.TaxIdEin"
               name="taxIdEin"
               class="form-input"
               placeholder="12-3456789">
@@ -144,7 +144,7 @@ interface BusinessSettings {
             <label for="payoutSchedule">Payout Schedule</label>
             <select
               id="payoutSchedule"
-              [(ngModel)]="settings()!.payouts.schedule"
+              [(ngModel)]="settings()!.Payouts.Schedule"
               name="payoutSchedule"
               class="form-select">
               <option value="weekly">Weekly (every Friday)</option>
@@ -163,7 +163,7 @@ interface BusinessSettings {
                 <input
                   type="number"
                   id="minimumPayout"
-                  [(ngModel)]="settings()!.payouts.minimumAmount"
+                  [(ngModel)]="settings()!.Payouts.MinimumAmount"
                   name="minimumPayout"
                   class="form-input"
                   placeholder="25.00"
@@ -176,7 +176,7 @@ interface BusinessSettings {
               <label for="holdPeriod">Payout Hold Period</label>
               <select
                 id="holdPeriod"
-                [(ngModel)]="settings()!.payouts.holdPeriodDays"
+                [(ngModel)]="settings()!.Payouts.HoldPeriodDays"
                 name="holdPeriod"
                 class="form-select">
                 <option value="0">Immediate</option>
@@ -197,7 +197,7 @@ interface BusinessSettings {
             <label for="consignmentPeriod">Default Consignment Period</label>
             <select
               id="consignmentPeriod"
-              [(ngModel)]="settings()!.items.defaultConsignmentPeriodDays"
+              [(ngModel)]="settings()!.Items.DefaultConsignmentPeriodDays"
               name="consignmentPeriod"
               class="form-select">
               <option value="30">30 days</option>
@@ -213,19 +213,19 @@ interface BusinessSettings {
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.items.enableAutoMarkdowns"
+                [(ngModel)]="settings()!.Items.EnableAutoMarkdowns"
                 name="enableMarkdowns">
               <span class="checkmark"></span>
               Enable automatic markdowns
             </label>
 
-            <div class="markdown-schedule" *ngIf="settings()?.items.enableAutoMarkdowns">
+            <div class="markdown-schedule" *ngIf="settings()?.Items.EnableAutoMarkdowns">
               <div class="markdown-item">
                 <span class="markdown-label">After 30 days:</span>
                 <div class="input-with-suffix">
                   <input
                     type="number"
-                    [(ngModel)]="settings()!.items.markdownSchedule.after30Days"
+                    [(ngModel)]="settings()!.Items.MarkdownSchedule.After30Days"
                     name="markdown30"
                     class="form-input markdown-input"
                     min="0"
@@ -240,7 +240,7 @@ interface BusinessSettings {
                 <div class="input-with-suffix">
                   <input
                     type="number"
-                    [(ngModel)]="settings()!.items.markdownSchedule.after60Days"
+                    [(ngModel)]="settings()!.Items.MarkdownSchedule.After60Days"
                     name="markdown60"
                     class="form-input markdown-input"
                     min="0"
@@ -257,7 +257,7 @@ interface BusinessSettings {
                     <input
                       type="radio"
                       value="donate"
-                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
+                      [(ngModel)]="settings()!.Items.MarkdownSchedule.After90DaysAction"
                       name="after90Action">
                     <span class="radio-mark"></span>
                     Donate
@@ -266,7 +266,7 @@ interface BusinessSettings {
                     <input
                       type="radio"
                       value="return"
-                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
+                      [(ngModel)]="settings()!.Items.MarkdownSchedule.After90DaysAction"
                       name="after90Action">
                     <span class="radio-mark"></span>
                     Return to consignor
@@ -601,7 +601,7 @@ export class BusinessSettingsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      const response = await this.http.get<BusinessSettings>(`${environment.apiUrl}/organization/business-settings`).toPromise();
+      const response = await this.http.get<BusinessSettings>(`${environment.apiUrl}/api/organization/business-settings`).toPromise();
       if (response) {
         this.settings.set(response);
       }
@@ -615,7 +615,7 @@ export class BusinessSettingsComponent implements OnInit {
 
     this.isSaving.set(true);
     try {
-      const response = await this.http.put(`${environment.apiUrl}/organization/business-settings`, this.settings()).toPromise();
+      const response = await this.http.put(`${environment.apiUrl}/api/organization/business-settings`, this.settings()).toPromise();
       this.showSuccess('Business settings saved successfully');
     } catch (error) {
       this.showError('Failed to save business settings');
