@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface BusinessSettings {
   commission: {
@@ -600,36 +601,10 @@ export class BusinessSettingsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      // Mock data - replace with actual API call
-      const mockSettings: BusinessSettings = {
-        commission: {
-          defaultSplit: '60/40',
-          allowCustomSplitsPerConsignor: true,
-          allowCustomSplitsPerItem: true
-        },
-        tax: {
-          salesTaxRate: 8.25,
-          taxIncludedInPrices: true,
-          chargeTaxOnShipping: false,
-          taxIdEin: '12-3456789'
-        },
-        payouts: {
-          schedule: 'monthly',
-          minimumAmount: 25.00,
-          holdPeriodDays: 14
-        },
-        items: {
-          defaultConsignmentPeriodDays: 90,
-          enableAutoMarkdowns: true,
-          markdownSchedule: {
-            after30Days: 10,
-            after60Days: 25,
-            after90DaysAction: 'donate'
-          }
-        }
-      };
-
-      this.settings.set(mockSettings);
+      const response = await this.http.get<BusinessSettings>(`${environment.apiUrl}/organization/business-settings`).toPromise();
+      if (response) {
+        this.settings.set(response);
+      }
     } catch (error) {
       this.showError('Failed to load business settings');
     }
@@ -640,9 +615,7 @@ export class BusinessSettingsComponent implements OnInit {
 
     this.isSaving.set(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-
+      const response = await this.http.put(`${environment.apiUrl}/organization/business-settings`, this.settings()).toPromise();
       this.showSuccess('Business settings saved successfully');
     } catch (error) {
       this.showError('Failed to save business settings');
