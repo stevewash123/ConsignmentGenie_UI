@@ -6,8 +6,10 @@ import { Subject, takeUntil } from 'rxjs';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { OwnerWelcomeModalComponent } from './owner-welcome-modal.component';
 import { ConsignorService } from '../../services/consignor.service';
-import { TransactionService, SalesMetrics, MetricsQueryParams } from '../../services/transaction.service';
+import { TransactionService, SalesMetrics, MetricsQueryParams, TransactionQueryParams } from '../../services/transaction.service';
 import { PayoutService, PayoutStatus } from '../../services/payout.service';
+import { InventoryService } from '../../services/inventory.service';
+import { Transaction } from '../../models/transaction.model';
 import { PendingPayoutData } from '../../models/payout.model';
 import { AuthService } from '../../services/auth.service';
 import { OnboardingService } from '../../shared/services/onboarding.service';
@@ -21,10 +23,10 @@ interface ShopSummary {
   recentSalesCount: number;
   pendingPayouts: number;
   pendingPayoutCount: number;
-  recentTransactions: Transaction[];
+  recentTransactions: DashboardTransaction[];
 }
 
-interface Transaction {
+interface DashboardTransaction {
   id: string;
   date: Date;
   itemName: string;
@@ -374,7 +376,8 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
     private transactionService: TransactionService,
     private payoutService: PayoutService,
     private authService: AuthService,
-    private onboardingService: OnboardingService
+    private onboardingService: OnboardingService,
+    private inventoryService: InventoryService
   ) {}
 
   ngOnInit() {
@@ -393,7 +396,7 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadDashboardData() {
-    // Load real consignor count and sales metrics
+    // Load real consignor count, sales metrics, inventory metrics, and recent transactions
     const consignorsPromise = this.consignorService.getConsignors().toPromise();
 
     // Get last 30 days sales metrics
@@ -405,12 +408,22 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
       endDate: new Date()
     };
 
+    // Get recent transactions (last 10)
+    const transactionParams: TransactionQueryParams = {
+      page: 1,
+      pageSize: 10,
+      sortBy: 'saleDate',
+      sortDirection: 'desc'
+    };
+
     const salesPromise = this.transactionService.getSalesMetrics(metricsParams).toPromise();
     const pendingPayoutsPromise = this.payoutService.getPendingPayouts().toPromise();
+    const inventoryMetricsPromise = this.inventoryService.getInventoryMetrics().toPromise();
+    const recentTransactionsPromise = this.transactionService.getTransactions(transactionParams).toPromise();
 
-    Promise.all([consignorsPromise, salesPromise, pendingPayoutsPromise])
-      .then(([consignors, salesMetrics, pendingPayouts]) => {
-        console.log('Dashboard data loaded:', { consignors, salesMetrics, pendingPayouts });
+    Promise.all([consignorsPromise, salesPromise, pendingPayoutsPromise, inventoryMetricsPromise, recentTransactionsPromise])
+      .then(([consignors, salesMetrics, pendingPayouts, inventoryMetrics, recentTransactions]) => {
+        console.log('Dashboard data loaded:', { consignors, salesMetrics, pendingPayouts, inventoryMetrics, recentTransactions });
 
         // Handle consignors response - might be wrapped in API response object
         let consignorsArray = consignors;
@@ -428,60 +441,49 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
         const totalPendingAmount = pendingPayouts?.reduce((total, pending) => total + pending.pendingAmount, 0) || 0;
         const pendingConsignorCount = pendingPayouts?.length || 0;
 
-        const mockSummary: ShopSummary = {
+        // Extract inventory metrics
+        const inventoryValue = inventoryMetrics?.data?.totalValue || 0;
+        const totalItems = inventoryMetrics?.data?.totalItems || 0;
+
+        // Transform recent transactions to dashboard format
+        const dashboardTransactions: DashboardTransaction[] = recentTransactions?.items?.map((t: Transaction) => ({
+          id: t.id,
+          date: new Date(t.saleDate),
+          itemName: t.item.name,
+          consignor: t.provider.name,
+          amount: t.salePrice,
+          commission: t.shopAmount
+        })) || [];
+
+        const realSummary: ShopSummary = {
           activeConsignors: activeConsignorCount,
-          inventoryValue: 42750.80, // Still mock - needs inventory API
-          totalItems: 342, // Still mock - needs inventory API
+          inventoryValue: inventoryValue,
+          totalItems: totalItems,
           recentSales: salesMetrics?.totalSales || 0,
           recentSalesCount: salesMetrics?.transactionCount || 0,
           pendingPayouts: totalPendingAmount,
           pendingPayoutCount: pendingConsignorCount,
-          recentTransactions: [
-            {
-              id: '1',
-              date: new Date(2024, 10, 20, 14, 30),
-              itemName: 'Vintage Leather Jacket',
-              consignor: 'Sarah Thompson',
-              amount: 125.00,
-              commission: 62.50
-            },
-            {
-              id: '2',
-              date: new Date(2024, 10, 20, 12, 15),
-              itemName: 'Antique Jewelry Box',
-              consignor: 'Mike Chen',
-              amount: 89.99,
-              commission: 44.99
-            },
-            {
-              id: '3',
-              date: new Date(2024, 10, 19, 16, 45),
-              itemName: 'Designer Handbag',
-              consignor: 'Emma Rodriguez',
-              amount: 275.00,
-              commission: 137.50
-            }
-          ]
+          recentTransactions: dashboardTransactions
         };
 
-        this.summary.set(mockSummary);
+        this.summary.set(realSummary);
       })
       .catch((error) => {
         console.error('Failed to load dashboard data:', error);
         this.activeConsignorCount.set(0);
 
-        // Fallback to mock data if API fails
-        const mockSummary: ShopSummary = {
+        // Fallback to basic data if API fails
+        const fallbackSummary: ShopSummary = {
           activeConsignors: 0,
-          inventoryValue: 42750.80,
-          totalItems: 342,
-          recentSales: 0, // Show 0 for failed sales data
+          inventoryValue: 0,
+          totalItems: 0,
+          recentSales: 0,
           recentSalesCount: 0,
-          pendingPayouts: 3247.60,
-          pendingPayoutCount: 8,
+          pendingPayouts: 0,
+          pendingPayoutCount: 0,
           recentTransactions: []
         };
-        this.summary.set(mockSummary);
+        this.summary.set(fallbackSummary);
       });
   }
 
