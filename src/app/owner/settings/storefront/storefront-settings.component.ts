@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 type SalesChannel = 'square' | 'shopify' | 'cg_storefront' | 'in_store_only';
 
@@ -991,36 +992,10 @@ export class StorefrontSettingsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      // Mock data - replace with actual API call
-      const mockSettings: StorefrontSettings = {
-        selectedChannel: 'square',
-        square: {
-          connected: true,
-          businessName: 'Vintage Treasures',
-          locationName: 'Austin - Main St',
-          connectedAt: new Date('2024-11-15'),
-          syncInventory: true,
-          importSales: true,
-          syncCustomers: false,
-          syncFrequency: '15min',
-          categoryMappings: []
-        },
-        cgStorefront: {
-          storeSlug: 'vintage-treasures',
-          customDomain: 'shop.vintagetreasures.com',
-          dnsVerified: false,
-          stripeConnected: false,
-          bannerImageUrl: undefined,
-          primaryColor: '#8B4513',
-          accentColor: '#D4A574',
-          displayStoreHours: true,
-          storeHours: [],
-          metaTitle: 'Vintage Treasures - Austin Consignment',
-          metaDescription: 'Shop curated vintage and antique items...'
-        }
-      };
-
-      this.settings.set(mockSettings);
+      const response = await this.http.get<StorefrontSettings>(`${environment.apiUrl}/organization/storefront-settings`).toPromise();
+      if (response) {
+        this.settings.set(response);
+      }
     } catch (error) {
       this.showError('Failed to load storefront settings');
     }
@@ -1031,9 +1006,7 @@ export class StorefrontSettingsComponent implements OnInit {
 
     this.isSaving.set(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-
+      const response = await this.http.put(`${environment.apiUrl}/organization/storefront-settings`, this.settings()).toPromise();
       this.showSuccess('Storefront settings saved successfully');
     } catch (error) {
       this.showError('Failed to save storefront settings');
