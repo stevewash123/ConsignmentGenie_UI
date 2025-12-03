@@ -1,43 +1,51 @@
 // Updated inventory models to match the new specification
 
 export interface ItemListDto {
-  id: string;
+  itemId: string;
   sku: string;
   title: string;
   description?: string;
-  category: string;
-  condition: ItemCondition;
   price: number;
+  category?: string;
+  condition: ItemCondition;
   status: ItemStatus;
   primaryImageUrl?: string;
-  providerId: string;
-  providerName: string;
+  receivedDate: Date;
+  soldDate?: Date;
+  consignorId: string;
+  consignorName: string;
   commissionRate: number;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface ItemDetailDto {
-  id: string;
+  itemId: string;
+  consignorId: string;
+  consignorName: string;
+  commissionRate: number;
   sku: string;
+  barcode?: string;
   title: string;
   description?: string;
-  category: string;
-  condition: ItemCondition;
-  price: number;
-  originalPrice?: number;
-  status: ItemStatus;
-  primaryImageUrl?: string;
-  materials?: string;
-  measurements?: string;
+  category?: string;
   brand?: string;
   size?: string;
   color?: string;
-  season?: string;
-  year?: number;
-  providerId: string;
-  providerName: string;
-  commissionRate: number;
+  condition: ItemCondition;
+  materials?: string;
+  measurements?: string;
+  price: number;
+  originalPrice?: number;
+  minimumPrice?: number;
+  shopAmount: number;
+  consignorAmount: number;
+  status: ItemStatus;
+  statusChangedAt?: Date;
+  statusChangedReason?: string;
+  receivedDate: Date;
+  listedDate?: Date;
+  expirationDate?: Date;
+  soldDate?: Date;
+  images: ItemImageDto[];
   location?: string;
   notes?: string;
   internalNotes?: string;
@@ -45,52 +53,56 @@ export interface ItemDetailDto {
   updatedAt: Date;
   transactionId?: string;
   salePrice?: number;
-  images: ItemImageDto[];
 }
 
 export interface ItemImageDto {
-  id: string;
+  itemImageId: string;
   imageUrl: string;
   displayOrder: number;
   isPrimary: boolean;
-  createdAt: Date;
 }
 
 export interface CreateItemRequest {
-  providerId: string;
+  consignorId: string;
+  sku?: string;
+  barcode?: string;
   title: string;
   description?: string;
   category: string;
-  condition: ItemCondition;
-  price: number;
-  originalPrice?: number;
-  materials?: string;
-  measurements?: string;
   brand?: string;
   size?: string;
   color?: string;
-  season?: string;
-  year?: number;
+  condition: ItemCondition;
+  materials?: string;
+  measurements?: string;
+  price: number;
+  originalPrice?: number;
+  minimumPrice?: number;
+  receivedDate?: Date;
+  expirationDate?: Date;
   location?: string;
   notes?: string;
   internalNotes?: string;
 }
 
 export interface UpdateItemRequest {
-  providerId: string;
+  consignorId: string;
+  sku?: string;
+  barcode?: string;
   title: string;
   description?: string;
   category: string;
-  condition: ItemCondition;
-  price: number;
-  originalPrice?: number;
-  materials?: string;
-  measurements?: string;
   brand?: string;
   size?: string;
   color?: string;
-  season?: string;
-  year?: number;
+  condition: ItemCondition;
+  materials?: string;
+  measurements?: string;
+  price: number;
+  originalPrice?: number;
+  minimumPrice?: number;
+  receivedDate?: Date;
+  expirationDate?: Date;
   location?: string;
   notes?: string;
   internalNotes?: string;
@@ -108,7 +120,7 @@ export interface ItemQueryParams {
   category?: string;
   status?: string;
   condition?: string;
-  providerId?: string;
+  consignorId?: string;
   priceMin?: number;
   priceMax?: number;
   createdAfter?: Date;
@@ -173,4 +185,45 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   errors?: string[];
+}
+
+// New interfaces for bulk operations and metrics
+export interface BulkStatusUpdateRequest {
+  itemIds: string[];
+  status: string;
+  reason?: string;
+}
+
+export interface BulkUpdateResultDto {
+  successfulUpdates: number;
+  failedUpdates: number;
+  errorMessages: string[];
+  updatedItemIds: string[];
+  failedItemIds: string[];
+}
+
+export interface InventoryMetricsDto {
+  totalItems: number;
+  availableItems: number;
+  soldItems: number;
+  removedItems: number;
+  totalValue: number;
+  averagePrice: number;
+  itemsAddedThisMonth: number;
+  itemsSoldThisMonth: number;
+  byCategory: CategoryBreakdownDto[];
+  byProvider: ProviderBreakdownDto[];
+}
+
+export interface CategoryBreakdownDto {
+  category: string;
+  count: number;
+  value: number;
+}
+
+export interface ProviderBreakdownDto {
+  consignorId: string;
+  consignorName: string;
+  count: number;
+  value: number;
 }

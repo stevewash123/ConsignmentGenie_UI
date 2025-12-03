@@ -106,17 +106,27 @@ import {
         </div>
       </div>
 
-      <!-- Results Summary -->
+      <!-- Results Summary and View Toggle -->
       <div class="results-summary">
         <span>Showing {{ itemsResult()?.items.length || 0 }} of {{ itemsResult()?.totalCount || 0 }} items</span>
-        <div class="page-size-selector">
-          <label>Items per page:</label>
-          <select [(ngModel)]="pageSize" (change)="changePageSize()" class="form-select">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
+        <div class="view-controls">
+          <div class="view-toggle">
+            <button class="btn btn-sm" [class.btn-primary]="viewMode === 'table'" [class.btn-outline-primary]="viewMode !== 'table'" (click)="setViewMode('table')">
+              <i class="fas fa-table"></i> Table
+            </button>
+            <button class="btn btn-sm" [class.btn-primary]="viewMode === 'cards'" [class.btn-outline-primary]="viewMode !== 'cards'" (click)="setViewMode('cards')">
+              <i class="fas fa-th-large"></i> Cards
+            </button>
+          </div>
+          <div class="page-size-selector">
+            <label>Items per page:</label>
+            <select [(ngModel)]="pageSize" (change)="changePageSize()" class="form-select">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -137,7 +147,7 @@ import {
       }
 
       <!-- Items Table -->
-      @if (!isInventoryLoading() && !error() && itemsResult()) {
+      @if (!isInventoryLoading() && !error() && itemsResult() && viewMode === 'table') {
         <div class="items-table-container">
           <table class="table table-striped table-hover">
             <thead>
@@ -149,13 +159,14 @@ import {
                 <th>Condition</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Source</th>
                 <th>Provider</th>
-                <th>Created</th>
+                <th>Received</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              @for (item of itemsResult()!.items; track item.id) {
+              @for (item of itemsResult()!.items; track item.itemId) {
                 <tr>
                   <td class="image-cell">
                     @if (item.primaryImageUrl) {
@@ -185,14 +196,19 @@ import {
                       {{ item.status }}
                     </span>
                   </td>
-                  <td>{{ item.providerName }}</td>
-                  <td>{{ item.createdAt | date:'short' }}</td>
+                  <td>
+                    <span class="badge badge-info">
+                      Manual
+                    </span>
+                  </td>
+                  <td>{{ item.consignorName }}</td>
+                  <td>{{ item.receivedDate | date:'short' }}</td>
                   <td class="actions-cell">
                     <div class="btn-group">
-                      <button class="btn btn-sm btn-outline-primary" (click)="viewItem(item.id)">
+                      <button class="btn btn-sm btn-outline-primary" (click)="viewItem(item.itemId)">
                         <i class="fas fa-eye"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-secondary" (click)="editItem(item.id)">
+                      <button class="btn btn-sm btn-outline-secondary" (click)="editItem(item.itemId)">
                         <i class="fas fa-edit"></i>
                       </button>
                       @if (item.status === 'Available') {
@@ -208,7 +224,7 @@ import {
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="10" class="no-results">
+                  <td colspan="11" class="no-results">
                     <div class="empty-state">
                       <i class="fas fa-box-open fa-3x"></i>
                       <h3>No items found</h3>
@@ -223,7 +239,74 @@ import {
             </tbody>
           </table>
         </div>
+      }
 
+      <!-- Items Cards -->
+      @if (!isInventoryLoading() && !error() && itemsResult() && viewMode === 'cards') {
+        <div class="items-cards-container">
+          @for (item of itemsResult()!.items; track item.itemId) {
+            <div class="item-card">
+              <div class="card-image">
+                @if (item.primaryImageUrl) {
+                  <img [src]="item.primaryImageUrl" [alt]="item.title" class="card-thumbnail">
+                } @else {
+                  <div class="no-image-large">
+                    <i class="fas fa-image"></i>
+                  </div>
+                }
+              </div>
+              <div class="card-content">
+                <div class="card-header">
+                  <h3 class="card-title">{{ item.title }}</h3>
+                  <span class="card-price">{{ item.price | currency }}</span>
+                </div>
+                <div class="card-details">
+                  <p class="card-sku">SKU: {{ item.sku }}</p>
+                  <p class="card-category">{{ item.category }}</p>
+                  <div class="card-badges">
+                    <span class="badge" [class]="getConditionClass(item.condition)">
+                      {{ getConditionLabel(item.condition) }}
+                    </span>
+                    <span class="badge" [class]="getStatusClass(item.status)">
+                      {{ item.status }}
+                    </span>
+                    <span class="badge badge-info">Manual</span>
+                  </div>
+                  <p class="card-consignor">{{ item.consignorName }}</p>
+                  <p class="card-received">Received: {{ item.receivedDate | date:'short' }}</p>
+                </div>
+                <div class="card-actions">
+                  <button class="btn btn-sm btn-outline-primary" (click)="viewItem(item.itemId)">
+                    <i class="fas fa-eye"></i> View
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary" (click)="editItem(item.itemId)">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  @if (item.status === 'Available') {
+                    <button class="btn btn-sm btn-outline-warning" (click)="markAsRemoved(item)">
+                      <i class="fas fa-archive"></i>
+                    </button>
+                  }
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteItem(item)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              <i class="fas fa-box-open fa-3x"></i>
+              <h3>No items found</h3>
+              <p>Try adjusting your search criteria or add new items to your inventory.</p>
+              <button class="btn btn-primary" (click)="createNewItem()">
+                <i class="fas fa-plus"></i> Add Your First Item
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!isInventoryLoading() && !error() && itemsResult()) {
         <!-- Pagination -->
         @if (itemsResult()!.totalPages > 1) {
           <nav class="pagination-nav">
@@ -262,8 +345,380 @@ import {
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #e9ecef;
+    }
+
+    .inventory-header h1 {
+      margin: 0;
+      color: #333;
+    }
+
+    /* Search and Filters */
+    .filters-section {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .search-row {
+      margin-bottom: 15px;
+    }
+
+    .search-field {
+      display: flex;
+      gap: 10px;
+      max-width: 500px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .sort-row {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .price-input {
+      max-width: 120px;
+    }
+
+    /* Results and View Controls */
+    .results-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px 0;
+    }
+
+    .view-controls {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 5px;
+    }
+
+    .page-size-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .page-size-selector label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    /* Cards Layout */
+    .items-cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .item-card {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .item-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+    .card-image {
+      height: 200px;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .card-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .no-image-large {
+      color: #6c757d;
+      font-size: 3rem;
+    }
+
+    .card-content {
+      padding: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      line-height: 1.3;
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    .card-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #28a745;
+    }
+
+    .card-details {
+      margin-bottom: 15px;
+    }
+
+    .card-sku {
+      margin: 0 0 4px 0;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .card-category {
+      margin: 0 0 8px 0;
+      font-size: 0.9rem;
+      color: #495057;
+    }
+
+    .card-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .card-consignor {
+      margin: 0 0 4px 0;
+      font-size: 0.9rem;
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .card-received {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-actions .btn {
+      flex: 1;
+      min-width: 70px;
+    }
+
+    /* Table Layout */
+    .items-table-container {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .table {
+      margin: 0;
+    }
+
+    .image-cell {
+      width: 60px;
+      padding: 8px;
+    }
+
+    .item-thumbnail {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .no-image {
+      width: 50px;
+      height: 50px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6c757d;
+    }
+
+    .sku-cell {
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .title-cell {
+      max-width: 200px;
+    }
+
+    .item-title {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .item-description {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    .price-cell {
+      font-weight: 600;
+      color: #28a745;
+    }
+
+    .actions-cell {
+      width: 200px;
+    }
+
+    /* Status and Condition Badges */
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+
+    .badge-success { background-color: #28a745; }
+    .badge-warning { background-color: #ffc107; color: #212529; }
+    .badge-danger { background-color: #dc3545; }
+    .badge-info { background-color: #17a2b8; }
+    .badge-secondary { background-color: #6c757d; }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+
+    .empty-state h3 {
+      margin: 20px 0 10px 0;
+      color: #495057;
+    }
+
+    .empty-state p {
+      margin-bottom: 30px;
+    }
+
+    /* Pagination */
+    .pagination-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .pagination {
+      margin: 0;
+    }
+
+    .pagination-info {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    /* Loading State */
+    .loading-state {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+    }
+
+    .loading-state i {
+      margin-right: 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .inventory-container {
+        padding: 15px;
+      }
+
+      .inventory-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .results-summary {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+
+      .view-controls {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .items-cards-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .card-actions {
+        justify-content: center;
+      }
+
+      .table-responsive {
+        font-size: 0.85rem;
+      }
+
+      .pagination-nav {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .card-price {
+        margin-top: 8px;
+      }
+
+      .card-actions .btn {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+      }
     }
 
     .inventory-header h1 {
@@ -312,6 +767,17 @@ import {
       align-items: center;
       margin-bottom: 20px;
       padding: 10px 0;
+    }
+
+    .view-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 5px;
     }
 
     .page-size-selector {
@@ -402,6 +868,7 @@ import {
     .badge.status-available { background: #d4edda; color: #155724; }
     .badge.status-sold { background: #ffeaa7; color: #2d3748; }
     .badge.status-removed { background: #f8d7da; color: #721c24; }
+    .badge.badge-info { background: #17a2b8; color: white; }
 
     .actions-cell {
       width: 150px;
@@ -559,6 +1026,9 @@ export class InventoryListComponent implements OnInit {
   currentPage = signal(1);
   pageSize = 25;
 
+  // View state
+  viewMode: 'table' | 'cards' = 'table';
+
   // Computed values
   visiblePages = computed(() => {
     const result = this.itemsResult();
@@ -672,7 +1142,7 @@ export class InventoryListComponent implements OnInit {
         reason: 'Marked as removed from inventory list'
       };
 
-      this.inventoryService.updateItemStatus(item.id, request).subscribe({
+      this.inventoryService.updateItemStatus(item.itemId, request).subscribe({
         next: (response) => {
           if (response.success) {
             this.loadItems(); // Refresh the list
@@ -688,7 +1158,7 @@ export class InventoryListComponent implements OnInit {
 
   deleteItem(item: ItemListDto) {
     if (confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
-      this.inventoryService.deleteItem(item.id).subscribe({
+      this.inventoryService.deleteItem(item.itemId).subscribe({
         next: (response) => {
           if (response.success) {
             this.loadItems(); // Refresh the list
@@ -715,5 +1185,9 @@ export class InventoryListComponent implements OnInit {
 
   getStatusClass(status: ItemStatus): string {
     return `status-${status.toLowerCase()}`;
+  }
+
+  setViewMode(mode: 'table' | 'cards') {
+    this.viewMode = mode;
   }
 }
