@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { OwnerWelcomeModalComponent } from './owner-welcome-modal.component';
-import { ProviderService } from '../../services/provider.service';
+import { ConsignorService } from '../../services/consignor.service';
 import { TransactionService, SalesMetrics, MetricsQueryParams } from '../../services/transaction.service';
 import { PayoutService, PayoutStatus } from '../../services/payout.service';
 import { PendingPayoutData } from '../../models/payout.model';
@@ -14,7 +14,7 @@ import { OnboardingService } from '../../shared/services/onboarding.service';
 import { OnboardingStatus, OnboardingStep } from '../../shared/models/onboarding.models';
 
 interface ShopSummary {
-  activeProviders: number;
+  activeConsignors: number;
   inventoryValue: number;
   totalItems: number;
   recentSales: number;
@@ -28,7 +28,7 @@ interface Transaction {
   id: string;
   date: Date;
   itemName: string;
-  provider: string;
+  consignor: string;
   amount: number;
   commission: number;
 }
@@ -77,14 +77,14 @@ interface Transaction {
               <p>Record a new transaction and automatically calculate splits</p>
             </a>
 
-            <a routerLink="/owner/providers" class="action-card">
-              <h3>Manage Providers</h3>
-              <p>View providers, update commission rates, and track performance</p>
+            <a routerLink="/owner/consignors" class="action-card">
+              <h3>Manage Consignors</h3>
+              <p>View consignors, update commission rates, and track performance</p>
             </a>
 
             <a routerLink="/owner/payouts" class="action-card">
               <h3>Generate Payouts</h3>
-              <p>Create payout reports and process provider payments</p>
+              <p>Create payout reports and process consignor payments</p>
             </a>
           </div>
         </div>
@@ -96,7 +96,7 @@ interface Transaction {
             <div class="table-header">
               <div class="col-date">Date</div>
               <div class="col-item">Item</div>
-              <div class="col-provider">Provider</div>
+              <div class="col-consignor">Consignor</div>
               <div class="col-amount">Sale Amount</div>
               <div class="col-commission">Commission</div>
             </div>
@@ -104,7 +104,7 @@ interface Transaction {
               <div class="transaction-row" *ngFor="let transaction of summary()!.recentTransactions">
                 <div class="col-date">{{ transaction.date | date:'short' }}</div>
                 <div class="col-item">{{ transaction.itemName }}</div>
-                <div class="col-provider">{{ transaction.provider }}</div>
+                <div class="col-consignor">{{ transaction.consignor }}</div>
                 <div class="col-amount">\${{ transaction.amount | number:'1.2-2' }}</div>
                 <div class="col-commission">\${{ transaction.commission | number:'1.2-2' }}</div>
               </div>
@@ -171,7 +171,7 @@ interface Transaction {
 
     .metric-card.sales { border-left-color: #059669; }
     .metric-card.profit { border-left-color: #fbbf24; }
-    .metric-card.providers { border-left-color: #3b82f6; }
+    .metric-card.consignors { border-left-color: #3b82f6; }
     .metric-card.inventory { border-left-color: #8b5cf6; }
     .metric-card.pending-payouts {
       border-left-color: #f59e0b;
@@ -347,7 +347,7 @@ interface Transaction {
         border-bottom: 1px solid #e5e7eb;
       }
 
-      .col-date, .col-item, .col-provider, .col-amount, .col-commission {
+      .col-date, .col-item, .col-consignor, .col-amount, .col-commission {
         display: flex;
         justify-content: space-between;
         margin-bottom: 0.25rem;
@@ -355,7 +355,7 @@ interface Transaction {
 
       .col-date::before { content: "Date: "; font-weight: 600; }
       .col-item::before { content: "Item: "; font-weight: 600; }
-      .col-provider::before { content: "Provider: "; font-weight: 600; }
+      .col-consignor::before { content: "Consignor: "; font-weight: 600; }
       .col-amount::before { content: "Amount: "; font-weight: 600; }
       .col-commission::before { content: "Commission: "; font-weight: 600; }
     }
@@ -365,12 +365,12 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   summary = signal<ShopSummary | null>(null);
-  activeProviderCount = signal<number>(0);
+  activeConsignorCount = signal<number>(0);
   onboardingStatus = signal<OnboardingStatus | null>(null);
   showWelcomeModal = signal<boolean>(false);
 
   constructor(
-    private providerService: ProviderService,
+    private consignorService: ConsignorService,
     private transactionService: TransactionService,
     private payoutService: PayoutService,
     private authService: AuthService,
@@ -393,8 +393,8 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadDashboardData() {
-    // Load real provider count and sales metrics
-    const providersPromise = this.providerService.getProviders().toPromise();
+    // Load real consignor count and sales metrics
+    const consignorsPromise = this.consignorService.getConsignors().toPromise();
 
     // Get last 30 days sales metrics
     const thirtyDaysAgo = new Date();
@@ -408,40 +408,40 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
     const salesPromise = this.transactionService.getSalesMetrics(metricsParams).toPromise();
     const pendingPayoutsPromise = this.payoutService.getPendingPayouts().toPromise();
 
-    Promise.all([providersPromise, salesPromise, pendingPayoutsPromise])
-      .then(([providers, salesMetrics, pendingPayouts]) => {
-        console.log('Dashboard data loaded:', { providers, salesMetrics, pendingPayouts });
+    Promise.all([consignorsPromise, salesPromise, pendingPayoutsPromise])
+      .then(([consignors, salesMetrics, pendingPayouts]) => {
+        console.log('Dashboard data loaded:', { consignors, salesMetrics, pendingPayouts });
 
-        // Handle providers response - might be wrapped in API response object
-        let providersArray = providers;
-        if (providers && typeof providers === 'object' && !Array.isArray(providers)) {
+        // Handle consignors response - might be wrapped in API response object
+        let consignorsArray = consignors;
+        if (consignors && typeof consignors === 'object' && !Array.isArray(consignors)) {
           // Check if it's wrapped in a response object with proper type casting
-          const response = providers as any;
-          providersArray = response.data || response.providers || providers;
+          const response = consignors as any;
+          consignorsArray = response.data || response.consignors || consignors;
         }
 
-        const activeProviderCount = Array.isArray(providersArray) ?
-          providersArray.filter((p: any) => p?.isActive).length : 0;
-        this.activeProviderCount.set(activeProviderCount);
+        const activeConsignorCount = Array.isArray(consignorsArray) ?
+          consignorsArray.filter((p: any) => p?.isActive).length : 0;
+        this.activeConsignorCount.set(activeConsignorCount);
 
         // Calculate real pending payout totals from new API
         const totalPendingAmount = pendingPayouts?.reduce((total, pending) => total + pending.pendingAmount, 0) || 0;
-        const pendingProviderCount = pendingPayouts?.length || 0;
+        const pendingConsignorCount = pendingPayouts?.length || 0;
 
         const mockSummary: ShopSummary = {
-          activeProviders: activeProviderCount,
+          activeConsignors: activeConsignorCount,
           inventoryValue: 42750.80, // Still mock - needs inventory API
           totalItems: 342, // Still mock - needs inventory API
           recentSales: salesMetrics?.totalSales || 0,
           recentSalesCount: salesMetrics?.transactionCount || 0,
           pendingPayouts: totalPendingAmount,
-          pendingPayoutCount: pendingProviderCount,
+          pendingPayoutCount: pendingConsignorCount,
           recentTransactions: [
             {
               id: '1',
               date: new Date(2024, 10, 20, 14, 30),
               itemName: 'Vintage Leather Jacket',
-              provider: 'Sarah Thompson',
+              consignor: 'Sarah Thompson',
               amount: 125.00,
               commission: 62.50
             },
@@ -449,7 +449,7 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
               id: '2',
               date: new Date(2024, 10, 20, 12, 15),
               itemName: 'Antique Jewelry Box',
-              provider: 'Mike Chen',
+              consignor: 'Mike Chen',
               amount: 89.99,
               commission: 44.99
             },
@@ -457,7 +457,7 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
               id: '3',
               date: new Date(2024, 10, 19, 16, 45),
               itemName: 'Designer Handbag',
-              provider: 'Emma Rodriguez',
+              consignor: 'Emma Rodriguez',
               amount: 275.00,
               commission: 137.50
             }
@@ -468,11 +468,11 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
       })
       .catch((error) => {
         console.error('Failed to load dashboard data:', error);
-        this.activeProviderCount.set(0);
+        this.activeConsignorCount.set(0);
 
         // Fallback to mock data if API fails
         const mockSummary: ShopSummary = {
-          activeProviders: 0,
+          activeConsignors: 0,
           inventoryValue: 42750.80,
           totalItems: 342,
           recentSales: 0, // Show 0 for failed sales data

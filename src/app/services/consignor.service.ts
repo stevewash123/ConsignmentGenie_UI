@@ -1,0 +1,111 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Consignor, CreateConsignorRequest, UpdateConsignorRequest } from '../models/consignor.model';
+import { environment } from '../../environments/environment';
+
+export interface ConsignorInvitationRequest {
+  name: string;
+  email: string;
+}
+
+export interface ConsignorInvitationResponse {
+  success: boolean;
+  message: string;
+  invitation?: any;
+}
+
+export interface InvitationValidationResponse {
+  isValid: boolean;
+  message?: string;
+  shopName?: string;
+  invitedName?: string;
+  invitedEmail?: string;
+  expirationDate?: string;
+}
+
+export interface ConsignorRegistrationRequest {
+  invitationToken: string;
+  fullName: string;
+  email: string;
+  password: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface RegistrationResult {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
+export interface PendingInvitation {
+  id: number;
+  email: string;
+  name?: string;
+  sentAt: string;
+  expiresAt: string;
+  status: 'pending' | 'expired' | 'cancelled';
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ConsignorService {
+  private readonly apiUrl = `${environment.apiUrl}/api/consignors`;
+  private readonly authUrl = `${environment.apiUrl}/api/auth`;
+
+  constructor(private http: HttpClient) {}
+
+  getConsignors(): Observable<Consignor[]> {
+    return this.http.get<Consignor[]>(this.apiUrl);
+  }
+
+  getConsignor(id: number): Observable<Consignor> {
+    return this.http.get<Consignor>(`${this.apiUrl}/${id}`);
+  }
+
+  createConsignor(request: CreateConsignorRequest): Observable<Consignor> {
+    return this.http.post<Consignor>(this.apiUrl, request);
+  }
+
+  updateConsignor(id: number, request: UpdateConsignorRequest): Observable<Consignor> {
+    return this.http.put<Consignor>(`${this.apiUrl}/${id}`, request);
+  }
+
+  deleteConsignor(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  deactivateConsignor(id: number): Observable<Consignor> {
+    return this.http.patch<Consignor>(`${this.apiUrl}/${id}/deactivate`, {});
+  }
+
+  activateConsignor(id: number): Observable<Consignor> {
+    return this.http.patch<Consignor>(`${this.apiUrl}/${id}/activate`, {});
+  }
+
+  inviteConsignor(invitation: ConsignorInvitationRequest): Observable<ConsignorInvitationResponse> {
+    return this.http.post<ConsignorInvitationResponse>(`${this.apiUrl}/invitations`, invitation);
+  }
+
+  getPendingInvitations(): Observable<PendingInvitation[]> {
+    return this.http.get<PendingInvitation[]>(`${this.apiUrl}/invitations`);
+  }
+
+  resendInvitation(invitationId: number): Observable<ConsignorInvitationResponse> {
+    return this.http.post<ConsignorInvitationResponse>(`${this.apiUrl}/invitations/${invitationId}/resend`, {});
+  }
+
+  cancelInvitation(invitationId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/invitations/${invitationId}`);
+  }
+
+  validateInvitation(token: string): Observable<InvitationValidationResponse> {
+    return this.http.get<InvitationValidationResponse>(`${environment.apiUrl}/invitations/validate/${token}`);
+  }
+
+  registerFromInvitation(request: ConsignorRegistrationRequest): Observable<RegistrationResult> {
+    return this.http.post<RegistrationResult>(`${environment.apiUrl}/invitations/register`, request);
+  }
+}
