@@ -6,7 +6,8 @@ import { OwnerDashboardComponent } from './owner-dashboard.component';
 import { OnboardingService } from '../../shared/services/onboarding.service';
 import { OnboardingStatus, OnboardingStep } from '../../shared/models/onboarding.models';
 import { AuthService } from '../../services/auth.service';
-import { ProviderService } from '../../services/provider.service';
+import { ConsignorService } from '../../services/consignor.service';
+import { InventoryService } from '../../services/inventory.service';
 import { TransactionService } from '../../services/transaction.service';
 import { PayoutService } from '../../services/payout.service';
 
@@ -42,9 +43,10 @@ describe('OwnerDashboardComponent - Onboarding Integration', () => {
     ]);
 
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['getCurrentUser']);
-    const providerServiceSpy = jasmine.createSpyObj('ProviderService', ['getProviders']);
-    const transactionServiceSpy = jasmine.createSpyObj('TransactionService', ['getSalesMetrics']);
+    const consignorServiceSpy = jasmine.createSpyObj('ConsignorService', ['getConsignors']);
+    const transactionServiceSpy = jasmine.createSpyObj('TransactionService', ['getSalesMetrics', 'getTransactions']);
     const payoutServiceSpy = jasmine.createSpyObj('PayoutService', ['getPendingPayouts']);
+    const inventoryServiceSpy = jasmine.createSpyObj('InventoryService', ['getInventoryMetrics']);
 
     // Mock ActivatedRoute
     const mockActivatedRoute = {
@@ -58,7 +60,8 @@ describe('OwnerDashboardComponent - Onboarding Integration', () => {
       providers: [
         { provide: OnboardingService, useValue: onboardingServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: ProviderService, useValue: providerServiceSpy },
+        { provide: ConsignorService, useValue: consignorServiceSpy },
+        { provide: InventoryService, useValue: inventoryServiceSpy },
         { provide: TransactionService, useValue: transactionServiceSpy },
         { provide: PayoutService, useValue: payoutServiceSpy },
         { provide: ActivatedRoute, useValue: mockActivatedRoute }
@@ -78,17 +81,25 @@ describe('OwnerDashboardComponent - Onboarding Integration', () => {
     mockOnboardingService.shouldShowOnboarding.and.returnValue(true);
 
     // Mock other services to prevent API calls
-    const providerService = TestBed.inject(ProviderService) as jasmine.SpyObj<ProviderService>;
+    const consignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
     const transactionService = TestBed.inject(TransactionService) as jasmine.SpyObj<TransactionService>;
     const payoutService = TestBed.inject(PayoutService) as jasmine.SpyObj<PayoutService>;
+    const inventoryService = TestBed.inject(InventoryService) as jasmine.SpyObj<InventoryService>;
 
-    providerService.getProviders.and.returnValue(of([]));
+    consignorService.getConsignors.and.returnValue(of([]));
     transactionService.getSalesMetrics.and.returnValue(of({
       totalSales: 0, totalShopAmount: 0, totalProviderAmount: 0,
       totalTax: 0, transactionCount: 0, averageTransactionValue: 0,
       topProviders: [], paymentMethodBreakdown: []
     }));
+    transactionService.getTransactions.and.returnValue(of({
+      items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0,
+      hasNextPage: false, hasPreviousPage: false, organizationId: 'test-org'
+    }));
     payoutService.getPendingPayouts.and.returnValue(of([]));
+    inventoryService.getInventoryMetrics.and.returnValue(of({
+      success: true, data: { totalValue: 0, totalItems: 0 }
+    }));
   });
 
   describe('Onboarding Modal Integration', () => {

@@ -992,7 +992,7 @@ export class StorefrontSettingsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      const response = await this.http.get<StorefrontSettings>(`${environment.apiUrl}/organization/storefront-settings`).toPromise();
+      const response = await this.http.get<StorefrontSettings>(`${environment.apiUrl}/api/organization/storefront-settings`).toPromise();
       if (response) {
         this.settings.set(response);
       }
@@ -1006,7 +1006,7 @@ export class StorefrontSettingsComponent implements OnInit {
 
     this.isSaving.set(true);
     try {
-      const response = await this.http.put(`${environment.apiUrl}/organization/storefront-settings`, this.settings()).toPromise();
+      const response = await this.http.put(`${environment.apiUrl}/api/organization/storefront-settings`, this.settings()).toPromise();
       this.showSuccess('Storefront settings saved successfully');
     } catch (error) {
       this.showError('Failed to save storefront settings');

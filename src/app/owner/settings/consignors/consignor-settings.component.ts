@@ -627,7 +627,7 @@ export class ConsignorSettingsComponent implements OnInit {
 
   async loadPendingInvitations() {
     try {
-      const response = await this.http.get<any[]>(`${environment.apiUrl}/providers/invitations`).toPromise();
+      const response = await this.http.get<any[]>(`${environment.apiUrl}/api/consignors/invitations`).toPromise();
 
       if (response) {
         // Transform API response to our interface format
@@ -723,7 +723,7 @@ export class ConsignorSettingsComponent implements OnInit {
             message: this.customMessage
           };
 
-          await this.http.post(`${environment.apiUrl}/providers/invitations`, inviteRequest).toPromise();
+          await this.http.post(`${environment.apiUrl}/api/consignors/invitations`, inviteRequest).toPromise();
           successCount++;
         } catch (error) {
           console.error(`Failed to send invitation to ${email}:`, error);
@@ -753,7 +753,7 @@ export class ConsignorSettingsComponent implements OnInit {
 
   async resendInvitation(invitationId: string) {
     try {
-      await this.http.post(`${environment.apiUrl}/providers/invitations/${invitationId}/resend`, {}).toPromise();
+      await this.http.post(`${environment.apiUrl}/api/consignors/invitations/${invitationId}/resend`, {}).toPromise();
 
       // Reload invitations to show updated data
       await this.loadPendingInvitations();
@@ -770,7 +770,7 @@ export class ConsignorSettingsComponent implements OnInit {
     }
 
     try {
-      await this.http.delete(`${environment.apiUrl}/providers/invitations/${invitationId}`).toPromise();
+      await this.http.delete(`${environment.apiUrl}/api/consignors/invitations/${invitationId}`).toPromise();
 
       // Reload invitations to show updated list
       await this.loadPendingInvitations();
