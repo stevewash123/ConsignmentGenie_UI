@@ -31,6 +31,10 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/inventory-list.component').then(m => m.InventoryListComponent)
   },
   {
+    path: 'record-sale',
+    loadComponent: () => import('./components/record-sale.component').then(m => m.RecordSaleComponent)
+  },
+  {
     path: 'sales',
     loadComponent: () => import('./components/owner-sales.component').then(m => m.OwnerSalesComponent)
   },
