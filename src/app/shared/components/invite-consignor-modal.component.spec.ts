@@ -10,9 +10,9 @@ describe('InviteConsignorModalComponent', () => {
   let mockConsignorService: jasmine.SpyObj<ConsignorService>;
 
   beforeEach(async () => {
-    mockConsignorService = jasmine.createSpyObj('ConsignorService', ['inviteConsignor', 'createConsignor']);
-    mockConsignorService.inviteConsignor.and.returnValue(of({ success: true, message: 'Invitation sent successfully' }));
-    mockConsignorService.createConsignor.and.returnValue(of({} as any));
+    mockConsignorService = jasmine.createSpyObj('ConsignorService', ['inviteProvider', 'createProvider']);
+    mockConsignorService.inviteProvider.and.returnValue(of({ success: true, message: 'Invitation sent successfully' }));
+    mockConsignorService.createProvider.and.returnValue(of({} as any));
 
     await TestBed.configureTestingModule({
       imports: [InviteConsignorModalComponent, ReactiveFormsModule],
@@ -67,7 +67,7 @@ describe('InviteConsignorModalComponent', () => {
 
     component.submitInvite();
 
-    expect(mockConsignorService.inviteConsignor).toHaveBeenCalledWith({
+    expect(mockConsignorService.inviteProvider).toHaveBeenCalledWith({
       email: 'test@test.com',
       name: 'John Doe'
     });
@@ -85,7 +85,7 @@ describe('InviteConsignorModalComponent', () => {
     });
     component.submitManual();
     // TODO: Manual consignor creation not yet implemented
-    // Once implemented, should verify createConsignor was called
+    // Once implemented, should verify createProvider was called
     expect(component.isSubmitting()).toBe(true);
   });
 });

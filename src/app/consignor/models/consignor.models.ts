@@ -1,4 +1,4 @@
-export interface ConsignorDashboard {
+export interface ProviderDashboard {
   shopName: string;
   providerName: string;
   totalItems: number;
@@ -8,11 +8,11 @@ export interface ConsignorDashboard {
   pendingBalance: number;
   totalEarningsAllTime: number;
   earningsThisMonth: number;
-  recentSales: ConsignorSale[];
-  lastPayout?: ConsignorPayout;
+  recentSales: consignorsale[];
+  lastPayout?: ProviderPayout;
 }
 
-export interface ConsignorItem {
+export interface ProviderItem {
   itemId: string;
   sku: string;
   title: string;
@@ -26,13 +26,13 @@ export interface ConsignorItem {
   salePrice?: number;
 }
 
-export interface ConsignorItemDetail extends ConsignorItem {
+export interface ProviderItemDetail extends ProviderItem {
   description: string;
   imageUrls: string[];
   notes: string;
 }
 
-export interface ConsignorSale {
+export interface consignorsale {
   transactionId: string;
   saleDate: Date;
   itemTitle: string;
@@ -42,7 +42,7 @@ export interface ConsignorSale {
   payoutStatus: string;
 }
 
-export interface ConsignorPayout {
+export interface ProviderPayout {
   payoutId: string;
   payoutNumber: string;
   payoutDate: Date;
@@ -51,14 +51,14 @@ export interface ConsignorPayout {
   itemCount: number;
 }
 
-export interface ConsignorPayoutDetail extends ConsignorPayout {
+export interface ProviderPayoutDetail extends ProviderPayout {
   paymentReference: string;
   periodStart: Date;
   periodEnd: Date;
-  items: ConsignorSale[];
+  items: consignorsale[];
 }
 
-export interface ConsignorProfile {
+export interface ProviderProfile {
   providerId: string;
   fullName: string;
   email: string;
@@ -71,7 +71,7 @@ export interface ConsignorProfile {
   organizationName: string;
 }
 
-export interface UpdateConsignorProfile {
+export interface UpdateProviderProfile {
   fullName: string;
   phone?: string;
   preferredPaymentMethod?: string;
@@ -89,7 +89,7 @@ export interface PagedResult<T> {
   hasPrevious: boolean;
 }
 
-export interface ConsignorItemQuery {
+export interface ProviderItemQuery {
   status?: string;
   category?: string;
   dateFrom?: Date;
@@ -99,7 +99,7 @@ export interface ConsignorItemQuery {
   search?: string;
 }
 
-export interface ConsignorSaleQuery {
+export interface consignorsaleQuery {
   dateFrom?: Date;
   dateTo?: Date;
   payoutStatus?: string;

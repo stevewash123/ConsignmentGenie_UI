@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { ConsignorService } from '../services/consignor.service';
-import { CreateConsignorRequest } from '../models/consignor.model';
+import { CreateProviderRequest } from '../models/consignor.model';
 
 @Component({
   selector: 'app-consignor-add',
@@ -16,22 +16,22 @@ import { CreateConsignorRequest } from '../models/consignor.model';
         <div class="breadcrumb">
           <a routerLink="/owner/consignors">← Back to consignors</a>
         </div>
-        <h1>Add New Consignor</h1>
-        <p class="subtitle">Create a new consignor account or consider using <strong>Invite Consignor</strong> to send them a registration link instead.</p>
+        <h1>Add New consignor</h1>
+        <p class="subtitle">Create a new consignor account or consider using <strong>Invite consignor</strong> to send them a registration link instead.</p>
       </div>
 
       <div class="add-card">
-        <form (ngSubmit)="onSubmit()" #consignorForm="ngForm">
+        <form (ngSubmit)="onSubmit()" #providerForm="ngForm">
           <div class="form-section">
             <h3>Basic Information</h3>
             <div class="form-row">
               <div class="form-group">
-                <label for="name">Consignor Name *</label>
+                <label for="name">consignor Name *</label>
                 <input
                   type="text"
                   id="name"
                   name="name"
-                  [(ngModel)]="consignorData.name"
+                  [(ngModel)]="providerData.name"
                   required
                   #nameField="ngModel"
                   class="form-control"
@@ -39,7 +39,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
                   placeholder="Enter consignor name"
                 >
                 <div class="error-message" *ngIf="nameField.invalid && nameField.touched">
-                  Consignor name is required
+                  consignor name is required
                 </div>
               </div>
 
@@ -49,7 +49,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
                   type="email"
                   id="email"
                   name="email"
-                  [(ngModel)]="consignorData.email"
+                  [(ngModel)]="providerData.email"
                   required
                   email
                   #emailField="ngModel"
@@ -71,7 +71,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
                   type="tel"
                   id="phone"
                   name="phone"
-                  [(ngModel)]="consignorData.phone"
+                  [(ngModel)]="providerData.phone"
                   class="form-control"
                   placeholder="(555) 123-4567"
                 >
@@ -83,7 +83,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
                   type="text"
                   id="address"
                   name="address"
-                  [(ngModel)]="consignorData.address"
+                  [(ngModel)]="providerData.address"
                   class="form-control"
                   placeholder="Enter address"
                 >
@@ -100,7 +100,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
                   type="number"
                   id="commissionRate"
                   name="commissionRate"
-                  [(ngModel)]="consignorData.commissionRate"
+                  [(ngModel)]="providerData.commissionRate"
                   required
                   min="0"
                   max="100"
@@ -122,7 +122,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
                 <select
                   id="preferredPaymentMethod"
                   name="preferredPaymentMethod"
-                  [(ngModel)]="consignorData.preferredPaymentMethod"
+                  [(ngModel)]="providerData.preferredPaymentMethod"
                   class="form-control"
                 >
                   <option value="">Select payment method</option>
@@ -140,7 +140,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
               <textarea
                 id="paymentDetails"
                 name="paymentDetails"
-                [(ngModel)]="consignorData.paymentDetails"
+                [(ngModel)]="providerData.paymentDetails"
                 class="form-control"
                 rows="3"
                 placeholder="Enter payment details (e.g., PayPal email, bank account info, mailing address)"
@@ -156,7 +156,7 @@ import { CreateConsignorRequest } from '../models/consignor.model';
               <textarea
                 id="notes"
                 name="notes"
-                [(ngModel)]="consignorData.notes"
+                [(ngModel)]="providerData.notes"
                 class="form-control"
                 rows="4"
                 placeholder="Add any additional notes about this consignor..."
@@ -171,9 +171,9 @@ import { CreateConsignorRequest } from '../models/consignor.model';
             <button
               type="submit"
               class="btn-primary"
-              [disabled]="consignorForm.invalid || isSubmitting()"
+              [disabled]="providerForm.invalid || isSubmitting()"
             >
-              {{ isSubmitting() ? 'Creating...' : 'Create Consignor' }}
+              {{ isSubmitting() ? 'Creating...' : 'Create consignor' }}
             </button>
           </div>
 
@@ -187,13 +187,13 @@ import { CreateConsignorRequest } from '../models/consignor.model';
         </form>
 
         <div class="alternative-note">
-          <h4>💡 Tip: Consider using "Invite Consignor" instead</h4>
+          <h4>💡 Tip: Consider using "Invite consignor" instead</h4>
           <p>
             Instead of manually creating accounts, you can invite consignors to register themselves.
             This ensures they have access to their login credentials and receive welcome emails.
           </p>
           <button class="btn-outline" routerLink="/owner/consignors">
-            Go back and use "Invite Consignor"
+            Go back and use "Invite consignor"
           </button>
         </div>
       </div>
@@ -389,12 +389,12 @@ import { CreateConsignorRequest } from '../models/consignor.model';
     }
   `]
 })
-export class ConsignorAddComponent {
+export class ProviderAddComponent {
   isSubmitting = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
 
-  consignorData: CreateConsignorRequest = {
+  providerData: CreateProviderRequest = {
     name: '',
     email: '',
     phone: '',
@@ -406,7 +406,7 @@ export class ConsignorAddComponent {
   };
 
   constructor(
-    private consignorService: ConsignorService,
+    private ConsignorService: ConsignorService,
     private router: Router
   ) {}
 
@@ -418,20 +418,20 @@ export class ConsignorAddComponent {
     this.successMessage.set('');
 
     // Clean up undefined values
-    const request: CreateConsignorRequest = {
-      name: this.consignorData.name,
-      email: this.consignorData.email,
-      phone: this.consignorData.phone || undefined,
-      address: this.consignorData.address || undefined,
-      commissionRate: this.consignorData.commissionRate,
-      preferredPaymentMethod: this.consignorData.preferredPaymentMethod || undefined,
-      paymentDetails: this.consignorData.paymentDetails || undefined,
-      notes: this.consignorData.notes || undefined
+    const request: CreateProviderRequest = {
+      name: this.providerData.name,
+      email: this.providerData.email,
+      phone: this.providerData.phone || undefined,
+      address: this.providerData.address || undefined,
+      commissionRate: this.providerData.commissionRate,
+      preferredPaymentMethod: this.providerData.preferredPaymentMethod || undefined,
+      paymentDetails: this.providerData.paymentDetails || undefined,
+      notes: this.providerData.notes || undefined
     };
 
-    this.consignorService.createConsignor(request).subscribe({
+    this.ConsignorService.createProvider(request).subscribe({
       next: (created) => {
-        this.successMessage.set('Consignor created successfully!');
+        this.successMessage.set('consignor created successfully!');
         // Auto-redirect after 2 seconds
         setTimeout(() => {
           this.router.navigate(['/owner/consignors', created.id]);

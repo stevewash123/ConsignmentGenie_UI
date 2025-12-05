@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ConsignorService, PendingInvitation } from '../services/consignor.service';
-import { Consignor } from '../models/consignor.model';
+import { consignor } from '../models/consignor.model';
 import { InviteConsignorModalComponent } from '../shared/components/invite-consignor-modal.component';
 import { ENTITY_LABELS } from '../shared/constants/labels';
 import { ConsignorStatus } from '../models/consignor.model';
@@ -22,7 +22,7 @@ import { LoadingService } from '../shared/services/loading.service';
         <div class="header">
           <h1 class="page-title">👥 {{ labels.providerManagement }}</h1>
           <button class="btn-primary" (click)="showInviteModal()">
-            {{ labels.inviteConsignor }}
+            {{ labels.inviteProvider }}
           </button>
         </div>
 
@@ -51,10 +51,10 @@ import { LoadingService } from '../shared/services/loading.service';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let consignor of consignors(); trackBy: trackByConsignor">
+                  <tr *ngFor="let consignor of consignors(); trackBy: trackByProvider">
                     <td class="name-cell">{{ consignor.name }}</td>
                     <td class="email-cell">{{ consignor.email }}</td>
-                    <td class="items-cell">{{ getConsignorItemCount(consignor) }}</td>
+                    <td class="items-cell">{{ getProviderItemCount(consignor) }}</td>
                     <td class="actions-cell">
                       <div class="action-buttons">
                         <button class="btn-view" [routerLink]="['/owner/consignors', consignor.id]">
@@ -575,9 +575,9 @@ import { LoadingService } from '../shared/services/loading.service';
     }
   `]
 })
-export class ConsignorListComponent implements OnInit {
-  consignors = signal<Consignor[]>([]);
-  filteredconsignors = signal<Consignor[]>([]);
+export class ProviderListComponent implements OnInit {
+  consignors = signal<consignor[]>([]);
+  filteredconsignors = signal<consignor[]>([]);
   pendingInvitations = signal<PendingInvitation[]>([]);
   searchTerm = '';
   sortBy = 'name';
@@ -592,7 +592,7 @@ export class ConsignorListComponent implements OnInit {
     return this.loadingService.isLoading('consignors-list');
   }
 
-  constructor(private consignorService: ConsignorService, private loadingService: LoadingService) {}
+  constructor(private ConsignorService: ConsignorService, private loadingService: LoadingService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -600,7 +600,7 @@ export class ConsignorListComponent implements OnInit {
 
   loadconsignors(): void {
     this.loadingService.start('consignors-list');
-    this.consignorService.getConsignors().subscribe({
+    this.ConsignorService.getconsignors().subscribe({
       next: (consignors) => {
         console.log('consignors API response:', consignors);
 
@@ -615,25 +615,25 @@ export class ConsignorListComponent implements OnInit {
         // Ensure we have an array and transform to match frontend model
         let finalconsignors = Array.isArray(consignorsArray) ? consignorsArray : [];
 
-        // Transform API response to match frontend Consignor model
-        finalconsignors = finalconsignors.map((apiConsignor: any) => ({
-          id: apiConsignor.providerId || apiConsignor.id,
-          name: apiConsignor.fullName || apiConsignor.name || 'Unknown Consignor',
-          email: apiConsignor.email,
-          phone: apiConsignor.phone,
-          address: apiConsignor.address || apiConsignor.addressLine1,
-          commissionRate: (apiConsignor.commissionRate * 100) || 0, // Convert decimal to percentage
-          preferredPaymentMethod: apiConsignor.preferredPaymentMethod,
-          paymentDetails: apiConsignor.paymentDetails,
-          notes: apiConsignor.notes,
-          isActive: apiConsignor.status === 'Active' || apiConsignor.isActive === true,
-          status: this.mapApiStatusToConsignorStatus(apiConsignor.status || (apiConsignor.isActive ? 'Active' : 'Inactive')),
-          organizationId: apiConsignor.organizationId,
-          providerNumber: apiConsignor.providerNumber,
-          createdAt: new Date(apiConsignor.createdAt),
-          updatedAt: new Date(apiConsignor.updatedAt || apiConsignor.createdAt),
-          invitedAt: apiConsignor.invitedAt ? new Date(apiConsignor.invitedAt) : undefined,
-          activatedAt: apiConsignor.activatedAt ? new Date(apiConsignor.activatedAt) : undefined
+        // Transform API response to match frontend consignor model
+        finalconsignors = finalconsignors.map((apiProvider: any) => ({
+          id: apiProvider.providerId || apiProvider.id,
+          name: apiProvider.fullName || apiProvider.name || 'Unknown consignor',
+          email: apiProvider.email,
+          phone: apiProvider.phone,
+          address: apiProvider.address || apiProvider.addressLine1,
+          commissionRate: (apiProvider.commissionRate * 100) || 0, // Convert decimal to percentage
+          preferredPaymentMethod: apiProvider.preferredPaymentMethod,
+          paymentDetails: apiProvider.paymentDetails,
+          notes: apiProvider.notes,
+          isActive: apiProvider.status === 'Active' || apiProvider.isActive === true,
+          status: this.mapApiStatusToConsignorStatus(apiProvider.status || (apiProvider.isActive ? 'Active' : 'Inactive')),
+          organizationId: apiProvider.organizationId,
+          providerNumber: apiProvider.providerNumber,
+          createdAt: new Date(apiProvider.createdAt),
+          updatedAt: new Date(apiProvider.updatedAt || apiProvider.createdAt),
+          invitedAt: apiProvider.invitedAt ? new Date(apiProvider.invitedAt) : undefined,
+          activatedAt: apiProvider.activatedAt ? new Date(apiProvider.activatedAt) : undefined
         }));
 
         console.log('Transformed consignors:', finalconsignors);
@@ -664,7 +664,7 @@ export class ConsignorListComponent implements OnInit {
   }
 
   loadPendingInvitations(): void {
-    this.consignorService.getPendingInvitations().subscribe({
+    this.ConsignorService.getPendingInvitations().subscribe({
       next: (invitations) => {
         console.log('Pending invitations response:', invitations);
         const validInvitations = Array.isArray(invitations) ? invitations : [];
@@ -684,7 +684,7 @@ export class ConsignorListComponent implements OnInit {
   }
 
   resendInvitation(invitationId: number): void {
-    this.consignorService.resendInvitation(invitationId).subscribe({
+    this.ConsignorService.resendInvitation(invitationId).subscribe({
       next: (response) => {
         if (response.success) {
           console.log('Invitation resent successfully');
@@ -702,7 +702,7 @@ export class ConsignorListComponent implements OnInit {
 
   cancelInvitation(invitationId: number): void {
     if (confirm('Are you sure you want to cancel this invitation?')) {
-      this.consignorService.cancelInvitation(invitationId).subscribe({
+      this.ConsignorService.cancelInvitation(invitationId).subscribe({
         next: (response) => {
           if (response.success) {
             console.log('Invitation cancelled successfully');
@@ -756,10 +756,10 @@ export class ConsignorListComponent implements OnInit {
     this.filteredconsignors.set(filtered);
   }
 
-  sortconsignors(consignors: Consignor[]): Consignor[] {
+  sortconsignors(consignors: consignor[]): consignor[] {
     return [...consignors].sort((a, b) => {
-      let aValue: any = a[this.sortBy as keyof Consignor];
-      let bValue: any = b[this.sortBy as keyof Consignor];
+      let aValue: any = a[this.sortBy as keyof consignor];
+      let bValue: any = b[this.sortBy as keyof consignor];
 
       // Handle undefined values
       if (aValue === undefined) aValue = '';
@@ -791,7 +791,7 @@ export class ConsignorListComponent implements OnInit {
     this.applyFilters();
   }
 
-  getConsignorStatus(consignor: Consignor): ConsignorStatus {
+  getConsignorStatus(consignor: consignor): ConsignorStatus {
     return consignor.status || (consignor.isActive ? 'active' : 'inactive');
   }
 
@@ -810,26 +810,26 @@ export class ConsignorListComponent implements OnInit {
     }
   }
 
-  resendInvite(consignor: Consignor): void {
+  resendInvite(consignor: consignor): void {
     // TODO: Implement resend invitation API call
     console.log('Resending invitation to:', consignor.email);
   }
 
-  cancelInvite(consignor: Consignor): void {
+  cancelInvite(consignor: consignor): void {
     // TODO: Implement cancel invitation API call
     console.log('Cancelling invitation for:', consignor.email);
   }
 
-  reactivateConsignor(consignor: Consignor): void {
+  reactivateProvider(consignor: consignor): void {
     // TODO: Implement reactivate consignor API call
     console.log('Reactivating consignor:', consignor.name);
   }
 
-  trackByConsignor(index: number, consignor: Consignor): number {
+  trackByProvider(index: number, consignor: consignor): number {
     return consignor.id;
   }
 
-  getConsignorItemCount(consignor: Consignor): number {
+  getProviderItemCount(consignor: consignor): number {
     // TODO: Implement item count logic when items feature is available
     return 0;
   }
@@ -857,7 +857,7 @@ export class ConsignorListComponent implements OnInit {
     this.isInviteModalVisible.set(false);
   }
 
-  onConsignorAdded(consignor: Consignor): void {
+  onConsignorAdded(consignor: consignor): void {
     console.log('Consignor added successfully:', consignor);
     this.loadData(); // Refresh both lists
   }

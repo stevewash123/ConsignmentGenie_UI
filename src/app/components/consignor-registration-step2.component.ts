@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ConsignorService, ConsignorRegistrationRequest } from '../services/consignor.service';
+import { ConsignorService, ProviderRegistrationRequest } from '../services/consignor.service';
 
 interface RegistrationData {
   invitationToken: string;
@@ -18,7 +18,7 @@ interface RegistrationData {
   };
 }
 
-interface ConsignorDetails {
+interface ProviderDetails {
   fullName: string;
   phone: string;
 }
@@ -364,9 +364,9 @@ interface ConsignorDetails {
     }
   `]
 })
-export class ConsignorRegistrationStep2Component implements OnInit {
+export class ProviderRegistrationStep2Component implements OnInit {
   registrationData = signal<RegistrationData | null>(null);
-  details: ConsignorDetails = {
+  details: ProviderDetails = {
     fullName: '',
     phone: ''
   };
@@ -378,14 +378,14 @@ export class ConsignorRegistrationStep2Component implements OnInit {
   shopName = signal('');
 
   constructor(
-    private consignorService: ConsignorService,
+    private ConsignorService: ConsignorService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     // Check if we have registration data from step 1
-    const storedData = sessionStorage.getItem('consignor_registration_data');
+    const storedData = sessionStorage.getItem('provider_registration_data');
 
     if (!storedData) {
       this.isInvalidRegistration.set(true);
@@ -421,7 +421,7 @@ export class ConsignorRegistrationStep2Component implements OnInit {
 
     const regData = this.registrationData()!;
 
-    const request: ConsignorRegistrationRequest = {
+    const request: ProviderRegistrationRequest = {
       invitationToken: regData.invitationToken,
       fullName: this.details.fullName,
       email: regData.credentials.email,
@@ -430,12 +430,12 @@ export class ConsignorRegistrationStep2Component implements OnInit {
       // Note: No address field as requested
     };
 
-    this.consignorService.registerFromInvitation(request).subscribe({
+    this.ConsignorService.registerFromInvitation(request).subscribe({
       next: (response) => {
         if (response.success) {
           this.isSubmitted.set(true);
           // Clear session storage
-          sessionStorage.removeItem('consignor_registration_data');
+          sessionStorage.removeItem('provider_registration_data');
         } else {
           this.errorMessage.set(response.message || 'Registration failed');
         }

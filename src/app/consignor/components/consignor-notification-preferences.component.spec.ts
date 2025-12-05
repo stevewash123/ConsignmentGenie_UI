@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ConsignorNotificationPreferencesComponent } from './consignor-notification-preferences.component';
+import { ProviderNotificationPreferencesComponent } from './consignor-notification-preferences.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-describe('ConsignorNotificationPreferencesComponent', () => {
-  let component: ConsignorNotificationPreferencesComponent;
-  let fixture: ComponentFixture<ConsignorNotificationPreferencesComponent>;
+describe('ProviderNotificationPreferencesComponent', () => {
+  let component: ProviderNotificationPreferencesComponent;
+  let fixture: ComponentFixture<ProviderNotificationPreferencesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConsignorNotificationPreferencesComponent, HttpClientTestingModule, RouterTestingModule],
+      imports: [ProviderNotificationPreferencesComponent, HttpClientTestingModule, RouterTestingModule],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorNotificationPreferencesComponent);
+    fixture = TestBed.createComponent(ProviderNotificationPreferencesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ConsignorProfile, UpdateConsignorProfile } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ProviderProfile, UpdateProviderProfile } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -485,8 +485,8 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ConsignorProfileComponent implements OnInit {
-  profile: ConsignorProfile | null = null;
+export class ProviderProfileComponent implements OnInit {
+  profile: ProviderProfile | null = null;
   saving = false;
   error: string | null = null;
   successMessage: string | null = null;
@@ -494,7 +494,7 @@ export class ConsignorProfileComponent implements OnInit {
   // Expose for template
   readonly KEYS = LOADING_KEYS;
 
-  formData: UpdateConsignorProfile = {
+  formData: UpdateProviderProfile = {
     fullName: '',
     phone: '',
     preferredPaymentMethod: '',
@@ -505,7 +505,7 @@ export class ConsignorProfileComponent implements OnInit {
   payoutNotifications = true;
 
   constructor(
-    private consignorService: ConsignorPortalService,
+    private ConsignorService: ProviderPortalService,
     public loadingService: LoadingService
   ) {}
 
@@ -517,7 +517,7 @@ export class ConsignorProfileComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.PROFILE);
     this.error = null;
 
-    this.consignorService.getProfile().subscribe({
+    this.ConsignorService.getProfile().subscribe({
       next: (profile) => {
         this.profile = profile;
         this.populateForm(profile);
@@ -532,7 +532,7 @@ export class ConsignorProfileComponent implements OnInit {
     });
   }
 
-  populateForm(profile: ConsignorProfile) {
+  populateForm(profile: ProviderProfile) {
     this.formData = {
       fullName: profile.fullName,
       phone: profile.phone || '',
@@ -546,7 +546,7 @@ export class ConsignorProfileComponent implements OnInit {
     if (form.valid) {
       this.saving = true;
 
-      this.consignorService.updateProfile(this.formData).subscribe({
+      this.ConsignorService.updateProfile(this.formData).subscribe({
         next: (updatedProfile) => {
           this.profile = updatedProfile;
           this.saving = false;

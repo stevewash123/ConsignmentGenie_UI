@@ -12,7 +12,7 @@ export interface Transaction {
 
   // Navigation data
   item: ItemSummary;
-  consignor: ConsignorSummary;
+  consignor: consignorsummary;
   notes?: string;
 
   // Audit
@@ -27,7 +27,7 @@ export interface ItemSummary {
   originalPrice: number;
 }
 
-export interface ConsignorSummary {
+export interface consignorsummary {
   id: string;
   name: string;
   email?: string;

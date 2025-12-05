@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ConsignorItem, PagedResult, ConsignorItemQuery } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ProviderItem, PagedResult, ProviderItemQuery } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -470,8 +470,8 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ConsignorItemsComponent implements OnInit {
-  itemsResult: PagedResult<ConsignorItem> | null = null;
+export class ProviderItemsComponent implements OnInit {
+  itemsResult: PagedResult<ProviderItem> | null = null;
   error: string | null = null;
 
   // Expose for template
@@ -489,7 +489,7 @@ export class ConsignorItemsComponent implements OnInit {
   removedCount = 0;
 
   constructor(
-    private consignorService: ConsignorPortalService,
+    private ConsignorService: ProviderPortalService,
     public loadingService: LoadingService
   ) {}
 
@@ -502,7 +502,7 @@ export class ConsignorItemsComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.ITEMS_LIST);
     this.error = null;
 
-    const query: ConsignorItemQuery = {
+    const query: ProviderItemQuery = {
       page: this.currentPage,
       pageSize: this.pageSize
     };
@@ -511,7 +511,7 @@ export class ConsignorItemsComponent implements OnInit {
       query.status = this.selectedStatus;
     }
 
-    this.consignorService.getMyItems(query).subscribe({
+    this.ConsignorService.getMyItems(query).subscribe({
       next: (result) => {
         this.itemsResult = result;
       },

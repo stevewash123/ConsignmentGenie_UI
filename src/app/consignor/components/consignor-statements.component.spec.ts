@@ -2,21 +2,21 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { RouterTestingModule } from '@angular/router/testing';
 import { Component } from '@angular/core';
 import { of, throwError } from 'rxjs';
-import { ConsignorStatementsComponent } from './consignor-statements.component';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
+import { consignorstatementsComponent } from './consignor-statements.component';
+import { ProviderPortalService } from '../services/consignor-portal.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
-import { StatementListDto } from "../models/consignor.models";
+import { StatementListDto } from '../models/consignor.models';
 
 @Component({
   template: '<div>Statement Detail</div>'
 })
 class MockStatementDetailComponent { }
 
-describe('ConsignorStatementsComponent', () => {
-  let component: ConsignorStatementsComponent;
-  let fixture: ComponentFixture<ConsignorStatementsComponent>;
-  let mockConsignorService: jasmine.SpyObj<ConsignorPortalService>;
+describe('consignorstatementsComponent', () => {
+  let component: consignorstatementsComponent;
+  let fixture: ComponentFixture<consignorstatementsComponent>;
+  let mockConsignorService: jasmine.SpyObj<ProviderPortalService>;
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   const mockStatements: StatementListDto[] = [
@@ -49,7 +49,7 @@ describe('ConsignorStatementsComponent', () => {
   ];
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('ConsignorPortalService', [
+    const spy = jasmine.createSpyObj('ProviderPortalService', [
       'getStatements',
       'downloadStatementPdf'
     ]);
@@ -61,20 +61,20 @@ describe('ConsignorStatementsComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        ConsignorStatementsComponent,
+        consignorstatementsComponent,
         RouterTestingModule.withRoutes([
           { path: 'consignor/statements/:id', component: MockStatementDetailComponent }
         ])
       ],
       providers: [
-        { provide: ConsignorPortalService, useValue: spy },
+        { provide: ProviderPortalService, useValue: spy },
         { provide: LoadingService, useValue: loadingSpy }
       ]
     }).compileComponents();
 
-    mockConsignorService = TestBed.inject(ConsignorPortalService) as jasmine.SpyObj<ConsignorPortalService>;
+    mockConsignorService = TestBed.inject(ProviderPortalService) as jasmine.SpyObj<ProviderPortalService>;
     mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
-    fixture = TestBed.createComponent(ConsignorStatementsComponent);
+    fixture = TestBed.createComponent(consignorstatementsComponent);
     component = fixture.componentInstance;
 
     // Don't automatically call detectChanges - let individual tests control this

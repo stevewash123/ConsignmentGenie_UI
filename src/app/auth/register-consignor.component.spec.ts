@@ -3,12 +3,12 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
-import { RegisterConsignorComponent } from './register-consignor.component';
+import { RegisterProviderComponent } from './register-consignor.component';
 import { AuthService } from '../services/auth.service';
 
-describe('RegisterConsignorComponent', () => {
-  let component: RegisterConsignorComponent;
-  let fixture: ComponentFixture<RegisterConsignorComponent>;
+describe('RegisterProviderComponent', () => {
+  let component: RegisterProviderComponent;
+  let fixture: ComponentFixture<RegisterProviderComponent>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
 
@@ -16,14 +16,14 @@ describe('RegisterConsignorComponent', () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['registerProvider', 'validateStoreCode']);
 
     await TestBed.configureTestingModule({
-      imports: [ RegisterConsignorComponent, ReactiveFormsModule, RouterTestingModule ],
+      imports: [ RegisterProviderComponent, ReactiveFormsModule, RouterTestingModule ],
       providers: [
         { provide: AuthService, useValue: mockAuthService }
       ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(RegisterConsignorComponent);
+    fixture = TestBed.createComponent(RegisterProviderComponent);
     component = fixture.componentInstance;
 
     // Get the router and spy on navigate

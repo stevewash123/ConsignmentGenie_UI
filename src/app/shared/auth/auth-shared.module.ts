@@ -22,4 +22,4 @@ export class AuthSharedModule { }
 // For standalone components, export them directly
 export { AuthMethodSelectorComponent } from './components/auth-method-selector/auth-method-selector.component';
 export { AccountSecurityComponent } from './components/account-security/account-security.component';
-export * from './config/auth-providers.config';
+export * from './config/auth-consignors.config';

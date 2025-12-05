@@ -254,7 +254,7 @@ describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
 
     it('should render table with correct headers', () => {
       const tableHeaders = fixture.nativeElement.querySelectorAll('th');
-      expect(tableHeaders.length).toBe(11); // Image, SKU, Title, Category, Condition, Price, Status, Source, Consignor, Received, Actions
+      expect(tableHeaders.length).toBe(11); // Image, SKU, Title, Category, Condition, Price, Status, Source, consignor, Received, Actions
     });
 
     it('should render table rows for items', () => {

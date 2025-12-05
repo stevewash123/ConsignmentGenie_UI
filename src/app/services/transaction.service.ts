@@ -19,7 +19,7 @@ export class TransactionService {
     let params = new HttpParams();
     if (queryParams?.startDate) params = params.set('startDate', queryParams.startDate.toISOString());
     if (queryParams?.endDate) params = params.set('endDate', queryParams.endDate.toISOString());
-    if (queryParams?.consignorId) params = params.set('providerId', queryParams.consignorId);
+    if (queryParams?.providerId) params = params.set('providerId', queryParams.providerId);
     if (queryParams?.paymentMethod) params = params.set('paymentMethod', queryParams.paymentMethod);
     if (queryParams?.page) params = params.set('page', queryParams.page.toString());
     if (queryParams?.pageSize) params = params.set('pageSize', queryParams.pageSize.toString());
@@ -49,7 +49,7 @@ export class TransactionService {
     let params = new HttpParams();
     if (queryParams?.startDate) params = params.set('startDate', queryParams.startDate.toISOString());
     if (queryParams?.endDate) params = params.set('endDate', queryParams.endDate.toISOString());
-    if (queryParams?.consignorId) params = params.set('providerId', queryParams.consignorId);
+    if (queryParams?.providerId) params = params.set('providerId', queryParams.providerId);
 
     return this.http.get<SalesMetrics>(`${this.apiUrl}/metrics`, { params });
   }
@@ -58,7 +58,7 @@ export class TransactionService {
 export interface TransactionQueryParams {
   startDate?: Date;
   endDate?: Date;
-  consignorId?: string;
+  providerId?: string;
   paymentMethod?: string;
   page?: number;
   pageSize?: number;
@@ -69,7 +69,7 @@ export interface TransactionQueryParams {
 export interface MetricsQueryParams {
   startDate?: Date;
   endDate?: Date;
-  consignorId?: string;
+  providerId?: string;
 }
 
 export interface UpdateTransactionRequest {
@@ -82,19 +82,19 @@ export interface UpdateTransactionRequest {
 export interface SalesMetrics {
   totalSales: number;
   totalShopAmount: number;
-  totalConsignorAmount: number;
+  totalProviderAmount: number;
   totalTax: number;
   transactionCount: number;
   averageTransactionValue: number;
-  topConsignors: ConsignorSales[];
+  topconsignors: consignorsales[];
   paymentMethodBreakdown: PaymentMethodBreakdown[];
   periodStart?: Date;
   periodEnd?: Date;
 }
 
-export interface ConsignorSales {
-  consignorId: string;
-  consignorName: string;
+export interface consignorsales {
+  providerId: string;
+  providerName: string;
   transactionCount: number;
   totalSales: number;
   totalProviderAmount: number;

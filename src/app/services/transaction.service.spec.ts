@@ -216,14 +216,14 @@ describe('TransactionService', () => {
     const mockMetrics: SalesMetrics = {
       totalSales: 1000.00,
       totalShopAmount: 500.00,
-      totalConsignorAmount: 450.00,
+      totalProviderAmount: 450.00,
       totalTax: 50.00,
       transactionCount: 10,
       averageTransactionValue: 100.00,
-      topConsignors: [
+      topproviders: [
         {
-          consignorId: 'consignor-1',
-          consignorName: 'consignor 1',
+          providerId: 'consignor-1',
+          providerName: 'consignor 1',
           transactionCount: 5,
           totalSales: 500.00,
           totalProviderAmount: 225.00
@@ -243,7 +243,7 @@ describe('TransactionService', () => {
       expect(metrics).toEqual(mockMetrics);
       expect(metrics.totalSales).toBe(1000.00);
       expect(metrics.transactionCount).toBe(10);
-      expect(metrics.topConsignors.length).toBe(1);
+      expect(metrics.topconsignors.length).toBe(1);
       expect(metrics.paymentMethodBreakdown.length).toBe(2);
     });
 
@@ -256,11 +256,11 @@ describe('TransactionService', () => {
     const mockMetrics: SalesMetrics = {
       totalSales: 500.00,
       totalShopAmount: 250.00,
-      totalConsignorAmount: 225.00,
+      totalProviderAmount: 225.00,
       totalTax: 25.00,
       transactionCount: 5,
       averageTransactionValue: 100.00,
-      topConsignors: [],
+      topproviders: [],
       paymentMethodBreakdown: []
     };
 

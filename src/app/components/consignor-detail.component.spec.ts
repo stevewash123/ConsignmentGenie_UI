@@ -4,29 +4,29 @@ import { ActivatedRoute, Router, RouterLinkWithHref, RouterLink } from '@angular
 import { of, throwError } from 'rxjs';
 import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { ConsignorDetailComponent } from './consignor-detail.component';
+import { ProviderDetailComponent } from './consignor-detail.component';
 import { ConsignorService } from '../services/consignor.service';
-import { Consignor } from '../models/consignor.model';
+import { consignor } from '../models/consignor.model';
 import { LoadingService } from '../shared/services/loading.service';
 
 // Mock components for routing tests
 @Component({ template: '' })
-class MockConsignorListComponent { }
+class MockProviderListComponent { }
 
 @Component({ template: '' })
-class MockConsignorEditComponent { }
+class MockProviderEditComponent { }
 
-describe('ConsignorDetailComponent', () => {
-  let component: ConsignorDetailComponent;
-  let fixture: ComponentFixture<ConsignorDetailComponent>;
+describe('ProviderDetailComponent', () => {
+  let component: ProviderDetailComponent;
+  let fixture: ComponentFixture<ProviderDetailComponent>;
   let router: Router;
   let activatedRoute: ActivatedRoute;
   let consignorService: jasmine.SpyObj<ConsignorService>;
   let loadingService: jasmine.SpyObj<LoadingService>;
 
-  const mockConsignor: Consignor = {
+  const mockProvider: consignor = {
     id: 1,
-    name: 'Test Consignor',
+    name: 'Test consignor',
     email: 'test@consignor.com',
     phone: '1234567890',
     address: '123 Test Street',
@@ -43,9 +43,9 @@ describe('ConsignorDetailComponent', () => {
 
   beforeEach(async () => {
     const ConsignorServiceSpy = jasmine.createSpyObj('ConsignorService', [
-      'getConsignor',
-      'deactivateConsignor',
-      'activateConsignor'
+      'getProvider',
+      'deactivateProvider',
+      'activateProvider'
     ]);
 
     const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
@@ -56,10 +56,10 @@ describe('ConsignorDetailComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        ConsignorDetailComponent,
+        ProviderDetailComponent,
         RouterTestingModule.withRoutes([
-          { path: 'owner/consignors', component: MockConsignorListComponent },
-          { path: 'owner/consignors/:id/edit', component: MockConsignorEditComponent }
+          { path: 'owner/consignors', component: MockProviderListComponent },
+          { path: 'owner/consignors/:id/edit', component: MockProviderEditComponent }
         ])
       ],
       providers: [
@@ -77,15 +77,15 @@ describe('ConsignorDetailComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorDetailComponent);
+    fixture = TestBed.createComponent(ProviderDetailComponent);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     activatedRoute = TestBed.inject(ActivatedRoute);
-    consignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
+    ConsignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
     loadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
 
     loadingService.isLoading.and.returnValue(false);
-    consignorService.getConsignor.and.returnValue(of(mockConsignor));
+    ConsignorService.getProvider.and.returnValue(of(mockProvider));
   });
 
   describe('Standard behavior', () => {
@@ -98,8 +98,8 @@ describe('ConsignorDetailComponent', () => {
   });
 
   it('should load consignor data on init', () => {
-    expect(consignorService.getConsignor).toHaveBeenCalledWith(1);
-    expect(component.consignor()?.name).toBe('Test Consignor');
+    expect(ConsignorService.getProvider).toHaveBeenCalledWith(1);
+    expect(component.consignor()?.name).toBe('Test consignor');
     expect(component.consignor()?.email).toBe('test@consignor.com');
   });
 
@@ -111,7 +111,7 @@ describe('ConsignorDetailComponent', () => {
   it('should display consignor information', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('h1')?.textContent).toBe('Test Consignor');
+    expect(compiled.querySelector('h1')?.textContent).toBe('Test consignor');
     expect(compiled.textContent).toContain('test@consignor.com');
     expect(compiled.textContent).toContain('1234567890');
     expect(compiled.textContent).toContain('123 Test Street');
@@ -126,8 +126,8 @@ describe('ConsignorDetailComponent', () => {
   });
 
   it('should show inactive status for inactive consignor', () => {
-    const inactiveConsignor = { ...mockConsignor, isActive: false };
-    consignorService.getConsignor.and.returnValue(of(inactiveConsignor));
+    const inactiveProvider = { ...mockProvider, isActive: false };
+    ConsignorService.getProvider.and.returnValue(of(inactiveProvider));
 
     component.ngOnInit();
     fixture.detectChanges();
@@ -157,8 +157,8 @@ describe('ConsignorDetailComponent', () => {
   });
 
   it('should show activate button for inactive consignor', () => {
-    const inactiveConsignor = { ...mockConsignor, isActive: false };
-    consignorService.getConsignor.and.returnValue(of(inactiveConsignor));
+    const inactiveProvider = { ...mockProvider, isActive: false };
+    ConsignorService.getProvider.and.returnValue(of(inactiveProvider));
 
     component.ngOnInit();
     fixture.detectChanges();
@@ -173,51 +173,51 @@ describe('ConsignorDetailComponent', () => {
   });
 
   it('should deactivate consignor successfully', () => {
-    const deactivatedConsignor = { ...mockConsignor, isActive: false };
-    consignorService.deactivateConsignor.and.returnValue(of(deactivatedConsignor));
+    const deactivatedProvider = { ...mockProvider, isActive: false };
+    ConsignorService.deactivateProvider.and.returnValue(of(deactivatedProvider));
 
-    component.deactivateConsignor();
+    component.deactivateProvider();
 
-    expect(consignorService.deactivateConsignor).toHaveBeenCalledWith(1);
+    expect(ConsignorService.deactivateProvider).toHaveBeenCalledWith(1);
     expect(component.consignor()?.isActive).toBe(false);
     expect(component.isSubmitting()).toBe(false);
   });
 
   it('should activate consignor successfully', () => {
-    const inactiveConsignor = { ...mockConsignor, isActive: false };
-    consignorService.getConsignor.and.returnValue(of(inactiveConsignor));
+    const inactiveProvider = { ...mockProvider, isActive: false };
+    ConsignorService.getProvider.and.returnValue(of(inactiveProvider));
     component.ngOnInit();
 
-    const activatedConsignor = { ...inactiveConsignor, isActive: true };
-    consignorService.activateConsignor.and.returnValue(of(activatedConsignor));
+    const activatedProvider = { ...inactiveProvider, isActive: true };
+    ConsignorService.activateProvider.and.returnValue(of(activatedProvider));
 
-    component.activateConsignor();
+    component.activateProvider();
 
-    expect(consignorService.activateConsignor).toHaveBeenCalledWith(1);
+    expect(ConsignorService.activateProvider).toHaveBeenCalledWith(1);
     expect(component.consignor()?.isActive).toBe(true);
     expect(component.isSubmitting()).toBe(false);
   });
 
   xit('should handle deactivation error', () => {
-    consignorService.deactivateConsignor.and.returnValue(throwError(() => new Error('Deactivation failed')));
+    ConsignorService.deactivateProvider.and.returnValue(throwError(() => new Error('Deactivation failed')));
 
-    component.deactivateConsignor();
+    component.deactivateProvider();
 
     expect(component.errorMessage()).toContain('Failed to deactivate consignor');
     expect(component.isSubmitting()).toBe(false);
   });
 
   xit('should handle activation error', () => {
-    consignorService.activateConsignor.and.returnValue(throwError(() => new Error('Activation failed')));
+    ConsignorService.activateProvider.and.returnValue(throwError(() => new Error('Activation failed')));
 
-    component.activateConsignor();
+    component.activateProvider();
 
     expect(component.errorMessage()).toContain('Failed to activate consignor');
     expect(component.isSubmitting()).toBe(false);
   });
 
   it('should handle consignor loading error', () => {
-    consignorService.getConsignor.and.returnValue(throwError(() => new Error('Consignor not found')));
+    ConsignorService.getProvider.and.returnValue(throwError(() => new Error('consignor not found')));
 
     component.ngOnInit();
 
@@ -264,19 +264,19 @@ describe('ConsignorDetailComponent', () => {
 
   it('should handle missing optional fields gracefully', () => {
     const providerWithMissingFields = {
-      ...mockConsignor,
+      ...mockProvider,
       phone: undefined,
       address: undefined,
       notes: undefined
     };
-    consignorService.getConsignor.and.returnValue(of(providerWithMissingFields));
+    ConsignorService.getProvider.and.returnValue(of(providerWithMissingFields));
 
     component.ngOnInit();
     fixture.detectChanges();
 
     // Should not crash and should display available information
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toBe('Test Consignor');
+    expect(compiled.querySelector('h1')?.textContent).toBe('Test consignor');
   });
 
   });
@@ -284,7 +284,7 @@ describe('ConsignorDetailComponent', () => {
   describe('Custom detectChanges control', () => {
     it('should have correct edit button link', fakeAsync(() => {
       // Set the providerId signal BEFORE any change detection
-      component.consignorId.set(1);
+      component.providerId.set(1);
 
       // Now trigger the first change detection with the correct providerId
       fixture.detectChanges();

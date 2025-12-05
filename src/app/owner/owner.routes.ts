@@ -67,8 +67,8 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./settings/accounting/accounting-settings.component').then(m => m.AccountingSettingsComponent)
       },
       {
-        path: 'consignors',
-        loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
+        path: 'providers',
+        loadComponent: () => import('./settings/providers/provider-settings.component').then(m => m.providerSettingsComponent)
       },
       {
         path: 'subscription',

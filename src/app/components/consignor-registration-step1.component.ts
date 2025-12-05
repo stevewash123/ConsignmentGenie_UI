@@ -214,7 +214,7 @@ interface InvitationDetails {
     }
   `]
 })
-export class ConsignorRegistrationStep1Component implements OnInit {
+export class ProviderRegistrationStep1Component implements OnInit {
   invitationDetails = signal<InvitationDetails | null>(null);
   isValidating = signal(true);
   isInvalidToken = signal(false);
@@ -224,10 +224,10 @@ export class ConsignorRegistrationStep1Component implements OnInit {
   invitationToken = '';
 
   credentials: CredentialsEvent | null = null;
-  selectedConsignor: string | null = null;
+  selectedProvider: string | null = null;
 
   constructor(
-    private consignorService: ConsignorService,
+    private ConsignorService: ConsignorService,
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
@@ -248,7 +248,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
   }
 
   validateInvitation(): void {
-    this.consignorService.validateInvitation(this.invitationToken).subscribe({
+    this.ConsignorService.validateInvitation(this.invitationToken).subscribe({
       next: (response) => {
         this.isValidating.set(false);
 
@@ -271,7 +271,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
 
   handleProviderAuth(event: ProviderAuthEvent): void {
     this.isProcessing.set(true);
-    this.selectedConsignor = event.provider;
+    this.selectedProvider = event.consignor;
 
     // TODO: Implement OAuth flow
     setTimeout(() => {
@@ -282,7 +282,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
 
   handleCredentials(event: CredentialsEvent): void {
     this.credentials = event;
-    this.selectedConsignor = null;
+    this.selectedProvider = null;
     this.errorMessage.set('');
   }
 
@@ -303,7 +303,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
       invitationDetails: this.invitationDetails()
     };
 
-    sessionStorage.setItem('consignor_registration_data', JSON.stringify(registrationData));
+    sessionStorage.setItem('provider_registration_data', JSON.stringify(registrationData));
 
     // Navigate to step 2
     setTimeout(() => {

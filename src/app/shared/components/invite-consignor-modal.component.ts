@@ -1,7 +1,7 @@
 import { Component, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Consignor } from '../../models/consignor.model';
+import { consignor } from '../../models/consignor.model';
 import { ConsignorService } from '../../services/consignor.service';
 import { ENTITY_LABELS } from '../constants/labels';
 
@@ -13,7 +13,7 @@ import { ENTITY_LABELS } from '../constants/labels';
     <div class="modal-overlay" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ mode === 'invite' ? labels.inviteConsignor : labels.addConsignorManually }}</h2>
+          <h2>{{ mode === 'invite' ? labels.inviteProvider : labels.addProviderManually }}</h2>
           <button class="close-btn" (click)="close()">×</button>
         </div>
 
@@ -390,7 +390,7 @@ import { ENTITY_LABELS } from '../constants/labels';
 })
 export class InviteConsignorModalComponent {
   @Output() closed = new EventEmitter<void>();
-  @Output() consignorAdded = new EventEmitter<Consignor>();
+  @Output() consignorAdded = new EventEmitter<consignor>();
 
   labels = ENTITY_LABELS;
   mode: 'invite' | 'manual' = 'invite';
@@ -412,7 +412,7 @@ export class InviteConsignorModalComponent {
     useShopDefault: new FormControl(true)
   });
 
-  constructor(private consignorService: ConsignorService) {}
+  constructor(private ConsignorService: ConsignorService) {}
 
   close(): void {
     this.closed.emit();
@@ -444,7 +444,7 @@ export class InviteConsignorModalComponent {
       };
 
       // Send invitation via API
-      this.consignorService.inviteConsignor(inviteData).subscribe({
+      this.ConsignorService.inviteProvider(inviteData).subscribe({
         next: (response) => {
           this.isSubmitting.set(false);
           if (response.success) {

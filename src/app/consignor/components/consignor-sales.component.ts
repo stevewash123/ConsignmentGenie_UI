@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ConsignorSale, PagedResult, ConsignorSaleQuery } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { consignorsale, PagedResult, consignorsaleQuery } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -455,8 +455,8 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ConsignorSalesComponent implements OnInit {
-  salesResult: PagedResult<ConsignorSale> | null = null;
+export class consignorsalesComponent implements OnInit {
+  salesResult: PagedResult<consignorsale> | null = null;
   error: string | null = null;
 
   // Expose for template
@@ -473,7 +473,7 @@ export class ConsignorSalesComponent implements OnInit {
   totalShownEarnings = 0;
 
   constructor(
-    private consignorService: ConsignorPortalService,
+    private ConsignorService: ProviderPortalService,
     public loadingService: LoadingService
   ) {}
 
@@ -485,7 +485,7 @@ export class ConsignorSalesComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.SALES_LIST);
     this.error = null;
 
-    const query: ConsignorSaleQuery = {
+    const query: consignorsaleQuery = {
       page: this.currentPage,
       pageSize: this.pageSize
     };
@@ -500,7 +500,7 @@ export class ConsignorSalesComponent implements OnInit {
       query.payoutStatus = this.selectedPayoutStatus;
     }
 
-    this.consignorService.getMySales(query).subscribe({
+    this.ConsignorService.getMySales(query).subscribe({
       next: (result) => {
         this.salesResult = result;
         this.calculateSummary();

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { ConsignorService } from '../services/consignor.service';
-import { Consignor } from '../models/consignor.model';
+import { consignor } from '../models/consignor.model';
 import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
@@ -11,19 +11,19 @@ import { LoadingService } from '../shared/services/loading.service';
   standalone: true,
   imports: [CommonModule, RouterModule, HttpClientModule],
   template: `
-    <div class="consignor-detail-container" *ngIf="!isConsignorLoading(); else loading">
+    <div class="consignor-detail-container" *ngIf="!isProviderLoading(); else loading">
       <div class="detail-header">
         <div class="breadcrumb">
           <a routerLink="/owner/consignors">← Back to consignors</a>
         </div>
         <div class="header-actions">
-          <button class="btn-secondary" [routerLink]="['/owner/consignors', consignorId(), 'edit']">
-            Edit Consignor
+          <button class="btn-secondary" [routerLink]="['/owner/consignors', providerId(), 'edit']">
+            Edit consignor
           </button>
           <button
             class="btn-danger"
             *ngIf="consignor()?.isActive"
-            (click)="deactivateConsignor()"
+            (click)="deactivateProvider()"
             [disabled]="isSubmitting()"
           >
             {{ isSubmitting() ? 'Deactivating...' : 'Deactivate' }}
@@ -31,7 +31,7 @@ import { LoadingService } from '../shared/services/loading.service';
           <button
             class="btn-success"
             *ngIf="!consignor()?.isActive"
-            (click)="activateConsignor()"
+            (click)="activateProvider()"
             [disabled]="isSubmitting()"
           >
             {{ isSubmitting() ? 'Activating...' : 'Activate' }}
@@ -81,9 +81,9 @@ import { LoadingService } from '../shared/services/loading.service';
                 <label>Payment Details:</label>
                 <span>{{ consignor()!.paymentDetails }}</span>
               </div>
-              <div class="info-item" *ngIf="consignor()!.consignorNumber">
-                <label>Consignor Number:</label>
-                <span>{{ consignor()!.consignorNumber }}</span>
+              <div class="info-item" *ngIf="consignor()!.providerNumber">
+                <label>consignor Number:</label>
+                <span>{{ consignor()!.providerNumber }}</span>
               </div>
             </div>
           </div>
@@ -386,9 +386,9 @@ import { LoadingService } from '../shared/services/loading.service';
     }
   `]
 })
-export class ConsignorDetailComponent implements OnInit {
-  consignor = signal<Consignor | null>(null);
-  consignorId = signal<number>(0);
+export class ProviderDetailComponent implements OnInit {
+  consignor = signal<consignor | null>(null);
+  providerId = signal<number>(0);
   isSubmitting = signal(false);
   errorMessage = signal('');
 
@@ -402,12 +402,12 @@ export class ConsignorDetailComponent implements OnInit {
 
   recentActivity = signal<any[]>([]);
 
-  isConsignorLoading(): boolean {
+  isProviderLoading(): boolean {
     return this.loadingService.isLoading('consignor-detail');
   }
 
   constructor(
-    private consignorService: ConsignorService,
+    private ConsignorService: ConsignorService,
     private route: ActivatedRoute,
     private router: Router,
     private loadingService: LoadingService
@@ -416,16 +416,16 @@ export class ConsignorDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
     if (id) {
-      this.consignorId.set(parseInt(id));
-      this.loadConsignor();
+      this.providerId.set(parseInt(id));
+      this.loadProvider();
       this.loadStats();
       this.loadRecentActivity();
     }
   }
 
-  loadConsignor(): void {
+  loadProvider(): void {
     this.loadingService.start('consignor-detail');
-    this.consignorService.getConsignor(this.consignorId()).subscribe({
+    this.ConsignorService.getProvider(this.providerId()).subscribe({
       next: (consignor) => {
         this.consignor.set(consignor);
       },
@@ -485,11 +485,11 @@ export class ConsignorDetailComponent implements OnInit {
     }
   }
 
-  deactivateConsignor(): void {
+  deactivateProvider(): void {
     if (!this.consignor()) return;
 
     this.isSubmitting.set(true);
-    this.consignorService.deactivateConsignor(this.consignor()!.id).subscribe({
+    this.ConsignorService.deactivateProvider(this.consignor()!.id).subscribe({
       next: (updated) => {
         this.consignor.set(updated);
       },
@@ -503,11 +503,11 @@ export class ConsignorDetailComponent implements OnInit {
     });
   }
 
-  activateConsignor(): void {
+  activateProvider(): void {
     if (!this.consignor()) return;
 
     this.isSubmitting.set(true);
-    this.consignorService.activateConsignor(this.consignor()!.id).subscribe({
+    this.ConsignorService.activateProvider(this.consignor()!.id).subscribe({
       next: (updated) => {
         this.consignor.set(updated);
       },

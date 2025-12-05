@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ConsignorPayoutDetail } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ProviderPayoutDetail } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -464,8 +464,8 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ConsignorPayoutDetailComponent implements OnInit {
-  payoutDetail: ConsignorPayoutDetail | null = null;
+export class ProviderPayoutDetailComponent implements OnInit {
+  payoutDetail: ProviderPayoutDetail | null = null;
   error: string | null = null;
   payoutId: string;
 
@@ -473,7 +473,7 @@ export class ConsignorPayoutDetailComponent implements OnInit {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private consignorService: ConsignorPortalService,
+    private ConsignorService: ProviderPortalService,
     private route: ActivatedRoute,
     public loadingService: LoadingService
   ) {
@@ -490,7 +490,7 @@ export class ConsignorPayoutDetailComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.PAYOUT_DETAIL);
     this.error = null;
 
-    this.consignorService.getMyPayout(this.payoutId).subscribe({
+    this.ConsignorService.getMyPayout(this.payoutId).subscribe({
       next: (detail) => {
         this.payoutDetail = detail;
       },

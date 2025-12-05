@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Component, Input, NO_ERRORS_SCHEMA } from '@angular/core';
-import { ConsignorLayoutComponent } from './consignor-layout.component';
+import { ProviderLayoutComponent } from './consignor-layout.component';
 import { UserRole } from '../../shared/models/notification.models';
 
 @Component({
@@ -10,14 +10,14 @@ import { UserRole } from '../../shared/models/notification.models';
 })
 class TestComponent { }
 
-describe('ConsignorLayoutComponent', () => {
-  let component: ConsignorLayoutComponent;
-  let fixture: ComponentFixture<ConsignorLayoutComponent>;
+describe('ProviderLayoutComponent', () => {
+  let component: ProviderLayoutComponent;
+  let fixture: ComponentFixture<ProviderLayoutComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        ConsignorLayoutComponent,
+        ProviderLayoutComponent,
         HttpClientTestingModule,
         RouterTestingModule.withRoutes([
           { path: 'consignor/dashboard', component: TestComponent },
@@ -28,7 +28,7 @@ describe('ConsignorLayoutComponent', () => {
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorLayoutComponent);
+    fixture = TestBed.createComponent(ProviderLayoutComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

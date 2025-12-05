@@ -4,13 +4,13 @@ import { FormBuilder } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 
-import { ConsignorSignupStep1Component } from './consignor-signup-step1.component';
+import { consignorsignupStep1Component } from './consignor-signup-step1.component';
 import { AuthService } from '../services/auth.service';
 import { ConsignorService } from '../services/consignor.service';
 
-describe('ConsignorSignupStep1Component', () => {
-  let component: ConsignorSignupStep1Component;
-  let fixture: ComponentFixture<ConsignorSignupStep1Component>;
+describe('consignorsignupStep1Component', () => {
+  let component: consignorsignupStep1Component;
+  let fixture: ComponentFixture<consignorsignupStep1Component>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockConsignorService: jasmine.SpyObj<ConsignorService>;
@@ -38,7 +38,7 @@ describe('ConsignorSignupStep1Component', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        ConsignorSignupStep1Component
+        consignorsignupStep1Component
       ],
       providers: [
         FormBuilder,
@@ -50,7 +50,7 @@ describe('ConsignorSignupStep1Component', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorSignupStep1Component);
+    fixture = TestBed.createComponent(consignorsignupStep1Component);
     component = fixture.componentInstance;
     mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     mockConsignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
@@ -76,7 +76,7 @@ describe('ConsignorSignupStep1Component', () => {
 
     expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('LOGIN');
     expect(compiled.querySelector('.subtitle')?.textContent?.trim())
-      .toBe('Choose your method to log in as a Consignor');
+      .toBe('Choose your method to log in as a consignor');
   });
 
   it('should validate required fields', () => {
@@ -147,7 +147,7 @@ describe('ConsignorSignupStep1Component', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const submitButton = compiled.querySelector('.submit-btn') as HTMLButtonElement;
 
-    expect(submitButton.textContent?.trim()).toBe('Continue to Consignor Details');
+    expect(submitButton.textContent?.trim()).toBe('Continue to consignor Details');
 
     component.isSubmitting.set(true);
     fixture.detectChanges();
@@ -168,7 +168,7 @@ describe('ConsignorSignupStep1Component', () => {
     component.onSubmit();
 
     expect(component.isSubmitting()).toBeTrue();
-    expect(sessionStorage.setItem).toHaveBeenCalledWith('consignorAuthData',
+    expect(sessionStorage.setItem).toHaveBeenCalledWith('providerAuthData',
       JSON.stringify({
         email: 'test@example.com',
         password: 'password123'
@@ -324,7 +324,7 @@ describe('ConsignorSignupStep1Component', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       const subtitle = compiled.querySelector('.subtitle');
 
-      expect(subtitle?.textContent?.trim()).toBe('Choose your method to log in as a Consignor');
+      expect(subtitle?.textContent?.trim()).toBe('Choose your method to log in as a consignor');
     });
   });
 
@@ -342,9 +342,9 @@ describe('ConsignorSignupStep1Component', () => {
   });
 });
 
-describe('ConsignorSignupStep1Component - With Invitation Token', () => {
-  let component: ConsignorSignupStep1Component;
-  let fixture: ComponentFixture<ConsignorSignupStep1Component>;
+describe('consignorsignupStep1Component - With Invitation Token', () => {
+  let component: consignorsignupStep1Component;
+  let fixture: ComponentFixture<consignorsignupStep1Component>;
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
@@ -372,7 +372,7 @@ describe('ConsignorSignupStep1Component - With Invitation Token', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [ConsignorSignupStep1Component],
+      imports: [consignorsignupStep1Component],
       providers: [
         FormBuilder,
         { provide: AuthService, useValue: authServiceSpy },
@@ -383,7 +383,7 @@ describe('ConsignorSignupStep1Component - With Invitation Token', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorSignupStep1Component);
+    fixture = TestBed.createComponent(consignorsignupStep1Component);
     component = fixture.componentInstance;
   });
 
@@ -398,9 +398,9 @@ describe('ConsignorSignupStep1Component - With Invitation Token', () => {
   });
 });
 
-describe('ConsignorSignupStep1Component - With Token Only', () => {
-  let component: ConsignorSignupStep1Component;
-  let fixture: ComponentFixture<ConsignorSignupStep1Component>;
+describe('consignorsignupStep1Component - With Token Only', () => {
+  let component: consignorsignupStep1Component;
+  let fixture: ComponentFixture<consignorsignupStep1Component>;
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
@@ -428,7 +428,7 @@ describe('ConsignorSignupStep1Component - With Token Only', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [ConsignorSignupStep1Component],
+      imports: [consignorsignupStep1Component],
       providers: [
         FormBuilder,
         { provide: AuthService, useValue: authServiceSpy },
@@ -439,7 +439,7 @@ describe('ConsignorSignupStep1Component - With Token Only', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorSignupStep1Component);
+    fixture = TestBed.createComponent(consignorsignupStep1Component);
     component = fixture.componentInstance;
   });
 

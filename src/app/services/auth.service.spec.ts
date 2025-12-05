@@ -163,14 +163,14 @@ describe('AuthService', () => {
     tick();
   }));
 
-  it('should register provider successfully', fakeAsync(() => {
+  it('should register consignor successfully', fakeAsync(() => {
     const providerRequest = {
       storeCode: '1234',
-      fullName: 'Provider Name',
-      email: 'provider@test.com',
+      fullName: 'consignor Name',
+      email: 'consignor@test.com',
       password: 'password123'
     };
-    const mockResponse = { success: true, message: 'Provider registered successfully' };
+    const mockResponse = { success: true, message: 'consignor registered successfully' };
 
     mockHttpClient.post.and.returnValue(of(mockResponse));
 
@@ -180,7 +180,7 @@ describe('AuthService', () => {
 
     tick();
 
-    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/auth/register/provider', providerRequest);
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/auth/register/consignor', providerRequest);
   }));
 
   it('should validate store code successfully', fakeAsync(() => {
@@ -330,11 +330,11 @@ describe('AuthService', () => {
     expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/auth/refresh', { refreshToken });
   }));
 
-  it('should handle provider registration errors gracefully', fakeAsync(() => {
+  it('should handle consignor registration errors gracefully', fakeAsync(() => {
     const providerRequest = {
       storeCode: '1234',
-      fullName: 'Provider Name',
-      email: 'provider@test.com',
+      fullName: 'consignor Name',
+      email: 'consignor@test.com',
       password: 'password123'
     };
 

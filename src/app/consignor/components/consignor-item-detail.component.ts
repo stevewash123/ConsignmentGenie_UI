@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ConsignorItemDetail } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ProviderItemDetail } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -488,8 +488,8 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ConsignorItemDetailComponent implements OnInit {
-  item: ConsignorItemDetail | null = null;
+export class ProviderItemDetailComponent implements OnInit {
+  item: ProviderItemDetail | null = null;
   error: string | null = null;
   itemId: string;
   selectedImageUrl: string = '';
@@ -498,7 +498,7 @@ export class ConsignorItemDetailComponent implements OnInit {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private consignorService: ConsignorPortalService,
+    private ConsignorService: ProviderPortalService,
     private route: ActivatedRoute,
     public loadingService: LoadingService
   ) {
@@ -515,7 +515,7 @@ export class ConsignorItemDetailComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.ITEM_DETAIL);
     this.error = null;
 
-    this.consignorService.getMyItem(this.itemId).subscribe({
+    this.ConsignorService.getMyItem(this.itemId).subscribe({
       next: (item) => {
         this.item = item;
         this.selectedImageUrl = item.primaryImageUrl;

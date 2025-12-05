@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { ConsignorService } from '../services/consignor.service';
-import { Consignor, UpdateConsignorRequest } from '../models/consignor.model';
+import { consignor, UpdateProviderRequest } from '../models/consignor.model';
 import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
@@ -15,18 +15,18 @@ import { LoadingService } from '../shared/services/loading.service';
     <div class="consignor-edit-container">
       <div class="edit-header">
         <div class="breadcrumb">
-          <a [routerLink]="['/owner/consignors', consignorId()]">← Back to Consignor</a>
+          <a [routerLink]="['/owner/consignors', providerId()]">← Back to consignor</a>
         </div>
-        <h1>Edit Consignor</h1>
+        <h1>Edit consignor</h1>
       </div>
 
-      <div class="edit-card" *ngIf="!isConsignorLoading(); else loading">
-        <form (ngSubmit)="onSubmit()" #consignorForm="ngForm">
+      <div class="edit-card" *ngIf="!isProviderLoading(); else loading">
+        <form (ngSubmit)="onSubmit()" #providerForm="ngForm">
           <div class="form-section">
             <h3>Basic Information</h3>
             <div class="form-row">
               <div class="form-group">
-                <label for="name">Consignor Name *</label>
+                <label for="name">consignor Name *</label>
                 <input
                   type="text"
                   id="name"
@@ -39,7 +39,7 @@ import { LoadingService } from '../shared/services/loading.service';
                   placeholder="Enter consignor name"
                 >
                 <div class="error-message" *ngIf="nameField.invalid && nameField.touched">
-                  Consignor name is required
+                  consignor name is required
                 </div>
               </div>
 
@@ -170,20 +170,20 @@ import { LoadingService } from '../shared/services/loading.service';
                   [(ngModel)]="editData.isActive"
                   name="isActive"
                 >
-                Active Consignor
+                Active consignor
               </label>
               <small class="form-text">Inactive consignors cannot add new items or receive payouts</small>
             </div>
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-secondary" [routerLink]="['/owner/consignors', consignorId()]">
+            <button type="button" class="btn-secondary" [routerLink]="['/owner/consignors', providerId()]">
               Cancel
             </button>
             <button
               type="submit"
               class="btn-primary"
-              [disabled]="consignorForm.invalid || isSubmitting()"
+              [disabled]="providerForm.invalid || isSubmitting()"
             >
               {{ isSubmitting() ? 'Saving...' : 'Save Changes' }}
             </button>
@@ -370,8 +370,8 @@ import { LoadingService } from '../shared/services/loading.service';
     }
   `]
 })
-export class ConsignorEditComponent implements OnInit {
-  consignorId = signal<number>(0);
+export class ProviderEditComponent implements OnInit {
+  providerId = signal<number>(0);
   isSubmitting = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
@@ -388,12 +388,12 @@ export class ConsignorEditComponent implements OnInit {
     isActive: true
   };
 
-  isConsignorLoading(): boolean {
+  isProviderLoading(): boolean {
     return this.loadingService.isLoading('consignor-edit');
   }
 
   constructor(
-    private consignorService: ConsignorService,
+    private ConsignorService: ConsignorService,
     private route: ActivatedRoute,
     private router: Router,
     private loadingService: LoadingService
@@ -402,14 +402,14 @@ export class ConsignorEditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
     if (id) {
-      this.consignorId.set(parseInt(id));
-      this.loadConsignor();
+      this.providerId.set(parseInt(id));
+      this.loadProvider();
     }
   }
 
-  loadConsignor(): void {
+  loadProvider(): void {
     this.loadingService.start('consignor-edit');
-    this.consignorService.getConsignor(this.consignorId()).subscribe({
+    this.ConsignorService.getProvider(this.providerId()).subscribe({
       next: (consignor) => {
         this.populateEditData(consignor);
       },
@@ -423,7 +423,7 @@ export class ConsignorEditComponent implements OnInit {
     });
   }
 
-  populateEditData(consignor: Consignor): void {
+  populateEditData(consignor: consignor): void {
     this.editData = {
       name: consignor.name,
       email: consignor.email,
@@ -444,7 +444,7 @@ export class ConsignorEditComponent implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    const updateRequest: UpdateConsignorRequest = {
+    const updateRequest: UpdateProviderRequest = {
       name: this.editData.name,
       email: this.editData.email,
       phone: this.editData.phone || undefined,
@@ -456,12 +456,12 @@ export class ConsignorEditComponent implements OnInit {
       isActive: this.editData.isActive
     };
 
-    this.consignorService.updateConsignor(this.consignorId(), updateRequest).subscribe({
+    this.ConsignorService.updateProvider(this.providerId(), updateRequest).subscribe({
       next: (updated) => {
-        this.successMessage.set('Consignor updated successfully!');
+        this.successMessage.set('consignor updated successfully!');
         // Auto-redirect after 2 seconds
         setTimeout(() => {
-          this.router.navigate(['/owner/consignors', this.consignorId()]);
+          this.router.navigate(['/owner/consignors', this.providerId()]);
         }, 2000);
       },
       error: (error) => {

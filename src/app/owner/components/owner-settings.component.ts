@@ -113,7 +113,7 @@ interface SquareAuthResponse {
                   <li>✅ Automatic customer sync</li>
                   <li>✅ Item and inventory sync</li>
                   <li>✅ Sales transaction export</li>
-                  <li>✅ Consignor payout tracking</li>
+                  <li>✅ consignor payout tracking</li>
                   <li>✅ Real-time financial reporting</li>
                 </ul>
               </div>

@@ -88,9 +88,9 @@ describe('OwnerDashboardComponent - Onboarding Integration', () => {
 
     consignorService.getConsignors.and.returnValue(of([]));
     transactionService.getSalesMetrics.and.returnValue(of({
-      totalSales: 0, totalShopAmount: 0, totalConsignorAmount: 0,
+      totalSales: 0, totalShopAmount: 0, totalProviderAmount: 0,
       totalTax: 0, transactionCount: 0, averageTransactionValue: 0,
-      topConsignors: [], paymentMethodBreakdown: []
+      topproviders: [], paymentMethodBreakdown: []
     }));
     transactionService.getTransactions.and.returnValue(of({
       items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0,
