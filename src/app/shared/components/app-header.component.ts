@@ -34,7 +34,7 @@ interface UserData {
             <!-- Owner Navigation -->
             <div *ngIf="isOwner()" class="nav-links">
               <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
-              <a routerLink="/owner/providers" routerLinkActive="active">Providers</a>
+              <a routerLink="/owner/consignors" routerLinkActive="active">consignors</a>
               <a routerLink="/owner/inventory" routerLinkActive="active">Inventory</a>
               <a routerLink="/owner/transactions" routerLinkActive="active">Transactions</a>
               <a routerLink="/owner/payouts" routerLinkActive="active">Payouts</a>
@@ -42,7 +42,7 @@ interface UserData {
               <a routerLink="/owner/settings" routerLinkActive="active">Settings</a>
             </div>
 
-            <!-- Customer/Provider Navigation -->
+            <!-- Customer/consignor Navigation -->
             <div *ngIf="isCustomerOrProvider()" class="nav-links">
               <a routerLink="/customer/dashboard" routerLinkActive="active">Dashboard</a>
               <a routerLink="/customer/items" routerLinkActive="active">My Items</a>
@@ -316,7 +316,7 @@ export class AppHeaderComponent implements OnInit {
   }
 
   isCustomerOrProvider(): boolean {
-    return [6, 7].includes(this.currentUser()?.role || 0); // Provider, Customer
+    return [6, 7].includes(this.currentUser()?.role || 0); // consignor, Customer
   }
 
   getRoleName(role?: number): string {
@@ -326,7 +326,7 @@ export class AppHeaderComponent implements OnInit {
       3: 'Staff',
       4: 'Cashier',
       5: 'Accountant',
-      6: 'Provider',
+      6: 'consignor',
       7: 'Customer'
     };
     return roleMap[role || 0] || 'Unknown';

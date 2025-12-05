@@ -81,13 +81,13 @@ describe('UnauthorizedComponent', () => {
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
     });
 
-    it('should navigate to provider dashboard for provider role', () => {
+    it('should navigate to consignor dashboard for consignor role', () => {
       const userData = { role: 6 };
       localStorage.setItem('user_data', JSON.stringify(userData));
 
       component.goToDashboard();
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/provider/dashboard']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/consignor/dashboard']);
     });
 
     it('should navigate to customer dashboard for customer role', () => {

@@ -1,8 +1,8 @@
-describe('Provider Registration Workflow', () => {
+describe('consignor Registration Workflow', () => {
   const testProvider = {
     storeCode: '1234',
-    fullName: 'Test Provider User',
-    email: `test-provider-${Date.now()}@testshop.com`,
+    fullName: 'Test consignor User',
+    email: `test-consignor-${Date.now()}@testshop.com`,
     phone: '555-987-6543',
     password: 'TestPassword123!',
     preferredPaymentMethod: 'Venmo',
@@ -13,12 +13,12 @@ describe('Provider Registration Workflow', () => {
   const validShopName = 'Demo Consignment Shop';
 
   beforeEach(() => {
-    cy.visit('/register/provider');
+    cy.visit('/register/consignor');
   });
 
   describe('Step 1: Store Code Validation', () => {
     it('should display the store code validation form correctly', () => {
-      cy.get('h2').should('contain', 'Join as a Provider');
+      cy.get('h2').should('contain', 'Join as a consignor');
       cy.get('h3').should('contain', 'Step 1: Enter Store Code');
       cy.get('form').should('be.visible');
 
@@ -116,7 +116,7 @@ describe('Provider Registration Workflow', () => {
       cy.get('select[name="preferredPaymentMethod"]').should('be.visible');
 
       // Check submit button
-      cy.get('button[type="submit"]').should('contain', 'Create Provider Account');
+      cy.get('button[type="submit"]').should('contain', 'Create consignor Account');
       cy.get('button[type="submit"]').should('be.disabled');
     });
 
@@ -184,7 +184,7 @@ describe('Provider Registration Workflow', () => {
       cy.get('[data-cy="registration-form"]').should('be.visible');
     });
 
-    it('should successfully register a new provider with all details', () => {
+    it('should successfully register a new consignor with all details', () => {
       // Fill out the form completely
       cy.get('input[name="fullName"]').type(testProvider.fullName);
       cy.get('input[name="email"]').type(testProvider.email);
@@ -206,16 +206,16 @@ describe('Provider Registration Workflow', () => {
       cy.url().should('include', '/register/success');
       cy.get('h1').should('contain', 'Account Created!');
 
-      // Should show correct success message for provider
+      // Should show correct success message for consignor
       cy.get('.success-content').should('contain', testProvider.fullName.split(' ')[0]);
       cy.get('.success-content').should('contain', validShopName);
       cy.get('.success-content').should('contain', 'pending approval');
     });
 
-    it('should successfully register a provider with minimal required details', () => {
+    it('should successfully register a consignor with minimal required details', () => {
       // Fill out only required fields
-      cy.get('input[name="fullName"]').type('Minimal Provider');
-      cy.get('input[name="email"]').type(`minimal-provider-${Date.now()}@testshop.com`);
+      cy.get('input[name="fullName"]').type('Minimal consignor');
+      cy.get('input[name="email"]').type(`minimal-consignor-${Date.now()}@testshop.com`);
       cy.get('input[name="password"]').type('TestPassword123!');
 
       // Form should be valid now
@@ -231,7 +231,7 @@ describe('Provider Registration Workflow', () => {
 
     it('should handle registration errors gracefully', () => {
       // Try to register with an email that might already exist
-      cy.get('input[name="fullName"]').type('Duplicate Provider');
+      cy.get('input[name="fullName"]').type('Duplicate consignor');
       cy.get('input[name="email"]').type('admin@demoshop.com'); // Known test email
       cy.get('input[name="password"]').type('TestPassword123!');
 
@@ -346,12 +346,12 @@ describe('Provider Registration Workflow', () => {
   });
 });
 
-describe('Provider Registration Success Page', () => {
+describe('consignor Registration Success Page', () => {
   const testParams = {
-    type: 'provider',
+    type: 'consignor',
     shopName: 'Test Consignment Shop',
-    email: 'provider@example.com',
-    fullName: 'Test Provider'
+    email: 'consignor@example.com',
+    fullName: 'Test consignor'
   };
 
   beforeEach(() => {
@@ -359,17 +359,17 @@ describe('Provider Registration Success Page', () => {
     cy.visit(`/register/success?${queryParams}`);
   });
 
-  it('should display provider-specific success message', () => {
+  it('should display consignor-specific success message', () => {
     cy.get('h1').should('contain', 'Account Created!');
     cy.get('.greeting').should('contain', 'Thanks for registering, Test!');
     cy.get('.status-message').should('contain', `Your account is pending approval from ${testParams.shopName}`);
     cy.get('.email-info').should('contain', testParams.email);
   });
 
-  it('should show provider-specific next steps', () => {
+  it('should show consignor-specific next steps', () => {
     cy.get('.next-steps h3').should('contain', 'What happens next:');
     cy.get('.next-steps li').should('contain', 'The shop owner will review your request');
-    cy.get('.next-steps li').should('contain', 'you can access your Provider Portal');
+    cy.get('.next-steps li').should('contain', 'you can access your consignor Portal');
     cy.get('.next-steps li').should('contain', 'track your items and earnings');
   });
 
@@ -387,16 +387,16 @@ describe('Provider Registration Success Page', () => {
   });
 });
 
-describe('Provider Login with Pending Approval', () => {
+describe('consignor Login with Pending Approval', () => {
   const pendingProvider = {
-    email: 'pending-provider@testshop.com',
+    email: 'pending-consignor@testshop.com',
     password: 'TestPassword123!',
     storeCode: '1234'
   };
 
-  it('should show pending approval message for unapproved provider', () => {
-    // First register a provider (this will be pending by default)
-    cy.visit('/register/provider');
+  it('should show pending approval message for unapproved consignor', () => {
+    // First register a consignor (this will be pending by default)
+    cy.visit('/register/consignor');
 
     // Step 1: Validate store code
     cy.get('input[name="storeCode"]').type(pendingProvider.storeCode);
@@ -404,7 +404,7 @@ describe('Provider Login with Pending Approval', () => {
     cy.get('[data-cy="registration-form"]').should('be.visible');
 
     // Step 2: Complete registration
-    cy.get('input[name="fullName"]').type('Pending Provider');
+    cy.get('input[name="fullName"]').type('Pending consignor');
     cy.get('input[name="email"]').type(pendingProvider.email);
     cy.get('input[name="password"]').type(pendingProvider.password);
     cy.get('button[type="submit"]').click();

@@ -21,7 +21,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
               <p>Your account is pending approval from our team.</p>
             </div>
 
-            <div class="status-message" *ngIf="registrationType() === 'provider'">
+            <div class="status-message" *ngIf="registrationType() === 'consignor'">
               <p>Your account is pending approval from {{ shopName() }}.</p>
             </div>
 
@@ -35,17 +35,17 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
               <ul>
                 <li>Our team will review your shop registration</li>
                 <li>You'll receive an approval email within 1-2 business days</li>
-                <li>Once approved, you'll get your unique store code for providers</li>
+                <li>Once approved, you'll get your unique store code for consignors</li>
                 <li>You can then start adding inventory and managing your shop</li>
               </ul>
             </div>
 
-            <div class="next-steps" *ngIf="registrationType() === 'provider'">
+            <div class="next-steps" *ngIf="registrationType() === 'consignor'">
               <h3>What happens next:</h3>
               <ul>
                 <li>The shop owner will review your request</li>
                 <li>You'll receive an email when approved</li>
-                <li>Once approved, you can access your Provider Portal</li>
+                <li>Once approved, you can access your consignor Portal</li>
                 <li>You'll be able to track your items and earnings</li>
               </ul>
             </div>

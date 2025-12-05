@@ -18,7 +18,7 @@ Cypress.Commands.add('loginAsAdmin', () => {
 })
 
 Cypress.Commands.add('loginAsProvider', () => {
-  cy.login('provider@demoshop.com')
+  cy.login('consignor@demoshop.com')
 })
 
 Cypress.Commands.add('loginAsCustomer', () => {
@@ -60,10 +60,10 @@ Cypress.Commands.add('loginAsOwnerWithMocks', () => {
 Cypress.Commands.add('mockOwnerAPIs', () => {
   cy.fixture('owner-data').then((ownerData) => {
     // Mock common owner APIs
-    cy.intercept('GET', '**/api/providers*', {
+    cy.intercept('GET', '**/api/consignors*', {
       statusCode: 200,
-      body: { success: true, data: ownerData.providers }
-    }).as('getProviders')
+      body: { success: true, data: ownerData.consignors }
+    }).as('getconsignors')
 
     cy.intercept('GET', '**/api/transactions*', {
       statusCode: 200,
@@ -285,7 +285,7 @@ Cypress.Commands.add('verifyEmailSent', (options: { to: string; type: string }) 
 
   if (sendReal) {
     cy.log(`📧 Real ${options.type} email sent to: ${options.to}`)
-    // In a real implementation, could verify via email provider API
+    // In a real implementation, could verify via email consignor API
     // For now, just log that real email was expected to be sent
   } else {
     cy.log(`🔧 Mock ${options.type} email verified for: ${options.to}`)
@@ -318,7 +318,7 @@ Cypress.Commands.add('registerOwner', (ownerData: {
   cy.url().should('include', '/register/success')
 })
 
-// Register as provider command
+// Register as consignor command
 Cypress.Commands.add('registerProvider', (storeCode: string, providerData: {
   fullName: string,
   email: string,
@@ -327,7 +327,7 @@ Cypress.Commands.add('registerProvider', (storeCode: string, providerData: {
   preferredPaymentMethod?: string,
   paymentDetails?: string
 }) => {
-  cy.visit('/register/provider')
+  cy.visit('/register/consignor')
 
   // Step 1: Validate store code
   cy.get('input[name="storeCode"]').type(storeCode)
@@ -382,8 +382,8 @@ Cypress.Commands.add('mockRegistrationAPIs', () => {
     }
   }).as('registerOwner')
 
-  // Mock provider registration
-  cy.intercept('POST', '**/auth/register/provider', {
+  // Mock consignor registration
+  cy.intercept('POST', '**/auth/register/consignor', {
     statusCode: 200,
     body: {
       success: true,
@@ -401,7 +401,7 @@ Cypress.Commands.add('mockRegistrationAPIs', () => {
     }
   }).as('registerOwnerDuplicate')
 
-  cy.intercept('POST', '**/auth/register/provider', {
+  cy.intercept('POST', '**/auth/register/consignor', {
     statusCode: 400,
     body: {
       success: false,
@@ -442,7 +442,7 @@ declare global {
       loginAsAdmin(): Chainable<void>
 
       /**
-       * Login as provider test account
+       * Login as consignor test account
        */
       loginAsProvider(): Chainable<void>
 
@@ -526,7 +526,7 @@ declare global {
       }): Chainable<void>
 
       /**
-       * Register as provider
+       * Register as consignor
        */
       registerProvider(storeCode: string, providerData: {
         fullName: string,

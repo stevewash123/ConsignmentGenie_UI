@@ -116,7 +116,7 @@ The following test accounts are available (defined in `fixtures/users.json`):
 |------|-------|----------|-------------------|
 | System Admin | admin@demoshop.com | password123 | /admin/dashboard |
 | Shop Owner | owner@demoshop.com | password123 | /owner/dashboard |
-| Provider | provider@demoshop.com | password123 | /customer/dashboard |
+| consignor | consignor@demoshop.com | password123 | /customer/dashboard |
 | Customer | customer@demoshop.com | password123 | /customer/dashboard |
 
 ## Custom Commands

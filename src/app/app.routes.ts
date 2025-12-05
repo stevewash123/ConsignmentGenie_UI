@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
 import { AdminGuard } from './guards/admin.guard';
 import { OwnerGuard } from './guards/owner.guard';
-import { ProviderGuard } from './guards/provider.guard';
+import { ConsignorGuard } from './guards/consignor.guard';
 import { CustomerGuard } from './guards/customer.guard';
 
 export const routes: Routes = [
-  // Shop-first URL pattern for customers/providers (/shop/{shop-slug})
+  // Shop-first URL pattern for customers/consignors (/shop/{shop-slug})
   {
     path: 'shop/:shopSlug',
     loadChildren: () => import('./shop/shop.routes').then(m => m.shopRoutes)
@@ -37,14 +37,14 @@ export const routes: Routes = [
     loadChildren: () => import('./owner/owner.routes').then(m => m.ownerRoutes)
   },
 
-  // Provider area routes (provider role + owners/managers)
+  // consignor area routes (consignor role + owners/managers)
   {
-    path: 'provider',
-    canActivate: [ProviderGuard],
-    loadChildren: () => import('./provider/provider.routes').then(m => m.providerRoutes)
+    path: 'consignor',
+    canActivate: [ConsignorGuard],
+    loadChildren: () => import('./consignor/consignor.routes').then(m => m.consignorRoutes)
   },
 
-  // Customer area routes (customer/provider roles)
+  // Customer area routes (customer/consignor roles)
   {
     path: 'customer',
     canActivate: [CustomerGuard],
@@ -70,12 +70,12 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/owner-signup-step2.component').then(m => m.OwnerSignupStep2Component)
   },
   {
-    path: 'signup/provider',
-    loadComponent: () => import('./auth/provider-signup-step1.component').then(m => m.ProviderSignupStep1Component)
+    path: 'signup/consignor',
+    loadComponent: () => import('./auth/consignor-signup-step1.component').then(m => m.ConsignorSignupStep1Component)
   },
   {
-    path: 'signup/provider/details',
-    loadComponent: () => import('./auth/provider-signup-step2.component').then(m => m.ProviderSignupStep2Component)
+    path: 'signup/consignor/details',
+    loadComponent: () => import('./auth/consignor-signup-step2.component').then(m => m.ConsignorSignupStep2Component)
   },
 
   // Authentication routes (no auth required)
@@ -92,16 +92,16 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/owner-signup-step1.component').then(m => m.OwnerSignupStep1Component)
   },
   {
-    path: 'register/provider',
-    loadComponent: () => import('./auth/register-provider.component').then(m => m.RegisterProviderComponent)
+    path: 'register/consignor',
+    loadComponent: () => import('./auth/register-consignor.component').then(m => m.RegisterConsignorComponent)
   },
   {
-    path: 'register/provider/invitation',
-    loadComponent: () => import('./components/provider-registration-step1.component').then(m => m.ProviderRegistrationStep1Component)
+    path: 'register/consignor/invitation',
+    loadComponent: () => import('./components/consignor-registration-step1.component').then(m => m.ConsignorRegistrationStep1Component)
   },
   {
-    path: 'register/provider/details',
-    loadComponent: () => import('./components/provider-registration-step2.component').then(m => m.ProviderRegistrationStep2Component)
+    path: 'register/consignor/details',
+    loadComponent: () => import('./components/consignor-registration-step2.component').then(m => m.ConsignorRegistrationStep2Component)
   },
   {
     path: 'register/success',

@@ -61,7 +61,7 @@ describe('AppHeaderComponent', () => {
     expect(typeof result).toBe('boolean');
   });
 
-  it('should check if user is customer or provider', () => {
+  it('should check if user is customer or consignor', () => {
     const result = component.isCustomerOrProvider();
     expect(typeof result).toBe('boolean');
   });

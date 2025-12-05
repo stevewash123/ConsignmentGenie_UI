@@ -14,7 +14,7 @@ describe('OnboardingService', () => {
     welcomeGuideCompleted: false,
     showModal: true,
     steps: {
-      hasProviders: true,
+      hasconsignors: true,
       storefrontConfigured: false,
       hasInventory: true,
       quickBooksConnected: false
@@ -109,8 +109,8 @@ describe('OnboardingService', () => {
       const steps = service.getOnboardingSteps(mockOnboardingStatus);
 
       expect(steps.length).toBe(4);
-      expect(steps[0].id).toBe('providers');
-      expect(steps[0].completed).toBe(true); // hasProviders is true
+      expect(steps[0].id).toBe('consignors');
+      expect(steps[0].completed).toBe(true); // hasconsignors is true
       expect(steps[1].id).toBe('storefront');
       expect(steps[1].completed).toBe(false); // storefrontConfigured is false
       expect(steps[2].id).toBe('inventory');
@@ -122,7 +122,7 @@ describe('OnboardingService', () => {
     it('should have proper routing links', () => {
       const steps = service.getOnboardingSteps(mockOnboardingStatus);
 
-      expect(steps[0].routerLink).toBe('/owner/providers');
+      expect(steps[0].routerLink).toBe('/owner/consignors');
       expect(steps[1].routerLink).toBe('/owner/settings/storefront');
       expect(steps[2].routerLink).toBe('/owner/inventory');
       expect(steps[3].routerLink).toBe('/owner/settings/integrations');
@@ -143,7 +143,7 @@ describe('OnboardingService', () => {
       const progress = service.getOnboardingProgress(mockOnboardingStatus);
 
       expect(progress.totalSteps).toBe(4);
-      expect(progress.completedSteps).toBe(2); // providers and inventory are completed
+      expect(progress.completedSteps).toBe(2); // consignors and inventory are completed
       expect(progress.progressPercentage).toBe(50);
     });
 
@@ -153,7 +153,7 @@ describe('OnboardingService', () => {
         welcomeGuideCompleted: false,
         showModal: false,
         steps: {
-          hasProviders: true,
+          hasconsignors: true,
           storefrontConfigured: true,
           hasInventory: true,
           quickBooksConnected: true
@@ -172,7 +172,7 @@ describe('OnboardingService', () => {
         welcomeGuideCompleted: false,
         showModal: true,
         steps: {
-          hasProviders: false,
+          hasconsignors: false,
           storefrontConfigured: false,
           hasInventory: false,
           quickBooksConnected: false
@@ -263,7 +263,7 @@ describe('OnboardingService', () => {
         welcomeGuideCompleted: false,
         showModal: undefined as any, // Force fallback
         steps: {
-          hasProviders: true,
+          hasconsignors: true,
           storefrontConfigured: true,
           hasInventory: true,
           quickBooksConnected: true
@@ -289,7 +289,7 @@ describe('OnboardingService', () => {
         welcomeGuideCompleted: false,
         showModal: false,
         steps: {
-          hasProviders: true,
+          hasconsignors: true,
           storefrontConfigured: true,
           hasInventory: true,
           quickBooksConnected: true
@@ -310,7 +310,7 @@ describe('OnboardingService', () => {
         welcomeGuideCompleted: false,
         showModal: true,
         steps: {
-          hasProviders: false,
+          hasconsignors: false,
           storefrontConfigured: false,
           hasInventory: false,
           quickBooksConnected: false
@@ -337,7 +337,7 @@ describe('OnboardingService', () => {
         welcomeGuideCompleted: false,
         showModal: false,
         steps: {
-          hasProviders: true,
+          hasconsignors: true,
           storefrontConfigured: true,
           hasInventory: true,
           quickBooksConnected: true

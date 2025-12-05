@@ -6,11 +6,11 @@ describe('Basic Component Tests', () => {
 
       // Mock APIs with delay to ensure loading state is visible
       cy.fixture('owner-data').then((ownerData) => {
-        cy.intercept('GET', '**/api/providers*', {
+        cy.intercept('GET', '**/api/consignors*', {
           statusCode: 200,
-          body: { success: true, data: ownerData.providers },
+          body: { success: true, data: ownerData.consignors },
           delay: 1000
-        }).as('getProviders')
+        }).as('getconsignors')
 
         cy.intercept('GET', '**/api/transactions/metrics*', {
           statusCode: 200,

@@ -6,13 +6,13 @@ export interface Transaction {
   paymentMethod: string;
 
   // Commission split
-  providerSplitPercentage: number;
+  consignorsplitPercentage: number;
   providerAmount: number;
   shopAmount: number;
 
   // Navigation data
   item: ItemSummary;
-  provider: ProviderSummary;
+  consignor: ConsignorSummary;
   notes?: string;
 
   // Audit
@@ -27,7 +27,7 @@ export interface ItemSummary {
   originalPrice: number;
 }
 
-export interface ProviderSummary {
+export interface ConsignorSummary {
   id: string;
   name: string;
   email?: string;

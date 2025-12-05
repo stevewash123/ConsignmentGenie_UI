@@ -450,7 +450,7 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
           id: t.id,
           date: new Date(t.saleDate),
           itemName: t.item.name,
-          consignor: t.provider.name,
+          consignor: t.consignor.name,
           amount: t.salePrice,
           commission: t.shopAmount
         })) || [];

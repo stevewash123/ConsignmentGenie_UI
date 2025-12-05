@@ -2,22 +2,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { of } from 'rxjs';
 import { InviteConsignorModalComponent } from './invite-consignor-modal.component';
-import { ProviderService } from '../../services/provider.service';
+import { ConsignorService } from '../../services/consignor.service';
 
 describe('InviteConsignorModalComponent', () => {
   let component: InviteConsignorModalComponent;
   let fixture: ComponentFixture<InviteConsignorModalComponent>;
-  let mockProviderService: jasmine.SpyObj<ProviderService>;
+  let mockConsignorService: jasmine.SpyObj<ConsignorService>;
 
   beforeEach(async () => {
-    mockProviderService = jasmine.createSpyObj('ProviderService', ['inviteProvider', 'createProvider']);
-    mockProviderService.inviteProvider.and.returnValue(of({ success: true, message: 'Invitation sent successfully' }));
-    mockProviderService.createProvider.and.returnValue(of({} as any));
+    mockConsignorService = jasmine.createSpyObj('ConsignorService', ['inviteConsignor', 'createConsignor']);
+    mockConsignorService.inviteConsignor.and.returnValue(of({ success: true, message: 'Invitation sent successfully' }));
+    mockConsignorService.createConsignor.and.returnValue(of({} as any));
 
     await TestBed.configureTestingModule({
       imports: [InviteConsignorModalComponent, ReactiveFormsModule],
       providers: [
-        { provide: ProviderService, useValue: mockProviderService }
+        { provide: ConsignorService, useValue: mockConsignorService }
       ]
     }).compileComponents();
 
@@ -67,7 +67,7 @@ describe('InviteConsignorModalComponent', () => {
 
     component.submitInvite();
 
-    expect(mockProviderService.inviteProvider).toHaveBeenCalledWith({
+    expect(mockConsignorService.inviteConsignor).toHaveBeenCalledWith({
       email: 'test@test.com',
       name: 'John Doe'
     });
@@ -79,13 +79,13 @@ describe('InviteConsignorModalComponent', () => {
   it('should submit manual when form valid', () => {
     component.manualForm.patchValue({
       firstName: 'Test',
-      lastName: 'Provider',
+      lastName: 'consignor',
       email: 'test@test.com',
       commissionRate: 50
     });
     component.submitManual();
-    // TODO: Manual provider creation not yet implemented
-    // Once implemented, should verify createProvider was called
+    // TODO: Manual consignor creation not yet implemented
+    // Once implemented, should verify createConsignor was called
     expect(component.isSubmitting()).toBe(true);
   });
 });

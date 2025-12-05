@@ -134,11 +134,11 @@ describe('Edit Transaction Tests', () => {
         cy.get('input[name="salePrice"]').should('have.value', transaction.salePrice.toString())
         cy.get('input[name="salesTaxAmount"]').should('have.value', transaction.salesTaxAmount.toString())
         cy.get('select[name="paymentMethod"]').should('have.value', transaction.paymentMethod)
-        cy.get('input[name="providerSplitPercentage"]').should('have.value', transaction.providerSplitPercentage.toString())
+        cy.get('input[name="consignorsplitPercentage"]').should('have.value', transaction.consignorsplitPercentage.toString())
       })
     })
 
-    it('should display item and provider information', function() {
+    it('should display item and consignor information', function() {
       const transaction = this.ownerData.salesData.transactions[0]
 
       cy.get('.edit-modal-content').within(() => {
@@ -146,8 +146,8 @@ describe('Edit Transaction Tests', () => {
         cy.contains(transaction.item.name).should('be.visible')
         cy.contains(transaction.item.description).should('be.visible')
 
-        // Provider info should be displayed
-        cy.contains(transaction.provider.name).should('be.visible')
+        // consignor info should be displayed
+        cy.contains(transaction.consignor.name).should('be.visible')
       })
     })
 
@@ -174,23 +174,23 @@ describe('Edit Transaction Tests', () => {
         cy.get('input[name="salePrice"]').clear().type('150.50')
         cy.get('input[name="salePrice"]').should('have.value', '150.50')
 
-        // Test provider split percentage
-        cy.get('input[name="providerSplitPercentage"]').clear().type('invalid')
-        cy.get('input[name="providerSplitPercentage"]').should('have.value', '')
+        // Test consignor split percentage
+        cy.get('input[name="consignorsplitPercentage"]').clear().type('invalid')
+        cy.get('input[name="consignorsplitPercentage"]').should('have.value', '')
 
-        cy.get('input[name="providerSplitPercentage"]').clear().type('55')
-        cy.get('input[name="providerSplitPercentage"]').should('have.value', '55')
+        cy.get('input[name="consignorsplitPercentage"]').clear().type('55')
+        cy.get('input[name="consignorsplitPercentage"]').should('have.value', '55')
       })
     })
 
     it('should validate percentage field range', () => {
       cy.get('.edit-modal-content form').within(() => {
         // Test values outside valid range
-        cy.get('input[name="providerSplitPercentage"]').clear().type('150')
-        cy.get('input[name="providerSplitPercentage"]').should('have.attr', 'max', '100')
+        cy.get('input[name="consignorsplitPercentage"]').clear().type('150')
+        cy.get('input[name="consignorsplitPercentage"]').should('have.attr', 'max', '100')
 
-        cy.get('input[name="providerSplitPercentage"]').clear().type('-5')
-        cy.get('input[name="providerSplitPercentage"]').should('have.attr', 'min', '0')
+        cy.get('input[name="consignorsplitPercentage"]').clear().type('-5')
+        cy.get('input[name="consignorsplitPercentage"]').should('have.attr', 'min', '0')
       })
     })
 
@@ -243,26 +243,26 @@ describe('Edit Transaction Tests', () => {
 
       cy.get('.breakdown-grid').within(() => {
         cy.contains('Total Sale Amount').should('be.visible')
-        cy.contains('Provider Amount').should('be.visible')
+        cy.contains('consignor Amount').should('be.visible')
         cy.contains('Shop Amount').should('be.visible')
       })
     })
 
-    it('should calculate provider and shop amounts correctly', function() {
+    it('should calculate consignor and shop amounts correctly', function() {
       const originalData = this.ownerData.editTransactionData.original
 
       cy.get('.edit-modal-content form').within(() => {
         // Set known values
         cy.get('input[name="salePrice"]').clear().type(originalData.salePrice.toString())
         cy.get('input[name="salesTaxAmount"]').clear().type(originalData.salesTaxAmount.toString())
-        cy.get('input[name="providerSplitPercentage"]').clear().type(originalData.providerSplitPercentage.toString())
+        cy.get('input[name="consignorsplitPercentage"]').clear().type(originalData.consignorsplitPercentage.toString())
       })
 
       // Check calculations
       cy.get('.breakdown-grid').within(() => {
         cy.contains('$135.00').should('be.visible') // Total: 125 + 10
-        cy.contains('$62.50').should('be.visible')  // Provider: 125 * 0.5
-        cy.contains('$72.50').should('be.visible')  // Shop: 72.50 (total - provider)
+        cy.contains('$62.50').should('be.visible')  // consignor: 125 * 0.5
+        cy.contains('$72.50').should('be.visible')  // Shop: 72.50 (total - consignor)
       })
     })
 
@@ -273,13 +273,13 @@ describe('Edit Transaction Tests', () => {
         // Update values
         cy.get('input[name="salePrice"]').clear().type(updatedData.salePrice.toString())
         cy.get('input[name="salesTaxAmount"]').clear().type(updatedData.salesTaxAmount.toString())
-        cy.get('input[name="providerSplitPercentage"]').clear().type(updatedData.providerSplitPercentage.toString())
+        cy.get('input[name="consignorsplitPercentage"]').clear().type(updatedData.consignorsplitPercentage.toString())
       })
 
       // Check updated calculations
       cy.get('.breakdown-grid').within(() => {
         cy.contains('$151.20').should('be.visible') // Total: 140 + 11.20
-        cy.contains('$77.00').should('be.visible')  // Provider: 140 * 0.55
+        cy.contains('$77.00').should('be.visible')  // consignor: 140 * 0.55
         cy.contains('$74.20').should('be.visible')  // Shop: 151.20 - 77.00
       })
     })
@@ -573,7 +573,7 @@ describe('Edit Transaction Tests', () => {
         // Should display all transaction details
         cy.contains(transaction.item.name).should('be.visible')
         cy.contains(transaction.item.description).should('be.visible')
-        cy.contains(transaction.provider.name).should('be.visible')
+        cy.contains(transaction.consignor.name).should('be.visible')
         cy.contains(`$${transaction.salePrice.toFixed(2)}`).should('be.visible')
         cy.contains(transaction.paymentMethod).should('be.visible')
 

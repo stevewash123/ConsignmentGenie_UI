@@ -69,7 +69,7 @@ export interface SalesReport {
   totalTransactions: number;
   averageTransactionValue: number;
   topItems: ReportItem[];
-  salesByProvider: ProviderSales[];
+  salesByProvider: ConsignorSales[];
 }
 
 export interface ReportItem {
@@ -79,7 +79,7 @@ export interface ReportItem {
   totalRevenue: number;
 }
 
-export interface ProviderSales {
+export interface ConsignorSales {
   providerId: string;
   providerName: string;
   totalSales: number;
@@ -136,7 +136,7 @@ export interface IAccountingPayments {
 export interface IAccountingReports {
   generateSalesReport(period: Period): Promise<SalesReport>;
   generateTaxReport(period: Period): Promise<any>; // TBD based on tax requirements
-  generateProviderPayoutReport(period: DateRange): Promise<ProviderSales[]>;
+  generateProviderPayoutReport(period: DateRange): Promise<ConsignorSales[]>;
   exportToSpreadsheet(reportType: string, period: Period): Promise<Blob>;
   getFinancialSummary(period: Period): Promise<any>; // TBD based on dashboard needs
 }

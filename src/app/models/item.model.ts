@@ -11,7 +11,7 @@ export interface Item {
   organizationId: number;
   createdAt: Date;
   updatedAt: Date;
-  provider?: { name: string };
+  consignor?: { name: string };
   category?: { name: string };
 }
 

@@ -3,7 +3,7 @@
 **🚨 CRITICAL: Read [Master CLAUDE.md](../../CLAUDE.md) FIRST for ConsignmentGenie context, workspace structure, and development guidelines.**
 
 ## Project Overview
-Angular frontend for the ConsignmentGenie multi-tenant consignment management platform. Provides user interfaces for shop owners, providers, and future customer-facing functionality.
+Angular frontend for the ConsignmentGenie multi-tenant consignment management platform. Provides user interfaces for shop owners, consignors, and future customer-facing functionality.
 
 ## Architecture
 - **Framework**: Angular 17+ with standalone components
@@ -32,8 +32,8 @@ src/
 
 ## Key Features
 - **Authentication**: JWT-based login with role management
-- **Provider Management**: Add, edit, view provider details
-- **Inventory Management**: Item CRUD with provider assignment
+- **consignor Management**: Add, edit, view consignor details
+- **Inventory Management**: Item CRUD with consignor assignment
 - **Transaction Recording**: Sales entry with split calculations
 - **Payout Reporting**: Generate and export payout summaries
 - **Responsive Design**: Mobile-friendly Tailwind CSS layouts

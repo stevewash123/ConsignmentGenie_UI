@@ -24,7 +24,7 @@ import { RouterModule } from '@angular/router';
           <div class="hero-content">
             <h2 class="hero-title">The simple way to run your consignment shop</h2>
             <p class="hero-subtitle">
-              Manage providers, track inventory, process sales, and generate payouts all in one place.
+              Manage consignors, track inventory, process sales, and generate payouts all in one place.
             </p>
 
             <div class="cta-section">

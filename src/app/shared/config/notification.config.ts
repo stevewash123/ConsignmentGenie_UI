@@ -10,14 +10,14 @@ export interface NotificationTypeConfig {
 }
 
 export const notificationConfig: Record<NotificationType, NotificationTypeConfig> = {
-  // Provider types
+  // consignor types
   item_sold: {
     icon: '🛒',
     color: 'green',
     getTitle: () => 'Item Sold! 🎉',
     getMessage: (n) => n.message,
     getRoute: (n, role) => n.transactionId ? `/${role}/sales/${n.transactionId}` : null,
-    allowedRoles: ['provider', 'owner']
+    allowedRoles: ['consignor', 'owner']
   },
   payout_processed: {
     icon: '💰',
@@ -25,7 +25,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getTitle: () => 'Payout Processed',
     getMessage: (n) => n.message,
     getRoute: (n, role) => n.payoutId ? `/${role}/payouts/${n.payoutId}` : `/${role}/payouts`,
-    allowedRoles: ['provider']
+    allowedRoles: ['consignor']
   },
   item_price_changed: {
     icon: '💲',
@@ -33,7 +33,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getTitle: () => 'Price Updated',
     getMessage: (n) => n.message,
     getRoute: (n, role) => n.itemId ? `/${role}/items/${n.itemId}` : null,
-    allowedRoles: ['provider']
+    allowedRoles: ['consignor']
   },
   item_returned: {
     icon: '🔄',
@@ -41,7 +41,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getTitle: () => 'Item Returned',
     getMessage: (n) => n.message,
     getRoute: (n, role) => n.itemId ? `/${role}/items/${n.itemId}` : null,
-    allowedRoles: ['provider']
+    allowedRoles: ['consignor']
   },
   item_expired: {
     icon: '⏰',
@@ -49,7 +49,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getTitle: () => 'Item Expired',
     getMessage: (n) => n.message,
     getRoute: (n, role) => n.itemId ? `/${role}/items/${n.itemId}` : null,
-    allowedRoles: ['provider']
+    allowedRoles: ['consignor']
   },
   statement_ready: {
     icon: '📄',
@@ -57,7 +57,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getTitle: () => 'Statement Ready',
     getMessage: (n) => n.message,
     getRoute: (n, role) => `/${role}/statements`,
-    allowedRoles: ['provider']
+    allowedRoles: ['consignor']
   },
   welcome: {
     icon: '🎉',
@@ -65,24 +65,24 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getTitle: () => 'Welcome!',
     getMessage: (n) => n.message,
     getRoute: (n, role) => `/${role}/dashboard`,
-    allowedRoles: ['provider', 'owner', 'customer']
+    allowedRoles: ['consignor', 'owner', 'customer']
   },
 
   // Owner types
   new_provider_request: {
     icon: '👤',
     color: 'blue',
-    getTitle: () => 'New Provider Request',
+    getTitle: () => 'New consignor Request',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => n.providerId ? `/${role}/providers/${n.providerId}` : `/${role}/providers`,
+    getRoute: (n, role) => n.providerId ? `/${role}/consignors/${n.providerId}` : `/${role}/consignors`,
     allowedRoles: ['owner']
   },
   provider_approved: {
     icon: '✅',
     color: 'green',
-    getTitle: () => 'Provider Approved',
+    getTitle: () => 'consignor Approved',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => n.providerId ? `/${role}/providers/${n.providerId}` : `/${role}/providers`,
+    getRoute: (n, role) => n.providerId ? `/${role}/consignors/${n.providerId}` : `/${role}/consignors`,
     allowedRoles: ['owner']
   },
   daily_sales_summary: {
@@ -147,7 +147,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getTitle: () => 'System Announcement',
     getMessage: (n) => n.message,
     getRoute: () => null,
-    allowedRoles: ['owner', 'provider']
+    allowedRoles: ['owner', 'consignor']
   },
 
   // Admin types

@@ -13,7 +13,7 @@ export interface PayoutDto {
   syncedToQuickBooks: boolean;
   quickBooksBillId?: string;
   createdAt: Date;
-  provider: ProviderSummary;
+  consignor: ConsignorSummary;
   transactions: PayoutTransaction[];
 }
 
@@ -27,10 +27,10 @@ export interface PayoutListDto {
   periodStart: Date;
   periodEnd: Date;
   transactionCount: number;
-  provider: ProviderSummary;
+  consignor: ConsignorSummary;
 }
 
-export interface ProviderSummary {
+export interface ConsignorSummary {
   id: string;
   name: string;
   email?: string;
@@ -58,7 +58,7 @@ export interface PayoutTransaction {
 }
 
 export interface CreatePayoutRequest {
-  providerId: string;
+  consignorId: string;
   payoutDate: Date;
   paymentMethod: string;
   paymentReference?: string;
@@ -77,7 +77,7 @@ export interface UpdatePayoutRequest {
 }
 
 export interface PayoutSearchRequest {
-  providerId?: string;
+  consignorId?: string;
   payoutDateFrom?: Date;
   payoutDateTo?: Date;
   status?: PayoutStatus;
@@ -90,14 +90,14 @@ export interface PayoutSearchRequest {
 }
 
 export interface PendingPayoutsRequest {
-  providerId?: string;
+  consignorId?: string;
   periodEndBefore?: Date;
   minimumAmount?: number;
 }
 
 export interface PendingPayoutData {
-  providerId: string;
-  providerName: string;
+  consignorId: string;
+  consignorName: string;
   providerEmail?: string;
   pendingAmount: number;
   transactionCount: number;

@@ -151,12 +151,12 @@ describe('Registration API Tests', () => {
     });
   });
 
-  describe('Provider Registration API', () => {
-    it('should successfully register a new provider', () => {
+  describe('consignor Registration API', () => {
+    it('should successfully register a new consignor', () => {
       const providerData = {
         storeCode: '1234',
-        fullName: 'API Test Provider',
-        email: `api-provider-${Date.now()}@testshop.com`,
+        fullName: 'API Test consignor',
+        email: `api-consignor-${Date.now()}@testshop.com`,
         password: 'TestPassword123!',
         phone: '555-987-6543',
         preferredPaymentMethod: 'Venmo',
@@ -165,7 +165,7 @@ describe('Registration API Tests', () => {
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: providerData,
       }).then((response) => {
         expect(response.status).to.eq(200);
@@ -175,17 +175,17 @@ describe('Registration API Tests', () => {
       });
     });
 
-    it('should successfully register provider with minimal required fields', () => {
+    it('should successfully register consignor with minimal required fields', () => {
       const minimalProviderData = {
         storeCode: '1234',
-        fullName: 'Minimal Provider',
-        email: `minimal-provider-${Date.now()}@testshop.com`,
+        fullName: 'Minimal consignor',
+        email: `minimal-consignor-${Date.now()}@testshop.com`,
         password: 'TestPassword123!'
       };
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: minimalProviderData,
       }).then((response) => {
         expect(response.status).to.eq(200);
@@ -193,17 +193,17 @@ describe('Registration API Tests', () => {
       });
     });
 
-    it('should reject provider registration with invalid store code', () => {
+    it('should reject consignor registration with invalid store code', () => {
       const providerData = {
         storeCode: '9999', // Invalid store code
-        fullName: 'Invalid Store Provider',
+        fullName: 'Invalid Store consignor',
         email: `invalid-store-${Date.now()}@testshop.com`,
         password: 'TestPassword123!'
       };
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: providerData,
         failOnStatusCode: false,
       }).then((response) => {
@@ -214,19 +214,19 @@ describe('Registration API Tests', () => {
       });
     });
 
-    it('should reject provider registration with duplicate email', () => {
+    it('should reject consignor registration with duplicate email', () => {
       const duplicateEmail = 'admin@demoshop.com';
 
       const providerData = {
         storeCode: '1234',
-        fullName: 'Duplicate Provider',
+        fullName: 'Duplicate consignor',
         email: duplicateEmail,
         password: 'TestPassword123!'
       };
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: providerData,
         failOnStatusCode: false,
       }).then((response) => {
@@ -237,7 +237,7 @@ describe('Registration API Tests', () => {
       });
     });
 
-    it('should validate required fields for provider registration', () => {
+    it('should validate required fields for consignor registration', () => {
       const invalidProviderData = {
         storeCode: '', // Required
         fullName: '', // Required
@@ -247,7 +247,7 @@ describe('Registration API Tests', () => {
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: invalidProviderData,
         failOnStatusCode: false,
       }).then((response) => {
@@ -272,7 +272,7 @@ describe('Registration API Tests', () => {
       paymentMethods.forEach((payment, index) => {
         const providerData = {
           storeCode: '1234',
-          fullName: `Payment Test Provider ${index}`,
+          fullName: `Payment Test consignor ${index}`,
           email: `payment-test-${index}-${Date.now()}@testshop.com`,
           password: 'TestPassword123!',
           preferredPaymentMethod: payment.method,
@@ -281,7 +281,7 @@ describe('Registration API Tests', () => {
 
         cy.request({
           method: 'POST',
-          url: `${baseUrl}/auth/register/provider`,
+          url: `${baseUrl}/auth/register/consignor`,
           body: providerData,
         }).then((response) => {
           expect(response.status).to.eq(200);
@@ -291,14 +291,14 @@ describe('Registration API Tests', () => {
     });
   });
 
-  describe('Auto-Approve Provider Registration', () => {
-    it('should auto-approve provider when organization has auto-approve enabled', () => {
+  describe('Auto-Approve consignor Registration', () => {
+    it('should auto-approve consignor when organization has auto-approve enabled', () => {
       // Note: This test assumes store code '5678' is configured for auto-approve
       const autoApproveStoreCode = '5678';
 
       const providerData = {
         storeCode: autoApproveStoreCode,
-        fullName: 'Auto Approve Provider',
+        fullName: 'Auto Approve consignor',
         email: `auto-approve-${Date.now()}@testshop.com`,
         password: 'TestPassword123!',
         preferredPaymentMethod: 'Check'
@@ -306,7 +306,7 @@ describe('Registration API Tests', () => {
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: providerData,
       }).then((response) => {
         expect(response.status).to.eq(200);
@@ -316,19 +316,19 @@ describe('Registration API Tests', () => {
       });
     });
 
-    it('should require approval for provider when organization has auto-approve disabled', () => {
+    it('should require approval for consignor when organization has auto-approve disabled', () => {
       const manualApproveStoreCode = '1234';
 
       const providerData = {
         storeCode: manualApproveStoreCode,
-        fullName: 'Manual Approve Provider',
+        fullName: 'Manual Approve consignor',
         email: `manual-approve-${Date.now()}@testshop.com`,
         password: 'TestPassword123!'
       };
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: providerData,
       }).then((response) => {
         expect(response.status).to.eq(200);
@@ -486,23 +486,23 @@ describe('Registration API Tests', () => {
       });
     });
 
-    it('should create provider record with correct approval status', () => {
+    it('should create consignor record with correct approval status', () => {
       const providerData = {
         storeCode: '1234',
-        fullName: 'DB Test Provider',
-        email: `db-provider-${Date.now()}@testshop.com`,
+        fullName: 'DB Test consignor',
+        email: `db-consignor-${Date.now()}@testshop.com`,
         password: 'TestPassword123!'
       };
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/auth/register/provider`,
+        url: `${baseUrl}/auth/register/consignor`,
         body: providerData,
       }).then((response) => {
         expect(response.status).to.eq(200);
         expect(response.body.success).to.be.true;
 
-        // Verify provider cannot log in immediately (pending approval)
+        // Verify consignor cannot log in immediately (pending approval)
         cy.request({
           method: 'POST',
           url: `${baseUrl}/auth/login`,
@@ -543,7 +543,7 @@ describe('Registration API Tests', () => {
       for (let i = 0; i < 3; i++) {
         const providerData = {
           storeCode: '1234',
-          fullName: `Concurrent Provider ${i}`,
+          fullName: `Concurrent consignor ${i}`,
           email: `concurrent-${i}-${Date.now()}@testshop.com`,
           password: 'TestPassword123!'
         };
@@ -551,7 +551,7 @@ describe('Registration API Tests', () => {
         concurrentRequests.push(
           cy.request({
             method: 'POST',
-            url: `${baseUrl}/auth/register/provider`,
+            url: `${baseUrl}/auth/register/consignor`,
             body: providerData,
             failOnStatusCode: false,
           })

@@ -29,7 +29,7 @@ export default defineConfig({
       if (config.env.SEND_REAL_EMAILS) {
         console.warn('🚨 REAL EMAIL MODE ENABLED - Emails will be sent!');
         console.log('📧 Email domain:', config.env.REAL_EMAIL_DOMAIN);
-        console.log('📦 Provider:', config.env.TEST_EMAIL_PROVIDER);
+        console.log('📦 consignor:', config.env.TEST_EMAIL_PROVIDER);
 
         if (config.env.REQUIRE_EMAIL_CONFIRMATION) {
           console.error('❌ Set REQUIRE_EMAIL_CONFIRMATION=false to proceed with real emails');

@@ -20,11 +20,11 @@ export class CustomerGuard implements CanActivate {
     try {
       const userData = JSON.parse(userDataStr);
 
-      // Allow Customer and Provider roles access to customer area
-      // Providers often need customer-style access to see public views
+      // Allow Customer and consignor roles access to customer area
+      // consignors often need customer-style access to see public views
       const allowedRoles = [
         UserRole.Customer,
-        UserRole.Provider
+        UserRole.consignor
       ];
 
       if (allowedRoles.includes(userData.role)) {

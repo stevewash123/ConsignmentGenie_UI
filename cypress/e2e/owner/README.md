@@ -18,7 +18,7 @@ Basic navigation and fundamental Owner workflow functionality:
 ### `dashboard.cy.ts` ⚠️ **11/18 tests passing (61%)**
 Owner Dashboard comprehensive functionality:
 - **Dashboard Header**: Shop name and welcome message display ✅
-- **Metrics Cards**: Active providers, inventory value, sales, payouts
+- **Metrics Cards**: Active consignors, inventory value, sales, payouts
 - **Quick Actions**: Navigation cards for key workflows ✅
 - **Recent Transactions**: Transaction history display
 - **Pending Payouts**: Highlight and navigation for pending payments ✅
@@ -49,7 +49,7 @@ Edit Transaction modal and functionality:
 Comprehensive test fixtures including:
 - **Dashboard Data**: Metrics, summaries, and recent transactions
 - **Sales Data**: Transaction lists, summaries, and available items
-- **Provider Data**: Active providers and commission rates
+- **consignor Data**: Active consignors and commission rates
 - **Edit Transaction Data**: Original and updated transaction examples
 
 ### Custom Commands (`cypress/support/commands.ts`)

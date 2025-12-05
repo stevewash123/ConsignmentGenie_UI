@@ -13,7 +13,7 @@ describe('OwnerSignupStep2Component', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerOwner', 'validateSubdomain']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['registerOwner', 'registerOwnerFrictionless', 'validateSubdomain']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
       events: of({})
     });
@@ -134,7 +134,7 @@ describe('OwnerSignupStep2Component', () => {
       success: false,
       message: 'Shop name already exists'
     };
-    mockAuthService.registerOwner.and.returnValue(of(mockResponse));
+    mockAuthService.registerOwnerFrictionless.and.returnValue(of(mockResponse));
 
     // Fill form with valid data
     component.profileForm.patchValue({
@@ -158,7 +158,7 @@ describe('OwnerSignupStep2Component', () => {
     const mockError = {
       message: 'Server error occurred'
     };
-    mockAuthService.registerOwner.and.returnValue(throwError(() => mockError));
+    mockAuthService.registerOwnerFrictionless.and.returnValue(throwError(() => mockError));
 
     // Fill form with valid data
     component.profileForm.patchValue({
@@ -195,7 +195,7 @@ describe('OwnerSignupStep2Component', () => {
 
     expect(component.errorMessage()).toBe('Session expired. Please start over.');
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/signup/owner']);
-    expect(mockAuthService.registerOwner).not.toHaveBeenCalled();
+    expect(mockAuthService.registerOwnerFrictionless).not.toHaveBeenCalled();
   });
 
   it('should not submit if form is invalid', () => {
@@ -206,7 +206,7 @@ describe('OwnerSignupStep2Component', () => {
 
     expect((component as any).markAllFieldsTouched).toHaveBeenCalled();
     expect(component.isSubmitting()).toBeFalse();
-    expect(mockAuthService.registerOwner).not.toHaveBeenCalled();
+    expect(mockAuthService.registerOwnerFrictionless).not.toHaveBeenCalled();
   });
 
   it('should mark all fields as touched when form is invalid', () => {
@@ -230,7 +230,7 @@ describe('OwnerSignupStep2Component', () => {
       role: 'owner',
       message: 'Registration successful'
     };
-    mockAuthService.registerOwner.and.returnValue(of(mockResponse));
+    mockAuthService.registerOwnerFrictionless.and.returnValue(of(mockResponse));
 
     // Fill form with valid data but no phone
     component.profileForm.patchValue({
@@ -246,7 +246,7 @@ describe('OwnerSignupStep2Component', () => {
 
     component.onSubmit();
 
-    expect(mockAuthService.registerOwner).toHaveBeenCalledWith(
+    expect(mockAuthService.registerOwnerFrictionless).toHaveBeenCalledWith(
       jasmine.objectContaining({
         phone: ''
       })
@@ -259,7 +259,7 @@ describe('OwnerSignupStep2Component', () => {
       role: 'owner',
       message: 'Registration successful'
     };
-    mockAuthService.registerOwner.and.returnValue(of(mockResponse));
+    mockAuthService.registerOwnerFrictionless.and.returnValue(of(mockResponse));
 
     component.profileForm.patchValue({
       fullName: 'John Doe',
@@ -273,7 +273,7 @@ describe('OwnerSignupStep2Component', () => {
 
     component.onSubmit();
 
-    expect(mockAuthService.registerOwner).toHaveBeenCalledWith(
+    expect(mockAuthService.registerOwnerFrictionless).toHaveBeenCalledWith(
       jasmine.objectContaining({
         address: '456 Oak Ave, Springfield, IL 62701'
       })
@@ -304,7 +304,7 @@ describe('OwnerSignupStep2Component', () => {
         message: 'Registration successful',
         token: 'jwt-token-123'
       };
-      mockAuthService.registerOwner.and.returnValue(of(mockResponse));
+      mockAuthService.registerOwnerFrictionless.and.returnValue(of(mockResponse));
 
       // Fill form with valid data
       component.profileForm.patchValue({
@@ -321,7 +321,7 @@ describe('OwnerSignupStep2Component', () => {
       component.onSubmit();
       tick();
 
-      expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
+      expect(mockAuthService.registerOwnerFrictionless).toHaveBeenCalledWith(jasmine.objectContaining({
         fullName: 'John Doe',
         email: 'test@example.com',
         phone: '555-1234',
@@ -342,7 +342,7 @@ describe('OwnerSignupStep2Component', () => {
         message: 'Registration successful'
         // No token - approval required
       };
-      mockAuthService.registerOwner.and.returnValue(of(mockResponse));
+      mockAuthService.registerOwnerFrictionless.and.returnValue(of(mockResponse));
 
       // Fill form with valid data
       component.profileForm.patchValue({
@@ -359,7 +359,7 @@ describe('OwnerSignupStep2Component', () => {
       component.onSubmit();
       tick();
 
-      expect(mockAuthService.registerOwner).toHaveBeenCalledWith(jasmine.objectContaining({
+      expect(mockAuthService.registerOwnerFrictionless).toHaveBeenCalledWith(jasmine.objectContaining({
         fullName: 'John Doe',
         email: 'test@example.com',
         phone: '555-1234',

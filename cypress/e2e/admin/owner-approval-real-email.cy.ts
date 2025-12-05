@@ -81,14 +81,14 @@ describe('Owner Approval with Real Email Environment Switch', () => {
     const config = {
       sendReal: Cypress.env('SEND_REAL_EMAILS'),
       domain: Cypress.env('REAL_EMAIL_DOMAIN'),
-      provider: Cypress.env('TEST_EMAIL_PROVIDER'),
+      consignor: Cypress.env('TEST_EMAIL_PROVIDER'),
       requireConfirmation: Cypress.env('REQUIRE_EMAIL_CONFIRMATION')
     };
 
     cy.log('📧 Email Environment Configuration:');
     cy.log(`  SEND_REAL_EMAILS: ${config.sendReal}`);
     cy.log(`  REAL_EMAIL_DOMAIN: ${config.domain}`);
-    cy.log(`  TEST_EMAIL_PROVIDER: ${config.provider}`);
+    cy.log(`  TEST_EMAIL_PROVIDER: ${config.consignor}`);
     cy.log(`  REQUIRE_EMAIL_CONFIRMATION: ${config.requireConfirmation}`);
 
     if (config.sendReal) {

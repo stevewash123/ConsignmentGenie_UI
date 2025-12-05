@@ -124,7 +124,7 @@ import { AuthService } from '../services/auth.service';
               <ul>
                 <li>Your shop will be created immediately</li>
                 <li>You can add address, commission rates, and policies in settings</li>
-                <li>Start adding providers and inventory right away</li>
+                <li>Start adding consignors and inventory right away</li>
               </ul>
             </div>
 

@@ -1,9 +1,9 @@
 export const ENTITY_LABELS = {
   // Singular
-  provider: 'Consignor',
+  consignor: 'Consignor',
 
   // Plural
-  providers: 'Consignors',
+  consignors: 'Consignors',
 
   // Page titles
   providerManagement: 'Consignor Management',
@@ -15,9 +15,11 @@ export const ENTITY_LABELS = {
   inviteProvider: 'Invite Consignor',
   editProvider: 'Edit Consignor',
   viewProvider: 'View Consignor',
+  inviteConsignor: 'Invite Consignor',
+  addConsignorManually: 'Add Consignor Manually',
 
   // Messages
-  noProvidersFound: 'No consignors found.',
+  noconsignorsFound: 'No consignors found.',
   inviteFirstProvider: 'Invite your first consignor',
   providerInvited: 'Consignor invitation sent!',
   providerAdded: 'Consignor added successfully!',
@@ -32,14 +34,14 @@ export const ENTITY_LABELS = {
   providerCommission: 'Consignor Commission Rate',
 
   // Status
-  providerStatusActive: 'Active',
-  providerStatusInvited: 'Invited',
-  providerStatusInactive: 'Inactive',
+  ConsignorStatusActive: 'Active',
+  ConsignorStatusInvited: 'Invited',
+  ConsignorStatusInactive: 'Inactive',
 
   // Search/Filter
-  searchProviders: 'Search consignors...',
-  filterAllProviders: 'All',
-  filterActiveProviders: 'Active',
-  filterInvitedProviders: 'Invited',
-  filterInactiveProviders: 'Inactive',
+  searchconsignors: 'Search consignors...',
+  filterAllconsignors: 'All',
+  filterActiveconsignors: 'Active',
+  filterInvitedconsignors: 'Invited',
+  filterInactiveconsignors: 'Inactive',
 };

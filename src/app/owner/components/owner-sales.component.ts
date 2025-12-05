@@ -7,9 +7,9 @@ import { OwnerLayoutComponent } from './owner-layout.component';
 import { TransactionService, TransactionQueryParams, PagedResult, UpdateTransactionRequest } from '../../services/transaction.service';
 import { Transaction, CreateTransactionRequest } from '../../models/transaction.model';
 import { ItemService, ItemFilters } from '../../services/item.service';
-import { ProviderService } from '../../services/provider.service';
+import { ConsignorService } from '../../services/consignor.service';
 import { Item, ItemStatus } from '../../models/item.model';
-import { Provider } from '../../models/provider.model';
+import { Consignor } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
@@ -84,8 +84,8 @@ import { LoadingService } from '../../shared/services/loading.service';
             <div class="summary-value">\${{ summary()!.totalShopAmount | number:'1.2-2' }}</div>
             <div class="summary-detail">After commissions</div>
           </div>
-          <div class="summary-card provider">
-            <h3>Provider Payouts</h3>
+          <div class="summary-card consignor">
+            <h3>Consignor Payouts</h3>
             <div class="summary-value">\${{ summary()!.totalProviderAmount | number:'1.2-2' }}</div>
             <div class="summary-detail">Commissions owed</div>
           </div>
@@ -120,7 +120,7 @@ import { LoadingService } from '../../shared/services/loading.service';
                     </span>
                   </th>
                   <th>Item</th>
-                  <th>Provider</th>
+                  <th>Consignor</th>
                   <th (click)="setSorting('salePrice')" class="sortable">
                     Sale Price
                     <span class="sort-indicator" [class.active]="sortBy === 'salePrice'">
@@ -144,10 +144,10 @@ import { LoadingService } from '../../shared/services/loading.service';
                       <div class="item-description">{{ transaction.item.description }}</div>
                     </div>
                   </td>
-                  <td class="provider-cell">
-                    <div class="provider-info">
-                      <div class="provider-name">{{ transaction.provider.name }}</div>
-                      <div class="commission-rate">{{ transaction.providerSplitPercentage }}% commission</div>
+                  <td class="consignor-cell">
+                    <div class="consignor-info">
+                      <div class="consignor-name">{{ transaction.consignor.name }}</div>
+                      <div class="commission-rate">{{ transaction.consignorsplitPercentage }}% commission</div>
                     </div>
                   </td>
                   <td class="price-cell">
@@ -250,12 +250,12 @@ import { LoadingService } from '../../shared/services/loading.service';
                   </select>
                 </div>
 
-                <!-- Provider Info (Auto-populated) -->
-                <div class="form-group" *ngIf="selectedProvider()">
-                  <label>Provider</label>
-                  <div class="provider-info-display">
-                    <div class="provider-name">{{ selectedProvider()!.name }}</div>
-                    <div class="commission-rate">{{ selectedProvider()!.commissionRate }}% commission</div>
+                <!-- Consignor Info (Auto-populated) -->
+                <div class="form-group" *ngIf="selectedConsignor()">
+                  <label>Consignor</label>
+                  <div class="consignor-info-display">
+                    <div class="consignor-name">{{ selectedConsignor()!.name }}</div>
+                    <div class="commission-rate">{{ selectedConsignor()!.commissionRate }}% commission</div>
                   </div>
                 </div>
 
@@ -319,14 +319,14 @@ import { LoadingService } from '../../shared/services/loading.service';
                 </div>
 
                 <!-- Commission Split Display -->
-                <div class="commission-split" *ngIf="selectedProvider() && saleForm_salePrice">
+                <div class="commission-split" *ngIf="selectedConsignor() && saleForm_salePrice">
                   <h4>Commission Split</h4>
                   <div class="split-row">
-                    <span>Provider ({{ selectedProvider()!.commissionRate }}%):</span>
-                    <span class="amount">\${{ calculatedProviderAmount() | number:'1.2-2' }}</span>
+                    <span>Consignor ({{ selectedConsignor()!.commissionRate }}%):</span>
+                    <span class="amount">\${{ calculatedConsignorAmount() | number:'1.2-2' }}</span>
                   </div>
                   <div class="split-row">
-                    <span>Shop ({{ 100 - selectedProvider()!.commissionRate }}%):</span>
+                    <span>Shop ({{ 100 - selectedConsignor()!.commissionRate }}%):</span>
                     <span class="amount">\${{ calculatedShopAmount() | number:'1.2-2' }}</span>
                   </div>
                   <div class="split-row total">
@@ -420,11 +420,11 @@ import { LoadingService } from '../../shared/services/loading.service';
                       <h4>Commission Split</h4>
                       <div class="commission-breakdown compact">
                         <div class="breakdown-row">
-                          <span>Provider ({{ transaction.providerSplitPercentage }}%)</span>
-                          <span class="amount provider-amount">\${{ transaction.providerAmount | number:'1.2-2' }}</span>
+                          <span>Consignor ({{ transaction.consignorsplitPercentage }}%)</span>
+                          <span class="amount consignor-amount">\${{ transaction.providerAmount | number:'1.2-2' }}</span>
                         </div>
                         <div class="breakdown-row">
-                          <span>Shop ({{ 100 - transaction.providerSplitPercentage }}%)</span>
+                          <span>Shop ({{ 100 - transaction.consignorsplitPercentage }}%)</span>
                           <span class="amount shop-amount">\${{ transaction.shopAmount | number:'1.2-2' }}</span>
                         </div>
                       </div>
@@ -433,21 +433,21 @@ import { LoadingService } from '../../shared/services/loading.service';
 
                   <!-- Right Column -->
                   <div class="detail-column">
-                    <!-- Provider Information -->
+                    <!-- Consignor Information -->
                     <div class="detail-section">
-                      <h4>Provider</h4>
+                      <h4>Consignor</h4>
                       <div class="detail-grid compact">
                         <div class="detail-row">
                           <label>Name:</label>
-                          <span>{{ transaction.provider.name }}</span>
+                          <span>{{ transaction.consignor.name }}</span>
                         </div>
-                        <div class="detail-row" *ngIf="transaction.provider.email">
+                        <div class="detail-row" *ngIf="transaction.consignor.email">
                           <label>Email:</label>
-                          <span>{{ transaction.provider.email }}</span>
+                          <span>{{ transaction.consignor.email }}</span>
                         </div>
                         <div class="detail-row">
                           <label>Commission Rate:</label>
-                          <span>{{ transaction.providerSplitPercentage }}%</span>
+                          <span>{{ transaction.consignorsplitPercentage }}%</span>
                         </div>
                       </div>
                     </div>
@@ -500,7 +500,7 @@ import { LoadingService } from '../../shared/services/loading.service';
                 <div class="transaction-summary compact">
                   <div class="summary-row">
                     <strong>{{ transaction.item.name }}</strong>
-                    <span class="provider-info">{{ transaction.provider.name }} ({{ transaction.providerSplitPercentage }}%)</span>
+                    <span class="consignor-info">{{ transaction.consignor.name }} ({{ transaction.consignorsplitPercentage }}%)</span>
                   </div>
                 </div>
 
@@ -555,7 +555,7 @@ import { LoadingService } from '../../shared/services/loading.service';
                   <!-- Inline Commission Split -->
                   <div class="commission-split-inline" *ngIf="editForm_salePrice">
                     <div class="split-summary">
-                      <span class="split-item">Provider: <strong>\${{ calculatedProviderAmount() | number:'1.2-2' }}</strong></span>
+                      <span class="split-item">Consignor: <strong>\${{ calculatedConsignorAmount() | number:'1.2-2' }}</strong></span>
                       <span class="split-item">Shop: <strong>\${{ calculatedShopAmount() | number:'1.2-2' }}</strong></span>
                       <span class="split-item total">Total: <strong>\${{ editForm_salePrice | number:'1.2-2' }}</strong></span>
                     </div>
@@ -737,7 +737,7 @@ import { LoadingService } from '../../shared/services/loading.service';
 
     .summary-card.total { border-left-color: #059669; }
     .summary-card.shop { border-left-color: #0891b2; }
-    .summary-card.provider { border-left-color: #7c3aed; }
+    .summary-card.consignor { border-left-color: #7c3aed; }
     .summary-card.average { border-left-color: #f59e0b; }
 
     .summary-card h3 {
@@ -840,12 +840,12 @@ import { LoadingService } from '../../shared/services/loading.service';
       vertical-align: top;
     }
 
-    .item-info, .provider-info {
+    .item-info, .consignor-info {
       display: flex;
       flex-direction: column;
     }
 
-    .item-name, .provider-name {
+    .item-name, .consignor-name {
       font-weight: 600;
       color: #1f2937;
       margin-bottom: 0.25rem;
@@ -1070,14 +1070,14 @@ import { LoadingService } from '../../shared/services/loading.service';
       border-color: #ef4444;
     }
 
-    .provider-info-display {
+    .consignor-info-display {
       background: #f3f4f6;
       border: 1px solid #d1d5db;
       border-radius: 6px;
       padding: 0.75rem;
     }
 
-    .provider-name {
+    .consignor-name {
       font-weight: 600;
       color: #1f2937;
       margin-bottom: 0.25rem;
@@ -1312,7 +1312,7 @@ import { LoadingService } from '../../shared/services/loading.service';
       font-weight: 600;
     }
 
-    .breakdown-row .provider-amount {
+    .breakdown-row .consignor-amount {
       color: #7c3aed;
     }
 
@@ -1359,7 +1359,7 @@ import { LoadingService } from '../../shared/services/loading.service';
       align-items: center;
     }
 
-    .provider-info {
+    .consignor-info {
       color: #6b7280;
       font-size: 0.875rem;
     }
@@ -1665,8 +1665,8 @@ export class OwnerSalesComponent implements OnInit {
 
   // Available data for form
   availableItems = signal<Item[]>([]);
-  providers = signal<Provider[]>([]);
-  selectedProvider = signal<Provider | null>(null);
+  consignors = signal<Consignor[]>([]);
+  selectedConsignor = signal<Consignor | null>(null);
 
   // Form data
   saleForm_itemId: number | null = null;
@@ -1683,7 +1683,7 @@ export class OwnerSalesComponent implements OnInit {
   editForm_notes: string = '';
 
   // Calculated amounts
-  calculatedProviderAmount = signal(0);
+  calculatedConsignorAmount = signal(0);
   calculatedShopAmount = signal(0);
 
   private toastr = inject(ToastrService);
@@ -1696,14 +1696,14 @@ export class OwnerSalesComponent implements OnInit {
   constructor(
     private transactionService: TransactionService,
     private itemService: ItemService,
-    private providerService: ProviderService
+    private consignorService: ConsignorService
   ) {}
 
   ngOnInit() {
     this.loadTransactions();
     this.loadSummary();
     this.loadAvailableItems();
-    this.loadProviders();
+    this.loadconsignors();
     this.initializeSaleForm();
   }
 
@@ -1851,8 +1851,8 @@ export class OwnerSalesComponent implements OnInit {
     this.saleForm_salesTax = null;
     this.saleForm_paymentMethod = '';
     this.saleForm_notes = '';
-    this.selectedProvider.set(null);
-    this.calculatedProviderAmount.set(0);
+    this.selectedConsignor.set(null);
+    this.calculatedConsignorAmount.set(0);
     this.calculatedShopAmount.set(0);
   }
 
@@ -1868,13 +1868,13 @@ export class OwnerSalesComponent implements OnInit {
     });
   }
 
-  loadProviders() {
-    this.providerService.getProviders().subscribe({
-      next: (providers) => {
-        this.providers.set(providers.filter(p => p.isActive));
+  loadconsignors() {
+    this.consignorService.getConsignors().subscribe({
+      next: (consignors) => {
+        this.consignors.set(consignors.filter(p => p.isActive));
       },
       error: (error) => {
-        console.error('Failed to load providers:', error);
+        console.error('Failed to load consignors:', error);
       }
     });
   }
@@ -1882,7 +1882,7 @@ export class OwnerSalesComponent implements OnInit {
   onItemSelected() {
     const itemId = this.saleForm_itemId;
     if (!itemId) {
-      this.selectedProvider.set(null);
+      this.selectedConsignor.set(null);
       this.saleForm_salePrice = null;
       this.calculateCommission();
       return;
@@ -1894,9 +1894,9 @@ export class OwnerSalesComponent implements OnInit {
       // Set the sale price to the item's listed price
       this.saleForm_salePrice = selectedItem.price;
 
-      // Find and set the provider
-      const provider = this.providers().find(p => p.id === selectedItem.providerId);
-      this.selectedProvider.set(provider || null);
+      // Find and set the consignor
+      const consignor = this.consignors().find(p => p.id === selectedItem.providerId);
+      this.selectedConsignor.set(consignor || null);
 
       // Recalculate commission split
       this.calculateCommission();
@@ -1905,16 +1905,16 @@ export class OwnerSalesComponent implements OnInit {
 
   calculateCommission() {
     const salePrice = this.saleForm_salePrice || 0;
-    const provider = this.selectedProvider();
+    const consignor = this.selectedConsignor();
 
-    if (provider && salePrice > 0) {
-      const providerAmount = (salePrice * provider.commissionRate) / 100;
-      const shopAmount = salePrice - providerAmount;
+    if (consignor && salePrice > 0) {
+      const consignorAmount = (salePrice * consignor.commissionRate) / 100;
+      const shopAmount = salePrice - consignorAmount;
 
-      this.calculatedProviderAmount.set(providerAmount);
+      this.calculatedConsignorAmount.set(consignorAmount);
       this.calculatedShopAmount.set(shopAmount);
     } else {
-      this.calculatedProviderAmount.set(0);
+      this.calculatedConsignorAmount.set(0);
       this.calculatedShopAmount.set(0);
     }
   }
@@ -1983,8 +1983,8 @@ export class OwnerSalesComponent implements OnInit {
     this.editForm_notes = transaction.notes || '';
 
     // Set up calculation with existing commission rate
-    const provider = this.providers().find(p => p.name === transaction.provider.name);
-    this.selectedProvider.set(provider || null);
+    const consignor = this.consignors().find(p => p.name === transaction.consignor.name);
+    this.selectedConsignor.set(consignor || null);
     this.calculateEditCommission();
   }
 
@@ -1993,13 +1993,13 @@ export class OwnerSalesComponent implements OnInit {
     const transaction = this.selectedTransactionForEdit();
 
     if (transaction && salePrice > 0) {
-      const providerAmount = (salePrice * transaction.providerSplitPercentage) / 100;
-      const shopAmount = salePrice - providerAmount;
+      const consignorAmount = (salePrice * transaction.consignorsplitPercentage) / 100;
+      const shopAmount = salePrice - consignorAmount;
 
-      this.calculatedProviderAmount.set(providerAmount);
+      this.calculatedConsignorAmount.set(consignorAmount);
       this.calculatedShopAmount.set(shopAmount);
     } else {
-      this.calculatedProviderAmount.set(0);
+      this.calculatedConsignorAmount.set(0);
       this.calculatedShopAmount.set(0);
     }
   }
@@ -2015,7 +2015,7 @@ export class OwnerSalesComponent implements OnInit {
     this.editForm_salesTax = null;
     this.editForm_paymentMethod = '';
     this.editForm_notes = '';
-    this.calculatedProviderAmount.set(0);
+    this.calculatedConsignorAmount.set(0);
     this.calculatedShopAmount.set(0);
   }
 

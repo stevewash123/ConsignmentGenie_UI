@@ -95,12 +95,12 @@ export class OnboardingService {
   getOnboardingSteps(status: OnboardingStatus): OnboardingStep[] {
     const steps: OnboardingStep[] = [
       {
-        id: 'providers',
+        id: 'consignors',
         title: 'Add your consignors',
         description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
-        completed: status.steps.hasProviders,
+        completed: status.steps.hasconsignors,
         actionText: 'Add Consignors',
-        routerLink: '/owner/providers',
+        routerLink: '/owner/consignors',
         icon: '👥'
       },
       {
@@ -170,7 +170,7 @@ export class OnboardingService {
     }
 
     // Show if any setup steps are incomplete
-    const showModal = !status.steps.hasProviders ||
+    const showModal = !status.steps.hasconsignors ||
                      !status.steps.storefrontConfigured ||
                      !status.steps.hasInventory ||
                      !status.steps.quickBooksConnected;

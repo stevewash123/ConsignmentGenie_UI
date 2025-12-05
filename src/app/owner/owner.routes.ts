@@ -11,20 +11,20 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/owner-dashboard.component').then(m => m.OwnerDashboardComponent)
   },
   {
-    path: 'providers',
-    loadComponent: () => import('../components/provider-list.component').then(m => m.ProviderListComponent)
+    path: 'consignors',
+    loadComponent: () => import('../components/consignor-list.component').then(m => m.ConsignorListComponent)
   },
   {
-    path: 'providers/new',
-    loadComponent: () => import('../components/provider-add.component').then(m => m.ProviderAddComponent)
+    path: 'consignors/new',
+    loadComponent: () => import('../components/consignor-add.component').then(m => m.ConsignorAddComponent)
   },
   {
-    path: 'providers/:id',
-    loadComponent: () => import('../components/provider-detail.component').then(m => m.ProviderDetailComponent)
+    path: 'consignors/:id',
+    loadComponent: () => import('../components/consignor-detail.component').then(m => m.ConsignorDetailComponent)
   },
   {
-    path: 'providers/:id/edit',
-    loadComponent: () => import('../components/provider-edit.component').then(m => m.ProviderEditComponent)
+    path: 'consignors/:id/edit',
+    loadComponent: () => import('../components/consignor-edit.component').then(m => m.ConsignorEditComponent)
   },
   {
     path: 'inventory',

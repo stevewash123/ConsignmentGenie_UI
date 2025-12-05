@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe('Provider Auto-Approve API Tests', () => {
+describe('consignor Auto-Approve API Tests', () => {
   const baseUrl = Cypress.env('apiUrl') || 'http://localhost:5000'
   const authToken = 'test-owner-token'
 
@@ -23,7 +23,7 @@ describe('Provider Auto-Approve API Tests', () => {
       }).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body).to.have.property('success', true)
-        expect(response.body.data).to.have.property('autoApproveProviders')
+        expect(response.body.data).to.have.property('autoApproveconsignors')
         expect(response.body.data).to.have.property('storeCodeEnabled')
         expect(response.body.data).to.have.property('storeCode')
       })
@@ -38,12 +38,12 @@ describe('Provider Auto-Approve API Tests', () => {
           'Content-Type': 'application/json'
         },
         body: {
-          autoApproveProviders: true
+          autoApproveconsignors: true
         }
       }).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body).to.have.property('success', true)
-        expect(response.body.data).to.have.property('autoApproveProviders', true)
+        expect(response.body.data).to.have.property('autoApproveconsignors', true)
         expect(response.body.message).to.contain('auto-approval enabled')
       })
     })
@@ -57,12 +57,12 @@ describe('Provider Auto-Approve API Tests', () => {
           'Content-Type': 'application/json'
         },
         body: {
-          autoApproveProviders: false
+          autoApproveconsignors: false
         }
       }).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body).to.have.property('success', true)
-        expect(response.body.data).to.have.property('autoApproveProviders', false)
+        expect(response.body.data).to.have.property('autoApproveconsignors', false)
         expect(response.body.message).to.contain('auto-approval disabled')
       })
     })
@@ -95,7 +95,7 @@ describe('Provider Auto-Approve API Tests', () => {
     })
   })
 
-  describe('Provider Registration API with Auto-Approve', () => {
+  describe('consignor Registration API with Auto-Approve', () => {
     beforeEach(() => {
       // Ensure auto-approve is enabled for these tests
       cy.request({
@@ -106,17 +106,17 @@ describe('Provider Auto-Approve API Tests', () => {
           'Content-Type': 'application/json'
         },
         body: {
-          autoApproveProviders: true
+          autoApproveconsignors: true
         }
       })
     })
 
-    it('should auto-approve provider with valid store code when enabled', () => {
+    it('should auto-approve consignor with valid store code when enabled', () => {
       const uniqueEmail = `test-${Date.now()}@test.com`
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/api/registration/register/provider`,
+        url: `${baseUrl}/api/registration/register/consignor`,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -146,7 +146,7 @@ describe('Provider Auto-Approve API Tests', () => {
           'Content-Type': 'application/json'
         },
         body: {
-          autoApproveProviders: false
+          autoApproveconsignors: false
         }
       })
 
@@ -154,7 +154,7 @@ describe('Provider Auto-Approve API Tests', () => {
 
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/api/registration/register/provider`,
+        url: `${baseUrl}/api/registration/register/consignor`,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -187,7 +187,7 @@ describe('Provider Auto-Approve API Tests', () => {
     it('should reject registration with invalid store code', () => {
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/api/registration/register/provider`,
+        url: `${baseUrl}/api/registration/register/consignor`,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -208,7 +208,7 @@ describe('Provider Auto-Approve API Tests', () => {
     it('should validate required fields', () => {
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/api/registration/register/provider`,
+        url: `${baseUrl}/api/registration/register/consignor`,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -228,7 +228,7 @@ describe('Provider Auto-Approve API Tests', () => {
       // First registration
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/api/registration/register/provider`,
+        url: `${baseUrl}/api/registration/register/consignor`,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -247,7 +247,7 @@ describe('Provider Auto-Approve API Tests', () => {
       // Duplicate registration attempt
       cy.request({
         method: 'POST',
-        url: `${baseUrl}/api/registration/register/provider`,
+        url: `${baseUrl}/api/registration/register/consignor`,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -267,14 +267,14 @@ describe('Provider Auto-Approve API Tests', () => {
     })
   })
 
-  describe('Provider Status Tracking', () => {
-    it('should track provider status in database after registration', () => {
-      // This would require a separate API endpoint to check provider status
-      // or could be verified through the providers list endpoint
+  describe('consignor Status Tracking', () => {
+    it('should track consignor status in database after registration', () => {
+      // This would require a separate API endpoint to check consignor status
+      // or could be verified through the consignors list endpoint
 
       cy.request({
         method: 'GET',
-        url: `${baseUrl}/api/providers`,
+        url: `${baseUrl}/api/consignors`,
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
@@ -284,10 +284,10 @@ describe('Provider Auto-Approve API Tests', () => {
         expect(response.body).to.have.property('success', true)
         expect(response.body.data).to.be.an('array')
 
-        // Check if any providers have been auto-approved
-        const providers = response.body.data
-        const autoApprovedProviders = providers.filter(p => p.status === 'Active')
-        expect(autoApprovedProviders.length).to.be.greaterThan(0)
+        // Check if any consignors have been auto-approved
+        const consignors = response.body.data
+        const autoApprovedconsignors = consignors.filter(p => p.status === 'Active')
+        expect(autoApprovedconsignors.length).to.be.greaterThan(0)
       })
     })
   })
@@ -319,7 +319,7 @@ describe('Provider Auto-Approve API Tests', () => {
           'Content-Type': 'application/json'
         },
         body: {
-          autoApproveProviders: true
+          autoApproveconsignors: true
         },
         failOnStatusCode: false
       }).then((response) => {
@@ -337,7 +337,7 @@ describe('Provider Auto-Approve API Tests', () => {
         requests.push(
           cy.request({
             method: 'POST',
-            url: `${baseUrl}/api/registration/register/provider`,
+            url: `${baseUrl}/api/registration/register/consignor`,
             headers: {
               'Content-Type': 'application/json'
             },

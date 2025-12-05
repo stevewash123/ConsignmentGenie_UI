@@ -42,7 +42,7 @@ export class ItemService {
   }
 
   getItemsByProvider(providerId: number): Observable<Item[]> {
-    return this.http.get<Item[]>(`${this.apiUrl}/provider/${providerId}`);
+    return this.http.get<Item[]>(`${this.apiUrl}/consignor/${providerId}`);
   }
 
   searchItems(searchTerm: string): Observable<Item[]> {

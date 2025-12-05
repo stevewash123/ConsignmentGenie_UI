@@ -9,7 +9,7 @@ interface ShopItem {
   price: number;
   imageUrl?: string;
   category: string;
-  provider: string;
+  consignor: string;
   condition: string;
   isAvailable: boolean;
 }
@@ -23,7 +23,7 @@ interface ShopItem {
       <!-- Welcome Banner -->
       <div class="welcome-banner">
         <h1>Welcome to Our Shop</h1>
-        <p>Discover unique consignment items from local providers</p>
+        <p>Discover unique consignment items from local consignors</p>
       </div>
 
       <!-- Categories Filter -->
@@ -72,7 +72,7 @@ interface ShopItem {
               <p class="item-description">{{ item.description }}</p>
 
               <div class="item-meta">
-                <span class="item-provider">by {{ item.provider }}</span>
+                <span class="item-consignor">by {{ item.consignor }}</span>
                 <span class="item-condition">{{ item.condition }}</span>
               </div>
 
@@ -103,7 +103,7 @@ interface ShopItem {
         <div class="cta-card">
           <h3>Interested in Consigning?</h3>
           <p>Turn your unused items into cash by consigning with us.</p>
-          <a routerLink="/signup/provider" class="btn btn-outline">Become a Provider</a>
+          <a routerLink="/signup/consignor" class="btn btn-outline">Become a consignor</a>
         </div>
       </div>
     </div>
@@ -261,7 +261,7 @@ interface ShopItem {
       font-size: 0.8rem;
     }
 
-    .item-provider {
+    .item-consignor {
       color: #047857;
       font-weight: 500;
     }
@@ -410,7 +410,7 @@ export class ShopStorefrontComponent implements OnInit {
         description: 'Classic brown leather jacket in excellent condition',
         price: 125.00,
         category: 'Clothing',
-        provider: 'Sarah Thompson',
+        consignor: 'Sarah Thompson',
         condition: 'Excellent',
         isAvailable: true
       },
@@ -420,7 +420,7 @@ export class ShopStorefrontComponent implements OnInit {
         description: 'Beautiful handcrafted wooden jewelry box with mirror',
         price: 89.99,
         category: 'Home & Garden',
-        provider: 'Mike Chen',
+        consignor: 'Mike Chen',
         condition: 'Very Good',
         isAvailable: true
       },
@@ -430,7 +430,7 @@ export class ShopStorefrontComponent implements OnInit {
         description: 'Authentic designer purse with original tags',
         price: 275.00,
         category: 'Accessories',
-        provider: 'Emma Rodriguez',
+        consignor: 'Emma Rodriguez',
         condition: 'Like New',
         isAvailable: false
       },
@@ -440,7 +440,7 @@ export class ShopStorefrontComponent implements OnInit {
         description: 'Collection of classic literature hardcover books',
         price: 45.00,
         category: 'Books',
-        provider: 'David Wilson',
+        consignor: 'David Wilson',
         condition: 'Good',
         isAvailable: true
       }

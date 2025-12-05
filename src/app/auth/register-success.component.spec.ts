@@ -71,7 +71,7 @@ describe('RegisterSuccessComponent', () => {
       expect(component.fullName()).toBe('');
     });
 
-    it('should handle provider registration type', () => {
+    it('should handle consignor registration type', () => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         imports: [RegisterSuccessComponent, RouterTestingModule],
@@ -80,10 +80,10 @@ describe('RegisterSuccessComponent', () => {
             provide: ActivatedRoute,
             useValue: {
               queryParams: of({
-                type: 'provider',
-                shopName: 'Provider Shop',
-                email: 'provider@example.com',
-                fullName: 'Jane Provider'
+                type: 'consignor',
+                shopName: 'consignor Shop',
+                email: 'consignor@example.com',
+                fullName: 'Jane consignor'
               })
             }
           }
@@ -94,10 +94,10 @@ describe('RegisterSuccessComponent', () => {
       component = fixture.componentInstance;
       fixture.detectChanges();
 
-      expect(component.registrationType()).toBe('provider');
-      expect(component.shopName()).toBe('Provider Shop');
-      expect(component.userEmail()).toBe('provider@example.com');
-      expect(component.fullName()).toBe('Jane Provider');
+      expect(component.registrationType()).toBe('consignor');
+      expect(component.shopName()).toBe('consignor Shop');
+      expect(component.userEmail()).toBe('consignor@example.com');
+      expect(component.fullName()).toBe('Jane consignor');
     });
   });
 
@@ -158,18 +158,18 @@ describe('RegisterSuccessComponent', () => {
       const compiled = fixture.debugElement.nativeElement;
       expect(compiled.textContent).toContain('Your account is pending approval from our team');
       expect(compiled.textContent).toContain('Our team will review your shop registration');
-      expect(compiled.textContent).toContain('you\'ll get your unique store code for providers');
+      expect(compiled.textContent).toContain('you\'ll get your unique store code for consignors');
     });
 
-    it('should show provider-specific content when type is provider', () => {
-      component.registrationType.set('provider');
+    it('should show consignor-specific content when type is consignor', () => {
+      component.registrationType.set('consignor');
       component.shopName.set('Test Shop');
       fixture.detectChanges();
 
       const compiled = fixture.debugElement.nativeElement;
       expect(compiled.textContent).toContain('Your account is pending approval from Test Shop');
       expect(compiled.textContent).toContain('The shop owner will review your request');
-      expect(compiled.textContent).toContain('you can access your Provider Portal');
+      expect(compiled.textContent).toContain('you can access your consignor Portal');
     });
 
     it('should display user email in confirmation message', () => {
@@ -199,22 +199,22 @@ describe('RegisterSuccessComponent', () => {
       expect(loginBtn.textContent).toContain('Try to Log In');
     });
 
-    it('should not show owner-specific content for provider', () => {
-      component.registrationType.set('provider');
+    it('should not show owner-specific content for consignor', () => {
+      component.registrationType.set('consignor');
       fixture.detectChanges();
 
       const compiled = fixture.debugElement.nativeElement;
       expect(compiled.textContent).not.toContain('Our team will review your shop registration');
-      expect(compiled.textContent).not.toContain('you\'ll get your unique store code for providers');
+      expect(compiled.textContent).not.toContain('you\'ll get your unique store code for consignors');
     });
 
-    it('should not show provider-specific content for owner', () => {
+    it('should not show consignor-specific content for owner', () => {
       component.registrationType.set('owner');
       fixture.detectChanges();
 
       const compiled = fixture.debugElement.nativeElement;
       expect(compiled.textContent).not.toContain('The shop owner will review your request');
-      expect(compiled.textContent).not.toContain('you can access your Provider Portal');
+      expect(compiled.textContent).not.toContain('you can access your consignor Portal');
     });
 
     it('should handle unknown registration type gracefully', () => {

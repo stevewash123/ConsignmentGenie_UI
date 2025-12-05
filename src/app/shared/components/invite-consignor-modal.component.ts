@@ -1,8 +1,8 @@
 import { Component, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Provider } from '../../models/provider.model';
-import { ProviderService } from '../../services/provider.service';
+import { Consignor } from '../../models/consignor.model';
+import { ConsignorService } from '../../services/consignor.service';
 import { ENTITY_LABELS } from '../constants/labels';
 
 @Component({
@@ -13,7 +13,7 @@ import { ENTITY_LABELS } from '../constants/labels';
     <div class="modal-overlay" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ mode === 'invite' ? labels.inviteProvider : labels.addProviderManually }}</h2>
+          <h2>{{ mode === 'invite' ? labels.inviteConsignor : labels.addConsignorManually }}</h2>
           <button class="close-btn" (click)="close()">×</button>
         </div>
 
@@ -390,7 +390,7 @@ import { ENTITY_LABELS } from '../constants/labels';
 })
 export class InviteConsignorModalComponent {
   @Output() closed = new EventEmitter<void>();
-  @Output() consignorAdded = new EventEmitter<Provider>();
+  @Output() consignorAdded = new EventEmitter<Consignor>();
 
   labels = ENTITY_LABELS;
   mode: 'invite' | 'manual' = 'invite';
@@ -412,7 +412,7 @@ export class InviteConsignorModalComponent {
     useShopDefault: new FormControl(true)
   });
 
-  constructor(private providerService: ProviderService) {}
+  constructor(private consignorService: ConsignorService) {}
 
   close(): void {
     this.closed.emit();
@@ -444,12 +444,12 @@ export class InviteConsignorModalComponent {
       };
 
       // Send invitation via API
-      this.providerService.inviteProvider(inviteData).subscribe({
+      this.consignorService.inviteConsignor(inviteData).subscribe({
         next: (response) => {
           this.isSubmitting.set(false);
           if (response.success) {
             this.close();
-            this.consignorAdded.emit(null); // Trigger refresh of provider list
+            this.consignorAdded.emit(null); // Trigger refresh of consignor list
           } else {
             console.error('Invite failed:', response.message);
             // TODO: Show error message to user
@@ -478,13 +478,13 @@ export class InviteConsignorModalComponent {
       };
 
       // TODO: Implement manual add API call
-      console.log('Creating manual provider:', manualData);
+      console.log('Creating manual consignor:', manualData);
 
       // Simulate API call
       setTimeout(() => {
         this.isSubmitting.set(false);
         this.close();
-        // TODO: Show success message and refresh provider list
+        // TODO: Show success message and refresh consignor list
       }, 1000);
     }
   }

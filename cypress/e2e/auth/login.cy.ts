@@ -21,7 +21,7 @@ describe('Login Tests', () => {
       cy.contains('Test Accounts').should('be.visible')
       cy.get('.test-account-btn.admin').should('contain', 'System Admin')
       cy.get('.test-account-btn.owner').should('contain', 'Shop Owner')
-      cy.get('.test-account-btn.provider').should('contain', 'Provider')
+      cy.get('.test-account-btn.consignor').should('contain', 'consignor')
       cy.get('.test-account-btn.customer').should('contain', 'Customer')
     })
 
@@ -118,12 +118,12 @@ describe('Login Tests', () => {
             message: 'Login successful',
             errors: null
           },
-          'provider@demoshop.com': {
+          'consignor@demoshop.com': {
             success: true,
             data: {
-              token: 'mock-provider-token',
-              userId: 'provider-user-id',
-              email: 'provider@demoshop.com',
+              token: 'mock-consignor-token',
+              userId: 'consignor-user-id',
+              email: 'consignor@demoshop.com',
               role: 2,
               organizationId: 'demo-shop-org',
               organizationName: 'Demo Shop',
@@ -176,9 +176,9 @@ describe('Login Tests', () => {
       cy.url().should('include', '/owner/dashboard')
     })
 
-    it('should login successfully as provider and redirect to customer dashboard', function() {
-      const { provider } = this.users.testAccounts
-      cy.get('.test-account-btn.provider').click()
+    it('should login successfully as consignor and redirect to customer dashboard', function() {
+      const { consignor } = this.users.testAccounts
+      cy.get('.test-account-btn.consignor').click()
       cy.get('button[type="submit"]').click()
 
       cy.wait('@loginRequest')

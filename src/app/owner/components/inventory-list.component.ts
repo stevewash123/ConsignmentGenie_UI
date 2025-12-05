@@ -160,7 +160,7 @@ import {
                 <th>Price</th>
                 <th>Status</th>
                 <th>Source</th>
-                <th>Provider</th>
+                <th>Consignor</th>
                 <th>Received</th>
                 <th>Actions</th>
               </tr>

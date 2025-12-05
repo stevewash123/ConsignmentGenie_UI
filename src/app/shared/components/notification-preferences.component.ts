@@ -94,8 +94,8 @@ import { LoadingService } from '../services/loading.service';
                 </div>
               </div>
 
-              <!-- Provider-specific preferences -->
-              <div *ngIf="role === 'provider'" class="role-specific-preferences">
+              <!-- consignor-specific preferences -->
+              <div *ngIf="role === 'consignor'" class="role-specific-preferences">
                 <div class="preference-item">
                   <div class="preference-content">
                     <label for="emailItemSold" class="preference-label">Item Sold 💰</label>
@@ -152,8 +152,8 @@ import { LoadingService } from '../services/loading.service';
               <div *ngIf="role === 'owner'" class="role-specific-preferences">
                 <div class="preference-item">
                   <div class="preference-content">
-                    <label for="emailNewProviderRequest" class="preference-label">New Provider Requests 👤</label>
-                    <p class="preference-description">Get notified when providers want to join your shop</p>
+                    <label for="emailNewProviderRequest" class="preference-label">New consignor Requests 👤</label>
+                    <p class="preference-description">Get notified when consignors want to join your shop</p>
                   </div>
                   <div class="preference-control">
                     <label class="toggle-switch">
@@ -170,7 +170,7 @@ import { LoadingService } from '../services/loading.service';
                 <div class="preference-item">
                   <div class="preference-content">
                     <label for="emailPayoutDueReminder" class="preference-label">Payout Reminders ⚠️</label>
-                    <p class="preference-description">Get notified when providers have earnings ready for payout</p>
+                    <p class="preference-description">Get notified when consignors have earnings ready for payout</p>
                   </div>
                   <div class="preference-control">
                     <label class="toggle-switch">
@@ -333,8 +333,8 @@ import { LoadingService } from '../services/loading.service';
           </div>
         </div>
 
-        <!-- Payout Threshold Section (Provider and Owner only) -->
-        <div *ngIf="role === 'provider'" class="preferences-section">
+        <!-- Payout Threshold Section (consignor and Owner only) -->
+        <div *ngIf="role === 'consignor'" class="preferences-section">
           <h2>Payout Alerts</h2>
           <p class="section-description">Get notified when your pending earnings reach a certain amount.</p>
 
@@ -744,7 +744,7 @@ import { LoadingService } from '../services/loading.service';
   `]
 })
 export class NotificationPreferencesComponent implements OnInit, OnDestroy {
-  @Input() role: UserRole = 'provider';
+  @Input() role: UserRole = 'consignor';
 
   private destroy$ = new Subject<void>();
 

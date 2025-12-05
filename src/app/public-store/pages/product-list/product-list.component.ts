@@ -186,7 +186,7 @@ import { PublicItem, PagedResult } from '../../../shared/models/api.models';
                   }
 
                   <div class="product-meta">
-                    <div class="provider">by {{ product.providerName }}</div>
+                    <div class="consignor">by {{ product.providerName }}</div>
                     <div class="condition">{{ product.condition }}</div>
                   </div>
 

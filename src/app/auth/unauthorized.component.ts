@@ -132,8 +132,8 @@ export class UnauthorizedComponent {
           case 5: // Accountant
             this.router.navigate(['/owner/dashboard']);
             break;
-          case 6: // Provider
-            this.router.navigate(['/provider/dashboard']);
+          case 6: // consignor
+            this.router.navigate(['/consignor/dashboard']);
             break;
           case 7: // Customer
             this.router.navigate(['/customer/dashboard']);
