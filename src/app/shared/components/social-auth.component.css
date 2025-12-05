@@ -1,0 +1,165 @@
+.social-auth-container {
+  @apply max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm border border-gray-200;
+}
+
+.social-auth-header {
+  @apply text-center mb-6;
+}
+
+.auth-title {
+  @apply text-2xl font-bold text-gray-900 mb-2;
+}
+
+.auth-subtitle {
+  @apply text-gray-600 text-sm;
+}
+
+.social-buttons {
+  @apply space-y-3 mb-6;
+}
+
+.social-btn {
+  @apply w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 relative;
+}
+
+.social-btn:disabled {
+  @apply opacity-60 cursor-not-allowed hover:bg-white;
+}
+
+.google-btn {
+  @apply hover:border-blue-300 hover:shadow-sm;
+}
+
+.facebook-btn {
+  @apply hover:border-blue-300 hover:shadow-sm;
+}
+
+.btn-icon {
+  @apply flex-shrink-0;
+}
+
+.btn-text {
+  @apply flex-1 text-center;
+}
+
+.coming-soon {
+  @apply absolute top-1 right-2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded;
+}
+
+.divider {
+  @apply relative mb-6;
+}
+
+.divider::before {
+  @apply absolute inset-0 flex items-center;
+  content: '';
+}
+
+.divider::before::after {
+  @apply flex-1 border-t border-gray-300;
+  content: '';
+}
+
+.divider-text {
+  @apply relative flex justify-center text-sm;
+}
+
+.divider-text::before,
+.divider-text::after {
+  @apply bg-white px-2 text-gray-500;
+  content: '';
+}
+
+.divider-text::before {
+  content: '';
+  @apply flex-1 border-t border-gray-300;
+}
+
+.divider-text::after {
+  content: '';
+  @apply flex-1 border-t border-gray-300;
+}
+
+/* Proper divider implementation */
+.divider {
+  @apply flex items-center my-6;
+}
+
+.divider::before,
+.divider::after {
+  @apply flex-1 border-t border-gray-300;
+  content: '';
+}
+
+.divider-text {
+  @apply mx-4 text-gray-500 text-sm font-medium;
+}
+
+.email-signup-prompt {
+  @apply text-center;
+}
+
+.prompt-text {
+  @apply text-gray-600 text-sm;
+}
+
+/* Loading state for buttons */
+.social-btn.loading {
+  @apply opacity-75 cursor-not-allowed;
+}
+
+.social-btn.loading .btn-text::after {
+  content: '...';
+  @apply ml-1;
+}
+
+/* Error state styling */
+.social-auth-container.error {
+  @apply border-red-300;
+}
+
+/* Success state styling */
+.social-auth-container.success {
+  @apply border-green-300;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .social-auth-container {
+    @apply mx-4 p-4;
+  }
+
+  .auth-title {
+    @apply text-xl;
+  }
+
+  .social-btn {
+    @apply py-4 text-sm;
+  }
+
+  .coming-soon {
+    @apply text-xs px-1;
+  }
+}
+
+/* Accessibility improvements */
+.social-btn:focus-visible {
+  @apply ring-2 ring-offset-2 ring-blue-500;
+}
+
+.social-btn:disabled:focus-visible {
+  @apply ring-gray-300;
+}
+
+/* Animation for button interactions */
+.social-btn {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.social-btn:hover:not(:disabled) {
+  @apply transform translate-y-[-1px] shadow-md;
+}
+
+.social-btn:active:not(:disabled) {
+  @apply transform translate-y-0 shadow-sm;
+}
