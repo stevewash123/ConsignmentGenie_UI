@@ -40,7 +40,7 @@ describe('ConsignorService', () => {
 
     mockHttpClient.get.and.returnValue(of(mockconsignors));
 
-    service.getconsignors().subscribe(consignors => {
+    service.getConsignors().subscribe(consignors => {
       expect(consignors).toEqual(mockconsignors);
       expect(consignors.length).toBe(1);
     });

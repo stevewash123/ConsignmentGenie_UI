@@ -343,7 +343,7 @@ import { AuthService } from '../services/auth.service';
     }
   `]
 })
-export class consignorsignupStep2Component implements OnInit {
+export class ConsignorSignupStep2Component implements OnInit {
   signupForm: FormGroup;
   isSubmitting = signal(false);
   errorMessage = signal('');

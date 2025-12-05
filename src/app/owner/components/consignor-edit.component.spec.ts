@@ -3,9 +3,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ProviderEditComponent } from './consignor-edit.component';
-import { ConsignorService } from '../services/consignor.service';
-import { consignor } from '../models/consignor.model';
-import { LoadingService } from '../shared/services/loading.service';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
+import { LoadingService } from '../../shared/services/loading.service';
 
 describe('ProviderEditComponent', () => {
   let component: ProviderEditComponent;

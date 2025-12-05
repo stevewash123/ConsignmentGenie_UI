@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { Component } from '@angular/core';
-import { consignorsignupStep2Component } from './consignor-signup-step2.component';
+import { ConsignorSignupStep2Component } from './consignor-signup-step2.component';
 import { AuthService } from '../services/auth.service';
 
 // Mock components for routing tests
@@ -11,11 +11,11 @@ import { AuthService } from '../services/auth.service';
 class MockLoginComponent { }
 
 @Component({ template: '' })
-class MockconsignorsignupStep1Component { }
+class MockConsignorSignupStep1Component { }
 
-describe('consignorsignupStep2Component', () => {
-  let component: consignorsignupStep2Component;
-  let fixture: ComponentFixture<consignorsignupStep2Component>;
+describe('ConsignorSignupStep2Component', () => {
+  let component: ConsignorSignupStep2Component;
+  let fixture: ComponentFixture<ConsignorSignupStep2Component>;
   let router: Router;
   let authService: jasmine.SpyObj<AuthService>;
   let sessionStorageSpy: jasmine.Spy;
@@ -28,10 +28,10 @@ describe('consignorsignupStep2Component', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        consignorsignupStep2Component,
+        ConsignorSignupStep2Component,
         RouterTestingModule.withRoutes([
           { path: 'login', component: MockLoginComponent },
-          { path: 'signup/consignor', component: MockconsignorsignupStep1Component }
+          { path: 'signup/consignor', component: MockConsignorSignupStep1Component }
         ])
       ],
       providers: [
@@ -39,7 +39,7 @@ describe('consignorsignupStep2Component', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(consignorsignupStep2Component);
+    fixture = TestBed.createComponent(ConsignorSignupStep2Component);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
@@ -199,7 +199,7 @@ describe('consignorsignupStep2Component', () => {
 
       component.onSubmit();
 
-      expect(sessionStorage.removeItem).toHaveBeenCalledWith('providerAuthData');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('consignorAuthData');
       expect(router.navigate).toHaveBeenCalledWith(['/login'], {
         queryParams: {
           message: 'Account created successfully! Log in to join consignment shops.'
@@ -308,7 +308,7 @@ describe('consignorsignupStep2Component', () => {
 
       component.onSubmit();
 
-      expect(sessionStorage.removeItem).toHaveBeenCalledWith('providerAuthData');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('consignorAuthData');
     });
 
     it('should not remove auth data on registration failure', () => {

@@ -485,7 +485,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ProviderProfileComponent implements OnInit {
+export class ConsignorProfileComponent implements OnInit {
   profile: ProviderProfile | null = null;
   saving = false;
   error: string | null = null;

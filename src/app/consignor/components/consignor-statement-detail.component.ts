@@ -587,7 +587,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class consignorstatementDetailComponent implements OnInit, OnDestroy {
+export class ConsignorStatementDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   statement: StatementDto | null = null;

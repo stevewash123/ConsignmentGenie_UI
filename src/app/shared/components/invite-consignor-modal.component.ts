@@ -1,7 +1,7 @@
 import { Component, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { consignor } from '../../models/consignor.model';
+import { Consignor } from '../../models/consignor.model';
 import { ConsignorService } from '../../services/consignor.service';
 import { ENTITY_LABELS } from '../constants/labels';
 
@@ -390,7 +390,7 @@ import { ENTITY_LABELS } from '../constants/labels';
 })
 export class InviteConsignorModalComponent {
   @Output() closed = new EventEmitter<void>();
-  @Output() consignorAdded = new EventEmitter<consignor>();
+  @Output() consignorAdded = new EventEmitter<Consignor>();
 
   labels = ENTITY_LABELS;
   mode: 'invite' | 'manual' = 'invite';
@@ -444,7 +444,7 @@ export class InviteConsignorModalComponent {
       };
 
       // Send invitation via API
-      this.ConsignorService.inviteProvider(inviteData).subscribe({
+      this.ConsignorService.inviteConsignor(inviteData).subscribe({
         next: (response) => {
           this.isSubmitting.set(false);
           if (response.success) {

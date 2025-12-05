@@ -2,7 +2,7 @@ import { Component, Input, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { AuthProvider, getProviderById } from '../../config/auth-consignors.config';
+import { AuthProvider, getProviderById } from '../../config/auth-providers.config';
 
 export interface LinkedProvider {
   id: string;
@@ -564,7 +564,7 @@ export class AccountSecurityComponent implements OnInit {
     try {
       // Mock data for now - replace with actual API call
       const mockData: SecuritySettings = {
-        linkedproviders: [
+        linkedconsignors: [
           { id: 'google', name: 'Google', email: 'user@gmail.com', connected: true, connectedAt: new Date() },
           { id: 'facebook', name: 'Facebook', connected: false }
         ],

@@ -9,7 +9,7 @@ import { Transaction, CreateTransactionRequest } from '../../models/transaction.
 import { ItemService, ItemFilters } from '../../services/item.service';
 import { ConsignorService } from '../../services/consignor.service';
 import { Item, ItemStatus } from '../../models/item.model';
-import { consignor } from '../../models/consignor.model';
+import { Consignor } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
@@ -1665,8 +1665,8 @@ export class OwnerSalesComponent implements OnInit {
 
   // Available data for form
   availableItems = signal<Item[]>([]);
-  consignors = signal<consignor[]>([]);
-  selectedProvider = signal<consignor | null>(null);
+  consignors = signal<Consignor[]>([]);
+  selectedProvider = signal<Consignor | null>(null);
 
   // Form data
   saleForm_itemId: number | null = null;
@@ -1869,7 +1869,7 @@ export class OwnerSalesComponent implements OnInit {
   }
 
   loadconsignors() {
-    this.ConsignorService.getconsignors().subscribe({
+    this.ConsignorService.getConsignors().subscribe({
       next: (consignors) => {
         this.consignors.set(consignors.filter(p => p.isActive));
       },

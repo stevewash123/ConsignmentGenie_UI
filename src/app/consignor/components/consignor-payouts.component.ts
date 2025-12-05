@@ -409,7 +409,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ProviderPayoutsComponent implements OnInit {
+export class ConsignorPayoutsComponent implements OnInit {
   payoutsResult: PagedResult<ProviderPayout> | null = null;
   error: string | null = null;
 

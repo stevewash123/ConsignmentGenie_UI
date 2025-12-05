@@ -464,7 +464,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ProviderPayoutDetailComponent implements OnInit {
+export class ConsignorPayoutDetailComponent implements OnInit {
   payoutDetail: ProviderPayoutDetail | null = null;
   error: string | null = null;
   payoutId: string;

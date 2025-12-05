@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ConsignorService } from '../services/consignor.service';
-import { AuthService } from '../services/auth.service';
-import { AuthMethodSelectorComponent, ProviderAuthEvent, CredentialsEvent } from '../shared/auth/components/auth-method-selector/auth-method-selector.component';
+import { ConsignorService } from '../../services/consignor.service';
+import { AuthService } from '../../services/auth.service';
+import { AuthMethodSelectorComponent, ProviderAuthEvent, CredentialsEvent } from '../../shared/auth/components/auth-method-selector/auth-method-selector.component';
 
 interface InvitationDetails {
   isValid: boolean;
@@ -214,7 +214,7 @@ interface InvitationDetails {
     }
   `]
 })
-export class ProviderRegistrationStep1Component implements OnInit {
+export class ConsignorRegistrationStep1Component implements OnInit {
   invitationDetails = signal<InvitationDetails | null>(null);
   isValidating = signal(true);
   isInvalidToken = signal(false);

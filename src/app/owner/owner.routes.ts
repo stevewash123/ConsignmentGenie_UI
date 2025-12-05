@@ -12,19 +12,19 @@ export const ownerRoutes: Routes = [
   },
   {
     path: 'consignors',
-    loadComponent: () => import('../components/consignor-list.component').then(m => m.ConsignorListComponent)
+    loadComponent: () => import('./components/consignor-list.component').then(m => m.ConsignorListComponent)
   },
   {
     path: 'consignors/new',
-    loadComponent: () => import('../components/consignor-add.component').then(m => m.ConsignorAddComponent)
+    loadComponent: () => import('./components/consignor-add.component').then(m => m.ConsignorAddComponent)
   },
   {
     path: 'consignors/:id',
-    loadComponent: () => import('../components/consignor-detail.component').then(m => m.ConsignorDetailComponent)
+    loadComponent: () => import('./components/consignor-detail.component').then(m => m.ConsignorDetailComponent)
   },
   {
     path: 'consignors/:id/edit',
-    loadComponent: () => import('../components/consignor-edit.component').then(m => m.ConsignorEditComponent)
+    loadComponent: () => import('./components/consignor-edit.component').then(m => m.ConsignorEditComponent)
   },
   {
     path: 'inventory',
@@ -67,8 +67,8 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./settings/accounting/accounting-settings.component').then(m => m.AccountingSettingsComponent)
       },
       {
-        path: 'providers',
-        loadComponent: () => import('./settings/providers/provider-settings.component').then(m => m.providerSettingsComponent)
+        path: 'consignors',
+        loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
       },
       {
         path: 'subscription',

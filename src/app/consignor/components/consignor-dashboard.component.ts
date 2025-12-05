@@ -291,7 +291,7 @@ import { ProviderDashboard } from '../models/consignor.models';
     }
   `]
 })
-export class ProviderDashboardComponent implements OnInit {
+export class ConsignorDashboardComponent implements OnInit {
   dashboard: ProviderDashboard | null = null;
   error: string | null = null;
 

@@ -455,7 +455,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class consignorsalesComponent implements OnInit {
+export class ConsignorSalesComponent implements OnInit {
   salesResult: PagedResult<consignorsale> | null = null;
   error: string | null = null;
 

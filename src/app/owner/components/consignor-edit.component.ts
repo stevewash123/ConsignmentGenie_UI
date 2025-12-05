@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { ConsignorService } from '../services/consignor.service';
-import { consignor, UpdateProviderRequest } from '../models/consignor.model';
-import { LoadingService } from '../shared/services/loading.service';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor, UpdateConsignorRequest } from '../../models/consignor.model';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-consignor-edit',
@@ -370,7 +370,7 @@ import { LoadingService } from '../shared/services/loading.service';
     }
   `]
 })
-export class ProviderEditComponent implements OnInit {
+export class ConsignorEditComponent implements OnInit {
   providerId = signal<number>(0);
   isSubmitting = signal(false);
   successMessage = signal('');
@@ -409,7 +409,7 @@ export class ProviderEditComponent implements OnInit {
 
   loadProvider(): void {
     this.loadingService.start('consignor-edit');
-    this.ConsignorService.getProvider(this.providerId()).subscribe({
+    this.ConsignorService.getConsignor(this.providerId()).subscribe({
       next: (consignor) => {
         this.populateEditData(consignor);
       },
@@ -423,7 +423,7 @@ export class ProviderEditComponent implements OnInit {
     });
   }
 
-  populateEditData(consignor: consignor): void {
+  populateEditData(consignor: Consignor): void {
     this.editData = {
       name: consignor.name,
       email: consignor.email,
@@ -444,7 +444,7 @@ export class ProviderEditComponent implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    const updateRequest: UpdateProviderRequest = {
+    const updateRequest: UpdateConsignorRequest = {
       name: this.editData.name,
       email: this.editData.email,
       phone: this.editData.phone || undefined,
@@ -456,7 +456,7 @@ export class ProviderEditComponent implements OnInit {
       isActive: this.editData.isActive
     };
 
-    this.ConsignorService.updateProvider(this.providerId(), updateRequest).subscribe({
+    this.ConsignorService.updateConsignor(this.providerId(), updateRequest).subscribe({
       next: (updated) => {
         this.successMessage.set('consignor updated successfully!');
         // Auto-redirect after 2 seconds

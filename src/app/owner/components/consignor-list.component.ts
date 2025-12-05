@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { ConsignorService, PendingInvitation } from '../services/consignor.service';
-import { consignor } from '../models/consignor.model';
-import { InviteConsignorModalComponent } from '../shared/components/invite-consignor-modal.component';
-import { ENTITY_LABELS } from '../shared/constants/labels';
-import { ConsignorStatus } from '../models/consignor.model';
-import { OwnerLayoutComponent } from '../owner/components/owner-layout.component';
-import { LoadingService } from '../shared/services/loading.service';
+import { ConsignorService, PendingInvitation } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
+import { InviteConsignorModalComponent } from '../../shared/components/invite-consignor-modal.component';
+import { ENTITY_LABELS } from '../../shared/constants/labels';
+import { ConsignorStatus } from '../../models/consignor.model';
+import { OwnerLayoutComponent } from './owner-layout.component';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-consignor-list',
@@ -575,9 +575,9 @@ import { LoadingService } from '../shared/services/loading.service';
     }
   `]
 })
-export class ProviderListComponent implements OnInit {
-  consignors = signal<consignor[]>([]);
-  filteredconsignors = signal<consignor[]>([]);
+export class ConsignorListComponent implements OnInit {
+  consignors = signal<Consignor[]>([]);
+  filteredconsignors = signal<Consignor[]>([]);
   pendingInvitations = signal<PendingInvitation[]>([]);
   searchTerm = '';
   sortBy = 'name';
@@ -600,7 +600,7 @@ export class ProviderListComponent implements OnInit {
 
   loadconsignors(): void {
     this.loadingService.start('consignors-list');
-    this.ConsignorService.getconsignors().subscribe({
+    this.ConsignorService.getConsignors().subscribe({
       next: (consignors) => {
         console.log('consignors API response:', consignors);
 
@@ -629,7 +629,7 @@ export class ProviderListComponent implements OnInit {
           isActive: apiProvider.status === 'Active' || apiProvider.isActive === true,
           status: this.mapApiStatusToConsignorStatus(apiProvider.status || (apiProvider.isActive ? 'Active' : 'Inactive')),
           organizationId: apiProvider.organizationId,
-          providerNumber: apiProvider.providerNumber,
+          consignorNumber: apiProvider.consignorNumber,
           createdAt: new Date(apiProvider.createdAt),
           updatedAt: new Date(apiProvider.updatedAt || apiProvider.createdAt),
           invitedAt: apiProvider.invitedAt ? new Date(apiProvider.invitedAt) : undefined,
@@ -756,10 +756,10 @@ export class ProviderListComponent implements OnInit {
     this.filteredconsignors.set(filtered);
   }
 
-  sortconsignors(consignors: consignor[]): consignor[] {
+  sortconsignors(consignors: Consignor[]): Consignor[] {
     return [...consignors].sort((a, b) => {
-      let aValue: any = a[this.sortBy as keyof consignor];
-      let bValue: any = b[this.sortBy as keyof consignor];
+      let aValue: any = a[this.sortBy as keyof Consignor];
+      let bValue: any = b[this.sortBy as keyof Consignor];
 
       // Handle undefined values
       if (aValue === undefined) aValue = '';
@@ -791,7 +791,7 @@ export class ProviderListComponent implements OnInit {
     this.applyFilters();
   }
 
-  getConsignorStatus(consignor: consignor): ConsignorStatus {
+  getConsignorStatus(consignor: Consignor): ConsignorStatus {
     return consignor.status || (consignor.isActive ? 'active' : 'inactive');
   }
 
@@ -810,26 +810,26 @@ export class ProviderListComponent implements OnInit {
     }
   }
 
-  resendInvite(consignor: consignor): void {
+  resendInvite(consignor: Consignor): void {
     // TODO: Implement resend invitation API call
     console.log('Resending invitation to:', consignor.email);
   }
 
-  cancelInvite(consignor: consignor): void {
+  cancelInvite(consignor: Consignor): void {
     // TODO: Implement cancel invitation API call
     console.log('Cancelling invitation for:', consignor.email);
   }
 
-  reactivateProvider(consignor: consignor): void {
+  reactivateProvider(consignor: Consignor): void {
     // TODO: Implement reactivate consignor API call
     console.log('Reactivating consignor:', consignor.name);
   }
 
-  trackByProvider(index: number, consignor: consignor): number {
+  trackByProvider(index: number, consignor: Consignor): number {
     return consignor.id;
   }
 
-  getProviderItemCount(consignor: consignor): number {
+  getProviderItemCount(consignor: Consignor): number {
     // TODO: Implement item count logic when items feature is available
     return 0;
   }
@@ -857,7 +857,7 @@ export class ProviderListComponent implements OnInit {
     this.isInviteModalVisible.set(false);
   }
 
-  onConsignorAdded(consignor: consignor): void {
+  onConsignorAdded(consignor: Consignor): void {
     console.log('Consignor added successfully:', consignor);
     this.loadData(); // Refresh both lists
   }

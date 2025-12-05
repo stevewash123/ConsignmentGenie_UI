@@ -5,9 +5,9 @@ import { of, throwError } from 'rxjs';
 import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { ProviderDetailComponent } from './consignor-detail.component';
-import { ConsignorService } from '../services/consignor.service';
-import { consignor } from '../models/consignor.model';
-import { LoadingService } from '../shared/services/loading.service';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
+import { LoadingService } from '../../shared/services/loading.service';
 
 // Mock components for routing tests
 @Component({ template: '' })
@@ -176,7 +176,7 @@ describe('ProviderDetailComponent', () => {
     const deactivatedProvider = { ...mockProvider, isActive: false };
     ConsignorService.deactivateProvider.and.returnValue(of(deactivatedProvider));
 
-    component.deactivateProvider();
+    component.deactivateConsignor();
 
     expect(ConsignorService.deactivateProvider).toHaveBeenCalledWith(1);
     expect(component.consignor()?.isActive).toBe(false);
@@ -191,7 +191,7 @@ describe('ProviderDetailComponent', () => {
     const activatedProvider = { ...inactiveProvider, isActive: true };
     ConsignorService.activateProvider.and.returnValue(of(activatedProvider));
 
-    component.activateProvider();
+    component.activateConsignor();
 
     expect(ConsignorService.activateProvider).toHaveBeenCalledWith(1);
     expect(component.consignor()?.isActive).toBe(true);
@@ -201,7 +201,7 @@ describe('ProviderDetailComponent', () => {
   xit('should handle deactivation error', () => {
     ConsignorService.deactivateProvider.and.returnValue(throwError(() => new Error('Deactivation failed')));
 
-    component.deactivateProvider();
+    component.deactivateConsignor();
 
     expect(component.errorMessage()).toContain('Failed to deactivate consignor');
     expect(component.isSubmitting()).toBe(false);
@@ -210,7 +210,7 @@ describe('ProviderDetailComponent', () => {
   xit('should handle activation error', () => {
     ConsignorService.activateProvider.and.returnValue(throwError(() => new Error('Activation failed')));
 
-    component.activateProvider();
+    component.activateConsignor();
 
     expect(component.errorMessage()).toContain('Failed to activate consignor');
     expect(component.isSubmitting()).toBe(false);

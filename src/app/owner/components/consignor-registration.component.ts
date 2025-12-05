@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ConsignorService, ProviderRegistrationRequest } from '../services/consignor.service';
+import { ConsignorService, ConsignorRegistrationRequest } from '../../services/consignor.service';
 
 export interface ProviderRegistrationData {
   name: string;
@@ -324,7 +324,7 @@ export interface ProviderRegistrationData {
     }
   `]
 })
-export class ProviderRegistrationComponent implements OnInit {
+export class ConsignorRegistrationComponent implements OnInit {
   registration: ProviderRegistrationData = {
     name: '',
     email: '',
@@ -391,7 +391,7 @@ export class ProviderRegistrationComponent implements OnInit {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    const request: ProviderRegistrationRequest = {
+    const request: ConsignorRegistrationRequest = {
       invitationToken: this.invitationToken,
       fullName: this.registration.name,
       email: this.registration.email,

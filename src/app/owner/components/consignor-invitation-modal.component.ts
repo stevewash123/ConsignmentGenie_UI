@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConsignorService } from '../services/consignor.service';
+import { ConsignorService } from '../../services/consignor.service';
 
 @Component({
   selector: 'app-consignor-invitation-modal',
@@ -248,7 +248,7 @@ import { ConsignorService } from '../services/consignor.service';
     }
   `]
 })
-export class ProviderInvitationModalComponent {
+export class ConsignorInvitationModalComponent {
   @Input() isVisible!: () => boolean;
   @Output() close = new EventEmitter<void>();
   @Output() invitationSent = new EventEmitter<void>();
@@ -275,7 +275,7 @@ export class ProviderInvitationModalComponent {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    this.ConsignorService.inviteProvider(this.invitation).subscribe({
+    this.ConsignorService.inviteConsignor(this.invitation).subscribe({
       next: (response) => {
         this.successMessage.set('Invitation sent successfully!');
         this.resetForm();

@@ -453,7 +453,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class consignorstatementsComponent implements OnInit, OnDestroy {
+export class ConsignorStatementsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   statements: StatementListDto[] = [];

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { ConsignorService } from '../services/consignor.service';
-import { CreateProviderRequest } from '../models/consignor.model';
+import { ConsignorService } from '../../services/consignor.service';
+import { CreateConsignorRequest } from '../../models/consignor.model';
 
 @Component({
   selector: 'app-consignor-add',
@@ -389,12 +389,12 @@ import { CreateProviderRequest } from '../models/consignor.model';
     }
   `]
 })
-export class ProviderAddComponent {
+export class ConsignorAddComponent {
   isSubmitting = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
 
-  providerData: CreateProviderRequest = {
+  providerData: CreateConsignorRequest = {
     name: '',
     email: '',
     phone: '',
@@ -418,7 +418,7 @@ export class ProviderAddComponent {
     this.successMessage.set('');
 
     // Clean up undefined values
-    const request: CreateProviderRequest = {
+    const request: CreateConsignorRequest = {
       name: this.providerData.name,
       email: this.providerData.email,
       phone: this.providerData.phone || undefined,
@@ -429,7 +429,7 @@ export class ProviderAddComponent {
       notes: this.providerData.notes || undefined
     };
 
-    this.ConsignorService.createProvider(request).subscribe({
+    this.ConsignorService.createConsignor(request).subscribe({
       next: (created) => {
         this.successMessage.set('consignor created successfully!');
         // Auto-redirect after 2 seconds

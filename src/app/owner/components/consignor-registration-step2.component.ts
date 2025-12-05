@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ConsignorService, ProviderRegistrationRequest } from '../services/consignor.service';
+import { ConsignorService, ConsignorRegistrationRequest } from '../../services/consignor.service';
 
 interface RegistrationData {
   invitationToken: string;
@@ -364,7 +364,7 @@ interface ProviderDetails {
     }
   `]
 })
-export class ProviderRegistrationStep2Component implements OnInit {
+export class ConsignorRegistrationStep2Component implements OnInit {
   registrationData = signal<RegistrationData | null>(null);
   details: ProviderDetails = {
     fullName: '',
@@ -421,7 +421,7 @@ export class ProviderRegistrationStep2Component implements OnInit {
 
     const regData = this.registrationData()!;
 
-    const request: ProviderRegistrationRequest = {
+    const request: ConsignorRegistrationRequest = {
       invitationToken: regData.invitationToken,
       fullName: this.details.fullName,
       email: regData.credentials.email,

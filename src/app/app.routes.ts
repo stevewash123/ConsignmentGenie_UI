@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AdminGuard } from './guards/admin.guard';
 import { OwnerGuard } from './guards/owner.guard';
-import { ProviderGuard } from './guards/consignor.guard';
+import { ConsignorGuard } from './guards/consignor.guard';
 import { CustomerGuard } from './guards/customer.guard';
 
 export const routes: Routes = [
@@ -40,8 +40,8 @@ export const routes: Routes = [
   // consignor area routes (consignor role + owners/managers)
   {
     path: 'consignor',
-    canActivate: [ProviderGuard],
-    loadChildren: () => import('./consignor/consignor.routes').then(m => m.providerRoutes)
+    canActivate: [ConsignorGuard],
+    loadChildren: () => import('./consignor/consignor.routes').then(m => m.consignorRoutes)
   },
 
   // Customer area routes (customer/consignor roles)
@@ -71,11 +71,11 @@ export const routes: Routes = [
   },
   {
     path: 'signup/consignor',
-    loadComponent: () => import('./auth/consignor-signup-step1.component').then(m => m.consignorsignupStep1Component)
+    loadComponent: () => import('./auth/consignor-signup-step1.component').then(m => m.ConsignorSignupStep1Component)
   },
   {
     path: 'signup/consignor/details',
-    loadComponent: () => import('./auth/consignor-signup-step2.component').then(m => m.consignorsignupStep2Component)
+    loadComponent: () => import('./auth/consignor-signup-step2.component').then(m => m.ConsignorSignupStep2Component)
   },
 
   // Authentication routes (no auth required)
@@ -93,15 +93,15 @@ export const routes: Routes = [
   },
   {
     path: 'register/consignor',
-    loadComponent: () => import('./auth/register-consignor.component').then(m => m.RegisterProviderComponent)
+    loadComponent: () => import('./auth/register-consignor.component').then(m => m.RegisterConsignorComponent)
   },
   {
     path: 'register/consignor/invitation',
-    loadComponent: () => import('./components/consignor-registration-step1.component').then(m => m.ProviderRegistrationStep1Component)
+    loadComponent: () => import('./owner/components/consignor-registration-step1.component').then(m => m.ConsignorRegistrationStep1Component)
   },
   {
     path: 'register/consignor/details',
-    loadComponent: () => import('./components/consignor-registration-step2.component').then(m => m.ProviderRegistrationStep2Component)
+    loadComponent: () => import('./owner/components/consignor-registration-step2.component').then(m => m.ConsignorRegistrationStep2Component)
   },
   {
     path: 'register/success',

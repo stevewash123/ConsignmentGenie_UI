@@ -3,8 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { Component } from '@angular/core';
 import { ProviderAddComponent } from './consignor-add.component';
-import { ConsignorService } from '../services/consignor.service';
-import { consignor } from '../models/consignor.model';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
 
 // Mock components for routing tests
 @Component({ template: '' })

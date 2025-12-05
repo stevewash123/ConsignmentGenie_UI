@@ -488,7 +488,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ProviderItemDetailComponent implements OnInit {
+export class ConsignorItemDetailComponent implements OnInit {
   item: ProviderItemDetail | null = null;
   error: string | null = null;
   itemId: string;

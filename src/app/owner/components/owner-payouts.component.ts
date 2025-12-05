@@ -13,7 +13,7 @@ import {
   UpdatePayoutRequest
 } from '../../models/payout.model';
 import { ConsignorService } from '../../services/consignor.service';
-import { consignor } from '../../models/consignor.model';
+import { Consignor } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
@@ -823,7 +823,7 @@ export class OwnerPayoutsComponent implements OnInit {
   // State signals
   payouts = signal<PayoutListDto[]>([]);
   pendingPayouts = signal<PendingPayoutData[]>([]);
-  consignors = signal<consignor[]>([]);
+  consignors = signal<Consignor[]>([]);
   selectedPayout = signal<PayoutDto | null>(null);
 
   // Pagination
@@ -890,7 +890,7 @@ export class OwnerPayoutsComponent implements OnInit {
 
   async loadconsignors() {
     try {
-      const consignors = await this.ConsignorService.getconsignors().toPromise();
+      const consignors = await this.ConsignorService.getConsignors().toPromise();
       this.consignors.set(consignors || []);
     } catch (error) {
       console.error('Error loading consignors:', error);

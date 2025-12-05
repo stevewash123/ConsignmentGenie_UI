@@ -470,7 +470,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
     }
   `]
 })
-export class ProviderItemsComponent implements OnInit {
+export class ConsignorItemsComponent implements OnInit {
   itemsResult: PagedResult<ProviderItem> | null = null;
   error: string | null = null;
 

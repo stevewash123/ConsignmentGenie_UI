@@ -4,10 +4,10 @@ import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { ProviderListComponent } from './consignor-list.component';
-import { ConsignorService, PendingInvitation } from '../services/consignor.service';
-import { LoadingService } from '../shared/services/loading.service';
-import { consignor } from '../models/consignor.model';
-import { ENTITY_LABELS } from '../shared/constants/labels';
+import { ConsignorService, PendingInvitation } from '../../services/consignor.service';
+import { LoadingService } from '../../shared/services/loading.service';
+import { Consignor } from '../../models/consignor.model';
+import { ENTITY_LABELS } from '../../shared/constants/labels';
 
 describe('ProviderListComponent', () => {
   let component: ProviderListComponent;
@@ -16,7 +16,7 @@ describe('ProviderListComponent', () => {
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
   let mockRouter: jasmine.SpyObj<Router>;
 
-  const mockconsignors: consignor[] = [
+  const mockconsignors: Consignor[] = [
     {
       id: 1,
       name: 'John Doe',
@@ -30,7 +30,7 @@ describe('ProviderListComponent', () => {
       isActive: true,
       status: 'active',
       organizationId: 1,
-      providerNumber: 'P001',
+      consignorNumber: 'P001',
       createdAt: new Date('2023-01-01'),
       updatedAt: new Date('2023-01-01')
     }
