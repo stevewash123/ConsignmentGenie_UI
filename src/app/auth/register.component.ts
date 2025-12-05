@@ -24,7 +24,7 @@ import { RouterModule } from '@angular/router';
                 <button class="select-btn">Select</button>
               </a>
 
-              <a routerLink="/register/provider" class="role-card">
+              <a routerLink="/register/consignor" class="role-card">
                 <div class="role-icon">📦</div>
                 <h3>Consign Items at a Shop</h3>
                 <p>→ Basic signup</p>

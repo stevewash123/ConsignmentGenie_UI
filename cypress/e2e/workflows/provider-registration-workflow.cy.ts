@@ -1,4 +1,4 @@
-describe('Complete Provider Registration and Approval Workflow', () => {
+describe('Complete consignor Registration and Approval Workflow', () => {
   const testData = {
     owner: {
       fullName: 'Workflow Test Owner',
@@ -7,9 +7,9 @@ describe('Complete Provider Registration and Approval Workflow', () => {
       shopName: 'Workflow Test Shop',
       phone: '555-111-2222'
     },
-    provider: {
-      fullName: 'Workflow Test Provider',
-      email: `workflow-provider-${Date.now()}@testshop.com`,
+    consignor: {
+      fullName: 'Workflow Test consignor',
+      email: `workflow-consignor-${Date.now()}@testshop.com`,
       password: 'TestPassword123!',
       phone: '555-333-4444',
       preferredPaymentMethod: 'Venmo',
@@ -26,7 +26,7 @@ describe('Complete Provider Registration and Approval Workflow', () => {
   before(() => {
     // Clean up any existing test data
     cy.task('cleanupTestData', {
-      emails: [testData.owner.email, testData.provider.email]
+      emails: [testData.owner.email, testData.consignor.email]
     }, { timeout: 10000 }).then(() => {
       cy.log('Test data cleanup completed');
     });
@@ -35,7 +35,7 @@ describe('Complete Provider Registration and Approval Workflow', () => {
   after(() => {
     // Clean up test data after completion
     cy.task('cleanupTestData', {
-      emails: [testData.owner.email, testData.provider.email]
+      emails: [testData.owner.email, testData.consignor.email]
     }, { timeout: 10000 });
   });
 
@@ -127,9 +127,9 @@ describe('Complete Provider Registration and Approval Workflow', () => {
     });
   });
 
-  describe('Phase 2: Provider Registration with Generated Store Code', () => {
+  describe('Phase 2: consignor Registration with Generated Store Code', () => {
     it('should validate the generated store code', () => {
-      cy.visit('/register/provider');
+      cy.visit('/register/consignor');
 
       // Enter the generated store code
       cy.get('input[name="storeCode"]').type(storeCode);
@@ -144,29 +144,29 @@ describe('Complete Provider Registration and Approval Workflow', () => {
       cy.get('[data-cy="registration-form"]').should('be.visible');
     });
 
-    it('should allow provider to complete registration', () => {
-      // Fill out provider registration form
-      cy.get('input[name="fullName"]').type(testData.provider.fullName);
-      cy.get('input[name="email"]').type(testData.provider.email);
-      cy.get('input[name="phone"]').type(testData.provider.phone);
-      cy.get('input[name="password"]').type(testData.provider.password);
-      cy.get('select[name="preferredPaymentMethod"]').select(testData.provider.preferredPaymentMethod);
-      cy.get('input[name="paymentDetails"]').type(testData.provider.paymentDetails);
+    it('should allow consignor to complete registration', () => {
+      // Fill out consignor registration form
+      cy.get('input[name="fullName"]').type(testData.consignor.fullName);
+      cy.get('input[name="email"]').type(testData.consignor.email);
+      cy.get('input[name="phone"]').type(testData.consignor.phone);
+      cy.get('input[name="password"]').type(testData.consignor.password);
+      cy.get('select[name="preferredPaymentMethod"]').select(testData.consignor.preferredPaymentMethod);
+      cy.get('input[name="paymentDetails"]').type(testData.consignor.paymentDetails);
 
       cy.get('button[type="submit"]').click();
 
       // Should redirect to success page
       cy.url().should('include', '/register/success');
       cy.get('h1').should('contain', 'Account Created!');
-      cy.get('.success-content').should('contain', testData.provider.fullName.split(' ')[0]);
+      cy.get('.success-content').should('contain', testData.consignor.fullName.split(' ')[0]);
       cy.get('.success-content').should('contain', testData.owner.shopName);
     });
 
-    it('should prevent login for pending provider', () => {
+    it('should prevent login for pending consignor', () => {
       cy.visit('/login');
 
-      cy.get('input[name="email"]').type(testData.provider.email);
-      cy.get('input[name="password"]').type(testData.provider.password);
+      cy.get('input[name="email"]').type(testData.consignor.email);
+      cy.get('input[name="password"]').type(testData.consignor.password);
       cy.get('button[type="submit"]').click();
 
       // Should show pending approval message
@@ -176,73 +176,73 @@ describe('Complete Provider Registration and Approval Workflow', () => {
     });
   });
 
-  describe('Phase 3: Provider Approval by Owner', () => {
-    it('should show pending provider to owner', () => {
+  describe('Phase 3: consignor Approval by Owner', () => {
+    it('should show pending consignor to owner', () => {
       // Login as owner
       cy.visit('/login');
       cy.get('input[name="email"]').type(testData.owner.email);
       cy.get('input[name="password"]').type(testData.owner.password);
       cy.get('button[type="submit"]').click();
 
-      // Navigate to provider management
-      cy.get('[data-cy="provider-management"]').click();
-      cy.url().should('include', '/owner/providers');
+      // Navigate to consignor management
+      cy.get('[data-cy="consignor-management"]').click();
+      cy.url().should('include', '/owner/consignors');
 
-      // Check pending providers list
-      cy.get('[data-cy="pending-providers"]').should('be.visible');
-      cy.get('[data-cy="pending-providers"]').should('contain', testData.provider.fullName);
-      cy.get('[data-cy="pending-providers"]').should('contain', testData.provider.email);
+      // Check pending consignors list
+      cy.get('[data-cy="pending-consignors"]').should('be.visible');
+      cy.get('[data-cy="pending-consignors"]').should('contain', testData.consignor.fullName);
+      cy.get('[data-cy="pending-consignors"]').should('contain', testData.consignor.email);
 
       // Should show payment preferences
-      cy.get('[data-cy="pending-providers"]').should('contain', testData.provider.preferredPaymentMethod);
+      cy.get('[data-cy="pending-consignors"]').should('contain', testData.consignor.preferredPaymentMethod);
     });
 
-    it('should allow owner to approve provider', () => {
-      // Approve the provider
-      cy.get('[data-cy="approve-provider-btn"]').last().click();
+    it('should allow owner to approve consignor', () => {
+      // Approve the consignor
+      cy.get('[data-cy="approve-consignor-btn"]').last().click();
 
       // Should show confirmation dialog
       cy.get('[data-cy="confirm-approval"]').should('be.visible');
-      cy.get('[data-cy="confirm-approval"]').should('contain', testData.provider.fullName);
+      cy.get('[data-cy="confirm-approval"]').should('contain', testData.consignor.fullName);
       cy.get('[data-cy="confirm-approve-btn"]').click();
 
       // Should show success message
-      cy.get('.success-message').should('contain', 'Provider approved successfully');
+      cy.get('.success-message').should('contain', 'consignor approved successfully');
 
-      // Provider should move to approved list
-      cy.get('[data-cy="approved-providers"]').should('be.visible');
-      cy.get('[data-cy="approved-providers"]').should('contain', testData.provider.fullName);
+      // consignor should move to approved list
+      cy.get('[data-cy="approved-consignors"]').should('be.visible');
+      cy.get('[data-cy="approved-consignors"]').should('contain', testData.consignor.fullName);
 
       // Logout owner
       cy.get('[data-cy="logout-btn"]').click();
     });
 
-    it('should allow approved provider to login', () => {
+    it('should allow approved consignor to login', () => {
       cy.visit('/login');
 
-      cy.get('input[name="email"]').type(testData.provider.email);
-      cy.get('input[name="password"]').type(testData.provider.password);
+      cy.get('input[name="email"]').type(testData.consignor.email);
+      cy.get('input[name="password"]').type(testData.consignor.password);
       cy.get('button[type="submit"]').click();
 
-      // Should successfully login and redirect to provider dashboard
-      cy.url().should('include', '/provider');
-      cy.get('.dashboard-header').should('contain', testData.provider.fullName);
+      // Should successfully login and redirect to consignor dashboard
+      cy.url().should('include', '/consignor');
+      cy.get('.dashboard-header').should('contain', testData.consignor.fullName);
 
-      // Should see provider-specific dashboard content
-      cy.get('[data-cy="provider-dashboard"]').should('be.visible');
+      // Should see consignor-specific dashboard content
+      cy.get('[data-cy="consignor-dashboard"]').should('be.visible');
       cy.get('[data-cy="my-items"]').should('be.visible');
       cy.get('[data-cy="earnings-summary"]').should('be.visible');
 
       // Should show connected shop information
       cy.get('[data-cy="shop-info"]').should('contain', testData.owner.shopName);
 
-      // Logout provider
+      // Logout consignor
       cy.get('[data-cy="logout-btn"]').click();
     });
   });
 
   describe('Phase 4: Workflow Verification', () => {
-    it('should show correct provider count in owner dashboard', () => {
+    it('should show correct consignor count in owner dashboard', () => {
       // Login as owner
       cy.visit('/login');
       cy.get('input[name="email"]').type(testData.owner.email);
@@ -250,50 +250,50 @@ describe('Complete Provider Registration and Approval Workflow', () => {
       cy.get('button[type="submit"]').click();
 
       // Check dashboard stats
-      cy.get('[data-cy="provider-count"]').should('contain', '1');
-      cy.get('[data-cy="active-providers"]').should('contain', '1');
+      cy.get('[data-cy="consignor-count"]').should('contain', '1');
+      cy.get('[data-cy="active-consignors"]').should('contain', '1');
 
-      // Provider should be listed in active providers
-      cy.get('[data-cy="provider-management"]').click();
-      cy.get('[data-cy="approved-providers"]').should('contain', testData.provider.fullName);
+      // consignor should be listed in active consignors
+      cy.get('[data-cy="consignor-management"]').click();
+      cy.get('[data-cy="approved-consignors"]').should('contain', testData.consignor.fullName);
 
       cy.get('[data-cy="logout-btn"]').click();
     });
 
-    it('should show provider details correctly in owner view', () => {
+    it('should show consignor details correctly in owner view', () => {
       // Login as owner
       cy.visit('/login');
       cy.get('input[name="email"]').type(testData.owner.email);
       cy.get('input[name="password"]').type(testData.owner.password);
       cy.get('button[type="submit"]').click();
 
-      cy.get('[data-cy="provider-management"]').click();
+      cy.get('[data-cy="consignor-management"]').click();
 
-      // Click on provider details
-      cy.get('[data-cy="view-provider-details"]').last().click();
+      // Click on consignor details
+      cy.get('[data-cy="view-consignor-details"]').last().click();
 
-      // Should show full provider information
-      cy.get('[data-cy="provider-details"]').should('be.visible');
-      cy.get('[data-cy="provider-details"]').should('contain', testData.provider.fullName);
-      cy.get('[data-cy="provider-details"]').should('contain', testData.provider.email);
-      cy.get('[data-cy="provider-details"]').should('contain', testData.provider.phone);
-      cy.get('[data-cy="provider-details"]').should('contain', testData.provider.preferredPaymentMethod);
-      cy.get('[data-cy="provider-details"]').should('contain', testData.provider.paymentDetails);
+      // Should show full consignor information
+      cy.get('[data-cy="consignor-details"]').should('be.visible');
+      cy.get('[data-cy="consignor-details"]').should('contain', testData.consignor.fullName);
+      cy.get('[data-cy="consignor-details"]').should('contain', testData.consignor.email);
+      cy.get('[data-cy="consignor-details"]').should('contain', testData.consignor.phone);
+      cy.get('[data-cy="consignor-details"]').should('contain', testData.consignor.preferredPaymentMethod);
+      cy.get('[data-cy="consignor-details"]').should('contain', testData.consignor.paymentDetails);
 
       cy.get('[data-cy="logout-btn"]').click();
     });
 
     it('should prevent unauthorized access to other user types', () => {
-      // Try to access admin area as provider
+      // Try to access admin area as consignor
       cy.visit('/login');
-      cy.get('input[name="email"]').type(testData.provider.email);
-      cy.get('input[name="password"]').type(testData.provider.password);
+      cy.get('input[name="email"]').type(testData.consignor.email);
+      cy.get('input[name="password"]').type(testData.consignor.password);
       cy.get('button[type="submit"]').click();
 
       cy.visit('/admin', { failOnStatusCode: false });
       cy.url().should('include', '/unauthorized');
 
-      // Try to access owner area as provider
+      // Try to access owner area as consignor
       cy.visit('/owner', { failOnStatusCode: false });
       cy.url().should('include', '/unauthorized');
 
@@ -313,32 +313,32 @@ describe('Complete Provider Registration and Approval Workflow', () => {
 
       cy.get('[data-cy="logout-btn"]').click();
 
-      // Verify provider has provider role
+      // Verify consignor has consignor role
       cy.visit('/login');
-      cy.get('input[name="email"]').type(testData.provider.email);
-      cy.get('input[name="password"]').type(testData.provider.password);
+      cy.get('input[name="email"]').type(testData.consignor.email);
+      cy.get('input[name="password"]').type(testData.consignor.password);
       cy.get('button[type="submit"]').click();
 
-      cy.visit('/provider');
-      cy.url().should('include', '/provider');
-      cy.get('[data-cy="provider-dashboard"]').should('be.visible');
+      cy.visit('/consignor');
+      cy.url().should('include', '/consignor');
+      cy.get('[data-cy="consignor-dashboard"]').should('be.visible');
 
       cy.get('[data-cy="logout-btn"]').click();
     });
   });
 
   describe('Phase 5: Integration with Existing Features', () => {
-    it('should allow provider to view items (when feature is available)', () => {
+    it('should allow consignor to view items (when feature is available)', () => {
       cy.visit('/login');
-      cy.get('input[name="email"]').type(testData.provider.email);
-      cy.get('input[name="password"]').type(testData.provider.password);
+      cy.get('input[name="email"]').type(testData.consignor.email);
+      cy.get('input[name="password"]').type(testData.consignor.password);
       cy.get('button[type="submit"]').click();
 
-      // If items feature exists, provider should be able to access it
+      // If items feature exists, consignor should be able to access it
       cy.get('body').then(($body) => {
         if ($body.find('[data-cy="my-items"]').length > 0) {
           cy.get('[data-cy="my-items"]').click();
-          cy.url().should('include', '/provider/items');
+          cy.url().should('include', '/consignor/items');
           cy.get('[data-cy="items-list"]').should('be.visible');
         }
       });
@@ -346,7 +346,7 @@ describe('Complete Provider Registration and Approval Workflow', () => {
       cy.get('[data-cy="logout-btn"]').click();
     });
 
-    it('should allow owner to manage provider settings', () => {
+    it('should allow owner to manage consignor settings', () => {
       cy.visit('/login');
       cy.get('input[name="email"]').type(testData.owner.email);
       cy.get('input[name="password"]').type(testData.owner.password);
@@ -359,8 +359,8 @@ describe('Complete Provider Registration and Approval Workflow', () => {
       // Should be able to regenerate store code
       cy.get('[data-cy="regenerate-store-code"]').should('be.visible');
 
-      // Should be able to toggle provider auto-approval
-      cy.get('[data-cy="auto-approve-providers"]').should('be.visible');
+      // Should be able to toggle consignor auto-approval
+      cy.get('[data-cy="auto-approve-consignors"]').should('be.visible');
 
       cy.get('[data-cy="logout-btn"]').click();
     });
@@ -381,16 +381,16 @@ describe('Error Scenarios and Edge Cases', () => {
       password: 'TestPassword123!',
       shopName: 'Error Test Shop 2'
     },
-    provider: {
-      fullName: 'Error Test Provider',
-      email: `error-provider-${Date.now()}@testshop.com`,
+    consignor: {
+      fullName: 'Error Test consignor',
+      email: `error-consignor-${Date.now()}@testshop.com`,
       password: 'TestPassword123!'
     }
   };
 
-  it('should handle provider registration with disabled store code', () => {
+  it('should handle consignor registration with disabled store code', () => {
     // This test assumes there's a disabled store code for testing
-    cy.visit('/register/provider');
+    cy.visit('/register/consignor');
 
     cy.get('input[name="storeCode"]').type('0000'); // Assumed disabled code
     cy.get('button[type="submit"]').click();
@@ -403,7 +403,7 @@ describe('Error Scenarios and Edge Cases', () => {
   it('should handle network errors gracefully', () => {
     cy.intercept('GET', '**/auth/validate-store-code/**', { forceNetworkError: true }).as('networkError');
 
-    cy.visit('/register/provider');
+    cy.visit('/register/consignor');
     cy.get('input[name="storeCode"]').type('1234');
     cy.get('button[type="submit"]').click();
 

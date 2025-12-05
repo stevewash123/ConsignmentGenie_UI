@@ -17,7 +17,7 @@ describe('OwnerWelcomeModalComponent', () => {
     welcomeGuideCompleted: false,
     showModal: true,
     steps: {
-      hasProviders: true,
+      hasconsignors: true,
       storefrontConfigured: false,
       hasInventory: true,
       quickBooksConnected: false
@@ -26,12 +26,12 @@ describe('OwnerWelcomeModalComponent', () => {
 
   const mockSteps: OnboardingStep[] = [
     {
-      id: 'providers',
-      title: 'Add your providers',
+      id: 'consignors',
+      title: 'Add your consignors',
       description: 'Invite the people who consign items with you.',
       completed: true,
-      actionText: 'Add Providers',
-      routerLink: '/owner/providers',
+      actionText: 'Add consignors',
+      routerLink: '/owner/consignors',
       icon: '👥'
     },
     {

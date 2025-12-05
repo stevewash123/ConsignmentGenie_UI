@@ -599,7 +599,7 @@ export class OwnerSignupStep2Component implements OnInit {
       zipCode: formValue.zipCode
     };
 
-    this.authService.registerOwner(request).subscribe({
+    this.authService.registerOwnerFrictionless(request).subscribe({
       next: (result) => {
         console.log('Owner registration response:', result);
         if (result.success) {

@@ -28,10 +28,10 @@ describe('Complete Inventory Management Workflow', () => {
         body: { success: true, data: this.inventoryData.categories }
       }).as('getCategories')
 
-      cy.intercept('GET', '**/api/providers*', {
+      cy.intercept('GET', '**/api/consignors*', {
         statusCode: 200,
-        body: { success: true, data: this.ownerData.providers }
-      }).as('getProviders')
+        body: { success: true, data: this.ownerData.consignors }
+      }).as('getconsignors')
 
       cy.intercept('GET', '**/api/items*', {
         statusCode: 200,
@@ -100,10 +100,10 @@ describe('Complete Inventory Management Workflow', () => {
       cy.url().should('include', '/owner/inventory/add')
 
       // Fill out item creation form
-      cy.wait('@getProviders')
+      cy.wait('@getconsignors')
 
       // Basic information
-      cy.get('[data-cy="provider-select"]').select('Sarah Thompson')
+      cy.get('[data-cy="consignor-select"]').select('Sarah Thompson')
       cy.get('[data-cy="category-select"]').select('Home & Decor')
 
       // Auto-generate SKU
@@ -187,20 +187,20 @@ describe('Complete Inventory Management Workflow', () => {
 
     it('should handle form validation errors gracefully', function() {
       cy.visit('/owner/inventory/add')
-      cy.wait(['@getProviders', '@getCategories'])
+      cy.wait(['@getconsignors', '@getCategories'])
 
       // Try to submit form without required fields
       cy.get('[data-cy="save-item"]').click()
 
       // Should show validation errors
-      cy.contains('Provider is required').should('be.visible')
+      cy.contains('consignor is required').should('be.visible')
       cy.contains('Title is required').should('be.visible')
       cy.contains('Category is required').should('be.visible')
       cy.contains('Condition is required').should('be.visible')
       cy.contains('Price is required').should('be.visible')
 
       // Fill minimum required fields
-      cy.get('[data-cy="provider-select"]').select('Sarah Thompson')
+      cy.get('[data-cy="consignor-select"]').select('Sarah Thompson')
       cy.get('[data-cy="title-input"]').type('Test Item')
       cy.get('[data-cy="category-select"]').select('Clothing')
       cy.get('[data-cy="condition-select"]').select('Good')
@@ -214,7 +214,7 @@ describe('Complete Inventory Management Workflow', () => {
 
     it('should cancel item creation and return to list', function() {
       cy.visit('/owner/inventory/add')
-      cy.wait(['@getProviders', '@getCategories'])
+      cy.wait(['@getconsignors', '@getCategories'])
 
       // Fill some fields
       cy.get('[data-cy="title-input"]').type('Partial Item')

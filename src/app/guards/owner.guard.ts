@@ -45,8 +45,8 @@ export class OwnerGuard implements CanActivate {
 
   private redirectToUserDashboard(userRole: number) {
     switch (userRole) {
-      case UserRole.Provider:
-        this.router.navigate(['/provider/dashboard']);
+      case UserRole.consignor:
+        this.router.navigate(['/consignor/dashboard']);
         break;
       case UserRole.Customer:
         this.router.navigate(['/customer/dashboard']);

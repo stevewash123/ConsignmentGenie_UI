@@ -138,11 +138,11 @@ interface LoginResponse {
               <div class="account-email">owner1@microsaasbuilders.com</div>
             </button>
             <button
-              class="test-account-btn provider"
+              class="test-account-btn consignor"
               (click)="useTestAccount('provider1@microsaasbuilders.com')"
               [disabled]="isAuthLoading()"
             >
-              <div class="account-role">Provider</div>
+              <div class="account-role">consignor</div>
               <div class="account-email">provider1@microsaasbuilders.com</div>
             </button>
             <button
@@ -351,7 +351,7 @@ interface LoginResponse {
 
     .test-account-btn.admin { border-left: 4px solid #dc2626; }
     .test-account-btn.owner { border-left: 4px solid #059669; }
-    .test-account-btn.provider { border-left: 4px solid #d97706; }
+    .test-account-btn.consignor { border-left: 4px solid #d97706; }
     .test-account-btn.customer { border-left: 4px solid #7c3aed; }
 
     .account-role {
@@ -535,8 +535,8 @@ export class LoginComponent {
       //   this.router.navigate(['/owner/dashboard']);
       //   break;
 
-      case 'Provider':
-        // For now, redirect to customer area - could be separate provider portal later
+      case 'consignor':
+        // For now, redirect to customer area - could be separate consignor portal later
         this.router.navigate(['/customer/dashboard']);
         break;
 
@@ -557,7 +557,7 @@ export class LoginComponent {
         0: 'Admin',
         1: 'Owner',
         // 2: 'Manager', // Planned feature - commented out for now
-        2: 'Provider',
+        2: 'consignor',
         3: 'Customer'
       };
       return roleMap[Number(role)] || 'Owner';

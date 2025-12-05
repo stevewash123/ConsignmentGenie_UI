@@ -9,7 +9,7 @@ The notification system has been successfully unified and implemented according 
 ### 1. Shared Infrastructure (`/src/app/shared/`)
 
 **Models & Types** (`models/notification.models.ts`):
-- `UserRole` type supporting 'provider', 'owner', 'admin', 'customer'
+- `UserRole` type supporting 'consignor', 'owner', 'admin', 'customer'
 - `NotificationType` union with 24 notification types across all roles
 - `NotificationDto` with unified schema including role, metadata, actionUrl
 - `NotificationPreferencesDto` with role-specific preference fields
@@ -38,8 +38,8 @@ The notification system has been successfully unified and implemented according 
 
 **NotificationPreferencesComponent** (`notification-preferences.component.ts`):
 - Role-specific preference forms with conditional sections
-- Provider: item sales, payouts, statements, thresholds
-- Owner: provider requests, sync errors, subscription alerts
+- consignor: item sales, payouts, statements, thresholds
+- Owner: consignor requests, sync errors, subscription alerts
 - Admin: shop registrations, subscription events, system errors
 - Master email toggle, digest frequency, validation
 
@@ -49,15 +49,15 @@ The notification system has been successfully unified and implemented according 
 - Auto-refresh, mark as read, navigation support
 - Mobile-responsive with backdrop click-to-close
 
-### 3. Updated Provider Components
+### 3. Updated consignor Components
 
-**Provider Notifications** (`/src/app/provider/components/`):
-- `provider-notifications.component.ts` → wrapper using `<app-notification-center role="provider">`
-- `provider-notification-preferences.component.ts` → wrapper using `<app-notification-preferences role="provider">`
+**consignor Notifications** (`/src/app/consignor/components/`):
+- `consignor-notifications.component.ts` → wrapper using `<app-notification-center role="consignor">`
+- `consignor-notification-preferences.component.ts` → wrapper using `<app-notification-preferences role="consignor">`
 - Removed 600+ lines of duplicate code, now 3-line components
 
-**Provider Layout** (`provider-layout.component.ts`):
-- Replaced custom notification bell with `<app-notification-bell role="provider">`
+**consignor Layout** (`consignor-layout.component.ts`):
+- Replaced custom notification bell with `<app-notification-bell role="consignor">`
 - Removed old notification count logic and styling
 - Clean integration with shared component
 
@@ -76,11 +76,11 @@ The notification system has been successfully unified and implemented according 
 ### Role-Based Operation
 ```typescript
 // Components specify role via input
-<app-notification-center role="provider"></app-notification-center>
+<app-notification-center role="consignor"></app-notification-center>
 <app-notification-bell role="owner"></app-notification-bell>
 
 // Service routes to role-specific API endpoints
-GET /api/provider/notifications
+GET /api/consignor/notifications
 GET /api/owner/notifications
 GET /api/admin/notifications
 ```
@@ -91,13 +91,13 @@ GET /api/admin/notifications
 {
   item_sold: {
     icon: '🛒',
-    allowedRoles: ['provider', 'owner'],
+    allowedRoles: ['consignor', 'owner'],
     getRoute: (n, role) => `/${role}/sales/${n.transactionId}`
   },
   new_provider_request: {
     icon: '👤',
     allowedRoles: ['owner'],
-    getRoute: (n, role) => `/${role}/providers/${n.providerId}`
+    getRoute: (n, role) => `/${role}/consignors/${n.providerId}`
   }
 }
 ```
@@ -120,11 +120,11 @@ src/app/
 │       ├── notification-center.component.ts      ← Main center
 │       ├── notification-preferences.component.ts ← Settings
 │       └── notification-bell.component.ts        ← Header bell
-├── provider/
+├── consignor/
 │   └── components/
-│       ├── provider-notifications.component.ts         ← 3-line wrapper
-│       ├── provider-notification-preferences.component.ts ← 3-line wrapper
-│       └── provider-layout.component.ts                ← Uses shared bell
+│       ├── consignor-notifications.component.ts         ← 3-line wrapper
+│       ├── consignor-notification-preferences.component.ts ← 3-line wrapper
+│       └── consignor-layout.component.ts                ← Uses shared bell
 ├── owner/
 │   └── pages/
 │       ├── owner-notifications.component.ts         ← New, uses shared
@@ -138,7 +138,7 @@ src/app/
 ## 🎉 Benefits Achieved
 
 ### ✅ No Dead Code
-- **Deleted** 600+ lines of duplicate provider notification code
+- **Deleted** 600+ lines of duplicate consignor notification code
 - **Replaced** with 3-line wrapper components that use shared infrastructure
 - **Eliminated** redundant styling, logic, and API calls
 
@@ -175,7 +175,7 @@ The frontend is ready but requires backend changes per the specification:
    - Update `NotificationService` to accept role parameter
 
 3. **Notification Triggers**:
-   - Owner notifications: provider requests, sync errors, etc.
+   - Owner notifications: consignor requests, sync errors, etc.
    - Admin notifications: shop registrations, subscription events
    - Update existing services to create role-specific notifications
 
@@ -187,4 +187,4 @@ The frontend is ready but requires backend changes per the specification:
 
 ## 💯 Status: FRONTEND COMPLETE
 
-The unified notification center frontend is **100% complete** and ready for backend integration. The old provider-specific code has been successfully replaced with the new unified system while maintaining full backward compatibility.
+The unified notification center frontend is **100% complete** and ready for backend integration. The old consignor-specific code has been successfully replaced with the new unified system while maintaining full backward compatibility.

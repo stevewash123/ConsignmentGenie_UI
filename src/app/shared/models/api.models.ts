@@ -107,7 +107,7 @@ export interface PublicSearchRequest {
     max: number;
   };
   conditions?: string[];
-  providers?: string[];
+  consignors?: string[];
   tags?: string[];
   sortBy?: string;
   sortOrder?: string;
@@ -121,7 +121,7 @@ export interface PublicSearchResult {
     categories: { name: string; count: number; }[];
     priceRanges: { label: string; min: number; max: number; count: number; }[];
     conditions: { name: string; count: number; }[];
-    providers: { name: string; count: number; }[];
+    consignors: { name: string; count: number; }[];
   };
   totalCount: number;
   organizationId: string;

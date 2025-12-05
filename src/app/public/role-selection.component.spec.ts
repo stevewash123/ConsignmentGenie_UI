@@ -9,7 +9,7 @@ import { RoleSelectionComponent } from './role-selection.component';
 class MockOwnerSignupComponent { }
 
 @Component({ template: '' })
-class MockProviderSignupComponent { }
+class MockConsignorSignupComponent { }
 
 @Component({ template: '' })
 class MockLoginComponent { }
@@ -25,7 +25,7 @@ describe('RoleSelectionComponent', () => {
         RoleSelectionComponent,
         RouterTestingModule.withRoutes([
           { path: 'signup/owner', component: MockOwnerSignupComponent },
-          { path: 'signup/provider', component: MockProviderSignupComponent },
+          { path: 'signup/consignor', component: MockConsignorSignupComponent },
           { path: 'login', component: MockLoginComponent }
         ])
       ]
@@ -60,10 +60,10 @@ describe('RoleSelectionComponent', () => {
     expect(ownerCard.querySelector('h3')?.textContent).toBe('Open a Consignment Shop');
     expect(ownerCard.getAttribute('href')).toBe('/signup/owner');
 
-    // Check provider card
+    // Check consignor card
     const providerCard = roleCards[1];
     expect(providerCard.querySelector('h3')?.textContent).toBe('Consign Items at a Shop');
-    expect(providerCard.getAttribute('href')).toBe('/signup/provider');
+    expect(providerCard.getAttribute('href')).toBe('/signup/consignor');
   });
 
   it('should display correct features for owner role', () => {
@@ -78,9 +78,9 @@ describe('RoleSelectionComponent', () => {
     expect(features?.[3].textContent?.trim()).toBe('Full business dashboard');
   });
 
-  it('should display correct features for provider role', () => {
+  it('should display correct features for consignor role', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const providerCard = compiled.querySelector('.provider-card');
+    const providerCard = compiled.querySelector('.consignor-card');
     const features = providerCard?.querySelectorAll('.feature-list li');
 
     expect(features?.length).toBe(4);
@@ -106,8 +106,8 @@ describe('RoleSelectionComponent', () => {
     const ownerLink = compiled.querySelector('a[routerLink="/signup/owner"]');
     expect(ownerLink).toBeTruthy();
 
-    // Check provider signup link
-    const providerLink = compiled.querySelector('a[routerLink="/signup/provider"]');
+    // Check consignor signup link
+    const providerLink = compiled.querySelector('a[routerLink="/signup/consignor"]');
     expect(providerLink).toBeTruthy();
 
     // Check login link
@@ -128,30 +128,30 @@ describe('RoleSelectionComponent', () => {
     expect(ownerCard.getAttribute('routerLink')).toBe('/signup/owner');
   });
 
-  it('should navigate to provider signup when provider card is clicked', async () => {
+  it('should navigate to consignor signup when consignor card is clicked', async () => {
     spyOn(router, 'navigate');
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const providerCard = compiled.querySelector('.provider-card') as HTMLElement;
+    const providerCard = compiled.querySelector('.consignor-card') as HTMLElement;
 
     providerCard.click();
 
     // Note: In real app, this would navigate via routerLink
     // This test verifies the element has the correct routerLink attribute
-    expect(providerCard.getAttribute('routerLink')).toBe('/signup/provider');
+    expect(providerCard.getAttribute('routerLink')).toBe('/signup/consignor');
   });
 
   it('should have proper styling classes for differentiation', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     const ownerCard = compiled.querySelector('.owner-card');
-    const providerCard = compiled.querySelector('.provider-card');
+    const providerCard = compiled.querySelector('.consignor-card');
 
     expect(ownerCard).toHaveClass('role-card');
     expect(ownerCard).toHaveClass('owner-card');
 
     expect(providerCard).toHaveClass('role-card');
-    expect(providerCard).toHaveClass('provider-card');
+    expect(providerCard).toHaveClass('consignor-card');
   });
 
   it('should display role icons', () => {
@@ -160,6 +160,6 @@ describe('RoleSelectionComponent', () => {
 
     expect(icons.length).toBe(2);
     expect(icons[0].textContent?.trim()).toBe('🏪'); // Shop icon for owner
-    expect(icons[1].textContent?.trim()).toBe('🎨'); // Artist icon for provider
+    expect(icons[1].textContent?.trim()).toBe('🎨'); // Artist icon for consignor
   });
 });

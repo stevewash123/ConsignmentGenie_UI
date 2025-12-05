@@ -28,7 +28,7 @@ interface UserData {
             <ul>
               <li><a href="#" target="_blank">Inventory Management</a></li>
               <li><a href="#" target="_blank">Sales Analytics</a></li>
-              <li><a href="#" target="_blank">Provider Relations</a></li>
+              <li><a href="#" target="_blank">Consignor Relations</a></li>
               <li><a href="#" target="_blank">Financial Reports</a></li>
             </ul>
           </div>

@@ -207,10 +207,10 @@ describe('LoginSimpleComponent', () => {
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
     });
 
-    it('should redirect provider role to provider dashboard', () => {
-      const userData = { email: 'provider@example.com', role: 2 };
+    it('should redirect consignor role to consignor dashboard', () => {
+      const userData = { email: 'consignor@example.com', role: 2 };
       (component as any).redirectBasedOnUser(userData);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/provider/dashboard']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/consignor/dashboard']);
     });
 
     it('should redirect customer role to customer dashboard', () => {
@@ -248,7 +248,7 @@ describe('LoginSimpleComponent', () => {
     it('should convert numeric role to string', () => {
       expect((component as any).normalizeRole(0)).toBe('Admin');
       expect((component as any).normalizeRole(1)).toBe('Owner');
-      expect((component as any).normalizeRole(2)).toBe('Provider');
+      expect((component as any).normalizeRole(2)).toBe('consignor');
       expect((component as any).normalizeRole(3)).toBe('Customer');
     });
 
@@ -263,7 +263,7 @@ describe('LoginSimpleComponent', () => {
     it('should handle string numbers', () => {
       expect((component as any).normalizeRole('0')).toBe('Admin');
       expect((component as any).normalizeRole('1')).toBe('Owner');
-      expect((component as any).normalizeRole('2')).toBe('Provider');
+      expect((component as any).normalizeRole('2')).toBe('consignor');
       expect((component as any).normalizeRole('3')).toBe('Customer');
     });
 

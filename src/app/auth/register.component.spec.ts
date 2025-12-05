@@ -21,7 +21,7 @@ describe('RegisterComponent', () => {
         RegisterComponent,
         RouterTestingModule.withRoutes([
           { path: 'register/owner', component: MockComponent },
-          { path: 'register/provider', component: MockComponent },
+          { path: 'register/consignor', component: MockComponent },
           { path: 'login', component: MockComponent }
         ])
       ]
@@ -60,15 +60,15 @@ describe('RegisterComponent', () => {
     expect(ownerDescription.nativeElement.textContent).toContain('→ Shop setup wizard');
   });
 
-  it('should render provider role card', () => {
-    const providerCard = fixture.debugElement.query(By.css('a[routerLink="/register/provider"]'));
-    expect(providerCard).toBeTruthy();
+  it('should render consignor role card', () => {
+    const consignorCard = fixture.debugElement.query(By.css('a[routerLink="/register/consignor"]'));
+    expect(consignorCard).toBeTruthy();
 
-    const providerTitle = providerCard.query(By.css('h3'));
-    expect(providerTitle.nativeElement.textContent).toContain('Consign Items at a Shop');
+    const consignorTitle = consignorCard.query(By.css('h3'));
+    expect(consignorTitle.nativeElement.textContent).toContain('Consign Items at a Shop');
 
-    const providerDescription = providerCard.query(By.css('p'));
-    expect(providerDescription.nativeElement.textContent).toContain('→ Basic signup');
+    const consignorDescription = consignorCard.query(By.css('p'));
+    expect(consignorDescription.nativeElement.textContent).toContain('→ Basic signup');
   });
 
   it('should render login link', () => {
@@ -87,11 +87,11 @@ describe('RegisterComponent', () => {
 
   it('should have proper navigation links', () => {
     const ownerLink = fixture.debugElement.query(By.css('a[routerLink="/register/owner"]'));
-    const providerLink = fixture.debugElement.query(By.css('a[routerLink="/register/provider"]'));
+    const providerLink = fixture.debugElement.query(By.css('a[routerLink="/register/consignor"]'));
     const loginLink = fixture.debugElement.query(By.css('a[routerLink="/login"]'));
 
     expect(ownerLink.nativeElement.getAttribute('routerLink')).toBe('/register/owner');
-    expect(providerLink.nativeElement.getAttribute('routerLink')).toBe('/register/provider');
+    expect(providerLink.nativeElement.getAttribute('routerLink')).toBe('/register/consignor');
     expect(loginLink.nativeElement.getAttribute('routerLink')).toBe('/login');
   });
 
@@ -135,12 +135,12 @@ describe('RegisterComponent', () => {
     expect(location.path()).toBe('/register/owner');
   });
 
-  it('should navigate to provider registration when provider card is clicked', async () => {
-    const providerLink = fixture.debugElement.query(By.css('a[routerLink="/register/provider"]'));
+  it('should navigate to consignor registration when consignor card is clicked', async () => {
+    const providerLink = fixture.debugElement.query(By.css('a[routerLink="/register/consignor"]'));
     providerLink.nativeElement.click();
 
     await fixture.whenStable();
-    expect(location.path()).toBe('/register/provider');
+    expect(location.path()).toBe('/register/consignor');
   });
 
   it('should navigate to login when login link is clicked', async () => {

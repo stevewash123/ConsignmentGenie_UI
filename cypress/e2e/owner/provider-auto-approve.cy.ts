@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe('Provider Auto-Approval Settings Tests', () => {
+describe('consignor Auto-Approval Settings Tests', () => {
   beforeEach(() => {
     cy.fixture('owner-data').as('ownerData')
     cy.fixture('users').as('users')
@@ -27,7 +27,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
         body: {
           success: true,
           data: {
-            autoApproveProviders: true,
+            autoApproveconsignors: true,
             storeCodeEnabled: true,
             storeCode: "DEMO"
           }
@@ -43,13 +43,13 @@ describe('Provider Auto-Approval Settings Tests', () => {
         statusCode: 200,
         body: {
           success: true,
-          message: "Provider auto-approval enabled. New providers will be automatically approved.",
-          data: { autoApproveProviders: true }
+          message: "consignor auto-approval enabled. New consignors will be automatically approved.",
+          data: { autoApproveconsignors: true }
         }
       }).as('updateAutoApprove')
 
       cy.request('PUT', '/api/dashboard/organization/settings/auto-approve', {
-        autoApproveProviders: true
+        autoApproveconsignors: true
       })
       cy.wait('@updateAutoApprove')
     })
@@ -63,7 +63,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
         body: {
           success: true,
           data: {
-            autoApproveProviders: true,
+            autoApproveconsignors: true,
             storeCodeEnabled: true,
             storeCode: "DEMO"
           }
@@ -74,8 +74,8 @@ describe('Provider Auto-Approval Settings Tests', () => {
         statusCode: 200,
         body: {
           success: true,
-          message: "Provider auto-approval setting updated successfully.",
-          data: { autoApproveProviders: true }
+          message: "consignor auto-approval setting updated successfully.",
+          data: { autoApproveconsignors: true }
         }
       }).as('updateAutoApprove')
     })
@@ -85,8 +85,8 @@ describe('Provider Auto-Approval Settings Tests', () => {
       cy.wait('@getOrgSettings')
 
       cy.get('[data-cy="auto-approve-section"]').within(() => {
-        cy.contains('Provider Auto-Approval').should('be.visible')
-        cy.contains('Automatically approve new providers with valid store codes').should('be.visible')
+        cy.contains('consignor Auto-Approval').should('be.visible')
+        cy.contains('Automatically approve new consignors with valid store codes').should('be.visible')
         cy.get('[data-cy="auto-approve-toggle"]').should('be.visible')
       })
     })
@@ -111,8 +111,8 @@ describe('Provider Auto-Approval Settings Tests', () => {
       cy.wait('@getOrgSettings')
 
       cy.get('[data-cy="auto-approve-section"]').within(() => {
-        cy.contains('When enabled, providers with valid store codes will be automatically approved').should('be.visible')
-        cy.contains('When disabled, you must manually approve each provider request').should('be.visible')
+        cy.contains('When enabled, consignors with valid store codes will be automatically approved').should('be.visible')
+        cy.contains('When disabled, you must manually approve each consignor request').should('be.visible')
       })
     })
 
@@ -132,7 +132,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
     })
   })
 
-  describe('Provider Registration Flow with Auto-Approve', () => {
+  describe('consignor Registration Flow with Auto-Approve', () => {
     beforeEach(() => {
       // Mock store code validation
       cy.intercept('GET', '**/api/registration/validate-store-code/DEMO', {
@@ -144,8 +144,8 @@ describe('Provider Auto-Approval Settings Tests', () => {
       }).as('validateStoreCode')
     })
 
-    it('should register provider with auto-approve enabled', () => {
-      cy.intercept('POST', '**/api/registration/register/provider', {
+    it('should register consignor with auto-approve enabled', () => {
+      cy.intercept('POST', '**/api/registration/register/consignor', {
         statusCode: 200,
         body: {
           success: true,
@@ -153,7 +153,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
         }
       }).as('registerProviderAutoApprove')
 
-      cy.visit('/provider/register')
+      cy.visit('/consignor/register')
 
       // Fill in registration form
       cy.get('[data-cy="store-code-input"]').type('DEMO')
@@ -174,8 +174,8 @@ describe('Provider Auto-Approval Settings Tests', () => {
       cy.contains('You can now start adding items').should('be.visible')
     })
 
-    it('should register provider with auto-approve disabled', () => {
-      cy.intercept('POST', '**/api/registration/register/provider', {
+    it('should register consignor with auto-approve disabled', () => {
+      cy.intercept('POST', '**/api/registration/register/consignor', {
         statusCode: 200,
         body: {
           success: true,
@@ -183,7 +183,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
         }
       }).as('registerProviderManualApprove')
 
-      cy.visit('/provider/register')
+      cy.visit('/consignor/register')
 
       // Fill in registration form
       cy.get('[data-cy="store-code-input"]').type('DEMO')
@@ -205,7 +205,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
     })
 
     it('should handle registration validation errors', () => {
-      cy.visit('/provider/register')
+      cy.visit('/consignor/register')
 
       // Try to submit with empty form
       cy.get('[data-cy="register-submit"]').click()
@@ -218,10 +218,10 @@ describe('Provider Auto-Approval Settings Tests', () => {
     })
   })
 
-  describe('Provider Management with Auto-Approve', () => {
+  describe('consignor Management with Auto-Approve', () => {
     beforeEach(() => {
-      // Mock providers list with different statuses
-      cy.intercept('GET', '**/api/providers*', {
+      // Mock consignors list with different statuses
+      cy.intercept('GET', '**/api/consignors*', {
         statusCode: 200,
         body: {
           success: true,
@@ -244,46 +244,46 @@ describe('Provider Auto-Approval Settings Tests', () => {
             }
           ]
         }
-      }).as('getProviders')
+      }).as('getconsignors')
     })
 
-    it('should display provider approval status indicators', () => {
-      cy.visit('/owner/providers')
-      cy.wait('@getProviders')
+    it('should display consignor approval status indicators', () => {
+      cy.visit('/owner/consignors')
+      cy.wait('@getconsignors')
 
-      // Should show auto-approved provider with indicator
-      cy.get('[data-cy="provider-prov-001"]').within(() => {
+      // Should show auto-approved consignor with indicator
+      cy.get('[data-cy="consignor-prov-001"]').within(() => {
         cy.contains('John Doe (Auto-Approved)').should('be.visible')
         cy.get('[data-cy="auto-approved-badge"]').should('be.visible')
         cy.contains('Active').should('be.visible')
       })
 
-      // Should show pending provider without auto-approved indicator
-      cy.get('[data-cy="provider-prov-002"]').within(() => {
+      // Should show pending consignor without auto-approved indicator
+      cy.get('[data-cy="consignor-prov-002"]').within(() => {
         cy.contains('Jane Smith (Pending)').should('be.visible')
         cy.contains('Pending').should('be.visible')
         cy.get('[data-cy="approve-button"]').should('be.visible')
       })
     })
 
-    it('should filter providers by approval status', () => {
-      cy.visit('/owner/providers')
-      cy.wait('@getProviders')
+    it('should filter consignors by approval status', () => {
+      cy.visit('/owner/consignors')
+      cy.wait('@getconsignors')
 
-      // Filter for auto-approved providers
+      // Filter for auto-approved consignors
       cy.get('[data-cy="filter-auto-approved"]').click()
-      cy.get('[data-cy="provider-prov-001"]').should('be.visible')
-      cy.get('[data-cy="provider-prov-002"]').should('not.be.visible')
+      cy.get('[data-cy="consignor-prov-001"]').should('be.visible')
+      cy.get('[data-cy="consignor-prov-002"]').should('not.be.visible')
 
-      // Filter for pending providers
+      // Filter for pending consignors
       cy.get('[data-cy="filter-pending"]').click()
-      cy.get('[data-cy="provider-prov-001"]').should('not.be.visible')
-      cy.get('[data-cy="provider-prov-002"]').should('be.visible')
+      cy.get('[data-cy="consignor-prov-001"]').should('not.be.visible')
+      cy.get('[data-cy="consignor-prov-002"]').should('be.visible')
 
       // Clear filters
       cy.get('[data-cy="filter-all"]').click()
-      cy.get('[data-cy="provider-prov-001"]').should('be.visible')
-      cy.get('[data-cy="provider-prov-002"]').should('be.visible')
+      cy.get('[data-cy="consignor-prov-001"]').should('be.visible')
+      cy.get('[data-cy="consignor-prov-002"]').should('be.visible')
     })
   })
 
@@ -294,14 +294,14 @@ describe('Provider Auto-Approval Settings Tests', () => {
         body: {
           success: true,
           data: {
-            autoApproveProviders: true,
+            autoApproveconsignors: true,
             storeCodeEnabled: true,
             storeCode: "DEMO"
           }
         }
       }).as('getOrgSettings')
 
-      cy.intercept('GET', '**/api/providers*', {
+      cy.intercept('GET', '**/api/consignors*', {
         statusCode: 200,
         body: {
           success: true,
@@ -311,7 +311,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
             { id: 'p3', status: 'Pending', isAutoApproved: false }
           ]
         }
-      }).as('getProviders')
+      }).as('getconsignors')
 
       cy.intercept('GET', '**/api/transactions/metrics*', {
         statusCode: 200,
@@ -326,9 +326,9 @@ describe('Provider Auto-Approval Settings Tests', () => {
 
     it('should show auto-approve status in dashboard summary', () => {
       cy.visit('/owner/dashboard')
-      cy.wait(['@getOrgSettings', '@getProviders', '@getMetrics', '@getPendingPayouts'])
+      cy.wait(['@getOrgSettings', '@getconsignors', '@getMetrics', '@getPendingPayouts'])
 
-      cy.get('.provider-metrics').within(() => {
+      cy.get('.consignor-metrics').within(() => {
         cy.contains('Auto-Approval: Enabled').should('be.visible')
         cy.contains('2 auto-approved').should('be.visible')
         cy.contains('1 pending manual review').should('be.visible')
@@ -337,10 +337,10 @@ describe('Provider Auto-Approval Settings Tests', () => {
 
     it('should display auto-approve efficiency metrics', () => {
       cy.visit('/owner/analytics')
-      cy.wait(['@getProviders'])
+      cy.wait(['@getconsignors'])
 
       cy.get('.approval-metrics').within(() => {
-        cy.contains('Provider Approval Efficiency').should('be.visible')
+        cy.contains('consignor Approval Efficiency').should('be.visible')
         cy.contains('67% auto-approved').should('be.visible') // 2 out of 3
         cy.contains('Average approval time: Instant').should('be.visible')
       })
@@ -353,7 +353,7 @@ describe('Provider Auto-Approval Settings Tests', () => {
         statusCode: 200,
         body: {
           success: true,
-          data: { autoApproveProviders: true, storeCodeEnabled: true, storeCode: "DEMO" }
+          data: { autoApproveconsignors: true, storeCodeEnabled: true, storeCode: "DEMO" }
         }
       }).as('getOrgSettings')
     })
@@ -365,12 +365,12 @@ describe('Provider Auto-Approval Settings Tests', () => {
 
       cy.get('[data-cy="auto-approve-section"]').should('be.visible')
       cy.get('[data-cy="auto-approve-toggle"]').should('be.visible')
-      cy.contains('Provider Auto-Approval').should('be.visible')
+      cy.contains('consignor Auto-Approval').should('be.visible')
     })
 
-    it('should handle provider registration on mobile', () => {
+    it('should handle consignor registration on mobile', () => {
       cy.viewport('iphone-x')
-      cy.visit('/provider/register')
+      cy.visit('/consignor/register')
 
       cy.get('[data-cy="store-code-input"]').should('be.visible')
       cy.get('[data-cy="full-name-input"]').should('be.visible')
@@ -384,8 +384,8 @@ describe('Provider Auto-Approval Settings Tests', () => {
         statusCode: 200,
         body: {
           success: true,
-          message: "Provider auto-approval disabled. New providers will require manual approval.",
-          data: { autoApproveProviders: false }
+          message: "consignor auto-approval disabled. New consignors will require manual approval.",
+          data: { autoApproveconsignors: false }
         }
       }).as('disableAutoApprove')
 
@@ -396,10 +396,10 @@ describe('Provider Auto-Approval Settings Tests', () => {
 
       // Should show toast notification
       cy.get('[data-cy="toast-notification"]').should('be.visible')
-      cy.contains('New providers will require manual approval').should('be.visible')
+      cy.contains('New consignors will require manual approval').should('be.visible')
     })
 
-    it('should show owner notification when provider auto-registers', () => {
+    it('should show owner notification when consignor auto-registers', () => {
       // This would be handled by real-time notifications in the actual app
       cy.visit('/owner/dashboard')
 

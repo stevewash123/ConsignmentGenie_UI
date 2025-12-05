@@ -12,7 +12,7 @@ describe('BusinessSettingsComponent', () => {
 
   const mockBusinessSettings = {
     Commission: {
-      DefaultSplit: '60/40',
+      DefaultSplit: '70/30',
       AllowCustomSplitsPerConsignor: true,
       AllowCustomSplitsPerItem: false
     },
@@ -93,7 +93,7 @@ describe('BusinessSettingsComponent', () => {
       const customConsignorCheckbox = compiled.querySelector('input[name="allowCustomConsignor"]') as HTMLInputElement;
       const customItemCheckbox = compiled.querySelector('input[name="allowCustomItem"]') as HTMLInputElement;
 
-      expect(defaultSplitSelect.value).toBe('60/40');
+      expect(defaultSplitSelect.value).toBe('70/30');
       expect(customConsignorCheckbox.checked).toBe(true);
       expect(customItemCheckbox.checked).toBe(false);
     }));

@@ -1,7 +1,7 @@
-export type UserRole = 'provider' | 'owner' | 'admin' | 'customer';
+export type UserRole = 'consignor' | 'owner' | 'admin' | 'customer';
 
 export type NotificationType =
-  // Provider types
+  // consignor types
   | 'item_sold' | 'payout_processed' | 'item_price_changed' | 'item_returned'
   | 'item_expired' | 'statement_ready' | 'welcome'
   // Owner types

@@ -31,7 +31,7 @@ import { RouterModule } from '@angular/router';
             <a routerLink="/signup/owner" class="role-card owner-card">
               <div class="role-icon">🏪</div>
               <h3>Open a Consignment Shop</h3>
-              <p>Start your own consignment business. Manage providers, track inventory, and process sales all in one place.</p>
+              <p>Start your own consignment business. Manage consignors, track inventory, and process sales all in one place.</p>
               <ul class="feature-list">
                 <li>Set up your shop instantly</li>
                 <li>Manage consignors and inventory</li>
@@ -41,8 +41,8 @@ import { RouterModule } from '@angular/router';
               <div class="cta-button">Get Started</div>
             </a>
 
-            <!-- Provider Option -->
-            <a routerLink="/signup/provider" class="role-card provider-card">
+            <!-- consignor Option -->
+            <a routerLink="/signup/consignor" class="role-card consignor-card">
               <div class="role-icon">🎨</div>
               <h3>Consign Items at a Shop</h3>
               <p>Join an existing consignment shop to sell your items. Track your inventory and earnings with ease.</p>
@@ -166,7 +166,7 @@ import { RouterModule } from '@angular/router';
       background: linear-gradient(90deg, #047857, #059669);
     }
 
-    .provider-card::before {
+    .consignor-card::before {
       background: linear-gradient(90deg, #7c3aed, #8b5cf6);
     }
 
@@ -179,7 +179,7 @@ import { RouterModule } from '@angular/router';
       border-color: #047857;
     }
 
-    .provider-card:hover {
+    .consignor-card:hover {
       border-color: #7c3aed;
     }
 
@@ -226,7 +226,7 @@ import { RouterModule } from '@angular/router';
       font-weight: 700;
     }
 
-    .provider-card .feature-list li::before {
+    .consignor-card .feature-list li::before {
       color: #7c3aed;
     }
 
@@ -242,7 +242,7 @@ import { RouterModule } from '@angular/router';
       min-width: 160px;
     }
 
-    .provider-card .cta-button {
+    .consignor-card .cta-button {
       background: #7c3aed;
     }
 
@@ -255,7 +255,7 @@ import { RouterModule } from '@angular/router';
       background: #065f46;
     }
 
-    .provider-card:hover .cta-button {
+    .consignor-card:hover .cta-button {
       background: #6b21a8;
     }
 

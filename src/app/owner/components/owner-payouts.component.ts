@@ -12,8 +12,8 @@ import {
   PendingPayoutData,
   UpdatePayoutRequest
 } from '../../models/payout.model';
-import { ProviderService } from '../../services/provider.service';
-import { Provider } from '../../models/provider.model';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
@@ -43,10 +43,10 @@ import { LoadingService } from '../../shared/services/loading.service';
       <!-- Filters -->
       <div class="filters-section">
         <div class="filter-row">
-          <select [(ngModel)]="selectedProviderId" (change)="loadPayouts()" class="form-select">
-            <option value="">All Providers</option>
-            <option *ngFor="let provider of providers()" [value]="provider.id">
-              {{provider.name}}
+          <select [(ngModel)]="selectedConsignorId" (change)="loadPayouts()" class="form-select">
+            <option value="">All consignors</option>
+            <option *ngFor="let consignor of consignors()" [value]="consignor.id">
+              {{consignor.name}}
             </option>
           </select>
 
@@ -79,14 +79,14 @@ import { LoadingService } from '../../shared/services/loading.service';
         <div class="pending-grid">
           <div *ngFor="let pending of pendingPayouts()" class="pending-card">
             <div class="card-header">
-              <h3>{{pending.providerName}}</h3>
+              <h3>{{pending.consignorName}}</h3>
               <span class="amount">\${{pending.pendingAmount.toFixed(2)}}</span>
             </div>
             <div class="card-body">
               <p><strong>Transactions:</strong> {{pending.transactionCount}}</p>
               <p><strong>Period:</strong> {{formatDate(pending.earliestSale)}} - {{formatDate(pending.latestSale)}}</p>
               <button
-                (click)="createPayoutForProvider(pending)"
+                (click)="createPayoutForConsignor(pending)"
                 class="btn btn-sm btn-success"
               >
                 Create Payout
@@ -118,9 +118,9 @@ import { LoadingService } from '../../shared/services/loading.service';
                 Payout #
                 <span class="sort-indicator" [ngClass]="getSortClass('payoutNumber')"></span>
               </th>
-              <th (click)="sort('provider')" class="sortable">
-                Provider
-                <span class="sort-indicator" [ngClass]="getSortClass('provider')"></span>
+              <th (click)="sort('consignor')" class="sortable">
+                Consignor
+                <span class="sort-indicator" [ngClass]="getSortClass('consignor')"></span>
               </th>
               <th (click)="sort('payoutDate')" class="sortable">
                 Payout Date
@@ -140,7 +140,7 @@ import { LoadingService } from '../../shared/services/loading.service';
           <tbody>
             <tr *ngFor="let payout of payouts()">
               <td class="payout-number">{{payout.payoutNumber}}</td>
-              <td class="provider-name">{{payout.provider.name}}</td>
+              <td class="consignor-name">{{payout.consignor.name}}</td>
               <td>{{formatDate(payout.payoutDate)}}</td>
               <td class="amount">\${{payout.amount.toFixed(2)}}</td>
               <td>{{payout.paymentMethod}}</td>
@@ -223,11 +223,11 @@ import { LoadingService } from '../../shared/services/loading.service';
         <div class="modal-body">
           <form (ngSubmit)="createPayout()">
             <div class="form-group">
-              <label>Provider</label>
-              <select [(ngModel)]="newPayout.providerId" name="providerId" required class="form-control">
-                <option value="">Select Provider</option>
-                <option *ngFor="let pending of pendingPayouts()" [value]="pending.providerId">
-                  {{pending.providerName}} - \${{pending.pendingAmount.toFixed(2)}}
+              <label>Consignor</label>
+              <select [(ngModel)]="newPayout.consignorId" name="consignorId" required class="form-control">
+                <option value="">Select Consignor</option>
+                <option *ngFor="let pending of pendingPayouts()" [value]="pending.consignorId">
+                  {{pending.consignorName}} - \${{pending.pendingAmount.toFixed(2)}}
                 </option>
               </select>
             </div>
@@ -282,8 +282,8 @@ import { LoadingService } from '../../shared/services/loading.service';
           <div class="payout-details">
             <div class="details-grid">
               <div class="detail-item">
-                <label>Provider:</label>
-                <span>{{selectedPayout()?.provider.name}}</span>
+                <label>Consignor:</label>
+                <span>{{selectedPayout()?.consignor.name}}</span>
               </div>
               <div class="detail-item">
                 <label>Amount:</label>
@@ -327,7 +327,7 @@ import { LoadingService } from '../../shared/services/loading.service';
                     <th>Item</th>
                     <th>Sale Date</th>
                     <th>Sale Price</th>
-                    <th>Provider Amount</th>
+                    <th>Consignor Amount</th>
                     <th>Shop Amount</th>
                   </tr>
                 </thead>
@@ -508,7 +508,7 @@ import { LoadingService } from '../../shared/services/loading.service';
       color: #1f2937;
     }
 
-    .provider-name {
+    .consignor-name {
       font-weight: 500;
     }
 
@@ -823,7 +823,7 @@ export class OwnerPayoutsComponent implements OnInit {
   // State signals
   payouts = signal<PayoutListDto[]>([]);
   pendingPayouts = signal<PendingPayoutData[]>([]);
-  providers = signal<Provider[]>([]);
+  consignors = signal<Consignor[]>([]);
   selectedPayout = signal<PayoutDto | null>(null);
 
   // Pagination
@@ -833,7 +833,7 @@ export class OwnerPayoutsComponent implements OnInit {
   pageSize = 10;
 
   // Filters
-  selectedProviderId = '';
+  selectedConsignorId = '';
   selectedStatus = '';
   dateFrom = '';
   dateTo = '';
@@ -846,7 +846,7 @@ export class OwnerPayoutsComponent implements OnInit {
 
   // Form data
   newPayout: Partial<CreatePayoutRequest> = {
-    providerId: '',
+    consignorId: '',
     payoutDate: new Date(),
     paymentMethod: '',
     paymentReference: '',
@@ -878,23 +878,23 @@ export class OwnerPayoutsComponent implements OnInit {
 
   constructor(
     private payoutService: PayoutService,
-    private providerService: ProviderService,
+    private consignorService: ConsignorService,
     private toastr: ToastrService
   ) {}
 
   ngOnInit() {
-    this.loadProviders();
+    this.loadconsignors();
     this.loadPendingPayouts();
     this.loadPayouts();
   }
 
-  async loadProviders() {
+  async loadconsignors() {
     try {
-      const providers = await this.providerService.getProviders().toPromise();
-      this.providers.set(providers || []);
+      const consignors = await this.consignorService.getConsignors().toPromise();
+      this.consignors.set(consignors || []);
     } catch (error) {
-      console.error('Error loading providers:', error);
-      this.toastr.error('Failed to load providers');
+      console.error('Error loading consignors:', error);
+      this.toastr.error('Failed to load consignors');
     }
   }
 
@@ -919,7 +919,7 @@ export class OwnerPayoutsComponent implements OnInit {
         sortDirection: this.sortDirection
       };
 
-      if (this.selectedProviderId) request.providerId = this.selectedProviderId;
+      if (this.selectedConsignorId) request.consignorId = this.selectedConsignorId;
       if (this.selectedStatus) request.status = this.selectedStatus as PayoutStatus;
       if (this.dateFrom) request.payoutDateFrom = new Date(this.dateFrom);
       if (this.dateTo) request.payoutDateTo = new Date(this.dateTo);
@@ -939,9 +939,9 @@ export class OwnerPayoutsComponent implements OnInit {
     }
   }
 
-  createPayoutForProvider(pending: PendingPayoutData) {
+  createPayoutForConsignor(pending: PendingPayoutData) {
     this.newPayout = {
-      providerId: pending.providerId,
+      consignorId: pending.consignorId,
       payoutDate: new Date(),
       paymentMethod: '',
       paymentReference: '',
@@ -955,13 +955,13 @@ export class OwnerPayoutsComponent implements OnInit {
 
   async createPayout() {
     try {
-      if (!this.newPayout.providerId || !this.newPayout.paymentMethod || !this.newPayout.transactionIds?.length) {
+      if (!this.newPayout.consignorId || !this.newPayout.paymentMethod || !this.newPayout.transactionIds?.length) {
         this.toastr.error('Please fill in all required fields');
         return;
       }
 
       const request: CreatePayoutRequest = {
-        providerId: this.newPayout.providerId!,
+        consignorId: this.newPayout.consignorId!,
         payoutDate: this.newPayout.payoutDate!,
         paymentMethod: this.newPayout.paymentMethod!,
         paymentReference: this.newPayout.paymentReference,

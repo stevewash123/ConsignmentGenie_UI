@@ -23,10 +23,10 @@ describe('Owner Dashboard Tests', () => {
   describe('Dashboard Loading and Display', () => {
     beforeEach(function() {
       // Mock API responses for dashboard data
-      cy.intercept('GET', '**/api/providers*', {
+      cy.intercept('GET', '**/api/consignors*', {
         statusCode: 200,
-        body: { success: true, data: this.ownerData.providers }
-      }).as('getProviders')
+        body: { success: true, data: this.ownerData.consignors }
+      }).as('getconsignors')
 
       cy.intercept('GET', '**/api/transactions/metrics*', {
         statusCode: 200,
@@ -61,12 +61,12 @@ describe('Owner Dashboard Tests', () => {
     })
 
     it('should load and display key metrics cards', function() {
-      cy.wait(['@getProviders', '@getSalesMetrics', '@getPendingPayouts'])
+      cy.wait(['@getconsignors', '@getSalesMetrics', '@getPendingPayouts'])
 
-      // Active Providers metric
-      cy.get('.metric-card.providers').within(() => {
-        cy.contains('Active Providers').should('be.visible')
-        cy.get('.metric-value').should('contain', this.ownerData.providers.filter(p => p.isActive).length)
+      // Active consignors metric
+      cy.get('.metric-card.consignors').within(() => {
+        cy.contains('Active consignors').should('be.visible')
+        cy.get('.metric-value').should('contain', this.ownerData.consignors.filter(p => p.isActive).length)
         cy.get('.metric-icon').should('contain', '👥')
       })
 
@@ -90,7 +90,7 @@ describe('Owner Dashboard Tests', () => {
       cy.get('.metric-card.pending-payouts').within(() => {
         cy.contains('Pending Payouts').should('be.visible')
         cy.get('.metric-value').should('contain', '$3,247.60')
-        cy.contains('8 providers waiting').should('be.visible')
+        cy.contains('8 consignors waiting').should('be.visible')
         cy.get('.metric-icon').should('contain', '⏳')
       })
     })
@@ -103,12 +103,12 @@ describe('Owner Dashboard Tests', () => {
 
     it('should handle API errors gracefully', () => {
       // Mock failed API responses
-      cy.intercept('GET', '**/api/providers*', { statusCode: 500 }).as('getProvidersError')
+      cy.intercept('GET', '**/api/consignors*', { statusCode: 500 }).as('getconsignorsError')
       cy.intercept('GET', '**/api/transactions/metrics*', { statusCode: 500 }).as('getSalesMetricsError')
       cy.intercept('GET', '**/api/payouts/pending*', { statusCode: 500 }).as('getPendingPayoutsError')
 
       cy.visit('/owner/dashboard')
-      cy.wait(['@getProvidersError', '@getSalesMetricsError', '@getPendingPayoutsError'])
+      cy.wait(['@getconsignorsError', '@getSalesMetricsError', '@getPendingPayoutsError'])
 
       // Should still show metrics with fallback data
       cy.get('.metrics-grid').should('be.visible')
@@ -132,9 +132,9 @@ describe('Owner Dashboard Tests', () => {
         cy.get('.action-card').contains('Process Sale').should('be.visible')
         cy.contains('Record a new transaction and automatically calculate splits').should('be.visible')
 
-        // Manage Providers
-        cy.get('.action-card').contains('Manage Providers').should('be.visible')
-        cy.contains('View providers, update commission rates, and track performance').should('be.visible')
+        // Manage consignors
+        cy.get('.action-card').contains('Manage consignors').should('be.visible')
+        cy.contains('View consignors, update commission rates, and track performance').should('be.visible')
 
         // Inventory Check
         cy.get('.action-card').contains('Inventory Check').should('be.visible')
@@ -142,11 +142,11 @@ describe('Owner Dashboard Tests', () => {
 
         // Generate Payouts
         cy.get('.action-card').contains('Generate Payouts').should('be.visible')
-        cy.contains('Create payout reports and process provider payments').should('be.visible')
+        cy.contains('Create payout reports and process consignor payments').should('be.visible')
 
         // View Reports
         cy.get('.action-card').contains('View Reports').should('be.visible')
-        cy.contains('Analyze sales trends, provider performance, and profits').should('be.visible')
+        cy.contains('Analyze sales trends, consignor performance, and profits').should('be.visible')
 
         // Shop Settings
         cy.get('.action-card').contains('Shop Settings').should('be.visible')
@@ -161,8 +161,8 @@ describe('Owner Dashboard Tests', () => {
 
       cy.go('back')
 
-      cy.get('.action-card').contains('Manage Providers').click()
-      cy.url().should('include', '/owner/providers')
+      cy.get('.action-card').contains('Manage consignors').click()
+      cy.url().should('include', '/owner/consignors')
 
       cy.go('back')
 
@@ -184,10 +184,10 @@ describe('Owner Dashboard Tests', () => {
         recentTransactions: this.ownerData.dashboardData.summary.recentTransactions
       }
 
-      cy.intercept('GET', '**/api/providers*', {
+      cy.intercept('GET', '**/api/consignors*', {
         statusCode: 200,
-        body: { success: true, data: this.ownerData.providers }
-      }).as('getProviders')
+        body: { success: true, data: this.ownerData.consignors }
+      }).as('getconsignors')
 
       cy.intercept('GET', '**/api/transactions/metrics*', {
         statusCode: 200,
@@ -200,7 +200,7 @@ describe('Owner Dashboard Tests', () => {
       }).as('getPendingPayouts')
 
       cy.visit('/owner/dashboard')
-      cy.wait(['@getProviders', '@getSalesMetrics', '@getPendingPayouts'])
+      cy.wait(['@getconsignors', '@getSalesMetrics', '@getPendingPayouts'])
     })
 
     it('should display recent transactions table when data is available', function() {
@@ -211,7 +211,7 @@ describe('Owner Dashboard Tests', () => {
         cy.get('.table-header').within(() => {
           cy.contains('Date').should('be.visible')
           cy.contains('Item').should('be.visible')
-          cy.contains('Provider').should('be.visible')
+          cy.contains('consignor').should('be.visible')
           cy.contains('Sale Amount').should('be.visible')
           cy.contains('Commission').should('be.visible')
         })
@@ -249,10 +249,10 @@ describe('Owner Dashboard Tests', () => {
 
   describe('Pending Payouts Integration', () => {
     it('should highlight pending payouts card when there are pending payouts', function() {
-      cy.intercept('GET', '**/api/providers*', {
+      cy.intercept('GET', '**/api/consignors*', {
         statusCode: 200,
-        body: { success: true, data: this.ownerData.providers }
-      }).as('getProviders')
+        body: { success: true, data: this.ownerData.consignors }
+      }).as('getconsignors')
 
       cy.intercept('GET', '**/api/transactions/metrics*', {
         statusCode: 200,
@@ -271,7 +271,7 @@ describe('Owner Dashboard Tests', () => {
       }).as('getPendingPayouts')
 
       cy.visit('/owner/dashboard')
-      cy.wait(['@getProviders', '@getSalesMetrics', '@getPendingPayouts'])
+      cy.wait(['@getconsignors', '@getSalesMetrics', '@getPendingPayouts'])
 
       cy.get('.metric-card.pending-payouts').should('have.class', 'has-pending')
       cy.contains('→ Click to process').should('be.visible')

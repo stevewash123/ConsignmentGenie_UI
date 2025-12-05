@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { PayoutService } from './payout.service';
-import { PayoutStatus, PayoutSearchResponse } from '../models/payout.model';
+import { PayoutStatus, PayoutSearchResponse, PendingPayoutData } from '../models/payout.model';
 
 describe('PayoutService', () => {
   let service: PayoutService;
@@ -58,7 +58,7 @@ describe('PayoutService', () => {
       transactionCount: 5,
       syncedToQuickBooks: false,
       createdAt: new Date(),
-      provider: { id: 'provider-1', name: 'Test Provider' },
+      consignor: { id: 'consignor-1', name: 'Test consignor' },
       transactions: []
     };
     const mockResponse = { success: true, data: mockPayout };
@@ -76,14 +76,14 @@ describe('PayoutService', () => {
   it('should get pending payouts successfully', () => {
     const mockPendingPayouts = [
       {
-        providerId: 'provider-1',
-        providerName: 'Test Provider',
+        consignorId: 'consignor-1',
+        consignorName: 'Test consignor',
         pendingAmount: 150.00,
         transactionCount: 3,
         earliestSale: new Date('2024-01-01'),
         latestSale: new Date('2024-01-15'),
         transactions: []
-      }
+      } 
     ];
     const mockResponse = { success: true, data: mockPendingPayouts };
 
@@ -99,7 +99,7 @@ describe('PayoutService', () => {
 
   it('should create payout successfully', () => {
     const createRequest = {
-      providerId: 'provider-1',
+      consignorId: 'consignor-1',
       payoutDate: new Date(),
       paymentMethod: 'Bank Transfer',
       periodStart: new Date('2024-01-01'),
@@ -118,7 +118,7 @@ describe('PayoutService', () => {
       transactionCount: 6,
       syncedToQuickBooks: false,
       createdAt: new Date(),
-      provider: { id: 'provider-1', name: 'Test Provider' },
+      consignor: { id: 'consignor-1', name: 'Test consignor' },
       transactions: []
     };
     const mockResponse = { success: true, data: mockPayout };

@@ -43,8 +43,8 @@ export class AdminGuard implements CanActivate {
       case UserRole.Owner:
         this.router.navigate(['/owner/dashboard']);
         break;
-      case UserRole.Provider:
-        this.router.navigate(['/provider/dashboard']);
+      case UserRole.consignor:
+        this.router.navigate(['/consignor/dashboard']);
         break;
       case UserRole.Customer:
         this.router.navigate(['/customer/dashboard']);

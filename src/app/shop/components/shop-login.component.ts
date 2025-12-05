@@ -64,8 +64,8 @@ import { LoadingService } from '../../shared/services/loading.service';
         <div class="login-links">
           <div class="signup-links" *ngIf="shopSlug()">
             <p>New to this shop?</p>
-            <a routerLink="/signup/provider" class="link">
-              Become a Provider
+            <a routerLink="/signup/consignor" class="link">
+              Become a consignor
             </a>
           </div>
 
@@ -381,11 +381,11 @@ export class ShopLoginComponent implements OnInit {
           this.router.navigate(['/shop', shopSlug]);
           break;
 
-        case 'Provider':
-          // Provider: Logs in, sees their dashboard for this shop
-          // TODO: Implement shop-specific provider dashboard
-          // For now, redirect to general provider dashboard
-          this.router.navigate(['/provider/dashboard']);
+        case 'consignor':
+          // consignor: Logs in, sees their dashboard for this shop
+          // TODO: Implement shop-specific consignor dashboard
+          // For now, redirect to general consignor dashboard
+          this.router.navigate(['/consignor/dashboard']);
           break;
 
         case 'Owner':
@@ -413,8 +413,8 @@ export class ShopLoginComponent implements OnInit {
       case 'Owner':
         this.router.navigate(['/owner/dashboard']);
         break;
-      case 'Provider':
-        this.router.navigate(['/provider/dashboard']);
+      case 'consignor':
+        this.router.navigate(['/consignor/dashboard']);
         break;
       case 'Customer':
         this.router.navigate(['/customer/dashboard']);
@@ -435,7 +435,7 @@ export class ShopLoginComponent implements OnInit {
       const roleMap: { [key: number]: string } = {
         0: 'Admin',
         1: 'Owner',
-        2: 'Provider',
+        2: 'consignor',
         3: 'Customer'
       };
       return roleMap[Number(role)] || 'Customer';

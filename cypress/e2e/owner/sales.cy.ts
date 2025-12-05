@@ -94,9 +94,9 @@ describe('Owner Sales Tests', () => {
           cy.contains('After commissions').should('be.visible')
         })
 
-        // Provider Payouts card
-        cy.get('.summary-card.provider').within(() => {
-          cy.contains('Provider Payouts').should('be.visible')
+        // consignor Payouts card
+        cy.get('.summary-card.consignor').within(() => {
+          cy.contains('consignor Payouts').should('be.visible')
           cy.get('.summary-value').should('contain', '$244.99')
           cy.contains('Commissions owed').should('be.visible')
         })
@@ -169,7 +169,7 @@ describe('Owner Sales Tests', () => {
       cy.get('.transactions-table thead tr').within(() => {
         cy.contains('Date').should('be.visible')
         cy.contains('Item').should('be.visible')
-        cy.contains('Provider').should('be.visible')
+        cy.contains('consignor').should('be.visible')
         cy.contains('Sale Price').should('be.visible')
         cy.contains('Payment').should('be.visible')
         cy.contains('Commission').should('be.visible')
@@ -191,10 +191,10 @@ describe('Owner Sales Tests', () => {
           cy.contains(transaction.item.description).should('be.visible')
         })
 
-        // Provider info
-        cy.get('.provider-cell').within(() => {
-          cy.contains(transaction.provider.name).should('be.visible')
-          cy.contains(`${transaction.providerSplitPercentage}% commission`).should('be.visible')
+        // consignor info
+        cy.get('.consignor-cell').within(() => {
+          cy.contains(transaction.consignor.name).should('be.visible')
+          cy.contains(`${transaction.consignorsplitPercentage}% commission`).should('be.visible')
         })
 
         // Sale price
@@ -262,11 +262,11 @@ describe('Owner Sales Tests', () => {
               salePrice: 100 + i,
               salesTaxAmount: 8 + i,
               paymentMethod: 'Card',
-              providerSplitPercentage: 50,
+              consignorsplitPercentage: 50,
               providerAmount: 50 + i/2,
               shopAmount: 58 + i/2,
               item: { id: `item-${i + 1}`, name: `Item ${i + 1}`, description: `Description ${i + 1}` },
-              provider: { id: `prov-${i + 1}`, name: `Provider ${i + 1}` }
+              consignor: { id: `prov-${i + 1}`, name: `consignor ${i + 1}` }
             })),
             totalPages: 3,
             currentPage: 1,
@@ -418,14 +418,14 @@ describe('Owner Sales Tests', () => {
       cy.get('.modal-overlay').should('not.exist')
     })
 
-    it('should auto-populate provider info when item is selected', function() {
+    it('should auto-populate consignor info when item is selected', function() {
       cy.get('button').contains('Process Sale').click()
       cy.wait('@getAvailableItems')
 
       const item = this.ownerData.salesData.availableItems[0]
       cy.get('select[name="itemId"]').select(item.id)
 
-      // Verify provider information is displayed
+      // Verify consignor information is displayed
       cy.contains(item.providerName).should('be.visible')
     })
 

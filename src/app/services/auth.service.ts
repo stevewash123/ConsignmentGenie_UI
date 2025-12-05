@@ -92,6 +92,56 @@ export class AuthService {
     );
   }
 
+  // New frictionless owner registration method
+  registerOwnerFrictionless(request: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    password: string;
+    shopName: string;
+    subdomain: string;
+    address?: string;
+    streetAddress?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  }): Observable<{ success: boolean; message?: string; errors?: string[]; token?: string; userId?: string; email?: string; role?: any; organizationId?: string; organizationName?: string; expiresAt?: string }> {
+    return this.http.post<any>(
+      `${this.apiUrl}/auth/register/owner`,
+      request
+    ).pipe(
+      tap(response => {
+        // Handle wrapped API response format
+        const data = response.success && response.data ? response.data : response;
+
+        // If registration successful and we have token data, log the user in
+        if (data.success && data.token) {
+          const authData = {
+            token: data.token,
+            userId: data.userId,
+            email: data.email,
+            role: data.role,
+            organizationId: data.organizationId,
+            organizationName: data.organizationName,
+            expiresAt: data.expiresAt
+          };
+          this.setAuthData(authData);
+        }
+      }),
+      map(response => {
+        // Unwrap API response format
+        return response.success && response.data ? response.data : response;
+      }),
+      catchError((error: any) => {
+        return of({
+          success: false,
+          message: error.error?.message || error.error?.data?.message || 'Registration failed',
+          errors: error.error?.errors || error.error?.data?.errors || [error.message]
+        });
+      })
+    );
+  }
+
   registerProvider(request: {
     storeCode: string;
     fullName: string;

@@ -473,12 +473,12 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy, OnChanges 
 
       this.steps = [
         {
-          id: 'providers',
+          id: 'consignors',
           title: 'Add your consignors',
           description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
           completed: false,
           actionText: 'Add Consignors',
-          routerLink: '/owner/providers',
+          routerLink: '/owner/consignors',
           icon: '1'
         },
         {

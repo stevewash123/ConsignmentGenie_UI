@@ -1,0 +1,319 @@
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ConsignorService } from '../services/consignor.service';
+
+@Component({
+  selector: 'app-consignor-invitation-modal',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="modal-overlay" *ngIf="isVisible()" (click)="onOverlayClick($event)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Invite Consignor</h3>
+          <button class="close-btn" (click)="close.emit()">×</button>
+        </div>
+
+        <div class="modal-body">
+          <form (ngSubmit)="onSubmit()" #inviteForm="ngForm">
+            <div class="form-group">
+              <label for="consignorName">Consignor Name *</label>
+              <input
+                type="text"
+                id="consignorName"
+                name="consignorName"
+                [(ngModel)]="invitation.name"
+                required
+                #nameField="ngModel"
+                class="form-control"
+                [class.error]="nameField.invalid && nameField.touched"
+                placeholder="Enter consignor's full name"
+              >
+              <div class="error-message" *ngIf="nameField.invalid && (nameField.dirty || nameField.touched)">
+                Consignor name is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="consignorEmail">Email Address *</label>
+              <input
+                type="email"
+                id="consignorEmail"
+                name="consignorEmail"
+                [(ngModel)]="invitation.email"
+                required
+                email
+                #emailField="ngModel"
+                class="form-control"
+                [class.error]="emailField.invalid && emailField.touched"
+                placeholder="Enter consignor's email"
+              >
+              <div class="error-message" *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)">
+                <span *ngIf="emailField.errors?.['required']">Email is required</span>
+                <span *ngIf="emailField.errors?.['email']">Please enter a valid email</span>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="close.emit()">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="inviteForm.invalid || isSubmitting()"
+              >
+                {{ isSubmitting() ? 'Sending...' : 'Send Invitation' }}
+              </button>
+            </div>
+          </form>
+
+          <div class="success-message" *ngIf="successMessage()">
+            {{ successMessage() }}
+          </div>
+
+          <div class="error-message" *ngIf="errorMessage()">
+            {{ errorMessage() }}
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6c757d;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      color: #000;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #212529;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    .form-control:focus {
+      border-color: #007bff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .form-control.error {
+      border-color: #dc3545;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+
+    .btn-primary, .btn-secondary {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #0056b3;
+    }
+
+    .btn-primary:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .success-message {
+      color: #28a745;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .modal {
+        max-width: 95%;
+        width: 95%;
+        margin: 1rem;
+      }
+
+      .modal-header {
+        padding: 1rem;
+      }
+
+      .modal-body {
+        padding: 1rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        padding: 0.875rem;
+      }
+    }
+  `]
+})
+export class ConsignorInvitationModalComponent {
+  @Input() isVisible!: () => boolean;
+  @Output() close = new EventEmitter<void>();
+  @Output() invitationSent = new EventEmitter<void>();
+
+  invitation = {
+    name: '',
+    email: ''
+  };
+
+  isSubmitting = signal(false);
+  successMessage = signal('');
+  errorMessage = signal('');
+
+  constructor(private consignorService: ConsignorService) {}
+
+  onOverlayClick(event: Event): void {
+    this.close.emit();
+  }
+
+  onSubmit(): void {
+    if (this.isSubmitting()) return;
+
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.consignorService.inviteConsignor(this.invitation).subscribe({
+      next: (response) => {
+        this.successMessage.set('Invitation sent successfully!');
+        this.resetForm();
+        this.invitationSent.emit();
+
+        // Auto-close after 2 seconds
+        setTimeout(() => {
+          this.close.emit();
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Error sending invitation:', error);
+        let errorMsg = 'Failed to send invitation. Please try again.';
+
+        if (error.status === 405) {
+          errorMsg = 'Consignor invitation feature is not currently available. Please contact support.';
+        } else if (error.status === 404) {
+          errorMsg = 'Consignor invitation endpoint not found. Please contact support.';
+        } else if (error.status === 400) {
+          errorMsg = error.error?.message || 'Invalid invitation data. Please check the email address.';
+        } else if (error.status === 401) {
+          errorMsg = 'You are not authorized to send invitations. Please log in again.';
+        } else if (error.error?.message) {
+          errorMsg = error.error.message;
+        }
+
+        this.errorMessage.set(errorMsg);
+      },
+      complete: () => {
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  private resetForm(): void {
+    this.invitation = {
+      name: '',
+      email: ''
+    };
+  }
+}

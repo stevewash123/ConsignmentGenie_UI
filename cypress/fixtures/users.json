@@ -12,10 +12,10 @@
       "expectedRole": "Owner",
       "expectedDashboard": "/owner/dashboard"
     },
-    "provider": {
-      "email": "provider@demoshop.com",
+    "consignor": {
+      "email": "consignor@demoshop.com",
       "password": "password123",
-      "expectedRole": "Provider",
+      "expectedRole": "consignor",
       "expectedDashboard": "/customer/dashboard"
     },
     "customer": {

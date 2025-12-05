@@ -31,13 +31,13 @@ describe('TransactionService', () => {
         id: 'txn-1',
         salePrice: 100.00,
         salesTaxAmount: 8.50,
-        providerSplitPercentage: 50,
+        consignorsplitPercentage: 50,
         providerAmount: 45.75,
         shopAmount: 54.25,
         paymentMethod: 'Credit Card',
         saleDate: new Date(),
         item: { id: 'item-1', name: 'Test Item', originalPrice: 100.00 },
-        provider: { id: 'provider-1', name: 'Test Provider' },
+        consignor: { id: 'consignor-1', name: 'Test consignor' },
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -83,7 +83,7 @@ describe('TransactionService', () => {
     const queryParams = {
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-01-31'),
-      providerId: 'provider-1',
+      providerId: 'consignor-1',
       paymentMethod: 'Cash',
       page: 1,
       pageSize: 20,
@@ -105,13 +105,13 @@ describe('TransactionService', () => {
       id: 'txn-1',
       salePrice: 100.00,
       salesTaxAmount: 8.50,
-      providerSplitPercentage: 50,
+      consignorsplitPercentage: 50,
       providerAmount: 45.75,
       shopAmount: 54.25,
       paymentMethod: 'Credit Card',
       saleDate: new Date(),
       item: { id: 'item-1', name: 'Test Item', originalPrice: 100.00 },
-      provider: { id: 'provider-1', name: 'Test Provider' },
+      consignor: { id: 'consignor-1', name: 'Test consignor' },
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -141,13 +141,13 @@ describe('TransactionService', () => {
       id: 'txn-new',
       salePrice: 50.00,
       salesTaxAmount: 4.25,
-      providerSplitPercentage: 50,
+      consignorsplitPercentage: 50,
       providerAmount: 22.88,
       shopAmount: 27.12,
       paymentMethod: 'Credit Card',
       saleDate: new Date(),
       item: { id: 'item-1', name: 'Test Item', originalPrice: 50.00 },
-      provider: { id: 'provider-1', name: 'Test Provider' },
+      consignor: { id: 'consignor-1', name: 'Test consignor' },
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -176,13 +176,13 @@ describe('TransactionService', () => {
       id: 'txn-1',
       salePrice: 75.00,
       salesTaxAmount: 6.38,
-      providerSplitPercentage: 50,
+      consignorsplitPercentage: 50,
       providerAmount: 34.31,
       shopAmount: 40.69,
       paymentMethod: 'Cash',
       saleDate: new Date(),
       item: { id: 'item-1', name: 'Test Item', originalPrice: 75.00 },
-      provider: { id: 'provider-1', name: 'Test Provider' },
+      consignor: { id: 'consignor-1', name: 'Test consignor' },
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -216,14 +216,14 @@ describe('TransactionService', () => {
     const mockMetrics: SalesMetrics = {
       totalSales: 1000.00,
       totalShopAmount: 500.00,
-      totalProviderAmount: 450.00,
+      totalConsignorAmount: 450.00,
       totalTax: 50.00,
       transactionCount: 10,
       averageTransactionValue: 100.00,
-      topProviders: [
+      topConsignors: [
         {
-          providerId: 'provider-1',
-          providerName: 'Provider 1',
+          consignorId: 'consignor-1',
+          consignorName: 'consignor 1',
           transactionCount: 5,
           totalSales: 500.00,
           totalProviderAmount: 225.00
@@ -243,7 +243,7 @@ describe('TransactionService', () => {
       expect(metrics).toEqual(mockMetrics);
       expect(metrics.totalSales).toBe(1000.00);
       expect(metrics.transactionCount).toBe(10);
-      expect(metrics.topProviders.length).toBe(1);
+      expect(metrics.topConsignors.length).toBe(1);
       expect(metrics.paymentMethodBreakdown.length).toBe(2);
     });
 
@@ -256,11 +256,11 @@ describe('TransactionService', () => {
     const mockMetrics: SalesMetrics = {
       totalSales: 500.00,
       totalShopAmount: 250.00,
-      totalProviderAmount: 225.00,
+      totalConsignorAmount: 225.00,
       totalTax: 25.00,
       transactionCount: 5,
       averageTransactionValue: 100.00,
-      topProviders: [],
+      topConsignors: [],
       paymentMethodBreakdown: []
     };
 
@@ -269,7 +269,7 @@ describe('TransactionService', () => {
     const queryParams = {
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-01-15'),
-      providerId: 'provider-1'
+      providerId: 'consignor-1'
     };
 
     service.getSalesMetrics(queryParams).subscribe(metrics => {

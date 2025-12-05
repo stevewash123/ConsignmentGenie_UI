@@ -1,7 +1,7 @@
 {
   "dashboardData": {
     "summary": {
-      "activeProviders": 12,
+      "activeconsignors": 12,
       "inventoryValue": 42750.80,
       "totalItems": 342,
       "recentSales": 8945.67,
@@ -13,7 +13,7 @@
           "id": "txn-001",
           "date": "2024-11-20T14:30:00Z",
           "itemName": "Vintage Leather Jacket",
-          "provider": "Sarah Thompson",
+          "consignor": "Sarah Thompson",
           "amount": 125.00,
           "commission": 62.50
         },
@@ -21,7 +21,7 @@
           "id": "txn-002",
           "date": "2024-11-20T12:15:00Z",
           "itemName": "Antique Jewelry Box",
-          "provider": "Mike Chen",
+          "consignor": "Mike Chen",
           "amount": 89.99,
           "commission": 44.99
         },
@@ -29,7 +29,7 @@
           "id": "txn-003",
           "date": "2024-11-19T16:45:00Z",
           "itemName": "Designer Handbag",
-          "provider": "Emma Rodriguez",
+          "consignor": "Emma Rodriguez",
           "amount": 275.00,
           "commission": 137.50
         }
@@ -44,7 +44,7 @@
         "salePrice": 125.00,
         "salesTaxAmount": 10.00,
         "paymentMethod": "Card",
-        "providerSplitPercentage": 50,
+        "consignorsplitPercentage": 50,
         "providerAmount": 62.50,
         "shopAmount": 72.50,
         "item": {
@@ -52,7 +52,7 @@
           "name": "Vintage Leather Jacket",
           "description": "Classic brown leather jacket from the 1980s"
         },
-        "provider": {
+        "consignor": {
           "id": "prov-001",
           "name": "Sarah Thompson"
         }
@@ -63,7 +63,7 @@
         "salePrice": 89.99,
         "salesTaxAmount": 7.20,
         "paymentMethod": "Cash",
-        "providerSplitPercentage": 50,
+        "consignorsplitPercentage": 50,
         "providerAmount": 44.99,
         "shopAmount": 52.20,
         "item": {
@@ -71,7 +71,7 @@
           "name": "Antique Jewelry Box",
           "description": "Handcrafted wooden jewelry box with intricate carvings"
         },
-        "provider": {
+        "consignor": {
           "id": "prov-002",
           "name": "Mike Chen"
         }
@@ -82,7 +82,7 @@
         "salePrice": 275.00,
         "salesTaxAmount": 22.00,
         "paymentMethod": "Card",
-        "providerSplitPercentage": 50,
+        "consignorsplitPercentage": 50,
         "providerAmount": 137.50,
         "shopAmount": 159.50,
         "item": {
@@ -90,7 +90,7 @@
           "name": "Designer Handbag",
           "description": "Authentic Louis Vuitton handbag in excellent condition"
         },
-        "provider": {
+        "consignor": {
           "id": "prov-003",
           "name": "Emma Rodriguez"
         }
@@ -130,7 +130,7 @@
       }
     ]
   },
-  "providers": [
+  "consignors": [
     {
       "id": "prov-001",
       "name": "Sarah Thompson",
@@ -160,7 +160,7 @@
       "salePrice": 125.00,
       "salesTaxAmount": 10.00,
       "paymentMethod": "Card",
-      "providerSplitPercentage": 50
+      "consignorsplitPercentage": 50
     },
     "updated": {
       "id": "txn-001",
@@ -168,7 +168,7 @@
       "salePrice": 140.00,
       "salesTaxAmount": 11.20,
       "paymentMethod": "Cash",
-      "providerSplitPercentage": 55
+      "consignorsplitPercentage": 55
     },
     "calculations": {
       "original": {

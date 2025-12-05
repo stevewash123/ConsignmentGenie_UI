@@ -82,10 +82,10 @@ describe('Login Integration Tests', () => {
       cy.get('input[name="password"]').should('have.value', 'password123')
     })
 
-    it('should populate form when provider test account is clicked', () => {
-      cy.get('.test-account-btn.provider').click()
+    it('should populate form when consignor test account is clicked', () => {
+      cy.get('.test-account-btn.consignor').click()
 
-      cy.get('input[name="email"]').should('have.value', 'provider@demoshop.com')
+      cy.get('input[name="email"]').should('have.value', 'consignor@demoshop.com')
       cy.get('input[name="password"]').should('have.value', 'password123')
     })
 

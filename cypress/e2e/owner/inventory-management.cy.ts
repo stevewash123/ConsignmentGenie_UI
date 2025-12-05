@@ -68,7 +68,7 @@ describe('Owner Inventory Management Tests', () => {
         cy.contains('Condition').should('be.visible')
         cy.contains('Price').should('be.visible')
         cy.contains('Status').should('be.visible')
-        cy.contains('Provider').should('be.visible')
+        cy.contains('consignor').should('be.visible')
         cy.contains('Actions').should('be.visible')
       })
 
@@ -480,10 +480,10 @@ describe('Owner Inventory Management Tests', () => {
         body: { success: true, data: this.inventoryData.categories }
       }).as('getCategories')
 
-      cy.intercept('GET', '**/api/providers*', {
+      cy.intercept('GET', '**/api/consignors*', {
         statusCode: 200,
-        body: { success: true, data: this.ownerData.providers }
-      }).as('getProviders')
+        body: { success: true, data: this.ownerData.consignors }
+      }).as('getconsignors')
 
       const pagedResult = {
         ...this.inventoryData.pagedResult,

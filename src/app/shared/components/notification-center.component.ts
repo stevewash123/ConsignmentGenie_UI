@@ -480,7 +480,7 @@ import { LoadingService } from '../services/loading.service';
   `]
 })
 export class NotificationCenterComponent implements OnInit, OnDestroy {
-  @Input() role: UserRole = 'provider';
+  @Input() role: UserRole = 'consignor';
 
   private destroy$ = new Subject<void>();
 
@@ -498,7 +498,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     { value: 'payout_processed', label: 'Payout Processed' },
     { value: 'payout_pending', label: 'Payout Pending' },
     { value: 'statement_ready', label: 'Statement Ready' },
-    { value: 'new_provider_request', label: 'Provider Request' },
+    { value: 'new_provider_request', label: 'consignor Request' },
     { value: 'subscription_reminder', label: 'Subscription' },
     { value: 'system_announcement', label: 'Announcements' }
   ];

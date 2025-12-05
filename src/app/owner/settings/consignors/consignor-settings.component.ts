@@ -689,7 +689,7 @@ export class ConsignorSettingsComponent implements OnInit {
         const settings = this.settings();
         if (settings) {
           settings.storeCode = response.newStoreCode;
-          settings.signupUrl = `${window.location.origin}/register/provider/invitation?token=${response.newStoreCode}`;
+          settings.signupUrl = `${window.location.origin}/register/consignor/invitation?token=${response.newStoreCode}`;
           this.settings.set({ ...settings });
         }
         this.showSuccess('Store code regenerated successfully');

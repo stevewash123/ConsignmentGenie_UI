@@ -415,7 +415,7 @@ import { LoadingService } from '../services/loading.service';
   `]
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
-  @Input() role: UserRole = 'provider';
+  @Input() role: UserRole = 'consignor';
   @ViewChild('bellContainer', { static: true }) bellContainer!: ElementRef;
 
   private destroy$ = new Subject<void>();

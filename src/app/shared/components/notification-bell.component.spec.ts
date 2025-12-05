@@ -164,7 +164,7 @@ describe('NotificationBellComponent', () => {
 
     component.markAsRead(notification as any, event);
 
-    expect(mockNotificationService.markAsRead).toHaveBeenCalledWith('provider', 'test-1');
+    expect(mockNotificationService.markAsRead).toHaveBeenCalledWith('consignor', 'test-1');
   });
 
   it('should mark all notifications as read', () => {
@@ -176,7 +176,7 @@ describe('NotificationBellComponent', () => {
 
     component.markAllAsRead();
 
-    expect(mockNotificationService.markAllAsRead).toHaveBeenCalledWith('provider');
+    expect(mockNotificationService.markAllAsRead).toHaveBeenCalledWith('consignor');
   });
 
   it('should handle notification click', () => {

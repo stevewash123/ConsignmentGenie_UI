@@ -82,11 +82,11 @@ import { LoadingService } from '../shared/services/loading.service';
             </button>
 
             <button
-              class="quick-btn provider"
+              class="quick-btn consignor"
               (click)="quickLogin('provider1@microsaasbuilders.com')"
               [disabled]="isAuthLoading()"
             >
-              <span class="role">Provider</span>
+              <span class="role">consignor</span>
               <span class="email">provider1@microsaasbuilders.com</span>
             </button>
           </div>
@@ -243,7 +243,7 @@ import { LoadingService } from '../shared/services/loading.service';
 
     .quick-btn.admin { border-left: 3px solid #dc2626; }
     .quick-btn.owner { border-left: 3px solid #059669; }
-    .quick-btn.provider { border-left: 3px solid #d97706; }
+    .quick-btn.consignor { border-left: 3px solid #d97706; }
 
     .role {
       font-weight: 500;
@@ -393,8 +393,8 @@ export class LoginSimpleComponent implements OnInit {
       case 'Owner':
         this.router.navigate(['/owner/dashboard']);
         break;
-      case 'Provider':
-        this.router.navigate(['/provider/dashboard']);
+      case 'consignor':
+        this.router.navigate(['/consignor/dashboard']);
         break;
       case 'Customer':
         this.router.navigate(['/customer/dashboard']);
@@ -426,9 +426,9 @@ export class LoginSimpleComponent implements OnInit {
         this.router.navigateByUrl(returnUrl);
         break;
 
-      case 'Provider':
-        // Provider: go to their dashboard (TODO: shop-specific provider view)
-        this.router.navigate(['/provider/dashboard']);
+      case 'consignor':
+        // consignor: go to their dashboard (TODO: shop-specific consignor view)
+        this.router.navigate(['/consignor/dashboard']);
         break;
 
       case 'Owner':
@@ -451,8 +451,8 @@ export class LoginSimpleComponent implements OnInit {
       case 'Owner':
         this.router.navigate(['/owner/dashboard']);
         break;
-      case 'Provider':
-        this.router.navigate(['/provider/dashboard']);
+      case 'consignor':
+        this.router.navigate(['/consignor/dashboard']);
         break;
       case 'Customer':
         this.router.navigate(['/customer/dashboard']);
@@ -477,7 +477,7 @@ export class LoginSimpleComponent implements OnInit {
         0: 'Admin',
         1: 'Owner',
         // 2: 'Manager', // Planned feature - commented out for now
-        2: 'Provider',
+        2: 'consignor',
         3: 'Customer'
       };
       return roleMap[Number(role)] || 'Owner';

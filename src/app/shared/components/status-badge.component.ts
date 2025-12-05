@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProviderStatus } from '../../models/provider.model';
+import { ConsignorStatus } from '../../models/consignor.model';
 import { ENTITY_LABELS } from '../constants/labels';
 
 @Component({
@@ -14,7 +14,7 @@ import { ENTITY_LABELS } from '../constants/labels';
   `
 })
 export class StatusBadgeComponent {
-  @Input() status: ProviderStatus = 'active';
+  @Input() status: ConsignorStatus = 'active';
 
   get badgeClass(): string {
     const classes = {
@@ -26,7 +26,7 @@ export class StatusBadgeComponent {
   }
 
   get label(): string {
-    const key = `providerStatus${this.status.charAt(0).toUpperCase() + this.status.slice(1)}` as keyof typeof ENTITY_LABELS;
+    const key = `ConsignorStatus${this.status.charAt(0).toUpperCase() + this.status.slice(1)}` as keyof typeof ENTITY_LABELS;
     return ENTITY_LABELS[key];
   }
 }

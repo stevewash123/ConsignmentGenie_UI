@@ -13,7 +13,7 @@ export interface OnboardingStatus {
   welcomeGuideCompleted: boolean;
   showModal: boolean;
   steps: {
-    hasProviders: boolean;
+    hasconsignors: boolean;
     storefrontConfigured: boolean;
     hasInventory: boolean;
     quickBooksConnected: boolean;

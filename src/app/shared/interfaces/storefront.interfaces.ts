@@ -203,7 +203,7 @@ export interface BusinessHours {
 export interface PaymentMethodConfig {
   type: string; // 'credit_card', 'paypal', 'apple_pay', etc.
   enabled: boolean;
-  configuration: any; // Provider-specific config
+  configuration: any; // consignor-specific config
 }
 
 export interface StoreSettings {

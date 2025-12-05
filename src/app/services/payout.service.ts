@@ -28,7 +28,7 @@ export class PayoutService {
   getPayouts(request?: PayoutSearchRequest): Observable<PayoutSearchResponse> {
     let params = new HttpParams();
 
-    if (request?.providerId) params = params.set('providerId', request.providerId);
+    if (request?.consignorId) params = params.set('providerId', request.consignorId);
     if (request?.payoutDateFrom) params = params.set('payoutDateFrom', request.payoutDateFrom.toISOString());
     if (request?.payoutDateTo) params = params.set('payoutDateTo', request.payoutDateTo.toISOString());
     if (request?.status) params = params.set('status', request.status);
@@ -50,7 +50,7 @@ export class PayoutService {
   getPendingPayouts(request?: PendingPayoutsRequest): Observable<PendingPayoutData[]> {
     let params = new HttpParams();
 
-    if (request?.providerId) params = params.set('providerId', request.providerId);
+    if (request?.consignorId) params = params.set('providerId', request.consignorId);
     if (request?.periodEndBefore) params = params.set('periodEndBefore', request.periodEndBefore.toISOString());
     if (request?.minimumAmount) params = params.set('minimumAmount', request.minimumAmount.toString());
 

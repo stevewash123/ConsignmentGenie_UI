@@ -13,8 +13,8 @@
     "phone": "555-123-4567"
   },
   "testProvider": {
-    "fullName": "Test Provider User",
-    "email": "test-provider@testshop.com",
+    "fullName": "Test consignor User",
+    "email": "test-consignor@testshop.com",
     "password": "TestPassword123!",
     "phone": "555-987-6543",
     "preferredPaymentMethod": "Venmo",
@@ -60,12 +60,12 @@
   ],
   "testRegistrations": {
     "minimal": {
-      "fullName": "Minimal Provider",
+      "fullName": "Minimal consignor",
       "email": "minimal@testshop.com",
       "password": "TestPassword123!"
     },
     "complete": {
-      "fullName": "Complete Provider",
+      "fullName": "Complete consignor",
       "email": "complete@testshop.com",
       "password": "TestPassword123!",
       "phone": "555-444-3333",
@@ -73,7 +73,7 @@
       "paymentDetails": "complete@paypal.com"
     },
     "international": {
-      "fullName": "International Provider",
+      "fullName": "International consignor",
       "email": "international@testshop.com",
       "password": "TestPassword123!",
       "phone": "+44 20 7946 0958"
@@ -95,7 +95,7 @@
   "apiEndpoints": {
     "validateStoreCode": "/api/auth/validate-store-code",
     "registerOwner": "/api/auth/register/owner",
-    "registerProvider": "/api/auth/register/provider",
+    "registerProvider": "/api/auth/register/consignor",
     "login": "/api/auth/login"
   },
   "timeouts": {
@@ -115,17 +115,17 @@
     "providerRegistrationApproval": {
       "steps": [
         "validate-store-code",
-        "register-provider",
+        "register-consignor",
         "owner-login",
-        "approve-provider",
-        "provider-login-success"
+        "approve-consignor",
+        "consignor-login-success"
       ]
     },
     "autoApproveProvider": {
       "steps": [
         "validate-auto-approve-store-code",
-        "register-provider-auto-approve",
-        "provider-login-success"
+        "register-consignor-auto-approve",
+        "consignor-login-success"
       ]
     }
   }

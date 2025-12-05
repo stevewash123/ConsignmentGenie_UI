@@ -212,7 +212,7 @@ export interface InventoryMetricsDto {
   itemsAddedThisMonth: number;
   itemsSoldThisMonth: number;
   byCategory: CategoryBreakdownDto[];
-  byProvider: ProviderBreakdownDto[];
+  byProvider: ConsignorBreakdownDto[];
 }
 
 export interface CategoryBreakdownDto {
@@ -221,7 +221,7 @@ export interface CategoryBreakdownDto {
   value: number;
 }
 
-export interface ProviderBreakdownDto {
+export interface ConsignorBreakdownDto {
   consignorId: string;
   consignorName: string;
   count: number;

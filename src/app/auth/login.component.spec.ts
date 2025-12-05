@@ -298,7 +298,7 @@ describe('LoginComponent', () => {
     it('should convert numeric role to string', () => {
       expect(component['normalizeRole'](0)).toBe('Admin');
       expect(component['normalizeRole'](1)).toBe('Owner');
-      expect(component['normalizeRole'](2)).toBe('Provider');
+      expect(component['normalizeRole'](2)).toBe('consignor');
       expect(component['normalizeRole'](3)).toBe('Customer');
     });
 
@@ -313,7 +313,7 @@ describe('LoginComponent', () => {
     it('should handle string numbers', () => {
       expect(component['normalizeRole']('0')).toBe('Admin');
       expect(component['normalizeRole']('1')).toBe('Owner');
-      expect(component['normalizeRole']('2')).toBe('Provider');
+      expect(component['normalizeRole']('2')).toBe('consignor');
       expect(component['normalizeRole']('3')).toBe('Customer');
     });
   });
@@ -334,8 +334,8 @@ describe('LoginComponent', () => {
     //   expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
     // });
 
-    it('should redirect provider to customer dashboard', () => {
-      component['redirectBasedOnRole']('2', 'provider@example.com');
+    it('should redirect consignor to customer dashboard', () => {
+      component['redirectBasedOnRole']('2', 'consignor@example.com');
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
     });
 

@@ -9,7 +9,7 @@ import { NotificationType, UserRole, NotificationDto } from '../models/notificat
 describe('NotificationConfig', () => {
   const mockNotification: NotificationDto = {
     notificationId: '1',
-    role: 'provider',
+    role: 'consignor',
     type: 'item_sold',
     title: 'Item Sold',
     message: 'Test notification message',
@@ -18,7 +18,7 @@ describe('NotificationConfig', () => {
     timeAgo: '1 hour ago',
     itemId: 'item-1',
     transactionId: 'txn-1',
-    providerId: 'provider-1',
+    providerId: 'consignor-1',
     organizationId: 'org-1',
     referenceId: 'ref-1'
   };
@@ -57,15 +57,15 @@ describe('NotificationConfig', () => {
     });
   });
 
-  describe('provider notification types', () => {
+  describe('consignor notification types', () => {
     it('should configure item_sold correctly', () => {
       const config = notificationConfig.item_sold;
       expect(config.icon).toBe('🛒');
       expect(config.color).toBe('green');
       expect(config.getTitle(mockNotification)).toBe('Item Sold! 🎉');
       expect(config.getMessage(mockNotification)).toBe(mockNotification.message);
-      expect(config.getRoute(mockNotification, 'provider')).toBe('/provider/sales/txn-1');
-      expect(config.allowedRoles).toContain('provider');
+      expect(config.getRoute(mockNotification, 'consignor')).toBe('/consignor/sales/txn-1');
+      expect(config.allowedRoles).toContain('consignor');
       expect(config.allowedRoles).toContain('owner');
     });
 
@@ -74,7 +74,7 @@ describe('NotificationConfig', () => {
       expect(config.icon).toBe('💰');
       expect(config.color).toBe('green');
       expect(config.getTitle(mockNotification)).toBe('Payout Processed');
-      expect(config.allowedRoles).toEqual(['provider']);
+      expect(config.allowedRoles).toEqual(['consignor']);
     });
 
     it('should configure welcome correctly', () => {
@@ -82,8 +82,8 @@ describe('NotificationConfig', () => {
       expect(config.icon).toBe('🎉');
       expect(config.color).toBe('green');
       expect(config.getTitle(mockNotification)).toBe('Welcome!');
-      expect(config.getRoute(mockNotification, 'provider')).toBe('/provider/dashboard');
-      expect(config.allowedRoles).toContain('provider');
+      expect(config.getRoute(mockNotification, 'consignor')).toBe('/consignor/dashboard');
+      expect(config.allowedRoles).toContain('consignor');
       expect(config.allowedRoles).toContain('owner');
       expect(config.allowedRoles).toContain('customer');
     });
@@ -94,8 +94,8 @@ describe('NotificationConfig', () => {
       const config = notificationConfig.new_provider_request;
       expect(config.icon).toBe('👤');
       expect(config.color).toBe('blue');
-      expect(config.getTitle(mockNotification)).toBe('New Provider Request');
-      expect(config.getRoute(mockNotification, 'owner')).toBe('/owner/providers/provider-1');
+      expect(config.getTitle(mockNotification)).toBe('New consignor Request');
+      expect(config.getRoute(mockNotification, 'owner')).toBe('/owner/consignors/consignor-1');
       expect(config.allowedRoles).toEqual(['owner']);
     });
 
@@ -146,13 +146,13 @@ describe('NotificationConfig', () => {
         providerId: undefined
       };
 
-      expect(notificationConfig.item_sold.getRoute(notificationWithoutIds, 'provider')).toBeNull();
-      expect(notificationConfig.new_provider_request.getRoute(notificationWithoutIds, 'owner')).toBe('/owner/providers');
+      expect(notificationConfig.item_sold.getRoute(notificationWithoutIds, 'consignor')).toBeNull();
+      expect(notificationConfig.new_provider_request.getRoute(notificationWithoutIds, 'owner')).toBe('/owner/consignors');
     });
 
     it('should generate correct routes for different roles', () => {
       expect(notificationConfig.item_sold.getRoute(mockNotification, 'owner')).toBe('/owner/sales/txn-1');
-      expect(notificationConfig.item_sold.getRoute(mockNotification, 'provider')).toBe('/provider/sales/txn-1');
+      expect(notificationConfig.item_sold.getRoute(mockNotification, 'consignor')).toBe('/consignor/sales/txn-1');
     });
 
     it('should return null for system announcement', () => {
