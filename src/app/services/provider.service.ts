@@ -52,7 +52,7 @@ export interface PendingInvitation {
   providedIn: 'root'
 })
 export class ProviderService {
-  private readonly apiUrl = `${environment.apiUrl}/api/providers`;
+  private readonly apiUrl = `${environment.apiUrl}/api/consignors`;
   private readonly authUrl = `${environment.apiUrl}/api/auth`;
 
   constructor(private http: HttpClient) {}

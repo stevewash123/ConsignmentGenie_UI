@@ -45,7 +45,7 @@ describe('ProviderService', () => {
       expect(providers.length).toBe(1);
     });
 
-    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/providers');
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/consignors');
   });
 
   it('should get provider by id successfully', () => {
@@ -68,7 +68,7 @@ describe('ProviderService', () => {
       expect(provider.name).toBe('Provider 1');
     });
 
-    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/providers/1');
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/consignors/1');
   });
 
   it('should create provider successfully', () => {
@@ -96,7 +96,7 @@ describe('ProviderService', () => {
       expect(provider.name).toBe('New Provider');
     });
 
-    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/providers', createRequest);
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/consignors', createRequest);
   });
 
   it('should activate provider successfully', () => {
@@ -119,7 +119,7 @@ describe('ProviderService', () => {
       expect(provider.isActive).toBe(true);
     });
 
-    expect(mockHttpClient.patch).toHaveBeenCalledWith('http://localhost:5000/api/providers/1/activate', {});
+    expect(mockHttpClient.patch).toHaveBeenCalledWith('http://localhost:5000/api/consignors/1/activate', {});
   });
 
   it('should send provider invitation successfully', () => {
@@ -133,7 +133,7 @@ describe('ProviderService', () => {
       expect(response.message).toBe('Invitation sent successfully');
     });
 
-    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/providers/invitations', invitation);
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/consignors/invitations', invitation);
   });
 
   it('should validate invitation successfully', () => {
