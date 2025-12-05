@@ -61,14 +61,14 @@ describe('RegisterComponent', () => {
   });
 
   it('should render consignor role card', () => {
-    const consignorCard = fixture.debugElement.query(By.css('a[routerLink="/register/consignor"]'));
-    expect(consignorCard).toBeTruthy();
+    const providerCard = fixture.debugElement.query(By.css('a[routerLink="/register/consignor"]'));
+    expect(providerCard).toBeTruthy();
 
-    const consignorTitle = consignorCard.query(By.css('h3'));
-    expect(consignorTitle.nativeElement.textContent).toContain('Consign Items at a Shop');
+    const providerTitle = providerCard.query(By.css('h3'));
+    expect(providerTitle.nativeElement.textContent).toContain('Consign Items at a Shop');
 
-    const consignorDescription = consignorCard.query(By.css('p'));
-    expect(consignorDescription.nativeElement.textContent).toContain('→ Basic signup');
+    const providerDescription = providerCard.query(By.css('p'));
+    expect(providerDescription.nativeElement.textContent).toContain('→ Basic signup');
   });
 
   it('should render login link', () => {

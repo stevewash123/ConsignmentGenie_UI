@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ConsignorPayout, PagedResult } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ProviderPayout, PagedResult } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -410,7 +410,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
   `]
 })
 export class ConsignorPayoutsComponent implements OnInit {
-  payoutsResult: PagedResult<ConsignorPayout> | null = null;
+  payoutsResult: PagedResult<ProviderPayout> | null = null;
   error: string | null = null;
 
   // Expose for template
@@ -421,7 +421,7 @@ export class ConsignorPayoutsComponent implements OnInit {
   totalPaidOut = 735.50;
 
   constructor(
-    private consignorService: ConsignorPortalService,
+    private ConsignorService: ProviderPortalService,
     public loadingService: LoadingService
   ) {}
 
@@ -433,7 +433,7 @@ export class ConsignorPayoutsComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.PAYOUTS_LIST);
     this.error = null;
 
-    this.consignorService.getMyPayouts().subscribe({
+    this.ConsignorService.getMyPayouts().subscribe({
       next: (result) => {
         this.payoutsResult = result;
         this.calculateTotals();

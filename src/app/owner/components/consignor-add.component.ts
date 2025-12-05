@@ -1,37 +1,37 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { ConsignorService } from '../services/consignor.service';
-import { Consignor, UpdateConsignorRequest } from '../models/consignor.model';
-import { LoadingService } from '../shared/services/loading.service';
+import { ConsignorService } from '../../services/consignor.service';
+import { CreateConsignorRequest } from '../../models/consignor.model';
 
 @Component({
-  selector: 'app-consignor-edit',
+  selector: 'app-consignor-add',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
   template: `
-    <div class="consignor-edit-container">
-      <div class="edit-header">
+    <div class="consignor-add-container">
+      <div class="add-header">
         <div class="breadcrumb">
-          <a [routerLink]="['/owner/consignors', consignorId()]">← Back to Consignor</a>
+          <a routerLink="/owner/consignors">← Back to consignors</a>
         </div>
-        <h1>Edit Consignor</h1>
+        <h1>Add New consignor</h1>
+        <p class="subtitle">Create a new consignor account or consider using <strong>Invite consignor</strong> to send them a registration link instead.</p>
       </div>
 
-      <div class="edit-card" *ngIf="!isConsignorLoading(); else loading">
-        <form (ngSubmit)="onSubmit()" #consignorForm="ngForm">
+      <div class="add-card">
+        <form (ngSubmit)="onSubmit()" #providerForm="ngForm">
           <div class="form-section">
             <h3>Basic Information</h3>
             <div class="form-row">
               <div class="form-group">
-                <label for="name">Consignor Name *</label>
+                <label for="name">consignor Name *</label>
                 <input
                   type="text"
                   id="name"
                   name="name"
-                  [(ngModel)]="editData.name"
+                  [(ngModel)]="providerData.name"
                   required
                   #nameField="ngModel"
                   class="form-control"
@@ -39,7 +39,7 @@ import { LoadingService } from '../shared/services/loading.service';
                   placeholder="Enter consignor name"
                 >
                 <div class="error-message" *ngIf="nameField.invalid && nameField.touched">
-                  Consignor name is required
+                  consignor name is required
                 </div>
               </div>
 
@@ -49,7 +49,7 @@ import { LoadingService } from '../shared/services/loading.service';
                   type="email"
                   id="email"
                   name="email"
-                  [(ngModel)]="editData.email"
+                  [(ngModel)]="providerData.email"
                   required
                   email
                   #emailField="ngModel"
@@ -71,7 +71,7 @@ import { LoadingService } from '../shared/services/loading.service';
                   type="tel"
                   id="phone"
                   name="phone"
-                  [(ngModel)]="editData.phone"
+                  [(ngModel)]="providerData.phone"
                   class="form-control"
                   placeholder="(555) 123-4567"
                 >
@@ -83,7 +83,7 @@ import { LoadingService } from '../shared/services/loading.service';
                   type="text"
                   id="address"
                   name="address"
-                  [(ngModel)]="editData.address"
+                  [(ngModel)]="providerData.address"
                   class="form-control"
                   placeholder="Enter address"
                 >
@@ -100,7 +100,7 @@ import { LoadingService } from '../shared/services/loading.service';
                   type="number"
                   id="commissionRate"
                   name="commissionRate"
-                  [(ngModel)]="editData.commissionRate"
+                  [(ngModel)]="providerData.commissionRate"
                   required
                   min="0"
                   max="100"
@@ -122,7 +122,7 @@ import { LoadingService } from '../shared/services/loading.service';
                 <select
                   id="preferredPaymentMethod"
                   name="preferredPaymentMethod"
-                  [(ngModel)]="editData.preferredPaymentMethod"
+                  [(ngModel)]="providerData.preferredPaymentMethod"
                   class="form-control"
                 >
                   <option value="">Select payment method</option>
@@ -140,7 +140,7 @@ import { LoadingService } from '../shared/services/loading.service';
               <textarea
                 id="paymentDetails"
                 name="paymentDetails"
-                [(ngModel)]="editData.paymentDetails"
+                [(ngModel)]="providerData.paymentDetails"
                 class="form-control"
                 rows="3"
                 placeholder="Enter payment details (e.g., PayPal email, bank account info, mailing address)"
@@ -156,36 +156,24 @@ import { LoadingService } from '../shared/services/loading.service';
               <textarea
                 id="notes"
                 name="notes"
-                [(ngModel)]="editData.notes"
+                [(ngModel)]="providerData.notes"
                 class="form-control"
                 rows="4"
                 placeholder="Add any additional notes about this consignor..."
               ></textarea>
             </div>
-
-            <div class="form-group">
-              <label>
-                <input
-                  type="checkbox"
-                  [(ngModel)]="editData.isActive"
-                  name="isActive"
-                >
-                Active Consignor
-              </label>
-              <small class="form-text">Inactive consignors cannot add new items or receive payouts</small>
-            </div>
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-secondary" [routerLink]="['/owner/consignors', consignorId()]">
+            <button type="button" class="btn-secondary" routerLink="/owner/consignors">
               Cancel
             </button>
             <button
               type="submit"
               class="btn-primary"
-              [disabled]="consignorForm.invalid || isSubmitting()"
+              [disabled]="providerForm.invalid || isSubmitting()"
             >
-              {{ isSubmitting() ? 'Saving...' : 'Save Changes' }}
+              {{ isSubmitting() ? 'Creating...' : 'Create consignor' }}
             </button>
           </div>
 
@@ -197,21 +185,28 @@ import { LoadingService } from '../shared/services/loading.service';
             {{ errorMessage() }}
           </div>
         </form>
-      </div>
 
-      <ng-template #loading>
-        <div class="loading">Loading consignor...</div>
-      </ng-template>
+        <div class="alternative-note">
+          <h4>💡 Tip: Consider using "Invite consignor" instead</h4>
+          <p>
+            Instead of manually creating accounts, you can invite consignors to register themselves.
+            This ensures they have access to their login credentials and receive welcome emails.
+          </p>
+          <button class="btn-outline" routerLink="/owner/consignors">
+            Go back and use "Invite consignor"
+          </button>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
-    .consignor-edit-container {
+    .consignor-add-container {
       padding: 1.5rem;
       max-width: 800px;
       margin: 0 auto;
     }
 
-    .edit-header {
+    .add-header {
       margin-bottom: 2rem;
     }
 
@@ -221,12 +216,17 @@ import { LoadingService } from '../shared/services/loading.service';
       font-size: 0.875rem;
     }
 
-    .edit-header h1 {
-      margin: 0.5rem 0 0 0;
+    .add-header h1 {
+      margin: 0.5rem 0;
       color: #212529;
     }
 
-    .edit-card {
+    .subtitle {
+      color: #6c757d;
+      margin-bottom: 0;
+    }
+
+    .add-card {
       background: white;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -273,10 +273,6 @@ import { LoadingService } from '../shared/services/loading.service';
       color: #212529;
     }
 
-    label input[type="checkbox"] {
-      margin-right: 0.5rem;
-    }
-
     .form-control {
       width: 100%;
       padding: 0.75rem;
@@ -312,7 +308,7 @@ import { LoadingService } from '../shared/services/loading.service';
       border-top: 1px solid #e9ecef;
     }
 
-    .btn-primary, .btn-secondary {
+    .btn-primary, .btn-secondary, .btn-outline {
       padding: 0.75rem 1.5rem;
       border: none;
       border-radius: 4px;
@@ -347,6 +343,17 @@ import { LoadingService } from '../shared/services/loading.service';
       background: #545b62;
     }
 
+    .btn-outline {
+      background: transparent;
+      color: #007bff;
+      border: 1px solid #007bff;
+    }
+
+    .btn-outline:hover {
+      background: #007bff;
+      color: white;
+    }
+
     .error-message {
       color: #dc3545;
       font-size: 0.875rem;
@@ -363,20 +370,31 @@ import { LoadingService } from '../shared/services/loading.service';
       border-radius: 4px;
     }
 
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: #6c757d;
+    .alternative-note {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #e7f3ff;
+      border: 1px solid #b8daff;
+      border-radius: 4px;
+    }
+
+    .alternative-note h4 {
+      margin-bottom: 0.5rem;
+      color: #004085;
+    }
+
+    .alternative-note p {
+      margin-bottom: 1rem;
+      color: #004085;
     }
   `]
 })
-export class ConsignorEditComponent implements OnInit {
-  consignorId = signal<number>(0);
+export class ConsignorAddComponent {
   isSubmitting = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
 
-  editData = {
+  providerData: CreateConsignorRequest = {
     name: '',
     email: '',
     phone: '',
@@ -384,58 +402,13 @@ export class ConsignorEditComponent implements OnInit {
     commissionRate: 50,
     preferredPaymentMethod: '',
     paymentDetails: '',
-    notes: '',
-    isActive: true
+    notes: ''
   };
 
-  isConsignorLoading(): boolean {
-    return this.loadingService.isLoading('consignor-edit');
-  }
-
   constructor(
-    private consignorService: ConsignorService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private loadingService: LoadingService
+    private ConsignorService: ConsignorService,
+    private router: Router
   ) {}
-
-  ngOnInit(): void {
-    const id = this.route.snapshot.params['id'];
-    if (id) {
-      this.consignorId.set(parseInt(id));
-      this.loadConsignor();
-    }
-  }
-
-  loadConsignor(): void {
-    this.loadingService.start('consignor-edit');
-    this.consignorService.getConsignor(this.consignorId()).subscribe({
-      next: (consignor) => {
-        this.populateEditData(consignor);
-      },
-      error: (error) => {
-        console.error('Error loading consignor:', error);
-        this.errorMessage.set('Failed to load consignor details');
-      },
-      complete: () => {
-        this.loadingService.stop('consignor-edit');
-      }
-    });
-  }
-
-  populateEditData(consignor: Consignor): void {
-    this.editData = {
-      name: consignor.name,
-      email: consignor.email,
-      phone: consignor.phone || '',
-      address: consignor.address || '',
-      commissionRate: consignor.commissionRate,
-      preferredPaymentMethod: consignor.preferredPaymentMethod || '',
-      paymentDetails: consignor.paymentDetails || '',
-      notes: consignor.notes || '',
-      isActive: consignor.isActive
-    };
-  }
 
   onSubmit(): void {
     if (this.isSubmitting()) return;
@@ -444,29 +417,29 @@ export class ConsignorEditComponent implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    const updateRequest: UpdateConsignorRequest = {
-      name: this.editData.name,
-      email: this.editData.email,
-      phone: this.editData.phone || undefined,
-      address: this.editData.address || undefined,
-      commissionRate: this.editData.commissionRate,
-      preferredPaymentMethod: this.editData.preferredPaymentMethod || undefined,
-      paymentDetails: this.editData.paymentDetails || undefined,
-      notes: this.editData.notes || undefined,
-      isActive: this.editData.isActive
+    // Clean up undefined values
+    const request: CreateConsignorRequest = {
+      name: this.providerData.name,
+      email: this.providerData.email,
+      phone: this.providerData.phone || undefined,
+      address: this.providerData.address || undefined,
+      commissionRate: this.providerData.commissionRate,
+      preferredPaymentMethod: this.providerData.preferredPaymentMethod || undefined,
+      paymentDetails: this.providerData.paymentDetails || undefined,
+      notes: this.providerData.notes || undefined
     };
 
-    this.consignorService.updateConsignor(this.consignorId(), updateRequest).subscribe({
-      next: (updated) => {
-        this.successMessage.set('Consignor updated successfully!');
+    this.ConsignorService.createConsignor(request).subscribe({
+      next: (created) => {
+        this.successMessage.set('consignor created successfully!');
         // Auto-redirect after 2 seconds
         setTimeout(() => {
-          this.router.navigate(['/owner/consignors', this.consignorId()]);
+          this.router.navigate(['/owner/consignors', created.id]);
         }, 2000);
       },
       error: (error) => {
-        console.error('Error updating consignor:', error);
-        const errorMsg = error.error?.message || 'Failed to update consignor. Please try again.';
+        console.error('Error creating consignor:', error);
+        const errorMsg = error.error?.message || 'Failed to create consignor. Please try again.';
         this.errorMessage.set(errorMsg);
       },
       complete: () => {

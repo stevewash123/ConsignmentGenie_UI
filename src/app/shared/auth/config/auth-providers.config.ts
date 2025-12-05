@@ -5,18 +5,18 @@ export interface AuthProvider {
   enabled: boolean;
 }
 
-export const AUTH_PROVIDERS: AuthProvider[] = [
+export const AUTH_consignors: AuthProvider[] = [
   { id: 'google', name: 'Google', icon: 'G', enabled: true },
   { id: 'facebook', name: 'Facebook', icon: 'f', enabled: true },
-  // Future providers:
+  // Future consignors:
   // { id: 'apple', name: 'Apple', icon: '', enabled: false },
   // { id: 'microsoft', name: 'Microsoft', icon: '', enabled: false },
 ];
 
-export function getEnabledProviders(): AuthProvider[] {
-  return AUTH_PROVIDERS.filter(provider => provider.enabled);
+export function getEnabledconsignors(): AuthProvider[] {
+  return AUTH_consignors.filter(consignor => consignor.enabled);
 }
 
 export function getProviderById(id: string): AuthProvider | undefined {
-  return AUTH_PROVIDERS.find(provider => provider.id === id);
+  return AUTH_consignors.find(consignor => consignor.id === id);
 }

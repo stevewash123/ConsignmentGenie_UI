@@ -2,21 +2,21 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
-import { ConsignorEditComponent } from './consignor-edit.component';
-import { ConsignorService } from '../services/consignor.service';
-import { Consignor } from '../models/consignor.model';
-import { LoadingService } from '../shared/services/loading.service';
+import { ProviderEditComponent } from './consignor-edit.component';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
+import { LoadingService } from '../../shared/services/loading.service';
 
-describe('ConsignorEditComponent', () => {
-  let component: ConsignorEditComponent;
-  let fixture: ComponentFixture<ConsignorEditComponent>;
+describe('ProviderEditComponent', () => {
+  let component: ProviderEditComponent;
+  let fixture: ComponentFixture<ProviderEditComponent>;
   let routerSpy: jasmine.SpyObj<Router>;
   let consignorService: jasmine.SpyObj<ConsignorService>;
   let loadingService: jasmine.SpyObj<LoadingService>;
 
-  const mockConsignor: Consignor = {
+  const mockProvider: consignor = {
     id: 1,
-    name: 'Test Consignor',
+    name: 'Test consignor',
     email: 'test@consignor.com',
     phone: '1234567890',
     address: '123 Test Street',
@@ -33,8 +33,8 @@ describe('ConsignorEditComponent', () => {
 
   beforeEach(async () => {
     const ConsignorServiceSpy = jasmine.createSpyObj('ConsignorService', [
-      'getConsignor',
-      'updateConsignor'
+      'getProvider',
+      'updateProvider'
     ]);
 
     const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
@@ -49,7 +49,7 @@ describe('ConsignorEditComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        ConsignorEditComponent
+        ProviderEditComponent
       ],
       providers: [
         { provide: ConsignorService, useValue: ConsignorServiceSpy },
@@ -67,13 +67,13 @@ describe('ConsignorEditComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorEditComponent);
+    fixture = TestBed.createComponent(ProviderEditComponent);
     component = fixture.componentInstance;
-    consignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
+    ConsignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
     loadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
 
     loadingService.isLoading.and.returnValue(false);
-    consignorService.getConsignor.and.returnValue(of(mockConsignor));
+    ConsignorService.getProvider.and.returnValue(of(mockProvider));
     routerSpy.navigate.and.returnValue(Promise.resolve(true));
     routerSpy.createUrlTree.and.returnValue({} as any);
     routerSpy.serializeUrl.and.returnValue('/test-url');
@@ -86,8 +86,8 @@ describe('ConsignorEditComponent', () => {
   });
 
   it('should load consignor data on init', () => {
-    expect(consignorService.getConsignor).toHaveBeenCalledWith(1);
-    expect(component.editData.name).toBe('Test Consignor');
+    expect(ConsignorService.getProvider).toHaveBeenCalledWith(1);
+    expect(component.editData.name).toBe('Test consignor');
     expect(component.editData.email).toBe('test@consignor.com');
     expect(component.editData.phone).toBe('1234567890');
     expect(component.editData.commissionRate).toBe(50);
@@ -95,7 +95,7 @@ describe('ConsignorEditComponent', () => {
 
   it('should display the correct title', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toBe('Edit Consignor');
+    expect(compiled.querySelector('h1')?.textContent).toBe('Edit consignor');
   });
 
   it('should have correct breadcrumb link', () => {
@@ -104,7 +104,7 @@ describe('ConsignorEditComponent', () => {
     expect(breadcrumbLink).toBeTruthy();
 
     // Check that the routerLink directive is properly bound to the providerId
-    expect(component.consignorId()).toBe(1);
+    expect(component.providerId()).toBe(1);
     expect(breadcrumbLink).toBeTruthy();
   });
 
@@ -115,23 +115,23 @@ describe('ConsignorEditComponent', () => {
     const emailInput = compiled.querySelector('input[name="email"]') as HTMLInputElement;
     const phoneInput = compiled.querySelector('input[name="phone"]') as HTMLInputElement;
 
-    expect(nameInput?.value).toBe('Test Consignor');
+    expect(nameInput?.value).toBe('Test consignor');
     expect(emailInput?.value).toBe('test@consignor.com');
     expect(phoneInput?.value).toBe('1234567890');
   });
 
   it('should update consignor successfully', fakeAsync(() => {
-    const updatedConsignor = { ...mockConsignor, name: 'Updated Consignor' };
-    consignorService.updateConsignor.and.returnValue(of(updatedConsignor));
+    const updatedProvider = { ...mockProvider, name: 'Updated consignor' };
+    ConsignorService.updateProvider.and.returnValue(of(updatedProvider));
 
     // Update form data
-    component.editData.name = 'Updated Consignor';
+    component.editData.name = 'Updated consignor';
     component.editData.email = 'updated@consignor.com';
 
     component.onSubmit();
 
-    expect(consignorService.updateConsignor).toHaveBeenCalledWith(1, {
-      name: 'Updated Consignor',
+    expect(ConsignorService.updateProvider).toHaveBeenCalledWith(1, {
+      name: 'Updated consignor',
       email: 'updated@consignor.com',
       phone: '1234567890',
       address: '123 Test Street',
@@ -142,7 +142,7 @@ describe('ConsignorEditComponent', () => {
       isActive: true
     });
 
-    expect(component.successMessage()).toBe('Consignor updated successfully!');
+    expect(component.successMessage()).toBe('consignor updated successfully!');
     expect(component.isSubmitting()).toBe(false);
 
     // Advance time by 2000ms to trigger the setTimeout in component
@@ -154,7 +154,7 @@ describe('ConsignorEditComponent', () => {
   xit('should handle update error', () => {
     // X'd out due to async timing issues with Angular zone.js and observable completion
     const mockError = { error: { message: 'Email already exists' } };
-    consignorService.updateConsignor.and.returnValue(throwError(() => mockError));
+    ConsignorService.updateProvider.and.returnValue(throwError(() => mockError));
 
     component.editData.email = 'existing@consignor.com';
     component.onSubmit();
@@ -167,7 +167,7 @@ describe('ConsignorEditComponent', () => {
   xit('should handle update error without message', () => {
     // X'd out due to async timing issues with Angular zone.js and observable completion
     const mockError = {};
-    consignorService.updateConsignor.and.returnValue(throwError(() => mockError));
+    ConsignorService.updateProvider.and.returnValue(throwError(() => mockError));
 
     component.onSubmit();
 
@@ -180,16 +180,16 @@ describe('ConsignorEditComponent', () => {
 
     component.onSubmit();
 
-    expect(consignorService.updateConsignor).not.toHaveBeenCalled();
+    expect(ConsignorService.updateProvider).not.toHaveBeenCalled();
   });
 
   it('should handle consignor loading error', () => {
     // Create a fresh component instance for this error test
-    const errorFixture = TestBed.createComponent(ConsignorEditComponent);
+    const errorFixture = TestBed.createComponent(ProviderEditComponent);
     const errorComponent = errorFixture.componentInstance;
 
     // Set up the error condition before component initialization
-    consignorService.getConsignor.and.returnValue(throwError(() => new Error('Consignor not found')));
+    ConsignorService.getProvider.and.returnValue(throwError(() => new Error('consignor not found')));
 
     // Initialize the component which will trigger the error
     errorFixture.detectChanges();
@@ -199,8 +199,8 @@ describe('ConsignorEditComponent', () => {
   });
 
   it('should clean up undefined values in request', () => {
-    const updatedConsignor = { ...mockConsignor };
-    consignorService.updateConsignor.and.returnValue(of(updatedConsignor));
+    const updatedProvider = { ...mockProvider };
+    ConsignorService.updateProvider.and.returnValue(of(updatedProvider));
 
     // Set some fields to empty strings (should become undefined)
     component.editData.phone = '';
@@ -211,8 +211,8 @@ describe('ConsignorEditComponent', () => {
 
     component.onSubmit();
 
-    expect(consignorService.updateConsignor).toHaveBeenCalledWith(1, {
-      name: 'Test Consignor',
+    expect(ConsignorService.updateProvider).toHaveBeenCalledWith(1, {
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: undefined,
       address: undefined,
@@ -273,7 +273,7 @@ describe('ConsignorEditComponent', () => {
 
     // Verify that the cancel button exists and has routerLink functionality
     // The exact routing is handled by Angular's router in the template
-    expect(component.consignorId()).toBe(1);
+    expect(component.providerId()).toBe(1);
   });
 
   it('should display error message when present', () => {
@@ -307,12 +307,12 @@ describe('ConsignorEditComponent', () => {
 
   it('should handle missing optional consignor data gracefully', () => {
     const providerWithMissingFields = {
-      ...mockConsignor,
+      ...mockProvider,
       phone: undefined,
       address: undefined,
       notes: undefined
     };
-    consignorService.getConsignor.and.returnValue(of(providerWithMissingFields));
+    ConsignorService.getProvider.and.returnValue(of(providerWithMissingFields));
 
     component.ngOnInit();
 

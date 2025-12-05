@@ -16,7 +16,7 @@ import { ConsignorService } from '../services/consignor.service';
           <div class="header">
             <a routerLink="/signup" class="back-link">← Back</a>
             <h1>LOGIN</h1>
-            <p class="subtitle">Choose your method to log in as a Consignor</p>
+            <p class="subtitle">Choose your method to log in as a consignor</p>
           </div>
 
           <!-- Social Authentication Options -->
@@ -119,7 +119,7 @@ import { ConsignorService } from '../services/consignor.service';
               type="submit"
               class="submit-btn"
               [disabled]="authForm.invalid || isSubmitting()">
-              {{ isSubmitting() ? 'Creating Account...' : 'Continue to Consignor Details' }}
+              {{ isSubmitting() ? 'Creating Account...' : 'Continue to consignor Details' }}
             </button>
           </form>
 
@@ -386,7 +386,7 @@ export class ConsignorSignupStep1Component implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private consignorService: ConsignorService,
+    private ConsignorService: ConsignorService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -437,7 +437,7 @@ export class ConsignorSignupStep1Component implements OnInit {
     const formValue = this.authForm.value;
 
     // Store the email/password in session storage temporarily for step 2
-    sessionStorage.setItem('consignorAuthData', JSON.stringify({
+    sessionStorage.setItem('providerAuthData', JSON.stringify({
       email: formValue.email,
       password: formValue.password
     }));

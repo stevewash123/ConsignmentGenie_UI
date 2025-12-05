@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConsignorService } from '../services/consignor.service';
+import { ConsignorService } from '../../services/consignor.service';
 
 @Component({
   selector: 'app-consignor-invitation-modal',
@@ -11,18 +11,18 @@ import { ConsignorService } from '../services/consignor.service';
     <div class="modal-overlay" *ngIf="isVisible()" (click)="onOverlayClick($event)">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Invite Consignor</h3>
+          <h3>Invite consignor</h3>
           <button class="close-btn" (click)="close.emit()">×</button>
         </div>
 
         <div class="modal-body">
           <form (ngSubmit)="onSubmit()" #inviteForm="ngForm">
             <div class="form-group">
-              <label for="consignorName">Consignor Name *</label>
+              <label for="providerName">consignor Name *</label>
               <input
                 type="text"
-                id="consignorName"
-                name="consignorName"
+                id="providerName"
+                name="providerName"
                 [(ngModel)]="invitation.name"
                 required
                 #nameField="ngModel"
@@ -31,16 +31,16 @@ import { ConsignorService } from '../services/consignor.service';
                 placeholder="Enter consignor's full name"
               >
               <div class="error-message" *ngIf="nameField.invalid && (nameField.dirty || nameField.touched)">
-                Consignor name is required
+                consignor name is required
               </div>
             </div>
 
             <div class="form-group">
-              <label for="consignorEmail">Email Address *</label>
+              <label for="providerEmail">Email Address *</label>
               <input
                 type="email"
-                id="consignorEmail"
-                name="consignorEmail"
+                id="providerEmail"
+                name="providerEmail"
                 [(ngModel)]="invitation.email"
                 required
                 email
@@ -262,7 +262,7 @@ export class ConsignorInvitationModalComponent {
   successMessage = signal('');
   errorMessage = signal('');
 
-  constructor(private consignorService: ConsignorService) {}
+  constructor(private ConsignorService: ConsignorService) {}
 
   onOverlayClick(event: Event): void {
     this.close.emit();
@@ -275,7 +275,7 @@ export class ConsignorInvitationModalComponent {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    this.consignorService.inviteConsignor(this.invitation).subscribe({
+    this.ConsignorService.inviteConsignor(this.invitation).subscribe({
       next: (response) => {
         this.successMessage.set('Invitation sent successfully!');
         this.resetForm();
@@ -291,9 +291,9 @@ export class ConsignorInvitationModalComponent {
         let errorMsg = 'Failed to send invitation. Please try again.';
 
         if (error.status === 405) {
-          errorMsg = 'Consignor invitation feature is not currently available. Please contact support.';
+          errorMsg = 'consignor invitation feature is not currently available. Please contact support.';
         } else if (error.status === 404) {
-          errorMsg = 'Consignor invitation endpoint not found. Please contact support.';
+          errorMsg = 'consignor invitation endpoint not found. Please contact support.';
         } else if (error.status === 400) {
           errorMsg = error.error?.message || 'Invalid invitation data. Please check the email address.';
         } else if (error.status === 401) {

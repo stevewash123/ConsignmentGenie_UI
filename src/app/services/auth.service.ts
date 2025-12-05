@@ -152,7 +152,7 @@ export class AuthService {
     paymentDetails?: string;
   }): Observable<{ success: boolean; message?: string; errors?: string[] }> {
     return this.http.post<{ success: boolean; message?: string; errors?: string[] }>(
-      `${this.apiUrl}/auth/register/provider`,
+      `${this.apiUrl}/auth/register/consignor`,
       request
     ).pipe(
       catchError((error: any) => {

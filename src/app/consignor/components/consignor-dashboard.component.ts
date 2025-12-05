@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ConsignorDashboard } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ProviderDashboard } from '../models/consignor.models';
 
 @Component({
   selector: 'app-consignor-dashboard',
@@ -292,10 +292,10 @@ import { ConsignorDashboard } from "../models/consignor.models";
   `]
 })
 export class ConsignorDashboardComponent implements OnInit {
-  dashboard: ConsignorDashboard | null = null;
+  dashboard: ProviderDashboard | null = null;
   error: string | null = null;
 
-  constructor(private consignorService: ConsignorPortalService) {}
+  constructor(private ConsignorService: ProviderPortalService) {}
 
   ngOnInit() {
     this.loadDashboard();
@@ -303,7 +303,7 @@ export class ConsignorDashboardComponent implements OnInit {
 
   loadDashboard() {
     this.error = null;
-    this.consignorService.getDashboard().subscribe({
+    this.ConsignorService.getDashboard().subscribe({
       next: (data) => {
         this.dashboard = data;
       },

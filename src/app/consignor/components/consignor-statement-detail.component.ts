@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, switchMap } from 'rxjs';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { StatementDto } from "../models/consignor.models";
+import { ProviderPortalService } from '../services/consignor-portal.service';
+import { StatementDto } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -598,7 +598,7 @@ export class ConsignorStatementDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private consignorService: ConsignorPortalService,
+    private ConsignorService: ProviderPortalService,
     public loadingService: LoadingService
   ) {}
 
@@ -613,7 +613,7 @@ export class ConsignorStatementDetailComponent implements OnInit, OnDestroy {
           }
           this.loadingService.start(LOADING_KEYS.STATEMENT);
           this.error = null;
-          return this.consignorService.getStatement(statementId);
+          return this.ConsignorService.getStatement(statementId);
         })
       )
       .subscribe({
@@ -643,7 +643,7 @@ export class ConsignorStatementDetailComponent implements OnInit, OnDestroy {
     this.loadingService.start(LOADING_KEYS.STATEMENT);
     this.error = null;
 
-    return this.consignorService.getStatement(statementId)
+    return this.ConsignorService.getStatement(statementId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (statement) => {
@@ -677,7 +677,7 @@ export class ConsignorStatementDetailComponent implements OnInit, OnDestroy {
 
     this.loadingService.start(LOADING_KEYS.STATEMENT_PDF);
 
-    this.consignorService.downloadStatementPdf(this.statement.id)
+    this.ConsignorService.downloadStatementPdf(this.statement.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {
@@ -705,7 +705,7 @@ export class ConsignorStatementDetailComponent implements OnInit, OnDestroy {
 
     this.loadingService.start(LOADING_KEYS.STATEMENT_REGENERATE);
 
-    this.consignorService.regenerateStatement(this.statement.id)
+    this.ConsignorService.regenerateStatement(this.statement.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updatedStatement) => {

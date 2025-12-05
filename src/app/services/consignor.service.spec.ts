@@ -49,7 +49,7 @@ describe('ConsignorService', () => {
   });
 
   it('should get consignor by id successfully', () => {
-    const mockConsignor = {
+    const mockProvider = {
       id: 1,
       name: 'consignor 1',
       email: 'provider1@test.com',
@@ -61,10 +61,10 @@ describe('ConsignorService', () => {
       updatedAt: new Date()
     };
 
-    mockHttpClient.get.and.returnValue(of(mockConsignor));
+    mockHttpClient.get.and.returnValue(of(mockProvider));
 
-    service.getConsignor(1).subscribe(consignor => {
-      expect(consignor).toEqual(mockConsignor);
+    service.getProvider(1).subscribe(consignor => {
+      expect(consignor).toEqual(mockProvider);
       expect(consignor.name).toBe('consignor 1');
     });
 
@@ -77,7 +77,7 @@ describe('ConsignorService', () => {
       email: 'new@test.com',
       commissionRate: 55
     };
-    const mockConsignor = {
+    const mockProvider = {
       id: 3,
       name: 'New consignor',
       email: 'new@test.com',
@@ -89,10 +89,10 @@ describe('ConsignorService', () => {
       updatedAt: new Date()
     };
 
-    mockHttpClient.post.and.returnValue(of(mockConsignor));
+    mockHttpClient.post.and.returnValue(of(mockProvider));
 
-    service.createConsignor(createRequest).subscribe(consignor => {
-      expect(consignor).toEqual(mockConsignor);
+    service.createProvider(createRequest).subscribe(consignor => {
+      expect(consignor).toEqual(mockProvider);
       expect(consignor.name).toBe('New consignor');
     });
 
@@ -100,7 +100,7 @@ describe('ConsignorService', () => {
   });
 
   it('should activate consignor successfully', () => {
-    const mockConsignor = {
+    const mockProvider = {
       id: 1,
       name: 'consignor 1',
       email: 'provider1@test.com',
@@ -112,10 +112,10 @@ describe('ConsignorService', () => {
       updatedAt: new Date()
     };
 
-    mockHttpClient.patch.and.returnValue(of(mockConsignor));
+    mockHttpClient.patch.and.returnValue(of(mockProvider));
 
-    service.activateConsignor(1).subscribe(consignor => {
-      expect(consignor).toEqual(mockConsignor);
+    service.activateProvider(1).subscribe(consignor => {
+      expect(consignor).toEqual(mockProvider);
       expect(consignor.isActive).toBe(true);
     });
 
@@ -128,7 +128,7 @@ describe('ConsignorService', () => {
 
     mockHttpClient.post.and.returnValue(of(mockResponse));
 
-    service.inviteConsignor(invitation).subscribe(response => {
+    service.inviteProvider(invitation).subscribe(response => {
       expect(response.success).toBe(true);
       expect(response.message).toBe('Invitation sent successfully');
     });

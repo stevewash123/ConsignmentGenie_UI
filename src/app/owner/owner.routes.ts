@@ -12,23 +12,27 @@ export const ownerRoutes: Routes = [
   },
   {
     path: 'consignors',
-    loadComponent: () => import('../components/consignor-list.component').then(m => m.ConsignorListComponent)
+    loadComponent: () => import('./components/consignor-list.component').then(m => m.ConsignorListComponent)
   },
   {
     path: 'consignors/new',
-    loadComponent: () => import('../components/consignor-add.component').then(m => m.ConsignorAddComponent)
+    loadComponent: () => import('./components/consignor-add.component').then(m => m.ConsignorAddComponent)
   },
   {
     path: 'consignors/:id',
-    loadComponent: () => import('../components/consignor-detail.component').then(m => m.ConsignorDetailComponent)
+    loadComponent: () => import('./components/consignor-detail.component').then(m => m.ConsignorDetailComponent)
   },
   {
     path: 'consignors/:id/edit',
-    loadComponent: () => import('../components/consignor-edit.component').then(m => m.ConsignorEditComponent)
+    loadComponent: () => import('./components/consignor-edit.component').then(m => m.ConsignorEditComponent)
   },
   {
     path: 'inventory',
     loadComponent: () => import('./components/inventory-list.component').then(m => m.InventoryListComponent)
+  },
+  {
+    path: 'record-sale',
+    loadComponent: () => import('./components/record-sale.component').then(m => m.RecordSaleComponent)
   },
   {
     path: 'sales',

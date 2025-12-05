@@ -9,7 +9,7 @@ import { RoleSelectionComponent } from './role-selection.component';
 class MockOwnerSignupComponent { }
 
 @Component({ template: '' })
-class MockConsignorSignupComponent { }
+class MockconsignorsignupComponent { }
 
 @Component({ template: '' })
 class MockLoginComponent { }
@@ -25,7 +25,7 @@ describe('RoleSelectionComponent', () => {
         RoleSelectionComponent,
         RouterTestingModule.withRoutes([
           { path: 'signup/owner', component: MockOwnerSignupComponent },
-          { path: 'signup/consignor', component: MockConsignorSignupComponent },
+          { path: 'signup/consignor', component: MockconsignorsignupComponent },
           { path: 'login', component: MockLoginComponent }
         ])
       ]

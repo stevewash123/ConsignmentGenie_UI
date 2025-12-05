@@ -1,10 +1,10 @@
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthProvider, getEnabledProviders, getProviderById } from '../../config/auth-providers.config';
+import { AuthProvider, getEnabledconsignors, getProviderById } from '../../config/auth-providers.config';
 
 export interface ProviderAuthEvent {
-  provider: string;
+  consignor: string;
 }
 
 export interface CredentialsEvent {
@@ -18,22 +18,22 @@ export interface CredentialsEvent {
   imports: [CommonModule, FormsModule],
   template: `
     <div class="auth-method-selector">
-      <!-- OAuth Providers -->
-      <div class="oauth-providers" *ngIf="availableProviders().length > 0">
+      <!-- OAuth consignors -->
+      <div class="oauth-consignors" *ngIf="availableconsignors().length > 0">
         <button
-          *ngFor="let provider of availableProviders()"
+          *ngFor="let consignor of availableconsignors()"
           type="button"
-          class="provider-button"
-          [class]="'provider-' + provider.id"
-          (click)="handleProviderAuth(provider.id)"
+          class="consignor-button"
+          [class]="'consignor-' + consignor.id"
+          (click)="handleProviderAuth(consignor.id)"
           [disabled]="isLoading()">
-          <span class="provider-icon">{{ provider.icon }}</span>
-          <span class="provider-text">Continue with {{ provider.name }}</span>
+          <span class="consignor-icon">{{ consignor.icon }}</span>
+          <span class="consignor-text">Continue with {{ consignor.name }}</span>
         </button>
       </div>
 
       <!-- Divider (only shown if both OAuth and email/password are available) -->
-      <div class="auth-divider" *ngIf="availableProviders().length > 0 && showEmailPassword">
+      <div class="auth-divider" *ngIf="availableconsignors().length > 0 && showEmailPassword">
         <hr class="divider-line">
         <span class="divider-text">or</span>
         <hr class="divider-line">
@@ -73,14 +73,14 @@ export interface CredentialsEvent {
       max-width: 400px;
     }
 
-    .oauth-providers {
+    .oauth-consignors {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       margin-bottom: 1.5rem;
     }
 
-    .provider-button {
+    .consignor-button {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -98,17 +98,17 @@ export interface CredentialsEvent {
       min-height: 48px;
     }
 
-    .provider-button:hover:not(:disabled) {
+    .consignor-button:hover:not(:disabled) {
       border-color: #9ca3af;
       background-color: #f9fafb;
     }
 
-    .provider-button:disabled {
+    .consignor-button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
-    .provider-icon {
+    .consignor-icon {
       font-weight: 700;
       font-size: 1.1rem;
       width: 20px;
@@ -120,15 +120,15 @@ export interface CredentialsEvent {
       color: white;
     }
 
-    .provider-google .provider-icon {
+    .consignor-google .consignor-icon {
       background: #db4437;
     }
 
-    .provider-facebook .provider-icon {
+    .consignor-facebook .consignor-icon {
       background: #1877f2;
     }
 
-    .provider-text {
+    .consignor-text {
       flex: 1;
       text-align: center;
     }
@@ -198,12 +198,12 @@ export interface CredentialsEvent {
     }
 
     @media (max-width: 480px) {
-      .provider-button {
+      .consignor-button {
         padding: 0.75rem 1rem;
         font-size: 0.9rem;
       }
 
-      .provider-text {
+      .consignor-text {
         font-size: 0.875rem;
       }
     }
@@ -220,28 +220,28 @@ export class AuthMethodSelectorComponent {
   email = '';
   password = '';
 
-  availableProviders = signal<AuthProvider[]>([]);
+  availableconsignors = signal<AuthProvider[]>([]);
 
   ngOnInit() {
-    this.updateAvailableProviders();
+    this.updateAvailableconsignors();
   }
 
   ngOnChanges() {
-    this.updateAvailableProviders();
+    this.updateAvailableconsignors();
   }
 
-  private updateAvailableProviders() {
-    const enabledProviders = getEnabledProviders();
-    const filteredProviders = enabledProviders.filter(provider =>
-      this.enabledProviders.includes(provider.id)
+  private updateAvailableconsignors() {
+    const enabledProviders = getEnabledconsignors();
+    const filteredconsignors = enabledProviders.filter(consignor =>
+      this.enabledProviders.includes(consignor.id)
     );
-    this.availableProviders.set(filteredProviders);
+    this.availableconsignors.set(filteredconsignors);
   }
 
   handleProviderAuth(providerId: string) {
     if (this.isLoading()) return;
 
-    this.onProviderAuth.emit({ provider: providerId });
+    this.onProviderAuth.emit({ consignor: providerId });
   }
 
   onCredentialsChange() {

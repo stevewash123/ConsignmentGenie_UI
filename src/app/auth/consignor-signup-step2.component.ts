@@ -362,7 +362,7 @@ export class ConsignorSignupStep2Component implements OnInit {
 
   ngOnInit() {
     // Get the auth data from step 1
-    const authDataStr = sessionStorage.getItem('consignorAuthData');
+    const authDataStr = sessionStorage.getItem('providerAuthData');
     if (authDataStr) {
       this.authData = JSON.parse(authDataStr);
     } else {
@@ -389,7 +389,7 @@ export class ConsignorSignupStep2Component implements OnInit {
           console.log('Consignor registration successful:', response);
           if (response.success) {
             // Clear the temporary auth data
-            sessionStorage.removeItem('consignorAuthData');
+            sessionStorage.removeItem('providerAuthData');
 
             // For now, redirect to login since consignors need to join shops separately
             this.router.navigate(['/login'], {

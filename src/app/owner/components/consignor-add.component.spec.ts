@@ -2,25 +2,25 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { Component } from '@angular/core';
-import { ConsignorAddComponent } from './consignor-add.component';
-import { ConsignorService } from '../services/consignor.service';
-import { Consignor } from '../models/consignor.model';
+import { ProviderAddComponent } from './consignor-add.component';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
 
 // Mock components for routing tests
 @Component({ template: '' })
-class MockConsignorListComponent { }
+class MockProviderListComponent { }
 
 @Component({ template: '' })
-class MockConsignorDetailComponent { }
+class MockProviderDetailComponent { }
 
-describe('ConsignorAddComponent', () => {
-  let component: ConsignorAddComponent;
-  let fixture: ComponentFixture<ConsignorAddComponent>;
+describe('ProviderAddComponent', () => {
+  let component: ProviderAddComponent;
+  let fixture: ComponentFixture<ProviderAddComponent>;
   let router: jasmine.SpyObj<Router>;
   let consignorService: jasmine.SpyObj<ConsignorService>;
 
   beforeEach(async () => {
-    const ConsignorServiceSpy = jasmine.createSpyObj('ConsignorService', ['createConsignor']);
+    const ConsignorServiceSpy = jasmine.createSpyObj('ConsignorService', ['createProvider']);
     router = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
       events: of({}),
       routerState: { root: {} }
@@ -37,7 +37,7 @@ describe('ConsignorAddComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        ConsignorAddComponent
+        ProviderAddComponent
       ],
       providers: [
         { provide: ConsignorService, useValue: ConsignorServiceSpy },
@@ -46,9 +46,9 @@ describe('ConsignorAddComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorAddComponent);
+    fixture = TestBed.createComponent(ProviderAddComponent);
     component = fixture.componentInstance;
-    consignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
+    ConsignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
     fixture.detectChanges();
   });
 
@@ -57,20 +57,20 @@ describe('ConsignorAddComponent', () => {
   });
 
   it('should initialize with empty form data', () => {
-    expect(component.consignorData.name).toBe('');
-    expect(component.consignorData.email).toBe('');
-    expect(component.consignorData.phone).toBe('');
-    expect(component.consignorData.address).toBe('');
-    expect(component.consignorData.commissionRate).toBe(50);
-    expect(component.consignorData.preferredPaymentMethod).toBe('');
-    expect(component.consignorData.paymentDetails).toBe('');
-    expect(component.consignorData.notes).toBe('');
+    expect(component.providerData.name).toBe('');
+    expect(component.providerData.email).toBe('');
+    expect(component.providerData.phone).toBe('');
+    expect(component.providerData.address).toBe('');
+    expect(component.providerData.commissionRate).toBe(50);
+    expect(component.providerData.preferredPaymentMethod).toBe('');
+    expect(component.providerData.paymentDetails).toBe('');
+    expect(component.providerData.notes).toBe('');
   });
 
   it('should display the correct title and description', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('h1')?.textContent).toBe('Add New Consignor');
+    expect(compiled.querySelector('h1')?.textContent).toBe('Add New consignor');
     expect(compiled.querySelector('.subtitle')?.textContent)
       .toContain('Create a new consignor account or consider using');
   });
@@ -83,9 +83,9 @@ describe('ConsignorAddComponent', () => {
   });
 
   it('should create consignor successfully', fakeAsync(() => {
-    const mockConsignor: Consignor = {
+    const mockProvider: consignor = {
       id: 1,
-      name: 'Test Consignor',
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '1234567890',
       address: '123 Test Street',
@@ -100,11 +100,11 @@ describe('ConsignorAddComponent', () => {
       organizationId: 1
     };
 
-    consignorService.createConsignor.and.returnValue(of(mockConsignor));
+    ConsignorService.createProvider.and.returnValue(of(mockProvider));
 
     // Fill form with valid data
-    component.consignorData = {
-      name: 'Test Consignor',
+    component.providerData = {
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '1234567890',
       address: '123 Test Street',
@@ -116,8 +116,8 @@ describe('ConsignorAddComponent', () => {
 
     component.onSubmit();
 
-    expect(consignorService.createConsignor).toHaveBeenCalledWith({
-      name: 'Test Consignor',
+    expect(ConsignorService.createProvider).toHaveBeenCalledWith({
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '1234567890',
       address: '123 Test Street',
@@ -127,7 +127,7 @@ describe('ConsignorAddComponent', () => {
       notes: 'Test notes'
     });
 
-    expect(component.successMessage()).toBe('Consignor created successfully!');
+    expect(component.successMessage()).toBe('consignor created successfully!');
     expect(component.isSubmitting()).toBe(false);
 
     // Advance time by 2000ms to trigger the setTimeout in component
@@ -139,10 +139,10 @@ describe('ConsignorAddComponent', () => {
   xit('should handle creation error', () => {
     // X'd out due to async timing issues with Angular zone.js and observable completion
     const mockError = { error: { message: 'Email already exists' } };
-    consignorService.createConsignor.and.returnValue(throwError(() => mockError));
+    ConsignorService.createProvider.and.returnValue(throwError(() => mockError));
 
-    component.consignorData = {
-      name: 'Test Consignor',
+    component.providerData = {
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '1234567890',
       address: '123 Test Street',
@@ -163,10 +163,10 @@ describe('ConsignorAddComponent', () => {
   xit('should handle creation error without message', () => {
     // X'd out due to async timing issues with Angular zone.js and observable completion
     const mockError = {};
-    consignorService.createConsignor.and.returnValue(throwError(() => mockError));
+    ConsignorService.createProvider.and.returnValue(throwError(() => mockError));
 
-    component.consignorData = {
-      name: 'Test Consignor',
+    component.providerData = {
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '',
       address: '',
@@ -188,13 +188,13 @@ describe('ConsignorAddComponent', () => {
 
     component.onSubmit();
 
-    expect(consignorService.createConsignor).not.toHaveBeenCalled();
+    expect(ConsignorService.createProvider).not.toHaveBeenCalled();
   });
 
   it('should clean up undefined values in request', () => {
-    const mockConsignor: Consignor = {
+    const mockProvider: consignor = {
       id: 1,
-      name: 'Test Consignor',
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '1234567890',
       address: undefined,
@@ -209,10 +209,10 @@ describe('ConsignorAddComponent', () => {
       organizationId: 1
     };
 
-    consignorService.createConsignor.and.returnValue(of(mockConsignor));
+    ConsignorService.createProvider.and.returnValue(of(mockProvider));
 
-    component.consignorData = {
-      name: 'Test Consignor',
+    component.providerData = {
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '1234567890',
       address: '',
@@ -224,8 +224,8 @@ describe('ConsignorAddComponent', () => {
 
     component.onSubmit();
 
-    expect(consignorService.createConsignor).toHaveBeenCalledWith({
-      name: 'Test Consignor',
+    expect(ConsignorService.createProvider).toHaveBeenCalledWith({
+      name: 'Test consignor',
       email: 'test@consignor.com',
       phone: '1234567890',
       address: undefined,

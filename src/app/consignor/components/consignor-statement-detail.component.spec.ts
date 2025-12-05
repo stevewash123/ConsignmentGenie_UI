@@ -2,14 +2,14 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
-import { ConsignorStatementDetailComponent } from './consignor-statement-detail.component';
-import { ConsignorPortalService } from '../services/consignor-portal.service';
+import { consignorstatementDetailComponent } from './consignor-statement-detail.component';
+import { ProviderPortalService } from '../services/consignor-portal.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
-import { StatementDto, StatementSaleLineDto, StatementPayoutLineDto } from "../models/consignor.models";
+import { StatementDto, StatementSaleLineDto, StatementPayoutLineDto } from '../models/consignor.models';
 
-describe('ConsignorStatementDetailComponent', () => {
-  let mockConsignorService: jasmine.SpyObj<ConsignorPortalService>;
+describe('consignorstatementDetailComponent', () => {
+  let mockConsignorService: jasmine.SpyObj<ProviderPortalService>;
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   const mockSales: StatementSaleLineDto[] = [
@@ -63,7 +63,7 @@ describe('ConsignorStatementDetailComponent', () => {
   };
 
   beforeEach(async () => {
-    const consignorspy = jasmine.createSpyObj('ConsignorPortalService', [
+    const consignorspy = jasmine.createSpyObj('ProviderPortalService', [
       'getStatement',
       'downloadStatementPdf',
       'regenerateStatement'
@@ -76,11 +76,11 @@ describe('ConsignorStatementDetailComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        ConsignorStatementDetailComponent,
+        consignorstatementDetailComponent,
         RouterTestingModule.withRoutes([])
       ],
       providers: [
-        { provide: ConsignorPortalService, useValue: consignorspy },
+        { provide: ProviderPortalService, useValue: consignorspy },
         { provide: LoadingService, useValue: loadingSpy },
         {
           provide: ActivatedRoute,
@@ -96,7 +96,7 @@ describe('ConsignorStatementDetailComponent', () => {
       ]
     }).compileComponents();
 
-    mockConsignorService = TestBed.inject(ConsignorPortalService) as jasmine.SpyObj<ConsignorPortalService>;
+    mockConsignorService = TestBed.inject(ProviderPortalService) as jasmine.SpyObj<ProviderPortalService>;
     mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
     mockConsignorService.getStatement.and.returnValue(of(mockStatement));
     mockConsignorService.downloadStatementPdf.and.returnValue(of(new Blob(['pdf content'], { type: 'application/pdf' })));
@@ -110,11 +110,11 @@ describe('ConsignorStatementDetailComponent', () => {
   // WITHOUT detectChanges in beforeEach (for specific loading state tests)
   // ===========================================
   describe('without detectChanges', () => {
-    let component: ConsignorStatementDetailComponent;
-    let fixture: ComponentFixture<ConsignorStatementDetailComponent>;
+    let component: consignorstatementDetailComponent;
+    let fixture: ComponentFixture<consignorstatementDetailComponent>;
 
     beforeEach(() => {
-      fixture = TestBed.createComponent(ConsignorStatementDetailComponent);
+      fixture = TestBed.createComponent(consignorstatementDetailComponent);
       component = fixture.componentInstance;
       // Reset loading service spies
       mockLoadingService.start.calls.reset();
@@ -173,11 +173,11 @@ describe('ConsignorStatementDetailComponent', () => {
   // WITH detectChanges in beforeEach
   // ===========================================
   describe('with detectChanges', () => {
-    let component: ConsignorStatementDetailComponent;
-    let fixture: ComponentFixture<ConsignorStatementDetailComponent>;
+    let component: consignorstatementDetailComponent;
+    let fixture: ComponentFixture<consignorstatementDetailComponent>;
 
     beforeEach(fakeAsync(() => {
-      fixture = TestBed.createComponent(ConsignorStatementDetailComponent);
+      fixture = TestBed.createComponent(consignorstatementDetailComponent);
       component = fixture.componentInstance;
       spyOn(window, 'confirm').and.returnValue(true);
       // Don't reset spies - let them accumulate calls for this test section

@@ -13,7 +13,7 @@ import { ENTITY_LABELS } from '../constants/labels';
     <div class="modal-overlay" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ mode === 'invite' ? labels.inviteConsignor : labels.addConsignorManually }}</h2>
+          <h2>{{ mode === 'invite' ? labels.inviteProvider : labels.addProviderManually }}</h2>
           <button class="close-btn" (click)="close()">×</button>
         </div>
 
@@ -412,7 +412,7 @@ export class InviteConsignorModalComponent {
     useShopDefault: new FormControl(true)
   });
 
-  constructor(private consignorService: ConsignorService) {}
+  constructor(private ConsignorService: ConsignorService) {}
 
   close(): void {
     this.closed.emit();
@@ -444,7 +444,7 @@ export class InviteConsignorModalComponent {
       };
 
       // Send invitation via API
-      this.consignorService.inviteConsignor(inviteData).subscribe({
+      this.ConsignorService.inviteConsignor(inviteData).subscribe({
         next: (response) => {
           this.isSubmitting.set(false);
           if (response.success) {

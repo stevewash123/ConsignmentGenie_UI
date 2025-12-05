@@ -27,7 +27,7 @@ export interface TwoFactorStatus {
 }
 
 export interface SecuritySettings {
-  linkedProviders: LinkedProvider[];
+  linkedconsignors: LinkedProvider[];
   activeSessions: ActiveSession[];
   twoFactorAuth: TwoFactorStatus;
   hasEmailPassword: boolean;
@@ -45,29 +45,29 @@ export interface SecuritySettings {
         <h3 class="section-title">Sign-in Method</h3>
         <div class="signin-methods">
 
-          <!-- OAuth Providers -->
-          <div *ngFor="let provider of securityData()?.linkedProviders" class="signin-method">
+          <!-- OAuth consignors -->
+          <div *ngFor="let consignor of securityData()?.linkedconsignors" class="signin-method">
             <div class="method-info">
-              <span class="method-icon" [class]="'icon-' + provider.id">{{ getProviderIcon(provider.id) }}</span>
+              <span class="method-icon" [class]="'icon-' + consignor.id">{{ getProviderIcon(consignor.id) }}</span>
               <div class="method-details">
-                <span class="method-name">{{ provider.name }}</span>
-                <span class="method-email" *ngIf="provider.email">{{ provider.email }}</span>
-                <span class="method-status" *ngIf="!provider.email">Not connected</span>
+                <span class="method-name">{{ consignor.name }}</span>
+                <span class="method-email" *ngIf="consignor.email">{{ consignor.email }}</span>
+                <span class="method-status" *ngIf="!consignor.email">Not connected</span>
               </div>
             </div>
             <div class="method-actions">
-              <span *ngIf="provider.connected" class="status-connected">✓ Connected</span>
+              <span *ngIf="consignor.connected" class="status-connected">✓ Connected</span>
               <button
-                *ngIf="provider.connected"
+                *ngIf="consignor.connected"
                 class="btn-disconnect"
-                (click)="disconnectProvider(provider.id)"
+                (click)="disconnectProvider(consignor.id)"
                 [disabled]="isLoading()">
                 Disconnect
               </button>
               <button
-                *ngIf="!provider.connected"
+                *ngIf="!consignor.connected"
                 class="btn-connect"
-                (click)="connectProvider(provider.id)"
+                (click)="connectProvider(consignor.id)"
                 [disabled]="isLoading()">
                 Connect
               </button>
@@ -564,7 +564,7 @@ export class AccountSecurityComponent implements OnInit {
     try {
       // Mock data for now - replace with actual API call
       const mockData: SecuritySettings = {
-        linkedProviders: [
+        linkedconsignors: [
           { id: 'google', name: 'Google', email: 'user@gmail.com', connected: true, connectedAt: new Date() },
           { id: 'facebook', name: 'Facebook', connected: false }
         ],
@@ -585,8 +585,8 @@ export class AccountSecurityComponent implements OnInit {
   }
 
   getProviderIcon(providerId: string): string {
-    const provider = getProviderById(providerId);
-    return provider?.icon || '?';
+    const consignor = getProviderById(providerId);
+    return consignor?.icon || '?';
   }
 
   getSessionTimeText(lastActivity: Date): string {
@@ -612,7 +612,7 @@ export class AccountSecurityComponent implements OnInit {
       // TODO: Implement OAuth flow
       this.showSuccess(`${providerId} connection initiated`);
     } catch (error) {
-      this.showError('Failed to connect provider');
+      this.showError('Failed to connect consignor');
     } finally {
       this.isLoading.set(false);
     }
@@ -627,7 +627,7 @@ export class AccountSecurityComponent implements OnInit {
       this.showSuccess(`${providerId} disconnected`);
       await this.loadSecuritySettings();
     } catch (error) {
-      this.showError('Failed to disconnect provider');
+      this.showError('Failed to disconnect consignor');
     } finally {
       this.isLoading.set(false);
     }

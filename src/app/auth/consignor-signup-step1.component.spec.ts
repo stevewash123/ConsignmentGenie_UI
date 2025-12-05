@@ -76,7 +76,7 @@ describe('ConsignorSignupStep1Component', () => {
 
     expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('LOGIN');
     expect(compiled.querySelector('.subtitle')?.textContent?.trim())
-      .toBe('Choose your method to log in as a Consignor');
+      .toBe('Choose your method to log in as a consignor');
   });
 
   it('should validate required fields', () => {
@@ -147,7 +147,7 @@ describe('ConsignorSignupStep1Component', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const submitButton = compiled.querySelector('.submit-btn') as HTMLButtonElement;
 
-    expect(submitButton.textContent?.trim()).toBe('Continue to Consignor Details');
+    expect(submitButton.textContent?.trim()).toBe('Continue to consignor Details');
 
     component.isSubmitting.set(true);
     fixture.detectChanges();
@@ -324,7 +324,7 @@ describe('ConsignorSignupStep1Component', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       const subtitle = compiled.querySelector('.subtitle');
 
-      expect(subtitle?.textContent?.trim()).toBe('Choose your method to log in as a Consignor');
+      expect(subtitle?.textContent?.trim()).toBe('Choose your method to log in as a consignor');
     });
   });
 

@@ -2,9 +2,9 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ConsignorService, ConsignorRegistrationRequest } from '../services/consignor.service';
+import { ConsignorService, ConsignorRegistrationRequest } from '../../services/consignor.service';
 
-export interface ConsignorRegistrationData {
+export interface ProviderRegistrationData {
   name: string;
   email: string;
   phone?: string;
@@ -21,7 +21,7 @@ export interface ConsignorRegistrationData {
     <div class="registration-container">
       <div class="registration-card">
         <div class="registration-header">
-          <h1>Complete Your Consignor Registration</h1>
+          <h1>Complete Your consignor Registration</h1>
           <p class="shop-info" *ngIf="shopName()">
             You've been invited to join <strong>{{ shopName() }}</strong>
           </p>
@@ -325,7 +325,7 @@ export interface ConsignorRegistrationData {
   `]
 })
 export class ConsignorRegistrationComponent implements OnInit {
-  registration: ConsignorRegistrationData = {
+  registration: ProviderRegistrationData = {
     name: '',
     email: '',
     phone: '',
@@ -342,7 +342,7 @@ export class ConsignorRegistrationComponent implements OnInit {
   invitationToken = '';
 
   constructor(
-    private consignorService: ConsignorService,
+    private ConsignorService: ConsignorService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -366,7 +366,7 @@ export class ConsignorRegistrationComponent implements OnInit {
   }
 
   validateInvitation(): void {
-    this.consignorService.validateInvitation(this.invitationToken).subscribe({
+    this.ConsignorService.validateInvitation(this.invitationToken).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.registration.name = response.invitedName || '';
@@ -400,7 +400,7 @@ export class ConsignorRegistrationComponent implements OnInit {
       address: this.registration.address
     };
 
-    this.consignorService.registerFromInvitation(request).subscribe({
+    this.ConsignorService.registerFromInvitation(request).subscribe({
       next: (response) => {
         if (response.success) {
           this.isSubmitted.set(true);

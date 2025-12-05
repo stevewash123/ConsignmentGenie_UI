@@ -3,15 +3,15 @@ import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
-import { ConsignorListComponent } from './consignor-list.component';
-import { ConsignorService, PendingInvitation } from '../services/consignor.service';
-import { LoadingService } from '../shared/services/loading.service';
-import { Consignor } from '../models/consignor.model';
-import { ENTITY_LABELS } from '../shared/constants/labels';
+import { ProviderListComponent } from './consignor-list.component';
+import { ConsignorService, PendingInvitation } from '../../services/consignor.service';
+import { LoadingService } from '../../shared/services/loading.service';
+import { Consignor } from '../../models/consignor.model';
+import { ENTITY_LABELS } from '../../shared/constants/labels';
 
-describe('ConsignorListComponent', () => {
-  let component: ConsignorListComponent;
-  let fixture: ComponentFixture<ConsignorListComponent>;
+describe('ProviderListComponent', () => {
+  let component: ProviderListComponent;
+  let fixture: ComponentFixture<ProviderListComponent>;
   let mockConsignorService: jasmine.SpyObj<ConsignorService>;
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
   let mockRouter: jasmine.SpyObj<Router>;
@@ -49,7 +49,7 @@ describe('ConsignorListComponent', () => {
 
   beforeEach(async () => {
     const ConsignorServiceSpy = jasmine.createSpyObj('ConsignorService', [
-      'getConsignors',
+      'getconsignors',
       'getPendingInvitations',
       'resendInvitation',
       'cancelInvitation'
@@ -62,7 +62,7 @@ describe('ConsignorListComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [ConsignorListComponent],
+      imports: [ProviderListComponent],
       providers: [
         { provide: ConsignorService, useValue: ConsignorServiceSpy },
         { provide: LoadingService, useValue: loadingServiceSpy },
@@ -70,14 +70,14 @@ describe('ConsignorListComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsignorListComponent);
+    fixture = TestBed.createComponent(ProviderListComponent);
     component = fixture.componentInstance;
     mockConsignorService = TestBed.inject(ConsignorService) as jasmine.SpyObj<ConsignorService>;
     mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
 
     // Setup default returns
-    mockConsignorService.getConsignors.and.returnValue(of(mockconsignors));
+    mockConsignorService.getconsignors.and.returnValue(of(mockconsignors));
     mockConsignorService.getPendingInvitations.and.returnValue(of(mockInvitations));
     mockLoadingService.isLoading.and.returnValue(false);
   });
@@ -90,7 +90,7 @@ describe('ConsignorListComponent', () => {
     component.ngOnInit();
 
     expect(mockLoadingService.start).toHaveBeenCalledWith('consignors-list');
-    expect(mockConsignorService.getConsignors).toHaveBeenCalled();
+    expect(mockConsignorService.getconsignors).toHaveBeenCalled();
     expect(mockConsignorService.getPendingInvitations).toHaveBeenCalled();
   });
 
@@ -108,7 +108,7 @@ describe('ConsignorListComponent', () => {
   });
 
   it('should handle consignor loading error gracefully', () => {
-    mockConsignorService.getConsignors.and.returnValue(throwError(() => new Error('API Error')));
+    mockConsignorService.getconsignors.and.returnValue(throwError(() => new Error('API Error')));
     spyOn(console, 'error');
 
     component.ngOnInit();
@@ -129,7 +129,7 @@ describe('ConsignorListComponent', () => {
   });
 
   it('should show invite modal if no consignors and no invitations exist', () => {
-    mockConsignorService.getConsignors.and.returnValue(of([]));
+    mockConsignorService.getconsignors.and.returnValue(of([]));
     mockConsignorService.getPendingInvitations.and.returnValue(of([]));
     spyOn(component, 'showInviteModal');
 
@@ -149,7 +149,7 @@ describe('ConsignorListComponent', () => {
   });
 
   it('should not show invite modal if invitations exist', () => {
-    mockConsignorService.getConsignors.and.returnValue(of([]));
+    mockConsignorService.getconsignors.and.returnValue(of([]));
     spyOn(component, 'showInviteModal');
 
     component.ngOnInit();
@@ -205,7 +205,7 @@ describe('ConsignorListComponent', () => {
   describe('Helper Methods', () => {
     it('should return consignor item count', () => {
       const consignor = mockconsignors[0];
-      const itemCount = component.getConsignorItemCount(consignor);
+      const itemCount = component.getProviderItemCount(consignor);
 
       // Currently returns 0 as per TODO comment
       expect(itemCount).toBe(0);
@@ -222,7 +222,7 @@ describe('ConsignorListComponent', () => {
 
     it('should track consignors by id', () => {
       const consignor = mockconsignors[0];
-      const trackingId = component.trackByConsignor(0, consignor);
+      const trackingId = component.trackByProvider(0, consignor);
 
       expect(trackingId).toBe(consignor.id);
     });
@@ -241,9 +241,9 @@ describe('ConsignorListComponent', () => {
 
     it('should refresh data when consignor added', () => {
       spyOn(component, 'loadData');
-      const mockConsignor = mockconsignors[0];
+      const mockProvider = mockconsignors[0];
 
-      component.onConsignorAdded(mockConsignor);
+      component.onConsignorAdded(mockProvider);
 
       expect(component.loadData).toHaveBeenCalled();
     });

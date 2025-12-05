@@ -3,40 +3,40 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  ConsignorDashboard,
-  ConsignorItem,
-  ConsignorItemDetail,
-  ConsignorSale,
-  ConsignorPayout,
-  ConsignorPayoutDetail,
-  ConsignorProfile,
-  UpdateConsignorProfile,
+  ProviderDashboard,
+  ProviderItem,
+  ProviderItemDetail,
+  consignorsale,
+  ProviderPayout,
+  ProviderPayoutDetail,
+  ProviderProfile,
+  UpdateProviderProfile,
   PagedResult,
-  ConsignorItemQuery,
-  ConsignorSaleQuery,
+  ProviderItemQuery,
+  consignorsaleQuery,
   NotificationDto,
   NotificationQueryParams,
   NotificationPreferencesDto,
   UpdateNotificationPreferencesRequest,
   StatementListDto,
   StatementDto
-} from "../models/consignor.models";
+} from '../models/consignor.models';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ConsignorPortalService {
+export class ProviderPortalService {
   private apiUrl = `${environment.apiUrl}/api/consignor`;
 
   constructor(private http: HttpClient) {}
 
   // Dashboard
-  getDashboard(): Observable<ConsignorDashboard> {
-    return this.http.get<ConsignorDashboard>(`${this.apiUrl}/dashboard`);
+  getDashboard(): Observable<ProviderDashboard> {
+    return this.http.get<ProviderDashboard>(`${this.apiUrl}/dashboard`);
   }
 
   // Items
-  getMyItems(query?: ConsignorItemQuery): Observable<PagedResult<ConsignorItem>> {
+  getMyItems(query?: ProviderItemQuery): Observable<PagedResult<ProviderItem>> {
     let params = new HttpParams();
 
     if (query?.status) params = params.set('status', query.status);
@@ -47,15 +47,15 @@ export class ConsignorPortalService {
     if (query?.page) params = params.set('page', query.page.toString());
     if (query?.pageSize) params = params.set('pageSize', query.pageSize.toString());
 
-    return this.http.get<PagedResult<ConsignorItem>>(`${this.apiUrl}/items`, { params });
+    return this.http.get<PagedResult<ProviderItem>>(`${this.apiUrl}/items`, { params });
   }
 
-  getMyItem(id: string): Observable<ConsignorItemDetail> {
-    return this.http.get<ConsignorItemDetail>(`${this.apiUrl}/items/${id}`);
+  getMyItem(id: string): Observable<ProviderItemDetail> {
+    return this.http.get<ProviderItemDetail>(`${this.apiUrl}/items/${id}`);
   }
 
   // Sales
-  getMySales(query?: ConsignorSaleQuery): Observable<PagedResult<ConsignorSale>> {
+  getMySales(query?: consignorsaleQuery): Observable<PagedResult<consignorsale>> {
     let params = new HttpParams();
 
     if (query?.dateFrom) params = params.set('dateFrom', query.dateFrom.toISOString());
@@ -64,25 +64,25 @@ export class ConsignorPortalService {
     if (query?.page) params = params.set('page', query.page.toString());
     if (query?.pageSize) params = params.set('pageSize', query.pageSize.toString());
 
-    return this.http.get<PagedResult<ConsignorSale>>(`${this.apiUrl}/sales`, { params });
+    return this.http.get<PagedResult<consignorsale>>(`${this.apiUrl}/sales`, { params });
   }
 
   // Payouts
-  getMyPayouts(): Observable<PagedResult<ConsignorPayout>> {
-    return this.http.get<PagedResult<ConsignorPayout>>(`${this.apiUrl}/payouts`);
+  getMyPayouts(): Observable<PagedResult<ProviderPayout>> {
+    return this.http.get<PagedResult<ProviderPayout>>(`${this.apiUrl}/payouts`);
   }
 
-  getMyPayout(id: string): Observable<ConsignorPayoutDetail> {
-    return this.http.get<ConsignorPayoutDetail>(`${this.apiUrl}/payouts/${id}`);
+  getMyPayout(id: string): Observable<ProviderPayoutDetail> {
+    return this.http.get<ProviderPayoutDetail>(`${this.apiUrl}/payouts/${id}`);
   }
 
   // Profile
-  getProfile(): Observable<ConsignorProfile> {
-    return this.http.get<ConsignorProfile>(`${this.apiUrl}/profile`);
+  getProfile(): Observable<ProviderProfile> {
+    return this.http.get<ProviderProfile>(`${this.apiUrl}/profile`);
   }
 
-  updateProfile(profile: UpdateConsignorProfile): Observable<ConsignorProfile> {
-    return this.http.put<ConsignorProfile>(`${this.apiUrl}/profile`, profile);
+  updateProfile(profile: UpdateProviderProfile): Observable<ProviderProfile> {
+    return this.http.put<ProviderProfile>(`${this.apiUrl}/profile`, profile);
   }
 
   // Notifications

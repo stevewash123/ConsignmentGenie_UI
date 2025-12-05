@@ -97,11 +97,11 @@ export const routes: Routes = [
   },
   {
     path: 'register/consignor/invitation',
-    loadComponent: () => import('./components/consignor-registration-step1.component').then(m => m.ConsignorRegistrationStep1Component)
+    loadComponent: () => import('./owner/components/consignor-registration-step1.component').then(m => m.ConsignorRegistrationStep1Component)
   },
   {
     path: 'register/consignor/details',
-    loadComponent: () => import('./components/consignor-registration-step2.component').then(m => m.ConsignorRegistrationStep2Component)
+    loadComponent: () => import('./owner/components/consignor-registration-step2.component').then(m => m.ConsignorRegistrationStep2Component)
   },
   {
     path: 'register/success',
