@@ -248,6 +248,13 @@ export class SettingsLayoutComponent {
       description: 'Plan & billing'
     },
     {
+      id: 'integrations',
+      label: 'Integrations',
+      icon: '🔗',
+      route: 'integrations',
+      description: 'Square, QuickBooks & more'
+    },
+    {
       id: 'account',
       label: 'Account',
       icon: '👤',
