@@ -113,4 +113,66 @@ export class PayoutService {
     }>(`${this.apiUrl}/process`, request)
       .pipe(map(response => response.data));
   }
+
+  // Batch payout methods for story 04
+  getBatchPayoutPreview(request: {
+    method: string;
+    consignorIds?: string[] | null;
+  }): Observable<{
+    eligibleConsignors: {
+      consignorId: string;
+      name: string;
+      availableBalance: number;
+      preferredPaymentMethod?: string;
+    }[];
+    totalAmount: number;
+    count: number;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      data: {
+        eligibleConsignors: {
+          consignorId: string;
+          name: string;
+          availableBalance: number;
+          preferredPaymentMethod?: string;
+        }[];
+        totalAmount: number;
+        count: number;
+      }
+    }>(`${this.apiUrl}/batch/preview`, request)
+      .pipe(map(response => response.data));
+  }
+
+  processBatchPayout(request: {
+    method: string;
+    consignorIds: string[];
+    notes?: string;
+  }): Observable<{
+    payouts: {
+      consignorId: string;
+      consignorName: string;
+      amount: number;
+      method: string;
+      payoutNumber: string;
+    }[];
+    totalAmount: number;
+    count: number;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      data: {
+        payouts: {
+          consignorId: string;
+          consignorName: string;
+          amount: number;
+          method: string;
+          payoutNumber: string;
+        }[];
+        totalAmount: number;
+        count: number;
+      }
+    }>(`${this.apiUrl}/batch`, request)
+      .pipe(map(response => response.data));
+  }
 }

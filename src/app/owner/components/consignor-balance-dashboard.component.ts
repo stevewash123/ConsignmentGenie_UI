@@ -6,6 +6,7 @@ import { OwnerLayoutComponent } from './owner-layout.component';
 import { LoadingService } from '../../shared/services/loading.service';
 import { ProcessSinglePayoutModalComponent, ConsignorPayoutData, SinglePayoutResponse } from '../../shared/components/process-single-payout-modal.component';
 import { PayoutSuccessModalComponent } from '../../shared/components/payout-success-modal.component';
+import { BatchPayoutModalComponent, BatchPayoutResult } from '../../shared/components/batch-payout-modal.component';
 
 // Interfaces for the Balance Dashboard
 export interface ConsignorBalanceSummary {
@@ -39,7 +40,7 @@ export interface BalanceSort {
 @Component({
   selector: 'app-consignor-balance-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ProcessSinglePayoutModalComponent, PayoutSuccessModalComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ProcessSinglePayoutModalComponent, PayoutSuccessModalComponent, BatchPayoutModalComponent],
   templateUrl: './consignor-balance-dashboard.component.html',
   styleUrls: ['./consignor-balance-dashboard.component.css']
 })
@@ -61,6 +62,7 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
   // Modal state
   showPayoutModal = signal(false);
   showSuccessModal = signal(false);
+  showBatchModal = signal(false);
   selectedConsignorData = signal<ConsignorPayoutData | null>(null);
   lastPayoutResult = signal<SinglePayoutResponse | null>(null);
 
@@ -237,9 +239,7 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
       return;
     }
 
-    // TODO: Implement batch payout functionality
-    const totalAmount = readyToPay.reduce((sum, b) => sum + b.availableBalance, 0);
-    this.toastr.info(`Pay All Due ($${totalAmount.toFixed(2)}) - Coming in story 04`);
+    this.showBatchModal.set(true);
   }
 
   formatCurrency(amount: number): string {
@@ -280,6 +280,21 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
     this.showSuccessModal.set(false);
     this.lastPayoutResult.set(null);
     this.selectedConsignorData.set(null);
+  }
+
+  onBatchModalClose() {
+    this.showBatchModal.set(false);
+  }
+
+  onBatchSuccess(batchResult: BatchPayoutResult) {
+    this.showBatchModal.set(false);
+
+    // Update balances for all consignors in the batch
+    batchResult.payouts.forEach(payout => {
+      this.updateConsignorBalance(payout.consignorName, payout.amount);
+    });
+
+    this.toastr.success(`Successfully processed ${batchResult.count} payouts totaling ${this.formatCurrency(batchResult.totalAmount)}`);
   }
 
   private updateConsignorBalance(consignorName: string, paidAmount: number) {

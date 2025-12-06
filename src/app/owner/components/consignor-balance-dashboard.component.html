@@ -163,4 +163,11 @@
     [payoutData]="lastPayoutResult()"
     (onClose)="onSuccessModalClose()">
   </app-payout-success-modal>
+
+  <!-- Batch Payout Modal -->
+  <app-batch-payout-modal
+    [isVisible]="showBatchModal()"
+    (onClose)="onBatchModalClose()"
+    (onSuccess)="onBatchSuccess($event)">
+  </app-batch-payout-modal>
 </app-owner-layout>
