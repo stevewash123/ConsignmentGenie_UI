@@ -15,6 +15,8 @@ export interface SocialAuthResult {
 declare global {
   interface Window {
     google: any;
+    FB: any;
+    fbAsyncInit: () => void;
   }
 }
 
@@ -31,10 +33,12 @@ export class SocialAuthComponent implements OnInit {
   @Output() authError = new EventEmitter<string>();
 
   private isGoogleLoaded = false;
+  private isFacebookLoaded = false;
   private authService = inject(AuthService);
 
   ngOnInit() {
     this.loadGoogleScript();
+    this.loadFacebookScript();
   }
 
   private loadGoogleScript() {
@@ -66,6 +70,100 @@ export class SocialAuthComponent implements OnInit {
     });
 
     this.isGoogleLoaded = true;
+  }
+
+  private loadFacebookScript() {
+    if (window.FB) {
+      this.initializeFacebook();
+      return;
+    }
+
+    // Set up Facebook async initialization
+    window.fbAsyncInit = () => {
+      this.initializeFacebook();
+    };
+
+    // Load the Facebook SDK
+    const script = document.createElement('script');
+    script.src = 'https://connect.facebook.net/en_US/sdk.js';
+    script.async = true;
+    script.defer = true;
+    script.crossOrigin = 'anonymous';
+    script.onload = () => {
+      // FB will call fbAsyncInit when ready
+    };
+    script.onerror = () => this.authError.emit('Failed to load Facebook authentication');
+    document.head.appendChild(script);
+  }
+
+  private initializeFacebook() {
+    if (!window.FB) {
+      this.authError.emit('Facebook authentication not available');
+      return;
+    }
+
+    const appId = environment.facebookAppId || 'mock-facebook-app-id'; // Use mock for development
+
+    window.FB.init({
+      appId: appId,
+      cookie: true,
+      xfbml: true,
+      version: 'v18.0'
+    });
+
+    this.isFacebookLoaded = true;
+  }
+
+  private handleFacebookResponse(authResponse: any) {
+    // Get user profile information
+    window.FB.api('/me', { fields: 'name,email' }, (profile: any) => {
+      if (profile.error) {
+        this.authError.emit('Failed to get Facebook profile');
+        return;
+      }
+
+      if (!profile.email) {
+        this.authError.emit('Facebook email permission is required');
+        return;
+      }
+
+      const authResult: SocialAuthResult = {
+        provider: 'facebook',
+        email: profile.email,
+        name: profile.name,
+        providerId: profile.id,
+        isNewUser: false // This will be determined by the backend
+      };
+
+      // Mock backend call for now
+      this.mockFacebookAuth(authResult, authResponse.accessToken);
+    });
+  }
+
+  private mockFacebookAuth(authResult: SocialAuthResult, accessToken: string) {
+    // Use AuthService for backend integration
+    const request = {
+      accessToken: accessToken,
+      mode: this.mode,
+      email: authResult.email,
+      name: authResult.name,
+      providerId: authResult.providerId
+    };
+
+    // Use mock implementation for development
+    this.authService.mockFacebookAuth(request).subscribe({
+      next: (response) => {
+        const result: SocialAuthResult = {
+          ...authResult,
+          isNewUser: response.isNewUser
+        };
+        this.authSuccess.emit(result);
+      },
+      error: (error) => {
+        console.error('Facebook auth error:', error);
+        this.authError.emit('Authentication failed. Please try again.');
+      }
+    });
   }
 
   private handleGoogleResponse(response: any) {
@@ -165,8 +263,18 @@ export class SocialAuthComponent implements OnInit {
   }
 
   loginWithFacebook() {
-    // Facebook implementation will be added later
-    this.authError.emit('Facebook authentication not yet implemented');
+    if (!this.isFacebookLoaded) {
+      this.authError.emit('Facebook authentication not loaded');
+      return;
+    }
+
+    window.FB.login((response: any) => {
+      if (response.authResponse) {
+        this.handleFacebookResponse(response.authResponse);
+      } else {
+        this.authError.emit('Facebook authentication cancelled');
+      }
+    }, { scope: 'email,public_profile' });
   }
 
   getModeText(): string {

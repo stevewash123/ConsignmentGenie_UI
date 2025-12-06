@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, BehaviorSubject, catchError, of, map } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse, GoogleAuthRequest, SocialAuthResponse } from '../models/auth.model';
+import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse, GoogleAuthRequest, SocialAuthResponse, FacebookAuthRequest } from '../models/auth.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -329,6 +329,35 @@ export class AuthService {
       email: request.email,
       role: 2, // Owner role
       organizationId: 'mock-org-' + Date.now(),
+      organizationName: request.name + "'s Shop",
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+      isNewUser: Math.random() > 0.5, // Random for testing
+      needsProfileCompletion: request.mode === 'signup'
+    }).pipe(
+      tap(() => {
+        // Simulate network delay
+        setTimeout(() => {}, 1000);
+      }),
+      tap(response => {
+        // Set auth data if login/signup was successful
+        if (!response.needsProfileCompletion) {
+          this.setAuthData(response);
+        }
+      })
+    );
+  }
+
+  /**
+   * Mock Facebook authentication for development
+   */
+  mockFacebookAuth(request: FacebookAuthRequest): Observable<SocialAuthResponse> {
+    // Simulate API call delay
+    return of({
+      token: 'mock-facebook-jwt-token',
+      userId: 'mock-facebook-user-' + Date.now(),
+      email: request.email,
+      role: 2, // Owner role
+      organizationId: 'mock-facebook-org-' + Date.now(),
       organizationName: request.name + "'s Shop",
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
       isNewUser: Math.random() > 0.5, // Random for testing

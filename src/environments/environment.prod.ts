@@ -3,5 +3,7 @@ export const environment = {
   apiUrl: 'https://consignmentgenie-api.onrender.com',
   stripePublishableKey: 'pk_live_your_stripe_key_here',
   appName: 'ConsignmentGenie',
-  supportEmail: 'support@consignmentgenie.com'
+  supportEmail: 'support@consignmentgenie.com',
+  googleClientId: 'your-production-google-client-id.googleusercontent.com',
+  facebookAppId: 'your-production-facebook-app-id'
 };

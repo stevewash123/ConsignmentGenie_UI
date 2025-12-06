@@ -54,3 +54,11 @@ export interface SocialAuthResponse extends AuthResponse {
   isNewUser: boolean;
   needsProfileCompletion?: boolean;
 }
+
+export interface FacebookAuthRequest {
+  accessToken: string;
+  mode: 'signup' | 'login' | 'link';
+  email: string;
+  name: string;
+  providerId: string;
+}
