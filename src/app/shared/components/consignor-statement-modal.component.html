@@ -1,0 +1,207 @@
+<div *ngIf="isVisible" class="modal-overlay" (click)="handleOverlayClick($event)">
+  <div class="modal-content" [class.large]="currentStep() === 'preview'">
+
+    <!-- Selection Step -->
+    <div *ngIf="currentStep() === 'select'">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3 class="modal-title">Generate Statement</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">
+          &times;
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <form (ngSubmit)="generateStatement()">
+          <!-- Consignor Selection -->
+          <div class="form-group">
+            <label for="consignor" class="form-label">Consignor</label>
+            <select
+              id="consignor"
+              [value]="selectedConsignorId()"
+              (change)="selectedConsignorId.set($any($event.target).value)"
+              class="form-control"
+              required>
+              <option value="">Select Consignor</option>
+              <option *ngFor="let consignor of availableConsignors" [value]="consignor.id">
+                {{ consignor.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Date Range -->
+          <div class="date-range-section">
+            <h4>Period</h4>
+            <div class="date-inputs">
+              <div class="form-group">
+                <label for="fromDate" class="form-label">From</label>
+                <input
+                  type="date"
+                  id="fromDate"
+                  [value]="fromDate()"
+                  (input)="fromDate.set($any($event.target).value)"
+                  class="form-control"
+                  required>
+              </div>
+              <div class="form-group">
+                <label for="toDate" class="form-label">To</label>
+                <input
+                  type="date"
+                  id="toDate"
+                  [value]="toDate()"
+                  (input)="toDate.set($any($event.target).value)"
+                  class="form-control"
+                  required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="!canGenerateStatement()">
+              Preview Statement
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Processing Step -->
+    <div *ngIf="currentStep() === 'processing'">
+      <div class="modal-header processing">
+        <h3 class="modal-title">Generating Statement...</h3>
+      </div>
+      <div class="modal-body processing-body">
+        <div class="processing-content">
+          <div class="spinner"></div>
+          <p>Generating statement for {{ selectedConsignor()?.name }}...</p>
+          <p class="processing-subtitle">Please wait while we compile the statement data.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Step -->
+    <div *ngIf="currentStep() === 'preview' && statementData()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3 class="modal-title">Statement Preview</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">
+          &times;
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Statement Preview -->
+        <div class="statement-preview">
+          <!-- Statement Header -->
+          <div class="statement-header">
+            <div class="shop-name">JANE'S VINTAGE CONSIGNMENT</div>
+            <div class="statement-type">CONSIGNOR STATEMENT</div>
+          </div>
+
+          <!-- Statement Info -->
+          <div class="statement-info">
+            <div class="info-left">
+              <div><strong>Consignor:</strong> {{ statementData()!.consignorName }}</div>
+              <div><strong>Account #:</strong> {{ statementData()!.accountNumber }}</div>
+            </div>
+            <div class="info-right">
+              <div><strong>Statement Date:</strong> {{ formatDate(statementData()!.generatedDate) }}</div>
+              <div><strong>Period:</strong> {{ formatDate(statementData()!.fromDate) }} - {{ formatDate(statementData()!.toDate) }}</div>
+            </div>
+          </div>
+
+          <!-- Opening Balance -->
+          <div class="balance-line opening">
+            <span><strong>OPENING BALANCE ({{ formatDate(statementData()!.fromDate) }})</strong></span>
+            <span class="amount"><strong>{{ formatCurrency(statementData()!.openingBalance) }}</strong></span>
+          </div>
+
+          <!-- Sales Section -->
+          <div class="statement-section" *ngIf="statementData()!.sales.length > 0">
+            <h4 class="section-title">SALES</h4>
+            <div class="sales-table">
+              <div class="table-header">
+                <span class="date-col">Date</span>
+                <span class="item-col">Item</span>
+                <span class="price-col">Sale Price</span>
+                <span class="share-col">Your Share (60%)</span>
+              </div>
+              <div *ngFor="let sale of statementData()!.sales" class="table-row">
+                <span class="date-col">{{ formatDate(sale.date) }}</span>
+                <span class="item-col">{{ sale.itemName }}</span>
+                <span class="price-col">{{ formatCurrency(sale.salePrice) }}</span>
+                <span class="share-col">{{ formatCurrency(sale.consignorShare) }}</span>
+              </div>
+            </div>
+            <div class="section-total">
+              <span><strong>TOTAL SALES ({{ statementData()!.sales.length }} items)</strong></span>
+              <span class="amount"><strong>{{ formatCurrency(statementData()!.totalSales) }}</strong></span>
+            </div>
+          </div>
+
+          <!-- Adjustments Section -->
+          <div class="statement-section" *ngIf="statementData()!.adjustments.length > 0">
+            <h4 class="section-title">ADJUSTMENTS</h4>
+            <div *ngFor="let adjustment of statementData()!.adjustments" class="line-item">
+              <span>{{ formatDate(adjustment.date) }} {{ adjustment.description }}</span>
+              <span class="amount">{{ formatCurrency(adjustment.amount) }}</span>
+            </div>
+            <div class="section-total">
+              <span><strong>TOTAL ADJUSTMENTS</strong></span>
+              <span class="amount"><strong>{{ formatCurrency(statementData()!.totalAdjustments) }}</strong></span>
+            </div>
+          </div>
+
+          <!-- Payouts Section -->
+          <div class="statement-section" *ngIf="statementData()!.payouts.length > 0">
+            <h4 class="section-title">PAYOUTS</h4>
+            <div *ngFor="let payout of statementData()!.payouts" class="line-item">
+              <span>{{ formatDate(payout.date) }} {{ payout.method }} {{ payout.reference || '' }}</span>
+              <span class="amount">{{ formatCurrency(payout.amount) }}</span>
+            </div>
+            <div class="section-total">
+              <span><strong>TOTAL PAYOUTS</strong></span>
+              <span class="amount"><strong>{{ formatCurrency(statementData()!.totalPayouts) }}</strong></span>
+            </div>
+          </div>
+
+          <!-- Closing Balance -->
+          <div class="closing-balance">
+            <span><strong>CLOSING BALANCE ({{ formatDate(statementData()!.toDate) }})</strong></span>
+            <span class="amount"><strong>{{ formatCurrency(statementData()!.closingBalance) }}</strong></span>
+          </div>
+
+          <!-- Footer -->
+          <div class="statement-footer">
+            Thank you for consigning with us!
+          </div>
+        </div>
+
+        <!-- Preview Actions -->
+        <div class="preview-actions">
+          <button type="button" class="btn btn-secondary" (click)="goBackToSelection()">
+            Back to Selection
+          </button>
+          <button type="button" class="btn btn-outline-primary" (click)="printStatement()">
+            <span class="icon">🖨</span>
+            Print PDF
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="emailStatement()"
+            *ngIf="statementData()!.consignorEmail">
+            <span class="icon">✉</span>
+            Email to {{ statementData()!.consignorEmail }}
+          </button>
+          <button type="button" class="btn btn-primary" (click)="closeModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

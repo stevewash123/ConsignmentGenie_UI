@@ -15,11 +15,12 @@ import {
 import { ConsignorService } from '../../services/consignor.service';
 import { Consignor } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
+import { ConsignorStatementModalComponent, ConsignorOption } from '../../shared/components/consignor-statement-modal.component';
 
 @Component({
   selector: 'app-owner-payouts',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ConsignorStatementModalComponent],
   template: `
     <app-owner-layout>
       <div class="page-container">
@@ -33,6 +34,13 @@ import { LoadingService } from '../../shared/services/loading.service';
             [disabled]="pendingPayouts().length === 0"
           >
             Create Payout
+          </button>
+          <button
+            (click)="showStatementModal = true"
+            class="btn btn-outline-primary"
+            [disabled]="consignors().length === 0"
+          >
+            Generate Statement
           </button>
           <button (click)="refreshData()" class="btn btn-secondary">
             Refresh
@@ -346,6 +354,13 @@ import { LoadingService } from '../../shared/services/loading.service';
         </div>
       </div>
       </div>
+
+    <!-- Consignor Statement Modal -->
+    <app-consignor-statement-modal
+      [isVisible]="showStatementModal"
+      [availableConsignors]="availableConsignorOptions()"
+      (onClose)="showStatementModal = false"
+    ></app-consignor-statement-modal>
     </app-owner-layout>
   `,
   styles: [`
@@ -843,6 +858,7 @@ export class OwnerPayoutsComponent implements OnInit {
   // Modals
   showCreatePayoutModal = false;
   showViewModal = false;
+  showStatementModal = false;
 
   // Form data
   newPayout: Partial<CreatePayoutRequest> = {
@@ -868,6 +884,14 @@ export class OwnerPayoutsComponent implements OnInit {
     }
 
     return pages;
+  });
+
+  availableConsignorOptions = computed((): ConsignorOption[] => {
+    return this.consignors().map(consignor => ({
+      id: consignor.id,
+      name: consignor.name,
+      email: consignor.email
+    }));
   });
 
   private loadingService = inject(LoadingService);
@@ -1053,6 +1077,7 @@ export class OwnerPayoutsComponent implements OnInit {
     if (event.target === event.currentTarget) {
       this.showCreatePayoutModal = false;
       this.showViewModal = false;
+      this.showStatementModal = false;
     }
   }
 
