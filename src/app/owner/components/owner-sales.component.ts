@@ -5,11 +5,7 @@ import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { TransactionService, TransactionQueryParams, PagedResult, UpdateTransactionRequest } from '../../services/transaction.service';
-import { Transaction, CreateTransactionRequest } from '../../models/transaction.model';
-import { ItemService, ItemFilters } from '../../services/item.service';
-import { ConsignorService } from '../../services/consignor.service';
-import { Item, ItemStatus } from '../../models/item.model';
-import { Consignor } from '../../models/consignor.model';
+import { Transaction } from '../../models/transaction.model';
 import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
@@ -25,9 +21,9 @@ import { LoadingService } from '../../shared/services/loading.service';
             <p>View and manage all sales transactions</p>
           </div>
           <div class="header-actions">
-            <button class="btn-primary" (click)="showCreateModal = true">
+            <button class="btn-primary" routerLink="/owner/record-sale">
               <span class="btn-icon">💰</span>
-              Process Sale
+              Record Sale
             </button>
           </div>
         </div>
@@ -223,145 +219,6 @@ import { LoadingService } from '../../shared/services/loading.service';
           </ng-template>
         </div>
 
-        <!-- Process Sale Modal -->
-        <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeModal($event)">
-          <div class="modal-content" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-              <h2>Process Sale</h2>
-              <button class="close-btn" (click)="closeModal()">×</button>
-            </div>
-
-            <div class="modal-body">
-              <form (ngSubmit)="onSubmitSale()" #saleForm="ngForm">
-                <!-- Item Selection -->
-                <div class="form-group">
-                  <label for="itemId">Item *</label>
-                  <select
-                    id="itemId"
-                    [(ngModel)]="saleForm_itemId"
-                    name="itemId"
-                    (change)="onItemSelected()"
-                    class="form-control"
-                    required>
-                    <option value="">Select an item...</option>
-                    <option *ngFor="let item of availableItems()" [value]="item.id">
-                      {{ item.name }} - \${{ item.price | number:'1.2-2' }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- consignor Info (Auto-populated) -->
-                <div class="form-group" *ngIf="selectedProvider()">
-                  <label>consignor</label>
-                  <div class="consignor-info-display">
-                    <div class="consignor-name">{{ selectedProvider()!.name }}</div>
-                    <div class="commission-rate">{{ selectedProvider()!.commissionRate }}% commission</div>
-                  </div>
-                </div>
-
-                <!-- Sale Price -->
-                <div class="form-group">
-                  <label for="salePrice">Sale Price *</label>
-                  <input
-                    type="number"
-                    id="salePrice"
-                    [(ngModel)]="saleForm_salePrice"
-                    name="salePrice"
-                    (input)="calculateCommission()"
-                    step="0.01"
-                    min="0"
-                    class="form-control"
-                    required>
-                </div>
-
-                <!-- Sales Tax -->
-                <div class="form-group">
-                  <label for="salesTax">Sales Tax</label>
-                  <input
-                    type="number"
-                    id="salesTax"
-                    [(ngModel)]="saleForm_salesTax"
-                    name="salesTax"
-                    (input)="calculateCommission()"
-                    step="0.01"
-                    min="0"
-                    class="form-control">
-                </div>
-
-                <!-- Sale Date -->
-                <div class="form-group">
-                  <label for="saleDate">Sale Date *</label>
-                  <input
-                    type="date"
-                    id="saleDate"
-                    [(ngModel)]="saleForm_saleDate"
-                    name="saleDate"
-                    class="form-control"
-                    required>
-                </div>
-
-                <!-- Payment Method -->
-                <div class="form-group">
-                  <label for="paymentMethod">Payment Method *</label>
-                  <select
-                    id="paymentMethod"
-                    [(ngModel)]="saleForm_paymentMethod"
-                    name="paymentMethod"
-                    class="form-control"
-                    required>
-                    <option value="">Select payment method...</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="Debit Card">Debit Card</option>
-                    <option value="Check">Check</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <!-- Commission Split Display -->
-                <div class="commission-split" *ngIf="selectedProvider() && saleForm_salePrice">
-                  <h4>Commission Split</h4>
-                  <div class="split-row">
-                    <span>consignor ({{ selectedProvider()!.commissionRate }}%):</span>
-                    <span class="amount">\${{ calculatedProviderAmount() | number:'1.2-2' }}</span>
-                  </div>
-                  <div class="split-row">
-                    <span>Shop ({{ 100 - selectedProvider()!.commissionRate }}%):</span>
-                    <span class="amount">\${{ calculatedShopAmount() | number:'1.2-2' }}</span>
-                  </div>
-                  <div class="split-row total">
-                    <span>Total:</span>
-                    <span class="amount">\${{ saleForm_salePrice | number:'1.2-2' }}</span>
-                  </div>
-                </div>
-
-                <!-- Notes -->
-                <div class="form-group">
-                  <label for="notes">Notes</label>
-                  <textarea
-                    id="notes"
-                    [(ngModel)]="saleForm_notes"
-                    name="notes"
-                    rows="3"
-                    class="form-control"
-                    placeholder="Optional notes about this sale..."></textarea>
-                </div>
-
-                <!-- Submit Buttons -->
-                <div class="modal-actions">
-                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
-                  <button
-                    type="submit"
-                    class="btn-primary"
-                    [disabled]="!saleForm.form.valid || isSubmitting()"
-                    [class.loading]="isSubmitting()">
-                    {{ isSubmitting() ? 'Processing...' : 'Process Sale' }}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
 
         <!-- Transaction Detail Modal -->
         <div class="modal-overlay" *ngIf="showDetailModal && selectedTransactionForDetail()" (click)="closeDetailModal($event)">
@@ -514,7 +371,6 @@ import { LoadingService } from '../../shared/services/loading.service';
                         id="editSalePrice"
                         [(ngModel)]="editForm_salePrice"
                         name="editSalePrice"
-                        (input)="calculateEditCommission()"
                         step="0.01"
                         min="0"
                         class="form-control compact"
@@ -528,7 +384,6 @@ import { LoadingService } from '../../shared/services/loading.service';
                         id="editSalesTax"
                         [(ngModel)]="editForm_salesTax"
                         name="editSalesTax"
-                        (input)="calculateEditCommission()"
                         step="0.01"
                         min="0"
                         class="form-control compact">
@@ -553,13 +408,6 @@ import { LoadingService } from '../../shared/services/loading.service';
                   </div>
 
                   <!-- Inline Commission Split -->
-                  <div class="commission-split-inline" *ngIf="editForm_salePrice">
-                    <div class="split-summary">
-                      <span class="split-item">consignor: <strong>\${{ calculatedProviderAmount() | number:'1.2-2' }}</strong></span>
-                      <span class="split-item">Shop: <strong>\${{ calculatedShopAmount() | number:'1.2-2' }}</strong></span>
-                      <span class="split-item total">Total: <strong>\${{ editForm_salePrice | number:'1.2-2' }}</strong></span>
-                    </div>
-                  </div>
 
                   <!-- Compact Notes -->
                   <div class="form-group compact">
@@ -1645,7 +1493,6 @@ export class OwnerSalesComponent implements OnInit {
   sortDirection = 'desc';
 
   // Modal state
-  showCreateModal = false;
   showDetailModal = false;
   showEditModal = false;
   showConfirmDialog = false;
@@ -1663,18 +1510,6 @@ export class OwnerSalesComponent implements OnInit {
     isDestructive: false
   };
 
-  // Available data for form
-  availableItems = signal<Item[]>([]);
-  consignors = signal<Consignor[]>([]);
-  selectedProvider = signal<Consignor | null>(null);
-
-  // Form data
-  saleForm_itemId: number | null = null;
-  saleForm_salePrice: number | null = null;
-  saleForm_salesTax: number | null = null;
-  saleForm_saleDate: string = '';
-  saleForm_paymentMethod: string = '';
-  saleForm_notes: string = '';
 
   // Edit form data
   editForm_salePrice: number | null = null;
@@ -1682,9 +1517,6 @@ export class OwnerSalesComponent implements OnInit {
   editForm_paymentMethod: string = '';
   editForm_notes: string = '';
 
-  // Calculated amounts
-  calculatedProviderAmount = signal(0);
-  calculatedShopAmount = signal(0);
 
   private toastr = inject(ToastrService);
   private loadingService = inject(LoadingService);
@@ -1694,17 +1526,12 @@ export class OwnerSalesComponent implements OnInit {
   }
 
   constructor(
-    private transactionService: TransactionService,
-    private itemService: ItemService,
-    private ConsignorService: ConsignorService
+    private transactionService: TransactionService
   ) {}
 
   ngOnInit() {
     this.loadTransactions();
     this.loadSummary();
-    this.loadAvailableItems();
-    this.loadconsignors();
-    this.initializeSaleForm();
   }
 
   private buildQueryParams(): TransactionQueryParams {
@@ -1843,86 +1670,6 @@ export class OwnerSalesComponent implements OnInit {
   }
 
   // Modal and Form Management
-  initializeSaleForm() {
-    const today = new Date();
-    this.saleForm_saleDate = today.toISOString().split('T')[0];
-    this.saleForm_itemId = null;
-    this.saleForm_salePrice = null;
-    this.saleForm_salesTax = null;
-    this.saleForm_paymentMethod = '';
-    this.saleForm_notes = '';
-    this.selectedProvider.set(null);
-    this.calculatedProviderAmount.set(0);
-    this.calculatedShopAmount.set(0);
-  }
-
-  loadAvailableItems() {
-    const filters: ItemFilters = { status: ItemStatus.Available };
-    this.itemService.getItems(filters).subscribe({
-      next: (items) => {
-        this.availableItems.set(items);
-      },
-      error: (error) => {
-        console.error('Failed to load available items:', error);
-      }
-    });
-  }
-
-  loadconsignors() {
-    this.ConsignorService.getConsignors().subscribe({
-      next: (consignors) => {
-        this.consignors.set(consignors.filter(p => p.isActive));
-      },
-      error: (error) => {
-        console.error('Failed to load consignors:', error);
-      }
-    });
-  }
-
-  onItemSelected() {
-    const itemId = this.saleForm_itemId;
-    if (!itemId) {
-      this.selectedProvider.set(null);
-      this.saleForm_salePrice = null;
-      this.calculateCommission();
-      return;
-    }
-
-    // Find the selected item
-    const selectedItem = this.availableItems().find(item => item.id === itemId);
-    if (selectedItem) {
-      // Set the sale price to the item's listed price
-      this.saleForm_salePrice = selectedItem.price;
-
-      // Find and set the consignor
-      const consignor = this.consignors().find(p => p.id === selectedItem.providerId);
-      this.selectedProvider.set(consignor || null);
-
-      // Recalculate commission split
-      this.calculateCommission();
-    }
-  }
-
-  calculateCommission() {
-    const salePrice = this.saleForm_salePrice || 0;
-    const consignor = this.selectedProvider();
-
-    if (consignor && salePrice > 0) {
-      const providerAmount = (salePrice * consignor.commissionRate) / 100;
-      const shopAmount = salePrice - providerAmount;
-
-      this.calculatedProviderAmount.set(providerAmount);
-      this.calculatedShopAmount.set(shopAmount);
-    } else {
-      this.calculatedProviderAmount.set(0);
-      this.calculatedShopAmount.set(0);
-    }
-  }
-
-  closeModal(event?: Event) {
-    this.showCreateModal = false;
-    this.initializeSaleForm();
-  }
 
   closeDetailModal(event?: Event) {
     this.showDetailModal = false;
@@ -1937,43 +1684,6 @@ export class OwnerSalesComponent implements OnInit {
     }
   }
 
-  onSubmitSale() {
-    if (!this.saleForm_itemId || !this.saleForm_salePrice || !this.saleForm_paymentMethod || !this.saleForm_saleDate) {
-      alert('Please fill in all required fields.');
-      return;
-    }
-
-    this.isSubmitting.set(true);
-
-    const request: CreateTransactionRequest = {
-      itemId: this.saleForm_itemId.toString(),
-      salePrice: this.saleForm_salePrice,
-      salesTaxAmount: this.saleForm_salesTax || undefined,
-      paymentMethod: this.saleForm_paymentMethod,
-      notes: this.saleForm_notes || undefined,
-      saleDate: new Date(this.saleForm_saleDate)
-    };
-
-    this.transactionService.createTransaction(request).subscribe({
-      next: (transaction) => {
-        this.isSubmitting.set(false);
-        this.showCreateModal = false;
-        this.initializeSaleForm();
-
-        // Reload data to reflect the new sale
-        this.loadTransactions();
-        this.loadSummary();
-        this.loadAvailableItems(); // Refresh to remove the sold item
-
-        this.showNotification(`Transaction ${transaction.id} created successfully!`, 'success', 'Sale Processed');
-      },
-      error: (error) => {
-        this.isSubmitting.set(false);
-        console.error('Failed to process sale:', error);
-        this.showNotification('Failed to process the sale. Please try again.', 'error', 'Process Sale Failed');
-      }
-    });
-  }
 
   // Edit Transaction Methods
   initializeEditForm(transaction: Transaction) {
@@ -1981,27 +1691,6 @@ export class OwnerSalesComponent implements OnInit {
     this.editForm_salesTax = transaction.salesTaxAmount || null;
     this.editForm_paymentMethod = transaction.paymentMethod;
     this.editForm_notes = transaction.notes || '';
-
-    // Set up calculation with existing commission rate
-    const consignor = this.consignors().find(p => p.name === transaction.consignor.name);
-    this.selectedProvider.set(consignor || null);
-    this.calculateEditCommission();
-  }
-
-  calculateEditCommission() {
-    const salePrice = this.editForm_salePrice || 0;
-    const transaction = this.selectedTransactionForEdit();
-
-    if (transaction && salePrice > 0) {
-      const providerAmount = (salePrice * transaction.consignorsplitPercentage) / 100;
-      const shopAmount = salePrice - providerAmount;
-
-      this.calculatedProviderAmount.set(providerAmount);
-      this.calculatedShopAmount.set(shopAmount);
-    } else {
-      this.calculatedProviderAmount.set(0);
-      this.calculatedShopAmount.set(0);
-    }
   }
 
   closeEditModal(event?: Event) {
@@ -2015,8 +1704,6 @@ export class OwnerSalesComponent implements OnInit {
     this.editForm_salesTax = null;
     this.editForm_paymentMethod = '';
     this.editForm_notes = '';
-    this.calculatedProviderAmount.set(0);
-    this.calculatedShopAmount.set(0);
   }
 
   onSubmitEditTransaction() {
