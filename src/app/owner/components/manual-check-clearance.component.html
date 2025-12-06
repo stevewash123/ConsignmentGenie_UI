@@ -1,0 +1,140 @@
+<app-owner-layout>
+  <div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Pending Check Clearance</h1>
+      <button
+        (click)="loadPendingChecks()"
+        class="btn btn-secondary"
+        [disabled]="isLoading()"
+      >
+        {{ isLoading() ? 'Loading...' : 'Refresh' }}
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading pending checks...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading() && pendingChecks().length === 0" class="empty-state">
+      <div class="empty-icon">✅</div>
+      <h2>All caught up!</h2>
+      <p>You have no pending checks that need clearance.</p>
+    </div>
+
+    <!-- Pending Checks Content -->
+    <div *ngIf="!isLoading() && pendingChecks().length > 0" class="content-container">
+
+      <!-- Summary Section -->
+      <div class="summary-section">
+        <div class="summary-info">
+          <span class="summary-text">
+            You have <strong>{{ pendingChecks().length }}</strong> check{{ pendingChecks().length !== 1 ? 's' : '' }}
+            pending clearance (<strong>{{ formatCurrency(totalPendingAmount()) }}</strong> total)
+          </span>
+
+          <div *ngIf="hasOverdueChecks()" class="overdue-warning">
+            ⚠️ Some checks are overdue (>10 days pending)
+          </div>
+        </div>
+
+        <button
+          (click)="markAllAsCleared()"
+          class="btn btn-primary"
+          [disabled]="isClearing()"
+        >
+          {{ isClearing() ? 'Processing...' : 'Mark All Cleared' }}
+        </button>
+      </div>
+
+      <!-- Checks Table -->
+      <div class="table-container">
+        <table class="checks-table">
+          <thead>
+            <tr>
+              <th class="checkbox-col">
+                <input
+                  type="checkbox"
+                  [checked]="allSelected()"
+                  [indeterminate]="someSelected()"
+                  (change)="toggleAllSelection()"
+                  class="table-checkbox"
+                >
+              </th>
+              <th>Date</th>
+              <th>Transaction</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let check of pendingChecks()"
+              [class.selected]="selectedCheckIds().has(check.id)"
+              [class.overdue-row]="check.isOverdue"
+            >
+              <td class="checkbox-col">
+                <input
+                  type="checkbox"
+                  [checked]="selectedCheckIds().has(check.id)"
+                  (change)="toggleCheckSelection(check.id)"
+                  class="table-checkbox"
+                >
+              </td>
+              <td class="date-col">{{ formatDate(check.saleDate) }}</td>
+              <td class="transaction-col">
+                <span class="transaction-number">{{ check.transactionNumber }}</span>
+              </td>
+              <td class="customer-col">{{ check.customerName }}</td>
+              <td class="amount-col">{{ formatCurrency(check.amount) }}</td>
+              <td class="status-col">
+                <span [class]="'status-badge ' + getStatusClass(check)">
+                  {{ getStatusDisplay(check) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Selection Actions -->
+      <div class="selection-actions">
+        <div class="selection-info">
+          Selected: <strong>{{ selectedChecks().length }}</strong>
+          <span *ngIf="selectedChecks().length > 0">
+            ({{ formatCurrency(selectedAmount()) }})
+          </span>
+        </div>
+
+        <button
+          (click)="markSelectedAsCleared()"
+          class="btn btn-success"
+          [disabled]="selectedChecks().length === 0 || isClearing()"
+        >
+          {{ isClearing() ? 'Processing...' : 'Mark Selected as Cleared' }}
+        </button>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend-section">
+        <div class="legend-divider"></div>
+        <div class="legend-content">
+          <span class="legend-title">Legend:</span>
+          <span class="legend-item">
+            <span class="status-badge normal">⏳ 5d</span>
+            Normal pending
+          </span>
+          <span class="legend-item">
+            <span class="status-badge overdue">⚠️ 13d</span>
+            Overdue (>10 days)
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</app-owner-layout>

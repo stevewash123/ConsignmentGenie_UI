@@ -1,0 +1,219 @@
+<div *ngIf="isVisible" class="modal-overlay" (click)="handleOverlayClick($event)">
+  <div class="modal-content">
+    <!-- Preview Step -->
+    <div *ngIf="currentStep() === 'preview'">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3 class="modal-title">Batch Payout - Preview</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">
+          &times;
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Summary -->
+        <div class="summary-section">
+          <p class="summary-text">
+            Ready to pay <strong>{{ selectedCount() }}</strong> consignors
+            totaling <strong>{{ formatCurrency(totalSelectedAmount()) }}</strong>
+          </p>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="payment-method-section">
+          <label for="paymentMethod" class="form-label">Payment Method for All:</label>
+          <select
+            id="paymentMethod"
+            [value]="selectedPaymentMethod()"
+            (change)="selectedPaymentMethod.set($any($event.target).value)"
+            class="form-control payment-method-select">
+            <option *ngFor="let method of paymentMethods" [value]="method">
+              {{ method }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Consignor List -->
+        <div class="consignors-section">
+          <div class="consignors-header">
+            <div class="bulk-actions">
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="selectAll()">
+                Select All
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="selectNone()">
+                Select None
+              </button>
+            </div>
+          </div>
+
+          <div class="consignors-table-container">
+            <table class="consignors-table">
+              <thead>
+                <tr>
+                  <th class="checkbox-col"></th>
+                  <th>Consignor</th>
+                  <th>Available</th>
+                  <th>Method</th>
+                  <th>Preference</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let consignor of consignors()"
+                    [class.selected-row]="consignor.selected"
+                    [class.disabled-row]="!consignor.selected">
+                  <td class="checkbox-col">
+                    <input
+                      type="checkbox"
+                      [checked]="consignor.selected"
+                      (change)="toggleConsignor(consignor.consignorId)"
+                      class="consignor-checkbox"
+                    />
+                  </td>
+                  <td class="consignor-name">{{ consignor.name }}</td>
+                  <td class="amount">{{ formatCurrency(consignor.availableBalance) }}</td>
+                  <td class="method">
+                    <span *ngIf="consignor.selected">{{ selectedPaymentMethod() }}</span>
+                    <span *ngIf="!consignor.selected" class="disabled-text">--</span>
+                  </td>
+                  <td class="preference">
+                    <span class="preference-text"
+                          [class.preferred]="consignor.preferredPaymentMethod === selectedPaymentMethod()"
+                          [class.different]="consignor.preferredPaymentMethod && consignor.preferredPaymentMethod !== selectedPaymentMethod()">
+                      {{ getMethodHint(consignor) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Selection Summary -->
+        <div class="selection-summary">
+          <strong>Selected:</strong> {{ selectedCount() }} consignors, {{ formatCurrency(totalSelectedAmount()) }}
+        </div>
+
+        <!-- Notes (Optional) -->
+        <div class="notes-section">
+          <label for="notes" class="form-label">
+            Notes <span class="optional-text">(optional)</span>
+          </label>
+          <textarea
+            id="notes"
+            [value]="notes()"
+            (input)="notes.set($any($event.target).value)"
+            class="form-control"
+            rows="2"
+            placeholder="e.g., December 2025 batch payout"
+          ></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="processBatchPayout()"
+            [disabled]="selectedCount() === 0"
+          >
+            Process {{ selectedCount() }} Payouts
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processing Step -->
+    <div *ngIf="currentStep() === 'processing'">
+      <div class="modal-header processing">
+        <h3 class="modal-title">Processing Payouts...</h3>
+      </div>
+      <div class="modal-body processing-body">
+        <div class="processing-content">
+          <div class="spinner"></div>
+          <p>Processing {{ selectedCount() }} payouts...</p>
+          <p class="processing-subtitle">Please wait while we create the payout records.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Step -->
+    <div *ngIf="currentStep() === 'result' && batchResult()">
+      <!-- Modal Header -->
+      <div class="modal-header success">
+        <div class="success-icon">✓</div>
+        <h3 class="modal-title">BATCH PAYOUT COMPLETE</h3>
+        <button type="button" class="close-btn" (click)="closeModal()">
+          &times;
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Success Summary -->
+        <div class="success-summary">
+          Successfully processed <strong>{{ batchResult()!.count }}</strong> payouts
+          totaling <strong>{{ formatCurrency(batchResult()!.totalAmount) }}</strong>
+        </div>
+
+        <!-- Results Table -->
+        <div class="results-section">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Consignor</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Payout #</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let payout of batchResult()!.payouts">
+                <td class="consignor-name">{{ payout.consignorName }}</td>
+                <td class="amount">{{ formatCurrency(payout.amount) }}</td>
+                <td>{{ payout.method }}</td>
+                <td class="payout-number">{{ payout.payoutNumber }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="result-actions">
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="printBatchReport()"
+          >
+            <span class="icon">🖨</span>
+            Print Batch Report
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="emailAllConsignors()"
+          >
+            <span class="icon">✉</span>
+            Email All Consignors
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="closeModal()"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

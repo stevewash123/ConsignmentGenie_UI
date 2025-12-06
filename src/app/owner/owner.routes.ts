@@ -40,7 +40,15 @@ export const ownerRoutes: Routes = [
   },
   {
     path: 'payouts',
-    loadComponent: () => import('./components/owner-payouts.component').then(m => m.OwnerPayoutsComponent)
+    loadComponent: () => import('./components/consignor-balance-dashboard.component').then(m => m.ConsignorBalanceDashboardComponent)
+  },
+  {
+    path: 'payouts/history',
+    loadComponent: () => import('./components/payout-history.component').then(m => m.PayoutHistoryComponent)
+  },
+  {
+    path: 'payouts/check-clearance',
+    loadComponent: () => import('./components/manual-check-clearance.component').then(m => m.ManualCheckClearanceComponent)
   },
   {
     path: 'settings',

@@ -1,0 +1,66 @@
+<div *ngIf="isVisible && payoutData" class="modal-overlay" (click)="handleOverlayClick($event)">
+  <div class="modal-content">
+    <!-- Modal Header -->
+    <div class="modal-header success">
+      <div class="success-icon">✓</div>
+      <h3 class="modal-title">PAYOUT COMPLETE</h3>
+      <button type="button" class="close-btn" (click)="closeModal()">
+        &times;
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <!-- Success Message -->
+      <div class="success-message">
+        <div class="payout-summary">
+          Paid <span class="amount">{{ formatCurrency(payoutData.amount) }}</span>
+          to <span class="consignor">{{ payoutData.consignorName }}</span>
+          via <span class="method">{{ payoutData.method }}</span>
+          <span *ngIf="payoutData.method === 'Check'"> #{{ payoutData.method }}</span>
+        </div>
+      </div>
+
+      <!-- Payout Details -->
+      <div class="payout-details">
+        <div class="detail-row">
+          <span class="detail-label">Payout ID:</span>
+          <span class="detail-value payout-id">{{ payoutData.payoutNumber }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">{{ formatDate(payoutData.createdAt) }}</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="printReceipt()"
+        >
+          <span class="icon">🖨</span>
+          Print Receipt
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="emailToConsignor()"
+        >
+          <span class="icon">✉</span>
+          Email to Consignor
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="closeModal()"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

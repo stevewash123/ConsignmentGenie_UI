@@ -20,6 +20,9 @@ interface BusinessSettings {
     Schedule: string;
     MinimumAmount: number;
     HoldPeriodDays: number;
+    RefundPolicy: 'NoRefunds' | 'WithinDays' | 'UntilPayout';
+    RefundWindowDays?: number;
+    DefaultPayoutMethod: 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit';
   };
   Items: {
     DefaultConsignmentPeriodDays: number;
@@ -141,51 +144,106 @@ interface BusinessSettings {
           <h3>Payout Settings</h3>
 
           <div class="form-group">
-            <label for="payoutSchedule">Payout Schedule</label>
-            <select
-              id="payoutSchedule"
-              [(ngModel)]="settings()!.Payouts.Schedule"
-              name="payoutSchedule"
-              class="form-select">
-              <option value="weekly">Weekly (every Friday)</option>
-              <option value="biweekly">Bi-weekly (1st and 15th)</option>
-              <option value="monthly">Monthly (1st of each month)</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="manual">Manual payouts only</option>
-            </select>
+            <label for="holdPeriod">Payout Hold Period (Days)</label>
+            <input
+              type="number"
+              id="holdPeriod"
+              [(ngModel)]="settings()!.Payouts.HoldPeriodDays"
+              name="holdPeriod"
+              class="form-input"
+              placeholder="7"
+              min="0"
+              max="90">
+            <div class="form-hint">
+              Funds become available this many days after the sale.<br>
+              This is your refund window — once paid, no refunds allowed.
+            </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="minimumPayout">Minimum Payout Amount</label>
-              <div class="input-with-prefix">
-                <span class="input-prefix">$</span>
-                <input
-                  type="number"
-                  id="minimumPayout"
-                  [(ngModel)]="settings()!.Payouts.MinimumAmount"
-                  name="minimumPayout"
-                  class="form-input"
-                  placeholder="25.00"
-                  min="0"
-                  step="0.01">
-              </div>
+          <div class="form-group">
+            <label for="minimumPayout">Minimum Payout Amount</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input
+                type="number"
+                id="minimumPayout"
+                [(ngModel)]="settings()!.Payouts.MinimumAmount"
+                name="minimumPayout"
+                class="form-input"
+                placeholder="25.00"
+                min="0"
+                max="10000"
+                step="0.01">
             </div>
+            <div class="form-hint">
+              Consignors won't appear in "Ready to Pay" until they reach this threshold.
+            </div>
+          </div>
 
-            <div class="form-group">
-              <label for="holdPeriod">Payout Hold Period</label>
-              <select
-                id="holdPeriod"
-                [(ngModel)]="settings()!.Payouts.HoldPeriodDays"
-                name="holdPeriod"
-                class="form-select">
-                <option value="0">Immediate</option>
-                <option value="7">7 days</option>
-                <option value="14">14 days</option>
-                <option value="30">30 days</option>
-              </select>
-              <div class="form-hint">Days after sale before payout</div>
+          <div class="payout-divider"></div>
+
+          <h4>Refund Policy</h4>
+          <div class="form-group">
+            <label>When are refunds allowed?</label>
+            <div class="radio-group vertical">
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  value="NoRefunds"
+                  [(ngModel)]="settings()!.Payouts.RefundPolicy"
+                  name="refundPolicy">
+                <span class="radio-mark"></span>
+                No refunds
+              </label>
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  value="WithinDays"
+                  [(ngModel)]="settings()!.Payouts.RefundPolicy"
+                  name="refundPolicy">
+                <span class="radio-mark"></span>
+                Within <input
+                  type="number"
+                  [(ngModel)]="settings()!.Payouts.RefundWindowDays"
+                  name="refundWindowDays"
+                  class="inline-input"
+                  placeholder="7"
+                  min="1"
+                  max="90"
+                  [disabled]="settings()!.Payouts.RefundPolicy !== 'WithinDays'"> days of sale
+              </label>
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  value="UntilPayout"
+                  [(ngModel)]="settings()!.Payouts.RefundPolicy"
+                  name="refundPolicy">
+                <span class="radio-mark"></span>
+                Until consignor is paid (recommended)
+              </label>
             </div>
+            <div class="form-hint info-box">
+              ⓘ Once a consignor has been paid for an item, that item cannot be refunded.
+              The hold period above gives customers time to return items before consignors are paid.
+            </div>
+          </div>
+
+          <div class="payout-divider"></div>
+
+          <div class="form-group">
+            <label for="defaultPayoutMethod">Default Payout Method</label>
+            <select
+              id="defaultPayoutMethod"
+              [(ngModel)]="settings()!.Payouts.DefaultPayoutMethod"
+              name="defaultPayoutMethod"
+              class="form-select">
+              <option value="Check">Check</option>
+              <option value="Cash">Cash</option>
+              <option value="DirectDeposit">Direct Deposit</option>
+              <option value="PayPal">PayPal</option>
+              <option value="Venmo">Venmo</option>
+              <option value="StoreCredit">Store Credit</option>
+            </select>
           </div>
         </div>
 
@@ -445,6 +503,11 @@ interface BusinessSettings {
       gap: 1rem;
     }
 
+    .radio-group.vertical {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
     .radio-label {
       display: flex;
       align-items: center;
@@ -456,6 +519,22 @@ interface BusinessSettings {
 
     .radio-label input[type="radio"] {
       margin: 0;
+    }
+
+    .inline-input {
+      width: 60px;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      margin: 0 0.25rem;
+      display: inline-block;
+    }
+
+    .inline-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
     }
 
     /* Markdown Settings */
@@ -612,6 +691,32 @@ export class BusinessSettingsComponent implements OnInit {
 
   async saveSettings() {
     if (!this.settings()) return;
+
+    // Validate payout settings per story requirements
+    const settings = this.settings()!;
+    const errors: string[] = [];
+
+    // Validation: HoldPeriodDays: ≥ 0, ≤ 90
+    if (settings.Payouts.HoldPeriodDays < 0 || settings.Payouts.HoldPeriodDays > 90) {
+      errors.push('Hold period must be between 0 and 90 days');
+    }
+
+    // Validation: MinimumAmount: ≥ 0, ≤ 10000
+    if (settings.Payouts.MinimumAmount < 0 || settings.Payouts.MinimumAmount > 10000) {
+      errors.push('Minimum payout amount must be between $0 and $10,000');
+    }
+
+    // Validation: RefundWindowDays: ≥ 1, ≤ 90 (only if RefundPolicy = WithinDays)
+    if (settings.Payouts.RefundPolicy === 'WithinDays') {
+      if (!settings.Payouts.RefundWindowDays || settings.Payouts.RefundWindowDays < 1 || settings.Payouts.RefundWindowDays > 90) {
+        errors.push('Refund window must be between 1 and 90 days when using "Within Days" policy');
+      }
+    }
+
+    if (errors.length > 0) {
+      this.showError(errors.join('. '));
+      return;
+    }
 
     this.isSaving.set(true);
     try {

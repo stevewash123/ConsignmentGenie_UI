@@ -1,0 +1,190 @@
+<app-owner-layout>
+  <div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Payouts</h1>
+      <div class="header-actions">
+        <button (click)="refreshData()" class="btn btn-secondary">
+          <span class="icon">🔄</span>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-section">
+      <div class="summary-cards">
+        <div class="summary-card available">
+          <div class="card-amount">{{ formatCurrency(summary().totalAvailable) }}</div>
+          <div class="card-label">Available</div>
+          <div class="card-subtitle">Ready to pay out</div>
+        </div>
+
+        <div class="summary-card pending">
+          <div class="card-amount">{{ formatCurrency(summary().totalPending) }}</div>
+          <div class="card-label">Pending</div>
+          <div class="card-subtitle">Still in hold period</div>
+        </div>
+
+        <div class="summary-card total">
+          <div class="card-amount">{{ formatCurrency(summary().totalOwed) }}</div>
+          <div class="card-label">Total Owed</div>
+          <div class="card-subtitle">All outstanding amounts</div>
+        </div>
+      </div>
+
+      <!-- Pay All Due Button -->
+      <div class="bulk-action">
+        <button
+          (click)="payAllDue()"
+          class="btn btn-primary btn-large"
+          [disabled]="summary().totalAvailable === 0">
+          Pay All Due ({{ formatCurrency(summary().totalAvailable) }})
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters and Controls -->
+    <div class="controls-section">
+      <div class="filters">
+        <div class="filter-group">
+          <label for="filter">Filter:</label>
+          <select
+            id="filter"
+            [value]="currentFilter()"
+            (change)="onFilterChange($any($event.target).value)"
+            class="form-select">
+            <option *ngFor="let filter of filterOptions" [value]="filter.type">
+              {{ filter.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="sort">Sort:</label>
+          <select
+            id="sort"
+            [value]="currentSort().field + '-' + currentSort().direction"
+            (change)="onSortChange($any($event.target).value || '')"
+            class="form-select">
+            <option *ngFor="let sort of sortOptions" [value]="sort.value">
+              {{ sort.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isComponentLoading()" class="loading">
+      <div class="loading-spinner"></div>
+      <p>Loading consignor balances...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isComponentLoading() && filteredBalances().length === 0" class="empty-state">
+      <div class="empty-icon">📊</div>
+      <h3>No consignor balances found</h3>
+      <p *ngIf="currentFilter() === 'all'">No consignors have outstanding balances yet.</p>
+      <p *ngIf="currentFilter() === 'ready'">No consignors are ready for payment at this time.</p>
+      <p *ngIf="currentFilter() === 'pending'">No consignors have pending balances.</p>
+    </div>
+
+    <!-- Balances Table -->
+    <div *ngIf="!isComponentLoading() && filteredBalances().length > 0" class="table-section">
+      <div class="table-container">
+        <table class="balances-table">
+          <thead>
+            <tr>
+              <th>Consignor</th>
+              <th>Pending</th>
+              <th>Available</th>
+              <th>Total</th>
+              <th>Last Payout</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let balance of filteredBalances()"
+                [class.ready-to-pay]="balance.canPay && balance.availableBalance > 0"
+                [class.pending-only]="balance.pendingBalance > 0 && balance.availableBalance === 0">
+              <td class="consignor-cell">
+                <div class="consignor-info">
+                  <div class="consignor-name">{{ balance.name }}</div>
+                  <div class="consignor-email" *ngIf="balance.email">{{ balance.email }}</div>
+                </div>
+              </td>
+              <td class="amount-cell pending-amount">
+                {{ formatCurrency(balance.pendingBalance) }}
+              </td>
+              <td class="amount-cell available-amount">
+                <span [class.highlight]="balance.availableBalance > 0">
+                  {{ formatCurrency(balance.availableBalance) }}
+                </span>
+              </td>
+              <td class="amount-cell total-amount">
+                <span class="total-owed">{{ formatCurrency(balance.totalOwed) }}</span>
+              </td>
+              <td class="date-cell">
+                {{ formatDate(balance.lastPayoutDate) }}
+              </td>
+              <td class="action-cell">
+                <div class="action-buttons">
+                  <button
+                    *ngIf="balance.canPay && balance.availableBalance > 0"
+                    (click)="payConsignor(balance)"
+                    class="btn btn-success btn-sm">
+                    Pay
+                  </button>
+                  <button
+                    (click)="openBalanceAdjustmentModal(balance)"
+                    class="btn btn-outline-secondary btn-sm"
+                    title="Adjust Balance">
+                    Adjust
+                  </button>
+                  <span
+                    *ngIf="!balance.canPay || balance.availableBalance === 0"
+                    class="status-text">
+                    <span *ngIf="balance.pendingBalance > 0 && balance.availableBalance === 0">Pending...</span>
+                    <span *ngIf="balance.totalOwed === 0">Paid Up</span>
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Process Single Payout Modal -->
+  <app-process-single-payout-modal
+    [isVisible]="showPayoutModal()"
+    [consignorData]="selectedConsignorData()"
+    (onClose)="onPayoutModalClose()"
+    (onSuccess)="onPayoutSuccess($event)">
+  </app-process-single-payout-modal>
+
+  <!-- Payout Success Modal -->
+  <app-payout-success-modal
+    [isVisible]="showSuccessModal()"
+    [payoutData]="lastPayoutResult()"
+    (onClose)="onSuccessModalClose()">
+  </app-payout-success-modal>
+
+  <!-- Batch Payout Modal -->
+  <app-batch-payout-modal
+    [isVisible]="showBatchModal()"
+    (onClose)="onBatchModalClose()"
+    (onSuccess)="onBatchSuccess($event)">
+  </app-batch-payout-modal>
+
+  <!-- Balance Adjustment Modal -->
+  <app-balance-adjustment-modal
+    [isVisible]="showBalanceAdjustmentModal()"
+    [consignors]="consignorsForModal()"
+    [selectedConsignorId]="selectedConsignorForAdjustment()?.consignorId"
+    (close)="onBalanceAdjustmentModalClose()"
+    (adjustmentCreated)="onBalanceAdjustmentCreated()">
+  </app-balance-adjustment-modal>
+</app-owner-layout>
