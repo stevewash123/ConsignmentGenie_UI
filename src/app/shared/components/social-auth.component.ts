@@ -1,5 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
+import { GoogleAuthRequest } from '../../models/auth.model';
 
 export interface SocialAuthResult {
   provider: 'google' | 'facebook' | 'apple' | 'microsoft';
@@ -28,6 +31,7 @@ export class SocialAuthComponent implements OnInit {
   @Output() authError = new EventEmitter<string>();
 
   private isGoogleLoaded = false;
+  private authService = inject(AuthService);
 
   ngOnInit() {
     this.loadGoogleScript();
@@ -52,8 +56,7 @@ export class SocialAuthComponent implements OnInit {
       return;
     }
 
-    // TODO: Replace with actual client ID from environment
-    const clientId = 'your-google-client-id.googleusercontent.com';
+    const clientId = environment.googleClientId;
 
     window.google.accounts.id.initialize({
       client_id: clientId,
@@ -87,18 +90,29 @@ export class SocialAuthComponent implements OnInit {
   }
 
   private mockBackendAuth(authResult: SocialAuthResult) {
-    // Simulate backend API call
-    setTimeout(() => {
-      // Mock: Check if user exists based on email
-      const isExistingUser = Math.random() > 0.7; // 30% chance new user
+    // Use AuthService for backend integration
+    const request: GoogleAuthRequest = {
+      idToken: 'mock-id-token', // In real implementation, this would be the JWT from Google
+      mode: this.mode,
+      email: authResult.email,
+      name: authResult.name,
+      providerId: authResult.providerId
+    };
 
-      const result: SocialAuthResult = {
-        ...authResult,
-        isNewUser: !isExistingUser
-      };
-
-      this.authSuccess.emit(result);
-    }, 1000);
+    // Use mock implementation for development
+    this.authService.mockGoogleAuth(request).subscribe({
+      next: (response) => {
+        const result: SocialAuthResult = {
+          ...authResult,
+          isNewUser: response.isNewUser
+        };
+        this.authSuccess.emit(result);
+      },
+      error: (error) => {
+        console.error('Google auth error:', error);
+        this.authError.emit('Authentication failed. Please try again.');
+      }
+    });
   }
 
   loginWithGoogle() {
@@ -116,8 +130,7 @@ export class SocialAuthComponent implements OnInit {
   }
 
   private showGooglePopup() {
-    // TODO: Replace with actual client ID from environment
-    const clientId = 'your-google-client-id.googleusercontent.com';
+    const clientId = environment.googleClientId;
 
     window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,

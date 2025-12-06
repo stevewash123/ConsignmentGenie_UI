@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, BehaviorSubject, catchError, of, map } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse } from '../models/auth.model';
+import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse, GoogleAuthRequest, SocialAuthResponse } from '../models/auth.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -294,5 +294,56 @@ export class AuthService {
 
   validateSubdomain(subdomain: string): Observable<{ success: boolean; data: { isAvailable: boolean; subdomain: string }; message: string }> {
     return this.http.get<{ success: boolean; data: { isAvailable: boolean; subdomain: string }; message: string }>(`${this.apiUrl}/auth/validate-subdomain/${subdomain}`);
+  }
+
+  /**
+   * Authenticate with Google OAuth
+   */
+  googleAuth(request: GoogleAuthRequest): Observable<SocialAuthResponse> {
+    return this.http.post<SocialAuthResponse>(`${this.apiUrl}/auth/google`, request)
+      .pipe(
+        tap(response => {
+          // Set auth data if login/signup was successful
+          if (!response.needsProfileCompletion) {
+            this.setAuthData(response);
+          }
+        })
+      );
+  }
+
+  /**
+   * Link Google account to existing user
+   */
+  linkGoogleAccount(request: Omit<GoogleAuthRequest, 'mode'>): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/auth/link/google`, request);
+  }
+
+  /**
+   * Mock implementation for development
+   */
+  mockGoogleAuth(request: GoogleAuthRequest): Observable<SocialAuthResponse> {
+    // Simulate API call delay
+    return of({
+      token: 'mock-jwt-token',
+      userId: 'mock-user-' + Date.now(),
+      email: request.email,
+      role: 2, // Owner role
+      organizationId: 'mock-org-' + Date.now(),
+      organizationName: request.name + "'s Shop",
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+      isNewUser: Math.random() > 0.5, // Random for testing
+      needsProfileCompletion: request.mode === 'signup'
+    }).pipe(
+      tap(() => {
+        // Simulate network delay
+        setTimeout(() => {}, 1000);
+      }),
+      tap(response => {
+        // Set auth data if login/signup was successful
+        if (!response.needsProfileCompletion) {
+          this.setAuthData(response);
+        }
+      })
+    );
   }
 }

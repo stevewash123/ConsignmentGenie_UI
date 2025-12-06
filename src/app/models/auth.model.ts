@@ -41,3 +41,16 @@ export interface TokenInfo {
   token: string;
   expiresAt: Date;
 }
+
+export interface GoogleAuthRequest {
+  idToken: string;
+  mode: 'signup' | 'login' | 'link';
+  email: string;
+  name: string;
+  providerId: string;
+}
+
+export interface SocialAuthResponse extends AuthResponse {
+  isNewUser: boolean;
+  needsProfileCompletion?: boolean;
+}
