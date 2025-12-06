@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Consignor, CreateConsignorRequest, UpdateConsignorRequest } from '../models/consignor.model';
+import { BalanceAdjustment, CreateBalanceAdjustmentRequest, BalanceAdjustmentResponse, ConsignorBalance } from '../models/balance-adjustment.model';
 import { environment } from '../../environments/environment';
 
 export interface ConsignorInvitationRequest {
@@ -107,5 +108,17 @@ export class ConsignorService {
 
   registerFromInvitation(request: ConsignorRegistrationRequest): Observable<RegistrationResult> {
     return this.http.post<RegistrationResult>(`${environment.apiUrl}/invitations/register`, request);
+  }
+
+  createBalanceAdjustment(consignorId: string, request: CreateBalanceAdjustmentRequest): Observable<BalanceAdjustmentResponse> {
+    return this.http.post<BalanceAdjustmentResponse>(`${this.apiUrl}/${consignorId}/adjustments`, request);
+  }
+
+  getConsignorAdjustments(consignorId: string): Observable<BalanceAdjustment[]> {
+    return this.http.get<BalanceAdjustment[]>(`${this.apiUrl}/${consignorId}/adjustments`);
+  }
+
+  getConsignorBalance(consignorId: string): Observable<ConsignorBalance> {
+    return this.http.get<ConsignorBalance>(`${this.apiUrl}/${consignorId}/balance`);
   }
 }

@@ -1,0 +1,153 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Balance Adjustment</h3>
+      <button class="close-btn" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <form (ngSubmit)="onSubmit()" #adjustmentForm="ngForm">
+        <!-- Consignor Selection -->
+        <div class="form-group">
+          <label for="consignor">Consignor *</label>
+          <select
+            id="consignor"
+            name="consignor"
+            [(ngModel)]="adjustment.consignorId"
+            (ngModelChange)="onConsignorChange()"
+            required
+            #consignorField="ngModel"
+            class="form-control"
+            [class.error]="consignorField.invalid && consignorField.touched"
+          >
+            <option value="">Select a consignor</option>
+            <option *ngFor="let consignor of consignors" [value]="consignor.id">
+              {{ consignor.name }}
+            </option>
+          </select>
+          <div class="error-message" *ngIf="consignorField.invalid && (consignorField.dirty || consignorField.touched)">
+            Please select a consignor
+          </div>
+        </div>
+
+        <!-- Current Balance Display -->
+        <div class="form-group" *ngIf="adjustment.consignorId">
+          <label>Current Balance:</label>
+          <div class="balance-display">
+            <span *ngIf="!isLoadingBalance(); else loadingBalance" class="current-balance">
+              {{ formatCurrency(currentBalance()) }}
+            </span>
+            <ng-template #loadingBalance>
+              <span class="loading">Loading...</span>
+            </ng-template>
+          </div>
+        </div>
+
+        <div class="separator" *ngIf="adjustment.consignorId"></div>
+
+        <!-- Adjustment Type -->
+        <div class="form-group">
+          <label for="adjustmentType">Adjustment Type *</label>
+          <select
+            id="adjustmentType"
+            name="adjustmentType"
+            [(ngModel)]="adjustment.type"
+            required
+            #typeField="ngModel"
+            class="form-control"
+            [class.error]="typeField.invalid && typeField.touched"
+          >
+            <option *ngFor="let type of adjustmentTypes" [value]="type">
+              {{ AdjustmentTypeLabels[type] }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group">
+          <label for="amount">Amount *</label>
+          <input
+            type="number"
+            id="amount"
+            name="amount"
+            [(ngModel)]="adjustment.amount"
+            (ngModelChange)="onAmountChange()"
+            step="0.01"
+            required
+            #amountField="ngModel"
+            class="form-control amount-input"
+            [class.error]="amountField.invalid && amountField.touched"
+            placeholder="0.00"
+          >
+          <div class="amount-help">
+            (Use negative for deductions, positive for credits)
+          </div>
+          <div class="error-message" *ngIf="amountField.invalid && (amountField.dirty || amountField.touched)">
+            Amount is required and cannot be zero
+          </div>
+        </div>
+
+        <!-- Reason -->
+        <div class="form-group">
+          <label for="reason">Reason (required) *</label>
+          <textarea
+            id="reason"
+            name="reason"
+            [(ngModel)]="adjustment.reason"
+            required
+            minlength="10"
+            #reasonField="ngModel"
+            class="form-control reason-textarea"
+            [class.error]="reasonField.invalid && reasonField.touched"
+            placeholder="Enter detailed reason for this adjustment (minimum 10 characters)"
+            rows="4"
+          ></textarea>
+          <div class="character-count">
+            {{ adjustment.reason.length }}/10 characters minimum
+          </div>
+          <div class="error-message" *ngIf="reasonField.invalid && (reasonField.dirty || reasonField.touched)">
+            <span *ngIf="reasonField.errors?.['required']">Reason is required</span>
+            <span *ngIf="reasonField.errors?.['minlength']">Reason must be at least 10 characters</span>
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <!-- New Balance Preview -->
+        <div class="form-group" *ngIf="newBalance() !== null">
+          <label>New Balance After Adjustment:</label>
+          <div class="new-balance" [class.negative-warning]="isNegativeWarning()">
+            {{ formatCurrency(newBalance()) }}
+            <span *ngIf="isNegativeWarning()" class="warning-text">
+              ⚠️ This will result in a negative balance
+            </span>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="close.emit()">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="adjustmentForm.invalid || isSubmitting() || adjustment.amount === 0"
+          >
+            {{ isSubmitting() ? 'Applying...' : 'Apply Adjustment' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div class="success-message" *ngIf="successMessage()">
+        {{ successMessage() }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message" *ngIf="errorMessage()">
+        {{ errorMessage() }}
+      </div>
+    </div>
+  </div>
+</div>

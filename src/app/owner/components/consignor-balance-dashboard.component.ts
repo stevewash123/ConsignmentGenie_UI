@@ -7,6 +7,7 @@ import { LoadingService } from '../../shared/services/loading.service';
 import { ProcessSinglePayoutModalComponent, ConsignorPayoutData, SinglePayoutResponse } from '../../shared/components/process-single-payout-modal.component';
 import { PayoutSuccessModalComponent } from '../../shared/components/payout-success-modal.component';
 import { BatchPayoutModalComponent, BatchPayoutResult } from '../../shared/components/batch-payout-modal.component';
+import { BalanceAdjustmentModalComponent } from '../../shared/components/balance-adjustment-modal.component';
 
 // Interfaces for the Balance Dashboard
 export interface ConsignorBalanceSummary {
@@ -40,7 +41,7 @@ export interface BalanceSort {
 @Component({
   selector: 'app-consignor-balance-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ProcessSinglePayoutModalComponent, PayoutSuccessModalComponent, BatchPayoutModalComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ProcessSinglePayoutModalComponent, PayoutSuccessModalComponent, BatchPayoutModalComponent, BalanceAdjustmentModalComponent],
   templateUrl: './consignor-balance-dashboard.component.html',
   styleUrls: ['./consignor-balance-dashboard.component.css']
 })
@@ -63,7 +64,9 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
   showPayoutModal = signal(false);
   showSuccessModal = signal(false);
   showBatchModal = signal(false);
+  showBalanceAdjustmentModal = signal(false);
   selectedConsignorData = signal<ConsignorPayoutData | null>(null);
+  selectedConsignorForAdjustment = signal<ConsignorBalance | null>(null);
   lastPayoutResult = signal<SinglePayoutResponse | null>(null);
 
   // Available filter options
@@ -124,6 +127,15 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
       const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       return sort.direction === 'desc' ? -comparison : comparison;
     });
+  });
+
+  // Convert ConsignorBalance[] to Consignor[] for the balance adjustment modal
+  consignorsForModal = computed(() => {
+    return this.balances().map(balance => ({
+      id: parseInt(balance.consignorId, 10) || 0, // Convert string to number for compatibility
+      name: balance.name,
+      email: balance.email
+    }));
   });
 
   private loadingService = inject(LoadingService);
@@ -321,5 +333,26 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
       totalAvailable: Math.max(0, summary.totalAvailable - paidAmount),
       totalOwed: Math.max(0, summary.totalOwed - paidAmount)
     });
+  }
+
+  // Balance Adjustment Modal Methods
+  openBalanceAdjustmentModal(consignor: ConsignorBalance) {
+    this.selectedConsignorForAdjustment.set(consignor);
+    this.showBalanceAdjustmentModal.set(true);
+  }
+
+  onBalanceAdjustmentModalClose() {
+    this.showBalanceAdjustmentModal.set(false);
+    this.selectedConsignorForAdjustment.set(null);
+  }
+
+  onBalanceAdjustmentCreated() {
+    this.showBalanceAdjustmentModal.set(false);
+    this.selectedConsignorForAdjustment.set(null);
+
+    // Refresh the data to show updated balances
+    this.refreshData();
+
+    this.toastr.success('Balance adjustment created successfully');
   }
 }

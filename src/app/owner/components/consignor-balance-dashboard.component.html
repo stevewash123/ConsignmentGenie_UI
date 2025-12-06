@@ -129,18 +129,26 @@
                 {{ formatDate(balance.lastPayoutDate) }}
               </td>
               <td class="action-cell">
-                <button
-                  *ngIf="balance.canPay && balance.availableBalance > 0"
-                  (click)="payConsignor(balance)"
-                  class="btn btn-success btn-sm">
-                  Pay
-                </button>
-                <span
-                  *ngIf="!balance.canPay || balance.availableBalance === 0"
-                  class="status-text">
-                  <span *ngIf="balance.pendingBalance > 0 && balance.availableBalance === 0">Pending...</span>
-                  <span *ngIf="balance.totalOwed === 0">Paid Up</span>
-                </span>
+                <div class="action-buttons">
+                  <button
+                    *ngIf="balance.canPay && balance.availableBalance > 0"
+                    (click)="payConsignor(balance)"
+                    class="btn btn-success btn-sm">
+                    Pay
+                  </button>
+                  <button
+                    (click)="openBalanceAdjustmentModal(balance)"
+                    class="btn btn-outline-secondary btn-sm"
+                    title="Adjust Balance">
+                    Adjust
+                  </button>
+                  <span
+                    *ngIf="!balance.canPay || balance.availableBalance === 0"
+                    class="status-text">
+                    <span *ngIf="balance.pendingBalance > 0 && balance.availableBalance === 0">Pending...</span>
+                    <span *ngIf="balance.totalOwed === 0">Paid Up</span>
+                  </span>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -170,4 +178,13 @@
     (onClose)="onBatchModalClose()"
     (onSuccess)="onBatchSuccess($event)">
   </app-batch-payout-modal>
+
+  <!-- Balance Adjustment Modal -->
+  <app-balance-adjustment-modal
+    [isVisible]="showBalanceAdjustmentModal()"
+    [consignors]="consignorsForModal()"
+    [selectedConsignorId]="selectedConsignorForAdjustment()?.consignorId"
+    (close)="onBalanceAdjustmentModalClose()"
+    (adjustmentCreated)="onBalanceAdjustmentCreated()">
+  </app-balance-adjustment-modal>
 </app-owner-layout>
