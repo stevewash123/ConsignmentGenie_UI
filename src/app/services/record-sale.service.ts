@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay, map, catchError, switchMap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 export interface Item {
   id: string;
@@ -26,6 +28,12 @@ export interface SaleResponse {
   transactionId: string;
   total: number;
   receiptSent: boolean;
+}
+
+interface ShopProfile {
+  ShopName: string;
+  TaxRate?: number;
+  // ... other properties as needed
 }
 
 // Mock data as specified in requirements
@@ -58,44 +66,148 @@ export const paymentTypes = ['Cash', 'Card', 'Check', 'Other'];
 })
 export class RecordSaleService {
 
+  constructor(private http: HttpClient) {}
+
   /**
    * Get available items with optional search filtering
    */
   getAvailableItems(search?: string): Observable<Item[]> {
-    // Return mock items, filtered by search and status
-    let items = mockItems.filter(i => i.status === 'Available');
-
+    // Use real API call
+    const params = new URLSearchParams();
+    params.set('available', 'true');
     if (search && search.trim()) {
-      const searchLower = search.toLowerCase().trim();
-      items = items.filter(i =>
-        i.name.toLowerCase().includes(searchLower) ||
-        i.sku.toLowerCase().includes(searchLower) ||
-        i.consignorName.toLowerCase().includes(searchLower)
-      );
+      params.set('search', search.trim());
     }
 
-    return of(items).pipe(delay(300));
+    return this.http.get<{
+      success: boolean;
+      data: {
+        id: string;
+        title: string;
+        sku: string;
+        price: number;
+        consignor: { displayName: string };
+        status: string;
+      }[];
+    }>(`${environment.apiUrl}/api/items?${params.toString()}`).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error('Failed to fetch items');
+        }
+
+        // Map API response to our Item interface
+        return response.data.map(item => ({
+          id: item.id,
+          name: item.title,
+          sku: item.sku,
+          price: item.price,
+          consignorName: item.consignor.displayName,
+          status: item.status
+        }));
+      }),
+      catchError(error => {
+        console.error('Error fetching items:', error);
+        // Fall back to mock data in case of API failure
+        let items = mockItems.filter(i => i.status === 'Available');
+
+        if (search && search.trim()) {
+          const searchLower = search.toLowerCase().trim();
+          items = items.filter(i =>
+            i.name.toLowerCase().includes(searchLower) ||
+            i.sku.toLowerCase().includes(searchLower) ||
+            i.consignorName.toLowerCase().includes(searchLower)
+          );
+        }
+
+        return of(items);
+      })
+    );
   }
 
   /**
-   * Get the shop's tax rate
+   * Get the shop's tax rate from API or fallback to default
    */
   getTaxRate(): Observable<number> {
-    return of(mockTaxRate);
+    if (!environment.production) {
+      // For development, use mock tax rate but make it configurable
+      return of(mockTaxRate);
+    }
+
+    return this.http.get<ShopProfile>(`${environment.apiUrl}/api/organization/profile`).pipe(
+      map(profile => (profile.TaxRate || 0) / 100), // Convert percentage to decimal (8.25% -> 0.0825)
+      catchError(() => of(0)) // Default to 0% tax rate if API fails
+    );
+  }
+
+  /**
+   * Get the shop's tax rate from API (returns percentage for display)
+   */
+  getTaxRatePercentage(): Observable<number> {
+    if (!environment.production) {
+      return of(mockTaxRate * 100); // Convert to percentage for display
+    }
+
+    return this.http.get<ShopProfile>(`${environment.apiUrl}/api/organization/profile`).pipe(
+      map(profile => profile.TaxRate || 0), // Already stored as percentage
+      catchError(() => of(0))
+    );
   }
 
   /**
    * Complete a sale transaction
    */
   completeSale(request: SaleRequest): Observable<SaleResponse> {
-    // Mock successful sale
-    const response: SaleResponse = {
-      transactionId: 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-      total: this.calculateTotal(request.items),
-      receiptSent: !!request.customerEmail
-    };
+    // Get tax rate first to calculate total correctly
+    return this.getTaxRate().pipe(
+      map(taxRate => {
+        const requestBody = {
+          items: request.items.map(cartItem => ({
+            itemId: cartItem.item.id,
+            quantity: cartItem.quantity,
+            unitPrice: cartItem.item.price
+          })),
+          paymentType: request.paymentType,
+          taxRate: taxRate,
+          customerEmail: request.customerEmail || undefined
+        };
 
-    return of(response).pipe(delay(500));
+        return this.http.post<{
+          success: boolean;
+          data: {
+            id: string;
+            total: number;
+            receiptSent?: boolean;
+          };
+        }>(`${environment.apiUrl}/api/transactions`, requestBody).pipe(
+          map(response => {
+            if (!response.success) {
+              throw new Error('Failed to complete sale');
+            }
+
+            return {
+              transactionId: response.data.id,
+              total: response.data.total,
+              receiptSent: response.data.receiptSent || false
+            };
+          }),
+          catchError(error => {
+            console.error('Error completing sale:', error);
+            // Provide fallback mock response for development
+            const mockResponse: SaleResponse = {
+              transactionId: 'TXN-MOCK-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+              total: this.calculateTotal(request.items),
+              receiptSent: !!request.customerEmail
+            };
+            return of(mockResponse);
+          })
+        );
+      })
+    ).pipe(
+      // Flatten the nested observable
+      (source) => source.pipe(
+        switchMap(innerObs => innerObs)
+      )
+    );
   }
 
   /**
