@@ -21,983 +21,644 @@ import {
   imports: [CommonModule, FormsModule, OwnerLayoutComponent],
   template: `
     <app-owner-layout>
-      <div class="inventory-container">
-      <!-- Header -->
-      <div class="inventory-header">
-        <h1>Inventory Management</h1>
-        <button class="btn btn-primary" (click)="createNewItem()">
-          <i class="fas fa-plus"></i> Add New Item
-        </button>
-      </div>
-
-      <!-- Search and Filters -->
-      <div class="filters-section">
-        <div class="search-row">
-          <div class="search-field">
-            <input
-              type="text"
-              [(ngModel)]="searchQuery"
-              (keyup.enter)="applyFilters()"
-              placeholder="Search items by title, SKU, or description..."
-              class="form-control">
-            <button class="btn btn-outline-primary" (click)="applyFilters()">
-              <i class="fas fa-search"></i>
+      <div class="inventory-page">
+        <!-- Header -->
+        <div class="page-header">
+          <div class="header-content">
+            <h1>Inventory Management</h1>
+            <p>View and manage all inventory items</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary" (click)="createNewItem()">
+              <span class="btn-icon">📦</span>
+              Add New Item
             </button>
           </div>
         </div>
 
-        <div class="filter-row">
-          <select [(ngModel)]="selectedStatus" (change)="applyFilters()" class="form-select">
-            <option value="">All Statuses</option>
-            <option value="Available">Available</option>
-            <option value="Sold">Sold</option>
-            <option value="Removed">Removed</option>
-          </select>
-
-          <select [(ngModel)]="selectedCondition" (change)="applyFilters()" class="form-select">
-            <option value="">All Conditions</option>
-            <option value="New">New</option>
-            <option value="LikeNew">Like New</option>
-            <option value="Good">Good</option>
-            <option value="Fair">Fair</option>
-            <option value="Poor">Poor</option>
-          </select>
-
-          <select [(ngModel)]="selectedCategory" (change)="applyFilters()" class="form-select">
-            <option value="">All Categories</option>
-            @for (category of categories(); track category.id) {
-              <option [value]="category.name">{{ category.name }}</option>
-            }
-          </select>
-
-          <input
-            type="number"
-            [(ngModel)]="priceMin"
-            (change)="applyFilters()"
-            placeholder="Min Price"
-            class="form-control price-input">
-
-          <input
-            type="number"
-            [(ngModel)]="priceMax"
-            (change)="applyFilters()"
-            placeholder="Max Price"
-            class="form-control price-input">
-
-          <button class="btn btn-outline-secondary" (click)="clearFilters()">
-            <i class="fas fa-times"></i> Clear
-          </button>
-        </div>
-
-        <div class="sort-row">
-          <label>Sort by:</label>
-          <select [(ngModel)]="sortBy" (change)="applyFilters()" class="form-select">
-            <option value="CreatedAt">Date Created</option>
-            <option value="Title">Title</option>
-            <option value="Price">Price</option>
-            <option value="Sku">SKU</option>
-            <option value="Status">Status</option>
-          </select>
-
-          <select [(ngModel)]="sortDirection" (change)="applyFilters()" class="form-select">
-            <option value="desc">Descending</option>
-            <option value="asc">Ascending</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Results Summary and View Toggle -->
-      <div class="results-summary">
-        <span>Showing {{ itemsResult()?.items.length || 0 }} of {{ itemsResult()?.totalCount || 0 }} items</span>
-        <div class="view-controls">
-          <div class="view-toggle">
-            <button class="btn btn-sm" [class.btn-primary]="viewMode === 'table'" [class.btn-outline-primary]="viewMode !== 'table'" (click)="setViewMode('table')">
-              <i class="fas fa-table"></i> Table
-            </button>
-            <button class="btn btn-sm" [class.btn-primary]="viewMode === 'cards'" [class.btn-outline-primary]="viewMode !== 'cards'" (click)="setViewMode('cards')">
-              <i class="fas fa-th-large"></i> Cards
+        <!-- Filters Section -->
+        <div class="filters-section">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="searchQuery">Search</label>
+              <input
+                type="text"
+                id="searchQuery"
+                [(ngModel)]="searchQuery"
+                (keyup.enter)="applyFilters()"
+                placeholder="Search items by title, SKU, or description..."
+                class="filter-input">
+            </div>
+            <div class="filter-group">
+              <label for="selectedStatus">Status</label>
+              <select id="selectedStatus" [(ngModel)]="selectedStatus" (change)="applyFilters()" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="Available">Available</option>
+                <option value="Sold">Sold</option>
+                <option value="Removed">Removed</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="selectedCondition">Condition</label>
+              <select id="selectedCondition" [(ngModel)]="selectedCondition" (change)="applyFilters()" class="filter-select">
+                <option value="">All Conditions</option>
+                <option value="New">New</option>
+                <option value="LikeNew">Like New</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Poor">Poor</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="selectedCategory">Category</label>
+              <select id="selectedCategory" [(ngModel)]="selectedCategory" (change)="applyFilters()" class="filter-select">
+                <option value="">All Categories</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.name">{{ category.name }}</option>
+                }
+              </select>
+            </div>
+            <button class="btn-secondary" (click)="clearFilters()">
+              Clear Filters
             </button>
           </div>
-          <div class="page-size-selector">
-            <label>Items per page:</label>
-            <select [(ngModel)]="pageSize" (change)="changePageSize()" class="form-select">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+          <div class="section-header">
+            <h2>Inventory Items</h2>
+            <div class="table-controls">
+              <select [(ngModel)]="pageSize" (change)="changePageSize()" class="page-size-select">
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+              </select>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Loading State -->
-      @if (isInventoryLoading()) {
-        <div class="loading-state">
-          <i class="fas fa-spinner fa-spin"></i> Loading inventory...
-        </div>
-      }
-
-      <!-- Error State -->
-      @if (error()) {
-        <div class="alert alert-danger">
-          <i class="fas fa-exclamation-triangle"></i>
-          {{ error() }}
-          <button class="btn btn-sm btn-outline-danger" (click)="loadItems()">Retry</button>
-        </div>
-      }
-
-      <!-- Items Table -->
-      @if (!isInventoryLoading() && !error() && itemsResult() && viewMode === 'table') {
-        <div class="items-table-container">
-          <table class="table table-striped table-hover">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>SKU</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Condition</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Source</th>
-                <th>consignor</th>
-                <th>Received</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of itemsResult()!.items; track item.itemId) {
+          <div class="table-container" *ngIf="!isInventoryLoading() && pagedResult(); else loadingInventory">
+            <table class="inventory-table">
+              <thead>
                 <tr>
+                  <th>Image</th>
+                  <th (click)="setSorting('sku')" class="sortable">
+                    SKU
+                    <span class="sort-indicator" [class.active]="sortBy === 'sku'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th (click)="setSorting('title')" class="sortable">
+                    Title
+                    <span class="sort-indicator" [class.active]="sortBy === 'title'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th>Category</th>
+                  <th>Condition</th>
+                  <th (click)="setSorting('price')" class="sortable">
+                    Price
+                    <span class="sort-indicator" [class.active]="sortBy === 'price'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th>Status</th>
+                  <th>Consignor</th>
+                  <th (click)="setSorting('receivedDate')" class="sortable">
+                    Received
+                    <span class="sort-indicator" [class.active]="sortBy === 'receivedDate'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of itemsResult()!.items" class="item-row">
                   <td class="image-cell">
                     @if (item.primaryImageUrl) {
                       <img [src]="item.primaryImageUrl" [alt]="item.title" class="item-thumbnail">
                     } @else {
                       <div class="no-image">
-                        <i class="fas fa-image"></i>
+                        📷
                       </div>
                     }
                   </td>
                   <td class="sku-cell">{{ item.sku }}</td>
                   <td class="title-cell">
-                    <div class="item-title">{{ item.title }}</div>
-                    @if (item.description) {
-                      <div class="item-description">{{ item.description | slice:0:50 }}...</div>
-                    }
+                    <div class="item-info">
+                      <div class="item-title">{{ item.title }}</div>
+                      <div class="item-description" *ngIf="item.description">{{ item.description | slice:0:50 }}{{ item.description.length > 50 ? '...' : '' }}</div>
+                    </div>
                   </td>
                   <td>{{ item.category }}</td>
-                  <td>
-                    <span class="badge" [class]="getConditionClass(item.condition)">
+                  <td class="condition-cell">
+                    <span class="condition-badge" [class]="getConditionClass(item.condition)">
                       {{ getConditionLabel(item.condition) }}
                     </span>
                   </td>
-                  <td class="price-cell">{{ item.price | currency }}</td>
-                  <td>
-                    <span class="badge" [class]="getStatusClass(item.status)">
+                  <td class="price-cell">
+                    <div class="item-price">\${{ item.price | number:'1.2-2' }}</div>
+                  </td>
+                  <td class="status-cell">
+                    <span class="status-badge" [class]="'status-' + item.status.toLowerCase()">
                       {{ item.status }}
                     </span>
                   </td>
-                  <td>
-                    <span class="badge badge-info">
-                      Manual
-                    </span>
+                  <td class="consignor-cell">
+                    <div class="consignor-info">
+                      <div class="consignor-name">{{ item.consignorName }}</div>
+                    </div>
                   </td>
-                  <td>{{ item.consignorName }}</td>
-                  <td>{{ item.receivedDate | date:'short' }}</td>
+                  <td class="date-cell">
+                    {{ item.receivedDate | date:'MMM d, y' }}
+                  </td>
                   <td class="actions-cell">
-                    <div class="btn-group">
-                      <button class="btn btn-sm btn-outline-primary" (click)="viewItem(item.itemId)">
-                        <i class="fas fa-eye"></i>
+                    <div class="action-buttons">
+                      <button class="btn-icon" (click)="viewItem(item.itemId)" title="View Details">
+                        👁️
                       </button>
-                      <button class="btn btn-sm btn-outline-secondary" (click)="editItem(item.itemId)">
-                        <i class="fas fa-edit"></i>
+                      <button class="btn-icon" (click)="editItem(item.itemId)" title="Edit">
+                        ✏️
                       </button>
                       @if (item.status === 'Available') {
-                        <button class="btn btn-sm btn-outline-warning" (click)="markAsRemoved(item)">
-                          <i class="fas fa-archive"></i>
+                        <button class="btn-icon" (click)="markAsRemoved(item)" title="Mark as Removed">
+                          📦
                         </button>
                       }
-                      <button class="btn btn-sm btn-outline-danger" (click)="deleteItem(item)">
-                        <i class="fas fa-trash"></i>
+                      <button class="btn-icon danger" (click)="deleteItem(item)" title="Delete">
+                        🗑️
                       </button>
                     </div>
                   </td>
                 </tr>
-              } @empty {
-                <tr>
-                  <td colspan="11" class="no-results">
-                    <div class="empty-state">
-                      <i class="fas fa-box-open fa-3x"></i>
-                      <h3>No items found</h3>
-                      <p>Try adjusting your search criteria or add new items to your inventory.</p>
-                      <button class="btn btn-primary" (click)="createNewItem()">
-                        <i class="fas fa-plus"></i> Add Your First Item
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+              </tbody>
+            </table>
 
-      <!-- Items Cards -->
-      @if (!isInventoryLoading() && !error() && itemsResult() && viewMode === 'cards') {
-        <div class="items-cards-container">
-          @for (item of itemsResult()!.items; track item.itemId) {
-            <div class="item-card">
-              <div class="card-image">
-                @if (item.primaryImageUrl) {
-                  <img [src]="item.primaryImageUrl" [alt]="item.title" class="card-thumbnail">
-                } @else {
-                  <div class="no-image-large">
-                    <i class="fas fa-image"></i>
-                  </div>
-                }
+            <!-- Pagination -->
+            <div class="pagination" *ngIf="itemsResult()!.totalPages > 1">
+              <button
+                class="page-btn"
+                [disabled]="currentPage() === 1"
+                (click)="goToPage(currentPage() - 1)">
+                Previous
+              </button>
+
+              <div class="page-numbers">
+                <button
+                  *ngFor="let page of visiblePages()"
+                  class="page-btn"
+                  [class.active]="page === currentPage()"
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
               </div>
-              <div class="card-content">
-                <div class="card-header">
-                  <h3 class="card-title">{{ item.title }}</h3>
-                  <span class="card-price">{{ item.price | currency }}</span>
-                </div>
-                <div class="card-details">
-                  <p class="card-sku">SKU: {{ item.sku }}</p>
-                  <p class="card-category">{{ item.category }}</p>
-                  <div class="card-badges">
-                    <span class="badge" [class]="getConditionClass(item.condition)">
-                      {{ getConditionLabel(item.condition) }}
-                    </span>
-                    <span class="badge" [class]="getStatusClass(item.status)">
-                      {{ item.status }}
-                    </span>
-                    <span class="badge badge-info">Manual</span>
-                  </div>
-                  <p class="card-consignor">{{ item.consignorName }}</p>
-                  <p class="card-received">Received: {{ item.receivedDate | date:'short' }}</p>
-                </div>
-                <div class="card-actions">
-                  <button class="btn btn-sm btn-outline-primary" (click)="viewItem(item.itemId)">
-                    <i class="fas fa-eye"></i> View
-                  </button>
-                  <button class="btn btn-sm btn-outline-secondary" (click)="editItem(item.itemId)">
-                    <i class="fas fa-edit"></i> Edit
-                  </button>
-                  @if (item.status === 'Available') {
-                    <button class="btn btn-sm btn-outline-warning" (click)="markAsRemoved(item)">
-                      <i class="fas fa-archive"></i>
-                    </button>
-                  }
-                  <button class="btn btn-sm btn-outline-danger" (click)="deleteItem(item)">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          } @empty {
-            <div class="empty-state">
-              <i class="fas fa-box-open fa-3x"></i>
-              <h3>No items found</h3>
-              <p>Try adjusting your search criteria or add new items to your inventory.</p>
-              <button class="btn btn-primary" (click)="createNewItem()">
-                <i class="fas fa-plus"></i> Add Your First Item
+
+              <button
+                class="page-btn"
+                [disabled]="currentPage() === itemsResult()!.totalPages"
+                (click)="goToPage(currentPage() + 1)">
+                Next
               </button>
             </div>
-          }
-        </div>
-      }
+          </div>
 
-      @if (!isInventoryLoading() && !error() && itemsResult()) {
-        <!-- Pagination -->
-        @if (itemsResult()!.totalPages > 1) {
-          <nav class="pagination-nav">
-            <ul class="pagination">
-              <li class="page-item" [class.disabled]="!itemsResult()!.hasPreviousPage">
-                <button class="page-link" (click)="goToPage(currentPage() - 1)">Previous</button>
-              </li>
-
-              @for (pageNum of visiblePages(); track pageNum) {
-                <li class="page-item" [class.active]="pageNum === currentPage()">
-                  <button class="page-link" (click)="goToPage(pageNum)">{{ pageNum }}</button>
-                </li>
-              }
-
-              <li class="page-item" [class.disabled]="!itemsResult()!.hasNextPage">
-                <button class="page-link" (click)="goToPage(currentPage() + 1)">Next</button>
-              </li>
-            </ul>
-
-            <div class="pagination-info">
-              Page {{ currentPage() }} of {{ itemsResult()!.totalPages }}
+          <ng-template #loadingInventory>
+            <div class="loading-state" *ngIf="isInventoryLoading()">
+              <div class="loading-spinner"></div>
+              <p>Loading inventory...</p>
             </div>
-          </nav>
-        }
-      }
+            <div class="empty-state" *ngIf="!isInventoryLoading() && (!itemsResult() || itemsResult()!.items.length === 0)">
+              <p>No inventory items found.</p>
+              <button class="btn-primary" (click)="createNewItem()">
+                <span class="btn-icon">📦</span>
+                Add Your First Item
+              </button>
+            </div>
+          </ng-template>
+        </div>
+
       </div>
     </app-owner-layout>
   `,
   styles: [`
-    .inventory-container {
-      padding: 20px;
+    .inventory-page {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    .inventory-header {
+    .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e5e7eb;
     }
 
-    .inventory-header h1 {
+    .page-header h1 {
+      color: #059669;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .page-header p {
+      color: #6b7280;
       margin: 0;
-      color: #333;
     }
 
-    /* Search and Filters */
-    .filters-section {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
+    .btn-primary, .btn-secondary {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
       border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .search-row {
-      margin-bottom: 15px;
-    }
-
-    .search-field {
-      display: flex;
-      gap: 10px;
-      max-width: 500px;
-    }
-
-    .filter-row {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .sort-row {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .price-input {
-      max-width: 120px;
-    }
-
-    /* Results and View Controls */
-    .results-summary {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding: 10px 0;
-    }
-
-    .view-controls {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .view-toggle {
-      display: flex;
-      gap: 5px;
-    }
-
-    .page-size-selector {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .page-size-selector label {
-      margin: 0;
-      white-space: nowrap;
-    }
-
-    /* Cards Layout */
-    .items-cards-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .item-card {
-      background: white;
-      border: 1px solid #dee2e6;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: box-shadow 0.3s ease, transform 0.2s ease;
+      font-weight: 600;
       cursor: pointer;
-    }
-
-    .item-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transform: translateY(-2px);
-    }
-
-    .card-image {
-      height: 200px;
-      background: #f8f9fa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .card-thumbnail {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .no-image-large {
-      color: #6c757d;
-      font-size: 3rem;
-    }
-
-    .card-content {
-      padding: 16px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-
-    .card-title {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
-      line-height: 1.3;
-      flex: 1;
-      margin-right: 10px;
-    }
-
-    .card-price {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #28a745;
-    }
-
-    .card-details {
-      margin-bottom: 15px;
-    }
-
-    .card-sku {
-      margin: 0 0 4px 0;
-      font-size: 0.9rem;
-      color: #6c757d;
-    }
-
-    .card-category {
-      margin: 0 0 8px 0;
-      font-size: 0.9rem;
-      color: #495057;
-    }
-
-    .card-badges {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-
-    .card-consignor {
-      margin: 0 0 4px 0;
-      font-size: 0.9rem;
-      color: #495057;
-      font-weight: 500;
-    }
-
-    .card-received {
-      margin: 0;
-      font-size: 0.85rem;
-      color: #6c757d;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .card-actions .btn {
-      flex: 1;
-      min-width: 70px;
-    }
-
-    /* Table Layout */
-    .items-table-container {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .table {
-      margin: 0;
-    }
-
-    .image-cell {
-      width: 60px;
-      padding: 8px;
-    }
-
-    .item-thumbnail {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 4px;
-    }
-
-    .no-image {
-      width: 50px;
-      height: 50px;
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #6c757d;
-    }
-
-    .sku-cell {
-      font-family: monospace;
-      font-size: 0.9rem;
-    }
-
-    .title-cell {
-      max-width: 200px;
-    }
-
-    .item-title {
-      font-weight: 500;
-      margin-bottom: 2px;
-    }
-
-    .item-description {
-      font-size: 0.85rem;
-      color: #6c757d;
-    }
-
-    .price-cell {
-      font-weight: 600;
-      color: #28a745;
-    }
-
-    .actions-cell {
-      width: 200px;
-    }
-
-    /* Status and Condition Badges */
-    .badge {
-      font-size: 0.75rem;
-      padding: 4px 8px;
-    }
-
-    .badge-success { background-color: #28a745; }
-    .badge-warning { background-color: #ffc107; color: #212529; }
-    .badge-danger { background-color: #dc3545; }
-    .badge-info { background-color: #17a2b8; }
-    .badge-secondary { background-color: #6c757d; }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #6c757d;
-    }
-
-    .empty-state h3 {
-      margin: 20px 0 10px 0;
-      color: #495057;
-    }
-
-    .empty-state p {
-      margin-bottom: 30px;
-    }
-
-    /* Pagination */
-    .pagination-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 30px;
-    }
-
-    .pagination {
-      margin: 0;
-    }
-
-    .pagination-info {
-      color: #6c757d;
-      font-size: 0.9rem;
-    }
-
-    /* Loading State */
-    .loading-state {
-      text-align: center;
-      padding: 40px;
-      color: #6c757d;
-    }
-
-    .loading-state i {
-      margin-right: 8px;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .inventory-container {
-        padding: 15px;
-      }
-
-      .inventory-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-      }
-
-      .filter-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .results-summary {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-      }
-
-      .view-controls {
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      .items-cards-container {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-
-      .card-actions {
-        justify-content: center;
-      }
-
-      .table-responsive {
-        font-size: 0.85rem;
-      }
-
-      .pagination-nav {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-      }
-    }
-
-    @media (max-width: 576px) {
-      .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .card-price {
-        margin-top: 8px;
-      }
-
-      .card-actions .btn {
-        font-size: 0.8rem;
-        padding: 4px 8px;
-      }
-    }
-
-    .inventory-header h1 {
-      margin: 0;
-      color: #495057;
-    }
-
-    .filters-section {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-
-    .search-row {
-      margin-bottom: 15px;
-    }
-
-    .search-field {
-      display: flex;
-      gap: 10px;
-      max-width: 500px;
-    }
-
-    .filter-row, .sort-row {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .price-input {
-      max-width: 120px;
-    }
-
-    .form-select, .form-control {
-      padding: 8px 12px;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-    }
-
-    .results-summary {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding: 10px 0;
-    }
-
-    .view-controls {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .view-toggle {
-      display: flex;
-      gap: 5px;
-    }
-
-    .page-size-selector {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .loading-state {
-      text-align: center;
-      padding: 40px;
-      font-size: 18px;
-      color: #6c757d;
-    }
-
-    .items-table-container {
-      overflow-x: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 8px;
-    }
-
-    .table {
-      margin: 0;
-      background: white;
-    }
-
-    .image-cell {
-      width: 60px;
-      text-align: center;
-    }
-
-    .item-thumbnail {
-      width: 40px;
-      height: 40px;
-      object-fit: cover;
-      border-radius: 4px;
-    }
-
-    .no-image {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #e9ecef;
-      border-radius: 4px;
-      color: #6c757d;
-    }
-
-    .sku-cell {
-      font-family: monospace;
-      font-weight: bold;
-      width: 120px;
-    }
-
-    .title-cell {
-      max-width: 200px;
-    }
-
-    .item-title {
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-
-    .item-description {
-      font-size: 12px;
-      color: #6c757d;
-    }
-
-    .price-cell {
-      font-weight: 600;
-      color: #28a745;
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
-    }
-
-    .badge.condition-new { background: #d4edda; color: #155724; }
-    .badge.condition-like-new { background: #cce5ff; color: #004085; }
-    .badge.condition-good { background: #fff3cd; color: #856404; }
-    .badge.condition-fair { background: #f8d7da; color: #721c24; }
-    .badge.condition-poor { background: #f5c6cb; color: #491217; }
-
-    .badge.status-available { background: #d4edda; color: #155724; }
-    .badge.status-sold { background: #ffeaa7; color: #2d3748; }
-    .badge.status-removed { background: #f8d7da; color: #721c24; }
-    .badge.badge-info { background: #17a2b8; color: white; }
-
-    .actions-cell {
-      width: 150px;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 5px;
-    }
-
-    .btn-sm {
-      padding: 4px 8px;
-      font-size: 12px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #6c757d;
-    }
-
-    .empty-state i {
-      color: #adb5bd;
-      margin-bottom: 20px;
-    }
-
-    .pagination-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 30px;
-    }
-
-    .pagination {
-      display: flex;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      gap: 5px;
-    }
-
-    .page-item.disabled .page-link {
-      color: #6c757d;
-      pointer-events: none;
-      background-color: #fff;
-      border-color: #dee2e6;
-    }
-
-    .page-item.active .page-link {
-      background-color: #007bff;
-      border-color: #007bff;
-      color: white;
-    }
-
-    .page-link {
-      padding: 8px 12px;
-      border: 1px solid #dee2e6;
-      background: white;
-      color: #007bff;
-      text-decoration: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .page-link:hover:not(.disabled) {
-      background-color: #e9ecef;
-    }
-
-    .pagination-info {
-      color: #6c757d;
-      font-size: 14px;
-    }
-
-    .alert {
-      padding: 15px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-
-    .alert-danger {
-      background-color: #f8d7da;
-      border-color: #f5c6cb;
-      color: #721c24;
-    }
-
-    .btn {
-      padding: 8px 16px;
       border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      transition: all 0.2s;
     }
 
     .btn-primary {
-      background-color: #007bff;
+      background: #059669;
       color: white;
     }
 
-    .btn-outline-primary {
-      border: 1px solid #007bff;
-      color: #007bff;
-      background: white;
+    .btn-primary:hover {
+      background: #047857;
     }
 
-    .btn-outline-secondary {
-      border: 1px solid #6c757d;
-      color: #6c757d;
-      background: white;
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
     }
 
-    .btn-outline-warning {
-      border: 1px solid #ffc107;
-      color: #856404;
-      background: white;
+    .btn-secondary:hover {
+      background: #e5e7eb;
     }
 
-    .btn-outline-danger {
-      border: 1px solid #dc3545;
-      color: #dc3545;
+    .filters-section {
       background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
     }
 
-    .btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
+    .filter-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
     }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .filter-input, .filter-select {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .filter-input:focus, .filter-select:focus {
+      outline: none;
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .results-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .section-header h2 {
+      color: #1f2937;
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .page-size-select {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .inventory-table th {
+      background: #f9fafb;
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .inventory-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .inventory-table th.sortable:hover {
+      background: #f3f4f6;
+    }
+
+    .sort-indicator {
+      opacity: 0.3;
+      margin-left: 0.5rem;
+    }
+
+    .sort-indicator.active {
+      opacity: 1;
+      color: #059669;
+    }
+
+    .item-row {
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .item-row:hover {
+      background: #f9fafb;
+    }
+
+    .item-row td {
+      padding: 1rem;
+      vertical-align: top;
+    }
+
+    .image-cell {
+      width: 60px;
+      text-align: center;
+    }
+
+    .item-thumbnail {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .no-image {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f3f4f6;
+      border-radius: 6px;
+      color: #6b7280;
+      font-size: 1.2rem;
+    }
+
+    .sku-cell {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-title {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .item-description {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .condition-badge, .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .condition-new { background: #dcfce7; color: #166534; }
+    .condition-like-new { background: #dbeafe; color: #1e40af; }
+    .condition-good { background: #fef3c7; color: #92400e; }
+    .condition-fair { background: #fed7aa; color: #9a3412; }
+    .condition-poor { background: #fecaca; color: #991b1b; }
+
+    .status-available { background: #dcfce7; color: #166534; }
+    .status-sold { background: #fef3c7; color: #92400e; }
+    .status-removed { background: #f3f4f6; color: #6b7280; }
+
+    .item-price {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 1rem;
+    }
+
+    .consignor-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .consignor-name {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .date-cell {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-icon.danger:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .page-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      background: #f3f4f6;
+    }
+
+    .page-btn.active {
+      background: #059669;
+      color: white;
+      border-color: #059669;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .page-numbers {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem;
+      color: #6b7280;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #059669;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem;
+      color: #6b7280;
+    }
+
+    .empty-state p {
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .inventory-page {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
+
+      .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .inventory-table {
+        font-size: 0.875rem;
+      }
+
+      .inventory-table th,
+      .inventory-table td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .btn-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
   `]
 })
 export class InventoryListComponent implements OnInit {
@@ -1026,8 +687,6 @@ export class InventoryListComponent implements OnInit {
   currentPage = signal(1);
   pageSize = 25;
 
-  // View state
-  viewMode: 'table' | 'cards' = 'table';
 
   // Computed values
   visiblePages = computed(() => {
@@ -1113,6 +772,16 @@ export class InventoryListComponent implements OnInit {
     this.applyFilters();
   }
 
+  setSorting(column: string) {
+    if (this.sortBy === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = column;
+      this.sortDirection = 'desc';
+    }
+    this.loadItems();
+  }
+
   changePageSize() {
     this.currentPage.set(1);
     this.loadItems();
@@ -1121,6 +790,10 @@ export class InventoryListComponent implements OnInit {
   goToPage(page: number) {
     this.currentPage.set(page);
     this.loadItems();
+  }
+
+  pagedResult() {
+    return this.itemsResult();
   }
 
   createNewItem() {
@@ -1185,9 +858,5 @@ export class InventoryListComponent implements OnInit {
 
   getStatusClass(status: ItemStatus): string {
     return `status-${status.toLowerCase()}`;
-  }
-
-  setViewMode(mode: 'table' | 'cards') {
-    this.viewMode = mode;
   }
 }

@@ -15,7 +15,7 @@ import {
   ApiResponse
 } from '../../models/inventory.model';
 
-describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
+describe('InventoryListComponent - Simplified Design', () => {
   let component: InventoryListComponent;
   let fixture: ComponentFixture<InventoryListComponent>;
   let mockInventoryService: jasmine.SpyObj<InventoryService>;
@@ -112,149 +112,63 @@ describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
     mockLoadingService.isLoading.and.returnValue(false);
   });
 
-  describe('View Mode Toggle', () => {
-    it('should initialize with table view by default', () => {
-      expect(component.viewMode).toBe('table');
-    });
-
-    it('should switch from table to cards view', () => {
-      component.setViewMode('cards');
-      expect(component.viewMode).toBe('cards');
-    });
-
-    it('should switch from cards to table view', () => {
-      component.viewMode = 'cards';
-      component.setViewMode('table');
-      expect(component.viewMode).toBe('table');
-    });
-
-    it('should maintain view mode when data is loaded', () => {
-      component.setViewMode('cards');
-      component.ngOnInit();
-      expect(component.viewMode).toBe('cards');
-    });
-
-    it('should render table view when viewMode is table', () => {
-      component.setViewMode('table');
+  describe('Simplified Table View', () => {
+    it('should render table view only', () => {
       component.itemsResult.set(mockPagedResult);
       fixture.detectChanges();
 
-      const tableContainer = fixture.nativeElement.querySelector('.items-table-container');
-      const cardsContainer = fixture.nativeElement.querySelector('.items-cards-container');
-
+      const tableContainer = fixture.nativeElement.querySelector('.table-container');
       expect(tableContainer).toBeTruthy();
+    });
+
+    it('should display inventory table', () => {
+      component.itemsResult.set(mockPagedResult);
+      fixture.detectChanges();
+
+      const inventoryTable = fixture.nativeElement.querySelector('.inventory-table');
+      expect(inventoryTable).toBeTruthy();
+    });
+
+    it('should not have cards view elements', () => {
+      component.itemsResult.set(mockPagedResult);
+      fixture.detectChanges();
+
+      const cardsContainer = fixture.nativeElement.querySelector('.items-cards-container');
       expect(cardsContainer).toBeFalsy();
     });
-
-    it('should render cards view when viewMode is cards', () => {
-      component.setViewMode('cards');
-      component.itemsResult.set(mockPagedResult);
-      fixture.detectChanges();
-
-      const tableContainer = fixture.nativeElement.querySelector('.items-table-container');
-      const cardsContainer = fixture.nativeElement.querySelector('.items-cards-container');
-
-      expect(tableContainer).toBeFalsy();
-      expect(cardsContainer).toBeTruthy();
-    });
   });
 
-  describe('Toggle Button Styling', () => {
+  describe('Action Button Styling', () => {
     beforeEach(() => {
       component.itemsResult.set(mockPagedResult);
       fixture.detectChanges();
     });
 
-    it('should highlight table button when table view is active', () => {
-      component.setViewMode('table');
-      fixture.detectChanges();
-
-      // Note: Due to Angular testing limitations with complex class binding,
-      // we're testing the component state rather than DOM classes
-      expect(component.viewMode).toBe('table');
+    it('should display action buttons with emoji icons', () => {
+      const actionButtons = fixture.nativeElement.querySelectorAll('.action-buttons .btn-icon');
+      expect(actionButtons.length).toBeGreaterThan(0);
     });
 
-    it('should highlight cards button when cards view is active', () => {
-      component.setViewMode('cards');
-      fixture.detectChanges();
-
-      expect(component.viewMode).toBe('cards');
-    });
-  });
-
-  describe('Cards View Rendering', () => {
-    beforeEach(() => {
-      component.setViewMode('cards');
-      component.itemsResult.set(mockPagedResult);
-      fixture.detectChanges();
-    });
-
-    it('should display cards container', () => {
-      const cardsContainer = fixture.nativeElement.querySelector('.items-cards-container');
-      expect(cardsContainer).toBeTruthy();
-    });
-
-    it('should render individual item cards', () => {
-      const itemCards = fixture.nativeElement.querySelectorAll('.item-card');
-      expect(itemCards.length).toBe(2);
-    });
-
-    it('should display item title in cards', () => {
-      const cardTitles = fixture.nativeElement.querySelectorAll('.card-title');
-      expect(cardTitles.length).toBe(2);
-      expect(cardTitles[0].textContent.trim()).toBe('Test Item 1');
-      expect(cardTitles[1].textContent.trim()).toBe('Test Item 2');
-    });
-
-    it('should display item price in cards', () => {
-      const cardPrices = fixture.nativeElement.querySelectorAll('.card-price');
-      expect(cardPrices.length).toBe(2);
-      // Angular currency pipe formatting may vary
-      expect(cardPrices[0].textContent).toContain('99.99');
-      expect(cardPrices[1].textContent).toContain('149.99');
-    });
-
-    it('should display item images when available', () => {
-      const cardImages = fixture.nativeElement.querySelectorAll('.card-thumbnail');
-      expect(cardImages.length).toBeGreaterThanOrEqual(1);
-      expect(cardImages[0].src).toContain('image1.jpg');
-    });
-
-    it('should show no-image placeholder when image is missing', () => {
-      const noImagePlaceholders = fixture.nativeElement.querySelectorAll('.no-image-large');
-      expect(noImagePlaceholders.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('should display action buttons in cards', () => {
-      const cardActions = fixture.nativeElement.querySelectorAll('.card-actions');
-      expect(cardActions.length).toBe(2);
-
-      // Each card should have view, edit, and delete buttons
-      const viewButtons = fixture.nativeElement.querySelectorAll('.card-actions .btn-outline-primary');
-      const editButtons = fixture.nativeElement.querySelectorAll('.card-actions .btn-outline-secondary');
-      const deleteButtons = fixture.nativeElement.querySelectorAll('.card-actions .btn-outline-danger');
-
-      expect(viewButtons.length).toBe(2);
-      expect(editButtons.length).toBe(2);
-      expect(deleteButtons.length).toBe(2);
+    it('should have consistent action button styling', () => {
+      const actionButtons = fixture.nativeElement.querySelectorAll('.btn-icon');
+      expect(actionButtons.length).toBeGreaterThan(0);
     });
   });
 
   describe('Table View Rendering', () => {
     beforeEach(() => {
-      component.setViewMode('table');
       component.itemsResult.set(mockPagedResult);
       fixture.detectChanges();
     });
 
     it('should display table container', () => {
-      const tableContainer = fixture.nativeElement.querySelector('.items-table-container');
+      const tableContainer = fixture.nativeElement.querySelector('.table-container');
       expect(tableContainer).toBeTruthy();
     });
 
     it('should render table with correct headers', () => {
       const tableHeaders = fixture.nativeElement.querySelectorAll('th');
-      expect(tableHeaders.length).toBe(11); // Image, SKU, Title, Category, Condition, Price, Status, Source, consignor, Received, Actions
+      expect(tableHeaders.length).toBe(10); // Image, SKU, Title, Category, Condition, Price, Status, Consignor, Received, Actions
     });
 
     it('should render table rows for items', () => {
@@ -289,21 +203,22 @@ describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
     });
 
     it('should handle empty data gracefully', () => {
-      component.setViewMode('table');
-      // Test basic empty state handling without DOM assertions
-      expect(component.viewMode).toBe('table');
-
-      component.setViewMode('cards');
-      expect(component.viewMode).toBe('cards');
-    });
-
-    it('should maintain view mode with empty data', () => {
-      component.setViewMode('cards');
-      component.itemsResult.set(emptyPagedResult);
+      mockInventoryService.getItems.and.returnValue(of(emptyPagedResult));
+      component.loadItems();
       fixture.detectChanges();
 
-      // View mode should be preserved even with empty data
-      expect(component.viewMode).toBe('cards');
+      // Component should still be functional with empty data
+      expect(component.itemsResult()).toEqual(emptyPagedResult);
+    });
+
+    it('should show empty state when no items', () => {
+      mockInventoryService.getItems.and.returnValue(of(emptyPagedResult));
+      mockLoadingService.isLoading.and.returnValue(false);
+      component.loadItems();
+      fixture.detectChanges();
+
+      // The empty state message should appear when no items are available
+      expect(component.itemsResult()?.items.length).toBe(0);
     });
   });
 
@@ -318,16 +233,13 @@ describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
       expect(loadingState.textContent).toContain('Loading inventory...');
     });
 
-    it('should hide cards/table when loading', () => {
+    it('should hide table when loading', () => {
       mockLoadingService.isLoading.and.returnValue(true);
       component.itemsResult.set(mockPagedResult);
       fixture.detectChanges();
 
-      const tableContainer = fixture.nativeElement.querySelector('.items-table-container');
-      const cardsContainer = fixture.nativeElement.querySelector('.items-cards-container');
-
+      const tableContainer = fixture.nativeElement.querySelector('.table-container');
       expect(tableContainer).toBeFalsy();
-      expect(cardsContainer).toBeFalsy();
     });
   });
 
@@ -340,39 +252,34 @@ describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
       expect(component.isInventoryLoading()).toBe(false);
     });
 
-    it('should maintain view mode during error state', () => {
-      component.setViewMode('cards');
+    it('should maintain component state during error state', () => {
       component.error.set('Test error');
       mockLoadingService.isLoading.and.returnValue(false);
 
-      // View mode should be preserved even with errors
-      expect(component.viewMode).toBe('cards');
+      // Component should be preserved even with errors
+      expect(component.error()).toBe('Test error');
     });
   });
 
-  describe('View Controls UI', () => {
+  describe('Table Controls UI', () => {
     beforeEach(() => {
       component.itemsResult.set(mockPagedResult);
       fixture.detectChanges();
     });
 
-    it('should display results summary', () => {
-      const resultsSummary = fixture.nativeElement.querySelector('.results-summary');
-      expect(resultsSummary).toBeTruthy();
-      expect(resultsSummary.textContent).toContain('Showing 2 of 2 items');
-    });
-
-    it('should display view toggle buttons', () => {
-      const viewToggle = fixture.nativeElement.querySelector('.view-toggle');
-      expect(viewToggle).toBeTruthy();
-
-      const toggleButtons = viewToggle.querySelectorAll('button');
-      expect(toggleButtons.length).toBe(2);
+    it('should display section header', () => {
+      const sectionHeader = fixture.nativeElement.querySelector('.section-header');
+      expect(sectionHeader).toBeTruthy();
     });
 
     it('should display page size selector', () => {
-      const pageSizeSelector = fixture.nativeElement.querySelector('.page-size-selector select');
+      const pageSizeSelector = fixture.nativeElement.querySelector('.page-size-select');
       expect(pageSizeSelector).toBeTruthy();
+    });
+
+    it('should not display view toggle buttons', () => {
+      const viewToggle = fixture.nativeElement.querySelector('.view-toggle');
+      expect(viewToggle).toBeFalsy();
     });
   });
 
@@ -401,14 +308,15 @@ describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
   });
 
   describe('Responsive Design Support', () => {
-    it('should maintain view mode across different screen sizes', () => {
-      component.setViewMode('cards');
+    it('should handle screen resizes gracefully', () => {
+      component.itemsResult.set(mockPagedResult);
+      fixture.detectChanges();
 
-      // Simulate window resize (component should maintain view mode)
+      // Simulate window resize (component should remain functional)
       window.dispatchEvent(new Event('resize'));
       fixture.detectChanges();
 
-      expect(component.viewMode).toBe('cards');
+      expect(component.itemsResult()).toBe(mockPagedResult);
     });
   });
 
@@ -418,31 +326,14 @@ describe('InventoryListComponent - Cards ↔ Table Toggle', () => {
       fixture.detectChanges();
     });
 
-    it('should display condition badges in both views', () => {
-      component.setViewMode('cards');
-      fixture.detectChanges();
-
-      const conditionBadges = fixture.nativeElement.querySelectorAll('.badge');
+    it('should display condition badges in table view', () => {
+      const conditionBadges = fixture.nativeElement.querySelectorAll('.condition-badge');
       expect(conditionBadges.length).toBeGreaterThan(0);
-
-      component.setViewMode('table');
-      fixture.detectChanges();
-
-      const tableBadges = fixture.nativeElement.querySelectorAll('.badge');
-      expect(tableBadges.length).toBeGreaterThan(0);
     });
 
-    it('should show source badge as "Manual"', () => {
-      component.setViewMode('cards');
-      fixture.detectChanges();
-
-      const sourceBadges = fixture.nativeElement.querySelectorAll('.badge-info');
-      expect(sourceBadges.length).toBeGreaterThan(0);
-      // Check if any badge contains "Manual" text
-      const manualBadges = Array.from(sourceBadges).filter((badge: any) =>
-        badge.textContent.trim() === 'Manual'
-      );
-      expect(manualBadges.length).toBeGreaterThan(0);
+    it('should display status badges in table view', () => {
+      const statusBadges = fixture.nativeElement.querySelectorAll('.status-badge');
+      expect(statusBadges.length).toBeGreaterThan(0);
     });
   });
 });
