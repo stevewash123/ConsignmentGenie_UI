@@ -63,7 +63,7 @@ export class PayoutService {
       .pipe(map(response => response.data));
   }
 
-  updatePayout(id: string, request: UpdatePayoutRequest): Observable<void> {
+  updatePayoutObservable(id: string, request: UpdatePayoutRequest): Observable<void> {
     return this.http.put<{success: boolean, message: string}>(`${this.apiUrl}/${id}`, request)
       .pipe(map(() => {}));
   }
@@ -174,5 +174,229 @@ export class PayoutService {
       }
     }>(`${this.apiUrl}/batch`, request)
       .pipe(map(response => response.data));
+  }
+
+  // Methods for payout history (story 05)
+  async getPayoutHistory(filters: {
+    consignorId?: string;
+    method?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    searchTerm?: string;
+    page: number;
+    pageSize: number;
+  }): Promise<{
+    payouts: {
+      id: string;
+      payoutNumber: string;
+      date: Date;
+      consignorId: string;
+      consignorName: string;
+      amount: number;
+      method: string;
+      status: string;
+      notes?: string;
+      processedBy: string;
+      itemCount: number;
+    }[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }> {
+    let params = new HttpParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, value.toString());
+      }
+    });
+
+    const response = await this.http.get<{
+      success: boolean;
+      data: {
+        payouts: {
+          id: string;
+          payoutNumber: string;
+          date: string;
+          consignorId: string;
+          consignorName: string;
+          amount: number;
+          method: string;
+          status: string;
+          notes?: string;
+          processedBy: string;
+          itemCount: number;
+        }[];
+        totalCount: number;
+        page: number;
+        pageSize: number;
+        totalPages: number;
+      }
+    }>(`${this.apiUrl}/history`, { params }).toPromise();
+
+    if (!response?.success) {
+      throw new Error('Failed to get payout history');
+    }
+
+    // Convert date strings to Date objects
+    const payouts = response.data.payouts.map(p => ({
+      ...p,
+      date: new Date(p.date)
+    }));
+
+    return {
+      ...response.data,
+      payouts
+    };
+  }
+
+  async getConsignorsList(): Promise<{ id: string, name: string }[]> {
+    const response = await this.http.get<{
+      success: boolean;
+      data: { id: string, name: string }[]
+    }>(`${environment.apiUrl}/api/consignors/list`).toPromise();
+
+    if (!response?.success) {
+      throw new Error('Failed to get consignors list');
+    }
+
+    return response.data;
+  }
+
+  async getPayoutDetail(payoutId: string): Promise<{
+    id: string;
+    payoutNumber: string;
+    date: Date;
+    consignorId: string;
+    consignorName: string;
+    consignorEmail?: string;
+    consignorPhone?: string;
+    amount: number;
+    method: string;
+    status: string;
+    notes?: string;
+    processedBy: string;
+    processedDate: Date;
+    voidedBy?: string;
+    voidedDate?: Date;
+    voidReason?: string;
+    items: {
+      id: string;
+      itemId: string;
+      title: string;
+      category: string;
+      saleDate: Date;
+      salePrice: number;
+      consignorCut: number;
+      commission: number;
+      transactionId: string;
+    }[];
+  }> {
+    const response = await this.http.get<{
+      success: boolean;
+      data: {
+        id: string;
+        payoutNumber: string;
+        date: string;
+        consignorId: string;
+        consignorName: string;
+        consignorEmail?: string;
+        consignorPhone?: string;
+        amount: number;
+        method: string;
+        status: string;
+        notes?: string;
+        processedBy: string;
+        processedDate: string;
+        voidedBy?: string;
+        voidedDate?: string;
+        voidReason?: string;
+        items: {
+          id: string;
+          itemId: string;
+          title: string;
+          category: string;
+          saleDate: string;
+          salePrice: number;
+          consignorCut: number;
+          commission: number;
+          transactionId: string;
+        }[];
+      }
+    }>(`${this.apiUrl}/${payoutId}/detail`).toPromise();
+
+    if (!response?.success) {
+      throw new Error('Failed to get payout detail');
+    }
+
+    // Convert date strings to Date objects
+    const data = response.data;
+    return {
+      ...data,
+      date: new Date(data.date),
+      processedDate: new Date(data.processedDate),
+      voidedDate: data.voidedDate ? new Date(data.voidedDate) : undefined,
+      items: data.items.map(item => ({
+        ...item,
+        saleDate: new Date(item.saleDate)
+      }))
+    };
+  }
+
+  async updatePayout(payoutId: string, updateData: {
+    method: string;
+    notes: string;
+  }): Promise<void> {
+    const response = await this.http.put<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/${payoutId}/update`, updateData).toPromise();
+
+    if (!response?.success) {
+      throw new Error('Failed to update payout');
+    }
+  }
+
+  async voidPayout(payoutId: string, reason: string): Promise<void> {
+    const response = await this.http.post<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/${payoutId}/void`, { reason }).toPromise();
+
+    if (!response?.success) {
+      throw new Error('Failed to void payout');
+    }
+  }
+
+  async downloadPayoutReceipt(payoutId: string): Promise<Blob> {
+    return this.http.get(`${this.apiUrl}/${payoutId}/receipt`, {
+      responseType: 'blob'
+    }).toPromise() as Promise<Blob>;
+  }
+
+  async exportPayoutHistoryCSV(filters: {
+    consignorId?: string;
+    method?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    searchTerm?: string;
+  }): Promise<string> {
+    let params = new HttpParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, value.toString());
+      }
+    });
+
+    const response = await this.http.get(`${this.apiUrl}/history/export`, {
+      params,
+      responseType: 'text'
+    }).toPromise();
+
+    return response as string;
   }
 }

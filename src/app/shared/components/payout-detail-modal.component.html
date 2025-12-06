@@ -1,0 +1,303 @@
+<!-- Modal Overlay -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+     (click)="onOverlayClick($event)">
+
+  <!-- Modal Content -->
+  <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden mx-4">
+
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h2 class="text-xl font-semibold text-gray-900">
+        Payout Details
+        <span *ngIf="payout" class="text-gray-500 font-normal"> - {{ payout.payoutNumber }}</span>
+      </h2>
+      <button
+        (click)="onClose()"
+        class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="p-6 text-center">
+      <div class="text-red-600 mb-4">
+        <svg class="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <p class="text-gray-900 font-medium">{{ error }}</p>
+      <button
+        (click)="loadPayoutDetail()"
+        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+        Try Again
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="payout && !loading && !error" class="flex flex-col max-h-full">
+
+      <!-- Scrollable Content -->
+      <div class="flex-1 overflow-y-auto">
+
+        <!-- Payout Information -->
+        <div class="px-6 py-6 border-b border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Left Column -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Consignor</label>
+                <p class="mt-1 text-sm text-gray-900">{{ payout.consignorName }}</p>
+                <p *ngIf="payout.consignorEmail" class="text-sm text-gray-500">{{ payout.consignorEmail }}</p>
+                <p *ngIf="payout.consignorPhone" class="text-sm text-gray-500">{{ payout.consignorPhone }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Payout Date</label>
+                <p class="mt-1 text-sm text-gray-900">{{ formatDate(payout.date) }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Amount</label>
+                <p class="mt-1 text-lg font-semibold text-gray-900">{{ formatCurrency(payout.amount) }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1"
+                      [class.bg-green-100]="payout.status === 'Completed'"
+                      [class.text-green-800]="payout.status === 'Completed'"
+                      [class.bg-yellow-100]="payout.status === 'Pending'"
+                      [class.text-yellow-800]="payout.status === 'Pending'"
+                      [class.bg-red-100]="payout.status === 'Voided'"
+                      [class.text-red-800]="payout.status === 'Voided'">
+                  {{ payout.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+                <div *ngIf="!isEditing">
+                  <p class="mt-1 text-sm text-gray-900">{{ payout.method }}</p>
+                </div>
+                <div *ngIf="isEditing">
+                  <select
+                    [(ngModel)]="editForm.method"
+                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="Check">Check</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Venmo">Venmo</option>
+                    <option value="PayPal">PayPal</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Processed By</label>
+                <p class="mt-1 text-sm text-gray-900">{{ payout.processedBy }}</p>
+                <p class="text-sm text-gray-500">{{ formatDateTime(payout.processedDate) }}</p>
+              </div>
+
+              <div *ngIf="payout.status === 'Voided'">
+                <label class="block text-sm font-medium text-gray-700">Voided By</label>
+                <p class="mt-1 text-sm text-gray-900">{{ payout.voidedBy }}</p>
+                <p class="text-sm text-gray-500">{{ formatDateTime(payout.voidedDate!) }}</p>
+                <p *ngIf="payout.voidReason" class="mt-1 text-sm text-gray-700">
+                  <strong>Reason:</strong> {{ payout.voidReason }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Notes</label>
+                <div *ngIf="!isEditing">
+                  <p class="mt-1 text-sm text-gray-900">{{ payout.notes || 'No notes' }}</p>
+                </div>
+                <div *ngIf="isEditing">
+                  <textarea
+                    [(ngModel)]="editForm.notes"
+                    rows="3"
+                    placeholder="Add notes..."
+                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  </textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Breakdown -->
+        <div class="px-6 py-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Items Included ({{ payout.items.length }})</h3>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Item
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sale Date
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sale Price
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Commission
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Payout
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let item of payout.items">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ item.title }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ item.category }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ formatDate(item.saleDate) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ formatCurrency(item.salePrice) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ formatCurrency(item.commission) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {{ formatCurrency(item.consignorCut) }}
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot class="bg-gray-50">
+                <tr>
+                  <td colspan="5" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                    Total Payout:
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                    {{ formatCurrency(payout.amount) }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+        <div class="flex space-x-2">
+          <button
+            (click)="downloadReceipt()"
+            class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
+            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Download Receipt
+          </button>
+        </div>
+
+        <div class="flex space-x-2">
+          <!-- Edit Mode Actions -->
+          <div *ngIf="isEditing" class="flex space-x-2">
+            <button
+              (click)="cancelEdit()"
+              class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+              Cancel
+            </button>
+            <button
+              (click)="saveEdit()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+              Save Changes
+            </button>
+          </div>
+
+          <!-- View Mode Actions -->
+          <div *ngIf="!isEditing" class="flex space-x-2">
+            <button
+              *ngIf="canEdit()"
+              (click)="startEdit()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+              Edit
+            </button>
+
+            <button
+              *ngIf="canVoid()"
+              (click)="showVoidConfirmation()"
+              class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+              Void Payout
+            </button>
+
+            <button
+              (click)="onClose()"
+              class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Void Confirmation Modal -->
+<div *ngIf="showVoidModal"
+     class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Confirm Void Payout</h3>
+    </div>
+
+    <div class="px-6 py-4">
+      <p class="text-sm text-gray-700 mb-4">
+        Are you sure you want to void this payout? This action cannot be undone.
+      </p>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for voiding</label>
+        <textarea
+          [(ngModel)]="voidReason"
+          rows="3"
+          placeholder="Enter reason for voiding this payout..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-2">
+      <button
+        (click)="hideVoidConfirmation()"
+        [disabled]="voiding"
+        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors disabled:opacity-50">
+        Cancel
+      </button>
+      <button
+        (click)="confirmVoid()"
+        [disabled]="!voidReason.trim() || voiding"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50">
+        <span *ngIf="voiding">Voiding...</span>
+        <span *ngIf="!voiding">Void Payout</span>
+      </button>
+    </div>
+  </div>
+</div>

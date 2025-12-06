@@ -888,7 +888,7 @@ export class OwnerPayoutsComponent implements OnInit {
 
   availableConsignorOptions = computed((): ConsignorOption[] => {
     return this.consignors().map(consignor => ({
-      id: consignor.id,
+      id: consignor.id.toString(),
       name: consignor.name,
       email: consignor.email
     }));
