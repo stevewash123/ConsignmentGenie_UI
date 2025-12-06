@@ -40,6 +40,10 @@ export const ownerRoutes: Routes = [
   },
   {
     path: 'payouts',
+    loadComponent: () => import('./components/consignor-balance-dashboard.component').then(m => m.ConsignorBalanceDashboardComponent)
+  },
+  {
+    path: 'payouts/history',
     loadComponent: () => import('./components/owner-payouts.component').then(m => m.OwnerPayoutsComponent)
   },
   {
