@@ -52,7 +52,7 @@
           <select
             id="filter"
             [value]="currentFilter()"
-            (change)="onFilterChange(($event.target as HTMLSelectElement)?.value as any)"
+            (change)="onFilterChange($any($event.target).value)"
             class="form-select">
             <option *ngFor="let filter of filterOptions" [value]="filter.type">
               {{ filter.label }}
@@ -65,7 +65,7 @@
           <select
             id="sort"
             [value]="currentSort().field + '-' + currentSort().direction"
-            (change)="onSortChange(($event.target as HTMLSelectElement)?.value || '')"
+            (change)="onSortChange($any($event.target).value || '')"
             class="form-select">
             <option *ngFor="let sort of sortOptions" [value]="sort.value">
               {{ sort.label }}
@@ -148,4 +148,19 @@
       </div>
     </div>
   </div>
+
+  <!-- Process Single Payout Modal -->
+  <app-process-single-payout-modal
+    [isVisible]="showPayoutModal()"
+    [consignorData]="selectedConsignorData()"
+    (onClose)="onPayoutModalClose()"
+    (onSuccess)="onPayoutSuccess($event)">
+  </app-process-single-payout-modal>
+
+  <!-- Payout Success Modal -->
+  <app-payout-success-modal
+    [isVisible]="showSuccessModal()"
+    [payoutData]="lastPayoutResult()"
+    (onClose)="onSuccessModalClose()">
+  </app-payout-success-modal>
 </app-owner-layout>

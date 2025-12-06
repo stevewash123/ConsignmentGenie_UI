@@ -1,0 +1,142 @@
+<div *ngIf="isVisible" class="modal-overlay" (click)="handleOverlayClick($event)">
+  <div class="modal-content">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3 class="modal-title">Process Payout</h3>
+      <button type="button" class="close-btn" (click)="closeModal()">
+        &times;
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body" *ngIf="consignorData">
+      <!-- Consignor Info -->
+      <div class="consignor-section">
+        <div class="consignor-info">
+          <h4 class="consignor-name">{{ consignorData.consignorName }}</h4>
+        </div>
+
+        <div class="balance-display">
+          <div class="balance-item">
+            <span class="balance-label">Available Balance:</span>
+            <span class="balance-amount available">{{ formatCurrency(consignorData.availableBalance) }}</span>
+          </div>
+          <div class="balance-item" *ngIf="consignorData.pendingBalance > 0">
+            <span class="balance-label">Pending Balance:</span>
+            <span class="balance-amount pending">{{ formatCurrency(consignorData.pendingBalance) }} (not included)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Form -->
+      <form (ngSubmit)="processPayout()" #payoutFormRef="ngForm">
+        <!-- Validation Errors -->
+        <div *ngIf="validationErrors().length > 0" class="validation-errors">
+          <div *ngFor="let error of validationErrors()" class="error-item">
+            {{ error }}
+          </div>
+        </div>
+
+        <!-- Amount Section -->
+        <div class="form-group">
+          <label for="amount" class="form-label">Amount to Pay</label>
+          <div class="amount-input-group">
+            <div class="currency-symbol">$</div>
+            <input
+              type="number"
+              id="amount"
+              step="0.01"
+              min="0.01"
+              [max]="consignorData.availableBalance"
+              [value]="payoutForm().amount"
+              (input)="updateFormField('amount', +$any($event.target).value)"
+              class="form-control amount-input"
+              required
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="payFullBalance()"
+              [disabled]="!canPayFull()"
+            >
+              Pay Full Balance
+            </button>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="form-group">
+          <label for="method" class="form-label">Payment Method</label>
+          <select
+            id="method"
+            [value]="payoutForm().method"
+            (change)="updateFormField('method', $any($event.target).value)"
+            class="form-control"
+            required
+          >
+            <option value="">Select Payment Method</option>
+            <option *ngFor="let method of paymentMethods" [value]="method.value">
+              {{ method.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Check Number (conditional) -->
+        <div class="form-group" *ngIf="showCheckNumber()">
+          <label for="checkNumber" class="form-label">
+            Check Number
+            <span class="optional-text">(optional)</span>
+          </label>
+          <input
+            type="text"
+            id="checkNumber"
+            [value]="payoutForm().checkNumber"
+            (input)="updateFormField('checkNumber', $any($event.target).value)"
+            class="form-control"
+            placeholder="e.g., 1234"
+          />
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label for="notes" class="form-label">
+            Notes
+            <span class="optional-text">(optional)</span>
+          </label>
+          <textarea
+            id="notes"
+            [value]="payoutForm().notes"
+            (input)="updateFormField('notes', $any($event.target).value)"
+            class="form-control"
+            rows="3"
+            placeholder="e.g., Monthly payout - December 2025"
+          ></textarea>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeModal()"
+            [disabled]="isProcessing()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isProcessing()"
+          >
+            <span *ngIf="!isProcessing()">Process Payout</span>
+            <span *ngIf="isProcessing()">Processing...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

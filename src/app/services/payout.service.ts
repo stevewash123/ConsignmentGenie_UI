@@ -84,4 +84,33 @@ export class PayoutService {
       responseType: 'blob'
     });
   }
+
+  // Single payout processing method for the new story
+  processSinglePayout(request: {
+    consignorId: string;
+    amount: number;
+    method: string;
+    checkNumber?: string;
+    notes?: string;
+  }): Observable<{
+    id: string;
+    payoutNumber: string;
+    amount: number;
+    method: string;
+    consignorName: string;
+    createdAt: Date;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      data: {
+        id: string;
+        payoutNumber: string;
+        amount: number;
+        method: string;
+        consignorName: string;
+        createdAt: Date;
+      }
+    }>(`${this.apiUrl}/process`, request)
+      .pipe(map(response => response.data));
+  }
 }

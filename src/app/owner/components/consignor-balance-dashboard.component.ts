@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { LoadingService } from '../../shared/services/loading.service';
+import { ProcessSinglePayoutModalComponent, ConsignorPayoutData, SinglePayoutResponse } from '../../shared/components/process-single-payout-modal.component';
+import { PayoutSuccessModalComponent } from '../../shared/components/payout-success-modal.component';
 
 // Interfaces for the Balance Dashboard
 export interface ConsignorBalanceSummary {
@@ -37,7 +39,7 @@ export interface BalanceSort {
 @Component({
   selector: 'app-consignor-balance-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ProcessSinglePayoutModalComponent, PayoutSuccessModalComponent],
   templateUrl: './consignor-balance-dashboard.component.html',
   styleUrls: ['./consignor-balance-dashboard.component.css']
 })
@@ -55,6 +57,12 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
   // Filter and sort state
   currentFilter = signal<BalanceFilter['type']>('all');
   currentSort = signal<BalanceSort>({ field: 'available', direction: 'desc' });
+
+  // Modal state
+  showPayoutModal = signal(false);
+  showSuccessModal = signal(false);
+  selectedConsignorData = signal<ConsignorPayoutData | null>(null);
+  lastPayoutResult = signal<SinglePayoutResponse | null>(null);
 
   // Available filter options
   filterOptions: BalanceFilter[] = [
@@ -206,8 +214,20 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
   }
 
   payConsignor(consignor: ConsignorBalance) {
-    // TODO: Implement pay consignor functionality
-    this.toastr.info(`Pay functionality for ${consignor.name} - Coming in story 03`);
+    if (!consignor.canPay || consignor.availableBalance <= 0) {
+      this.toastr.warning(`${consignor.name} has no available balance to pay`);
+      return;
+    }
+
+    const payoutData: ConsignorPayoutData = {
+      consignorId: consignor.consignorId,
+      consignorName: consignor.name,
+      availableBalance: consignor.availableBalance,
+      pendingBalance: consignor.pendingBalance
+    };
+
+    this.selectedConsignorData.set(payoutData);
+    this.showPayoutModal.set(true);
   }
 
   payAllDue() {
@@ -240,5 +260,51 @@ export class ConsignorBalanceDashboardComponent implements OnInit {
 
   refreshData() {
     this.loadBalanceData();
+  }
+
+  onPayoutModalClose() {
+    this.showPayoutModal.set(false);
+    this.selectedConsignorData.set(null);
+  }
+
+  onPayoutSuccess(payoutResult: SinglePayoutResponse) {
+    this.showPayoutModal.set(false);
+    this.lastPayoutResult.set(payoutResult);
+    this.showSuccessModal.set(true);
+
+    // Update the balance data to reflect the payout
+    this.updateConsignorBalance(payoutResult.consignorName, payoutResult.amount);
+  }
+
+  onSuccessModalClose() {
+    this.showSuccessModal.set(false);
+    this.lastPayoutResult.set(null);
+    this.selectedConsignorData.set(null);
+  }
+
+  private updateConsignorBalance(consignorName: string, paidAmount: number) {
+    const balances = this.balances();
+    const updatedBalances = balances.map(balance => {
+      if (balance.name === consignorName) {
+        return {
+          ...balance,
+          availableBalance: Math.max(0, balance.availableBalance - paidAmount),
+          totalOwed: Math.max(0, balance.totalOwed - paidAmount),
+          lastPayoutDate: new Date(),
+          canPay: (balance.availableBalance - paidAmount) > 0
+        };
+      }
+      return balance;
+    });
+
+    this.balances.set(updatedBalances);
+
+    // Update summary
+    const summary = this.summary();
+    this.summary.set({
+      ...summary,
+      totalAvailable: Math.max(0, summary.totalAvailable - paidAmount),
+      totalOwed: Math.max(0, summary.totalOwed - paidAmount)
+    });
   }
 }
