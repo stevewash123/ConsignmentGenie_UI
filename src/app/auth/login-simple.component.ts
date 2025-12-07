@@ -1,14 +1,14 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
   selector: 'app-login-simple',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="login-container">
       <div class="login-card">
@@ -58,6 +58,10 @@ import { LoadingService } from '../shared/services/loading.service';
             {{ isAuthLoading() ? 'Signing in...' : 'Sign In' }}
           </button>
         </form>
+
+        <div class="forgot-password-link">
+          <a routerLink="/forgot-password">Forgot your password?</a>
+        </div>
 
         <!-- Quick Login Buttons -->
         <div class="quick-login">
@@ -195,6 +199,21 @@ import { LoadingService } from '../shared/services/loading.service';
     .login-btn:disabled {
       background: #9ca3af;
       cursor: not-allowed;
+    }
+
+    .forgot-password-link {
+      text-align: center;
+      margin: 1rem 0 2rem 0;
+    }
+
+    .forgot-password-link a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+
+    .forgot-password-link a:hover {
+      text-decoration: underline;
     }
 
     .quick-login {

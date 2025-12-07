@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, BehaviorSubject, catchError, of, map } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse, GoogleAuthRequest, SocialAuthResponse, FacebookAuthRequest } from '../models/auth.model';
+import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse, GoogleAuthRequest, SocialAuthResponse, FacebookAuthRequest, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from '../models/auth.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -374,5 +374,50 @@ export class AuthService {
         }
       })
     );
+  }
+
+  /**
+   * Send password reset email
+   */
+  forgotPassword(request: ForgotPasswordRequest): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${this.apiUrl}/auth/forgot-password`, request)
+      .pipe(
+        catchError((error: any) => {
+          return of({
+            success: false,
+            message: error.error?.message || 'Unable to send password reset email'
+          });
+        })
+      );
+  }
+
+  /**
+   * Reset password with token
+   */
+  resetPassword(request: ResetPasswordRequest): Observable<ResetPasswordResponse> {
+    return this.http.post<ResetPasswordResponse>(`${this.apiUrl}/auth/reset-password`, request)
+      .pipe(
+        catchError((error: any) => {
+          return of({
+            success: false,
+            message: error.error?.message || 'Unable to reset password'
+          });
+        })
+      );
+  }
+
+  /**
+   * Validate password reset token
+   */
+  validateResetToken(token: string): Observable<{ isValid: boolean; message?: string }> {
+    return this.http.get<{ isValid: boolean; message?: string }>(`${this.apiUrl}/auth/validate-reset-token?token=${encodeURIComponent(token)}`)
+      .pipe(
+        catchError((error: any) => {
+          return of({
+            isValid: false,
+            message: error.error?.message || 'Invalid or expired reset token'
+          });
+        })
+      );
   }
 }
