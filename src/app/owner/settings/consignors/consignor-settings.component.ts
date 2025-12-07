@@ -161,6 +161,34 @@ interface PendingInvitation {
           </div>
         </div>
 
+        <!-- Agreement Template -->
+        <div class="form-section">
+          <h3>Agreement Template</h3>
+          <p class="section-description">
+            Download a professional consignment agreement template that you can print and use with consignors.
+          </p>
+
+          <div class="agreement-template">
+            <div class="template-info">
+              <h4>Consignment Agreement Template</h4>
+              <p>A professional, print-ready PDF template with standard consignment terms, signature lines, and fillable blanks for shop and consignor details.</p>
+              <ul class="template-features">
+                <li>✓ Standard consignment terms and conditions</li>
+                <li>✓ Fillable fields for shop and consignor information</li>
+                <li>✓ Commission split and consignment period fields</li>
+                <li>✓ Signature lines for both parties</li>
+                <li>✓ Print-friendly letter size format</li>
+              </ul>
+            </div>
+            <div class="template-actions">
+              <button class="btn-primary" (click)="downloadTemplate()">
+                <span class="download-icon">📄</span>
+                Download PDF Template
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Actions -->
         <div class="form-actions">
           <button type="button" class="btn-secondary" (click)="loadSettings()">Cancel</button>
@@ -557,6 +585,63 @@ interface PendingInvitation {
       border: 1px solid #fecaca;
     }
 
+    /* Agreement Template */
+    .agreement-template {
+      display: flex;
+      gap: 2rem;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .template-info {
+      flex: 1;
+    }
+
+    .template-info h4 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+
+    .template-info p {
+      color: #6b7280;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .template-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .template-features li {
+      color: #374151;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .template-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .download-icon {
+      margin-right: 0.5rem;
+      font-size: 1.25rem;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .consignor-settings {
@@ -589,6 +674,15 @@ interface PendingInvitation {
 
       .approval-options {
         gap: 0.75rem;
+      }
+
+      .agreement-template {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .template-actions {
+        align-self: stretch;
       }
     }
   `]
@@ -811,6 +905,26 @@ export class ConsignorSettingsComponent implements OnInit {
     this.successMessage.set(message);
     this.errorMessage.set('');
     setTimeout(() => this.successMessage.set(''), 5000);
+  }
+
+  downloadTemplate() {
+    try {
+      // Create a temporary link element to trigger download
+      const link = document.createElement('a');
+      link.href = '/assets/consignment-agreement-template.pdf';
+      link.download = 'Consignment-Agreement-Template.pdf';
+      link.target = '_blank';
+
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      this.showSuccess('Template download started');
+    } catch (error) {
+      console.error('Error downloading template:', error);
+      this.showError('Failed to download template');
+    }
   }
 
   private showError(message: string) {
