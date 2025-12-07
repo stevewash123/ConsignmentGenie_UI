@@ -83,6 +83,10 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./settings/subscription/subscription-settings.component').then(m => m.SubscriptionSettingsComponent)
       },
       {
+        path: 'integrations',
+        loadComponent: () => import('./settings/integrations/integrations-settings.component').then(m => m.IntegrationsSettingsComponent)
+      },
+      {
         path: 'account',
         loadComponent: () => import('./settings/account/account-settings.component').then(m => m.AccountSettingsComponent)
       }

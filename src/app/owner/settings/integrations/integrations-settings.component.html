@@ -1,0 +1,153 @@
+<div class="integrations-settings">
+  <div class="settings-header">
+    <h2>Integrations</h2>
+    <p>Connect with third-party services to sync data and expand functionality</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  }
+
+  <!-- Square Integration Section -->
+  <div class="integration-section">
+    <div class="integration-header">
+      <div class="integration-title">
+        <img src="/assets/icons/square-logo.svg" alt="Square" class="integration-logo" />
+        <h3>Square</h3>
+      </div>
+      <div class="integration-status">
+        @if (squareStatus().isConnected) {
+          <span class="status-badge connected">✓ Connected</span>
+        } @else {
+          <span class="status-badge not-connected">Not Connected</span>
+        }
+      </div>
+    </div>
+
+    <div class="integration-content">
+      @if (!squareStatus().isConnected) {
+        <!-- Not Connected State -->
+        <div class="not-connected-state">
+          <p class="integration-description">
+            Connect your Square account to sync inventory and receive sales notifications.
+            This integration allows ConsignmentGenie to automatically update your Square catalog
+            with consignment items and track sales across platforms.
+          </p>
+
+          @if (squareStatus().error) {
+            <div class="error-message">
+              <span class="error-icon">⚠️</span>
+              <span>{{ squareStatus().error }}</span>
+            </div>
+          }
+
+          <div class="integration-actions">
+            <button
+              class="btn btn-primary"
+              (click)="connectSquare()"
+              [disabled]="isLoading()">
+              Connect Square
+            </button>
+          </div>
+
+          <div class="integration-features">
+            <h4>What you'll get:</h4>
+            <ul>
+              <li>✓ Automatic inventory sync</li>
+              <li>✓ Real-time sales tracking</li>
+              <li>✓ Unified reporting</li>
+              <li>✓ Streamlined consignor payouts</li>
+            </ul>
+          </div>
+        </div>
+      } @else {
+        <!-- Connected State -->
+        <div class="connected-state">
+          <div class="connection-info">
+            <div class="merchant-details">
+              <h4>Account Details</h4>
+              <p><strong>Merchant:</strong> {{ squareStatus().merchantName || 'Unknown' }}</p>
+              <p><strong>Merchant ID:</strong> {{ squareStatus().merchantId || 'N/A' }}</p>
+              <p><strong>Connected:</strong> {{ formatDate(squareStatus().connectedAt) }}</p>
+            </div>
+
+            <div class="sync-status">
+              <h4>Sync Status</h4>
+              @if (squareStatus().itemCount !== undefined) {
+                <p><strong>Inventory:</strong> {{ squareStatus().itemCount }} items synced</p>
+              }
+              <p><strong>Last sync:</strong> {{ getTimeSinceSync() }}</p>
+
+              @if (squareStatus().lastSync) {
+                <p class="sync-time">{{ formatDate(squareStatus().lastSync) }}</p>
+              }
+            </div>
+          </div>
+
+          @if (squareStatus().error) {
+            <div class="error-message">
+              <span class="error-icon">⚠️</span>
+              <span>{{ squareStatus().error }}</span>
+            </div>
+          }
+
+          <div class="integration-actions">
+            <button
+              class="btn btn-secondary"
+              (click)="syncNow()"
+              [disabled]="isLoading()">
+              Sync Now
+            </button>
+            <button
+              class="btn btn-outline btn-danger"
+              (click)="disconnectSquare()"
+              [disabled]="isLoading()">
+              Disconnect
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Future Integrations Placeholder -->
+  <div class="integration-section coming-soon">
+    <div class="integration-header">
+      <div class="integration-title">
+        <div class="integration-logo-placeholder">QB</div>
+        <h3>QuickBooks</h3>
+      </div>
+      <div class="integration-status">
+        <span class="status-badge coming-soon">Coming Soon</span>
+      </div>
+    </div>
+
+    <div class="integration-content">
+      <p class="integration-description">
+        Sync your financial data with QuickBooks for seamless accounting and tax preparation.
+      </p>
+    </div>
+  </div>
+
+  <div class="integration-section coming-soon">
+    <div class="integration-header">
+      <div class="integration-title">
+        <div class="integration-logo-placeholder">SH</div>
+        <h3>Shopify</h3>
+      </div>
+      <div class="integration-status">
+        <span class="status-badge coming-soon">Coming Soon</span>
+      </div>
+    </div>
+
+    <div class="integration-content">
+      <p class="integration-description">
+        Expand your sales channels by syncing inventory to your Shopify store.
+      </p>
+    </div>
+  </div>
+</div>
