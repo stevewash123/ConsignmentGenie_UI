@@ -25,9 +25,9 @@ import { LoadingService } from '../../shared/services/loading.service';
             <p>View and manage all sales transactions</p>
           </div>
           <div class="header-actions">
-            <button class="btn-primary" (click)="showCreateModal = true">
+            <button class="btn-primary" routerLink="/owner/record-sale">
               <span class="btn-icon">💰</span>
-              Process Sale
+              Record Sale
             </button>
           </div>
         </div>
