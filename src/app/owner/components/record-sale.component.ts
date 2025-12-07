@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { ItemSearchComponent } from './item-search.component';
 import { CartComponent } from './cart.component';
@@ -74,6 +75,29 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
             </div>
           </div>
         }
+
+        <!-- Error Modal -->
+        @if (errorMessage()) {
+          <div class="modal-overlay" (click)="clearError()">
+            <div class="error-modal" (click)="$event.stopPropagation()">
+              <div class="modal-content">
+                <div class="error-icon">
+                  <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h2>Sale Failed</h2>
+                <div class="error-details">
+                  <p>{{ errorMessage() }}</p>
+                  <p class="error-hint">Please try again or contact support if the problem persists.</p>
+                </div>
+                <div class="modal-actions">
+                  <button class="btn btn-primary" (click)="clearError()">
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
       </div>
     </app-owner-layout>
   `,
@@ -126,7 +150,7 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    /* Success Modal */
+    /* Modal Styles */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -140,7 +164,7 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
       z-index: 1000;
     }
 
-    .success-modal {
+    .success-modal, .error-modal {
       background: white;
       border-radius: 12px;
       padding: 0;
@@ -160,6 +184,12 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
       margin-bottom: 20px;
     }
 
+    .error-icon {
+      font-size: 4rem;
+      color: #dc3545;
+      margin-bottom: 20px;
+    }
+
     .modal-content h2 {
       margin: 0 0 30px 0;
       color: #333;
@@ -171,6 +201,21 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 30px;
+    }
+
+    .error-details {
+      background: #fff5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border: 1px solid #fed7d7;
+    }
+
+    .error-hint {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      font-style: italic;
     }
 
     .transaction-details p {
@@ -268,6 +313,7 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
 export class RecordSaleComponent implements OnInit {
   private recordSaleService = inject(RecordSaleService);
   private router = inject(Router);
+  private toastr = inject(ToastrService);
 
   // State signals
   cartItems = signal<CartItem[]>([]);
@@ -277,6 +323,7 @@ export class RecordSaleComponent implements OnInit {
   isCompletingSale = signal<boolean>(false);
   saleCompleted = signal<boolean>(false);
   saleResult = signal<any>(null);
+  errorMessage = signal<string>('');
 
   // Computed values
   cartItemIds = computed(() =>
@@ -321,6 +368,7 @@ export class RecordSaleComponent implements OnInit {
     if (this.cartItems().length === 0) return;
 
     this.isCompletingSale.set(true);
+    this.errorMessage.set(''); // Clear any previous errors
 
     const saleRequest: SaleRequest = {
       items: this.cartItems(),
@@ -333,13 +381,24 @@ export class RecordSaleComponent implements OnInit {
         this.saleResult.set(result);
         this.saleCompleted.set(true);
         this.isCompletingSale.set(false);
+
+        // Show toast notification if receipt was sent
+        if (result.receiptSent && this.customerEmail()) {
+          this.toastr.success(`Receipt sent to ${this.customerEmail()}`, 'Email Sent!', {
+            timeOut: 5000
+          });
+        }
       },
       error: (err) => {
         console.error('Sale completion failed:', err);
         this.isCompletingSale.set(false);
-        // TODO: Show error toast/notification
+        this.errorMessage.set('Failed to complete the sale. Please check your connection and try again.');
       }
     });
+  }
+
+  clearError() {
+    this.errorMessage.set('');
   }
 
   recordAnotherSale() {

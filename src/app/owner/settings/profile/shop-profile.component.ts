@@ -19,6 +19,7 @@ interface ShopProfile {
   ShopZip?: string;
   ShopCountry: string;
   ShopTimezone: string;
+  TaxRate?: number;
 }
 
 @Component({
@@ -207,6 +208,29 @@ interface ShopProfile {
           </div>
         </div>
 
+        <!-- Business Settings -->
+        <div class="form-section">
+          <h3>Business Settings</h3>
+          <div class="form-group">
+            <label for="taxRate">Sales Tax Rate (%)</label>
+            <input
+              type="number"
+              id="taxRate"
+              [(ngModel)]="profile()!.TaxRate"
+              name="taxRate"
+              class="form-input"
+              placeholder="0.00"
+              min="0"
+              max="100"
+              step="0.01"
+              #taxRateInput>
+            <div class="field-hint">Enter your local sales tax rate as a percentage (e.g., 8.25 for 8.25%)</div>
+            <div *ngIf="taxRateInput.validity?.rangeOverflow || taxRateInput.validity?.rangeUnderflow" class="field-error">
+              Tax rate must be between 0 and 100 percent
+            </div>
+          </div>
+        </div>
+
         <!-- Actions -->
         <div class="form-actions">
           <button type="button" class="btn-secondary" (click)="loadProfile()">Cancel</button>
@@ -327,6 +351,19 @@ interface ShopProfile {
       color: #374151;
       margin-bottom: 0.5rem;
       font-size: 0.875rem;
+    }
+
+    .field-hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: #dc2626;
+      margin-top: 0.25rem;
+      font-weight: 500;
     }
 
     .form-input, .form-textarea, .form-select {
@@ -545,6 +582,10 @@ export class ShopProfileComponent implements OnInit {
     try {
       const response = await this.http.get<ShopProfile>(`${environment.apiUrl}/api/organization/profile`).toPromise();
       if (response) {
+        // Ensure tax rate defaults to 0 if not set
+        if (response.TaxRate === undefined || response.TaxRate === null) {
+          response.TaxRate = 0;
+        }
         this.profile.set(response);
       }
     } catch (error) {
