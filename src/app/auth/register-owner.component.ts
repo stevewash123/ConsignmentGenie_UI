@@ -2,6 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -63,18 +64,24 @@ import { AuthService } from '../services/auth.service';
 
             <div class="form-group">
               <label for="subdomain">Shop URL *</label>
-              <div class="subdomain-input-wrapper">
+              <div class="subdomain-input-wrapper" [class.validating]="isValidatingDomain()" [class.available]="isDomainAvailable() === true" [class.unavailable]="isDomainAvailable() === false">
                 <input
                   id="subdomain"
                   type="text"
                   formControlName="subdomain"
-                  [class.error]="signupForm.get('subdomain')?.invalid && signupForm.get('subdomain')?.touched"
+                  [class.error]="(signupForm.get('subdomain')?.invalid && signupForm.get('subdomain')?.touched) || isDomainAvailable() === false"
                   placeholder="myshop">
                 <span class="subdomain-suffix">.consignmentgenie.com</span>
+                <span class="validation-indicator" *ngIf="isValidatingDomain()">⟳</span>
+                <span class="validation-indicator success" *ngIf="isDomainAvailable() === true">✓</span>
+                <span class="validation-indicator error" *ngIf="isDomainAvailable() === false && !isValidatingDomain()">✗</span>
               </div>
               <div class="form-hint">This will be your shop's web address</div>
+              <div class="validation-message" *ngIf="domainValidationMessage()">
+                {{ domainValidationMessage() }}
+              </div>
               <div class="error-message"
-                   *ngIf="signupForm.get('subdomain')?.invalid && signupForm.get('subdomain')?.touched">
+                   *ngIf="signupForm.get('subdomain')?.invalid && signupForm.get('subdomain')?.touched && !domainValidationMessage()">
                 <span *ngIf="signupForm.get('subdomain')?.errors?.['required']">Shop URL is required</span>
                 <span *ngIf="signupForm.get('subdomain')?.errors?.['pattern']">Only letters, numbers, and dashes allowed</span>
               </div>
@@ -131,7 +138,7 @@ import { AuthService } from '../services/auth.service';
             <button
               type="submit"
               class="submit-btn"
-              [disabled]="signupForm.invalid || isSubmitting()">
+              [disabled]="signupForm.invalid || isSubmitting() || isValidatingDomain() || isDomainAvailable() === false">
               {{ isSubmitting() ? 'Creating Shop...' : 'Create Shop' }}
             </button>
           </form>
@@ -240,10 +247,23 @@ import { AuthService } from '../services/auth.service';
       overflow: hidden;
       background: white;
       transition: border-color 0.2s;
+      position: relative;
     }
 
     .subdomain-input-wrapper:focus-within {
       border-color: #047857;
+    }
+
+    .subdomain-input-wrapper.validating {
+      border-color: #f59e0b;
+    }
+
+    .subdomain-input-wrapper.available {
+      border-color: #10b981;
+    }
+
+    .subdomain-input-wrapper.unavailable {
+      border-color: #ef4444;
     }
 
     .subdomain-input-wrapper input {
@@ -259,6 +279,46 @@ import { AuthService } from '../services/auth.service';
       color: #6b7280;
       border-left: 1px solid #e5e7eb;
       font-size: 1rem;
+    }
+
+    .validation-indicator {
+      padding: 0 0.75rem;
+      font-size: 1rem;
+      animation: spin 1s linear infinite;
+    }
+
+    .validation-indicator.success {
+      color: #10b981;
+      animation: none;
+    }
+
+    .validation-indicator.error {
+      color: #ef4444;
+      animation: none;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .validation-message {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      font-weight: 500;
+    }
+
+    .validation-message:contains("✓") {
+      color: #10b981;
+    }
+
+    .validation-message:contains("taken") {
+      color: #ef4444;
+    }
+
+    .validation-message:contains("Error") {
+      color: #ef4444;
     }
 
     .error-message {
@@ -343,6 +403,9 @@ export class RegisterOwnerComponent implements OnInit {
   signupForm: FormGroup;
   isSubmitting = signal(false);
   errorMessage = signal('');
+  isValidatingDomain = signal(false);
+  domainValidationMessage = signal('');
+  isDomainAvailable = signal<boolean | null>(null);
   invitationToken: string | null = null;
 
   constructor(
@@ -373,6 +436,9 @@ export class RegisterOwnerComponent implements OnInit {
         this.validateInvitationToken(this.invitationToken);
       }
     });
+
+    // Set up real-time subdomain validation
+    this.setupSubdomainValidation();
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -386,6 +452,58 @@ export class RegisterOwnerComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private setupSubdomainValidation() {
+    const subdomainControl = this.signupForm.get('subdomain');
+    if (!subdomainControl) return;
+
+    // Set up real-time validation with debounce
+    subdomainControl.valueChanges.pipe(
+      debounceTime(500), // Wait 500ms after user stops typing
+      distinctUntilChanged(), // Only emit when value actually changes
+      switchMap(subdomain => {
+        // Reset validation state
+        this.isDomainAvailable.set(null);
+        this.domainValidationMessage.set('');
+
+        if (!subdomain || subdomain.length < 3) {
+          this.isValidatingDomain.set(false);
+          return [];
+        }
+
+        // Check if subdomain matches pattern requirements
+        if (!/^[a-zA-Z0-9-]+$/.test(subdomain)) {
+          this.isValidatingDomain.set(false);
+          this.domainValidationMessage.set('Only letters, numbers, and dashes allowed');
+          this.isDomainAvailable.set(false);
+          return [];
+        }
+
+        this.isValidatingDomain.set(true);
+        this.domainValidationMessage.set('Checking availability...');
+
+        return this.authService.validateSubdomain(subdomain);
+      })
+    ).subscribe({
+      next: (response: any) => {
+        this.isValidatingDomain.set(false);
+        if (response && response.success) {
+          if (response.data.isAvailable) {
+            this.isDomainAvailable.set(true);
+            this.domainValidationMessage.set('✓ Available');
+          } else {
+            this.isDomainAvailable.set(false);
+            this.domainValidationMessage.set('This URL is already taken');
+          }
+        }
+      },
+      error: () => {
+        this.isValidatingDomain.set(false);
+        this.domainValidationMessage.set('Error checking availability');
+        this.isDomainAvailable.set(false);
+      }
+    });
   }
 
   private validateInvitationToken(token: string) {
