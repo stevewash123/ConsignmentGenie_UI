@@ -8,6 +8,14 @@ interface ConsignorSettings {
   storeCode: string;
   autoApprove: boolean;
   signupUrl: string;
+  inventoryPermissions: ConsignorInventoryPermissions;
+}
+
+interface ConsignorInventoryPermissions {
+  canAddItems: boolean;
+  canEditItems: boolean;
+  canRemoveItems: boolean;
+  canViewDetailedAnalytics: boolean;
 }
 
 interface PendingInvitation {
@@ -84,6 +92,80 @@ interface PendingInvitation {
                 <span class="option-description">Review each consignor before they can add items</span>
               </div>
             </label>
+          </div>
+        </div>
+
+        <!-- Inventory Permissions -->
+        <div class="form-section">
+          <h3>Consignor Inventory Permissions</h3>
+          <p class="section-description">
+            Control what actions consignors can perform with their inventory items.
+          </p>
+
+          <div class="permissions-grid">
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canAddItems"
+                  name="canAddItems">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Add new items</span>
+                  <span class="permission-description">Allow consignors to submit new items for approval</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canEditItems"
+                  name="canEditItems">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Edit existing items</span>
+                  <span class="permission-description">Allow consignors to modify details of their approved items</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canRemoveItems"
+                  name="canRemoveItems">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Remove/withdraw items</span>
+                  <span class="permission-description">Allow consignors to withdraw items from the shop</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canViewDetailedAnalytics"
+                  name="canViewDetailedAnalytics">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">View detailed analytics</span>
+                  <span class="permission-description">Allow consignors to see detailed sales metrics and performance data</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="permissions-note">
+            <div class="note-icon">💡</div>
+            <div class="note-content">
+              <strong>Note:</strong> Consignors can always view their basic inventory list and sale notifications.
+              These permissions control additional actions and data access.
+            </div>
           </div>
         </div>
 
@@ -346,6 +428,107 @@ interface PendingInvitation {
       font-size: 0.875rem;
     }
 
+    /* Inventory Permissions */
+    .permissions-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .permission-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .permission-toggle {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      cursor: pointer;
+    }
+
+    .permission-toggle input[type="checkbox"] {
+      display: none;
+    }
+
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      background: #d1d5db;
+      border-radius: 12px;
+      position: relative;
+      transition: background-color 0.2s;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .permission-toggle input[type="checkbox"]:checked + .toggle-switch {
+      background: #3b82f6;
+    }
+
+    .permission-toggle input[type="checkbox"]:checked + .toggle-switch::after {
+      transform: translateX(20px);
+    }
+
+    .permission-content {
+      flex: 1;
+    }
+
+    .permission-title {
+      display: block;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .permission-description {
+      color: #6b7280;
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .permissions-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+    }
+
+    .note-icon {
+      font-size: 1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .note-content {
+      font-size: 0.875rem;
+      color: #1e40af;
+      line-height: 1.4;
+    }
+
+    .note-content strong {
+      font-weight: 600;
+    }
+
     /* Invite Form */
     .invite-form {
       background: #f9fafb;
@@ -590,6 +773,23 @@ interface PendingInvitation {
       .approval-options {
         gap: 0.75rem;
       }
+
+      .permissions-grid {
+        gap: 0.75rem;
+      }
+
+      .permission-item {
+        padding: 0.75rem;
+      }
+
+      .permissions-note {
+        padding: 0.75rem;
+        gap: 0.5rem;
+      }
+
+      .note-content {
+        font-size: 0.8rem;
+      }
     }
   `]
 })
@@ -616,7 +816,13 @@ export class ConsignorSettingsComponent implements OnInit {
       const mockSettings: ConsignorSettings = {
         storeCode: 'VINT-2024-7X9K',
         autoApprove: true,
-        signupUrl: 'consignmentgenie.com/join/VINT-2024-7X9K'
+        signupUrl: 'consignmentgenie.com/join/VINT-2024-7X9K',
+        inventoryPermissions: {
+          canAddItems: true,
+          canEditItems: true,
+          canRemoveItems: false,
+          canViewDetailedAnalytics: false
+        }
       };
 
       this.settings.set(mockSettings);
