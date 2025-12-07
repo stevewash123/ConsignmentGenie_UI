@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { ItemSearchComponent } from './item-search.component';
 import { CartComponent } from './cart.component';
@@ -312,6 +313,7 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
 export class RecordSaleComponent implements OnInit {
   private recordSaleService = inject(RecordSaleService);
   private router = inject(Router);
+  private toastr = inject(ToastrService);
 
   // State signals
   cartItems = signal<CartItem[]>([]);
@@ -379,6 +381,13 @@ export class RecordSaleComponent implements OnInit {
         this.saleResult.set(result);
         this.saleCompleted.set(true);
         this.isCompletingSale.set(false);
+
+        // Show toast notification if receipt was sent
+        if (result.receiptSent && this.customerEmail()) {
+          this.toastr.success(`Receipt sent to ${this.customerEmail()}`, 'Email Sent!', {
+            timeOut: 5000
+          });
+        }
       },
       error: (err) => {
         console.error('Sale completion failed:', err);

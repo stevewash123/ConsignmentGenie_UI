@@ -45,6 +45,11 @@ export class TransactionService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
+  voidTransaction(id: string, reason?: string): Observable<VoidTransactionResponse> {
+    const request: VoidTransactionRequest = { reason };
+    return this.http.post<VoidTransactionResponse>(`${this.apiUrl}/${id}/void`, request);
+  }
+
   getSalesMetrics(queryParams?: MetricsQueryParams): Observable<SalesMetrics> {
     let params = new HttpParams();
     if (queryParams?.startDate) params = params.set('startDate', queryParams.startDate.toISOString());
@@ -77,6 +82,17 @@ export interface UpdateTransactionRequest {
   salesTaxAmount?: number;
   paymentMethod?: string;
   notes?: string;
+}
+
+export interface VoidTransactionRequest {
+  reason?: string;
+}
+
+export interface VoidTransactionResponse {
+  success: boolean;
+  transactionId: string;
+  itemsRestored: number;
+  message: string;
 }
 
 export interface SalesMetrics {

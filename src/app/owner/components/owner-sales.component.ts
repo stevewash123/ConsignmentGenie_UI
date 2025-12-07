@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
-import { TransactionService, TransactionQueryParams, PagedResult, UpdateTransactionRequest } from '../../services/transaction.service';
+import { TransactionService, TransactionQueryParams, PagedResult, UpdateTransactionRequest, VoidTransactionResponse } from '../../services/transaction.service';
 import { Transaction } from '../../models/transaction.model';
 import { LoadingService } from '../../shared/services/loading.service';
 
@@ -171,7 +171,11 @@ import { LoadingService } from '../../shared/services/loading.service';
                       <button class="btn-icon" (click)="editTransaction(transaction)" title="Edit">
                         ✏️
                       </button>
-                      <button class="btn-icon danger" (click)="deleteTransaction(transaction)" title="Void Sale">
+                      <button
+                        class="btn-icon danger"
+                        *ngIf="canVoidTransaction(transaction)"
+                        (click)="voidTransaction(transaction)"
+                        title="Void Sale">
                         🗑️
                       </button>
                     </div>
@@ -338,6 +342,13 @@ import { LoadingService } from '../../shared/services/loading.service';
               <div class="modal-actions">
                 <button type="button" class="btn-secondary" (click)="closeDetailModal()">Close</button>
                 <button type="button" class="btn-primary" (click)="editTransactionFromDetail()">Edit Transaction</button>
+                <button
+                  type="button"
+                  class="btn-danger"
+                  *ngIf="canVoidTransaction(selectedTransactionForDetail()!)"
+                  (click)="voidTransactionFromDetail()">
+                  Void Sale
+                </button>
               </div>
             </div>
           </div>
@@ -1645,28 +1656,63 @@ export class OwnerSalesComponent implements OnInit {
     this.showEditModal = true;
   }
 
-  deleteTransaction(transaction: Transaction) {
+  canVoidTransaction(transaction: Transaction): boolean {
+    // Can only void transactions from the current day
+    const today = new Date();
+    const transactionDate = new Date(transaction.saleDate);
+
+    return today.toDateString() === transactionDate.toDateString();
+  }
+
+  voidTransaction(transaction: Transaction) {
+    if (!this.canVoidTransaction(transaction)) {
+      this.showNotification('Only same-day transactions can be voided.', 'warning', 'Cannot Void');
+      return;
+    }
+
     this.showConfirmDialog = true;
     this.confirmDialog = {
       title: 'Void Sale',
-      message: `Are you sure you want to void the sale of "${transaction.item.name}"? This action cannot be undone.`,
+      message: `Are you sure you want to void the sale of "${transaction.item.name}"? This will restore the item to inventory and cannot be undone.`,
       confirmText: 'Void Sale',
       cancelText: 'Cancel',
       isDestructive: true,
       confirmAction: () => {
-        this.transactionService.deleteTransaction(transaction.id).subscribe({
-          next: () => {
-            this.loadTransactions();
-            this.loadSummary();
-            this.showNotification('Sale voided successfully', 'success', 'Transaction Voided');
-          },
-          error: (error) => {
-            console.error('Failed to delete transaction:', error);
-            this.showNotification('Failed to void the sale. Please try again.', 'error', 'Delete Failed');
-          }
-        });
+        this.performVoidTransaction(transaction);
       }
     };
+  }
+
+  voidTransactionFromDetail() {
+    const transaction = this.selectedTransactionForDetail();
+    if (transaction) {
+      this.closeDetailModal();
+      this.voidTransaction(transaction);
+    }
+  }
+
+  private performVoidTransaction(transaction: Transaction) {
+    this.transactionService.voidTransaction(transaction.id, 'Voided by shop owner').subscribe({
+      next: (response: VoidTransactionResponse) => {
+        this.loadTransactions();
+        this.loadSummary();
+
+        const message = response.message ||
+          `Sale voided successfully. ${response.itemsRestored} item(s) restored to inventory.`;
+
+        this.showNotification(message, 'success', 'Transaction Voided');
+      },
+      error: (error) => {
+        console.error('Failed to void transaction:', error);
+
+        let errorMessage = 'Failed to void the sale. Please try again.';
+        if (error.status === 400) {
+          errorMessage = error.error?.message || 'Transaction cannot be voided at this time.';
+        }
+
+        this.showNotification(errorMessage, 'error', 'Void Failed');
+      }
+    });
   }
 
   // Modal and Form Management

@@ -74,34 +74,32 @@ export class RecordSaleService {
   getAvailableItems(search?: string): Observable<Item[]> {
     // Use real API call
     const params = new URLSearchParams();
-    params.set('available', 'true');
+    params.set('status', 'Available');
     if (search && search.trim()) {
       params.set('search', search.trim());
     }
 
     return this.http.get<{
-      success: boolean;
-      data: {
+      items: {
         id: string;
         title: string;
         sku: string;
         price: number;
-        consignor: { displayName: string };
+        consignor: { name: string };
         status: string;
       }[];
+      totalCount: number;
+      page: number;
+      pageSize: number;
     }>(`${environment.apiUrl}/api/items?${params.toString()}`).pipe(
       map(response => {
-        if (!response.success) {
-          throw new Error('Failed to fetch items');
-        }
-
         // Map API response to our Item interface
-        return response.data.map(item => ({
+        return response.items.map(item => ({
           id: item.id,
           name: item.title,
           sku: item.sku,
           price: item.price,
-          consignorName: item.consignor.displayName,
+          consignorName: item.consignor.name,
           status: item.status
         }));
       }),
@@ -159,7 +157,7 @@ export class RecordSaleService {
   completeSale(request: SaleRequest): Observable<SaleResponse> {
     // Get tax rate first to calculate total correctly
     return this.getTaxRate().pipe(
-      map(taxRate => {
+      switchMap(taxRate => {
         const requestBody = {
           items: request.items.map(cartItem => ({
             itemId: cartItem.item.id,
@@ -172,22 +170,24 @@ export class RecordSaleService {
         };
 
         return this.http.post<{
-          success: boolean;
-          data: {
-            id: string;
-            total: number;
-            receiptSent?: boolean;
-          };
+          id: string;
+          transactionDate: string;
+          paymentType: string;
+          subtotal: number;
+          taxAmount: number;
+          taxRate: number;
+          total: number;
+          customerEmail?: string;
+          notes?: string;
+          items: any[];
+          createdAt: string;
+          updatedAt: string;
         }>(`${environment.apiUrl}/api/transactions`, requestBody).pipe(
           map(response => {
-            if (!response.success) {
-              throw new Error('Failed to complete sale');
-            }
-
             return {
-              transactionId: response.data.id,
-              total: response.data.total,
-              receiptSent: response.data.receiptSent || false
+              transactionId: response.id,
+              total: response.total,
+              receiptSent: !!request.customerEmail
             };
           }),
           catchError(error => {
@@ -202,11 +202,6 @@ export class RecordSaleService {
           })
         );
       })
-    ).pipe(
-      // Flatten the nested observable
-      (source) => source.pipe(
-        switchMap(innerObs => innerObs)
-      )
     );
   }
 
