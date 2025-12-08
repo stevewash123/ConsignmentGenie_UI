@@ -38,7 +38,7 @@ describe('RecordSaleService Integration', () => {
     };
 
     service.getAvailableItems('test').subscribe(items => {
-      expect(items).toHaveLength(1);
+      expect(items.length).toBe(1);
       expect(items[0].name).toBe('Test Item');
       expect(items[0].consignorName).toBe('Test Consignor');
     });
@@ -94,7 +94,7 @@ describe('RecordSaleService Integration', () => {
     expect(transactionReq.request.method).toBe('POST');
     expect(transactionReq.request.body.paymentType).toBe('Cash');
     expect(transactionReq.request.body.customerEmail).toBe('test@example.com');
-    expect(transactionReq.request.body.items).toHaveLength(1);
+    expect(transactionReq.request.body.items.length).toBe(1);
     transactionReq.flush(mockTransactionResponse);
   });
 

@@ -1,0 +1,225 @@
+<div class="p-6">
+  <div class="max-w-4xl mx-auto">
+    <header class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Default Permissions</h2>
+      <p class="text-gray-600">Set default permissions that apply to newly approved consignors</p>
+    </header>
+
+    <form [formGroup]="permissionsForm" (ngSubmit)="onSave()" class="space-y-6">
+
+      <!-- Inventory Permissions -->
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">📦 Inventory Permissions</h3>
+        <p class="text-sm text-gray-600 mb-4">What can consignors do with their inventory items?</p>
+
+        <div formGroupName="inventory" class="space-y-3">
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canAddItems"
+                   formControlName="canAddItems"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canAddItems" class="text-sm font-medium text-gray-900">
+                Can add new items
+              </label>
+              <p class="text-sm text-gray-500">Allow consignors to add new items to the inventory</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canEditOwnItems"
+                   formControlName="canEditOwnItems"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canEditOwnItems" class="text-sm font-medium text-gray-900">
+                Can edit their own items
+              </label>
+              <p class="text-sm text-gray-500">Allow consignors to modify descriptions, photos, etc. of their items</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canEditPrices"
+                   formControlName="canEditPrices"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canEditPrices" class="text-sm font-medium text-gray-900">
+                Can edit item prices
+              </label>
+              <p class="text-sm text-gray-500">Allow consignors to change prices on their items</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canRemoveOwnItems"
+                   formControlName="canRemoveOwnItems"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canRemoveOwnItems" class="text-sm font-medium text-gray-900">
+                Can remove/withdraw their own items
+              </label>
+              <p class="text-sm text-gray-500">Allow consignors to remove items from sale</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canMarkAsSold"
+                   formControlName="canMarkAsSold"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canMarkAsSold" class="text-sm font-medium text-gray-900">
+                Can mark items as sold
+              </label>
+              <p class="text-sm text-gray-500">Allow consignors to record sales (typically restricted to shop staff)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics & Reporting Permissions -->
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Analytics & Reporting</h3>
+        <p class="text-sm text-gray-600 mb-4">What analytics and reports can consignors view?</p>
+
+        <div formGroupName="analytics" class="space-y-3">
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canViewBasicAnalytics"
+                   formControlName="canViewBasicAnalytics"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canViewBasicAnalytics" class="text-sm font-medium text-gray-900">
+                Can view basic analytics
+              </label>
+              <p class="text-sm text-gray-500">Item views, basic sales summaries for their own items</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canViewDetailedAnalytics"
+                   formControlName="canViewDetailedAnalytics"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canViewDetailedAnalytics" class="text-sm font-medium text-gray-900">
+                Can view detailed analytics
+              </label>
+              <p class="text-sm text-gray-500">Advanced metrics, trends, store-wide data (typically restricted)</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canViewSalesHistory"
+                   formControlName="canViewSalesHistory"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canViewSalesHistory" class="text-sm font-medium text-gray-900">
+                Can view their sales history
+              </label>
+              <p class="text-sm text-gray-500">History of sold items with dates and prices</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canViewPayoutHistory"
+                   formControlName="canViewPayoutHistory"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canViewPayoutHistory" class="text-sm font-medium text-gray-900">
+                Can view payout history
+              </label>
+              <p class="text-sm text-gray-500">History of payments received from the shop</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Management Permissions -->
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">👤 Account Management</h3>
+        <p class="text-sm text-gray-600 mb-4">What account actions can consignors perform?</p>
+
+        <div formGroupName="account" class="space-y-3">
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canUpdateProfile"
+                   formControlName="canUpdateProfile"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canUpdateProfile" class="text-sm font-medium text-gray-900">
+                Can update profile information
+              </label>
+              <p class="text-sm text-gray-500">Change name, contact info, bio, profile photo</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canChangePaymentPreferences"
+                   formControlName="canChangePaymentPreferences"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canChangePaymentPreferences" class="text-sm font-medium text-gray-900">
+                Can change payment preferences
+              </label>
+              <p class="text-sm text-gray-500">Update payment method, address for checks, etc.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <input type="checkbox"
+                   id="canCancelAccount"
+                   formControlName="canCancelAccount"
+                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <div class="flex-1">
+              <label for="canCancelAccount" class="text-sm font-medium text-gray-900">
+                Can cancel their account
+              </label>
+              <p class="text-sm text-gray-500">Self-service account cancellation (consider requiring approval)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Important Notes -->
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <span class="text-amber-400">💡</span>
+          </div>
+          <div class="ml-3">
+            <h4 class="text-sm font-medium text-amber-800">Important Notes</h4>
+            <div class="mt-2 text-sm text-amber-700">
+              <ul class="list-disc list-inside space-y-1">
+                <li>These permissions apply to NEW consignors when they're approved</li>
+                <li>You can override permissions for individual consignors later</li>
+                <li>Changes here don't affect existing consignors' permissions</li>
+                <li>Consider your business model when setting default permissions</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-between">
+        <button type="button"
+                (click)="resetToDefaults()"
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+          🔄 Reset to Recommended Defaults
+        </button>
+
+        <button type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+          💾 Save Default Permissions
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
