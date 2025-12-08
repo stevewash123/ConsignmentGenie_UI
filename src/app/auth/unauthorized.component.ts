@@ -6,25 +6,7 @@ import { Router } from '@angular/router';
   selector: 'app-unauthorized',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="unauthorized-container">
-      <div class="unauthorized-card">
-        <div class="error-icon">🚫</div>
-        <h1>Access Denied</h1>
-        <p>You don't have permission to access this page.</p>
-        <p class="help-text">Please contact your administrator if you believe this is an error.</p>
-
-        <div class="action-buttons">
-          <button class="btn-primary" (click)="goToDashboard()">
-            Go to Dashboard
-          </button>
-          <button class="btn-secondary" (click)="logout()">
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './unauthorized.component.html',
   styles: [`
     .unauthorized-container {
       min-height: 100vh;

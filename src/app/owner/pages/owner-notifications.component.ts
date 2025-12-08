@@ -5,9 +5,7 @@ import { NotificationCenterComponent } from '../../shared/components/notificatio
   selector: 'app-owner-notifications',
   standalone: true,
   imports: [NotificationCenterComponent],
-  template: `
-    <app-notification-center role="owner"></app-notification-center>
-  `,
+  templateUrl: './owner-notifications.component.html',
   styles: []
 })
 export class OwnerNotificationsComponent {}

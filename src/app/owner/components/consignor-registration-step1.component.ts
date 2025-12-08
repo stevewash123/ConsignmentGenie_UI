@@ -17,61 +17,7 @@ interface InvitationDetails {
   selector: 'app-consignor-registration-step1',
   standalone: true,
   imports: [CommonModule, AuthMethodSelectorComponent],
-  template: `
-    <div class="registration-container">
-      <div class="registration-card">
-        <!-- Header -->
-        <div class="registration-header">
-          <h1>Join {{ shopName() }}</h1>
-          <p class="shop-info" *ngIf="shopName()">
-            You've been invited to become a consignor at <strong>{{ shopName() }}</strong>
-          </p>
-          <p class="step-info">Step 1 of 2: Choose how you'd like to sign in</p>
-        </div>
-
-        <!-- Auth Method Selector -->
-        <div class="auth-section" *ngIf="!isInvalidToken() && invitationDetails()">
-          <app-auth-method-selector
-            [enabledProviders]="['google', 'facebook']"
-            [showEmailPassword]="true"
-            [isLoading]="isProcessing"
-            (onProviderAuth)="handleProviderAuth($event)"
-            (onCredentials)="handleCredentials($event)">
-          </app-auth-method-selector>
-
-          <div class="auth-actions" *ngIf="credentials">
-            <button
-              class="btn-primary"
-              (click)="proceedToStep2()"
-              [disabled]="isProcessing() || !hasValidCredentials()">
-              {{ isProcessing() ? 'Verifying...' : 'Continue' }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div class="loading-state" *ngIf="isValidating()">
-          <div class="loading-spinner"></div>
-          <p>Verifying invitation...</p>
-        </div>
-
-        <!-- Invalid/Expired Token State -->
-        <div class="error-state" *ngIf="isInvalidToken()">
-          <div class="error-icon">⚠️</div>
-          <h2>Invalid or Expired Invitation</h2>
-          <p>
-            This invitation link is either invalid or has expired.
-            Please contact the shop owner for a new invitation.
-          </p>
-        </div>
-
-        <!-- Error Messages -->
-        <div class="error-message" *ngIf="errorMessage()">
-          {{ errorMessage() }}
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './consignor-registration-step1.component.html',
   styles: [`
     .registration-container {
       min-height: 100vh;

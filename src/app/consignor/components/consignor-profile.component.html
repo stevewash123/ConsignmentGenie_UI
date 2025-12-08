@@ -1,0 +1,178 @@
+
+    <div class="consignor-profile">
+      <!-- Navigation Header -->
+      <div class="nav-header">
+        <div class="header-content">
+          <h1>Main Street Consignment</h1>
+          <nav class="nav-links">
+            <a routerLink="/consignor/dashboard">Dashboard</a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="content" *ngIf="profile">
+        <div class="page-header">
+          <h2>My Profile</h2>
+        </div>
+
+        <form #profileForm="ngForm" (ngSubmit)="onSubmit(profileForm)" class="profile-form">
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <h3>PERSONAL INFORMATION</h3>
+
+            <div class="form-group">
+              <label for="fullName">Full Name</label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                [(ngModel)]="formData.fullName"
+                required
+                class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                [value]="profile.email"
+                readonly
+                class="form-input readonly">
+              <div class="field-note">(cannot change)</div>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                [(ngModel)]="formData.phone"
+                class="form-input"
+                placeholder="(555) 123-4567">
+            </div>
+          </div>
+
+          <!-- Payment Preferences Section -->
+          <div class="form-section">
+            <h3>PAYMENT PREFERENCES</h3>
+
+            <div class="form-group">
+              <label for="paymentMethod">Preferred Payment Method</label>
+              <select
+                id="paymentMethod"
+                name="paymentMethod"
+                [(ngModel)]="formData.preferredPaymentMethod"
+                class="form-select">
+                <option value="">Select payment method</option>
+                <option value="Venmo">Venmo</option>
+                <option value="Zelle">Zelle</option>
+                <option value="PayPal">PayPal</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Check">Check</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="paymentDetails">Payment Details</label>
+              <input
+                type="text"
+                id="paymentDetails"
+                name="paymentDetails"
+                [(ngModel)]="formData.paymentDetails"
+                class="form-input"
+                placeholder="@username, email, account info, etc.">
+              <div class="field-note">(Venmo username, Zelle email, etc.)</div>
+            </div>
+          </div>
+
+          <!-- Notifications Section -->
+          <div class="form-section">
+            <h3>NOTIFICATIONS</h3>
+
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="emailNotifications"
+                  [(ngModel)]="formData.emailNotifications"
+                  class="checkbox">
+                <span class="checkmark"></span>
+                Email me when my items sell
+              </label>
+            </div>
+
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="payoutNotifications"
+                  [(ngModel)]="payoutNotifications"
+                  class="checkbox">
+                <span class="checkmark"></span>
+                Email me when a payout is processed
+              </label>
+            </div>
+          </div>
+
+          <!-- Account Info Section (Read-only) -->
+          <div class="form-section readonly-section">
+            <h3>ACCOUNT INFO (read only)</h3>
+
+            <div class="readonly-grid">
+              <div class="readonly-item">
+                <div class="readonly-label">Commission Rate:</div>
+                <div class="readonly-value">{{profile.commissionRate}}%</div>
+              </div>
+
+              <div class="readonly-item">
+                <div class="readonly-label">Member Since:</div>
+                <div class="readonly-value">{{formatMemberSince(profile.memberSince)}}</div>
+              </div>
+
+              <div class="readonly-item">
+                <div class="readonly-label">Shop:</div>
+                <div class="readonly-value">{{profile.organizationName}}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="resetForm()">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="profileForm.invalid || saving">
+              {{saving ? 'Saving...' : 'Save Changes'}}
+            </button>
+          </div>
+        </form>
+
+        <!-- Success Message -->
+        <div class="success-message" *ngIf="successMessage">
+          <div class="success-content">
+            <span class="success-icon">✓</span>
+            {{successMessage}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.PROFILE)">
+        <p>Loading profile...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="error" *ngIf="error">
+        <p>{{error}}</p>
+        <button (click)="loadProfile()">Retry</button>
+      </div>
+    </div>
+  

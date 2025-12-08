@@ -5,9 +5,7 @@ import { NotificationCenterComponent } from '../../shared/components/notificatio
   selector: 'app-consignor-notifications',
   standalone: true,
   imports: [NotificationCenterComponent],
-  template: `
-    <app-notification-center role="consignor"></app-notification-center>
-  `,
+  templateUrl: './consignor-notifications.component.html',
   styles: []
 })
 export class ConsignorNotificationsComponent {}

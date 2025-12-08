@@ -5,45 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-customer-dashboard',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="customer-dashboard">
-      <div class="dashboard-header">
-        <h1>Customer Dashboard</h1>
-        <p>Welcome to your personal shopping experience</p>
-      </div>
-
-      <div class="dashboard-grid">
-        <div class="dashboard-card">
-          <h3>Recent Purchases</h3>
-          <p class="card-value">0</p>
-          <p class="card-description">Items purchased this month</p>
-        </div>
-
-        <div class="dashboard-card">
-          <h3>Total Spent</h3>
-          <p class="card-value">$0.00</p>
-          <p class="card-description">All time purchases</p>
-        </div>
-
-        <div class="dashboard-card">
-          <h3>Favorite Shops</h3>
-          <p class="card-value">0</p>
-          <p class="card-description">Shops you follow</p>
-        </div>
-
-        <div class="dashboard-card">
-          <h3>Saved Items</h3>
-          <p class="card-value">0</p>
-          <p class="card-description">Items in your wishlist</p>
-        </div>
-      </div>
-
-      <div class="coming-soon">
-        <h2>🛍️ Customer Portal Coming Soon</h2>
-        <p>Full customer shopping experience will be available in Phase 5.</p>
-      </div>
-    </div>
-  `,
+  templateUrl: './customer-dashboard.component.html',
   styles: [`
     .customer-dashboard {
       padding: 2rem;

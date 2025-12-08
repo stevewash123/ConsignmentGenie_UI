@@ -10,41 +10,7 @@ import { ShopperStoreService, StoreInfoDto } from '../services/shopper-store.ser
   selector: 'app-store-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, StoreHeaderComponent],
-  template: `
-    <div class="store-layout">
-      <app-store-header
-        [storeInfo]="storeInfo"
-        [storeSlug]="storeSlug">
-      </app-store-header>
-
-      <main class="store-content">
-        <router-outlet></router-outlet>
-      </main>
-
-      <footer class="store-footer">
-        <div class="container" *ngIf="storeInfo">
-          <div class="footer-content">
-            <div class="store-details">
-              <h4>{{ storeInfo.name }}</h4>
-              <p *ngIf="storeInfo.address">{{ storeInfo.address }}</p>
-              <p *ngIf="storeInfo.phone">{{ storeInfo.phone }}</p>
-              <p *ngIf="storeInfo.email">{{ storeInfo.email }}</p>
-            </div>
-
-            <div class="store-hours" *ngIf="storeInfo.hours">
-              <h5>Store Hours</h5>
-              <!-- TODO: Display store hours when implemented -->
-            </div>
-          </div>
-
-          <div class="footer-bottom">
-            <p>&copy; {{ currentYear }} {{ storeInfo.name }}. All rights reserved.</p>
-            <p class="powered-by">Powered by ConsignmentGenie</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  `,
+  templateUrl: './store-layout.component.html',
   styles: [`
     .store-layout {
       min-height: 100vh;

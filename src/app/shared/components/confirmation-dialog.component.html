@@ -1,0 +1,58 @@
+
+    @if (showDialog()) {
+      <div class="confirmation-overlay" (click)="onOverlayClick()">
+        <div class="confirmation-dialog" (click)="$event.stopPropagation()">
+          <div class="dialog-header" [class.destructive]="dialogData()?.isDestructive">
+            <div class="dialog-icon">
+              @if (dialogData()?.isDestructive) {
+                <span class="warning-icon">⚠️</span>
+              } @else {
+                <span class="question-icon">❓</span>
+              }
+            </div>
+            <h3 class="dialog-title">{{ dialogData()?.title }}</h3>
+            <button class="dialog-close" (click)="onCancel()" type="button">✕</button>
+          </div>
+
+          <div class="dialog-body">
+            <p class="dialog-message">{{ dialogData()?.message }}</p>
+
+            @if (dialogData()?.showInput) {
+              <div class="input-group">
+                <label class="input-label">{{ dialogData()?.inputLabel }}</label>
+                <textarea
+                  [(ngModel)]="inputValue"
+                  [placeholder]="dialogData()?.inputPlaceholder || ''"
+                  class="dialog-input"
+                  rows="3"
+                  #textareaRef
+                ></textarea>
+              </div>
+            }
+          </div>
+
+          <div class="dialog-actions">
+            <button
+              class="dialog-btn cancel-btn"
+              (click)="onCancel()"
+              type="button"
+            >
+              {{ dialogData()?.cancelButtonText }}
+            </button>
+            <button
+              class="dialog-btn confirm-btn"
+              [class.destructive]="dialogData()?.isDestructive"
+              (click)="onConfirm()"
+              type="button"
+              [disabled]="isConfirming()"
+            >
+              @if (isConfirming()) {
+                <span class="spinner"></span>
+              }
+              {{ dialogData()?.confirmButtonText }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  

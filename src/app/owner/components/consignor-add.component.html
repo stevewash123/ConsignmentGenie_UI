@@ -1,0 +1,189 @@
+
+    <div class="consignor-add-container">
+      <div class="add-header">
+        <div class="breadcrumb">
+          <a routerLink="/owner/consignors">← Back to consignors</a>
+        </div>
+        <h1>Add New consignor</h1>
+        <p class="subtitle">Create a new consignor account or consider using <strong>Invite consignor</strong> to send them a registration link instead.</p>
+      </div>
+
+      <div class="add-card">
+        <form (ngSubmit)="onSubmit()" #providerForm="ngForm">
+          <div class="form-section">
+            <h3>Basic Information</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">consignor Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  [(ngModel)]="providerData.name"
+                  required
+                  #nameField="ngModel"
+                  class="form-control"
+                  [class.error]="nameField.invalid && nameField.touched"
+                  placeholder="Enter consignor name"
+                >
+                <div class="error-message" *ngIf="nameField.invalid && nameField.touched">
+                  consignor name is required
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  [(ngModel)]="providerData.email"
+                  required
+                  email
+                  #emailField="ngModel"
+                  class="form-control"
+                  [class.error]="emailField.invalid && emailField.touched"
+                  placeholder="Enter email address"
+                >
+                <div class="error-message" *ngIf="emailField.invalid && emailField.touched">
+                  <span *ngIf="emailField.errors?.['required']">Email is required</span>
+                  <span *ngIf="emailField.errors?.['email']">Please enter a valid email</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  [(ngModel)]="providerData.phone"
+                  class="form-control"
+                  placeholder="(555) 123-4567"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="address">Address</label>
+                <input
+                  type="text"
+                  id="address"
+                  name="address"
+                  [(ngModel)]="providerData.address"
+                  class="form-control"
+                  placeholder="Enter address"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Business Settings</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="commissionRate">Commission Rate (%) *</label>
+                <input
+                  type="number"
+                  id="commissionRate"
+                  name="commissionRate"
+                  [(ngModel)]="providerData.commissionRate"
+                  required
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  #commissionField="ngModel"
+                  class="form-control"
+                  [class.error]="commissionField.invalid && commissionField.touched"
+                  placeholder="50.0"
+                >
+                <div class="error-message" *ngIf="commissionField.invalid && commissionField.touched">
+                  <span *ngIf="commissionField.errors?.['required']">Commission rate is required</span>
+                  <span *ngIf="commissionField.errors?.['min']">Rate must be 0 or higher</span>
+                  <span *ngIf="commissionField.errors?.['max']">Rate must be 100 or lower</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="preferredPaymentMethod">Preferred Payment Method</label>
+                <select
+                  id="preferredPaymentMethod"
+                  name="preferredPaymentMethod"
+                  [(ngModel)]="providerData.preferredPaymentMethod"
+                  class="form-control"
+                >
+                  <option value="">Select payment method</option>
+                  <option value="Check">Check</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="PayPal">PayPal</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="paymentDetails">Payment Details</label>
+              <textarea
+                id="paymentDetails"
+                name="paymentDetails"
+                [(ngModel)]="providerData.paymentDetails"
+                class="form-control"
+                rows="3"
+                placeholder="Enter payment details (e.g., PayPal email, bank account info, mailing address)"
+              ></textarea>
+              <small class="form-text">This information is used for processing payouts</small>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Additional Information</h3>
+            <div class="form-group">
+              <label for="notes">Notes</label>
+              <textarea
+                id="notes"
+                name="notes"
+                [(ngModel)]="providerData.notes"
+                class="form-control"
+                rows="4"
+                placeholder="Add any additional notes about this consignor..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" routerLink="/owner/consignors">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="providerForm.invalid || isSubmitting()"
+            >
+              {{ isSubmitting() ? 'Creating...' : 'Create consignor' }}
+            </button>
+          </div>
+
+          <div class="success-message" *ngIf="successMessage()">
+            {{ successMessage() }}
+          </div>
+
+          <div class="error-message" *ngIf="errorMessage()">
+            {{ errorMessage() }}
+          </div>
+        </form>
+
+        <div class="alternative-note">
+          <h4>💡 Tip: Consider using "Invite consignor" instead</h4>
+          <p>
+            Instead of manually creating accounts, you can invite consignors to register themselves.
+            This ensures they have access to their login credentials and receive welcome emails.
+          </p>
+          <button class="btn-outline" routerLink="/owner/consignors">
+            Go back and use "Invite consignor"
+          </button>
+        </div>
+      </div>
+    </div>
+  

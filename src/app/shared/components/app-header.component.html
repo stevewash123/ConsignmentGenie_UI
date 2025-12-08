@@ -1,0 +1,64 @@
+
+    <header class="app-header">
+      <div class="header-container">
+        <div class="header-left">
+          <div class="logo">
+            <h1>ConsignmentGenie</h1>
+          </div>
+
+          <nav class="main-nav" *ngIf="currentUser()">
+            <!-- Admin Navigation -->
+            <div *ngIf="isAdmin()" class="nav-links">
+              <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+              <a routerLink="/admin/organizations" routerLinkActive="active">Organizations</a>
+              <a routerLink="/admin/billing" routerLinkActive="active">Billing</a>
+              <a routerLink="/admin/support" routerLinkActive="active">Support</a>
+            </div>
+
+            <!-- Owner Navigation -->
+            <div *ngIf="isOwner()" class="nav-links">
+              <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
+              <a routerLink="/owner/consignors" routerLinkActive="active">consignors</a>
+              <a routerLink="/owner/inventory" routerLinkActive="active">Inventory</a>
+              <a routerLink="/owner/transactions" routerLinkActive="active">Transactions</a>
+              <a routerLink="/owner/payouts" routerLinkActive="active">Payouts</a>
+              <a routerLink="/owner/reports" routerLinkActive="active">Reports</a>
+              <a routerLink="/owner/settings" routerLinkActive="active">Settings</a>
+            </div>
+
+            <!-- Customer/consignor Navigation -->
+            <div *ngIf="isCustomerOrProvider()" class="nav-links">
+              <a routerLink="/customer/dashboard" routerLinkActive="active">Dashboard</a>
+              <a routerLink="/customer/items" routerLinkActive="active">My Items</a>
+              <a routerLink="/customer/transactions" routerLinkActive="active">Transactions</a>
+              <a routerLink="/customer/profile" routerLinkActive="active">Profile</a>
+            </div>
+          </nav>
+        </div>
+
+        <div class="header-right" *ngIf="currentUser()">
+          <div class="user-info">
+            <div class="user-details">
+              <div class="user-email">{{ currentUser()?.email }}</div>
+              <div class="user-role">{{ getRoleName(currentUser()?.role) }}</div>
+              <div class="org-name">{{ currentUser()?.organizationName }}</div>
+            </div>
+          </div>
+
+          <div class="user-menu">
+            <button class="profile-btn" (click)="toggleUserMenu()">
+              <span class="user-avatar">{{ getInitials(currentUser()?.email) }}</span>
+              <span class="dropdown-arrow">▼</span>
+            </button>
+
+            <div class="user-dropdown" [class.show]="showUserMenu()">
+              <a routerLink="/profile" class="dropdown-item">Profile</a>
+              <a routerLink="/settings" class="dropdown-item">Settings</a>
+              <hr>
+              <button class="dropdown-item logout-btn" (click)="logout()">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  

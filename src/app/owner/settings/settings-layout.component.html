@@ -1,0 +1,34 @@
+
+    <app-layout>
+      <div class="settings-layout">
+        <!-- Header -->
+        <div class="settings-header">
+          <h1>Settings</h1>
+          <p>Manage your shop configuration and preferences</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="settings-container">
+          <!-- Sidebar Navigation -->
+          <nav class="settings-sidebar">
+            <div class="sidebar-menu">
+              <a
+                *ngFor="let item of menuItems"
+                [routerLink]="['/owner/settings', item.route]"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{exact: item.route === ''}"
+                class="menu-item">
+                <span class="menu-icon">{{ item.icon }}</span>
+                <span class="menu-label">{{ item.label }}</span>
+              </a>
+            </div>
+          </nav>
+
+          <!-- Content Area -->
+          <main class="settings-content">
+            <router-outlet></router-outlet>
+          </main>
+        </div>
+      </div>
+    </app-layout>
+  

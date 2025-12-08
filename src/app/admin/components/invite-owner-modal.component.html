@@ -1,0 +1,103 @@
+
+    @if (isOpen()) {
+      <div class="modal-overlay" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h2>Invite New Shop Owner</h2>
+            <button class="close-btn" (click)="closeModal()" type="button">×</button>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" #inviteForm="ngForm">
+            <div class="modal-body">
+              @if (errorMessage()) {
+                <div class="error-message">
+                  <span class="error-icon">⚠️</span>
+                  {{ errorMessage() }}
+                </div>
+              }
+
+              @if (successMessage()) {
+                <div class="success-message">
+                  <span class="success-icon">✅</span>
+                  {{ successMessage() }}
+                </div>
+              }
+
+              <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  [(ngModel)]="formData.name"
+                  required
+                  maxlength="100"
+                  placeholder="Enter the owner's full name"
+                  [disabled]="isComponentLoading()"
+                  #nameInput="ngModel"
+                />
+                @if (nameInput.invalid && nameInput.touched) {
+                  <div class="field-error">Full name is required</div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  [(ngModel)]="formData.email"
+                  required
+                  maxlength="254"
+                  placeholder="Enter the owner's email address"
+                  [disabled]="isComponentLoading()"
+                  #emailInput="ngModel"
+                />
+                @if (emailInput.invalid && emailInput.touched) {
+                  <div class="field-error">
+                    @if (emailInput.errors?.['required']) {
+                      Email address is required
+                    } @else if (emailInput.errors?.['email']) {
+                      Please enter a valid email address
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="info-box">
+                <div class="info-icon">💡</div>
+                <div class="info-content">
+                  <strong>What happens next?</strong>
+                  <ul>
+                    <li>An invitation email will be sent to the provided address</li>
+                    <li>The invitation expires in 7 days</li>
+                    <li>The owner can complete their registration and shop setup</li>
+                    <li>You can track the invitation status and resend if needed</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="cancel-btn" (click)="closeModal()" [disabled]="isComponentLoading()">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="invite-btn"
+                [disabled]="inviteForm.invalid || isComponentLoading()"
+              >
+                @if (isComponentLoading()) {
+                  <span class="spinner"></span>
+                  Sending Invitation...
+                } @else {
+                  📧 Send Invitation
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+  

@@ -15,56 +15,7 @@ interface UserData {
   selector: 'app-owner-header',
   standalone: true,
   imports: [CommonModule, RouterModule, NotificationBellComponent],
-  template: `
-    <header class="owner-header">
-      <div class="header-container">
-        <div class="header-left">
-          <div class="logo">
-            <h2>{{ currentUser()?.organizationName || 'ConsignmentGenie' }}</h2>
-            <span class="owner-badge">Shop Management</span>
-          </div>
-
-          <nav class="main-nav" *ngIf="currentUser()">
-            <div class="nav-links">
-              <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
-              <a routerLink="/owner/consignors" routerLinkActive="active">consignors</a>
-              <a routerLink="/owner/inventory" routerLinkActive="active">Inventory</a>
-              <a routerLink="/owner/sales" routerLinkActive="active">Sales</a>
-              <a routerLink="/owner/payouts" routerLinkActive="active">Payouts</a>
-              <a routerLink="/owner/reports" routerLinkActive="active">Reports</a>
-              <a routerLink="/owner/notifications" routerLinkActive="active">Notifications</a>
-            </div>
-          </nav>
-        </div>
-
-        <div class="header-right" *ngIf="currentUser()">
-          <!-- Notification Bell -->
-          <app-notification-bell role="owner"></app-notification-bell>
-
-          <div class="user-info">
-            <div class="user-details">
-              <div class="user-email">{{ currentUser()?.email }}</div>
-              <div class="org-name">{{ currentUser()?.organizationName }}</div>
-            </div>
-          </div>
-
-          <div class="user-menu">
-            <button class="profile-btn" (click)="toggleUserMenu()">
-              <span class="user-avatar owner">{{ getInitials(currentUser()?.email) }}</span>
-              <span class="dropdown-arrow">▼</span>
-            </button>
-
-            <div class="user-dropdown" [class.show]="showUserMenu()">
-              <a routerLink="/owner/notifications" class="dropdown-item">Notifications</a>
-              <a routerLink="/owner/settings" class="dropdown-item">Settings</a>
-              <hr>
-              <button class="dropdown-item logout-btn" (click)="logout()">Logout</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-  `,
+  templateUrl: './owner-header.component.html',
   styles: [`
     .owner-header {
       background: #059669;

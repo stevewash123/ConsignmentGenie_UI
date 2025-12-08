@@ -6,26 +6,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-subscription-settings',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="subscription-settings">
-      <div class="settings-header">
-        <h2>Subscription & Billing</h2>
-        <p>Manage your ConsignmentGenie plan, payment method, and billing history</p>
-      </div>
-
-      <div class="coming-soon">
-        <h3>🚧 Coming Soon</h3>
-        <p>Subscription management features are currently under development. This page will include:</p>
-        <ul>
-          <li>Current plan details and features</li>
-          <li>Plan upgrade/downgrade options</li>
-          <li>Payment method management</li>
-          <li>Billing history and invoices</li>
-          <li>Usage statistics and limits</li>
-        </ul>
-      </div>
-    </div>
-  `,
+  templateUrl: './subscription-settings.component.html',
   styles: [`
     .subscription-settings {
       padding: 2rem;

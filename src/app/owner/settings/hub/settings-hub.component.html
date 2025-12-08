@@ -1,0 +1,73 @@
+
+    <div class="settings-hub">
+      <div class="hub-header">
+        <h2>Settings Overview</h2>
+        <p>Manage your shop configuration from one place</p>
+      </div>
+
+      <div class="settings-grid">
+        <a
+          *ngFor="let card of settingsCards"
+          [routerLink]="[card.route]"
+          class="settings-card"
+          [class.warning]="card.status === 'warning'"
+          [class.incomplete]="card.status === 'incomplete'">
+
+          <div class="card-header">
+            <span class="card-icon">{{ card.icon }}</span>
+            <div class="card-status" *ngIf="card.status">
+              <span class="status-indicator" [class]="'status-' + card.status"></span>
+              <span class="status-text" *ngIf="card.statusText">{{ card.statusText }}</span>
+            </div>
+          </div>
+
+          <div class="card-content">
+            <h3>{{ card.title }}</h3>
+            <p>{{ card.description }}</p>
+          </div>
+
+          <div class="card-action">
+            <span class="action-text">{{ getActionText(card) }}</span>
+            <span class="action-arrow">→</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats" *ngIf="stats()">
+        <h3>Quick Overview</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ stats()?.activeConsignors || 0 }}</div>
+            <div class="stat-label">Active Consignors</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ stats()?.pendingApprovals || 0 }}</div>
+            <div class="stat-label">Pending Approvals</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ stats()?.integrations || 0 }}/3</div>
+            <div class="stat-label">Integrations Active</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ stats()?.completionPercentage || 0 }}%</div>
+            <div class="stat-label">Setup Complete</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="recent-activity" *ngIf="recentActivity().length > 0">
+        <h3>Recent Settings Changes</h3>
+        <div class="activity-list">
+          <div *ngFor="let activity of recentActivity()" class="activity-item">
+            <div class="activity-icon">{{ activity.icon }}</div>
+            <div class="activity-content">
+              <div class="activity-text">{{ activity.description }}</div>
+              <div class="activity-time">{{ activity.timestamp | date:'short' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  

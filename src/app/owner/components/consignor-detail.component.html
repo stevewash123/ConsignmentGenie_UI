@@ -1,0 +1,136 @@
+
+    <div class="consignor-detail-container" *ngIf="!isProviderLoading(); else loading">
+      <div class="detail-header">
+        <div class="breadcrumb">
+          <a routerLink="/owner/consignors">← Back to consignors</a>
+        </div>
+        <div class="header-actions">
+          <button class="btn-secondary" [routerLink]="['/owner/consignors', providerId(), 'edit']">
+            Edit consignor
+          </button>
+          <button
+            class="btn-danger"
+            *ngIf="consignor()?.isActive"
+            (click)="deactivateProvider()"
+            [disabled]="isSubmitting()"
+          >
+            {{ isSubmitting() ? 'Deactivating...' : 'Deactivate' }}
+          </button>
+          <button
+            class="btn-success"
+            *ngIf="!consignor()?.isActive"
+            (click)="activateProvider()"
+            [disabled]="isSubmitting()"
+          >
+            {{ isSubmitting() ? 'Activating...' : 'Activate' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="consignor-detail-card" *ngIf="consignor()">
+        <div class="consignor-header">
+          <h1>{{ consignor()!.name }}</h1>
+          <div class="status" [class.active]="consignor()!.isActive" [class.inactive]="!consignor()!.isActive">
+            {{ consignor()!.isActive ? 'Active' : 'Inactive' }}
+          </div>
+        </div>
+
+        <div class="consignor-info">
+          <div class="info-section">
+            <h3>Contact Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Email:</label>
+                <span>{{ consignor()!.email }}</span>
+              </div>
+              <div class="info-item" *ngIf="consignor()!.phone">
+                <label>Phone:</label>
+                <span>{{ consignor()!.phone }}</span>
+              </div>
+              <div class="info-item" *ngIf="consignor()!.address">
+                <label>Address:</label>
+                <span>{{ consignor()!.address }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Business Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Commission Rate:</label>
+                <span>{{ consignor()!.commissionRate }}%</span>
+              </div>
+              <div class="info-item" *ngIf="consignor()!.preferredPaymentMethod">
+                <label>Preferred Payment:</label>
+                <span>{{ consignor()!.preferredPaymentMethod }}</span>
+              </div>
+              <div class="info-item" *ngIf="consignor()!.paymentDetails">
+                <label>Payment Details:</label>
+                <span>{{ consignor()!.paymentDetails }}</span>
+              </div>
+              <div class="info-item" *ngIf="consignor()!.consignorNumber">
+                <label>consignor Number:</label>
+                <span>{{ consignor()!.consignorNumber }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section" *ngIf="consignor()!.notes">
+            <h3>Notes</h3>
+            <p class="notes">{{ consignor()!.notes }}</p>
+          </div>
+        </div>
+
+        <div class="consignor-stats">
+          <div class="stat-card">
+            <div class="stat-number">{{ stats().totalItems || 0 }}</div>
+            <div class="stat-label">Total Items</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ stats().activeItems || 0 }}</div>
+            <div class="stat-label">Active Items</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ stats().soldItems || 0 }}</div>
+            <div class="stat-label">Sold Items</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ stats().totalEarnings | currency:'USD':'symbol':'1.2-2' }}</div>
+            <div class="stat-label">Total Earnings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ stats().pendingPayout | currency:'USD':'symbol':'1.2-2' }}</div>
+            <div class="stat-label">Pending Payout</div>
+          </div>
+        </div>
+
+        <div class="recent-activity">
+          <h3>Recent Activity</h3>
+          <div class="activity-list">
+            <div class="activity-item" *ngFor="let activity of recentActivity()">
+              <div class="activity-icon">{{ getActivityIcon(activity.type) }}</div>
+              <div class="activity-content">
+                <div class="activity-description">{{ activity.description }}</div>
+                <div class="activity-date">{{ activity.date | date:'short' }}</div>
+              </div>
+              <div class="activity-amount" *ngIf="activity.amount">
+                {{ activity.amount | currency:'USD':'symbol':'1.2-2' }}
+              </div>
+            </div>
+          </div>
+          <div class="no-activity" *ngIf="recentActivity().length === 0">
+            No recent activity
+          </div>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage()">
+        {{ errorMessage() }}
+      </div>
+    </div>
+
+    <ng-template #loading>
+      <div class="loading">Loading consignor details...</div>
+    </ng-template>
+  

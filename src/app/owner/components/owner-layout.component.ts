@@ -7,17 +7,7 @@ import { OwnerFooterComponent } from './owner-footer.component';
   selector: 'app-owner-layout',
   standalone: true,
   imports: [CommonModule, OwnerHeaderComponent, OwnerFooterComponent],
-  template: `
-    <div class="owner-layout">
-      <app-owner-header></app-owner-header>
-
-      <main class="main-content">
-        <ng-content></ng-content>
-      </main>
-
-      <app-owner-footer></app-owner-footer>
-    </div>
-  `,
+  templateUrl: './owner-layout.component.html',
   styles: [`
     .owner-layout {
       min-height: 100vh;

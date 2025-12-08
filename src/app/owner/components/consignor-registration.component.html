@@ -1,0 +1,164 @@
+
+    <div class="registration-container">
+      <div class="registration-card">
+        <div class="registration-header">
+          <h1>Complete Your consignor Registration</h1>
+          <p class="shop-info" *ngIf="shopName()">
+            You've been invited to join <strong>{{ shopName() }}</strong>
+          </p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #registrationForm="ngForm" *ngIf="!isSubmitted()">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Full Name *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                [(ngModel)]="registration.name"
+                required
+                #nameField="ngModel"
+                class="form-control"
+                [class.error]="nameField.invalid && nameField.touched"
+                placeholder="Enter your full name"
+                readonly
+              >
+              <div class="error-message" *ngIf="nameField.invalid && nameField.touched">
+                Name is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                [(ngModel)]="registration.email"
+                required
+                email
+                #emailField="ngModel"
+                class="form-control"
+                [class.error]="emailField.invalid && emailField.touched"
+                placeholder="Enter your email"
+                readonly
+              >
+              <div class="error-message" *ngIf="emailField.invalid && emailField.touched">
+                <span *ngIf="emailField.errors?.['required']">Email is required</span>
+                <span *ngIf="emailField.errors?.['email']">Please enter a valid email</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                [(ngModel)]="registration.phone"
+                class="form-control"
+                placeholder="(555) 123-4567"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                [(ngModel)]="registration.address"
+                class="form-control"
+                placeholder="Enter your address"
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="password">Password *</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                [(ngModel)]="registration.password"
+                required
+                minlength="6"
+                #passwordField="ngModel"
+                class="form-control"
+                [class.error]="passwordField.invalid && passwordField.touched"
+                placeholder="Create a secure password"
+              >
+              <div class="error-message" *ngIf="passwordField.invalid && passwordField.touched">
+                <span *ngIf="passwordField.errors?.['required']">Password is required</span>
+                <span *ngIf="passwordField.errors?.['minlength']">Password must be at least 6 characters</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password *</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                [(ngModel)]="registration.confirmPassword"
+                required
+                #confirmPasswordField="ngModel"
+                class="form-control"
+                [class.error]="(confirmPasswordField.invalid && confirmPasswordField.touched) || passwordMismatch()"
+                placeholder="Confirm your password"
+              >
+              <div class="error-message" *ngIf="confirmPasswordField.invalid && confirmPasswordField.touched">
+                Confirm password is required
+              </div>
+              <div class="error-message" *ngIf="passwordMismatch() && confirmPasswordField.touched">
+                Passwords do not match
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="registrationForm.invalid || passwordMismatch() || isSubmitting()"
+            >
+              {{ isSubmitting() ? 'Creating Account...' : 'Complete Registration' }}
+            </button>
+          </div>
+
+          <div class="error-message" *ngIf="errorMessage()">
+            {{ errorMessage() }}
+          </div>
+        </form>
+
+        <!-- Success State -->
+        <div class="success-state" *ngIf="isSubmitted()">
+          <div class="success-icon">✓</div>
+          <h2>Registration Complete!</h2>
+          <p>
+            Welcome to <strong>{{ shopName() }}</strong>! Your consignor account has been created successfully.
+          </p>
+          <p>
+            You can now log in to your account and start managing your consigned items.
+          </p>
+          <button class="btn-primary" (click)="goToLogin()">
+            Go to Login
+          </button>
+        </div>
+
+        <!-- Invalid/Expired Token State -->
+        <div class="error-state" *ngIf="isInvalidToken()">
+          <div class="error-icon">⚠</div>
+          <h2>Invalid or Expired Invitation</h2>
+          <p>
+            This invitation link is either invalid or has expired.
+            Please contact the shop owner for a new invitation.
+          </p>
+        </div>
+      </div>
+    </div>
+  

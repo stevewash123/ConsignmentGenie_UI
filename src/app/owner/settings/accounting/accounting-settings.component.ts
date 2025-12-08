@@ -6,26 +6,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-accounting-settings',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="accounting-settings">
-      <div class="settings-header">
-        <h2>Accounting & Bookkeeping</h2>
-        <p>Integrate with QuickBooks or configure spreadsheet exports for your financial records</p>
-      </div>
-
-      <div class="coming-soon">
-        <h3>🚧 Coming Soon</h3>
-        <p>Accounting integration features are currently under development. This page will include:</p>
-        <ul>
-          <li>QuickBooks Online integration</li>
-          <li>Automated sales sync</li>
-          <li>Consignor payout tracking</li>
-          <li>Spreadsheet export options</li>
-          <li>Financial reporting tools</li>
-        </ul>
-      </div>
-    </div>
-  `,
+  templateUrl: './accounting-settings.component.html',
   styles: [`
     .accounting-settings {
       padding: 2rem;

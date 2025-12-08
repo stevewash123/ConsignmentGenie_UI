@@ -1,0 +1,74 @@
+
+    <div class="shop-layout" *ngIf="shopInfo(); else loadingShop">
+      <!-- Shop Header -->
+      <header class="shop-header">
+        <div class="container">
+          <div class="shop-brand">
+            <div class="shop-logo" *ngIf="shopInfo()!.logo; else defaultLogo">
+              <img [src]="shopInfo()!.logo" [alt]="shopInfo()!.shopName + ' logo'" />
+            </div>
+            <ng-template #defaultLogo>
+              <div class="shop-logo-placeholder">
+                {{ getShopInitials() }}
+              </div>
+            </ng-template>
+            <div class="shop-info">
+              <h1 class="shop-name">{{ shopInfo()!.shopName }}</h1>
+              <p class="shop-description" *ngIf="shopInfo()!.description">
+                {{ shopInfo()!.description }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Shop Navigation -->
+          <nav class="shop-nav">
+            <a [routerLink]="['/shop', shopInfo()!.shopSlug]"
+               routerLinkActive="active"
+               [routerLinkActiveOptions]="{exact: true}"
+               class="nav-link">Browse Items</a>
+
+            <!-- User Menu -->
+            <div class="user-menu" *ngIf="currentUser(); else guestMenu">
+              <span class="welcome-text">Hi, {{ currentUser()!.name || currentUser()!.email?.split('@')[0] }}</span>
+              <button (click)="logout()" class="btn btn-link">Sign Out</button>
+            </div>
+
+            <ng-template #guestMenu>
+              <a [routerLink]="['/shop', shopInfo()!.shopSlug, 'login']"
+                 class="btn btn-outline">Sign In</a>
+            </ng-template>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Shop Content -->
+      <main class="shop-content">
+        <div class="container">
+          <router-outlet></router-outlet>
+        </div>
+      </main>
+
+      <!-- Shop Footer -->
+      <footer class="shop-footer">
+        <div class="container">
+          <p>&copy; {{ currentYear }} {{ shopInfo()!.shopName }} | Powered by Consignment Genie</p>
+        </div>
+      </footer>
+    </div>
+
+    <ng-template #loadingShop>
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading shop...</p>
+      </div>
+    </ng-template>
+
+    <!-- Shop Not Found -->
+    <div class="shop-not-found" *ngIf="shopNotFound()">
+      <div class="container">
+        <h1>Shop Not Found</h1>
+        <p>The shop you're looking for doesn't exist or is no longer active.</p>
+        <a routerLink="/" class="btn btn-primary">Go to Consignment Genie</a>
+      </div>
+    </div>
+  

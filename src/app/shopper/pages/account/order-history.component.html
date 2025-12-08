@@ -1,0 +1,146 @@
+
+    <div class="order-history-container">
+      <div class="container">
+        <div class="page-header">
+          <h1>Order History</h1>
+          <p class="store-name" *ngIf="storeInfo">{{ storeInfo.name }}</p>
+        </div>
+
+        <div class="orders-content" *ngIf="orders.length > 0; else noOrdersTemplate">
+          <div class="orders-list">
+            <div class="order-card" *ngFor="let order of paginatedOrders">
+              <div class="order-header">
+                <div class="order-info">
+                  <h3>Order #{{ order.orderNumber }}</h3>
+                  <p class="order-date">{{ order.date | date:'mediumDate' }}</p>
+                </div>
+                <div class="order-status">
+                  <span class="status-badge" [class]="'status-' + order.status">
+                    {{ getStatusLabel(order.status) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="order-items">
+                <div class="order-item" *ngFor="let item of order.items">
+                  <img
+                    [src]="item.imageUrl || '/assets/placeholder-item.jpg'"
+                    [alt]="item.name"
+                    class="item-image"
+                    (error)="onImageError($event)">
+                  <div class="item-details">
+                    <h4>{{ item.name }}</h4>
+                    <p>Qty: {{ item.quantity }} × \${{ item.price | number:'1.2-2' }}</p>
+                  </div>
+                  <div class="item-total">
+                    \${{ (item.price * item.quantity) | number:'1.2-2' }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="order-summary">
+                <div class="summary-row">
+                  <span>Subtotal:</span>
+                  <span>\${{ order.subtotal | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row" *ngIf="order.shipping > 0">
+                  <span>Shipping:</span>
+                  <span>\${{ order.shipping | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row" *ngIf="order.shipping === 0">
+                  <span>Shipping:</span>
+                  <span>FREE</span>
+                </div>
+                <div class="summary-row">
+                  <span>Tax:</span>
+                  <span>\${{ order.tax | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row total">
+                  <span>Total:</span>
+                  <span>\${{ order.total | number:'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <div class="order-details">
+                <div class="shipping-info">
+                  <h5>Shipping Address</h5>
+                  <p>{{ order.shippingAddress.address }}</p>
+                  <p *ngIf="order.shippingAddress.apartment">{{ order.shippingAddress.apartment }}</p>
+                  <p>{{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} {{ order.shippingAddress.zipCode }}</p>
+                </div>
+
+                <div class="tracking-info" *ngIf="order.trackingNumber">
+                  <h5>Tracking Information</h5>
+                  <p>Tracking #: <strong>{{ order.trackingNumber }}</strong></p>
+                  <a href="#" class="track-link" (click)="trackOrder(order, $event)">Track Package</a>
+                </div>
+              </div>
+
+              <div class="order-actions">
+                <button class="btn btn-outline-primary btn-sm" (click)="viewOrderDetails(order)">
+                  View Details
+                </button>
+                <button
+                  class="btn btn-outline-secondary btn-sm"
+                  *ngIf="canReorder(order)"
+                  (click)="reorderItems(order)">
+                  Reorder
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  *ngIf="canCancel(order)"
+                  (click)="cancelOrder(order)">
+                  Cancel Order
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pagination" *ngIf="totalPages > 1">
+            <button
+              class="btn btn-outline-secondary"
+              [disabled]="currentPage === 1"
+              (click)="goToPage(currentPage - 1)">
+              Previous
+            </button>
+
+            <span class="page-info">
+              Page {{ currentPage }} of {{ totalPages }}
+            </span>
+
+            <button
+              class="btn btn-outline-secondary"
+              [disabled]="currentPage === totalPages"
+              (click)="goToPage(currentPage + 1)">
+              Next
+            </button>
+          </div>
+        </div>
+
+        <ng-template #noOrdersTemplate>
+          <div class="no-orders">
+            <div class="empty-icon">📋</div>
+            <h2>No Orders Yet</h2>
+            <p>You haven't placed any orders yet. Start shopping to see your order history here.</p>
+            <button class="btn btn-primary" [routerLink]="['/shop', storeSlug]">
+              Start Shopping
+            </button>
+          </div>
+        </ng-template>
+
+        <div class="help-section">
+          <div class="help-card">
+            <h3>Need Help?</h3>
+            <p>If you have questions about your orders or need assistance, we're here to help.</p>
+            <div class="help-actions">
+              <button class="btn btn-outline-primary" (click)="contactSupport()">
+                Contact Support
+              </button>
+              <a href="#" class="help-link">Return Policy</a>
+              <a href="#" class="help-link">Shipping Info</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  

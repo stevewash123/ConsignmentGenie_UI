@@ -1,0 +1,121 @@
+<app-admin-layout>
+  <div class="admin-dashboard">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>System Administrator Dashboard</h1>
+        <p class="subtitle">ConsignmentGenie Platform Overview</p>
+      </div>
+      <button class="invite-btn" (click)="showInviteModal = true">
+        + Invite Owner
+      </button>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>Active Organizations</h3>
+      <div class="stat-value">{{ metrics().activeOrganizations }}</div>
+    </div>
+    <div class="stat-card">
+      <h3>New Signups (30 days)</h3>
+      <div class="stat-value">{{ metrics().newSignups }}</div>
+    </div>
+    <div class="stat-card">
+      <h3>Monthly Revenue</h3>
+      <div class="stat-value">{{ (metrics().monthlyRevenue || 0) | currency:'USD':'symbol':'1.0-0' }}</div>
+    </div>
+  </div>
+
+
+  <!-- Pending Approvals Section -->
+  <div class="dashboard-section">
+    <h2>Recent Signups</h2>
+
+    @if (recentSignups().length === 0) {
+      <div class="empty-state">
+        <p>No new signups in the last 30 days</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Shop Name</th>
+              <th>Owner</th>
+              <th>Email</th>
+              <th>Subdomain</th>
+              <th>Registered</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (signup of recentSignups(); track signup.id) {
+              <tr>
+                <td class="font-medium">{{ signup.shopName }}</td>
+                <td>{{ signup.ownerName }}</td>
+                <td>{{ signup.email }}</td>
+                <td>{{ signup.subdomain || 'N/A' }}</td>
+                <td>{{ signup.registeredAt | date:'short' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  </div>
+
+  <!-- Invite Owner Modal -->
+  @if (showInviteModal) {
+    <div class="modal-overlay" (click)="closeInviteModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Invite Owner</h2>
+          <button class="modal-close" (click)="closeInviteModal()">&times;</button>
+        </div>
+
+        <form (ngSubmit)="inviteOwner()" #inviteForm="ngForm" class="modal-form">
+          <div class="form-group">
+            <label for="ownerName">Name *</label>
+            <input
+              type="text"
+              id="ownerName"
+              name="ownerName"
+              [(ngModel)]="inviteRequest.name"
+              required
+              [disabled]="isInviting"
+              placeholder="Enter owner's full name"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="ownerEmail">Email *</label>
+            <input
+              type="email"
+              id="ownerEmail"
+              name="ownerEmail"
+              [(ngModel)]="inviteRequest.email"
+              required
+              [disabled]="isInviting"
+              placeholder="Enter owner's email address"
+            >
+          </div>
+
+          @if (inviteError) {
+            <div class="error-message">{{ inviteError }}</div>
+          }
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="closeInviteModal()" [disabled]="isInviting">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary" [disabled]="inviteForm.invalid || isInviting">
+              {{ isInviting ? 'Sending...' : 'Send Invitation' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</app-admin-layout>

@@ -7,17 +7,7 @@ import { AdminFooterComponent } from './admin-footer.component';
   selector: 'app-admin-layout',
   standalone: true,
   imports: [CommonModule, AdminHeaderComponent, AdminFooterComponent],
-  template: `
-    <div class="admin-layout">
-      <app-admin-header></app-admin-header>
-
-      <main class="main-content">
-        <ng-content></ng-content>
-      </main>
-
-      <app-admin-footer></app-admin-footer>
-    </div>
-  `,
+  templateUrl: './admin-layout.component.html',
   styles: [`
     .admin-layout {
       min-height: 100vh;
