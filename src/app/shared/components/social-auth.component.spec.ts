@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { EventEmitter } from '@angular/core';
 import { SocialAuthComponent, SocialAuthResult } from './social-auth.component';
 import { By } from '@angular/platform-browser';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('SocialAuthComponent', () => {
   let component: SocialAuthComponent;
@@ -9,7 +10,7 @@ describe('SocialAuthComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SocialAuthComponent]
+      imports: [SocialAuthComponent, HttpClientTestingModule]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SocialAuthComponent);
@@ -72,12 +73,12 @@ describe('SocialAuthComponent', () => {
       expect(googleBtn.nativeElement.textContent).toContain('Sign up with Google');
     });
 
-    it('should render Facebook button as disabled', () => {
+    it('should render Facebook button as enabled with normal text', () => {
       fixture.detectChanges();
 
       const facebookBtn = fixture.debugElement.query(By.css('.facebook-btn'));
-      expect(facebookBtn.nativeElement.disabled).toBe(true);
-      expect(facebookBtn.nativeElement.textContent).toContain('Coming Soon');
+      expect(facebookBtn.nativeElement.disabled).toBe(false);
+      expect(facebookBtn.nativeElement.textContent).toContain('Sign in with Facebook');
     });
 
     it('should show divider and email prompt for non-link modes', () => {
@@ -145,12 +146,12 @@ describe('SocialAuthComponent', () => {
       expect(component.authError.emit).toHaveBeenCalledWith('Google authentication not loaded');
     });
 
-    it('should emit not implemented error for Facebook login', () => {
+    it('should emit not loaded error for Facebook login when not loaded', () => {
       spyOn(component.authError, 'emit');
 
       component.loginWithFacebook();
 
-      expect(component.authError.emit).toHaveBeenCalledWith('Facebook authentication not yet implemented');
+      expect(component.authError.emit).toHaveBeenCalledWith('Facebook authentication not loaded');
     });
   });
 

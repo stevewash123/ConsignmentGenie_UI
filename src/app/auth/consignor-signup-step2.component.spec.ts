@@ -199,7 +199,7 @@ describe('ConsignorSignupStep2Component', () => {
 
       component.onSubmit();
 
-      expect(sessionStorage.removeItem).toHaveBeenCalledWith('consignorAuthData');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('providerAuthData');
       expect(router.navigate).toHaveBeenCalledWith(['/login'], {
         queryParams: {
           message: 'Account created successfully! Log in to join consignment shops.'
@@ -308,7 +308,7 @@ describe('ConsignorSignupStep2Component', () => {
 
       component.onSubmit();
 
-      expect(sessionStorage.removeItem).toHaveBeenCalledWith('consignorAuthData');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('providerAuthData');
     });
 
     it('should not remove auth data on registration failure', () => {
