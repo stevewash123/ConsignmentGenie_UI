@@ -223,3 +223,108 @@ export interface StatementPayoutLineDto {
   paymentMethod: string;
   amount: number;
 }
+
+// Balance Overview Models
+export interface ConsignorBalance {
+  pending: BalanceAmount;
+  available: BalanceAmount;
+  inTransit: InTransitBalance | null;
+  lifetimeEarned: number;
+  lifetimeReceived: number;
+  nextPayoutDate: Date | null;
+  payoutScheduleDescription: string;
+  canRequestPayout: boolean;
+  minimumPayoutAmount: number;
+  pendingRequest?: PayoutRequest | null;
+}
+
+export interface BalanceAmount {
+  amount: number;
+  itemCount: number;
+}
+
+export interface InTransitBalance {
+  amount: number;
+  payoutId: string;
+  payoutNumber: number;
+  sentDate: Date;
+  paymentMethod: string;
+  paymentReference?: string;
+}
+
+export interface ConsignorPayoutSummary {
+  payoutId: string;
+  payoutNumber: number;
+  paymentDate: Date;
+  amount: number;
+  itemCount: number;
+  paymentMethod: string;
+  status: 'sent' | 'received';
+}
+
+export interface PayoutListQuery {
+  dateFrom?: Date;
+  dateTo?: Date;
+  page?: number;
+  pageSize?: number;
+}
+
+// Payout Detail Models
+export interface ConsignorPayoutDetail {
+  payoutId: string;
+  payoutNumber: number;
+  paymentDate: Date;
+  amount: number;
+  paymentMethod: string;
+  paymentReference?: string;
+  status: 'sent' | 'received';
+
+  // Summary breakdown fields
+  grossSales: number;
+  consignorSplitPercent: number;
+  consignorShare: number;
+  fees: number;
+  feeDescription?: string;  // e.g., "ACH fee (0.5%)"
+  netPayout: number;
+
+  items: ConsignorPayoutItem[];
+}
+
+export interface ConsignorPayoutItem {
+  itemId: string;
+  itemName: string;
+  soldDate: Date;
+  salePrice: number;
+  consignorEarnings: number;
+}
+
+// Payout Request Models
+export interface PayoutRequestStatus {
+  canRequest: boolean;
+  reason?: 'below_minimum' | 'pending_request' | 'not_allowed';
+  minimumAmount?: number;
+  pendingRequestDate?: Date;
+  availableAmount: number;
+}
+
+export interface SubmitPayoutRequest {
+  note?: string;
+}
+
+export interface PayoutRequest {
+  requestId: string;
+  amount: number;
+  itemCount: number;
+  requestedAt: Date;
+  status: 'pending' | 'processing' | 'completed' | 'declined';
+  note?: string;
+}
+
+// Earnings Widget Models
+export interface EarningsSummary {
+  pending: number;
+  pendingTooltip: string;        // "Expected payout date 2/2/2025" or "Minimum payout amount is $25.00" or "Payout Date TBD"
+  paidThisMonth: number;
+  payoutCountThisMonth: number;
+  nextPayoutDate: Date | null;
+}

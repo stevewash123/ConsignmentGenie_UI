@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProviderPortalService } from '../services/consignor-portal.service';
 import { ProviderDashboard } from '../models/consignor.models';
+import { EarningsWidgetComponent } from './earnings-widget.component';
 
 @Component({
   selector: 'app-consignor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, EarningsWidgetComponent],
   templateUrl: './consignor-dashboard.component.html',
   styles: [`
     .consignor-dashboard {
@@ -42,7 +43,7 @@ import { ProviderDashboard } from '../models/consignor.models';
 
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
