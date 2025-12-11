@@ -254,12 +254,20 @@ export class RecordSaleComponent implements OnInit {
   }
 
   addToCart(item: any) {
+    // Check if item is already in cart (prevent duplicates for consignment items)
+    const existingItem = this.cartItems().find(cartItem => cartItem.item.id === item.id);
+    if (existingItem) {
+      this.toastr.warning('Item is already in cart', 'Duplicate Item');
+      return;
+    }
+
     const newCartItem: CartItem = {
       item: item,
       quantity: 1
     };
 
     this.cartItems.update(items => [...items, newCartItem]);
+    this.toastr.success(`Added "${item.name}" to cart`, 'Item Added');
   }
 
   removeFromCart(itemId: string) {
