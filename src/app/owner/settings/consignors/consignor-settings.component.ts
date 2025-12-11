@@ -9,6 +9,9 @@ interface ConsignorSettings {
   autoApprove: boolean;
   signupUrl: string;
   inventoryPermissions: ConsignorInventoryPermissions;
+  defaults: ConsignorDefaults;
+  agreements: ConsignorAgreements;
+  notifications: ConsignorNotifications;
 }
 
 interface ConsignorInventoryPermissions {
@@ -16,6 +19,25 @@ interface ConsignorInventoryPermissions {
   canEditItems: boolean;
   canRemoveItems: boolean;
   canViewDetailedAnalytics: boolean;
+}
+
+interface ConsignorDefaults {
+  shopCommissionPercent: number;
+  consignmentPeriodDays: number;
+  retrievalPeriodDays: number;
+  unsoldItemPolicy: 'donate' | 'dispose' | 'return-to-consignor' | 'become-shop-property';
+}
+
+interface ConsignorAgreements {
+  autoSendOnRegistration: boolean;
+  requireBeforeItems: boolean;
+  templateCustomized: boolean; // Read-only status
+}
+
+interface ConsignorNotifications {
+  newConsignorRegistration: boolean;
+  itemSubmissions: boolean;
+  payoutRequests: boolean;
 }
 
 interface PendingInvitation {
@@ -92,6 +114,171 @@ interface PendingInvitation {
                 <span class="option-description">Review each consignor before they can add items</span>
               </div>
             </label>
+          </div>
+        </div>
+
+        <!-- Default Consignor Terms -->
+        <div class="form-section">
+          <h3>Default Consignor Terms</h3>
+          <p class="section-description">
+            These terms apply to all new consignors by default. You can customize them per consignor later.
+          </p>
+
+          <div class="form-group">
+            <label for="shopCommissionPercent">Shop Commission (%)</label>
+            <input
+              type="number"
+              id="shopCommissionPercent"
+              [(ngModel)]="settings()!.defaults.shopCommissionPercent"
+              name="shopCommissionPercent"
+              class="form-input number-input"
+              min="1"
+              max="99"
+              placeholder="50">
+            <div class="field-hint">Consignor receives the remaining percentage ({{ 100 - (settings()?.defaults?.shopCommissionPercent || 0) }}%)</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="consignmentPeriodDays">Consignment Period (days)</label>
+              <input
+                type="number"
+                id="consignmentPeriodDays"
+                [(ngModel)]="settings()!.defaults.consignmentPeriodDays"
+                name="consignmentPeriodDays"
+                class="form-input number-input"
+                min="1"
+                placeholder="90">
+              <div class="field-hint">How long items stay on sale</div>
+            </div>
+
+            <div class="form-group">
+              <label for="retrievalPeriodDays">Retrieval Period (days)</label>
+              <input
+                type="number"
+                id="retrievalPeriodDays"
+                [(ngModel)]="settings()!.defaults.retrievalPeriodDays"
+                name="retrievalPeriodDays"
+                class="form-input number-input"
+                min="1"
+                placeholder="14">
+              <div class="field-hint">How long consignors have to pick up unsold items</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="unsoldItemPolicy">Unclaimed Item Policy</label>
+            <select
+              id="unsoldItemPolicy"
+              [(ngModel)]="settings()!.defaults.unsoldItemPolicy"
+              name="unsoldItemPolicy"
+              class="form-select">
+              <option value="return-to-consignor">Return to consignor</option>
+              <option value="become-shop-property">Become shop property</option>
+              <option value="donate">Donate to charity</option>
+              <option value="dispose">Dispose of items</option>
+            </select>
+            <div class="field-hint">What happens to items left unclaimed after the retrieval period</div>
+          </div>
+        </div>
+
+        <!-- Agreement Settings -->
+        <div class="form-section">
+          <h3>Consignment Agreements</h3>
+          <p class="section-description">
+            Configure how consignment agreements are handled with new consignors.
+          </p>
+
+          <!-- Template Status Warning -->
+          <div class="agreement-status" *ngIf="!settings()?.agreements?.templateCustomized">
+            <div class="warning-banner">
+              <div class="warning-icon">⚠️</div>
+              <div class="warning-content">
+                <strong>Agreement template not customized.</strong>
+                <a href="/settings/integrations" class="warning-link">Edit Template</a> before enabling auto-send.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="permission-toggle">
+              <input
+                type="checkbox"
+                [(ngModel)]="settings()!.agreements.autoSendOnRegistration"
+                name="autoSendOnRegistration"
+                [disabled]="!settings()?.agreements?.templateCustomized">
+              <div class="toggle-switch"></div>
+              <div class="permission-content">
+                <span class="permission-title">Auto-send agreement when consignor registers</span>
+                <span class="permission-description">Automatically email agreement to new consignors</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="permission-toggle">
+              <input
+                type="checkbox"
+                [(ngModel)]="settings()!.agreements.requireBeforeItems"
+                name="requireBeforeItems">
+              <div class="toggle-switch"></div>
+              <div class="permission-content">
+                <span class="permission-title">Require signed agreement before item submission</span>
+                <span class="permission-description">Block item submission until agreement is on file</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Notification Preferences -->
+        <div class="form-section">
+          <h3>Notification Preferences</h3>
+          <p class="section-description">
+            Choose which consignor-related activities will send you email notifications.
+          </p>
+
+          <div class="permissions-grid">
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.notifications.newConsignorRegistration"
+                  name="newConsignorRegistration">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Notify me when new consignors register</span>
+                  <span class="permission-description">Get an email when someone joins your shop</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.notifications.itemSubmissions"
+                  name="itemSubmissions">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Notify me when consignors submit items</span>
+                  <span class="permission-description">Get an email when new items are submitted for approval</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.notifications.payoutRequests"
+                  name="payoutRequests">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Notify me when consignors request payouts</span>
+                  <span class="permission-description">Get an email when payouts are requested</span>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -529,6 +716,47 @@ interface PendingInvitation {
       font-weight: 600;
     }
 
+    /* Agreement Warning Banner */
+    .agreement-status {
+      margin-bottom: 1.5rem;
+    }
+
+    .warning-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      border-radius: 6px;
+    }
+
+    .warning-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .warning-content {
+      flex: 1;
+      font-size: 0.875rem;
+      color: #92400e;
+    }
+
+    .warning-content strong {
+      font-weight: 600;
+    }
+
+    .warning-link {
+      color: #3b82f6;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    .warning-link:hover {
+      color: #2563eb;
+    }
+
     /* Invite Form */
     .invite-form {
       background: #f9fafb;
@@ -551,6 +779,47 @@ interface PendingInvitation {
       color: #374151;
       margin-bottom: 0.5rem;
       font-size: 0.875rem;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+
+    .number-input {
+      max-width: 120px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .field-hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
     }
 
     .form-textarea {
@@ -778,6 +1047,14 @@ interface PendingInvitation {
         gap: 0.75rem;
       }
 
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .number-input {
+        max-width: none;
+      }
+
       .permission-item {
         padding: 0.75rem;
       }
@@ -822,6 +1099,22 @@ export class ConsignorSettingsComponent implements OnInit {
           canEditItems: true,
           canRemoveItems: false,
           canViewDetailedAnalytics: false
+        },
+        defaults: {
+          shopCommissionPercent: 50,
+          consignmentPeriodDays: 90,
+          retrievalPeriodDays: 14,
+          unsoldItemPolicy: 'return-to-consignor'
+        },
+        agreements: {
+          autoSendOnRegistration: false,
+          requireBeforeItems: false,
+          templateCustomized: false // Will be populated from API
+        },
+        notifications: {
+          newConsignorRegistration: true,
+          itemSubmissions: false,
+          payoutRequests: true
         }
       };
 

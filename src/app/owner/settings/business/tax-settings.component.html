@@ -1,0 +1,211 @@
+<div class="tax-settings-section">
+  <header class="tax-header">
+    <h2>Tax Settings</h2>
+    <p>Configure sales tax collection and calculation for your store</p>
+  </header>
+
+  <form [formGroup]="taxForm" (ngSubmit)="onSave()" *ngIf="taxForm">
+
+    <!-- Tax Collection Enable/Disable -->
+    <section class="form-section">
+      <h3>Sales Tax Collection</h3>
+
+      <div class="tax-collection-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" formControlName="collectionEnabled">
+          <span class="toggle-slider"></span>
+          Enable sales tax collection
+        </label>
+
+        <div class="compliance-warning" *ngIf="!taxForm.get('collectionEnabled')?.value">
+          <i class="icon-warning">⚠️</i>
+          <p><strong>Important:</strong> Verify your local tax collection requirements.
+          Some jurisdictions require sales tax collection for consignment businesses.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tax Rates -->
+    <section class="form-section" *ngIf="taxForm.get('collectionEnabled')?.value" formGroupName="rates">
+      <h3>Tax Rates</h3>
+
+      <div class="form-group">
+        <label for="defaultRate">Default Sales Tax Rate (%)</label>
+        <div class="input-group">
+          <input id="defaultRate" type="number" min="0" max="100"
+                 step="0.001" formControlName="defaultRate" class="form-input">
+          <span class="input-suffix">%</span>
+        </div>
+        <span class="help-text">Enter your local sales tax rate (e.g., 8.25 for 8.25%)</span>
+      </div>
+
+      <div class="form-group">
+        <label>Tax Calculation Method</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" formControlName="isInclusive" [value]="false">
+            <span class="radio-mark"></span>
+            Tax-exclusive (add tax to displayed prices)
+          </label>
+          <label class="radio-label">
+            <input type="radio" formControlName="isInclusive" [value]="true">
+            <span class="radio-mark"></span>
+            Tax-inclusive (displayed prices include tax)
+          </label>
+        </div>
+      </div>
+
+      <div class="calculation-preview">
+        <h4>Calculation Preview</h4>
+        <div class="preview-example">
+          <span class="label">Item price: $100.00</span>
+          <div class="calculation" *ngIf="!taxForm.get('rates.isInclusive')?.value">
+            + Tax ({{ taxForm.get('rates.defaultRate')?.value || 0 }}%): ${{ calculateTax(100) }}<br>
+            <strong>Total: ${{ calculateTotal(100) }}</strong>
+          </div>
+          <div class="calculation" *ngIf="taxForm.get('rates.isInclusive')?.value">
+            (includes ${{ calculateIncludedTax(100) }} tax)<br>
+            <strong>Customer pays: $100.00</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Business Tax Information -->
+    <section class="form-section" formGroupName="business">
+      <h3>Business Tax Information</h3>
+
+      <div class="form-group">
+        <label for="taxId">Federal Tax ID (EIN)</label>
+        <input id="taxId" type="text" formControlName="taxId"
+               placeholder="XX-XXXXXXX" class="form-input">
+        <span class="help-text">Your business federal tax identification number</span>
+      </div>
+
+      <div class="form-group">
+        <label for="stateTaxId">State Tax Registration Number</label>
+        <input id="stateTaxId" type="text" formControlName="stateTaxId"
+               placeholder="State registration number" class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showTaxIdOnReceipts">
+          <span class="checkmark"></span>
+          Show tax ID on customer receipts
+        </label>
+      </div>
+    </section>
+
+    <!-- Receipt Display Options -->
+    <section class="form-section" formGroupName="display">
+      <h3>Receipt & Display Options</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showBreakdownOnReceipt">
+          <span class="checkmark"></span>
+          Show detailed tax breakdown on receipts
+        </label>
+        <span class="help-text">Shows tax amount separate from item prices</span>
+      </div>
+
+      <div class="form-group">
+        <label>Tax Display Method</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" formControlName="lineItemTax" [value]="true">
+            <span class="radio-mark"></span>
+            Show tax on each line item
+          </label>
+          <label class="radio-label">
+            <input type="radio" formControlName="lineItemTax" [value]="false">
+            <span class="radio-mark"></span>
+            Show total tax summary only
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Commission Calculation -->
+    <section class="form-section" formGroupName="calculation">
+      <h3>Commission Calculation</h3>
+
+      <div class="form-group">
+        <label>Calculate consignor commission:</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" formControlName="applyToCommission" value="before">
+            <span class="radio-mark"></span>
+            Before tax (commission on pre-tax amount)
+          </label>
+          <label class="radio-label">
+            <input type="radio" formControlName="applyToCommission" value="after">
+            <span class="radio-mark"></span>
+            After tax (commission on total sale amount)
+          </label>
+        </div>
+
+        <div class="commission-example">
+          <h5>Example Impact:</h5>
+          <div class="example-calculation">
+            Item sells for: $100.00<br>
+            Tax ({{ taxForm.get('rates.defaultRate')?.value || 0 }}%): ${{ calculateTax(100) }}<br>
+            Total sale: ${{ calculateTotal(100) }}<br>
+            <strong *ngIf="taxForm.get('calculation.applyToCommission')?.value === 'before'">
+              50% commission on $100.00 = $50.00
+            </strong>
+            <strong *ngIf="taxForm.get('calculation.applyToCommission')?.value === 'after'">
+              50% commission on ${{ calculateTotal(100) }} = ${{ getCommissionAfterTax() }}
+            </strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reporting Preferences -->
+    <section class="form-section" formGroupName="reporting">
+      <h3>Tax Reporting</h3>
+
+      <div class="form-group">
+        <label for="period">Reporting Period</label>
+        <select id="period" formControlName="period" class="form-select">
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="autoGenerate">
+          <span class="checkmark"></span>
+          Automatically generate tax reports
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="exportFormat">Export Format</label>
+        <select id="exportFormat" formControlName="exportFormat" class="form-select">
+          <option value="csv">CSV</option>
+          <option value="pdf">PDF</option>
+          <option value="excel">Excel</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" (click)="previewTaxCalculation()" class="btn-secondary">
+        Preview Tax Impact
+      </button>
+      <button type="submit" [disabled]="!taxForm.valid || saving()" class="btn-primary">
+        {{ saving() ? 'Saving...' : 'Save Tax Settings' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

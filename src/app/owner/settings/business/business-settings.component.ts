@@ -3,37 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces/business.interfaces';
 
-interface BusinessSettings {
-  Commission: {
-    DefaultSplit: string;
-    AllowCustomSplitsPerConsignor: boolean;
-    AllowCustomSplitsPerItem: boolean;
-  };
-  Tax: {
-    SalesTaxRate: number;
-    TaxIncludedInPrices: boolean;
-    ChargeTaxOnShipping: boolean;
-    TaxIdEin?: string;
-  };
-  Payouts: {
-    Schedule: string;
-    MinimumAmount: number;
-    HoldPeriodDays: number;
-    RefundPolicy: 'NoRefunds' | 'WithinDays' | 'UntilPayout';
-    RefundWindowDays?: number;
-    DefaultPayoutMethod: 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit';
-  };
-  Items: {
-    DefaultConsignmentPeriodDays: number;
-    EnableAutoMarkdowns: boolean;
-    MarkdownSchedule: {
-      After30Days: number;
-      After60Days: number;
-      After90DaysAction: 'donate' | 'return';
-    };
-  };
-}
 
 @Component({
   selector: 'app-business-settings',
@@ -83,6 +54,32 @@ interface BusinessSettings {
               <span class="checkmark"></span>
               Allow custom splits per item
             </label>
+          </div>
+        </div>
+
+        <!-- Consignor Permissions -->
+        <div class="form-section">
+          <h3>Consignor Permissions</h3>
+
+          <div class="form-group">
+            <label>Inventory Submission Mode</label>
+            <div class="radio-group vertical">
+              <label
+                class="radio-label permission-option"
+                *ngFor="let option of submissionModeOptions"
+                [class.selected]="settings()?.ConsignorPermissions?.ItemSubmissionMode === option.value">
+                <input
+                  type="radio"
+                  [value]="option.value"
+                  [(ngModel)]="settings()!.ConsignorPermissions.ItemSubmissionMode"
+                  name="itemSubmissionMode">
+                <span class="radio-mark"></span>
+                <div class="option-content">
+                  <div class="option-label">{{ option.label }}</div>
+                  <div class="option-description">{{ option.description }}</div>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -537,6 +534,41 @@ interface BusinessSettings {
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
     }
 
+    /* Permission Options */
+    .permission-option {
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .permission-option:hover {
+      border-color: #3b82f6;
+      background: #f8faff;
+    }
+
+    .permission-option.selected {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    .option-content {
+      margin-left: 0.5rem;
+    }
+
+    .option-label {
+      font-weight: 500;
+      color: #111827;
+      margin-bottom: 0.25rem;
+    }
+
+    .option-description {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
     /* Markdown Settings */
     .markdown-settings {
       background: #f9fafb;
@@ -672,6 +704,26 @@ export class BusinessSettingsComponent implements OnInit {
   successMessage = signal('');
   errorMessage = signal('');
 
+  ItemSubmissionMode = ItemSubmissionMode;
+
+  submissionModeOptions = [
+    {
+      value: ItemSubmissionMode.OwnerOnly,
+      label: 'Owner adds all inventory',
+      description: 'Consignors cannot submit items.'
+    },
+    {
+      value: ItemSubmissionMode.ApprovalRequired,
+      label: 'Consignors submit for approval',
+      description: 'You review requests before items appear in inventory.'
+    },
+    {
+      value: ItemSubmissionMode.DirectAdd,
+      label: 'Consignors add directly',
+      description: 'Items go straight to inventory. No approval required.'
+    }
+  ];
+
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
@@ -682,6 +734,12 @@ export class BusinessSettingsComponent implements OnInit {
     try {
       const response = await this.http.get<BusinessSettings>(`${environment.apiUrl}/api/organization/business-settings`).toPromise();
       if (response) {
+        // Ensure ConsignorPermissions section exists with default value for backwards compatibility
+        if (!response.ConsignorPermissions) {
+          response.ConsignorPermissions = {
+            ItemSubmissionMode: ItemSubmissionMode.ApprovalRequired
+          };
+        }
         this.settings.set(response);
       }
     } catch (error) {

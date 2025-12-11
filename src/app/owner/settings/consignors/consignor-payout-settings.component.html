@@ -1,0 +1,343 @@
+<div class="payout-settings-section">
+  <header class="settings-header">
+    <h2>Consignor Payout Settings</h2>
+    <p>Configure how and when consignors receive payment for sold items</p>
+  </header>
+
+  <form [formGroup]="payoutForm" (ngSubmit)="onSave()" class="settings-form">
+
+    <!-- Payout Schedule -->
+    <section class="form-section" formGroupName="schedule">
+      <h3>Payout Schedule</h3>
+
+      <div class="form-group">
+        <label for="frequency">How often do you pay consignors?</label>
+        <select id="frequency" formControlName="frequency" class="form-select" (change)="onFrequencyChange()">
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Bi-weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="manual">Manual only (no automatic payouts)</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="payoutForm.get('schedule.frequency')?.value === 'weekly'">
+        <label for="dayOfWeek">Day of week for payouts</label>
+        <select id="dayOfWeek" formControlName="dayOfWeek" class="form-select">
+          <option *ngFor="let day of weekDays" [value]="day.value">{{ day.label }}</option>
+        </select>
+        <span class="help-text">Recommended: Friday for weekend processing</span>
+      </div>
+
+      <div class="form-group" *ngIf="payoutForm.get('schedule.frequency')?.value === 'monthly'">
+        <label for="dayOfMonth">Day of month for payouts</label>
+        <select id="dayOfMonth" formControlName="dayOfMonth" class="form-select">
+          <option *ngFor="let day of monthDays" [value]="day.value">{{ day.label }}</option>
+        </select>
+        <span class="help-text">Note: Payouts on 29-31 will occur on the last day of shorter months</span>
+      </div>
+
+      <div class="form-row" *ngIf="payoutForm.get('schedule.frequency')?.value !== 'manual'">
+        <div class="form-group">
+          <label for="cutoffTime">Daily cut-off time</label>
+          <input id="cutoffTime" type="time" formControlName="cutoffTime" class="form-input">
+          <span class="help-text">Sales after this time are included in the next payout cycle</span>
+        </div>
+
+        <div class="form-group">
+          <label for="processingDays">Processing lead time (days)</label>
+          <input id="processingDays" type="number" formControlName="processingDays"
+                 class="form-input" min="0" max="30" step="1">
+          <span class="help-text">Days between payout calculation and payment processing</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Minimum Thresholds -->
+    <section class="form-section" formGroupName="thresholds">
+      <h3>Payout Thresholds & Hold Periods</h3>
+
+      <div class="form-group">
+        <label for="minimumAmount">Minimum payout amount</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix">$</span>
+          <input id="minimumAmount" type="number" formControlName="minimumAmount"
+                 class="form-input" min="0" max="10000" step="0.01" placeholder="25.00">
+        </div>
+        <span class="help-text">Consignors won't receive payouts until they reach this threshold</span>
+      </div>
+
+      <div class="form-group">
+        <label for="holdPeriodDays">Hold period after sale (days)</label>
+        <input id="holdPeriodDays" type="number" formControlName="holdPeriodDays"
+               class="form-input" min="0" max="90" step="1" placeholder="14">
+        <span class="help-text">Buffer time for returns and refunds before funds are released</span>
+      </div>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="carryoverEnabled">
+          <span class="checkmark"></span>
+          Automatically carry over small amounts to next payout
+        </label>
+        <span class="help-text">When enabled, amounts below minimum will be saved for the next payout cycle</span>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="earlyPayoutForTrusted">
+          <span class="checkmark"></span>
+          Allow early payouts for trusted consignors
+        </label>
+        <span class="help-text">Enables bypassing hold period for established consignors</span>
+      </div>
+    </section>
+
+    <!-- Payment Methods -->
+    <section class="form-section" formGroupName="paymentMethods">
+      <h3>Payment Methods</h3>
+
+      <div class="form-group">
+        <label for="defaultMethod">Default payment method</label>
+        <select id="defaultMethod" formControlName="defaultMethod" class="form-select">
+          <option value="check">Check (by mail)</option>
+          <option value="cash">Cash (pickup)</option>
+          <option value="store_credit">Store credit</option>
+          <option value="ach">Bank transfer (ACH)</option>
+        </select>
+        <span class="help-text">This will be pre-selected for new consignors</span>
+      </div>
+
+      <div class="form-group">
+        <label>Available payment methods for consignors</label>
+        <div class="payment-methods-grid">
+          <div *ngFor="let method of paymentMethodsArray.controls; let i = index"
+               class="payment-method-option">
+            <label class="checkbox-label">
+              <input type="checkbox"
+                     [checked]="method.get('enabled')?.value"
+                     (change)="onPaymentMethodToggle(i, $any($event.target).checked)">
+              <span class="checkmark"></span>
+              <div class="method-info">
+                <span class="method-name">{{ method.get('displayName')?.value }}</span>
+                <span class="method-description">{{ method.get('description')?.value }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fee Structure -->
+    <section class="form-section" formGroupName="fees">
+      <h3>Processing Fees</h3>
+
+      <div class="form-group">
+        <label>Who pays processing fees?</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" value="shop" formControlName="processingFeePaidBy">
+            <span class="radio-mark"></span>
+            Shop pays all fees
+          </label>
+          <label class="radio-label">
+            <input type="radio" value="consignor" formControlName="processingFeePaidBy">
+            <span class="radio-mark"></span>
+            Deduct fees from consignor payouts
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" formGroupName="feesByMethod">
+        <label>Fee structure by payment method</label>
+        <div class="fees-grid">
+          <div class="fee-item">
+            <label>Check processing fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="check" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="fee-item">
+            <label>ACH/Bank transfer fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="ach" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="fee-item">
+            <label>Cash processing fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="cash" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="fee-item">
+            <label>Store credit fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="store_credit" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="feeDisclosureEnabled">
+          <span class="checkmark"></span>
+          Disclose fees to consignors in payout statements
+        </label>
+      </div>
+    </section>
+
+    <!-- Automation -->
+    <section class="form-section" formGroupName="automation">
+      <h3>Automation Settings</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="autoGeneratePayouts">
+          <span class="checkmark"></span>
+          Automatically generate payouts on schedule
+        </label>
+        <span class="help-text">Payouts will be calculated automatically but may require approval</span>
+      </div>
+
+      <div class="automation-options" *ngIf="payoutForm.get('automation.autoGeneratePayouts')?.value">
+        <div class="form-group">
+          <label for="autoApproveThreshold">Auto-approve payouts under</label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">$</span>
+            <input id="autoApproveThreshold" type="number" formControlName="autoApproveThreshold"
+                   class="form-input" min="0" step="0.01" placeholder="100.00">
+          </div>
+          <span class="help-text">Small payouts will be processed automatically</span>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="requireManualReview">
+            <span class="checkmark"></span>
+            Require manual review for large payouts
+          </label>
+        </div>
+
+        <div class="form-group" *ngIf="payoutForm.get('automation.requireManualReview')?.value">
+          <label for="manualReviewThreshold">Manual review threshold</label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">$</span>
+            <input id="manualReviewThreshold" type="number" formControlName="manualReviewThreshold"
+                   class="form-input" min="0" step="0.01" placeholder="500.00">
+          </div>
+          <span class="help-text">Payouts over this amount will require manual approval</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="form-section" formGroupName="notifications">
+      <h3>Notifications</h3>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="notifyConsignorOnCalculation">
+          <span class="checkmark"></span>
+          Notify consignors when payout is calculated
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="notifyConsignorOnPayment">
+          <span class="checkmark"></span>
+          Send payment confirmation when processed
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="notifyOwnerOnFailure">
+          <span class="checkmark"></span>
+          Alert shop owner when automatic payouts fail
+        </label>
+      </div>
+
+      <div class="form-group">
+        <h4>Statement Delivery</h4>
+
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="emailStatementsEnabled">
+            <span class="checkmark"></span>
+            Email payout statements to consignors
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="printStatementsEnabled">
+            <span class="checkmark"></span>
+            Print statements for physical pickup
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="statementRetentionDays">Statement retention period (days)</label>
+          <input id="statementRetentionDays" type="number" formControlName="statementRetentionDays"
+                 class="form-input" min="30" max="2555" step="1" placeholder="730">
+          <span class="help-text">How long to keep statement records (30 days to 7 years)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Report Configuration -->
+    <section class="form-section" formGroupName="reports">
+      <h3>Report Configuration</h3>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="autoGenerateStatements">
+          <span class="checkmark"></span>
+          Automatically generate payout statements
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="includeItemDetails">
+          <span class="checkmark"></span>
+          Include item details in statements
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="includeBranding">
+          <span class="checkmark"></span>
+          Include shop branding and logo
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="pdfFormat">
+          <span class="checkmark"></span>
+          Generate statements in PDF format
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="emailStatements">
+          <span class="checkmark"></span>
+          Email statements automatically
+        </label>
+      </div>
+    </section>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="submit" [disabled]="!payoutForm.valid || saving()" class="btn-primary">
+        {{ saving() ? 'Saving...' : 'Save Payout Settings' }}
+      </button>
+    </div>
+
+    <!-- Validation Errors -->
+    <div class="form-errors" *ngIf="formErrors().length > 0">
+      <h4>Please correct the following issues:</h4>
+      <ul>
+        <li *ngFor="let error of formErrors()">{{ error }}</li>
+      </ul>
+    </div>
+  </form>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

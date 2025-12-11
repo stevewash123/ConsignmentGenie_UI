@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AccountSecurityComponent } from '../../../shared/auth/components/account-security/account-security.component';
 import { AuthService } from '../../../services/auth.service';
@@ -20,12 +21,18 @@ interface OwnerPinSettings {
 @Component({
   selector: 'app-account-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, AccountSecurityComponent],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSecurityComponent],
   template: `
     <div class="account-settings">
       <div class="settings-header">
         <h2>Account & Security</h2>
         <p>Manage your personal information, authentication methods, and security settings</p>
+      </div>
+
+      <!-- Account Navigation -->
+      <div class="account-nav">
+        <a class="nav-link active" routerLink="/owner/settings/account">Account & Security</a>
+        <a class="nav-link" routerLink="/owner/settings/account/notifications">Notifications</a>
       </div>
 
       <!-- Profile Information -->
@@ -137,6 +144,34 @@ interface OwnerPinSettings {
     .settings-header p {
       color: #6b7280;
       font-size: 1rem;
+    }
+
+    /* Account Navigation */
+    .account-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0;
+    }
+
+    .nav-link {
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      color: #6b7280;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #374151;
+      border-bottom-color: #d1d5db;
+    }
+
+    .nav-link.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
     }
 
     .settings-section {

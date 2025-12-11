@@ -63,8 +63,39 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./settings/profile/shop-profile.component').then(m => m.ShopProfileComponent)
       },
       {
+        path: 'store-profile',
+        children: [
+          {
+            path: 'basic-info',
+            loadComponent: () => import('./settings/profile/basic-info/store-profile-basic-info.component').then(m => m.StoreProfileBasicInfoComponent)
+          },
+          {
+            path: '',
+            redirectTo: 'basic-info',
+            pathMatch: 'full'
+          }
+        ]
+      },
+      {
         path: 'business',
-        loadComponent: () => import('./settings/business/business-settings.component').then(m => m.BusinessSettingsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./settings/business/business-settings.component').then(m => m.BusinessSettingsComponent)
+          },
+          {
+            path: 'tax-settings',
+            loadComponent: () => import('./settings/business/tax-settings.component').then(m => m.TaxSettingsComponent)
+          },
+          {
+            path: 'receipt-settings',
+            loadComponent: () => import('./settings/business/receipt-settings/receipt-settings.component').then(m => m.ReceiptSettingsComponent)
+          },
+          {
+            path: 'policies',
+            loadComponent: () => import('./settings/business/policies/policies.component').then(m => m.PoliciesComponent)
+          }
+        ]
       },
       {
         path: 'storefront',
@@ -76,7 +107,16 @@ export const ownerRoutes: Routes = [
       },
       {
         path: 'consignors',
-        loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
+          },
+          {
+            path: 'payout-settings',
+            loadComponent: () => import('./settings/consignors/consignor-payout-settings.component').then(m => m.ConsignorPayoutSettingsComponent)
+          }
+        ]
       },
       {
         path: 'subscription',
@@ -88,7 +128,16 @@ export const ownerRoutes: Routes = [
       },
       {
         path: 'account',
-        loadComponent: () => import('./settings/account/account-settings.component').then(m => m.AccountSettingsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./settings/account/account-settings.component').then(m => m.AccountSettingsComponent)
+          },
+          {
+            path: 'notifications',
+            loadComponent: () => import('./settings/account/account-notifications.component').then(m => m.AccountNotificationsComponent)
+          }
+        ]
       }
     ]
   }

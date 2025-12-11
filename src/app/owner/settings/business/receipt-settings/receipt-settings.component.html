@@ -1,0 +1,277 @@
+<div class="receipt-settings-section">
+  <header class="settings-header">
+    <h2>Receipt Settings</h2>
+    <p>Customize how receipts appear and what information they contain</p>
+  </header>
+
+  <form [formGroup]="receiptForm()" (ngSubmit)="onSave()" class="settings-form">
+
+    <!-- Receipt Header -->
+    <section class="form-section" formGroupName="header">
+      <h3>Receipt Header</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="includeLogo">
+          <span class="checkmark"></span>
+          Include store logo on receipts
+        </label>
+        <span class="help-text">Requires logo upload in Store Profile > Branding</span>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showStoreInfo">
+          <span class="checkmark"></span>
+          Show store name and contact information
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showAddress">
+          <span class="checkmark"></span>
+          Show store address
+        </label>
+        <span class="help-text">Uncheck for home-based or privacy concerns</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dateFormat">Date Format</label>
+          <select id="dateFormat" formControlName="dateFormat" class="form-select">
+            <option value="MM/dd/yyyy">MM/DD/YYYY (US)</option>
+            <option value="dd/MM/yyyy">DD/MM/YYYY (International)</option>
+            <option value="yyyy-MM-dd">YYYY-MM-DD (ISO)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="timeFormat">Time Format</label>
+          <select id="timeFormat" formControlName="timeFormat" class="form-select">
+            <option value="12h">12-hour (2:30 PM)</option>
+            <option value="24h">24-hour (14:30)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Receipt Content -->
+    <section class="form-section" formGroupName="content">
+      <h3>Receipt Content & Layout</h3>
+
+      <div class="form-group">
+        <label for="layoutStyle">Layout Style</label>
+        <select id="layoutStyle" formControlName="layoutStyle" class="form-select">
+          <option value="compact">Compact (essential info only)</option>
+          <option value="detailed">Detailed (comprehensive information)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showItemDescriptions">
+          <span class="checkmark"></span>
+          Show detailed item descriptions
+        </label>
+      </div>
+
+      <div class="form-group" *ngIf="receiptForm().get('content.showItemDescriptions')?.value">
+        <label for="descriptionLength">Maximum description length</label>
+        <select id="descriptionLength" formControlName="descriptionLength" class="form-select">
+          <option value="30">Short (30 characters)</option>
+          <option value="50">Medium (50 characters)</option>
+          <option value="100">Long (100 characters)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showTaxBreakdown">
+          <span class="checkmark"></span>
+          Show detailed tax breakdown
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showPaymentMethod">
+          <span class="checkmark"></span>
+          Show payment method on receipt
+        </label>
+      </div>
+    </section>
+
+    <!-- Receipt Footer -->
+    <section class="form-section" formGroupName="footer">
+      <h3>Receipt Footer</h3>
+
+      <div class="form-group">
+        <label for="customMessage">Custom footer message</label>
+        <textarea
+          id="customMessage"
+          formControlName="customMessage"
+          placeholder="Thank you for shopping with us!"
+          maxlength="200"
+          class="form-textarea"
+          rows="3"></textarea>
+        <span class="char-count">{{ customMessageLength() }}/200 characters</span>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="includeReturnPolicy">
+          <span class="checkmark"></span>
+          Include return policy on receipts
+        </label>
+      </div>
+
+      <div class="form-group" *ngIf="receiptForm().get('footer.includeReturnPolicy')?.value">
+        <label for="returnPolicyText">Return policy text</label>
+        <textarea
+          id="returnPolicyText"
+          formControlName="returnPolicyText"
+          placeholder="Returns accepted within 30 days with receipt..."
+          maxlength="300"
+          class="form-textarea"
+          rows="4"></textarea>
+        <span class="char-count">{{ returnPolicyLength() }}/300 characters</span>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="includeWebsite">
+          <span class="checkmark"></span>
+          Include website/social media information
+        </label>
+      </div>
+    </section>
+
+    <!-- Digital Receipts -->
+    <section class="form-section" formGroupName="digital">
+      <h3>Digital Receipt Options</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="autoEmailReceipts">
+          <span class="checkmark"></span>
+          Automatically email receipts to customers
+        </label>
+        <span class="help-text">Requires customer email collection</span>
+      </div>
+
+      <div class="digital-options" *ngIf="receiptForm().get('digital.autoEmailReceipts')?.value">
+        <div class="form-group">
+          <label for="emailFormat">Email receipt format</label>
+          <select id="emailFormat" formControlName="emailFormat" class="form-select">
+            <option value="html">HTML email (formatted)</option>
+            <option value="pdf">PDF attachment</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="emailSubject">Email subject line</label>
+          <input
+            id="emailSubject"
+            type="text"
+            formControlName="emailSubject"
+            placeholder="Your receipt from [Store Name]"
+            class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="promptForEmail">
+            <span class="checkmark"></span>
+            Always prompt for customer email address
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="includePromoContent">
+            <span class="checkmark"></span>
+            Include promotional content in email receipts
+          </label>
+        </div>
+
+        <div class="form-group" *ngIf="receiptForm().get('digital.includePromoContent')?.value">
+          <label for="promoContent">Promotional content</label>
+          <textarea
+            id="promoContent"
+            formControlName="promoContent"
+            placeholder="Visit us next week for our spring sale!"
+            maxlength="250"
+            class="form-textarea"
+            rows="3"></textarea>
+          <span class="char-count">{{ promoContentLength() }}/250 characters</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Print Settings -->
+    <section class="form-section" formGroupName="print">
+      <h3>Print Receipt Settings</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="autoPrint">
+          <span class="checkmark"></span>
+          Automatically print receipt after transaction
+        </label>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="printerWidth">Receipt printer width</label>
+          <select id="printerWidth" formControlName="printerWidth" class="form-select">
+            <option value="58">58mm (2.25")</option>
+            <option value="80">80mm (3.125")</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="copies">Number of copies</label>
+          <select id="copies" formControlName="copies" class="form-select">
+            <option value="1">1 (customer copy only)</option>
+            <option value="2">2 (customer + store copy)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="printDensity">Print density</label>
+        <select id="printDensity" formControlName="printDensity" class="form-select">
+          <option value="light">Light</option>
+          <option value="medium">Medium</option>
+          <option value="dark">Dark</option>
+        </select>
+        <span class="help-text">Adjust for your thermal printer</span>
+      </div>
+
+      <div class="form-group" *ngIf="receiptForm().get('header.includeLogo')?.value">
+        <label for="logoSize">Logo size on printed receipts</label>
+        <select id="logoSize" formControlName="logoSize" class="form-select">
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" (click)="previewReceipt()" class="btn-secondary">
+        Preview Receipt
+      </button>
+      <button type="submit" [disabled]="receiptForm().invalid || saving()" class="btn-primary">
+        {{ saving() ? 'Saving...' : 'Save Receipt Settings' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

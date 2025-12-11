@@ -1,0 +1,214 @@
+<div class="branding-section">
+  <header class="settings-header">
+    <h2>Store Branding</h2>
+    <p>Customize your store's visual identity and brand presentation</p>
+  </header>
+
+  <form [formGroup]="brandingForm" (ngSubmit)="onSave()" class="branding-form">
+
+    <!-- Logo Management -->
+    <section class="form-section">
+      <h3>Logo</h3>
+
+      <div class="logo-upload-area">
+        <div class="current-logo" *ngIf="currentLogo()">
+          <img [src]="currentLogo()" alt="Current store logo" class="logo-preview">
+          <button type="button" (click)="removeLogo()" class="remove-btn btn-danger-outline">Remove</button>
+        </div>
+
+        <div class="upload-zone" *ngIf="!currentLogo()">
+          <input type="file" #logoInput (change)="onLogoSelect($event)"
+                 accept="image/*" class="file-input">
+          <div class="upload-prompt" (click)="logoInput.click()">
+            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <p>Click to upload logo or drag & drop</p>
+            <span class="file-specs">PNG, JPG, or SVG • Max 2MB • Recommended: 300x100px</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="logo-preview-contexts" *ngIf="currentLogo()">
+        <h4>Preview</h4>
+        <div class="preview-grid">
+          <div class="preview-item">
+            <label>Email Header</label>
+            <div class="email-preview">
+              <img [src]="currentLogo()" class="logo-email">
+            </div>
+          </div>
+          <div class="preview-item">
+            <label>Receipt</label>
+            <div class="receipt-preview">
+              <img [src]="currentLogo()" class="logo-receipt">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Color Scheme -->
+    <section class="form-section" formGroupName="colors">
+      <h3>Color Scheme</h3>
+
+      <div class="color-preset-section">
+        <h4>Quick Presets</h4>
+        <div class="preset-grid">
+          <div *ngFor="let preset of colorPresets"
+               class="preset-option"
+               [class.selected]="selectedPreset() === preset.name"
+               (click)="applyColorPreset(preset)">
+            <div class="preset-colors">
+              <span class="color-sample" [style.backgroundColor]="preset.primary"></span>
+              <span class="color-sample" [style.backgroundColor]="preset.secondary"></span>
+              <span class="color-sample" [style.backgroundColor]="preset.accent"></span>
+            </div>
+            <span class="preset-name">{{ preset.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="custom-colors">
+        <h4>Custom Colors</h4>
+        <div class="color-inputs">
+          <div class="color-group">
+            <label for="primaryColor">Primary Brand Color</label>
+            <div class="color-input-group">
+              <input type="color" id="primaryColor" formControlName="primary" class="color-picker">
+              <input type="text" formControlName="primary" class="hex-input" placeholder="#3b82f6">
+            </div>
+          </div>
+
+          <div class="color-group">
+            <label for="secondaryColor">Secondary Color</label>
+            <div class="color-input-group">
+              <input type="color" id="secondaryColor" formControlName="secondary" class="color-picker">
+              <input type="text" formControlName="secondary" class="hex-input" placeholder="#64748b">
+            </div>
+          </div>
+
+          <div class="color-group">
+            <label for="accentColor">Accent Color</label>
+            <div class="color-input-group">
+              <input type="color" id="accentColor" formControlName="accent" class="color-picker">
+              <input type="text" formControlName="accent" class="hex-input" placeholder="#06b6d4">
+            </div>
+          </div>
+
+          <div class="color-group">
+            <label for="textColor">Text Color</label>
+            <div class="color-input-group">
+              <input type="color" id="textColor" formControlName="text" class="color-picker">
+              <input type="text" formControlName="text" class="hex-input" placeholder="#1e293b">
+            </div>
+          </div>
+
+          <div class="color-group">
+            <label for="backgroundColor">Background Color</label>
+            <div class="color-input-group">
+              <input type="color" id="backgroundColor" formControlName="background" class="color-picker">
+              <input type="text" formControlName="background" class="hex-input" placeholder="#ffffff">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="color-preview">
+        <h4>Preview</h4>
+        <div class="themed-preview">
+          <!-- Sample interface elements showing color application -->
+          <div class="preview-header" [style.backgroundColor]="brandingForm.get('colors.primary')?.value"
+               [style.color]="brandingForm.get('colors.background')?.value">
+            <span class="preview-logo">Your Store</span>
+          </div>
+          <div class="preview-content" [style.backgroundColor]="brandingForm.get('colors.background')?.value"
+               [style.color]="brandingForm.get('colors.text')?.value">
+            <button class="preview-btn" [style.backgroundColor]="brandingForm.get('colors.accent')?.value"
+                    [style.color]="brandingForm.get('colors.background')?.value">
+              Sample Button
+            </button>
+            <a href="#" class="preview-link" [style.color]="brandingForm.get('colors.primary')?.value">Sample Link</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Typography -->
+    <section class="form-section" formGroupName="typography">
+      <h3>Typography</h3>
+
+      <div class="font-selection">
+        <div class="form-group">
+          <label for="headingFont">Heading Font</label>
+          <select id="headingFont" formControlName="headingFont" class="form-select">
+            <option *ngFor="let font of fontOptions" [value]="font.value">{{ font.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="bodyFont">Body Text Font</label>
+          <select id="bodyFont" formControlName="bodyFont" class="form-select">
+            <option *ngFor="let font of fontOptions" [value]="font.value">{{ font.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fontSize">Font Size Scale</label>
+          <select id="fontSize" formControlName="fontSizeScale" class="form-select">
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="typography-preview">
+        <h4>Preview</h4>
+        <div class="text-samples">
+          <h1 [style.fontFamily]="brandingForm.get('typography.headingFont')?.value"
+              [style.color]="brandingForm.get('colors.text')?.value">
+            Sample Heading
+          </h1>
+          <p [style.fontFamily]="brandingForm.get('typography.bodyFont')?.value"
+             [style.color]="brandingForm.get('colors.text')?.value">
+            This is sample body text that shows how your chosen fonts will appear
+            in customer-facing materials and throughout your store interface.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theme Style -->
+    <section class="form-section" formGroupName="style">
+      <h3>Theme Style</h3>
+
+      <div class="form-group">
+        <label for="theme">Overall Theme</label>
+        <select id="theme" formControlName="theme" class="form-select">
+          <option value="professional">Professional</option>
+          <option value="modern">Modern</option>
+          <option value="vintage">Vintage</option>
+          <option value="minimal">Minimal</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" (click)="previewStorefront()" class="btn-secondary">
+        Preview Storefront
+      </button>
+      <button type="submit" [disabled]="!brandingForm.valid || saving()" class="btn-primary">
+        {{ saving() ? 'Saving...' : 'Save Branding' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>
