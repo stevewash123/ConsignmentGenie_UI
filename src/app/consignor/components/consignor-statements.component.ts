@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { MockConsignorStatementService } from '../services/mock-consignor-statement.service';
 import { StatementListDto } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
@@ -335,7 +335,7 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private ConsignorService: ProviderPortalService,
+    private statementService: MockConsignorStatementService,
     public loadingService: LoadingService
   ) {}
 
@@ -352,7 +352,7 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
     this.loadingService.start(LOADING_KEYS.STATEMENTS_LIST);
     this.error = null;
 
-    this.ConsignorService.getStatements()
+    this.statementService.getStatements()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (statements) => {
@@ -377,7 +377,7 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
 
     this.loadingService.start(LOADING_KEYS.STATEMENT_PDF);
 
-    this.ConsignorService.downloadStatementPdf(statement.statementId)
+    this.statementService.downloadStatementPdf(statement.statementId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {

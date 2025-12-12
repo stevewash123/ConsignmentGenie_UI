@@ -1,0 +1,42 @@
+<div class="balance-card"
+     [class.zero-balance]="isZeroBalance"
+     [class.clickable]="type === 'in-transit' && inTransitData"
+     [class.expanded]="expanded && type === 'in-transit'"
+     (click)="onCardClick()">
+
+  <!-- Main Card Content -->
+  <div class="card-header">
+    <div class="card-icon">{{ cardIcon }}</div>
+    <div class="card-content">
+      <div class="card-title">{{ cardTitle }}</div>
+      <div class="card-amount">${{ displayAmount.toFixed(2) }}</div>
+      <div class="card-subtitle">{{ itemCountLabel }}</div>
+    </div>
+  </div>
+
+  <!-- Card Description -->
+  <div class="card-description">
+    {{ cardDescription }}
+  </div>
+
+  <!-- In Transit Expanded Details -->
+  <div class="transit-details" *ngIf="type === 'in-transit' && expanded && inTransitData">
+    <div class="details-separator"></div>
+    <div class="transit-info">
+      <div class="info-row">
+        <span class="info-label">Payout #{{ inTransitData.payoutNumber }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Sent:</span>
+        <span class="info-value">{{ formatDate(inTransitData.sentDate) }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Method:</span>
+        <span class="info-value">{{ inTransitData.paymentMethod }}</span>
+      </div>
+      <button class="confirm-button" (click)="onConfirmReceived(); $event.stopPropagation()">
+        Confirm Received
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,332 @@
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ConsignorBalance, SubmitPayoutRequest, PayoutRequest } from '../models/consignor.models';
+import { MockConsignorBalanceService } from '../services/mock-consignor-balance.service';
+
+@Component({
+  selector: 'app-request-payout-modal',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './request-payout-modal.component.html',
+  styles: [`
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-container {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 2rem 2rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      transition: all 0.2s ease;
+    }
+
+    .close-button:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .intro-text {
+      color: #374151;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .balance-summary {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .balance-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .balance-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .balance-label {
+      color: #6b7280;
+      font-size: 0.9375rem;
+    }
+
+    .balance-value {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .balance-amount {
+      color: #059669;
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 2rem 0;
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: #111827;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    .info-section {
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-icon {
+      color: #3b82f6;
+      margin-right: 0.5rem;
+      font-size: 1.125rem;
+    }
+
+    .info-text {
+      color: #1e40af;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .info-text strong {
+      font-weight: 600;
+    }
+
+    .modal-footer {
+      padding: 1.5rem 2rem;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .button-secondary {
+      background: #f9fafb;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .button-secondary:hover {
+      background: #f3f4f6;
+    }
+
+    .button-primary {
+      background: #3b82f6;
+      color: white;
+      border: 1px solid #3b82f6;
+    }
+
+    .button-primary:hover {
+      background: #2563eb;
+    }
+
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .button:disabled:hover {
+      background: #3b82f6;
+    }
+
+    .loading-spinner {
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .modal-overlay {
+        padding: 0.5rem;
+      }
+
+      .modal-header,
+      .modal-body,
+      .modal-footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+
+      .modal-footer {
+        flex-direction: column-reverse;
+      }
+
+      .button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  `]
+})
+export class RequestPayoutModalComponent implements OnInit {
+  @Input() balance: ConsignorBalance | null = null;
+  @Input() show = false;
+  @Output() close = new EventEmitter<void>();
+  @Output() requestSubmitted = new EventEmitter<PayoutRequest>();
+
+  note = '';
+  isSubmitting = false;
+  error: string | null = null;
+
+  constructor(private balanceService: MockConsignorBalanceService) {}
+
+  ngOnInit() {
+    // Focus the note field when modal opens
+    if (this.show) {
+      setTimeout(() => {
+        const textarea = document.querySelector('.form-textarea') as HTMLTextAreaElement;
+        if (textarea) {
+          textarea.focus();
+        }
+      }, 100);
+    }
+  }
+
+  onClose() {
+    if (this.isSubmitting) return;
+    this.close.emit();
+  }
+
+  onBackdropClick(event: Event) {
+    if (event.target === event.currentTarget) {
+      this.onClose();
+    }
+  }
+
+  onSubmit() {
+    if (this.isSubmitting || !this.balance) return;
+
+    this.isSubmitting = true;
+    this.error = null;
+
+    const request: SubmitPayoutRequest = {
+      note: this.note.trim() || undefined
+    };
+
+    this.balanceService.submitPayoutRequest(request).subscribe({
+      next: (payoutRequest) => {
+        this.isSubmitting = false;
+        this.requestSubmitted.emit(payoutRequest);
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.error = 'Failed to submit payout request. Please try again.';
+        console.error('Payout request error:', err);
+      }
+    });
+  }
+
+  get canSubmit(): boolean {
+    return !this.isSubmitting && this.balance !== null;
+  }
+}

@@ -1,0 +1,173 @@
+.balance-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  min-width: 200px;
+  flex: 1;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &.zero-balance {
+    opacity: 0.6;
+    background: #f9fafb;
+
+    .card-amount {
+      color: #6b7280;
+    }
+  }
+
+  &.expanded {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.card-content {
+  flex: 1;
+  text-align: center;
+}
+
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-amount {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #059669;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.card-description {
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.transit-details {
+  margin-top: 1rem;
+}
+
+.details-separator {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 1rem 0;
+}
+
+.transit-info {
+  text-align: left;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+
+  &:first-child {
+    justify-content: center;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+  }
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+.confirm-button {
+  width: 100%;
+  background: #059669;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+
+  &:hover {
+    background: #047857;
+  }
+
+  &:active {
+    background: #065f46;
+  }
+}
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .balance-card {
+    min-width: auto;
+    margin-bottom: 1rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .card-content {
+    width: 100%;
+  }
+
+  .card-icon {
+    font-size: 2.5rem;
+  }
+
+  .info-row {
+    &:first-child {
+      margin-bottom: 0.75rem;
+    }
+  }
+}

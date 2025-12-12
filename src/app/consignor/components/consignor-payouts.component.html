@@ -1,99 +1,277 @@
+<div class="balance-overview">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>My Payouts</h1>
+      <button
+        class="refresh-button"
+        (click)="manualRefresh()"
+        [disabled]="loadingService.isLoading(KEYS.PAYOUTS_LIST)"
+        title="Refresh payout information">
+        <span *ngIf="!loadingService.isLoading(KEYS.PAYOUTS_LIST)">🔄</span>
+        <span *ngIf="loadingService.isLoading(KEYS.PAYOUTS_LIST)">⏳</span>
+        Refresh
+      </button>
+    </div>
+  </div>
 
-    <div class="consignor-payouts">
-      <!-- Navigation Header -->
-      <div class="nav-header">
-        <div class="header-content">
-          <h1>Main Street Consignment</h1>
-          <nav class="nav-links">
-            <a routerLink="/consignor/dashboard" routerLinkActive="active">Dashboard</a>
-            <a routerLink="/consignor/items" routerLinkActive="active">Items</a>
-            <a routerLink="/consignor/sales" routerLinkActive="active">Sales</a>
-            <a routerLink="/consignor/payouts" routerLinkActive="active">Payouts</a>
-          </nav>
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'balance'"
+      (click)="switchTab('balance')">
+      Balance
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'history'"
+      (click)="switchTab('history')">
+      Payout History
+    </button>
+  </div>
+
+  <!-- Balance Tab Content -->
+  <div *ngIf="activeTab === 'balance'">
+    <!-- Loading State -->
+    <div class="loading" *ngIf="loadingService.isLoading(KEYS.PAYOUTS_LIST)">
+      <p>Loading balance information...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error" *ngIf="error">
+      <p>{{error}}</p>
+      <button (click)="loadBalance()">Retry</button>
+    </div>
+
+    <!-- Balance Content -->
+    <div *ngIf="!loadingService.isLoading(KEYS.PAYOUTS_LIST) && !error && consignorBalance">
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!hasAnyBalance">
+      <div class="empty-state-icon">💰</div>
+      <div class="empty-state-title">All Caught Up!</div>
+      <div class="empty-state-description">
+        You have no pending balance right now.<br>
+        When your items sell, earnings will appear here.
+      </div>
+      <a routerLink="/consignor/items" class="empty-state-button">View My Items</a>
+    </div>
+
+    <!-- Balance Overview -->
+    <div *ngIf="hasAnyBalance">
+
+      <!-- Balance Cards Section -->
+      <div class="balance-cards-section">
+        <div class="balance-cards-container">
+          <div class="balance-cards">
+            <!-- Pending Balance Card -->
+            <app-balance-card
+              type="pending"
+              [balance]="consignorBalance.pending">
+            </app-balance-card>
+
+            <!-- Available Balance Card -->
+            <app-balance-card
+              type="available"
+              [balance]="consignorBalance.available">
+            </app-balance-card>
+
+            <!-- In Transit Balance Card -->
+            <app-balance-card
+              type="in-transit"
+              [inTransitData]="consignorBalance.inTransit"
+              [expanded]="expandedInTransit"
+              (cardClick)="onTransitCardClick()"
+              (confirmReceived)="onConfirmReceived($event)">
+            </app-balance-card>
+          </div>
+
+          <!-- Balance Explanations -->
+          <div class="balance-explanations">
+            <ul class="explanation-list">
+              <li><strong>Pending:</strong> Payment is processing (card/check clearing)</li>
+              <li><strong>Available:</strong> Ready to be paid out by the shop</li>
+              <li><strong>In Transit:</strong> Payout sent, should arrive soon</li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <div class="content">
-        <div class="page-header">
-          <h2>My Payouts</h2>
+      <!-- Payout Schedule Section -->
+      <div class="payout-schedule-section">
+        <div class="schedule-icon">📅</div>
+        <div class="schedule-title">Next scheduled payout:</div>
+        <div class="schedule-date" *ngIf="consignorBalance.nextPayoutDate">
+          {{ formatDate(consignorBalance.nextPayoutDate) }}
         </div>
-
-        <!-- Current Balance Section -->
-        <div class="balance-section">
-          <div class="balance-card">
-            <div class="balance-icon">💰</div>
-            <div class="balance-info">
-              <div class="balance-title">Current Pending Balance: <span class="balance-amount">\${{currentBalance.toFixed(2)}}</span> ({{pendingItemCount}} items)</div>
-              <div class="balance-note">Next payout typically processed end of month</div>
-            </div>
-          </div>
+        <div class="schedule-description">
+          ({{ consignorBalance.payoutScheduleDescription }})
         </div>
-
-        <!-- Payout History -->
-        <div class="history-section">
-          <h3>Payout History</h3>
-
-          <div class="payouts-table" *ngIf="payoutsResult">
-            <div class="table-header">
-              <div class="col payout-col">Payout #</div>
-              <div class="col date-col">Date</div>
-              <div class="col amount-col">Amount</div>
-              <div class="col items-col">Items</div>
-              <div class="col method-col">Method</div>
-              <div class="col actions-col">Action</div>
-            </div>
-
-            <div class="table-row" *ngFor="let payout of payoutsResult.items">
-              <div class="col payout-col">
-                <span class="payout-number">{{payout.payoutNumber}}</span>
-              </div>
-              <div class="col date-col">
-                {{formatDate(payout.payoutDate)}}
-              </div>
-              <div class="col amount-col">
-                <span class="amount">\${{payout.amount.toFixed(2)}}</span>
-              </div>
-              <div class="col items-col">
-                {{payout.itemCount}}
-              </div>
-              <div class="col method-col">
-                {{payout.paymentMethod}}
-              </div>
-              <div class="col actions-col">
-                <button
-                  class="view-btn"
-                  [routerLink]="['/consignor/payouts', payout.payoutId]">
-                  View
-                </button>
-              </div>
-            </div>
-
-            <!-- No Payouts Message -->
-            <div class="no-payouts" *ngIf="payoutsResult.items.length === 0">
-              <p>No payouts have been processed yet.</p>
-              <p>Your first payout will appear here once the shop owner processes payments.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Total Summary -->
-        <div class="summary-section">
-          <div class="summary-card">
-            <div class="summary-title">Total Paid Out (All Time):</div>
-            <div class="summary-amount">\${{totalPaidOut.toFixed(2)}}</div>
-          </div>
+        <button
+          class="request-payout-button"
+          [disabled]="!canRequestPayout"
+          (click)="onRequestPayout()"
+          *ngIf="consignorBalance.canRequestPayout">
+          {{ requestButtonText }}
+        </button>
+        <div
+          class="request-button-message"
+          *ngIf="!canRequestPayout && requestButtonDisabledMessage">
+          {{ requestButtonDisabledMessage }}
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div class="loading" *ngIf="loadingService.isLoading(KEYS.PAYOUTS_LIST)">
-        <p>Loading payouts...</p>
-      </div>
-
-      <!-- Error State -->
-      <div class="error" *ngIf="error">
-        <p>{{error}}</p>
-        <button (click)="loadPayouts()">Retry</button>
+      <!-- Lifetime Earnings Section -->
+      <div class="lifetime-earnings-section">
+        <div class="lifetime-title">Lifetime Earnings</div>
+        <div class="lifetime-stats">
+          <div class="stat-item">
+            <div class="stat-label">Total Earned</div>
+            <div class="stat-value">${{ consignorBalance.lifetimeEarned.toFixed(2) }}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Received</div>
+            <div class="stat-value">${{ consignorBalance.lifetimeReceived.toFixed(2) }}</div>
+          </div>
+        </div>
       </div>
     </div>
-  
+    </div>
+  </div>
+
+  <!-- Payout History Tab Content -->
+  <div *ngIf="activeTab === 'history'">
+    <!-- Loading State -->
+    <div class="loading" *ngIf="loadingService.isLoading(KEYS.PAYOUTS_LIST)">
+      <p>Loading payout history...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error" *ngIf="payoutError">
+      <p>{{payoutError}}</p>
+      <button (click)="loadPayoutHistory()">Retry</button>
+    </div>
+
+    <!-- Payout History Content -->
+    <div class="payout-history-section" *ngIf="!loadingService.isLoading(KEYS.PAYOUTS_LIST) && !payoutError">
+      <!-- Header with Export -->
+      <div class="payout-history-header">
+        <h2 class="payout-history-title">PAYOUT HISTORY</h2>
+        <div class="export-dropdown">
+          <button class="export-button" (click)="onExportPayouts('csv')">
+            Export ▼
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-section">
+        <div class="date-range-filter">
+          <label class="filter-label">Date Range:</label>
+          <select class="filter-select" [(ngModel)]="dateRange" (change)="onDateRangeChange()">
+            <option value="all">All Time</option>
+            <option value="thisYear">This Year</option>
+            <option value="last6Months">Last 6 Months</option>
+            <option value="custom">Custom</option>
+          </select>
+          <div class="custom-date-inputs" *ngIf="dateRange === 'custom'">
+            <input
+              type="date"
+              class="date-input"
+              [(ngModel)]="customDateFrom"
+              (change)="onCustomDateChange()"
+              placeholder="From">
+            <input
+              type="date"
+              class="date-input"
+              [(ngModel)]="customDateTo"
+              (change)="onCustomDateChange()"
+              placeholder="To">
+          </div>
+        </div>
+      </div>
+
+      <!-- Payout List -->
+      <div class="payout-list" *ngIf="payoutHistory && payoutHistory.items.length > 0">
+        <div
+          class="payout-row"
+          *ngFor="let payout of payoutHistory.items"
+          (click)="onViewPayoutDetail(payout.payoutId)">
+          <div class="payout-info">
+            <div class="payout-date">{{ formatDate(payout.paymentDate) }}</div>
+            <div class="payout-number">Payout #{{ payout.payoutNumber }}</div>
+            <div class="payout-details">
+              <span class="payout-amount">${{ payout.amount.toFixed(2) }}</span>
+              <span>•</span>
+              <span>{{ payout.itemCount }} items</span>
+              <span>•</span>
+              <span>{{ payout.paymentMethod }}</span>
+            </div>
+          </div>
+          <div class="payout-actions">
+            <div class="payout-status" [ngClass]="payout.status === 'received' ? 'status-received' : 'status-sent'">
+              <span *ngIf="payout.status === 'received'">✅</span>
+              <span *ngIf="payout.status === 'sent'">📤</span>
+              <span>{{ payout.status === 'received' ? 'Received' : 'Sent' }}</span>
+            </div>
+            <button class="view-details-button" (click)="onViewPayoutDetail(payout.payoutId); $event.stopPropagation()">
+              View Details →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State for History -->
+      <div class="empty-payouts" *ngIf="payoutHistory && payoutHistory.items.length === 0">
+        <div class="empty-payouts-icon">📋</div>
+        <div>No payouts found for the selected period.</div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="payoutHistory && payoutHistory.totalPages > 1">
+        <div class="pagination-info">
+          Showing {{ ((payoutHistory.page - 1) * payoutHistory.pageSize) + 1 }}-{{ min(payoutHistory.page * payoutHistory.pageSize, payoutHistory.totalCount) }} of {{ payoutHistory.totalCount }} payouts
+        </div>
+        <div class="pagination-controls">
+          <button
+            class="pagination-button"
+            [class.disabled]="!payoutHistory.hasPrevious"
+            (click)="onPageChange(payoutHistory.page - 1)"
+            [disabled]="!payoutHistory.hasPrevious">
+            Previous
+          </button>
+          <button
+            class="pagination-button"
+            *ngFor="let page of totalPages"
+            [class.active]="page === payoutHistory.page"
+            (click)="onPageChange(page)">
+            {{ page }}
+          </button>
+          <button
+            class="pagination-button"
+            [class.disabled]="!payoutHistory.hasNext"
+            (click)="onPageChange(payoutHistory.page + 1)"
+            [disabled]="!payoutHistory.hasNext">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Payout Modal -->
+  <app-request-payout-modal
+    [show]="showRequestModal"
+    [balance]="consignorBalance"
+    (close)="onRequestModalClose()"
+    (requestSubmitted)="onRequestSubmitted($event)">
+  </app-request-payout-modal>
+
+  <!-- Success Modal -->
+  <app-request-success-modal
+    [show]="showSuccessModal"
+    [payoutRequest]="requestResult"
+    (close)="onSuccessModalClose()">
+  </app-request-success-modal>
+</div>
