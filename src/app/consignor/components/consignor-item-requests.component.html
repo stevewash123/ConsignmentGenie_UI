@@ -1,0 +1,216 @@
+<div class="item-requests-container">
+  <div class="page-header">
+    <h1>My Item Requests</h1>
+    <a routerLink="/consignor/item-requests/submit" class="submit-button">
+      ➕ Submit New Item
+    </a>
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="search">Search</label>
+        <input
+          type="text"
+          id="search"
+          [(ngModel)]="query.search"
+          (input)="onFilterChange()"
+          class="filter-control"
+          placeholder="Search by item name...">
+      </div>
+
+      <div class="filter-group">
+        <label for="status">Status</label>
+        <select
+          id="status"
+          [(ngModel)]="query.status"
+          (change)="onFilterChange()"
+          class="filter-control">
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="pageSize">Items per page</label>
+        <select
+          id="pageSize"
+          [(ngModel)]="query.pageSize"
+          (change)="onFilterChange()"
+          class="filter-control">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <button
+          type="button"
+          class="clear-filters"
+          (click)="clearFilters()">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <p>Loading your item requests...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && requests.totalCount === 0" class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h2 class="empty-title">No Item Requests Yet</h2>
+    <p class="empty-message">
+      You haven't submitted any items for consignment yet.
+      Start by submitting your first item for review.
+    </p>
+    <a routerLink="/consignor/item-requests/submit" class="submit-button">
+      Submit Your First Item
+    </a>
+  </div>
+
+  <!-- Requests Grid -->
+  <div *ngIf="!isLoading && requests.totalCount > 0" class="requests-grid">
+    <div *ngFor="let request of requests.items" class="request-card">
+      <!-- Image -->
+      <div class="request-image">
+        <img
+          *ngIf="getPrimaryImageUrl(request); else noImageTemplate"
+          [src]="getPrimaryImageUrl(request)"
+          [alt]="request.name">
+        <ng-template #noImageTemplate>
+          📷
+        </ng-template>
+      </div>
+
+      <!-- Details -->
+      <div class="request-details">
+        <h3 class="request-name">{{ request.name }}</h3>
+        <div class="request-info" *ngIf="request.brand">
+          <strong>Brand:</strong> {{ request.brand }}
+        </div>
+        <div class="request-info" *ngIf="request.category">
+          <strong>Category:</strong> {{ request.category }}
+        </div>
+        <div class="request-info">
+          <strong>Condition:</strong> {{ getStatusLabel(request.condition) }}
+        </div>
+        <div class="request-info" *ngIf="request.resubmissionCount > 0">
+          <strong>Resubmissions:</strong> {{ request.resubmissionCount }}
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="status-badge" [class]="getStatusClass(request.status)">
+        {{ getStatusLabel(request.status) }}
+      </div>
+
+      <!-- Price -->
+      <div class="price-display">
+        <div *ngIf="request.suggestedPrice">
+          ${{ request.suggestedPrice | number:'1.2-2' }}
+        </div>
+        <div *ngIf="!request.suggestedPrice" class="text-gray-400">
+          No price
+        </div>
+        <div *ngIf="request.approvedPrice && request.status === 'approved'" style="font-size: 0.75rem; color: #059669; margin-top: 0.25rem;">
+          Approved: ${{ request.approvedPrice | number:'1.2-2' }}
+        </div>
+      </div>
+
+      <!-- Date -->
+      <div class="date-display">
+        {{ formatDate(request.createdAt) }}
+      </div>
+
+      <!-- Actions Menu -->
+      <div class="actions-menu" (clickOutside)="closeActionMenu()">
+        <button
+          type="button"
+          class="actions-button"
+          (click)="toggleActionMenu(request.id)"
+          title="Actions">
+          ⋯
+        </button>
+
+        <div *ngIf="openActionMenu === request.id" class="actions-dropdown">
+          <button
+            type="button"
+            class="dropdown-item"
+            routerLink="/consignor/item-requests/{{ request.id }}"
+            (click)="closeActionMenu()">
+            View Details
+          </button>
+
+          <button
+            type="button"
+            *ngIf="request.status === 'pending'"
+            class="dropdown-item"
+            routerLink="/consignor/item-requests/{{ request.id }}/edit"
+            (click)="closeActionMenu()">
+            Edit Request
+          </button>
+
+          <button
+            type="button"
+            *ngIf="request.status === 'rejected'"
+            class="dropdown-item"
+            routerLink="/consignor/item-requests/resubmit/{{ request.id }}"
+            (click)="closeActionMenu()">
+            Resubmit
+          </button>
+
+          <button
+            type="button"
+            *ngIf="request.status === 'pending'"
+            class="dropdown-item danger"
+            (click)="withdrawRequest(request.id)">
+            Withdraw
+          </button>
+
+          <button
+            type="button"
+            *ngIf="request.status !== 'approved'"
+            class="dropdown-item danger"
+            (click)="deleteRequest(request.id)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && requests.totalCount > 0" class="pagination">
+    <button
+      type="button"
+      class="pagination-button"
+      [disabled]="!requests.hasPrevious"
+      (click)="goToPage(requests.page - 1)">
+      Previous
+    </button>
+
+    <span class="pagination-info">
+      Page {{ requests.page }} of {{ requests.totalPages }}
+      ({{ requests.totalCount }} total items)
+    </span>
+
+    <button
+      type="button"
+      class="pagination-button"
+      [disabled]="!requests.hasNext"
+      (click)="goToPage(requests.page + 1)">
+      Next
+    </button>
+  </div>
+</div>
