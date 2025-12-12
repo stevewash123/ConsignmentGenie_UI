@@ -311,7 +311,7 @@ export class ConsignorSignupStep1Component implements OnInit {
     const formValue = this.authForm.value;
 
     // Store the email/password in session storage temporarily for step 2
-    sessionStorage.setItem('providerAuthData', JSON.stringify({
+    sessionStorage.setItem('consignorAuthData', JSON.stringify({
       email: formValue.email,
       password: formValue.password
     }));
