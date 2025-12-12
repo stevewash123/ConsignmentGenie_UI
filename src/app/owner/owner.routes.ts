@@ -51,6 +51,14 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/manual-check-clearance.component').then(m => m.ManualCheckClearanceComponent)
   },
   {
+    path: 'price-requests',
+    loadComponent: () => import('./components/price-requests/price-request-list.component').then(m => m.PriceRequestListComponent)
+  },
+  {
+    path: 'return-requests',
+    loadComponent: () => import('./components/return-requests-list.component').then(m => m.ReturnRequestsListComponent)
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./settings/settings-layout.component').then(m => m.SettingsLayoutComponent),
     children: [

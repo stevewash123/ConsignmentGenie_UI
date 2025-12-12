@@ -5,11 +5,14 @@ import { ProviderPortalService } from '../services/consignor-portal.service';
 import { ProviderItemDetail } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
+import { MockConsignorItemService, ConsignorItemDetailDto, ItemPriceChangeRequestDto, ItemReturnRequestDto } from '../services/mock-consignor-item.service';
+import { RequestPriceChangeComponent } from './modals/request-price-change.component';
+import { ReturnRequestModalComponent } from './modals/return-request-modal.component';
 
 @Component({
   selector: 'app-consignor-item-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, RequestPriceChangeComponent, ReturnRequestModalComponent],
   templateUrl: './consignor-item-detail.component.html',
   styles: [`
     .item-detail {
@@ -324,6 +327,108 @@ import { LOADING_KEYS } from '../constants/loading-keys';
       margin-top: 1rem;
     }
 
+    .pending-request-alert {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .alert-icon {
+      font-size: 1.25rem;
+      color: #f59e0b;
+    }
+
+    .alert-content h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #92400e;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .alert-content p {
+      color: #92400e;
+      margin: 0.25rem 0;
+      font-size: 0.875rem;
+    }
+
+    .alert-date {
+      font-weight: 500;
+    }
+
+    .alert-message {
+      font-style: italic;
+    }
+
+    .price-change-actions,
+    .return-request-actions {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .btn-request-price-change,
+    .btn-request-return {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-request-return {
+      background: #dc2626;
+    }
+
+    .btn-request-price-change:hover:not(:disabled) {
+      background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-request-return:hover:not(:disabled) {
+      background: #b91c1c;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-request-price-change:disabled,
+    .btn-request-return:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .pending-return-alert {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .ready-return-alert {
+      background: #dcfce7;
+      border: 1px solid #16a34a;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+
     @media (max-width: 768px) {
       .nav-header {
         padding: 1rem;
@@ -352,20 +457,42 @@ import { LOADING_KEYS } from '../constants/loading-keys';
       .item-header h2 {
         font-size: 1.5rem;
       }
+
+      .pending-request-alert {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .alert-content h4 {
+        font-size: 0.875rem;
+      }
+
+      .alert-content p {
+        font-size: 0.8125rem;
+      }
+
+      .price-change-actions {
+        margin-top: 1rem;
+        padding-top: 1rem;
+      }
     }
   `]
 })
 export class ConsignorItemDetailComponent implements OnInit {
   item: ProviderItemDetail | null = null;
+  mockItem: ConsignorItemDetailDto | null = null;
   error: string | null = null;
   itemId: string;
   selectedImageUrl: string = '';
+  showPriceChangeModal = false;
+  showReturnRequestModal = false;
 
   // Expose for template
   readonly KEYS = LOADING_KEYS;
 
   constructor(
     private ConsignorService: ProviderPortalService,
+    private mockService: MockConsignorItemService,
     private route: ActivatedRoute,
     public loadingService: LoadingService
   ) {
@@ -375,6 +502,7 @@ export class ConsignorItemDetailComponent implements OnInit {
   ngOnInit() {
     if (this.itemId) {
       this.loadItem();
+      this.loadMockItem();
     }
   }
 
@@ -393,6 +521,17 @@ export class ConsignorItemDetailComponent implements OnInit {
       },
       complete: () => {
         this.loadingService.stop(LOADING_KEYS.ITEM_DETAIL);
+      }
+    });
+  }
+
+  loadMockItem() {
+    this.mockService.getItemDetail(this.itemId).subscribe({
+      next: (mockItem) => {
+        this.mockItem = mockItem;
+      },
+      error: (err) => {
+        console.error('Mock item detail error:', err);
       }
     });
   }
@@ -424,6 +563,55 @@ export class ConsignorItemDetailComponent implements OnInit {
       case 'sold': return '○ Sold';
       case 'removed': return '✗ Removed';
       default: return status;
+    }
+  }
+
+  canRequestPriceChange(): boolean {
+    return this.mockItem?.status === 'available' && !this.mockItem?.hasPendingPriceRequest;
+  }
+
+  openPriceChangeModal() {
+    if (this.canRequestPriceChange()) {
+      this.showPriceChangeModal = true;
+    }
+  }
+
+  onPriceChangeModalClosed(result: ItemPriceChangeRequestDto | null) {
+    this.showPriceChangeModal = false;
+
+    if (result) {
+      // Refresh the mock item to show updated pending request status
+      this.loadMockItem();
+      alert('Price change request submitted successfully! The shop owner will review your request.');
+    }
+  }
+
+  formatPendingRequestDate(date: Date): string {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
+  canRequestReturn(): boolean {
+    const validStatuses = ['available', 'expired'];
+    return validStatuses.includes(this.mockItem?.status || '') && !this.mockItem?.pendingReturnRequest;
+  }
+
+  openReturnRequestModal() {
+    if (this.canRequestReturn()) {
+      this.showReturnRequestModal = true;
+    }
+  }
+
+  onReturnRequestModalClosed(result: ItemReturnRequestDto | null) {
+    this.showReturnRequestModal = false;
+
+    if (result) {
+      // Refresh the mock item to show updated pending request status
+      this.loadMockItem();
+      alert('Return request submitted successfully! The shop owner will review your request and notify you when your item is ready for pickup.');
     }
   }
 }

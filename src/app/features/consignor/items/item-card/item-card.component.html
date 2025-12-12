@@ -1,0 +1,49 @@
+<div class="item-card"
+     [class.has-price-request]="item.priceChangeRequest"
+     (click)="onCardClick()">
+  <div class="card-header">
+    <img
+      [src]="item.thumbnailUrl"
+      [alt]="getImageAlt()"
+      (error)="onImageError($event)"
+      class="item-image"
+      loading="lazy"
+    >
+    <div class="price-request-indicator"
+         *ngIf="item.priceChangeRequest"
+         title="Price change request pending">
+      ⚠️
+    </div>
+  </div>
+
+  <div class="card-body">
+    <h3 class="item-name">{{ item.name }}</h3>
+
+    <div class="pricing-info">
+      <span class="listed-price">Listed: ${{ item.listedPrice.toFixed(2) }}</span>
+      <span class="earnings">You earn: ${{ item.consignorEarnings.toFixed(2) }}</span>
+    </div>
+
+    <div class="status-info">
+      <span class="status-badge" [ngClass]="getStatusClass()">
+        <span class="status-icon">{{ getStatusIcon() }}</span>
+        <span class="status-text">{{ getStatusText() }}</span>
+      </span>
+      <span class="date-info">{{ getDateDisplayText() }}</span>
+    </div>
+
+    <!-- Price Change Response Button -->
+    <div class="price-request-section" *ngIf="item.priceChangeRequest">
+      <div class="price-request-info">
+        <small class="price-request-text">
+          Owner proposed: ${{ item.priceChangeRequest.requestedPrice.toFixed(2) }}
+        </small>
+      </div>
+      <button class="respond-button"
+              (click)="onRespondClick($event)"
+              type="button">
+        Respond
+      </button>
+    </div>
+  </div>
+</div>

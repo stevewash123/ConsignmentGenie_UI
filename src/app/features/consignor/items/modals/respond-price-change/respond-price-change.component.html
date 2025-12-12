@@ -1,0 +1,182 @@
+<div class="modal-overlay"
+     *ngIf="isOpen"
+     (click)="onBackdropClick($event)"
+     role="dialog"
+     aria-labelledby="modal-title"
+     aria-modal="true">
+
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="modal-title">
+        ⚠️ Price Change Proposed
+      </h2>
+      <button class="close-button"
+              (click)="onCancel()"
+              aria-label="Close modal"
+              type="button">
+        ✕
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="item && item.priceChangeRequest">
+      <!-- Item Info Section -->
+      <div class="item-section">
+        <img [src]="item.thumbnailUrl"
+             [alt]="item.name"
+             class="item-image"
+             loading="lazy">
+        <h3 class="item-name">{{ item.name }}</h3>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Current Status Section -->
+      <div class="current-section">
+        <h4>Current Status</h4>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="label">Current Price:</span>
+            <span class="value price">${{ item.listedPrice.toFixed(2) }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Current Earnings:</span>
+            <span class="value earnings">${{ item.consignorEarnings.toFixed(2) }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Days Listed:</span>
+            <span class="value">{{ item.daysListed }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Owner's Proposal Section -->
+      <div class="proposal-section">
+        <h4>Owner's Proposal</h4>
+
+        <div class="proposal-grid">
+          <div class="proposal-item">
+            <span class="label">New Price:</span>
+            <span class="value price new-price">${{ item.priceChangeRequest.requestedPrice.toFixed(2) }}</span>
+            <span class="change"
+                  [class.negative]="getPriceDifference() < 0"
+                  [class.positive]="getPriceDifference() > 0">
+              ({{ getPriceDifference() >= 0 ? '+' : '' }}${{ getPriceDifference().toFixed(2) }})
+            </span>
+          </div>
+
+          <div class="proposal-item">
+            <span class="label">Your New Earnings (60%):</span>
+            <span class="value earnings new-earnings">${{ item.priceChangeRequest.requestedEarnings.toFixed(2) }}</span>
+            <span class="change"
+                  [class.negative]="getEarningsDifference() < 0"
+                  [class.positive]="getEarningsDifference() > 0">
+              ({{ getEarningsDifference() >= 0 ? '+' : '' }}${{ getEarningsDifference().toFixed(2) }})
+            </span>
+          </div>
+
+          <div class="proposal-item" *ngIf="item.priceChangeRequest.updatedMarketPrice">
+            <span class="label">Updated Market Price:</span>
+            <span class="value market-price">${{ item.priceChangeRequest.updatedMarketPrice.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <div class="owner-note">
+          <h5>Owner's Note:</h5>
+          <p>{{ item.priceChangeRequest.ownerNote }}</p>
+        </div>
+
+        <div class="request-info">
+          <small>
+            Requested {{ formatDate(item.priceChangeRequest.requestDate) }}
+            <span class="expires" [class.warning]="isExpiringSoon()">
+              • Expires in {{ getDaysUntilExpiry() }} day(s)
+            </span>
+          </small>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Decision Section -->
+      <div class="decision-section">
+        <h4>Your Decision</h4>
+
+        <div class="decision-options">
+          <button type="button"
+                  [class]="getDecisionButtonClass('accept')"
+                  (click)="onDecisionChange('accept')">
+            <div class="decision-header">
+              <span class="radio">{{ selectedDecision === 'accept' ? '●' : '○' }}</span>
+              <span class="decision-title">Accept new price (${{ item.priceChangeRequest.requestedPrice.toFixed(2) }})</span>
+            </div>
+            <div class="decision-subtitle">
+              Your earnings: ${{ item.priceChangeRequest.requestedEarnings.toFixed(2) }}
+            </div>
+          </button>
+
+          <button type="button"
+                  [class]="getDecisionButtonClass('keep_current')"
+                  (click)="onDecisionChange('keep_current')">
+            <div class="decision-header">
+              <span class="radio">{{ selectedDecision === 'keep_current' ? '●' : '○' }}</span>
+              <span class="decision-title">Keep current price (${{ item.listedPrice.toFixed(2) }})</span>
+            </div>
+            <div class="decision-subtitle">
+              Continue at current price, item stays listed
+            </div>
+          </button>
+
+          <button type="button"
+                  [class]="getDecisionButtonClass('decline_retrieve')"
+                  (click)="onDecisionChange('decline_retrieve')">
+            <div class="decision-header">
+              <span class="radio">{{ selectedDecision === 'decline_retrieve' ? '●' : '○' }}</span>
+              <span class="decision-title">Decline & retrieve item</span>
+            </div>
+            <div class="decision-subtitle">
+              Item will be removed and ready for pickup
+            </div>
+          </button>
+        </div>
+
+        <!-- Optional Note -->
+        <div class="note-section">
+          <label for="consignor-note">Note to owner (optional)</label>
+          <textarea id="consignor-note"
+                    [(ngModel)]="consignorNote"
+                    placeholder="Add a note for the owner..."
+                    rows="3"
+                    maxlength="500"
+                    class="note-input">
+          </textarea>
+          <small class="char-count">{{ consignorNote.length }}/500</small>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message" *ngIf="error">
+        {{ error }}
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button"
+              class="cancel-button"
+              (click)="onCancel()"
+              [disabled]="isSubmitting">
+        Cancel
+      </button>
+
+      <button type="button"
+              class="confirm-button"
+              (click)="onSubmit()"
+              [disabled]="!selectedDecision || isSubmitting"
+              [class.loading]="isSubmitting">
+        <span *ngIf="isSubmitting">Processing...</span>
+        <span *ngIf="!isSubmitting">Confirm Decision</span>
+      </button>
+    </div>
+  </div>
+</div>

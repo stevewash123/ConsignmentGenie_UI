@@ -1,0 +1,148 @@
+<!-- Notification Bell Container -->
+<div class="notification-bell-container relative" (document:click)="onDocumentClick($event)">
+  <!-- Bell Button -->
+  <button
+    type="button"
+    class="bell-button relative p-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    [class]="bellClass()"
+    (click)="toggleDropdown()"
+    (keydown)="onKeyDown($event)"
+    [attr.aria-label]="'Notifications. ' + (hasNotifications() ? badgeText() + ' unread' : 'No new notifications')"
+    aria-expanded="{{isDropdownOpen()}}"
+    aria-haspopup="true">
+
+    <!-- Bell Icon -->
+    <span class="text-xl">{{ bellIcon() }}</span>
+
+    <!-- Badge -->
+    <span
+      *ngIf="hasNotifications()"
+      class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center font-semibold"
+      [class.animate-pulse]="hasUrgentNotifications()">
+      {{ badgeText() }}
+    </span>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div
+    *ngIf="isDropdownOpen()"
+    class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between p-3 border-b border-gray-200 bg-gray-50">
+      <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+        🔔 Notifications
+        <span *ngIf="hasNotifications()" class="text-sm text-gray-500">({{ notificationCount().total }})</span>
+      </h3>
+      <button
+        *ngIf="hasNotifications()"
+        type="button"
+        class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+        (click)="markAllAsRead()">
+        Mark All Read
+      </button>
+    </div>
+
+    <!-- Notification List -->
+    <div class="max-h-72 overflow-y-auto">
+      <!-- Individual Notifications -->
+      <div
+        *ngFor="let notification of notifications(); trackBy: trackByNotificationId"
+        class="notification-item border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+        [class.bg-blue-50]="!notification.isRead"
+        [class.border-l-4]="notification.priority === 'urgent'"
+        [class.border-l-red-500]="notification.priority === 'urgent'"
+        (click)="onNotificationClick(notification)">
+
+        <div class="p-3">
+          <!-- Notification Header -->
+          <div class="flex items-start gap-2">
+            <!-- Category Icon -->
+            <span class="text-lg flex-shrink-0 mt-0.5">{{ getCategoryIcon(notification.category) }}</span>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <!-- Title and Time -->
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="font-medium text-sm text-gray-900 truncate"
+                    [class]="getCategoryColor(notification.category)">
+                  {{ notification.title }}
+                  <span *ngIf="isOverdue(notification)" class="text-red-600 font-bold ml-1">!</span>
+                </h4>
+                <span class="text-xs text-gray-500 flex-shrink-0">{{ getTimeAgo(notification.createdAt) }}</span>
+              </div>
+
+              <!-- Message -->
+              <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ notification.message }}</p>
+
+              <!-- Email Indicator and Actions -->
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-2">
+                  <!-- Email Sent Indicator -->
+                  <span *ngIf="notification.emailSent" class="text-xs text-blue-600 flex items-center gap-1">
+                    📧 Also sent via email
+                  </span>
+
+                  <!-- Resend Email Link -->
+                  <button
+                    *ngIf="notification.canResendEmail"
+                    type="button"
+                    class="text-xs text-blue-600 hover:text-blue-800 underline"
+                    (click)="openEmail(notification, $event)">
+                    Resend Email
+                  </button>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="flex items-center gap-2 text-xs">
+                  <button
+                    *ngIf="notification.emailSent"
+                    type="button"
+                    class="text-blue-600 hover:text-blue-800"
+                    (click)="openEmail(notification, $event)"
+                    title="View Email">
+                    📧
+                  </button>
+
+                  <button
+                    type="button"
+                    class="text-gray-600 hover:text-gray-800"
+                    (click)="viewFullDetails(notification, $event)"
+                    title="View Full Details">
+                    📄
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="notifications().length === 0" class="p-6 text-center">
+        <div class="text-4xl mb-2">🔔</div>
+        <h3 class="font-medium text-gray-900 mb-1">No notifications</h3>
+        <p class="text-sm text-gray-500">You're all caught up!</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-3 border-t border-gray-200 bg-gray-50">
+      <button
+        type="button"
+        class="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium">
+        See All Notifications
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Price Change Response Modal -->
+<div *ngIf="showPriceChangeModal() && getPriceChangeNotification()">
+  <app-respond-price-change
+    [isVisible]="showPriceChangeModal"
+    [notification]="getPriceChangeNotification()!"
+    (close)="onPriceChangeModalClose()"
+    (responseSubmitted)="onPriceChangeResponseSubmitted()">
+  </app-respond-price-change>
+</div>

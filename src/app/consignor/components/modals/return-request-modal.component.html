@@ -1,0 +1,97 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>Request Item Return</h2>
+      <button type="button" class="close-button" (click)="close()" aria-label="Close">
+        ×
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <!-- Item Preview -->
+      <div class="item-preview" *ngIf="item">
+        <img
+          class="item-thumbnail"
+          [src]="item.primaryImageUrl"
+          [alt]="item.name"
+          loading="lazy">
+        <div class="item-info">
+          <h3>{{item.name}}</h3>
+          <p class="item-price">Currently listed at ${{item.listedPrice.toFixed(2)}}</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form (ngSubmit)="onSubmit()" #returnForm="ngForm">
+        <!-- Reason -->
+        <div class="form-group">
+          <label class="form-label required" for="reason">Reason for Return</label>
+          <select
+            id="reason"
+            name="reason"
+            class="form-select"
+            [(ngModel)]="requestForm.reason"
+            required>
+            <option *ngFor="let option of reasonOptions" [value]="option.value">
+              {{option.label}}
+            </option>
+          </select>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label class="form-label" for="notes">Additional Notes (optional)</label>
+          <textarea
+            id="notes"
+            name="notes"
+            class="form-textarea"
+            [(ngModel)]="requestForm.notes"
+            placeholder="Any additional information about your return request..."
+            maxlength="500"></textarea>
+        </div>
+
+        <!-- Preferred Pickup -->
+        <div class="form-group">
+          <label class="form-label required" for="preferredPickup">Preferred Pickup Time</label>
+          <select
+            id="preferredPickup"
+            name="preferredPickup"
+            class="form-select"
+            [(ngModel)]="requestForm.preferredPickup"
+            required>
+            <option *ngFor="let option of pickupOptions" [value]="option.value">
+              {{option.label}}
+            </option>
+          </select>
+        </div>
+
+        <!-- Info Note -->
+        <div class="info-note">
+          <span class="info-icon">ℹ️</span>
+          <div>
+            The shop will notify you when your item is ready for pickup with specific instructions.
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onSubmit()"
+        [disabled]="!canSubmit()">
+        <span *ngIf="!isSubmitting">Submit Request</span>
+        <span *ngIf="isSubmitting" class="loading-text">
+          <span>Submitting...</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,135 @@
+<div class="return-requests">
+  <!-- Navigation Header -->
+  <div class="nav-header">
+    <div class="header-content">
+      <h1>
+        Return Requests
+        <span class="badge" [class.no-pending]="getPendingCount() === 0">
+          {{getPendingCount()}} Pending
+        </span>
+      </h1>
+      <nav class="nav-links">
+        <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/owner/inventory" routerLinkActive="active">Inventory</a>
+        <a routerLink="/owner/consignors" routerLinkActive="active">Consignors</a>
+        <a routerLink="/owner/return-requests" routerLinkActive="active">Return Requests</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Controls -->
+    <div class="controls">
+      <label for="statusFilter">Filter:</label>
+      <select
+        id="statusFilter"
+        class="filter-select"
+        [(ngModel)]="selectedFilter"
+        (ngModelChange)="onFilterChange()">
+        <option *ngFor="let option of filterOptions" [value]="option.value">
+          {{option.label}}
+        </option>
+      </select>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading" *ngIf="isLoading">
+      <p>Loading return requests...</p>
+    </div>
+
+    <!-- Request Cards -->
+    <div *ngIf="!isLoading">
+      <div class="request-card" *ngFor="let request of filteredRequests">
+        <!-- Request Header -->
+        <div class="request-header">
+          <img
+            class="item-thumbnail"
+            [src]="request.itemThumbnailUrl"
+            [alt]="request.itemName"
+            loading="lazy">
+
+          <div class="request-info">
+            <h3>{{request.itemName}}</h3>
+            <div class="request-meta">
+              <span>👤 {{request.consignorName}}</span>
+              <span>📧 {{request.consignorEmail}}</span>
+              <span *ngIf="request.consignorPhone">📞 {{request.consignorPhone}}</span>
+              <span>📅 {{formatDate(request.submittedDate)}} ({{getDaysAgo(request.submittedDate)}} days ago)</span>
+            </div>
+            <span class="status-badge" [class]="'status-' + request.status">
+              {{request.status}}
+            </span>
+          </div>
+        </div>
+
+        <!-- Request Details -->
+        <div class="request-details">
+          <div class="request-reason">
+            <p><strong>Reason:</strong> {{getReasonLabel(request.reason)}}</p>
+            <p *ngIf="request.notes" class="request-notes">
+              <strong>Notes:</strong> "{{request.notes}}"
+            </p>
+          </div>
+
+          <p><strong>Preferred Pickup:</strong> {{request.preferredPickup}}</p>
+
+          <div *ngIf="request.status === 'ready' && request.pickupInstructions">
+            <p><strong>Pickup Instructions:</strong></p>
+            <div class="request-reason">
+              <p>{{request.pickupInstructions}}</p>
+              <p *ngIf="request.readyDate"><strong>Ready since:</strong> {{formatDate(request.readyDate)}}</p>
+            </div>
+          </div>
+
+          <div *ngIf="request.status === 'declined' && request.declineReason">
+            <p><strong>Decline Reason:</strong> {{request.declineReason}}</p>
+            <p *ngIf="request.declinedDate"><strong>Declined on:</strong> {{formatDate(request.declinedDate)}}</p>
+          </div>
+
+          <div *ngIf="request.status === 'completed' && request.completedDate">
+            <p><strong>Picked up on:</strong> {{formatDate(request.completedDate)}}</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions" *ngIf="request.status === 'pending'">
+          <button
+            type="button"
+            class="btn btn-success"
+            (click)="markAsReady(request)">
+            ✓ Ready for Pickup
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="decline(request)">
+            ✗ Decline
+          </button>
+        </div>
+
+        <div class="actions" *ngIf="request.status === 'ready'">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="markAsComplete(request)">
+            ✓ Mark as Picked Up
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="filteredRequests.length === 0 && !isLoading">
+        <h3>No {{selectedFilter === 'all' ? '' : selectedFilter}} return requests</h3>
+        <p *ngIf="selectedFilter === 'pending'">
+          When consignors request item returns, they'll appear here for you to process.
+        </p>
+        <p *ngIf="selectedFilter !== 'pending' && selectedFilter !== 'all'">
+          Try selecting a different filter to see requests in other statuses.
+        </p>
+        <p *ngIf="selectedFilter === 'all'">
+          No return requests have been submitted yet.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

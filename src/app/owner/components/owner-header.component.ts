@@ -1,7 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NotificationBellComponent } from '../../shared/components/notification-bell.component';
+import { MockConsignorItemService } from '../../consignor/services/mock-consignor-item.service';
+import { Subject, takeUntil } from 'rxjs';
 
 interface UserData {
   userId: string;
@@ -92,6 +94,31 @@ interface UserData {
     .nav-links a.active {
       color: #fbbf24;
       background: rgba(251, 191, 36, 0.1);
+    }
+
+    .nav-link-with-badge {
+      position: relative;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #dc2626;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 20px;
+    }
+
+    .nav-badge.no-count {
+      display: none;
     }
 
     .header-right {
@@ -242,14 +269,27 @@ interface UserData {
     }
   `]
 })
-export class OwnerHeaderComponent implements OnInit {
+export class OwnerHeaderComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   currentUser = signal<UserData | null>(null);
   showUserMenu = signal(false);
+  pendingRequestsCount = signal(0);
+  pendingReturnRequestsCount = signal(0);
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private mockService: MockConsignorItemService
+  ) {}
 
   ngOnInit() {
     this.loadUserData();
+    this.loadPendingRequestsCount();
+    this.loadPendingReturnRequestsCount();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadUserData() {
@@ -266,6 +306,32 @@ export class OwnerHeaderComponent implements OnInit {
 
   toggleUserMenu() {
     this.showUserMenu.update(show => !show);
+  }
+
+  loadPendingRequestsCount() {
+    this.mockService.getPendingRequestsCount()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (count) => {
+          this.pendingRequestsCount.set(count);
+        },
+        error: (err) => {
+          console.error('Failed to load pending requests count:', err);
+        }
+      });
+  }
+
+  loadPendingReturnRequestsCount() {
+    this.mockService.getPendingReturnRequestsCount()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (count) => {
+          this.pendingReturnRequestsCount.set(count);
+        },
+        error: (err) => {
+          console.error('Failed to load pending return requests count:', err);
+        }
+      });
   }
 
   logout() {
