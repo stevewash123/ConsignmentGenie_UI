@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { BusinessSettingsComponent } from './business-settings.component';
-import { ItemSubmissionMode } from '../../../shared/interfaces/business.interfaces';
 
 describe('BusinessSettingsComponent', () => {
   let component: BusinessSettingsComponent;
@@ -26,10 +25,7 @@ describe('BusinessSettingsComponent', () => {
     Payouts: {
       Schedule: 'monthly',
       MinimumAmount: 25.00,
-      HoldPeriodDays: 14,
-      RefundPolicy: 'WithinDays' as 'NoRefunds' | 'WithinDays' | 'UntilPayout',
-      RefundWindowDays: 30,
-      DefaultPayoutMethod: 'Check' as 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit'
+      HoldPeriodDays: 14
     },
     Items: {
       DefaultConsignmentPeriodDays: 90,
@@ -39,9 +35,6 @@ describe('BusinessSettingsComponent', () => {
         After60Days: 20,
         After90DaysAction: 'return' as 'donate' | 'return'
       }
-    },
-    ConsignorPermissions: {
-      ItemSubmissionMode: ItemSubmissionMode.ApprovalRequired
     }
   };
 
@@ -371,82 +364,6 @@ describe('BusinessSettingsComponent', () => {
       tick(5000);
 
       expect(component.successMessage()).toBe('');
-    }));
-  });
-
-  describe('Consignor Permissions', () => {
-    it('should display consignor permissions section', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-
-      // Act
-      fixture.detectChanges();
-      tick();
-      fixture.detectChanges();
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const permissionsSection = compiled.querySelector('h3');
-      const permissionOptions = compiled.querySelectorAll('.permission-option');
-
-      expect(permissionsSection).toBeTruthy();
-      expect(permissionOptions.length).toBe(3);
-    }));
-
-    it('should set default ConsignorPermissions when not present in response', fakeAsync(() => {
-      // Arrange
-      const settingsWithoutPermissions = { ...mockBusinessSettings };
-      delete (settingsWithoutPermissions as any).ConsignorPermissions;
-      mockHttpClient.get.and.returnValue(of(settingsWithoutPermissions));
-
-      // Act
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      expect(component.settings()?.ConsignorPermissions?.ItemSubmissionMode)
-        .toBe(ItemSubmissionMode.ApprovalRequired);
-    }));
-
-    it('should have three submission mode options', () => {
-      // Assert
-      expect(component.submissionModeOptions).toHaveSize(3);
-      expect(component.submissionModeOptions[0].value).toBe(ItemSubmissionMode.OwnerOnly);
-      expect(component.submissionModeOptions[1].value).toBe(ItemSubmissionMode.ApprovalRequired);
-      expect(component.submissionModeOptions[2].value).toBe(ItemSubmissionMode.DirectAdd);
-    });
-
-    it('should select approval required option by default', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-
-      // Act
-      fixture.detectChanges();
-      tick();
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const selectedOption = compiled.querySelector('.permission-option.selected');
-      expect(selectedOption).toBeTruthy();
-      expect(selectedOption.textContent).toContain('Consignors submit for approval');
-    }));
-
-    it('should update submission mode when changed', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-      fixture.detectChanges();
-      tick();
-
-      // Act
-      component.settings()!.ConsignorPermissions.ItemSubmissionMode = ItemSubmissionMode.OwnerOnly;
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      expect(component.settings()?.ConsignorPermissions?.ItemSubmissionMode)
-        .toBe(ItemSubmissionMode.OwnerOnly);
     }));
   });
 
