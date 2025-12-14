@@ -387,7 +387,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   }
 
   get hasUnreadNotifications(): boolean {
-    return this.notifications.some(n => !n.isRead);
+    return this.notifications?.some(n => !n.isRead) ?? false;
   }
 
   loadNotifications() {
