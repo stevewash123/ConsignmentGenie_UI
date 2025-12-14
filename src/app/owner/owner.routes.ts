@@ -51,6 +51,10 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/manual-check-clearance.component').then(m => m.ManualCheckClearanceComponent)
   },
   {
+    path: 'notifications',
+    loadComponent: () => import('./pages/owner-notifications.component').then(m => m.OwnerNotificationsComponent)
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./settings/settings-layout.component').then(m => m.SettingsLayoutComponent),
     children: [
