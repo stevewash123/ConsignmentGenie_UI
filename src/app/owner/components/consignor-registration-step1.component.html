@@ -16,6 +16,8 @@
             [enabledProviders]="['google', 'facebook']"
             [showEmailPassword]="true"
             [isLoading]="isProcessing"
+            [prefilledEmail]="invitationDetails()?.invitedEmail || ''"
+            [emailReadonly]="!!invitationDetails()?.invitedEmail"
             (onProviderAuth)="handleProviderAuth($event)"
             (onCredentials)="handleCredentials($event)">
           </app-auth-method-selector>

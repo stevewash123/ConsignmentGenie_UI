@@ -81,6 +81,20 @@ export const ownerRoutes: Routes = [
         ]
       },
       {
+        path: 'profile',
+        children: [
+          {
+            path: 'branding',
+            loadComponent: () => import('./settings/profile/branding/branding.component').then(m => m.BrandingComponent)
+          },
+          {
+            path: '',
+            redirectTo: 'branding',
+            pathMatch: 'full'
+          }
+        ]
+      },
+      {
         path: 'business',
         children: [
           {
@@ -127,8 +141,46 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./settings/subscription/subscription-settings.component').then(m => m.SubscriptionSettingsComponent)
       },
       {
+        path: 'consignor-management',
+        children: [
+          {
+            path: 'store-codes',
+            loadComponent: () => import('./settings/consignor-management/store-codes/store-codes.component').then(m => m.StoreCodesComponent)
+          },
+          {
+            path: 'approval-workflow',
+            loadComponent: () => import('./settings/consignor-management/approval-workflow/approval-workflow.component').then(m => m.ApprovalWorkflowComponent)
+          },
+          {
+            path: 'permissions',
+            loadComponent: () => import('./settings/consignor-management/permissions/permissions.component').then(m => m.PermissionsComponent)
+          }
+        ]
+      },
+      {
         path: 'integrations',
-        loadComponent: () => import('./settings/integrations/integrations-settings.component').then(m => m.IntegrationsSettingsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./settings/integrations/integrations-settings.component').then(m => m.IntegrationsSettingsComponent)
+          },
+          {
+            path: 'inventory-sales',
+            loadComponent: () => import('./settings/integrations/inventory-sales/inventory-sales.component').then(m => m.InventorySalesComponent)
+          },
+          {
+            path: 'accounting',
+            loadComponent: () => import('./settings/integrations/accounting/accounting.component').then(m => m.AccountingComponent)
+          },
+          {
+            path: 'payments',
+            loadComponent: () => import('./settings/integrations/payments/payments.component').then(m => m.PaymentsComponent)
+          },
+          {
+            path: 'banking',
+            loadComponent: () => import('./settings/integrations/banking/banking.component').then(m => m.BankingComponent)
+          }
+        ]
       },
       {
         path: 'account',

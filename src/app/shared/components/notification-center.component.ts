@@ -405,7 +405,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (result) => {
           this.pagedResult = result;
-          this.notifications = result.items;
+          this.notifications = result.data;
         },
         error: (error) => {
           console.error('Error loading notifications:', error);

@@ -29,10 +29,11 @@
             type="email"
             id="auth-email"
             class="form-input"
-            placeholder="Enter your email"
+            [placeholder]="emailReadonly ? '' : 'Enter your email'"
             [(ngModel)]="email"
             (input)="onCredentialsChange()"
-            [disabled]="isLoading()">
+            [disabled]="isLoading() || emailReadonly"
+            [readonly]="emailReadonly">
         </div>
 
         <div class="form-group">
@@ -45,6 +46,22 @@
             [(ngModel)]="password"
             (input)="onCredentialsChange()"
             [disabled]="isLoading()">
+        </div>
+
+        <div class="form-group">
+          <label for="auth-password-confirm">Confirm Password</label>
+          <input
+            type="password"
+            id="auth-password-confirm"
+            class="form-input"
+            [class.error]="passwordConfirm && !passwordsMatch"
+            placeholder="Confirm your password"
+            [(ngModel)]="passwordConfirm"
+            (input)="onCredentialsChange()"
+            [disabled]="isLoading()">
+          <div class="error-text" *ngIf="passwordConfirm && !passwordsMatch">
+            Passwords do not match
+          </div>
         </div>
       </div>
     </div>
