@@ -1,0 +1,78 @@
+
+    <div class="item-search-container">
+      <!-- Header -->
+      <div class="search-header">
+        <h3>Item Search</h3>
+      </div>
+
+      <!-- Search Input -->
+      <div class="search-section">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (input)="onSearchInput($event)"
+            placeholder="🔍 Search items..."
+            class="search-input"
+            #searchInput>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      @if (isLoading()) {
+        <div class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i> Searching...
+        </div>
+      }
+
+      <!-- Available Items List -->
+      <div class="items-section">
+        <div class="section-title">
+          <span>Available Items</span>
+          <span class="item-count">({{ displayedItems().length }})</span>
+        </div>
+
+        <div class="items-list">
+          @for (item of displayedItems(); track item.id) {
+            <div class="item-row"
+                 [class.disabled]="disabledItems().includes(item.id)">
+              <div class="item-info">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-details">
+                  <span class="item-sku">{{ item.sku }}</span>
+                  <span class="item-consignor">{{ item.consignorName }}</span>
+                </div>
+              </div>
+              <div class="item-actions">
+                <div class="item-price">\${{ item.price | number:'1.2-2' }}</div>
+                <button
+                  class="add-button"
+                  [disabled]="disabledItems().includes(item.id)"
+                  (click)="selectItem(item)"
+                  [title]="disabledItems().includes(item.id) ? 'Already in cart' : 'Add to cart'">
+                  @if (disabledItems().includes(item.id)) {
+                    <i class="fas fa-check"></i>
+                  } @else {
+                    +
+                  }
+                </button>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              @if (searchQuery) {
+                <i class="fas fa-search"></i>
+                <p>No items found for "{{ searchQuery }}"</p>
+                <small>Try a different search term</small>
+              } @else {
+                <i class="fas fa-box-open"></i>
+                <p>Start typing to search for items</p>
+                <small>Search by item name, SKU, or consignor name</small>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  

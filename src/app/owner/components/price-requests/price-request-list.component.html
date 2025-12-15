@@ -1,0 +1,215 @@
+<div class="price-requests-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Price Change Requests</h1>
+      <p class="page-subtitle">Review and manage consignor price change requests</p>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        placeholder="Search by item name, consignor, or category..."
+        class="search-input">
+      <div class="search-icon">🔍</div>
+    </div>
+
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label for="status-filter">Status:</label>
+        <select
+          id="status-filter"
+          [(ngModel)]="filterStatus"
+          (change)="onFilterChange()"
+          class="filter-select">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sort-select">Sort by:</label>
+        <select
+          id="sort-select"
+          [(ngModel)]="sortBy"
+          (change)="onSortChange()"
+          class="filter-select">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="highestPrice">Highest Price</option>
+          <option value="lowestPrice">Lowest Price</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading price requests...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <h3>Error Loading Requests</h3>
+    <p>{{ error }}</p>
+    <button (click)="loadPriceRequests()" class="retry-btn">
+      Retry
+    </button>
+  </div>
+
+  <!-- Requests List -->
+  <div *ngIf="!loading && !error" class="requests-list">
+
+    <!-- Empty State -->
+    <div *ngIf="filteredRequests.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No Requests Found</h3>
+      <p *ngIf="filterStatus === 'pending'">
+        No pending price change requests at this time.
+      </p>
+      <p *ngIf="filterStatus !== 'pending'">
+        No requests match your current filters.
+      </p>
+      <button
+        *ngIf="searchTerm || filterStatus !== 'pending'"
+        (click)="searchTerm = ''; filterStatus = 'pending'; onFilterChange()"
+        class="clear-filters-btn">
+        Clear Filters
+      </button>
+    </div>
+
+    <!-- Requests Grid -->
+    <div *ngIf="filteredRequests.length > 0" class="requests-grid">
+      <div *ngFor="let request of filteredRequests" class="request-card">
+
+        <!-- Request Header -->
+        <div class="request-header">
+          <div class="item-info">
+            <div class="item-image" *ngIf="request.itemImageUrl">
+              <img [src]="request.itemImageUrl" [alt]="request.itemName">
+            </div>
+            <div class="item-details">
+              <h3 class="item-name">{{ request.itemName }}</h3>
+              <p class="item-meta">{{ request.category }} • {{ request.brand || 'No Brand' }}</p>
+              <p class="consignor-name">by {{ request.consignorName }}</p>
+            </div>
+          </div>
+
+          <div class="request-status">
+            <span class="status-badge" [ngClass]="getStatusBadgeClass(request.status)">
+              {{ request.status | titlecase }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Price Change Details -->
+        <div class="price-change-details">
+          <div class="price-comparison">
+            <div class="current-price">
+              <span class="label">Current:</span>
+              <span class="value">{{ formatCurrency(request.currentPrice) }}</span>
+            </div>
+
+            <div class="price-arrow" [ngClass]="getPriceChangeClass(request.currentPrice, request.requestedPrice)">
+              <span *ngIf="request.requestedPrice > request.currentPrice">↗</span>
+              <span *ngIf="request.requestedPrice < request.currentPrice">↘</span>
+              <span *ngIf="request.requestedPrice === request.currentPrice">→</span>
+            </div>
+
+            <div class="requested-price">
+              <span class="label">Requested:</span>
+              <span class="value" [ngClass]="getPriceChangeClass(request.currentPrice, request.requestedPrice)">
+                {{ formatCurrency(request.requestedPrice) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="price-change-summary">
+            <span class="change-amount" [ngClass]="getPriceChangeClass(request.currentPrice, request.requestedPrice)">
+              <span *ngIf="request.requestedPrice > request.currentPrice">+</span>
+              <span *ngIf="request.requestedPrice < request.currentPrice">-</span>
+              {{ formatCurrency(getPriceChangeAmount(request.currentPrice, request.requestedPrice)) }}
+              ({{ getPriceChangePercentage(request.currentPrice, request.requestedPrice).toFixed(1) }}%)
+            </span>
+          </div>
+        </div>
+
+        <!-- Request Details -->
+        <div class="request-details">
+          <div class="request-meta">
+            <span class="request-date">
+              Requested {{ formatDate(request.requestDate) }}
+            </span>
+          </div>
+
+          <div *ngIf="request.consignorReason" class="request-reason">
+            <h4>Reason:</h4>
+            <p>{{ request.consignorReason }}</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="request-actions" *ngIf="request.status === 'pending'">
+          <button
+            (click)="quickApprove(request)"
+            class="action-btn approve-btn">
+            ✅ Quick Approve
+          </button>
+
+          <button
+            (click)="openReviewModal(request)"
+            class="action-btn review-btn">
+            👁️ Review Details
+          </button>
+
+          <button
+            (click)="quickReject(request)"
+            class="action-btn reject-btn">
+            ❌ Quick Reject
+          </button>
+        </div>
+
+        <!-- Completed Actions Info -->
+        <div class="completed-action" *ngIf="request.status !== 'pending'">
+          <p class="action-status">
+            <span *ngIf="request.status === 'approved'" class="approved">
+              ✅ Approved
+            </span>
+            <span *ngIf="request.status === 'rejected'" class="declined">
+              ❌ Rejected
+            </span>
+            <span class="action-date">
+              <!-- TODO: Add reviewDate field to DTO -->
+            </span>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div *ngIf="filteredRequests.length > 0" class="results-summary">
+      <p>
+        Showing {{ filteredRequests.length }} of {{ requests.length }} requests
+        <span *ngIf="searchTerm || filterStatus !== 'all'"> (filtered)</span>
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Price Request Review Modal -->
+  <app-price-request-review-modal
+    *ngIf="selectedRequest"
+    [request]="selectedRequest"
+    [show]="showReviewModal"
+    (closed)="onReviewModalClosed($event)">
+  </app-price-request-review-modal>
+</div>

@@ -1,0 +1,173 @@
+
+    <div class="statement-detail-container">
+      <!-- Loading State -->
+      <div *ngIf="loadingService.isLoading(KEYS.STATEMENT)" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading statement...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h3>Unable to load statement</h3>
+        <p>{{ error }}</p>
+        <div class="error-actions">
+          <button class="btn btn-primary" (click)="loadStatement()">Try Again</button>
+          <a class="btn btn-secondary" routerLink="/consignor/statements">Back to Statements</a>
+        </div>
+      </div>
+
+      <!-- Statement Content -->
+      <div *ngIf="!loadingService.isLoading(KEYS.STATEMENT) && !error && statement" class="statement-content">
+        <!-- Header -->
+        <div class="statement-header">
+          <div class="header-nav">
+            <a routerLink="/consignor/statements" class="back-link">
+              ← Back to Statements
+            </a>
+          </div>
+          <div class="header-title">
+            <h1>{{ statement.periodLabel }} Statement</h1>
+            <div class="statement-number">{{ statement.statementNumber }}</div>
+          </div>
+          <div class="header-actions">
+            <button
+              class="btn btn-primary"
+              (click)="downloadPdf()"
+              [disabled]="!statement.hasPdf || loadingService.isLoading(KEYS.STATEMENT_PDF)">
+              <span *ngIf="loadingService.isLoading(KEYS.STATEMENT_PDF)">Downloading...</span>
+              <span *ngIf="!loadingService.isLoading(KEYS.STATEMENT_PDF)">
+                {{ statement.hasPdf ? '📄 Download PDF' : 'PDF Not Available' }}
+              </span>
+            </button>
+            <button
+              class="btn btn-secondary"
+              (click)="regenerateStatement()"
+              [disabled]="loadingService.isLoading(KEYS.STATEMENT_REGENERATE)">
+              <span *ngIf="loadingService.isLoading(KEYS.STATEMENT_REGENERATE)">Regenerating...</span>
+              <span *ngIf="!loadingService.isLoading(KEYS.STATEMENT_REGENERATE)">🔄 Regenerate</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Statement Info -->
+        <div class="statement-info-card">
+          <div class="info-grid">
+            <div class="info-item">
+              <label>consignor</label>
+              <span>{{ statement.providerName }}</span>
+            </div>
+            <div class="info-item">
+              <label>Shop</label>
+              <span>{{ statement.shopName }}</span>
+            </div>
+            <div class="info-item">
+              <label>Period</label>
+              <span>{{ formatDateRange(statement.periodStart, statement.periodEnd) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Status</label>
+              <span class="status-badge" [class]="getStatusClass(statement.status)">
+                {{ statement.status }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Generated</label>
+              <span>{{ formatDate(statement.generatedAt) }}</span>
+            </div>
+            <div class="info-item" *ngIf="statement.viewedAt">
+              <label>Last Viewed</label>
+              <span>{{ formatDate(statement.viewedAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="financial-summary">
+          <h2>Financial Summary</h2>
+          <div class="summary-grid">
+            <div class="summary-card opening">
+              <div class="summary-label">Opening Balance</div>
+              <div class="summary-value">{{ statement.openingBalance | currency }}</div>
+            </div>
+            <div class="summary-card sales">
+              <div class="summary-label">Total Sales</div>
+              <div class="summary-value">{{ statement.totalSales | currency }}</div>
+              <div class="summary-detail">{{ statement.itemsSold }} items sold</div>
+            </div>
+            <div class="summary-card earnings">
+              <div class="summary-label">Total Earnings</div>
+              <div class="summary-value">{{ statement.totalEarnings | currency }}</div>
+              <div class="summary-detail">Your commission</div>
+            </div>
+            <div class="summary-card payouts">
+              <div class="summary-label">Total Payouts</div>
+              <div class="summary-value">{{ statement.totalPayouts | currency }}</div>
+              <div class="summary-detail">{{ statement.payoutCount }} payouts</div>
+            </div>
+            <div class="summary-card closing">
+              <div class="summary-label">Closing Balance</div>
+              <div class="summary-value">{{ statement.closingBalance | currency }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sales Activity -->
+        <div *ngIf="statement.sales && statement.sales.length > 0" class="activity-section">
+          <h2>Sales Activity ({{ statement.sales.length }} items)</h2>
+          <div class="activity-table">
+            <div class="table-header">
+              <div class="table-cell">Date</div>
+              <div class="table-cell">Item</div>
+              <div class="table-cell">SKU</div>
+              <div class="table-cell">Sale Price</div>
+              <div class="table-cell">Commission</div>
+              <div class="table-cell">Your Cut</div>
+            </div>
+            <div
+              *ngFor="let sale of statement.sales; trackBy: trackBySaleDate"
+              class="table-row">
+              <div class="table-cell">{{ formatDate(sale.date) }}</div>
+              <div class="table-cell item-title">{{ sale.itemTitle }}</div>
+              <div class="table-cell sku">{{ sale.itemSku }}</div>
+              <div class="table-cell amount">{{ sale.salePrice | currency }}</div>
+              <div class="table-cell commission">{{ sale.commissionRate }}%</div>
+              <div class="table-cell earnings">{{ sale.earningsAmount | currency }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout Activity -->
+        <div *ngIf="statement.payouts && statement.payouts.length > 0" class="activity-section">
+          <h2>Payout Activity ({{ statement.payouts.length }} payouts)</h2>
+          <div class="activity-table">
+            <div class="table-header">
+              <div class="table-cell">Date</div>
+              <div class="table-cell">Payout #</div>
+              <div class="table-cell">Payment Method</div>
+              <div class="table-cell">Amount</div>
+            </div>
+            <div
+              *ngFor="let payout of statement.payouts; trackBy: trackByPayoutNumber"
+              class="table-row">
+              <div class="table-cell">{{ formatDate(payout.date) }}</div>
+              <div class="table-cell payout-number">{{ payout.payoutNumber }}</div>
+              <div class="table-cell payment-method">{{ payout.paymentMethod }}</div>
+              <div class="table-cell amount">{{ payout.amount | currency }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Activity Messages -->
+        <div *ngIf="statement.sales && statement.sales.length === 0" class="no-activity">
+          <h3>No Sales This Period</h3>
+          <p>There were no sales during this statement period.</p>
+        </div>
+
+        <div *ngIf="statement.payouts && statement.payouts.length === 0" class="no-activity">
+          <h3>No Payouts This Period</h3>
+          <p>There were no payouts processed during this statement period.</p>
+        </div>
+      </div>
+    </div>
+  

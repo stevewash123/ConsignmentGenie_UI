@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { InventoryListComponent } from './inventory-list.component';
 import { InventoryService } from '../../services/inventory.service';
@@ -86,13 +86,18 @@ describe('InventoryListComponent - Simplified Design', () => {
       'stop',
       'isLoading'
     ]);
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      queryParams: of({}),
+      params: of({})
+    });
 
     await TestBed.configureTestingModule({
       imports: [InventoryListComponent],
       providers: [
         { provide: InventoryService, useValue: inventoryServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: LoadingService, useValue: loadingServiceSpy }
+        { provide: LoadingService, useValue: loadingServiceSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

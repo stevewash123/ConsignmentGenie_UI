@@ -1,0 +1,223 @@
+
+    <app-owner-layout>
+      <div class="inventory-page">
+        <!-- Header -->
+        <div class="page-header">
+          <div class="header-content">
+            <h1>Inventory Management</h1>
+            <p>View and manage all inventory items</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary" (click)="createNewItem()">
+              <span class="btn-icon">📦</span>
+              Add New Item
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="searchQuery">Search</label>
+              <input
+                type="text"
+                id="searchQuery"
+                [(ngModel)]="searchQuery"
+                (keyup.enter)="applyFilters()"
+                placeholder="Search items by title, SKU, or description..."
+                class="filter-input">
+            </div>
+            <div class="filter-group">
+              <label for="selectedStatus">Status</label>
+              <select id="selectedStatus" [(ngModel)]="selectedStatus" (change)="applyFilters()" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="Available">Available</option>
+                <option value="Sold">Sold</option>
+                <option value="Removed">Removed</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="selectedCondition">Condition</label>
+              <select id="selectedCondition" [(ngModel)]="selectedCondition" (change)="applyFilters()" class="filter-select">
+                <option value="">All Conditions</option>
+                <option value="New">New</option>
+                <option value="LikeNew">Like New</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Poor">Poor</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="selectedCategory">Category</label>
+              <select id="selectedCategory" [(ngModel)]="selectedCategory" (change)="applyFilters()" class="filter-select">
+                <option value="">All Categories</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.name">{{ category.name }}</option>
+                }
+              </select>
+            </div>
+            <button class="btn-secondary" (click)="clearFilters()">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+          <div class="section-header">
+            <h2>Inventory Items</h2>
+            <div class="table-controls">
+              <select [(ngModel)]="pageSize" (change)="changePageSize()" class="page-size-select">
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container" *ngIf="!isInventoryLoading() && pagedResult(); else loadingInventory">
+            <table class="inventory-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th (click)="setSorting('sku')" class="sortable">
+                    SKU
+                    <span class="sort-indicator" [class.active]="sortBy === 'sku'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th (click)="setSorting('title')" class="sortable">
+                    Title
+                    <span class="sort-indicator" [class.active]="sortBy === 'title'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th>Category</th>
+                  <th>Condition</th>
+                  <th (click)="setSorting('price')" class="sortable">
+                    Price
+                    <span class="sort-indicator" [class.active]="sortBy === 'price'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th>Status</th>
+                  <th>Consignor</th>
+                  <th (click)="setSorting('receivedDate')" class="sortable">
+                    Received
+                    <span class="sort-indicator" [class.active]="sortBy === 'receivedDate'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of itemsResult()!.items" class="item-row">
+                  <td class="image-cell">
+                    @if (item.primaryImageUrl) {
+                      <img [src]="item.primaryImageUrl" [alt]="item.title" class="item-thumbnail">
+                    } @else {
+                      <div class="no-image">
+                        📷
+                      </div>
+                    }
+                  </td>
+                  <td class="sku-cell">{{ item.sku }}</td>
+                  <td class="title-cell">
+                    <div class="item-info">
+                      <div class="item-title">{{ item.title }}</div>
+                      <div class="item-description" *ngIf="item.description">{{ item.description | slice:0:50 }}{{ item.description.length > 50 ? '...' : '' }}</div>
+                    </div>
+                  </td>
+                  <td>{{ item.category }}</td>
+                  <td class="condition-cell">
+                    <span class="condition-badge" [class]="getConditionClass(item.condition)">
+                      {{ getConditionLabel(item.condition) }}
+                    </span>
+                  </td>
+                  <td class="price-cell">
+                    <div class="item-price">\${{ item.price | number:'1.2-2' }}</div>
+                  </td>
+                  <td class="status-cell">
+                    <span class="status-badge" [class]="'status-' + item.status.toLowerCase()">
+                      {{ item.status }}
+                    </span>
+                  </td>
+                  <td class="consignor-cell">
+                    <div class="consignor-info">
+                      <div class="consignor-name">{{ item.consignorName }}</div>
+                    </div>
+                  </td>
+                  <td class="date-cell">
+                    {{ item.receivedDate | date:'MMM d, y' }}
+                  </td>
+                  <td class="actions-cell">
+                    <div class="action-buttons">
+                      <button class="btn-icon" (click)="viewItem(item.itemId)" title="View Details">
+                        👁️
+                      </button>
+                      <button class="btn-icon" (click)="editItem(item.itemId)" title="Edit">
+                        ✏️
+                      </button>
+                      @if (item.status === 'Available') {
+                        <button class="btn-icon" (click)="markAsRemoved(item)" title="Mark as Removed">
+                          📦
+                        </button>
+                      }
+                      <button class="btn-icon danger" (click)="deleteItem(item)" title="Delete">
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination" *ngIf="itemsResult()!.totalPages > 1">
+              <button
+                class="page-btn"
+                [disabled]="currentPage() === 1"
+                (click)="goToPage(currentPage() - 1)">
+                Previous
+              </button>
+
+              <div class="page-numbers">
+                <button
+                  *ngFor="let page of visiblePages()"
+                  class="page-btn"
+                  [class.active]="page === currentPage()"
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              </div>
+
+              <button
+                class="page-btn"
+                [disabled]="currentPage() === itemsResult()!.totalPages"
+                (click)="goToPage(currentPage() + 1)">
+                Next
+              </button>
+            </div>
+          </div>
+
+          <ng-template #loadingInventory>
+            <div class="loading-state" *ngIf="isInventoryLoading()">
+              <div class="loading-spinner"></div>
+              <p>Loading inventory...</p>
+            </div>
+            <div class="empty-state" *ngIf="!isInventoryLoading() && (!itemsResult() || itemsResult()!.items.length === 0)">
+              <p>No inventory items found.</p>
+              <button class="btn-primary" (click)="createNewItem()">
+                <span class="btn-icon">📦</span>
+                Add Your First Item
+              </button>
+            </div>
+          </ng-template>
+        </div>
+
+      </div>
+    </app-owner-layout>
+  

@@ -5,9 +5,7 @@ import { NotificationPreferencesComponent } from '../../shared/components/notifi
   selector: 'app-admin-notification-preferences',
   standalone: true,
   imports: [NotificationPreferencesComponent],
-  template: `
-    <app-notification-preferences role="admin"></app-notification-preferences>
-  `,
+  templateUrl: './admin-notification-preferences.component.html',
   styles: []
 })
 export class AdminNotificationPreferencesComponent {}

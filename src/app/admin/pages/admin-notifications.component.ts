@@ -5,9 +5,7 @@ import { NotificationCenterComponent } from '../../shared/components/notificatio
   selector: 'app-admin-notifications',
   standalone: true,
   imports: [NotificationCenterComponent],
-  template: `
-    <app-notification-center role="admin"></app-notification-center>
-  `,
+  templateUrl: './admin-notifications.component.html',
   styles: []
 })
 export class AdminNotificationsComponent {}

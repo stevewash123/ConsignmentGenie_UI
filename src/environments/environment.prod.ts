@@ -4,5 +4,7 @@ export const environment = {
   stripePublishableKey: 'pk_live_your_stripe_key_here',
   appName: 'ConsignmentGenie',
   supportEmail: 'support@consignmentgenie.com',
-  squareApplicationId: 'sq0idp-XXXXXXXXXXXXXXXXXXXXXXXX'
+  squareApplicationId: 'sq0idp-XXXXXXXXXXXXXXXXXXXXXXXX',
+  googleClientId: 'your-production-google-client-id.googleusercontent.com',
+  facebookAppId: 'your-production-facebook-app-id'
 };

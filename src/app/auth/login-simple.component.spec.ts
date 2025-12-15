@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, EMPTY } from 'rxjs';
 import { LoginSimpleComponent } from './login-simple.component';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../shared/services/loading.service';
@@ -14,7 +14,9 @@ describe('LoginSimpleComponent', () => {
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   beforeEach(async () => {
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: EMPTY // Observable that emits no values
+    });
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['login']);
     const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
       'start',
@@ -42,6 +44,8 @@ describe('LoginSimpleComponent', () => {
     mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
 
     mockLoadingService.isLoading.and.returnValue(false);
+    mockRouter.createUrlTree.and.returnValue({} as any); // Mock UrlTree
+    mockRouter.serializeUrl.and.returnValue(''); // Mock serialized URL
     fixture.detectChanges();
   });
 

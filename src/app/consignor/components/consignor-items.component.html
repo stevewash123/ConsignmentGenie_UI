@@ -1,0 +1,139 @@
+
+    <div class="consignor-items">
+      <!-- Navigation Header -->
+      <div class="nav-header">
+        <div class="header-content">
+          <h1>Main Street Consignment</h1>
+          <nav class="nav-links">
+            <a routerLink="/consignor/dashboard" routerLinkActive="active">Dashboard</a>
+            <a routerLink="/consignor/items" routerLinkActive="active">Items</a>
+            <a routerLink="/consignor/sales" routerLinkActive="active">Sales</a>
+            <a routerLink="/consignor/payouts" routerLinkActive="active">Payouts</a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <h2>My Items</h2>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="filter-tabs">
+          <button
+            class="tab"
+            [class.active]="selectedStatus === null"
+            (click)="filterByStatus(null)">
+            All ({{totalItemsCount}})
+          </button>
+          <button
+            class="tab"
+            [class.active]="selectedStatus === 'Available'"
+            (click)="filterByStatus('Available')">
+            Available ({{availableCount}})
+          </button>
+          <button
+            class="tab"
+            [class.active]="selectedStatus === 'Sold'"
+            (click)="filterByStatus('Sold')">
+            Sold ({{soldCount}})
+          </button>
+          <button
+            class="tab"
+            [class.active]="selectedStatus === 'Removed'"
+            (click)="filterByStatus('Removed')">
+            Removed ({{removedCount}})
+          </button>
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-table" *ngIf="itemsResult">
+          <div class="table-header">
+            <div class="col photo-col">Photo</div>
+            <div class="col item-col">Item</div>
+            <div class="col price-col">Price</div>
+            <div class="col earnings-col">My Earnings</div>
+            <div class="col status-col">Status</div>
+          </div>
+
+          <div class="table-row"
+               *ngFor="let item of itemsResult.items"
+               [routerLink]="['/consignor/items', item.itemId]">
+            <div class="col photo-col">
+              <div class="item-photo">
+                <img *ngIf="item.primaryImageUrl"
+                     [src]="item.primaryImageUrl"
+                     [alt]="item.title"
+                     loading="lazy">
+                <div *ngIf="!item.primaryImageUrl" class="photo-placeholder">📷</div>
+              </div>
+            </div>
+            <div class="col item-col">
+              <div class="item-info">
+                <div class="item-title">{{item.title}}</div>
+                <div class="item-sku">{{item.sku}}</div>
+              </div>
+            </div>
+            <div class="col price-col">
+              \${{item.price.toFixed(2)}}
+            </div>
+            <div class="col earnings-col">
+              \${{item.myEarnings.toFixed(2)}}
+            </div>
+            <div class="col status-col">
+              <span class="status-badge" [class]="getStatusClass(item.status)">
+                {{getStatusDisplay(item.status)}}
+              </span>
+            </div>
+          </div>
+
+          <!-- No Items Message -->
+          <div class="no-items" *ngIf="itemsResult.items.length === 0">
+            <p>No items found.</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="itemsResult && itemsResult.totalPages > 1">
+          <button
+            class="pagination-btn"
+            [disabled]="!itemsResult.hasPrevious"
+            (click)="goToPage(currentPage - 1)">
+            ← Previous
+          </button>
+
+          <span class="pagination-info">
+            Page {{currentPage}} of {{itemsResult.totalPages}}
+          </span>
+
+          <button
+            class="pagination-btn"
+            [disabled]="!itemsResult.hasNext"
+            (click)="goToPage(currentPage + 1)">
+            Next →
+          </button>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="footer-info">
+          <div class="commission-info">
+            Your commission rate: {{commissionRate}}%
+          </div>
+          <div class="contact-info">
+            Questions about an item? Contact the shop at (555) 123-4567
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.ITEMS_LIST)">
+        <p>Loading items...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="error" *ngIf="error">
+        <p>{{error}}</p>
+        <button (click)="loadItems()">Retry</button>
+      </div>
+    </div>
+  

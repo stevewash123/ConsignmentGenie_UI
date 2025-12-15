@@ -16,68 +16,7 @@ export interface SuggestionFormData {
   selector: 'app-suggestion-box-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2>💡 Suggestion Box</h2>
-          <button class="close-button" (click)="onClose()">×</button>
-        </div>
-
-        <div class="modal-body">
-          <p class="description">
-            Help us improve ConsignmentGenie! Share your ideas, report issues, or suggest new features.
-            Your feedback is valuable to us.
-          </p>
-
-          <form (ngSubmit)="onSubmit()" #suggestionForm="ngForm">
-            <div class="form-group">
-              <label for="suggestionType">Suggestion Type <span class="required">*</span></label>
-              <select
-                id="suggestionType"
-                [(ngModel)]="formData().type"
-                name="type"
-                class="form-control"
-                required>
-                <option value="">Select a type...</option>
-                <option *ngFor="let type of suggestionTypes" [value]="type.value">
-                  {{ type.label }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="suggestionMessage">Your Suggestion <span class="required">*</span></label>
-              <textarea
-                id="suggestionMessage"
-                [(ngModel)]="formData().message"
-                name="message"
-                class="form-control"
-                placeholder="Please describe your suggestion in detail (up to 500 words)..."
-                rows="8"
-                maxlength="2000"
-                required>
-              </textarea>
-              <div class="character-count">
-                {{ formData().message.length }}/2000 characters
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-cancel" (click)="onClose()">Cancel</button>
-              <button
-                type="submit"
-                class="btn btn-submit"
-                [disabled]="!suggestionForm.valid || isSubmitting()"
-                [class.loading]="isSubmitting()">
-                {{ isSubmitting() ? 'Sending...' : 'Send Suggestion' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './suggestion-box-modal.component.html',
   styles: [`
     .modal-overlay {
       position: fixed;

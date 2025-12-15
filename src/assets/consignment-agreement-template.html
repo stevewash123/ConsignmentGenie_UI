@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consignment Agreement Template</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1in;
+        }
+
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+
+        .title {
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .date-line {
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 12pt;
+        }
+
+        .blank-line {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 200px;
+            margin: 0 5px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .info-section {
+            border: 1px solid #000;
+            padding: 15px;
+        }
+
+        .info-section h3 {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 8px;
+            margin: -15px -15px 15px -15px;
+        }
+
+        .field-line {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-label {
+            min-width: 80px;
+            font-weight: bold;
+        }
+
+        .field-blank {
+            flex: 1;
+            border-bottom: 1px solid #000;
+            margin-left: 10px;
+            height: 20px;
+        }
+
+        .terms-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .terms-field {
+            text-align: center;
+        }
+
+        .terms-field .label {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .terms-field .blank {
+            border-bottom: 1px solid #000;
+            height: 25px;
+            margin-bottom: 5px;
+        }
+
+        .legal-terms {
+            font-size: 11pt;
+            text-align: justify;
+            line-height: 1.3;
+        }
+
+        .legal-terms ol {
+            padding-left: 20px;
+        }
+
+        .legal-terms li {
+            margin-bottom: 8px;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .signature-block {
+            text-align: center;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #000;
+            height: 25px;
+            margin-bottom: 10px;
+        }
+
+        .signature-label {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .date-signature {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .date-field {
+            border-bottom: 1px solid #000;
+            width: 120px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Consignment Agreement</div>
+    </div>
+
+    <div class="date-line">
+        Date: <span class="blank-line"></span>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-section">
+            <h3>Shop Information</h3>
+            <div class="field-line">
+                <span class="field-label">Shop Name:</span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label">Address:</span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label"></span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label">Phone:</span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label">Email:</span>
+                <div class="field-blank"></div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Consignor Information</h3>
+            <div class="field-line">
+                <span class="field-label">Name:</span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label">Address:</span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label"></span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label">Phone:</span>
+                <div class="field-blank"></div>
+            </div>
+            <div class="field-line">
+                <span class="field-label">Email:</span>
+                <div class="field-blank"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Consignment Terms</div>
+        <div class="terms-grid">
+            <div class="terms-field">
+                <div class="label">Shop Commission</div>
+                <div class="blank"></div>
+                <div>% of sale price</div>
+            </div>
+            <div class="terms-field">
+                <div class="label">Consignor Portion</div>
+                <div class="blank"></div>
+                <div>% of sale price</div>
+            </div>
+            <div class="terms-field">
+                <div class="label">Consignment Period</div>
+                <div class="blank"></div>
+                <div>days</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <strong>Unsold Items Policy:</strong>
+            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox"> Return to consignor
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox"> Donate to charity
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox"> Dispose of items
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Terms and Conditions</div>
+        <div class="legal-terms">
+            <ol>
+                <li><strong>Consignment Relationship:</strong> This agreement establishes a consignment relationship between the Shop and Consignor. The Shop agrees to accept items from the Consignor for the purpose of display and sale to the public.</li>
+
+                <li><strong>Item Acceptance:</strong> The Shop reserves the right to refuse any items that do not meet quality standards, are not in good condition, or are not suitable for the shop's clientele. All items must be clean, functional, and in sellable condition.</li>
+
+                <li><strong>Pricing and Markdowns:</strong> Initial pricing will be mutually agreed upon between Shop and Consignor. The Shop reserves the right to mark down prices after 30 days at 10% intervals to facilitate sale. Consignor will be notified of significant markdowns when possible.</li>
+
+                <li><strong>Payment Terms:</strong> Consignor payments will be made monthly for items sold during the previous month. Payments will be made by the 15th of each month via check or other agreed-upon method. A detailed sales report will accompany each payment.</li>
+
+                <li><strong>Liability and Insurance:</strong> While the Shop will exercise reasonable care in handling consigned items, the Shop is not liable for loss, theft, or damage due to fire, flood, burglary, or other causes beyond the Shop's control. Consignor is advised to maintain personal insurance coverage for consigned items.</li>
+
+                <li><strong>Item Retrieval:</strong> Unsold items must be retrieved within 10 days after the consignment period expires. Items not retrieved within this time frame will be subject to the Unsold Items Policy selected above. The Shop is not responsible for storage of items beyond the agreed pickup date.</li>
+
+                <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice. Upon termination, Consignor must retrieve all unsold items within 10 days. Shop will remit payment for any items sold during the notice period.</li>
+
+                <li><strong>Shop Rights:</strong> The Shop has the right to display items in any manner deemed appropriate and may relocate items within the store as needed. The Shop may participate in store-wide sales and promotional events unless specifically requested otherwise by Consignor.</li>
+
+                <li><strong>Record Keeping:</strong> The Shop will maintain accurate records of all consigned items, including item descriptions, prices, and sale dates. Consignor may request to view these records during normal business hours.</li>
+
+                <li><strong>Disputes:</strong> Any disputes arising from this agreement will be resolved through good faith negotiation. If resolution cannot be reached, disputes will be subject to the laws of the state where the Shop is located.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-block">
+            <div class="signature-label">Shop Owner / Manager</div>
+            <div class="signature-line"></div>
+            <div>Signature</div>
+            <div class="date-signature">
+                <span>Date:</span>
+                <div class="date-field"></div>
+            </div>
+        </div>
+
+        <div class="signature-block">
+            <div class="signature-label">Consignor</div>
+            <div class="signature-line"></div>
+            <div>Signature</div>
+            <div class="date-signature">
+                <span>Date:</span>
+                <div class="date-field"></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; font-size: 10pt; color: #666;">
+        <em>This agreement constitutes the entire agreement between the parties and supersedes all prior negotiations, representations, or agreements. Any modifications must be made in writing and signed by both parties.</em>
+    </div>
+</body>
+</html>

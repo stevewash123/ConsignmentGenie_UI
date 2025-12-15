@@ -1,54 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { AppLayoutComponent } from '../../shared/components/app-layout.component';
+import { filter } from 'rxjs/operators';
+
+interface SettingsSubMenuItem {
+  id: string;
+  label: string;
+  route: string;
+  description: string;
+}
 
 interface SettingsMenuItem {
   id: string;
   label: string;
   icon: string;
-  route: string;
+  route?: string;
   description: string;
+  children?: SettingsSubMenuItem[];
 }
 
 @Component({
   selector: 'app-settings-layout',
   standalone: true,
   imports: [CommonModule, RouterModule, AppLayoutComponent],
-  template: `
-    <app-layout>
-      <div class="settings-layout">
-        <!-- Header -->
-        <div class="settings-header">
-          <h1>Settings</h1>
-          <p>Manage your shop configuration and preferences</p>
-        </div>
-
-        <!-- Main Content -->
-        <div class="settings-container">
-          <!-- Sidebar Navigation -->
-          <nav class="settings-sidebar">
-            <div class="sidebar-menu">
-              <a
-                *ngFor="let item of menuItems"
-                [routerLink]="['/owner/settings', item.route]"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{exact: item.route === ''}"
-                class="menu-item">
-                <span class="menu-icon">{{ item.icon }}</span>
-                <span class="menu-label">{{ item.label }}</span>
-              </a>
-            </div>
-          </nav>
-
-          <!-- Content Area -->
-          <main class="settings-content">
-            <router-outlet></router-outlet>
-          </main>
-        </div>
-      </div>
-    </app-layout>
-  `,
+  templateUrl: './settings-layout.component.html',
   styles: [`
     .settings-layout {
       max-width: 1200px;
@@ -118,6 +94,53 @@ interface SettingsMenuItem {
       background: #eff6ff;
       color: #1d4ed8;
       border-left: 3px solid #3b82f6;
+    }
+
+    .menu-item .expand-icon {
+      margin-left: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .menu-item .expand-icon.expanded {
+      transform: rotate(90deg);
+    }
+
+    .submenu {
+      background: #f8fafc;
+      border-left: 2px solid #e5e7eb;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .submenu.expanded {
+      max-height: 500px;
+    }
+
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem 0.75rem 2rem;
+      color: #6b7280;
+      text-decoration: none;
+      border-bottom: 1px solid #f3f4f6;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .submenu-item:last-child {
+      border-bottom: none;
+    }
+
+    .submenu-item:hover {
+      background: #f1f5f9;
+      color: #374151;
+    }
+
+    .submenu-item.active {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-left: 2px solid #3b82f6;
     }
 
     .menu-icon {
@@ -196,70 +219,165 @@ interface SettingsMenuItem {
     }
   `]
 })
-export class SettingsLayoutComponent {
+export class SettingsLayoutComponent implements OnInit {
+  expandedSections: Set<string> = new Set();
+
   menuItems: SettingsMenuItem[] = [
     {
-      id: 'hub',
-      label: 'Overview',
-      icon: '🏠',
-      route: '',
-      description: 'Settings overview'
-    },
-    {
-      id: 'profile',
-      label: 'Shop Profile',
+      id: 'store-profile',
+      label: 'Store Profile',
       icon: '🏪',
-      route: 'profile',
-      description: 'Shop identity & contact info'
+      description: 'Shop branding, contact info, domain',
+      children: [
+        {
+          id: 'basic-info',
+          label: 'Basic Information',
+          route: 'store-profile/basic-info',
+          description: 'Shop name, address, contact details'
+        },
+        {
+          id: 'branding',
+          label: 'Branding',
+          route: 'store-profile/branding',
+          description: 'Logo, colors, shop description'
+        },
+        {
+          id: 'domain-settings',
+          label: 'Domain Settings',
+          route: 'store-profile/domain-settings',
+          description: 'Custom domain configuration'
+        }
+      ]
     },
     {
-      id: 'business',
-      label: 'Business',
-      icon: '💼',
-      route: 'business',
-      description: 'Commission, tax, payouts'
+      id: 'business-settings',
+      label: 'Business Settings',
+      icon: '⚙️',
+      description: 'Tax rates, receipts, policies',
+      children: [
+        {
+          id: 'tax-settings',
+          label: 'Tax Settings',
+          route: 'business-settings/tax-settings',
+          description: 'Tax rates and calculations'
+        },
+        {
+          id: 'receipt-settings',
+          label: 'Receipt Settings',
+          route: 'business-settings/receipt-settings',
+          description: 'Receipt templates and formatting'
+        },
+        {
+          id: 'policies',
+          label: 'Shop Policies',
+          route: 'business-settings/policies',
+          description: 'Return, refund, and general policies'
+        }
+      ]
     },
     {
-      id: 'storefront',
-      label: 'Storefront',
-      icon: '🛒',
-      route: 'storefront',
-      description: 'Sales channels'
-    },
-    {
-      id: 'accounting',
-      label: 'Accounting',
-      icon: '📊',
-      route: 'accounting',
-      description: 'QuickBooks & reports'
-    },
-    {
-      id: 'consignors',
-      label: 'Consignors',
+      id: 'consignor-settings',
+      label: 'Consignor Settings',
       icon: '👥',
-      route: 'consignors',
-      description: 'Store code & invites'
+      description: 'Default terms, agreements, payout settings',
+      children: [
+        {
+          id: 'defaults',
+          label: 'Default Terms',
+          route: 'consignor-settings/defaults',
+          description: 'Commission rates, time periods'
+        },
+        {
+          id: 'agreements',
+          label: 'Agreements',
+          route: 'consignor-settings/agreements',
+          description: 'Agreement templates and settings'
+        },
+        {
+          id: 'payout-settings',
+          label: 'Payout Settings',
+          route: 'consignor-settings/payout-settings',
+          description: 'Payout schedules and preferences'
+        }
+      ]
     },
     {
-      id: 'subscription',
-      label: 'Subscription',
-      icon: '💳',
-      route: 'subscription',
-      description: 'Plan & billing'
+      id: 'consignor-management',
+      label: 'Consignor Management',
+      icon: '👥',
+      description: 'Onboarding, invitations, store codes, approvals',
+      children: [
+        {
+          id: 'store-codes',
+          label: 'Store Codes & Invitations',
+          route: 'consignor-management/store-codes',
+          description: 'Store code generation and invitation management'
+        },
+        {
+          id: 'approval-workflow',
+          label: 'Approval Workflow',
+          route: 'consignor-management/approval-workflow',
+          description: 'Auto-approval settings and pending approvals'
+        },
+        {
+          id: 'permissions',
+          label: 'Default Permissions',
+          route: 'consignor-management/permissions',
+          description: 'Default inventory and analytics permissions'
+        }
+      ]
     },
     {
       id: 'integrations',
       label: 'Integrations',
       icon: '🔗',
-      route: 'integrations',
-      description: 'Square, QuickBooks & more'
+      description: 'External services and connections',
+      children: [
+        {
+          id: 'inventory-sales',
+          label: 'Inventory & Sales',
+          route: 'integrations/inventory-sales',
+          description: 'Square integration for inventory and sales'
+        },
+        {
+          id: 'accounting',
+          label: 'Accounting',
+          route: 'integrations/accounting',
+          description: 'QuickBooks, Xero integrations'
+        },
+        {
+          id: 'payments',
+          label: 'Payment Processing',
+          route: 'integrations/payments',
+          description: 'Stripe, Square payment setup'
+        },
+        {
+          id: 'banking',
+          label: 'Banking',
+          route: 'integrations/banking',
+          description: 'Bank connections via Plaid'
+        }
+      ]
     },
     {
-      id: 'account',
+      id: 'account-settings',
       label: 'Account',
       icon: '👤',
-      route: 'account',
-      description: 'Profile & security'
+      description: 'Account notifications and license information',
+      children: [
+        {
+          id: 'notifications',
+          label: 'Notifications',
+          route: 'account-settings/notifications',
+          description: 'Personal notification preferences'
+        },
+        {
+          id: 'license',
+          label: 'License',
+          route: 'account-settings/license',
+          description: 'Subscription and license information'
+        }
+      ]
     }
   ];
 
@@ -267,4 +385,51 @@ export class SettingsLayoutComponent {
     private router: Router,
     private activatedRoute: ActivatedRoute
   ) {}
+
+  ngOnInit(): void {
+    // Initialize expanded sections based on current route
+    this.updateExpandedSectionFromRoute();
+
+    // Listen for route changes
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.updateExpandedSectionFromRoute();
+    });
+  }
+
+  toggleSection(sectionId: string): void {
+    if (this.expandedSections.has(sectionId)) {
+      this.expandedSections.delete(sectionId);
+    } else {
+      this.expandedSections.add(sectionId);
+    }
+  }
+
+  isExpanded(sectionId: string): boolean {
+    return this.expandedSections.has(sectionId);
+  }
+
+  navigateToSubItem(subItem: SettingsSubMenuItem): void {
+    this.router.navigate([subItem.route], { relativeTo: this.activatedRoute });
+  }
+
+  private updateExpandedSectionFromRoute(): void {
+    const currentUrl = this.router.url;
+
+    // Clear previous state
+    this.expandedSections.clear();
+
+    // Find which section should be expanded based on current route
+    for (const item of this.menuItems) {
+      if (item.children) {
+        for (const child of item.children) {
+          if (currentUrl.includes(child.route)) {
+            this.expandedSections.add(item.id);
+            break;
+          }
+        }
+      }
+    }
+  }
 }

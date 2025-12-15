@@ -1,0 +1,98 @@
+
+    <div class="notification-bell" #bellContainer>
+      <!-- Bell Icon with Badge -->
+      <button
+        class="bell-button"
+        (click)="toggleDropdown()"
+        [class.active]="isDropdownOpen"
+        type="button">
+        <span class="bell-icon">🔔</span>
+        <span
+          *ngIf="unreadCount > 0"
+          class="notification-badge">
+          {{ unreadCount > 99 ? '99+' : unreadCount }}
+        </span>
+      </button>
+
+      <!-- Dropdown -->
+      <div
+        *ngIf="isDropdownOpen"
+        class="notification-dropdown"
+        (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="dropdown-header">
+          <h3>Notifications</h3>
+          <div class="header-actions">
+            <button
+              *ngIf="unreadCount > 0"
+              class="mark-all-read-btn"
+              (click)="markAllAsRead()"
+              [disabled]="loadingService.isLoading(loadingKey)">
+              Mark all read
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="loadingService.isLoading(loadingKey)" class="dropdown-loading">
+          <div class="loading-spinner"></div>
+          <p>Loading notifications...</p>
+        </div>
+
+        <!-- Notifications List -->
+        <div *ngIf="!loadingService.isLoading(loadingKey)" class="notifications-list">
+          <div
+            *ngFor="let notification of recentNotifications; trackBy: trackByNotificationId"
+            class="notification-item"
+            [class.unread]="!notification.isRead"
+            (click)="handleNotificationClick(notification)">
+
+            <!-- Icon -->
+            <div class="notification-icon" [ngClass]="getNotificationIconClass(notification.type)">
+              {{ getNotificationIcon(notification.type) }}
+            </div>
+
+            <!-- Content -->
+            <div class="notification-content">
+              <div class="notification-title">{{ notification.title }}</div>
+              <div class="notification-message">{{ notification.message }}</div>
+              <div class="notification-time">{{ notification.timeAgo }}</div>
+            </div>
+
+            <!-- Mark as read button -->
+            <button
+              *ngIf="!notification.isRead"
+              class="mark-read-btn"
+              (click)="markAsRead(notification, $event)"
+              title="Mark as read">
+              ✓
+            </button>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="recentNotifications.length === 0" class="empty-state">
+            <div class="empty-icon">🔔</div>
+            <p>No notifications</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="dropdown-footer">
+          <a
+            [routerLink]="'/' + role + '/notifications'"
+            class="view-all-link"
+            (click)="closeDropdown()">
+            View All Notifications
+          </a>
+        </div>
+      </div>
+
+      <!-- Backdrop -->
+      <div
+        *ngIf="isDropdownOpen"
+        class="dropdown-backdrop"
+        (click)="closeDropdown()">
+      </div>
+    </div>
+  

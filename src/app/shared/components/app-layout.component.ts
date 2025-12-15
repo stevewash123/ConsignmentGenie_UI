@@ -7,17 +7,7 @@ import { AppFooterComponent } from './app-footer.component';
   selector: 'app-layout',
   standalone: true,
   imports: [CommonModule, AppHeaderComponent, AppFooterComponent],
-  template: `
-    <div class="app-layout">
-      <app-header></app-header>
-
-      <main class="main-content">
-        <ng-content></ng-content>
-      </main>
-
-      <app-footer></app-footer>
-    </div>
-  `,
+  templateUrl: './app-layout.component.html',
   styles: [`
     .app-layout {
       min-height: 100vh;

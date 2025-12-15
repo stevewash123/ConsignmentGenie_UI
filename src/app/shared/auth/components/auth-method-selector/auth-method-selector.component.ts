@@ -16,57 +16,7 @@ export interface CredentialsEvent {
   selector: 'app-auth-method-selector',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="auth-method-selector">
-      <!-- OAuth consignors -->
-      <div class="oauth-consignors" *ngIf="availableconsignors().length > 0">
-        <button
-          *ngFor="let consignor of availableconsignors()"
-          type="button"
-          class="consignor-button"
-          [class]="'consignor-' + consignor.id"
-          (click)="handleProviderAuth(consignor.id)"
-          [disabled]="isLoading()">
-          <span class="consignor-icon">{{ consignor.icon }}</span>
-          <span class="consignor-text">Continue with {{ consignor.name }}</span>
-        </button>
-      </div>
-
-      <!-- Divider (only shown if both OAuth and email/password are available) -->
-      <div class="auth-divider" *ngIf="availableconsignors().length > 0 && showEmailPassword">
-        <hr class="divider-line">
-        <span class="divider-text">or</span>
-        <hr class="divider-line">
-      </div>
-
-      <!-- Email/Password Section -->
-      <div class="email-password-section" *ngIf="showEmailPassword">
-        <div class="form-group">
-          <label for="auth-email">Email</label>
-          <input
-            type="email"
-            id="auth-email"
-            class="form-input"
-            placeholder="Enter your email"
-            [(ngModel)]="email"
-            (input)="onCredentialsChange()"
-            [disabled]="isLoading()">
-        </div>
-
-        <div class="form-group">
-          <label for="auth-password">Password</label>
-          <input
-            type="password"
-            id="auth-password"
-            class="form-input"
-            placeholder="Enter your password"
-            [(ngModel)]="password"
-            (input)="onCredentialsChange()"
-            [disabled]="isLoading()">
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './auth-method-selector.component.html',
   styles: [`
     .auth-method-selector {
       width: 100%;

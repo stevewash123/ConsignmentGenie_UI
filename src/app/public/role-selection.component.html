@@ -1,0 +1,58 @@
+
+    <div class="role-selection-page">
+      <!-- Header -->
+      <header class="header">
+        <div class="container">
+          <h1 class="logo">Consignment Genie</h1>
+          <nav class="nav">
+            <a routerLink="/login" class="nav-link">Sign In</a>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Role Selection -->
+      <main class="selection-main">
+        <div class="container">
+          <div class="selection-header">
+            <h2>Create Your Account</h2>
+            <p>Choose how you want to get started with Consignment Genie</p>
+          </div>
+
+          <div class="role-options">
+            <!-- Owner Option -->
+            <a routerLink="/signup/owner" class="role-card owner-card">
+              <div class="role-icon">🏪</div>
+              <h3>Open a Consignment Shop</h3>
+              <p>Start your own consignment business. Manage consignors, track inventory, and process sales all in one place.</p>
+              <ul class="feature-list">
+                <li>Set up your shop instantly</li>
+                <li>Manage consignors and inventory</li>
+                <li>Process sales and payouts</li>
+                <li>Full business dashboard</li>
+              </ul>
+              <div class="cta-button">Get Started</div>
+            </a>
+
+            <!-- consignor Option -->
+            <a routerLink="/signup/consignor" class="role-card consignor-card">
+              <div class="role-icon">🎨</div>
+              <h3>Consign Items at a Shop</h3>
+              <p>Join an existing consignment shop to sell your items. Track your inventory and earnings with ease.</p>
+              <ul class="feature-list">
+                <li>Quick and easy signup</li>
+                <li>Submit items for consignment</li>
+                <li>Track your sales and earnings</li>
+                <li>Get paid automatically</li>
+              </ul>
+              <div class="cta-button">Join a Shop</div>
+            </a>
+          </div>
+
+          <!-- Login Link -->
+          <div class="login-section">
+            <p>Already have an account? <a routerLink="/login">Sign in here</a></p>
+          </div>
+        </div>
+      </main>
+    </div>
+  

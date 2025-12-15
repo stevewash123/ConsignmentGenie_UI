@@ -1,0 +1,198 @@
+
+    <div class="profile-page">
+      <div class="container">
+        <div class="profile-card">
+          <div class="header">
+            <a routerLink="/signup/owner" class="back-link">← Back</a>
+            <h1>Complete Your Profile</h1>
+          </div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <!-- Business Information Section -->
+            <div class="form-section">
+              <h3>Business Information</h3>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Owner Name *</label>
+                  <input
+                    id="fullName"
+                    type="text"
+                    formControlName="fullName"
+                    [class.error]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched"
+                    placeholder="John Smith">
+                  <div class="error-message"
+                       *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+                    Owner name is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="phone">Phone</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    formControlName="phone"
+                    placeholder="(555) 123-4567">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="shopName">Business/Shop Name *</label>
+                <input
+                  id="shopName"
+                  type="text"
+                  formControlName="shopName"
+                  [class.error]="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched"
+                  placeholder="Main Street Consignment">
+                <div class="error-message"
+                     *ngIf="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched">
+                  Business name is required
+                </div>
+              </div>
+            </div>
+
+            <!-- Business Address Section -->
+            <div class="form-section">
+              <h3>Business Address</h3>
+
+              <div class="form-group">
+                <label for="streetAddress">Street Address *</label>
+                <input
+                  id="streetAddress"
+                  type="text"
+                  formControlName="streetAddress"
+                  [class.error]="profileForm.get('streetAddress')?.invalid && profileForm.get('streetAddress')?.touched"
+                  placeholder="123 Main Street">
+                <div class="error-message"
+                     *ngIf="profileForm.get('streetAddress')?.invalid && profileForm.get('streetAddress')?.touched">
+                  Street address is required
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="city">City *</label>
+                  <input
+                    id="city"
+                    type="text"
+                    formControlName="city"
+                    [class.error]="profileForm.get('city')?.invalid && profileForm.get('city')?.touched"
+                    placeholder="Your City">
+                  <div class="error-message"
+                       *ngIf="profileForm.get('city')?.invalid && profileForm.get('city')?.touched">
+                    City is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="state">State *</label>
+                  <select
+                    id="state"
+                    formControlName="state"
+                    [class.error]="profileForm.get('state')?.invalid && profileForm.get('state')?.touched">
+                    <option value="">Select State</option>
+                    <option value="AL">AL - Alabama</option>
+                    <option value="AK">AK - Alaska</option>
+                    <option value="AZ">AZ - Arizona</option>
+                    <option value="AR">AR - Arkansas</option>
+                    <option value="CA">CA - California</option>
+                    <option value="CO">CO - Colorado</option>
+                    <option value="CT">CT - Connecticut</option>
+                    <option value="DE">DE - Delaware</option>
+                    <option value="FL">FL - Florida</option>
+                    <option value="GA">GA - Georgia</option>
+                    <option value="HI">HI - Hawaii</option>
+                    <option value="ID">ID - Idaho</option>
+                    <option value="IL">IL - Illinois</option>
+                    <option value="IN">IN - Indiana</option>
+                    <option value="IA">IA - Iowa</option>
+                    <option value="KS">KS - Kansas</option>
+                    <option value="KY">KY - Kentucky</option>
+                    <option value="LA">LA - Louisiana</option>
+                    <option value="ME">ME - Maine</option>
+                    <option value="MD">MD - Maryland</option>
+                    <option value="MA">MA - Massachusetts</option>
+                    <option value="MI">MI - Michigan</option>
+                    <option value="MN">MN - Minnesota</option>
+                    <option value="MS">MS - Mississippi</option>
+                    <option value="MO">MO - Missouri</option>
+                    <option value="MT">MT - Montana</option>
+                    <option value="NE">NE - Nebraska</option>
+                    <option value="NV">NV - Nevada</option>
+                    <option value="NH">NH - New Hampshire</option>
+                    <option value="NJ">NJ - New Jersey</option>
+                    <option value="NM">NM - New Mexico</option>
+                    <option value="NY">NY - New York</option>
+                    <option value="NC">NC - North Carolina</option>
+                    <option value="ND">ND - North Dakota</option>
+                    <option value="OH">OH - Ohio</option>
+                    <option value="OK">OK - Oklahoma</option>
+                    <option value="OR">OR - Oregon</option>
+                    <option value="PA">PA - Pennsylvania</option>
+                    <option value="RI">RI - Rhode Island</option>
+                    <option value="SC">SC - South Carolina</option>
+                    <option value="SD">SD - South Dakota</option>
+                    <option value="TN">TN - Tennessee</option>
+                    <option value="TX">TX - Texas</option>
+                    <option value="UT">UT - Utah</option>
+                    <option value="VT">VT - Vermont</option>
+                    <option value="VA">VA - Virginia</option>
+                    <option value="WA">WA - Washington</option>
+                    <option value="WV">WV - West Virginia</option>
+                    <option value="WI">WI - Wisconsin</option>
+                    <option value="WY">WY - Wyoming</option>
+                  </select>
+                  <div class="error-message"
+                       *ngIf="profileForm.get('state')?.invalid && profileForm.get('state')?.touched">
+                    State is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="zipCode">ZIP Code *</label>
+                  <input
+                    id="zipCode"
+                    type="text"
+                    formControlName="zipCode"
+                    [class.error]="profileForm.get('zipCode')?.invalid && profileForm.get('zipCode')?.touched"
+                    placeholder="12345">
+                  <div class="error-message"
+                       *ngIf="profileForm.get('zipCode')?.invalid && profileForm.get('zipCode')?.touched">
+                    <span *ngIf="profileForm.get('zipCode')?.errors?.['required']">ZIP code is required</span>
+                    <span *ngIf="profileForm.get('zipCode')?.errors?.['pattern']">Please enter a valid ZIP code</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Confirmation -->
+            <div class="form-section">
+              <div class="form-group">
+                <label for="confirmEmail">Confirm email:</label>
+                <input
+                  id="confirmEmail"
+                  type="email"
+                  [value]="userEmail"
+                  readonly
+                  class="readonly-input">
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="submit-btn"
+              [disabled]="profileForm.invalid || isSubmitting()">
+              <span *ngIf="isSubmitting()" class="spinner"></span>
+              {{ isSubmitting() ? 'Creating Shop...' : 'Create Shop' }}
+            </button>
+          </form>
+
+          <!-- Error Display -->
+          <div class="alert error" *ngIf="errorMessage()">
+            {{ errorMessage() }}
+          </div>
+        </div>
+      </div>
+    </div>
+  

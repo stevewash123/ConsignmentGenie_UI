@@ -1,0 +1,137 @@
+
+    <div class="cart-container">
+      <div class="container">
+        <div class="cart-header">
+          <h1>Shopping Cart</h1>
+          <p class="store-name" *ngIf="storeInfo">{{ storeInfo.name }}</p>
+        </div>
+
+        <div class="cart-content" *ngIf="cartItems.length > 0; else emptyCartTemplate">
+          <div class="cart-items">
+            <div class="cart-item" *ngFor="let item of cartItems; trackBy: trackByItemId">
+              <div class="item-image">
+                <img
+                  [src]="item.imageUrl || '/assets/placeholder-item.jpg'"
+                  [alt]="item.name"
+                  class="item-img"
+                  (error)="onImageError($event)">
+              </div>
+
+              <div class="item-details">
+                <h3 class="item-name">{{ item.name }}</h3>
+                <p class="item-category">{{ item.category }}</p>
+                <p class="item-description">{{ item.description }}</p>
+              </div>
+
+              <div class="item-quantity">
+                <label class="quantity-label">Qty:</label>
+                <div class="quantity-controls">
+                  <button
+                    class="qty-btn"
+                    (click)="updateQuantity(item, item.quantity - 1)"
+                    [disabled]="item.quantity <= 1">
+                    -
+                  </button>
+                  <span class="quantity">{{ item.quantity }}</span>
+                  <button
+                    class="qty-btn"
+                    (click)="updateQuantity(item, item.quantity + 1)">
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div class="item-price">
+                <span class="price">\${{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+                <span class="unit-price" *ngIf="item.quantity > 1">
+                  (\${{ item.price | number:'1.2-2' }} each)
+                </span>
+              </div>
+
+              <div class="item-actions">
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="removeItem(item)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cart-summary">
+            <div class="summary-card">
+              <h3>Order Summary</h3>
+
+              <div class="summary-row">
+                <span>Subtotal ({{ getTotalItems() }} items)</span>
+                <span>\${{ getSubtotal() | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="summary-row">
+                <span>Tax (estimated)</span>
+                <span>\${{ getTax() | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="summary-row total">
+                <span>Total</span>
+                <span>\${{ getTotal() | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="checkout-actions">
+                <button
+                  class="btn btn-primary btn-block"
+                  (click)="proceedToCheckout()">
+                  Proceed to Checkout
+                </button>
+
+                <button
+                  class="btn btn-outline-secondary btn-block"
+                  [routerLink]="['/shop', storeSlug]">
+                  Continue Shopping
+                </button>
+              </div>
+
+              <div class="guest-notice" *ngIf="!isAuthenticated">
+                <p class="notice-text">
+                  💡 <a [routerLink]="['/shop', storeSlug, 'login']" [queryParams]="{returnUrl: '/shop/' + storeSlug + '/cart'}">
+                    Sign in
+                  </a> to save your cart and track your orders.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyCartTemplate>
+          <div class="empty-cart">
+            <div class="empty-icon">🛒</div>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added anything to your cart yet.</p>
+            <button
+              class="btn btn-primary"
+              [routerLink]="['/shop', storeSlug]">
+              Start Shopping
+            </button>
+          </div>
+        </ng-template>
+
+        <div class="recommended-section" *ngIf="cartItems.length > 0">
+          <h3>You might also like</h3>
+          <div class="recommended-items">
+            <div class="recommended-item" *ngFor="let item of recommendedItems">
+              <img
+                [src]="item.imageUrl || '/assets/placeholder-item.jpg'"
+                [alt]="item.name"
+                class="recommended-img"
+                (error)="onImageError($event)">
+              <h4>{{ item.name }}</h4>
+              <p class="recommended-price">\${{ item.price | number:'1.2-2' }}</p>
+              <button class="btn btn-outline-primary btn-sm" (click)="addRecommendedToCart(item)">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  

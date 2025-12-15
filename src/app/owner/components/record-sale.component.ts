@@ -12,95 +12,7 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
   selector: 'app-record-sale',
   standalone: true,
   imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemSearchComponent, CartComponent],
-  template: `
-    <app-owner-layout>
-      <div class="record-sale-container">
-        <!-- Header -->
-        <div class="record-sale-header">
-          <button class="btn btn-outline-secondary back-button" (click)="goBack()">
-            <i class="fas fa-arrow-left"></i> Back
-          </button>
-          <h1>Record Sale</h1>
-        </div>
-
-        <!-- Two Panel Layout -->
-        <div class="sale-panels">
-          <!-- Left Panel: Item Search -->
-          <div class="item-search-panel">
-            <app-item-search
-              (itemSelected)="addToCart($event)"
-              [disabledItems]="cartItemIds()"
-            ></app-item-search>
-          </div>
-
-          <!-- Right Panel: Cart -->
-          <div class="cart-panel">
-            <app-cart
-              [cartItems]="cartItems()"
-              [taxRate]="taxRate()"
-              [isLoading]="isCompletingSale()"
-              (itemRemoved)="removeFromCart($event)"
-              (paymentTypeChanged)="onPaymentTypeChanged($event)"
-              (customerEmailChanged)="onCustomerEmailChanged($event)"
-              (completeSale)="completeSale()"
-            ></app-cart>
-          </div>
-        </div>
-
-        <!-- Success Modal -->
-        @if (saleCompleted()) {
-          <div class="modal-overlay" (click)="closeSaleModal()">
-            <div class="success-modal" (click)="$event.stopPropagation()">
-              <div class="modal-content">
-                <div class="success-icon">
-                  <i class="fas fa-check-circle"></i>
-                </div>
-                <h2>✓ Sale Complete!</h2>
-                <div class="transaction-details">
-                  <p><strong>Transaction #{{ saleResult()?.transactionId }}</strong></p>
-                  <p><strong>Total: {{ saleResult()?.total | currency }}</strong></p>
-                  @if (saleResult()?.receiptSent) {
-                    <p class="receipt-sent">[Receipt emailed to {{ customerEmail() }}]</p>
-                  }
-                </div>
-                <div class="modal-actions">
-                  <button class="btn btn-primary" (click)="recordAnotherSale()">
-                    Record Another Sale
-                  </button>
-                  <button class="btn btn-outline-secondary" (click)="backToDashboard()">
-                    Back to Dashboard
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        }
-
-        <!-- Error Modal -->
-        @if (errorMessage()) {
-          <div class="modal-overlay" (click)="clearError()">
-            <div class="error-modal" (click)="$event.stopPropagation()">
-              <div class="modal-content">
-                <div class="error-icon">
-                  <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <h2>Sale Failed</h2>
-                <div class="error-details">
-                  <p>{{ errorMessage() }}</p>
-                  <p class="error-hint">Please try again or contact support if the problem persists.</p>
-                </div>
-                <div class="modal-actions">
-                  <button class="btn btn-primary" (click)="clearError()">
-                    Try Again
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-    </app-owner-layout>
-  `,
+  templateUrl: './record-sale.component.html',
   styles: [`
     .record-sale-container {
       padding: 20px;
@@ -342,12 +254,20 @@ export class RecordSaleComponent implements OnInit {
   }
 
   addToCart(item: any) {
+    // Check if item is already in cart (prevent duplicates for consignment items)
+    const existingItem = this.cartItems().find(cartItem => cartItem.item.id === item.id);
+    if (existingItem) {
+      this.toastr.warning('Item is already in cart', 'Duplicate Item');
+      return;
+    }
+
     const newCartItem: CartItem = {
       item: item,
       quantity: 1
     };
 
     this.cartItems.update(items => [...items, newCartItem]);
+    this.toastr.success(`Added "${item.name}" to cart`, 'Item Added');
   }
 
   removeFromCart(itemId: string) {

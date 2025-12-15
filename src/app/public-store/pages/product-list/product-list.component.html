@@ -1,0 +1,236 @@
+
+    <div class="product-list-page">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1>{{ pageTitle() }}</h1>
+          <p class="subtitle">{{ totalItems() }} {{ totalItems() === 1 ? 'item' : 'items' }} found</p>
+        </div>
+
+        <!-- Filters and Sort -->
+        <div class="filters-section">
+          <div class="filter-row">
+            <!-- Category Filter -->
+            <div class="filter-group">
+              <label>Category</label>
+              <select [(ngModel)]="selectedCategory" (change)="applyFilters()" class="filter-select">
+                <option value="">All Categories</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.slug">{{ category.name }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Price Range Filter -->
+            <div class="filter-group">
+              <label>Price Range</label>
+              <div class="price-range">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  [(ngModel)]="minPrice"
+                  (change)="applyFilters()"
+                  class="price-input"
+                >
+                <span>to</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  [(ngModel)]="maxPrice"
+                  (change)="applyFilters()"
+                  class="price-input"
+                >
+              </div>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="filter-group">
+              <label>Sort by</label>
+              <select [(ngModel)]="sortBy" (change)="applyFilters()" class="filter-select">
+                <option value="created">Newest First</option>
+                <option value="price">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="name">Name: A to Z</option>
+                <option value="name_desc">Name: Z to A</option>
+              </select>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+              <button
+                type="button"
+                [class.active]="viewMode() === 'grid'"
+                (click)="setViewMode('grid')"
+                class="view-button"
+              >
+                Grid
+              </button>
+              <button
+                type="button"
+                [class.active]="viewMode() === 'list'"
+                (click)="setViewMode('list')"
+                class="view-button"
+              >
+                List
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Filters -->
+          @if (hasActiveFilters()) {
+            <div class="active-filters">
+              <span class="filter-label">Active filters:</span>
+              @if (selectedCategory) {
+                <span class="filter-tag">
+                  Category: {{ getCategoryName(selectedCategory) }}
+                  <button type="button" (click)="clearCategoryFilter()">&times;</button>
+                </span>
+              }
+              @if (minPrice || maxPrice) {
+                <span class="filter-tag">
+                  Price: \${{ minPrice || 0 }} - \${{ maxPrice || '∞' }}
+                  <button type="button" (click)="clearPriceFilter()">&times;</button>
+                </span>
+              }
+              <button type="button" (click)="clearAllFilters()" class="clear-all-btn">Clear All</button>
+            </div>
+          }
+        </div>
+
+        <!-- Loading State -->
+        @if (isProductsLoading()) {
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading products...</p>
+          </div>
+        }
+
+        <!-- Empty State -->
+        @else if (products().length === 0 && !isProductsLoading()) {
+          <div class="empty-state">
+            <h3>No products found</h3>
+            <p>Try adjusting your filters or search criteria.</p>
+            @if (hasActiveFilters()) {
+              <button type="button" (click)="clearAllFilters()" class="clear-filters-btn">
+                Clear Filters
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Products Grid/List -->
+        @else {
+          <div class="products-container" [class]="viewMode()">
+            @for (product of products(); track product.id) {
+              <div class="product-card">
+                <!-- Product Image -->
+                <div class="product-image">
+                  <a [routerLink]="['/store', orgSlug(), 'products', product.id]">
+                    @if (product.photos?.[0]) {
+                      <img [src]="product.photos[0].url" [alt]="product.title" loading="lazy">
+                    } @else {
+                      <div class="placeholder-image">No Image</div>
+                    }
+                  </a>
+
+                  <!-- Quick Actions -->
+                  <div class="product-actions">
+                    <button
+                      type="button"
+                      (click)="addToCart(product)"
+                      [disabled]="!product.isAvailable"
+                      class="add-to-cart-btn"
+                    >
+                      @if (cartService.isItemInCart(product.id)) {
+                        <span>✓ In Cart</span>
+                      } @else {
+                        <span>Add to Cart</span>
+                      }
+                    </button>
+
+                    <button
+                      type="button"
+                      (click)="toggleWishlist(product)"
+                      class="wishlist-btn"
+                      [class.active]="isInWishlist(product.id)"
+                    >
+                      ♡
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="product-info">
+                  <div class="product-category">{{ product.category }}</div>
+                  <h3 class="product-title">
+                    <a [routerLink]="['/store', orgSlug(), 'products', product.id]">
+                      {{ product.title }}
+                    </a>
+                  </h3>
+
+                  @if (viewMode() === 'list') {
+                    <p class="product-description">{{ product.description | slice:0:150 }}...</p>
+                  }
+
+                  <div class="product-meta">
+                    <div class="consignor">by {{ product.providerName }}</div>
+                    <div class="condition">{{ product.condition }}</div>
+                  </div>
+
+                  <div class="product-price">
+                    <span class="current-price">\${{ product.price }}</span>
+                    @if (product.originalPrice && product.originalPrice > product.price) {
+                      <span class="original-price">\${{ product.originalPrice }}</span>
+                      <span class="discount">
+                        {{ ((product.originalPrice - product.price) / product.originalPrice * 100) | number:'1.0-0' }}% off
+                      </span>
+                    }
+                  </div>
+
+                  <div class="product-tags">
+                    @for (tag of product.tags?.slice(0, 3); track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Pagination -->
+          @if (totalPages() > 1) {
+            <div class="pagination">
+              <button
+                type="button"
+                (click)="goToPage(currentPage() - 1)"
+                [disabled]="currentPage() <= 1"
+                class="page-btn"
+              >
+                Previous
+              </button>
+
+              @for (page of getPageNumbers(); track page) {
+                <button
+                  type="button"
+                  (click)="goToPage(page)"
+                  [class.active]="page === currentPage()"
+                  class="page-btn"
+                >
+                  {{ page }}
+                </button>
+              }
+
+              <button
+                type="button"
+                (click)="goToPage(currentPage() + 1)"
+                [disabled]="currentPage() >= totalPages()"
+                class="page-btn"
+              >
+                Next
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  

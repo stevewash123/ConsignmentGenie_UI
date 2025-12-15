@@ -1,0 +1,99 @@
+
+    <div class="consignor-payouts">
+      <!-- Navigation Header -->
+      <div class="nav-header">
+        <div class="header-content">
+          <h1>Main Street Consignment</h1>
+          <nav class="nav-links">
+            <a routerLink="/consignor/dashboard" routerLinkActive="active">Dashboard</a>
+            <a routerLink="/consignor/items" routerLinkActive="active">Items</a>
+            <a routerLink="/consignor/sales" routerLinkActive="active">Sales</a>
+            <a routerLink="/consignor/payouts" routerLinkActive="active">Payouts</a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <h2>My Payouts</h2>
+        </div>
+
+        <!-- Current Balance Section -->
+        <div class="balance-section">
+          <div class="balance-card">
+            <div class="balance-icon">💰</div>
+            <div class="balance-info">
+              <div class="balance-title">Current Pending Balance: <span class="balance-amount">\${{currentBalance.toFixed(2)}}</span> ({{pendingItemCount}} items)</div>
+              <div class="balance-note">Next payout typically processed end of month</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout History -->
+        <div class="history-section">
+          <h3>Payout History</h3>
+
+          <div class="payouts-table" *ngIf="payoutsResult">
+            <div class="table-header">
+              <div class="col payout-col">Payout #</div>
+              <div class="col date-col">Date</div>
+              <div class="col amount-col">Amount</div>
+              <div class="col items-col">Items</div>
+              <div class="col method-col">Method</div>
+              <div class="col actions-col">Action</div>
+            </div>
+
+            <div class="table-row" *ngFor="let payout of payoutsResult.items">
+              <div class="col payout-col">
+                <span class="payout-number">{{payout.payoutNumber}}</span>
+              </div>
+              <div class="col date-col">
+                {{formatDate(payout.payoutDate)}}
+              </div>
+              <div class="col amount-col">
+                <span class="amount">\${{payout.amount.toFixed(2)}}</span>
+              </div>
+              <div class="col items-col">
+                {{payout.itemCount}}
+              </div>
+              <div class="col method-col">
+                {{payout.paymentMethod}}
+              </div>
+              <div class="col actions-col">
+                <button
+                  class="view-btn"
+                  [routerLink]="['/consignor/payouts', payout.payoutId]">
+                  View
+                </button>
+              </div>
+            </div>
+
+            <!-- No Payouts Message -->
+            <div class="no-payouts" *ngIf="payoutsResult.items.length === 0">
+              <p>No payouts have been processed yet.</p>
+              <p>Your first payout will appear here once the shop owner processes payments.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Summary -->
+        <div class="summary-section">
+          <div class="summary-card">
+            <div class="summary-title">Total Paid Out (All Time):</div>
+            <div class="summary-amount">\${{totalPaidOut.toFixed(2)}}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading" *ngIf="loadingService.isLoading(KEYS.PAYOUTS_LIST)">
+        <p>Loading payouts...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="error" *ngIf="error">
+        <p>{{error}}</p>
+        <button (click)="loadPayouts()">Retry</button>
+      </div>
+    </div>
+  

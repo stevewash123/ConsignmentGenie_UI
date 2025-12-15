@@ -1,0 +1,216 @@
+<div *ngIf="show" class="modal-backdrop">
+  <div class="review-modal">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2>Review Price Change Request</h2>
+      <button (click)="onCancel()" class="close-button" aria-label="Close">
+        ×
+      </button>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="modal-content">
+
+      <!-- Item Information -->
+      <div class="item-info-section">
+        <h3>Item Details</h3>
+        <div class="item-info">
+          <div class="item-image" *ngIf="request.itemImageUrl">
+            <img [src]="request.itemImageUrl" [alt]="request.itemName">
+          </div>
+          <div class="item-details">
+            <h4>{{ request.itemName }}</h4>
+            <p class="item-meta">
+              {{ request.category }} • {{ request.brand || 'No Brand' }}
+            </p>
+            <p class="consignor-name">
+              Requested by <strong>{{ request.consignorName }}</strong>
+            </p>
+            <p class="request-date">
+              {{ formatDate(request.requestDate) }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Price Change Analysis -->
+      <div class="price-analysis-section">
+        <h3>Price Change Analysis</h3>
+
+        <div class="price-comparison">
+          <div class="price-item current">
+            <span class="label">Current Price</span>
+            <span class="value">{{ formatCurrency(request.currentPrice) }}</span>
+          </div>
+
+          <div class="arrow-container">
+            <div class="price-arrow" [ngClass]="{
+              'increase': isPriceIncrease(),
+              'decrease': isPriceDecrease()
+            }">
+              <span *ngIf="isPriceIncrease()">↗</span>
+              <span *ngIf="isPriceDecrease()">↘</span>
+              <span *ngIf="!isPriceIncrease() && !isPriceDecrease()">→</span>
+            </div>
+          </div>
+
+          <div class="price-item requested">
+            <span class="label">Requested Price</span>
+            <span class="value" [ngClass]="{
+              'increase': isPriceIncrease(),
+              'decrease': isPriceDecrease()
+            }">
+              {{ formatCurrency(request.requestedPrice) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="change-summary">
+          <div class="change-amount" [ngClass]="{
+            'increase': isPriceIncrease(),
+            'decrease': isPriceDecrease()
+          }">
+            <span *ngIf="isPriceIncrease()">+</span>
+            <span *ngIf="isPriceDecrease()">-</span>
+            {{ formatCurrency(getAbsolutePriceChange()) }}
+            ({{ getAbsolutePercentageChange() }}%)
+          </div>
+        </div>
+
+        <!-- Earnings Impact -->
+        <div class="earnings-impact">
+          <h4>Consignor Earnings Impact</h4>
+          <div class="earnings-comparison">
+            <div class="earnings-row">
+              <span class="label">Current Earnings:</span>
+              <span class="value">{{ formatCurrency(currentConsignorEarnings) }}</span>
+            </div>
+            <div class="earnings-row">
+              <span class="label">New Earnings:</span>
+              <span class="value" [ngClass]="{
+                'increase': isEarningsIncrease,
+                'decrease': isEarningsDecrease
+              }">
+                {{ formatCurrency(newConsignorEarnings) }}
+              </span>
+            </div>
+            <div class="earnings-row change">
+              <span class="label">Change:</span>
+              <span class="value" [ngClass]="{
+                'increase': isEarningsIncrease,
+                'decrease': isEarningsDecrease
+              }">
+                <span *ngIf="isEarningsIncrease">+</span>
+                <span *ngIf="isEarningsDecrease">-</span>
+                {{ formatCurrency(getAbsoluteEarningsChange()) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Request Reason -->
+      <div class="reason-section" *ngIf="request.consignorReason">
+        <h3>Consignor's Reason</h3>
+        <div class="reason-content">
+          <p>{{ request.consignorReason }}</p>
+        </div>
+      </div>
+
+      <hr class="divider" *ngIf="request.consignorReason">
+
+      <!-- Decision Section -->
+      <div class="decision-section">
+        <h3>Your Decision</h3>
+
+        <div class="decision-buttons">
+          <button
+            (click)="onApprove()"
+            class="decision-btn approve"
+            [class.selected]="decision === 'approve'"
+            [disabled]="loading">
+            <span class="btn-icon">✅</span>
+            <span class="btn-text">Approve Request</span>
+          </button>
+
+          <button
+            (click)="onDecline()"
+            class="decision-btn decline"
+            [class.selected]="decision === 'decline'"
+            [disabled]="loading">
+            <span class="btn-icon">❌</span>
+            <span class="btn-text">Decline Request</span>
+          </button>
+        </div>
+
+        <!-- Decision Context -->
+        <div class="decision-context" *ngIf="decision">
+          <div class="context-message" [ngClass]="{
+            'approve': decision === 'approve',
+            'decline': decision === 'decline'
+          }">
+            <p *ngIf="decision === 'approve'">
+              ✅ You're approving this price change. The item will be updated to the new price immediately.
+            </p>
+            <p *ngIf="decision === 'decline'">
+              ❌ You're declining this price change. The item will keep its current price.
+            </p>
+          </div>
+        </div>
+
+        <!-- Owner Notes -->
+        <div class="notes-section" *ngIf="decision">
+          <label for="owner-notes">
+            Notes to Consignor <span class="optional">(Optional)</span>
+          </label>
+          <textarea
+            id="owner-notes"
+            [(ngModel)]="ownerNotes"
+            [maxlength]="maxCharacters"
+            placeholder="Add any notes or feedback for the consignor..."
+            class="notes-textarea"
+            rows="4"></textarea>
+          <div class="character-count">
+            {{ characterCount }} / {{ maxCharacters }} characters
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="error" class="error-alert">
+        <div class="error-icon">⚠️</div>
+        <p>{{ error }}</p>
+      </div>
+
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="modal-actions">
+      <button
+        (click)="onCancel()"
+        class="btn-cancel"
+        [disabled]="loading">
+        Cancel
+      </button>
+
+      <button
+        (click)="onSubmit()"
+        class="btn-primary"
+        [disabled]="!canSubmit"
+        [class.loading]="loading">
+        <span *ngIf="!loading">
+          {{ decision === 'approve' ? 'Approve Request' : 'Decline Request' }}
+        </span>
+        <span *ngIf="loading">
+          Submitting...
+        </span>
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,402 @@
+
+    <div class="settings-container">
+      <div class="container">
+        <div class="page-header">
+          <h1>Account Settings</h1>
+          <p class="store-name" *ngIf="storeInfo">{{ storeInfo.name }}</p>
+        </div>
+
+        <div class="settings-content">
+          <div class="settings-nav">
+            <nav class="nav-pills">
+              <button
+                class="nav-item"
+                [class.active]="activeTab === 'profile'"
+                (click)="setActiveTab('profile')">
+                Profile Information
+              </button>
+              <button
+                class="nav-item"
+                [class.active]="activeTab === 'shipping'"
+                (click)="setActiveTab('shipping')">
+                Shipping Address
+              </button>
+              <button
+                class="nav-item"
+                [class.active]="activeTab === 'password'"
+                (click)="setActiveTab('password')">
+                Change Password
+              </button>
+              <button
+                class="nav-item"
+                [class.active]="activeTab === 'preferences'"
+                (click)="setActiveTab('preferences')">
+                Preferences
+              </button>
+            </nav>
+          </div>
+
+          <div class="settings-panel">
+            <!-- Profile Information Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'profile'">
+              <div class="tab-header">
+                <h2>Profile Information</h2>
+                <p>Update your personal information and contact details.</p>
+              </div>
+
+              <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="settings-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input
+                      id="firstName"
+                      type="text"
+                      formControlName="firstName"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('firstName', profileForm)">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('firstName', profileForm)">
+                      First name is required
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input
+                      id="lastName"
+                      type="text"
+                      formControlName="lastName"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('lastName', profileForm)">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('lastName', profileForm)">
+                      Last name is required
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email Address *</label>
+                  <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    class="form-control"
+                    [class.is-invalid]="isFieldInvalid('email', profileForm)">
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('email', profileForm)">
+                    <span *ngIf="profileForm.get('email')?.errors?.['required']">Email is required</span>
+                    <span *ngIf="profileForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="phone">Phone Number</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    formControlName="phone"
+                    class="form-control"
+                    placeholder="(555) 123-4567">
+                </div>
+
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="profileForm.invalid || isUpdatingProfile">
+                    <span *ngIf="isUpdatingProfile" class="spinner-border spinner-border-sm" role="status"></span>
+                    {{ isUpdatingProfile ? 'Updating...' : 'Update Profile' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Shipping Address Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'shipping'">
+              <div class="tab-header">
+                <h2>Shipping Address</h2>
+                <p>Manage your default shipping address for faster checkout.</p>
+              </div>
+
+              <form [formGroup]="shippingForm" (ngSubmit)="updateShipping()" class="settings-form">
+                <div class="form-group">
+                  <label for="address">Street Address *</label>
+                  <input
+                    id="address"
+                    type="text"
+                    formControlName="address"
+                    class="form-control"
+                    [class.is-invalid]="isFieldInvalid('address', shippingForm)">
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('address', shippingForm)">
+                    Street address is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="apartment">Apartment, suite, etc.</label>
+                  <input
+                    id="apartment"
+                    type="text"
+                    formControlName="apartment"
+                    class="form-control">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="city">City *</label>
+                    <input
+                      id="city"
+                      type="text"
+                      formControlName="city"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('city', shippingForm)">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('city', shippingForm)">
+                      City is required
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="state">State *</label>
+                    <select
+                      id="state"
+                      formControlName="state"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('state', shippingForm)">
+                      <option value="">Select State</option>
+                      <option value="AL">Alabama</option>
+                      <option value="CA">California</option>
+                      <option value="FL">Florida</option>
+                      <option value="NY">New York</option>
+                      <option value="TX">Texas</option>
+                    </select>
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('state', shippingForm)">
+                      State is required
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="zipCode">ZIP Code *</label>
+                    <input
+                      id="zipCode"
+                      type="text"
+                      formControlName="zipCode"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('zipCode', shippingForm)">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('zipCode', shippingForm)">
+                      ZIP code is required
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="shippingForm.invalid || isUpdatingShipping">
+                    <span *ngIf="isUpdatingShipping" class="spinner-border spinner-border-sm" role="status"></span>
+                    {{ isUpdatingShipping ? 'Updating...' : 'Update Address' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Change Password Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'password'">
+              <div class="tab-header">
+                <h2>Change Password</h2>
+                <p>Update your password to keep your account secure.</p>
+              </div>
+
+              <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="settings-form">
+                <div class="form-group">
+                  <label for="currentPassword">Current Password *</label>
+                  <div class="password-input">
+                    <input
+                      id="currentPassword"
+                      [type]="showCurrentPassword ? 'text' : 'password'"
+                      formControlName="currentPassword"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('currentPassword', passwordForm)">
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      (click)="toggleCurrentPasswordVisibility()">
+                      {{ showCurrentPassword ? '👁️' : '👁️‍🗨️' }}
+                    </button>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('currentPassword', passwordForm)">
+                    Current password is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="newPassword">New Password *</label>
+                  <div class="password-input">
+                    <input
+                      id="newPassword"
+                      [type]="showNewPassword ? 'text' : 'password'"
+                      formControlName="newPassword"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('newPassword', passwordForm)">
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      (click)="toggleNewPasswordVisibility()">
+                      {{ showNewPassword ? '👁️' : '👁️‍🗨️' }}
+                    </button>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('newPassword', passwordForm)">
+                    <span *ngIf="passwordForm.get('newPassword')?.errors?.['required']">New password is required</span>
+                    <span *ngIf="passwordForm.get('newPassword')?.errors?.['minlength']">Password must be at least 8 characters</span>
+                  </div>
+                  <small class="form-text text-muted">Password must be at least 8 characters long</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="confirmPassword">Confirm New Password *</label>
+                  <div class="password-input">
+                    <input
+                      id="confirmPassword"
+                      [type]="showConfirmPassword ? 'text' : 'password'"
+                      formControlName="confirmPassword"
+                      class="form-control"
+                      [class.is-invalid]="isFieldInvalid('confirmPassword', passwordForm) || passwordForm.hasError('passwordMismatch')">
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      (click)="toggleConfirmPasswordVisibility()">
+                      {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+                    </button>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('confirmPassword', passwordForm) || passwordForm.hasError('passwordMismatch')">
+                    <span *ngIf="passwordForm.get('confirmPassword')?.errors?.['required']">Please confirm your password</span>
+                    <span *ngIf="passwordForm.hasError('passwordMismatch')">Passwords do not match</span>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="passwordForm.invalid || isChangingPassword">
+                    <span *ngIf="isChangingPassword" class="spinner-border spinner-border-sm" role="status"></span>
+                    {{ isChangingPassword ? 'Changing Password...' : 'Change Password' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Preferences Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'preferences'">
+              <div class="tab-header">
+                <h2>Preferences</h2>
+                <p>Customize your shopping experience and notification preferences.</p>
+              </div>
+
+              <form [formGroup]="preferencesForm" (ngSubmit)="updatePreferences()" class="settings-form">
+                <div class="preference-section">
+                  <h3>Email Notifications</h3>
+
+                  <div class="form-check">
+                    <input
+                      id="orderUpdates"
+                      type="checkbox"
+                      formControlName="orderUpdates"
+                      class="form-check-input">
+                    <label for="orderUpdates" class="form-check-label">
+                      Order status updates
+                    </label>
+                    <small class="form-text">Receive emails when your order status changes</small>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      id="promotions"
+                      type="checkbox"
+                      formControlName="promotions"
+                      class="form-check-input">
+                    <label for="promotions" class="form-check-label">
+                      Promotions and deals
+                    </label>
+                    <small class="form-text">Get notified about sales and special offers</small>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      id="newArrivals"
+                      type="checkbox"
+                      formControlName="newArrivals"
+                      class="form-check-input">
+                    <label for="newArrivals" class="form-check-label">
+                      New arrivals
+                    </label>
+                    <small class="form-text">Be first to know about new items</small>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      id="priceDrops"
+                      type="checkbox"
+                      formControlName="priceDrops"
+                      class="form-check-input">
+                    <label for="priceDrops" class="form-check-label">
+                      Price drop alerts
+                    </label>
+                    <small class="form-text">Get notified when favorited items go on sale</small>
+                  </div>
+                </div>
+
+                <div class="preference-section">
+                  <h3>Privacy</h3>
+
+                  <div class="form-check">
+                    <input
+                      id="profilePublic"
+                      type="checkbox"
+                      formControlName="profilePublic"
+                      class="form-check-input">
+                    <label for="profilePublic" class="form-check-label">
+                      Make my profile public
+                    </label>
+                    <small class="form-text">Allow other shoppers to see your public wishlist</small>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      id="shareData"
+                      type="checkbox"
+                      formControlName="shareData"
+                      class="form-check-input">
+                    <label for="shareData" class="form-check-label">
+                      Share usage data for improvements
+                    </label>
+                    <small class="form-text">Help us improve your shopping experience</small>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="isUpdatingPreferences">
+                    <span *ngIf="isUpdatingPreferences" class="spinner-border spinner-border-sm" role="status"></span>
+                    {{ isUpdatingPreferences ? 'Updating...' : 'Update Preferences' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="danger-card">
+            <h3>Account Deletion</h3>
+            <p>
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <button class="btn btn-danger" (click)="requestAccountDeletion()">
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  

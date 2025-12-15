@@ -1,0 +1,34 @@
+
+    <div class="item-detail">
+      <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+          <a [routerLink]="['/shop', storeSlug]">Home</a>
+          <span>/</span>
+          <a [routerLink]="['/shop', storeSlug, 'catalog']">Catalog</a>
+          <span>/</span>
+          <span>Item Details</span>
+        </nav>
+
+        <!-- Item Details Content -->
+        <div class="item-content">
+          <div class="item-images">
+            <div class="main-image">
+              <img src="/assets/placeholder-item.jpg" alt="Item Image" />
+            </div>
+          </div>
+
+          <div class="item-info">
+            <h1>Item Detail</h1>
+            <p class="price">$0.00</p>
+            <p class="description">This feature is planned for Phase 2 - Shopper Portal implementation.</p>
+
+            <div class="actions">
+              <button class="btn btn-primary" disabled>Add to Cart</button>
+              <button class="btn btn-outline" disabled>Add to Favorites</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  

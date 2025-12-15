@@ -6,40 +6,7 @@ import { RouterModule } from '@angular/router';
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  template: `
-    <div class="registration-page">
-      <div class="container">
-        <div class="registration-card">
-          <h1>ConsignmentGenie</h1>
-
-          <div class="selection-section">
-            <h2>Join Consignment Genie</h2>
-            <p>I want to...</p>
-
-            <div class="role-selection">
-              <a routerLink="/register/owner" class="role-card">
-                <div class="role-icon">🏪</div>
-                <h3>Open a Consignment Shop</h3>
-                <p>→ Shop setup wizard</p>
-                <button class="select-btn">Select</button>
-              </a>
-
-              <a routerLink="/register/consignor" class="role-card">
-                <div class="role-icon">📦</div>
-                <h3>Consign Items at a Shop</h3>
-                <p>→ Basic signup</p>
-                <button class="select-btn">Select</button>
-              </a>
-            </div>
-
-            <div class="login-link">
-              <p>Already have an account? <a routerLink="/login">Log In</a></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './register.component.html',
   styles: [`
     .registration-page {
       min-height: 100vh;

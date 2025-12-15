@@ -1,0 +1,64 @@
+
+    <div class="checkout-confirmation">
+      <div class="container">
+        <div class="confirmation-content">
+          <!-- Success Icon -->
+          <div class="success-icon">
+            <div class="checkmark">✓</div>
+          </div>
+
+          <!-- Thank You Message -->
+          <h1 class="confirmation-title">Order Confirmed!</h1>
+          <p class="confirmation-message">
+            Thank you for your order. We'll send you a confirmation email shortly.
+          </p>
+
+          <!-- Order Details -->
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="order-info">
+              <div class="order-row">
+                <span class="label">Order Number:</span>
+                <span class="value">{{ orderNumber || '#1234' }}</span>
+              </div>
+              <div class="order-row">
+                <span class="label">Total:</span>
+                <span class="value">\${{ orderTotal || '0.00' }}</span>
+              </div>
+              <div class="order-row">
+                <span class="label">Status:</span>
+                <span class="value status-pending">Processing</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next Steps -->
+          <div class="next-steps">
+            <h3>What's Next?</h3>
+            <ul>
+              <li>You'll receive a confirmation email with your order details</li>
+              <li>We'll notify you when your order is ready for pickup</li>
+              <li>Bring a valid ID when picking up your order</li>
+            </ul>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="actions">
+            <a [routerLink]="['/shop', storeSlug]" class="btn btn-primary">
+              Continue Shopping
+            </a>
+            <a [routerLink]="['/shop', storeSlug, 'account', 'orders']" class="btn btn-outline">
+              View Orders
+            </a>
+          </div>
+
+          <!-- Phase Notice -->
+          <div class="phase-notice">
+            <p>
+              <em>Note: Full checkout and order management features will be implemented in Phase 2.</em>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  

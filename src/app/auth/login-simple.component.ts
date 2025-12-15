@@ -1,99 +1,15 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../shared/services/loading.service';
 
 @Component({
   selector: 'app-login-simple',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div class="login-container">
-      <div class="login-card">
-        <div class="login-header">
-          <h1>ConsignmentGenie</h1>
-          <p>Sign in to your account</p>
-        </div>
-
-        @if (errorMessage()) {
-          <div class="error-message">
-            {{ errorMessage() }}
-          </div>
-        }
-
-        <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              [(ngModel)]="email"
-              required
-              [disabled]="isAuthLoading()"
-              placeholder="Enter your email"
-            >
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              [(ngModel)]="password"
-              required
-              [disabled]="isAuthLoading()"
-              placeholder="Enter your password"
-            >
-          </div>
-
-          <button
-            type="submit"
-            class="login-btn"
-            [disabled]="loginForm.invalid || isAuthLoading()"
-          >
-            {{ isAuthLoading() ? 'Signing in...' : 'Sign In' }}
-          </button>
-        </form>
-
-        <!-- Quick Login Buttons -->
-        <div class="quick-login">
-          <h3>Quick Login</h3>
-          <div class="login-buttons">
-            <button
-              class="quick-btn admin"
-              (click)="quickLogin('admin@microsaasbuilders.com')"
-              [disabled]="isAuthLoading()"
-            >
-              <span class="role">Admin</span>
-              <span class="email">admin@microsaasbuilders.com</span>
-            </button>
-
-            <button
-              class="quick-btn owner"
-              (click)="quickLogin('owner1@microsaasbuilders.com')"
-              [disabled]="isAuthLoading()"
-            >
-              <span class="role">Shop Owner</span>
-              <span class="email">owner1@microsaasbuilders.com</span>
-            </button>
-
-            <button
-              class="quick-btn consignor"
-              (click)="quickLogin('provider1@microsaasbuilders.com')"
-              [disabled]="isAuthLoading()"
-            >
-              <span class="role">consignor</span>
-              <span class="email">provider1@microsaasbuilders.com</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [CommonModule, FormsModule, RouterModule],
+  templateUrl: './login-simple.component.html',
   styles: [`
     .login-container {
       min-height: 100vh;
@@ -195,6 +111,21 @@ import { LoadingService } from '../shared/services/loading.service';
     .login-btn:disabled {
       background: #9ca3af;
       cursor: not-allowed;
+    }
+
+    .forgot-password-link {
+      text-align: center;
+      margin: 1rem 0 2rem 0;
+    }
+
+    .forgot-password-link a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+
+    .forgot-password-link a:hover {
+      text-decoration: underline;
     }
 
     .quick-login {

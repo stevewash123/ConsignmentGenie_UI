@@ -2,148 +2,14 @@ import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-register-owner',
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
-  template: `
-    <div class="registration-page">
-      <div class="container">
-        <div class="registration-card">
-          <div class="header">
-            <a routerLink="/register" class="back-link">← Back</a>
-            <h1>Create Your Shop</h1>
-            <p class="subtitle">Get started with just the essentials. You can add more details later.</p>
-          </div>
-
-          <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-            <div class="form-group">
-              <label for="fullName">Full Name *</label>
-              <input
-                id="fullName"
-                type="text"
-                formControlName="fullName"
-                [class.error]="signupForm.get('fullName')?.invalid && signupForm.get('fullName')?.touched"
-                placeholder="John Smith">
-              <div class="error-message"
-                   *ngIf="signupForm.get('fullName')?.invalid && signupForm.get('fullName')?.touched">
-                Full name is required
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="email">Email *</label>
-              <input
-                id="email"
-                type="email"
-                formControlName="email"
-                [class.error]="signupForm.get('email')?.invalid && signupForm.get('email')?.touched"
-                placeholder="john@myshop.com">
-              <div class="error-message"
-                   *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched">
-                Valid email is required
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="shopName">Business/Shop Name *</label>
-              <input
-                id="shopName"
-                type="text"
-                formControlName="shopName"
-                [class.error]="signupForm.get('shopName')?.invalid && signupForm.get('shopName')?.touched"
-                placeholder="Main Street Consignment">
-              <div class="error-message"
-                   *ngIf="signupForm.get('shopName')?.invalid && signupForm.get('shopName')?.touched">
-                Business name is required
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="subdomain">Shop URL *</label>
-              <div class="subdomain-input-wrapper">
-                <input
-                  id="subdomain"
-                  type="text"
-                  formControlName="subdomain"
-                  [class.error]="signupForm.get('subdomain')?.invalid && signupForm.get('subdomain')?.touched"
-                  placeholder="myshop">
-                <span class="subdomain-suffix">.consignmentgenie.com</span>
-              </div>
-              <div class="form-hint">This will be your shop's web address</div>
-              <div class="error-message"
-                   *ngIf="signupForm.get('subdomain')?.invalid && signupForm.get('subdomain')?.touched">
-                <span *ngIf="signupForm.get('subdomain')?.errors?.['required']">Shop URL is required</span>
-                <span *ngIf="signupForm.get('subdomain')?.errors?.['pattern']">Only letters, numbers, and dashes allowed</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="phone">Phone</label>
-              <input
-                id="phone"
-                type="tel"
-                formControlName="phone"
-                placeholder="(555) 123-4567">
-              <div class="form-hint">Optional - for customer contact and support</div>
-            </div>
-
-            <div class="form-group">
-              <label for="password">Password *</label>
-              <input
-                id="password"
-                type="password"
-                formControlName="password"
-                [class.error]="signupForm.get('password')?.invalid && signupForm.get('password')?.touched"
-                placeholder="••••••••••••">
-              <div class="form-hint">At least 8 characters</div>
-              <div class="error-message"
-                   *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched">
-                Password must be at least 8 characters
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="confirmPassword">Confirm Password *</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                formControlName="confirmPassword"
-                [class.error]="signupForm.get('confirmPassword')?.invalid && signupForm.get('confirmPassword')?.touched"
-                placeholder="••••••••••••">
-              <div class="error-message"
-                   *ngIf="signupForm.get('confirmPassword')?.invalid && signupForm.get('confirmPassword')?.touched">
-                Passwords must match
-              </div>
-            </div>
-
-            <div class="info-box">
-              <h4>What happens next?</h4>
-              <ul>
-                <li>Your shop will be created immediately</li>
-                <li>You can add address, commission rates, and policies in settings</li>
-                <li>Start adding consignors and inventory right away</li>
-              </ul>
-            </div>
-
-            <button
-              type="submit"
-              class="submit-btn"
-              [disabled]="signupForm.invalid || isSubmitting()">
-              {{ isSubmitting() ? 'Creating Shop...' : 'Create Shop' }}
-            </button>
-          </form>
-
-          <!-- Error Display -->
-          <div class="alert error" *ngIf="errorMessage()">
-            {{ errorMessage() }}
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './register-owner.component.html',
   styles: [`
     .registration-page {
       min-height: 100vh;
@@ -240,10 +106,23 @@ import { AuthService } from '../services/auth.service';
       overflow: hidden;
       background: white;
       transition: border-color 0.2s;
+      position: relative;
     }
 
     .subdomain-input-wrapper:focus-within {
       border-color: #047857;
+    }
+
+    .subdomain-input-wrapper.validating {
+      border-color: #f59e0b;
+    }
+
+    .subdomain-input-wrapper.available {
+      border-color: #10b981;
+    }
+
+    .subdomain-input-wrapper.unavailable {
+      border-color: #ef4444;
     }
 
     .subdomain-input-wrapper input {
@@ -259,6 +138,46 @@ import { AuthService } from '../services/auth.service';
       color: #6b7280;
       border-left: 1px solid #e5e7eb;
       font-size: 1rem;
+    }
+
+    .validation-indicator {
+      padding: 0 0.75rem;
+      font-size: 1rem;
+      animation: spin 1s linear infinite;
+    }
+
+    .validation-indicator.success {
+      color: #10b981;
+      animation: none;
+    }
+
+    .validation-indicator.error {
+      color: #ef4444;
+      animation: none;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .validation-message {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      font-weight: 500;
+    }
+
+    .validation-message:contains("✓") {
+      color: #10b981;
+    }
+
+    .validation-message:contains("taken") {
+      color: #ef4444;
+    }
+
+    .validation-message:contains("Error") {
+      color: #ef4444;
     }
 
     .error-message {
@@ -343,6 +262,9 @@ export class RegisterOwnerComponent implements OnInit {
   signupForm: FormGroup;
   isSubmitting = signal(false);
   errorMessage = signal('');
+  isValidatingDomain = signal(false);
+  domainValidationMessage = signal('');
+  isDomainAvailable = signal<boolean | null>(null);
   invitationToken: string | null = null;
 
   constructor(
@@ -373,6 +295,9 @@ export class RegisterOwnerComponent implements OnInit {
         this.validateInvitationToken(this.invitationToken);
       }
     });
+
+    // Set up real-time subdomain validation
+    this.setupSubdomainValidation();
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -386,6 +311,58 @@ export class RegisterOwnerComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private setupSubdomainValidation() {
+    const subdomainControl = this.signupForm.get('subdomain');
+    if (!subdomainControl) return;
+
+    // Set up real-time validation with debounce
+    subdomainControl.valueChanges.pipe(
+      debounceTime(500), // Wait 500ms after user stops typing
+      distinctUntilChanged(), // Only emit when value actually changes
+      switchMap(subdomain => {
+        // Reset validation state
+        this.isDomainAvailable.set(null);
+        this.domainValidationMessage.set('');
+
+        if (!subdomain || subdomain.length < 3) {
+          this.isValidatingDomain.set(false);
+          return [];
+        }
+
+        // Check if subdomain matches pattern requirements
+        if (!/^[a-zA-Z0-9-]+$/.test(subdomain)) {
+          this.isValidatingDomain.set(false);
+          this.domainValidationMessage.set('Only letters, numbers, and dashes allowed');
+          this.isDomainAvailable.set(false);
+          return [];
+        }
+
+        this.isValidatingDomain.set(true);
+        this.domainValidationMessage.set('Checking availability...');
+
+        return this.authService.validateSubdomain(subdomain);
+      })
+    ).subscribe({
+      next: (response: any) => {
+        this.isValidatingDomain.set(false);
+        if (response && response.success) {
+          if (response.data.isAvailable) {
+            this.isDomainAvailable.set(true);
+            this.domainValidationMessage.set('✓ Available');
+          } else {
+            this.isDomainAvailable.set(false);
+            this.domainValidationMessage.set('This URL is already taken');
+          }
+        }
+      },
+      error: () => {
+        this.isValidatingDomain.set(false);
+        this.domainValidationMessage.set('Error checking availability');
+        this.isDomainAvailable.set(false);
+      }
+    });
   }
 
   private validateInvitationToken(token: string) {

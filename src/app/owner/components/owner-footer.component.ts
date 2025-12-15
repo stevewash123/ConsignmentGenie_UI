@@ -14,64 +14,7 @@ interface UserData {
   selector: 'app-owner-footer',
   standalone: true,
   imports: [CommonModule, SuggestionBoxModalComponent],
-  template: `
-    <footer class="owner-footer">
-      <div class="footer-container">
-        <div class="footer-content">
-          <div class="footer-section">
-            <h3>Consignment Genie</h3>
-            <p>Complete consignment management for your business.</p>
-          </div>
-
-          <div class="footer-section">
-            <h4>Business Tools</h4>
-            <ul>
-              <li><a href="#" target="_blank">Inventory Management</a></li>
-              <li><a href="#" target="_blank">Sales Analytics</a></li>
-              <li><a href="#" target="_blank">consignor Relations</a></li>
-              <li><a href="#" target="_blank">Financial Reports</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-section">
-            <h4>Integrations</h4>
-            <ul>
-              <li><a href="#" target="_blank">QuickBooks Setup</a></li>
-              <li><a href="#" target="_blank">Square POS</a></li>
-              <li><a href="#" target="_blank">Payment Processing</a></li>
-              <li><a href="#" target="_blank">Accounting Export</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-section">
-            <h4>Support</h4>
-            <ul>
-              <li><a href="mailto:support@consignmentgenie.com">Contact Support</a></li>
-              <li><a href="#" target="_blank">User Guide</a></li>
-              <li><a href="#" target="_blank">Video Tutorials</a></li>
-              <li><a href="#" target="_blank">Best Practices</a></li>
-              <li><button class="suggestion-link" (click)="openSuggestionBox()">💡 Suggestion Box</button></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="footer-bottom">
-          <div class="copyright">
-            <p>&copy; {{ currentYear }} {{ currentUser()?.organizationName || 'ConsignmentGenie' }} Shop Management</p>
-          </div>
-          <div class="version">
-            <p>Business v1.0.0 | <a href="#" target="_blank">Release Notes</a></p>
-          </div>
-        </div>
-      </div>
-    </footer>
-
-    <app-suggestion-box-modal
-      [isVisible]="showSuggestionModal()"
-      (close)="closeSuggestionBox()"
-      (submit)="onSuggestionSubmit($event)">
-    </app-suggestion-box-modal>
-  `,
+  templateUrl: './owner-footer.component.html',
   styles: [`
     .owner-footer {
       background: #047857;

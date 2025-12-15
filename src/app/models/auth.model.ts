@@ -41,3 +41,44 @@ export interface TokenInfo {
   token: string;
   expiresAt: Date;
 }
+
+export interface GoogleAuthRequest {
+  idToken: string;
+  mode: 'signup' | 'login' | 'link';
+  email: string;
+  name: string;
+  providerId: string;
+}
+
+export interface SocialAuthResponse extends AuthResponse {
+  isNewUser: boolean;
+  needsProfileCompletion?: boolean;
+}
+
+export interface FacebookAuthRequest {
+  accessToken: string;
+  mode: 'signup' | 'login' | 'link';
+  email: string;
+  name: string;
+  providerId: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}

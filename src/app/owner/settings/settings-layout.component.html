@@ -1,0 +1,47 @@
+
+    <app-layout>
+      <div class="settings-layout">
+        <!-- Header -->
+        <div class="settings-header">
+          <h1>Settings</h1>
+          <p>Manage your shop configuration and preferences</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="settings-container">
+          <!-- Sidebar Navigation -->
+          <nav class="settings-sidebar">
+            <div class="sidebar-menu">
+              <div *ngFor="let item of menuItems" class="menu-section">
+                <!-- Main Menu Item -->
+                <div
+                  class="menu-item"
+                  [class.active]="isExpanded(item.id)"
+                  (click)="toggleSection(item.id)">
+                  <span class="menu-icon">{{ item.icon }}</span>
+                  <span class="menu-label">{{ item.label }}</span>
+                  <span class="expand-icon" [class.expanded]="isExpanded(item.id)">▶</span>
+                </div>
+
+                <!-- Submenu -->
+                <div class="submenu" [class.expanded]="isExpanded(item.id)" *ngIf="item.children">
+                  <a
+                    *ngFor="let subItem of item.children"
+                    [routerLink]="[subItem.route]"
+                    routerLinkActive="active"
+                    class="submenu-item">
+                    <span class="submenu-label">{{ subItem.label }}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </nav>
+
+          <!-- Content Area -->
+          <main class="settings-content">
+            <router-outlet></router-outlet>
+          </main>
+        </div>
+      </div>
+    </app-layout>
+  

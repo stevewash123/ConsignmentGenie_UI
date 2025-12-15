@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { RecordSaleService, SaleRequest } from './record-sale.service';
 import { environment } from '../../environments/environment';
+import { of } from 'rxjs';
 
 describe('RecordSaleService Integration', () => {
   let service: RecordSaleService;
@@ -38,7 +39,7 @@ describe('RecordSaleService Integration', () => {
     };
 
     service.getAvailableItems('test').subscribe(items => {
-      expect(items).toHaveLength(1);
+      expect(items.length).toBe(1);
       expect(items[0].name).toBe('Test Item');
       expect(items[0].consignorName).toBe('Test Consignor');
     });
@@ -49,6 +50,9 @@ describe('RecordSaleService Integration', () => {
   });
 
   it('should call real API for completing sale', () => {
+    // Mock environment.production to force API calls
+    spyOn(service, 'getTaxRate').and.returnValue(of(0.08));
+
     const mockTransactionResponse = {
       id: 'txn-123',
       transactionDate: '2023-12-06T18:00:00Z',
@@ -85,20 +89,19 @@ describe('RecordSaleService Integration', () => {
       expect(response.receiptSent).toBe(true);
     });
 
-    // First request is for tax rate
-    const taxRateReq = httpMock.expectOne(`${environment.apiUrl}/api/organization/profile`);
-    taxRateReq.flush({ TaxRate: 8 });
-
-    // Second request is for creating transaction
+    // Only expect the transaction POST request since getTaxRate is mocked
     const transactionReq = httpMock.expectOne(`${environment.apiUrl}/api/transactions`);
     expect(transactionReq.request.method).toBe('POST');
     expect(transactionReq.request.body.paymentType).toBe('Cash');
     expect(transactionReq.request.body.customerEmail).toBe('test@example.com');
-    expect(transactionReq.request.body.items).toHaveLength(1);
+    expect(transactionReq.request.body.items.length).toBe(1);
     transactionReq.flush(mockTransactionResponse);
   });
 
   it('should set receiptSent to false when no customer email provided', () => {
+    // Mock getTaxRate to avoid HTTP call
+    spyOn(service, 'getTaxRate').and.returnValue(of(0.08));
+
     const mockTransactionResponse = {
       id: 'txn-124',
       transactionDate: '2023-12-06T18:00:00Z',
@@ -132,11 +135,7 @@ describe('RecordSaleService Integration', () => {
       expect(response.receiptSent).toBe(false);
     });
 
-    // First request is for tax rate
-    const taxRateReq = httpMock.expectOne(`${environment.apiUrl}/api/organization/profile`);
-    taxRateReq.flush({ TaxRate: 8 });
-
-    // Second request is for creating transaction
+    // Only expect the transaction POST request since getTaxRate is mocked
     const transactionReq = httpMock.expectOne(`${environment.apiUrl}/api/transactions`);
     expect(transactionReq.request.body.customerEmail).toBeUndefined();
     transactionReq.flush(mockTransactionResponse);

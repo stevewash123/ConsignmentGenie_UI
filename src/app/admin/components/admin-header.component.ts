@@ -17,55 +17,7 @@ interface UserData {
   selector: 'app-admin-header',
   standalone: true,
   imports: [CommonModule, RouterModule, NotificationBellComponent],
-  template: `
-    <header class="admin-header">
-      <div class="header-container">
-        <div class="header-left">
-          <div class="logo">
-            <h1>ConsignmentGenie</h1>
-            <span class="admin-badge">System Admin</span>
-          </div>
-
-          <nav class="main-nav" *ngIf="currentUser()">
-            <div class="nav-links">
-              <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
-              <a routerLink="/admin/organizations" routerLinkActive="active">Organizations</a>
-              <a routerLink="/admin/users" routerLinkActive="active">Users</a>
-              <a routerLink="/admin/billing" routerLinkActive="active">Billing</a>
-              <a routerLink="/admin/notifications" routerLinkActive="active">Notifications</a>
-            </div>
-          </nav>
-        </div>
-
-        <div class="header-right" *ngIf="currentUser()">
-          <!-- Notification Bell -->
-          <app-notification-bell role="admin"></app-notification-bell>
-
-          <div class="user-info">
-            <div class="user-details">
-              <div class="user-email">{{ currentUser()?.email }}</div>
-              <div class="platform-info">Platform Administrator</div>
-            </div>
-          </div>
-
-          <div class="user-menu">
-            <button class="profile-btn" (click)="toggleUserMenu()">
-              <span class="user-avatar admin">{{ getInitials(currentUser()?.email) }}</span>
-              <span class="dropdown-arrow">▼</span>
-            </button>
-
-            <div class="user-dropdown" [class.show]="showUserMenu()">
-              <a routerLink="/admin/notifications" class="dropdown-item">Notifications</a>
-              <a routerLink="/admin/profile" class="dropdown-item">My Profile</a>
-              <a routerLink="/admin/system-settings" class="dropdown-item">System Settings</a>
-              <hr>
-              <button class="dropdown-item logout-btn" (click)="logout()">Logout</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-  `,
+  templateUrl: './admin-header.component.html',
   styles: [`
     .admin-header {
       background: #1e293b;

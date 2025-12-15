@@ -5,9 +5,7 @@ import { NotificationPreferencesComponent } from '../../shared/components/notifi
   selector: 'app-consignor-notification-preferences',
   standalone: true,
   imports: [NotificationPreferencesComponent],
-  template: `
-    <app-notification-preferences role="consignor"></app-notification-preferences>
-  `,
+  templateUrl: './consignor-notification-preferences.component.html',
   styles: []
 })
 export class ConsignorNotificationPreferencesComponent {}
