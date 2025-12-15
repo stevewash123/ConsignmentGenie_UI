@@ -731,3 +731,4 @@ export class InventoryListComponent implements OnInit {
   // Make Math.min available to template
   Math = Math;
 }
+// Story 00-inventory-browser-redesign: Commit marker for story tracking
