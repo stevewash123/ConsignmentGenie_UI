@@ -25,7 +25,9 @@ describe('BusinessSettingsComponent', () => {
     Payouts: {
       Schedule: 'monthly',
       MinimumAmount: 25.00,
-      HoldPeriodDays: 14
+      HoldPeriodDays: 14,
+      RefundPolicy: 'NoRefunds' as 'NoRefunds' | 'WithinDays' | 'UntilPayout',
+      DefaultPayoutMethod: 'Check' as 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit'
     },
     Items: {
       DefaultConsignmentPeriodDays: 90,
