@@ -17,11 +17,13 @@ describe('NotificationPreferencesComponent', () => {
     mockLoadingService = jasmine.createSpyObj('LoadingService', ['isLoading', 'start', 'stop']);
 
     mockNotificationService.getNotifications.and.returnValue(of({
-      items: [],
-      totalItems: 0,
+      data: [],
+      totalCount: 0,
       totalPages: 0,
-      currentPage: 1,
-      pageSize: 20
+      page: 1,
+      pageSize: 20,
+      hasNextPage: false,
+      hasPreviousPage: false
     }));
 
     // Mock getPreferences to return some default preferences

@@ -212,7 +212,7 @@ export interface InventoryMetricsDto {
   itemsAddedThisMonth: number;
   itemsSoldThisMonth: number;
   byCategory: CategoryBreakdownDto[];
-  byProvider: ConsignorBreakdownDto[];
+  byConsignor: ConsignorBreakdownDto[];
 }
 
 export interface CategoryBreakdownDto {

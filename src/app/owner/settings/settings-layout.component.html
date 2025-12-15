@@ -1,5 +1,5 @@
 
-    <app-layout>
+    <app-owner-layout>
       <div class="settings-layout">
         <!-- Header -->
         <div class="settings-header">
@@ -13,8 +13,8 @@
           <nav class="settings-sidebar">
             <div class="sidebar-menu">
               <div *ngFor="let item of menuItems" class="menu-section">
-                <!-- Main Menu Item -->
-                <div
+                <!-- Menu Item with Children (Expandable Section) -->
+                <div *ngIf="item.children"
                   class="menu-item"
                   [class.active]="isExpanded(item.id)"
                   (click)="toggleSection(item.id)">
@@ -22,6 +22,15 @@
                   <span class="menu-label">{{ item.label }}</span>
                   <span class="expand-icon" [class.expanded]="isExpanded(item.id)">▶</span>
                 </div>
+
+                <!-- Single Route Menu Item -->
+                <a *ngIf="!item.children && item.route"
+                  [routerLink]="[item.route]"
+                  routerLinkActive="active"
+                  class="menu-item">
+                  <span class="menu-icon">{{ item.icon }}</span>
+                  <span class="menu-label">{{ item.label }}</span>
+                </a>
 
                 <!-- Submenu -->
                 <div class="submenu" [class.expanded]="isExpanded(item.id)" *ngIf="item.children">
@@ -43,5 +52,5 @@
           </main>
         </div>
       </div>
-    </app-layout>
+    </app-owner-layout>
   
