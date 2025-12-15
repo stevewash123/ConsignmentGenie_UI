@@ -1,65 +1,65 @@
 // Updated inventory models to match the new specification
 
 export interface ItemListDto {
-  itemId: string;
-  sku: string;
-  title: string;
-  description?: string;
-  price: number;
-  category?: string;
-  condition: ItemCondition;
-  status: ItemStatus;
-  primaryImageUrl?: string;
-  receivedDate: Date;
-  soldDate?: Date;
-  consignorId: string;
-  consignorName: string;
-  commissionRate: number;
+  ItemId: string;
+  Sku: string;
+  Title: string;
+  Description?: string;
+  Price: number;
+  Category?: string;
+  Condition: ItemCondition;
+  Status: ItemStatus;
+  PrimaryImageUrl?: string;
+  ReceivedDate: Date;
+  SoldDate?: Date;
+  ConsignorId: string;
+  ConsignorName: string;
+  CommissionRate: number;
 }
 
 export interface ItemDetailDto {
-  itemId: string;
-  consignorId: string;
-  consignorName: string;
-  commissionRate: number;
-  sku: string;
-  barcode?: string;
-  title: string;
-  description?: string;
-  category?: string;
-  brand?: string;
-  size?: string;
-  color?: string;
-  condition: ItemCondition;
-  materials?: string;
-  measurements?: string;
-  price: number;
-  originalPrice?: number;
-  minimumPrice?: number;
-  shopAmount: number;
-  consignorAmount: number;
-  status: ItemStatus;
-  statusChangedAt?: Date;
-  statusChangedReason?: string;
-  receivedDate: Date;
-  listedDate?: Date;
-  expirationDate?: Date;
-  soldDate?: Date;
-  images: ItemImageDto[];
-  location?: string;
-  notes?: string;
-  internalNotes?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  transactionId?: string;
-  salePrice?: number;
+  ItemId: string;
+  ConsignorId: string;
+  ConsignorName: string;
+  CommissionRate: number;
+  Sku: string;
+  Barcode?: string;
+  Title: string;
+  Description?: string;
+  Category?: string;
+  Brand?: string;
+  Size?: string;
+  Color?: string;
+  Condition: ItemCondition;
+  Materials?: string;
+  Measurements?: string;
+  Price: number;
+  OriginalPrice?: number;
+  MinimumPrice?: number;
+  ShopAmount: number;
+  ConsignorAmount: number;
+  Status: ItemStatus;
+  StatusChangedAt?: Date;
+  StatusChangedReason?: string;
+  ReceivedDate: Date;
+  ListedDate?: Date;
+  ExpirationDate?: Date;
+  SoldDate?: Date;
+  Images: ItemImageDto[];
+  Location?: string;
+  Notes?: string;
+  InternalNotes?: string;
+  CreatedAt: Date;
+  UpdatedAt: Date;
+  TransactionId?: string;
+  SalePrice?: number;
 }
 
 export interface ItemImageDto {
-  itemImageId: string;
-  imageUrl: string;
-  displayOrder: number;
-  isPrimary: boolean;
+  ItemImageId: string;
+  ImageUrl: string;
+  DisplayOrder: number;
+  IsPrimary: boolean;
 }
 
 export interface CreateItemRequest {
@@ -130,14 +130,14 @@ export interface ItemQueryParams {
 }
 
 export interface PagedResult<T> {
-  items: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  organizationId: string;
+  Items: T[];
+  TotalCount: number;
+  Page: number;
+  PageSize: number;
+  TotalPages: number;
+  HasNextPage: boolean;
+  HasPreviousPage: boolean;
+  OrganizationId: string;
 }
 
 export enum ItemCondition {
@@ -155,11 +155,11 @@ export enum ItemStatus {
 }
 
 export interface CategoryDto {
-  id: string;
-  name: string;
-  displayOrder: number;
-  isActive: boolean;
-  createdAt: Date;
+  Id: string;
+  Name: string;
+  DisplayOrder: number;
+  IsActive: boolean;
+  CreatedAt: Date;
 }
 
 export interface CreateCategoryRequest {
