@@ -63,7 +63,7 @@ export interface ReceiptSettings {
   styleUrls: ['./receipt-settings.component.css']
 })
 export class ReceiptSettingsComponent implements OnInit {
-  receiptForm = signal<FormGroup>(this.createForm());
+  receiptForm = signal<FormGroup | null>(null); // Will be set up in constructor
   settings = signal<ReceiptSettings | null>(null);
   saving = signal(false);
   successMessage = signal('');
@@ -71,24 +71,32 @@ export class ReceiptSettingsComponent implements OnInit {
 
   // Character counting
   customMessageLength = computed(() => {
-    const value = this.receiptForm().get('footer.customMessage')?.value || '';
+    const form = this.receiptForm();
+    if (!form) return 0;
+    const value = form.get('footer.customMessage')?.value || '';
     return value.length;
   });
 
   returnPolicyLength = computed(() => {
-    const value = this.receiptForm().get('footer.returnPolicyText')?.value || '';
+    const form = this.receiptForm();
+    if (!form) return 0;
+    const value = form.get('footer.returnPolicyText')?.value || '';
     return value.length;
   });
 
   promoContentLength = computed(() => {
-    const value = this.receiptForm().get('digital.promoContent')?.value || '';
+    const form = this.receiptForm();
+    if (!form) return 0;
+    const value = form.get('digital.promoContent')?.value || '';
     return value.length;
   });
 
   constructor(
     private fb: FormBuilder,
     private http: HttpClient
-  ) {}
+  ) {
+    this.receiptForm.set(this.createForm());
+  }
 
   ngOnInit() {
     this.loadSettings();
@@ -150,6 +158,7 @@ export class ReceiptSettingsComponent implements OnInit {
 
   private populateForm(settings: ReceiptSettings) {
     const form = this.receiptForm();
+    if (!form) return;
     form.patchValue({
       header: settings.header,
       content: settings.content,
@@ -160,12 +169,15 @@ export class ReceiptSettingsComponent implements OnInit {
   }
 
   async onSave() {
-    if (this.receiptForm().invalid) {
+    const form = this.receiptForm();
+    if (!form) return;
+
+    if (form.invalid) {
       this.showError('Please correct the validation errors before saving');
       return;
     }
 
-    const formValue = this.receiptForm().value;
+    const formValue = form.value;
     const receiptSettings: ReceiptSettings = {
       header: formValue.header,
       content: formValue.content,

@@ -624,7 +624,9 @@ export class InventoryListComponent implements OnInit {
   }
 
   getConditionClass(condition: ItemCondition): string {
-    return `condition-${condition.toLowerCase().replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+    // Insert dash between camelCase words, then lowercase
+    // e.g., "LikeNew" -> "Like-New" -> "like-new" -> "condition-like-new"
+    return `condition-${condition.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}`;
   }
 
   getConditionLabel(condition: ItemCondition): string {

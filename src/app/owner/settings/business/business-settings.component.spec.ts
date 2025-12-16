@@ -1,479 +1,619 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
-import { BusinessSettingsComponent } from './business-settings.component';
-import { ItemSubmissionMode } from '../../../shared/interfaces/business.interfaces';
+import { InventoryListComponent } from './inventory-list.component';
+import { InventoryService } from '../../services/inventory.service';
+import { LoadingService } from '../../shared/services/loading.service';
+import {
+  ItemListDto,
+  PagedResult,
+  CategoryDto,
+  ItemCondition,
+  ItemStatus,
+  ApiResponse
+} from '../../models/inventory.model';
 
-describe('BusinessSettingsComponent', () => {
-  let component: BusinessSettingsComponent;
-  let fixture: ComponentFixture<BusinessSettingsComponent>;
-  let mockHttpClient: jasmine.SpyObj<HttpClient>;
+describe('InventoryListComponent', () => {
+  let component: InventoryListComponent;
+  let fixture: ComponentFixture<InventoryListComponent>;
+  let mockInventoryService: jasmine.SpyObj<InventoryService>;
+  let mockRouter: jasmine.SpyObj<Router>;
+  let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
-  const mockBusinessSettings = {
-    Commission: {
-      DefaultSplit: '70/30',
-      AllowCustomSplitsPerConsignor: true,
-      AllowCustomSplitsPerItem: false
+  const mockCategories: CategoryDto[] = [
+    { id: 'cat1', name: 'Electronics', displayOrder: 1, isActive: true, createdAt: new Date() },
+    { id: 'cat2', name: 'Clothing', displayOrder: 2, isActive: true, createdAt: new Date() }
+  ];
+
+  const mockItems: ItemListDto[] = [
+    {
+      itemId: 'item1',
+      sku: 'SKU001',
+      title: 'Test Item 1',
+      description: 'This is a test item description',
+      price: 99.99,
+      category: 'Electronics',
+      condition: ItemCondition.New,
+      status: ItemStatus.Available,
+      primaryImageUrl: 'https://example.com/image1.jpg',
+      receivedDate: new Date('2023-01-01'),
+      soldDate: undefined,
+      consignorId: 'consignor1',
+      consignorName: 'John Doe',
+      commissionRate: 0.4
     },
-    Tax: {
-      SalesTaxRate: 8.25,
-      TaxIncludedInPrices: false,
-      ChargeTaxOnShipping: false,
-      TaxIdEin: '12-3456789'
-    },
-    Payouts: {
-      Schedule: 'monthly',
-      MinimumAmount: 25.00,
-      HoldPeriodDays: 14,
-      RefundPolicy: 'WithinDays' as 'NoRefunds' | 'WithinDays' | 'UntilPayout',
-      RefundWindowDays: 30,
-      DefaultPayoutMethod: 'Check' as 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit'
-    },
-    Items: {
-      DefaultConsignmentPeriodDays: 90,
-      EnableAutoMarkdowns: true,
-      MarkdownSchedule: {
-        After30Days: 10,
-        After60Days: 20,
-        After90DaysAction: 'return' as 'donate' | 'return'
-      }
-    },
-    ConsignorPermissions: {
-      ItemSubmissionMode: ItemSubmissionMode.ApprovalRequired
+    {
+      itemId: 'item2',
+      sku: 'SKU002',
+      title: 'Test Item 2',
+      description: 'Another test item',
+      price: 149.99,
+      category: 'Clothing',
+      condition: ItemCondition.LikeNew,
+      status: ItemStatus.Available,
+      primaryImageUrl: undefined,
+      receivedDate: new Date('2023-01-02'),
+      soldDate: undefined,
+      consignorId: 'consignor2',
+      consignorName: 'Jane Smith',
+      commissionRate: 0.5
     }
+  ];
+
+  const mockPagedResult: PagedResult<ItemListDto> = {
+    items: mockItems,
+    totalCount: 2,
+    page: 1,
+    pageSize: 25,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+    organizationId: 'org1'
+  };
+
+  const emptyPagedResult: PagedResult<ItemListDto> = {
+    items: [],
+    totalCount: 0,
+    page: 1,
+    pageSize: 25,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPreviousPage: false,
+    organizationId: 'org1'
   };
 
   beforeEach(async () => {
-    const httpClientSpy = jasmine.createSpyObj('HttpClient', ['get', 'put']);
+    const inventoryServiceSpy = jasmine.createSpyObj('InventoryService', [
+      'getItems',
+      'getCategories',
+      'updateItemStatus',
+      'deleteItem'
+    ]);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'isActive'], {
+      events: of(),  // RouterLinkActive subscribes to router.events
+      url: '/owner/inventory'
+    });
+    const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
+      'start',
+      'stop',
+      'isLoading'
+    ]);
 
     await TestBed.configureTestingModule({
-      imports: [BusinessSettingsComponent, CommonModule, FormsModule],
+      imports: [
+        InventoryListComponent,
+        HttpClientTestingModule  // Satisfies HttpClient dependency chain
+      ],
       providers: [
-        { provide: HttpClient, useValue: httpClientSpy }
-      ]
+        { provide: InventoryService, useValue: inventoryServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: LoadingService, useValue: loadingServiceSpy },
+        { 
+          provide: ActivatedRoute, 
+          useValue: { queryParams: of({}), params: of({}) }
+        }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BusinessSettingsComponent);
+    fixture = TestBed.createComponent(InventoryListComponent);
     component = fixture.componentInstance;
-    mockHttpClient = TestBed.inject(HttpClient) as jasmine.SpyObj<HttpClient>;
+    mockInventoryService = TestBed.inject(InventoryService) as jasmine.SpyObj<InventoryService>;
+    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
+
+    // Setup default mock returns
+    mockInventoryService.getItems.and.returnValue(of(mockPagedResult));
+    mockInventoryService.getCategories.and.returnValue(of({
+      success: true,
+      data: mockCategories
+    } as ApiResponse<CategoryDto[]>));
+    mockLoadingService.isLoading.and.returnValue(false);
   });
 
-  describe('Happy Path Tests', () => {
-    beforeEach(() => {
-      mockHttpClient.get.calls.reset();
-      mockHttpClient.put.calls.reset();
-    });
+  /**
+   * Helper to initialize component - triggers ngOnInit and waits for observables
+   */
+  function initializeComponent(options: { loading?: boolean; items?: PagedResult<ItemListDto> | null } = {}) {
+    const { loading = false, items = mockPagedResult } = options;
+    
+    mockLoadingService.isLoading.and.returnValue(loading);
+    
+    if (items) {
+      mockInventoryService.getItems.and.returnValue(of(items));
+    }
+    
+    fixture.detectChanges(); // triggers ngOnInit -> loadCategories() + loadItems()
+  }
 
-    it('should create the component', () => {
+  describe('Component Creation', () => {
+    it('should create', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should load business settings on init', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-
-      // Act
-      fixture.detectChanges(); // triggers ngOnInit
-      tick(); // resolve promises
-
-      // Assert
-      expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/organization/business-settings');
-      expect(component.settings()).toEqual(mockBusinessSettings);
-    }));
-
-    it('should display commission settings in template', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-
-      // Act
-      fixture.detectChanges(); // triggers ngOnInit and loads settings
-      tick(); // resolve the HTTP promise
-      fixture.detectChanges(); // update view with loaded settings
-      tick(); // allow ngModel to sync
-      fixture.detectChanges(); // final view update
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const defaultSplitSelect = compiled.querySelector('select[name="defaultSplit"]') as HTMLSelectElement;
-      const customConsignorCheckbox = compiled.querySelector('input[name="allowCustomConsignor"]') as HTMLInputElement;
-      const customItemCheckbox = compiled.querySelector('input[name="allowCustomItem"]') as HTMLInputElement;
-
-      expect(defaultSplitSelect.value).toBe('70/30');
-      expect(customConsignorCheckbox.checked).toBe(true);
-      expect(customItemCheckbox.checked).toBe(false);
-    }));
-
-    it('should display tax settings in template', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-
-      // Act
-      fixture.detectChanges(); // triggers ngOnInit and loads settings
-      tick(); // resolve the HTTP promise
-      fixture.detectChanges(); // update view with loaded settings
-      tick(); // allow ngModel to sync
-      fixture.detectChanges(); // final view update
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const taxRateInput = compiled.querySelector('input[name="salesTaxRate"]') as HTMLInputElement;
-      const taxIncludedCheckbox = compiled.querySelector('input[name="taxIncluded"]') as HTMLInputElement;
-      const taxOnShippingCheckbox = compiled.querySelector('input[name="taxOnShipping"]') as HTMLInputElement;
-      const einInput = compiled.querySelector('input[name="taxIdEin"]') as HTMLInputElement;
-
-      expect(taxRateInput.value).toBe('8.25');
-      expect(taxIncludedCheckbox.checked).toBe(false);
-      expect(taxOnShippingCheckbox.checked).toBe(false);
-      expect(einInput.value).toBe('12-3456789');
-    }));
-
-    it('should display payout settings in template', fakeAsync(() => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-
-      // Act
-      fixture.detectChanges();
-      tick(); // Allow ngModel to process bindings
-      fixture.detectChanges();
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const scheduleSelect = compiled.querySelector('select[name="payoutSchedule"]') as HTMLSelectElement;
-      const minimumInput = compiled.querySelector('input[name="minimumPayout"]') as HTMLInputElement;
-      const holdPeriodSelect = compiled.querySelector('select[name="holdPeriod"]') as HTMLSelectElement;
-
-      expect(scheduleSelect.value).toBe('monthly');
-      expect(minimumInput.value).toBe('25');
-      expect(holdPeriodSelect.value).toBe('14');
-    }));
-
-    it('should display item policy settings in template', fakeAsync(() => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-
-      // Act
-      fixture.detectChanges();
-      tick(); // Allow ngModel to process bindings
-      fixture.detectChanges();
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const consignmentPeriodSelect = compiled.querySelector('select[name="consignmentPeriod"]') as HTMLSelectElement;
-      const autoMarkdownCheckbox = compiled.querySelector('input[name="enableMarkdowns"]') as HTMLInputElement;
-
-      expect(consignmentPeriodSelect.value).toBe('90');
-      expect(autoMarkdownCheckbox.checked).toBe(true);
-    }));
-
-    it('should show markdown schedule when auto markdowns are enabled', fakeAsync(() => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-
-      // Act
-      fixture.detectChanges();
-      tick(); // Allow ngModel to process bindings
-      fixture.detectChanges();
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const markdownSchedule = compiled.querySelector('.markdown-schedule');
-      const after30Input = compiled.querySelector('input[name="markdown30"]') as HTMLInputElement;
-      const after60Input = compiled.querySelector('input[name="markdown60"]') as HTMLInputElement;
-      const returnRadio = compiled.querySelector('input[name="after90Action"][value="return"]') as HTMLInputElement;
-
-      expect(markdownSchedule).toBeTruthy();
-      expect(after30Input.value).toBe('10');
-      expect(after60Input.value).toBe('20');
-      expect(returnRadio.checked).toBe(true);
-    }));
-
-    it('should hide markdown schedule when auto markdowns are disabled', () => {
-      // Arrange
-      const settingsWithoutMarkdowns = {
-        ...mockBusinessSettings,
-        Items: {
-          ...mockBusinessSettings.Items,
-          EnableAutoMarkdowns: false
-        }
-      };
-      component.settings.set(settingsWithoutMarkdowns);
-
-      // Act
-      fixture.detectChanges();
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const markdownSchedule = compiled.querySelector('.markdown-schedule');
-      expect(markdownSchedule).toBeFalsy();
+    it('should have initial signal values', () => {
+      expect(component.itemsResult()).toBeNull();
+      expect(component.categories()).toEqual([]);
+      expect(component.error()).toBeNull();
+      expect(component.currentPage()).toBe(1);
     });
 
-    it('should save business settings when form is submitted', async () => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      mockHttpClient.put.and.returnValue(of({ success: true, message: 'Settings updated successfully' }));
-
-      // Act
-      await component.saveSettings();
-
-      // Assert
-      expect(mockHttpClient.put).toHaveBeenCalledWith('http://localhost:5000/api/organization/business-settings', mockBusinessSettings);
-      expect(component.successMessage()).toBe('Business settings saved successfully');
-      expect(component.errorMessage()).toBe('');
+    it('should have default filter values', () => {
+      expect(component.searchQuery).toBe('');
+      expect(component.selectedStatus).toBe('');
+      expect(component.selectedCondition).toBe('');
+      expect(component.selectedCategory).toBe('');
+      expect(component.priceMin).toBeNull();
+      expect(component.priceMax).toBeNull();
+      expect(component.sortBy).toBe('CreatedAt');
+      expect(component.sortDirection).toBe('desc');
+      expect(component.pageSize).toBe(25);
     });
-
-    it('should show success message after successful save', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-      mockHttpClient.put.and.returnValue(of({ success: true }));
-      fixture.detectChanges(); // triggers ngOnInit
-      tick(); // resolve load
-
-      // Act
-      component.saveSettings();
-      tick(); // resolve save promise
-      fixture.detectChanges(); // update view with message signal change
-      tick(); // allow *ngIf to process
-      fixture.detectChanges(); // render the message element
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const successMessage = compiled.querySelector('.message.success');
-      expect(successMessage).toBeTruthy();
-      expect(successMessage.textContent).toBe('Business settings saved successfully');
-    }));
-
-    it('should show error message on save failure', async () => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      mockHttpClient.put.and.returnValue(throwError(() => new Error('Network error')));
-
-      // Act
-      await component.saveSettings();
-
-      // Assert
-      expect(component.errorMessage()).toBe('Failed to save business settings');
-      expect(component.successMessage()).toBe('');
-    });
-
-    it('should reload settings data when cancel is clicked', async () => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      const updatedSettings = {
-        ...mockBusinessSettings,
-        Commission: { ...mockBusinessSettings.Commission, DefaultSplit: '70/30' }
-      };
-      mockHttpClient.get.and.returnValue(of(updatedSettings));
-
-      // Act
-      await component.loadSettings();
-
-      // Assert
-      expect(mockHttpClient.get).toHaveBeenCalled();
-      expect(component.settings()).toEqual(updatedSettings);
-    });
-
-    it('should set saving state during save operation', async () => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      mockHttpClient.put.and.returnValue(of({ success: true }));
-
-      // Act & Assert
-      expect(component.isSaving()).toBeFalsy();
-
-      const savePromise = component.saveSettings();
-      expect(component.isSaving()).toBeTruthy();
-
-      await savePromise;
-      expect(component.isSaving()).toBeFalsy();
-    });
-
-    it('should handle missing settings gracefully in saveSettings', async () => {
-      // Arrange
-      component.settings.set(null);
-
-      // Act
-      await component.saveSettings();
-
-      // Assert
-      expect(mockHttpClient.put).not.toHaveBeenCalled();
-    });
-
-    it('should update commission split when dropdown changes', fakeAsync(() => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      fixture.detectChanges();
-      tick();
-      fixture.detectChanges();
-
-      // Act
-      const compiled = fixture.nativeElement;
-      const defaultSplitSelect = compiled.querySelector('select[name="defaultSplit"]') as HTMLSelectElement;
-      defaultSplitSelect.value = '70/30';
-      defaultSplitSelect.dispatchEvent(new Event('change'));
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      expect(component.settings()?.Commission.DefaultSplit).toBe('70/30');
-    }));
-
-    it('should toggle custom splits checkbox', fakeAsync(() => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      fixture.detectChanges();
-      tick();
-      fixture.detectChanges();
-
-      // Act
-      const compiled = fixture.nativeElement;
-      const customConsignorCheckbox = compiled.querySelector('input[name="allowCustomConsignor"]') as HTMLInputElement;
-      customConsignorCheckbox.click();
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      expect(component.settings()?.Commission.AllowCustomSplitsPerConsignor).toBe(false);
-    }));
-
-    it('should update tax rate input', fakeAsync(() => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      fixture.detectChanges();
-      tick();
-      fixture.detectChanges();
-
-      // Act
-      const compiled = fixture.nativeElement;
-      const taxRateInput = compiled.querySelector('input[name="salesTaxRate"]') as HTMLInputElement;
-      taxRateInput.value = '7.5';
-      taxRateInput.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      expect(component.settings()?.Tax.SalesTaxRate).toBe(7.5);
-    }));
-
-    it('should auto-clear success message after 5 seconds', fakeAsync(async () => {
-      // Arrange
-      component.settings.set(mockBusinessSettings);
-      mockHttpClient.put.and.returnValue(of({ success: true }));
-
-      // Act
-      await component.saveSettings();
-      tick();
-
-      // Assert
-      expect(component.successMessage()).toBe('Business settings saved successfully');
-
-      tick(5000);
-
-      expect(component.successMessage()).toBe('');
-    }));
   });
 
-  describe('Consignor Permissions', () => {
-    it('should display consignor permissions section', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
+  describe('Initialization', () => {
+    it('should load categories on init', () => {
+      initializeComponent();
 
-      // Act
-      fixture.detectChanges();
-      tick();
-      fixture.detectChanges();
-
-      // Assert
-      const compiled = fixture.nativeElement;
-      const permissionsSection = compiled.querySelector('h3');
-      const permissionOptions = compiled.querySelectorAll('.permission-option');
-
-      expect(permissionsSection).toBeTruthy();
-      expect(permissionOptions.length).toBe(3);
-    }));
-
-    it('should set default ConsignorPermissions when not present in response', fakeAsync(() => {
-      // Arrange
-      const settingsWithoutPermissions = { ...mockBusinessSettings };
-      delete (settingsWithoutPermissions as any).ConsignorPermissions;
-      mockHttpClient.get.and.returnValue(of(settingsWithoutPermissions));
-
-      // Act
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      expect(component.settings()?.ConsignorPermissions?.ItemSubmissionMode)
-        .toBe(ItemSubmissionMode.ApprovalRequired);
-    }));
-
-    it('should have three submission mode options', () => {
-      // Assert
-      expect(component.submissionModeOptions).toHaveSize(3);
-      expect(component.submissionModeOptions[0].value).toBe(ItemSubmissionMode.OwnerOnly);
-      expect(component.submissionModeOptions[1].value).toBe(ItemSubmissionMode.ApprovalRequired);
-      expect(component.submissionModeOptions[2].value).toBe(ItemSubmissionMode.DirectAdd);
+      expect(mockInventoryService.getCategories).toHaveBeenCalled();
+      expect(component.categories()).toEqual(mockCategories);
     });
 
-    it('should select approval required option by default', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
+    it('should load items on init', () => {
+      initializeComponent();
 
-      // Act
-      fixture.detectChanges();
-      tick();
-      fixture.detectChanges();
-      tick();
+      expect(mockInventoryService.getItems).toHaveBeenCalled();
+      expect(component.itemsResult()).toEqual(mockPagedResult);
+    });
 
-      // Assert
-      const compiled = fixture.nativeElement;
-      const selectedOption = compiled.querySelector('.permission-option.selected');
-      expect(selectedOption).toBeTruthy();
-      expect(selectedOption.textContent).toContain('Consignors submit for approval');
-    }));
+    it('should call loading service start and stop', () => {
+      initializeComponent();
 
-    it('should update submission mode when changed', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-      fixture.detectChanges();
-      tick();
-
-      // Act
-      component.settings()!.ConsignorPermissions.ItemSubmissionMode = ItemSubmissionMode.OwnerOnly;
-      fixture.detectChanges();
-      tick();
-
-      // Assert
-      expect(component.settings()?.ConsignorPermissions?.ItemSubmissionMode)
-        .toBe(ItemSubmissionMode.OwnerOnly);
-    }));
+      expect(mockLoadingService.start).toHaveBeenCalledWith('inventory-list');
+      expect(mockLoadingService.stop).toHaveBeenCalledWith('inventory-list');
+    });
   });
 
-  describe('Error Handling', () => {
-    it('should show error message when loading settings fails', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(throwError(() => new Error('API Error')));
+  describe('Loading State', () => {
+    it('should return loading state from loading service', () => {
+      mockLoadingService.isLoading.and.returnValue(true);
+      expect(component.isInventoryLoading()).toBe(true);
 
-      // Act
-      fixture.detectChanges(); // triggers ngOnInit
-      tick(); // resolve error promise
+      mockLoadingService.isLoading.and.returnValue(false);
+      expect(component.isInventoryLoading()).toBe(false);
+    });
 
-      // Assert
-      expect(component.errorMessage()).toBe('Failed to load business settings');
-      expect(component.settings()).toBeNull();
-    }));
+    it('should call isLoading with correct key', () => {
+      component.isInventoryLoading();
+      expect(mockLoadingService.isLoading).toHaveBeenCalledWith('inventory-list');
+    });
 
-    it('should handle empty response when loading settings', fakeAsync(() => {
-      // Arrange
-      mockHttpClient.get.and.returnValue(of(null));
+    it('should show loading state in template when loading', () => {
+      mockLoadingService.isLoading.and.returnValue(true);
+      fixture.detectChanges();
 
-      // Act
-      fixture.detectChanges(); // triggers ngOnInit
-      tick(); // resolve promise
+      const loadingState = fixture.nativeElement.querySelector('.loading-state');
+      expect(loadingState).toBeTruthy();
+    });
 
-      // Assert
-      expect(component.settings()).toBeNull();
-    }));
+    it('should hide table when loading', () => {
+      mockLoadingService.isLoading.and.returnValue(true);
+      fixture.detectChanges();
+
+      const tableContainer = fixture.nativeElement.querySelector('.table-container');
+      expect(tableContainer).toBeFalsy();
+    });
+  });
+
+  describe('Table View Rendering', () => {
+    beforeEach(() => {
+      initializeComponent();
+    });
+
+    it('should display table container when not loading', () => {
+      const tableContainer = fixture.nativeElement.querySelector('.table-container');
+      expect(tableContainer).toBeTruthy();
+    });
+
+    it('should display inventory table', () => {
+      const inventoryTable = fixture.nativeElement.querySelector('.inventory-table');
+      expect(inventoryTable).toBeTruthy();
+    });
+
+    it('should render table with correct headers', () => {
+      const tableHeaders = fixture.nativeElement.querySelectorAll('th');
+      expect(tableHeaders.length).toBe(10);
+    });
+
+    it('should render table rows for items', () => {
+      const tableRows = fixture.nativeElement.querySelectorAll('tbody tr');
+      expect(tableRows.length).toBe(2);
+    });
+
+    it('should display SKU in table cells', () => {
+      const skuCells = fixture.nativeElement.querySelectorAll('.sku-cell');
+      expect(skuCells.length).toBe(2);
+      expect(skuCells[0].textContent.trim()).toBe('SKU001');
+      expect(skuCells[1].textContent.trim()).toBe('SKU002');
+    });
+
+    it('should display condition badges', () => {
+      const conditionBadges = fixture.nativeElement.querySelectorAll('.condition-badge');
+      expect(conditionBadges.length).toBeGreaterThan(0);
+    });
+
+    it('should display status badges', () => {
+      const statusBadges = fixture.nativeElement.querySelectorAll('.status-badge');
+      expect(statusBadges.length).toBeGreaterThan(0);
+    });
+
+    it('should display action buttons with icons', () => {
+      const actionButtons = fixture.nativeElement.querySelectorAll('.action-buttons .btn-icon');
+      expect(actionButtons.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Table Controls', () => {
+    beforeEach(() => {
+      initializeComponent();
+    });
+
+    it('should display section header', () => {
+      const sectionHeader = fixture.nativeElement.querySelector('.section-header');
+      expect(sectionHeader).toBeTruthy();
+    });
+
+    it('should display page size selector', () => {
+      const pageSizeSelector = fixture.nativeElement.querySelector('.page-size-select');
+      expect(pageSizeSelector).toBeTruthy();
+    });
+
+    it('should not display view toggle buttons (table-only design)', () => {
+      const viewToggle = fixture.nativeElement.querySelector('.view-toggle');
+      expect(viewToggle).toBeFalsy();
+    });
+
+    it('should not have cards view elements (table-only design)', () => {
+      const cardsContainer = fixture.nativeElement.querySelector('.items-cards-container');
+      expect(cardsContainer).toBeFalsy();
+    });
+  });
+
+  describe('Empty State', () => {
+    it('should handle empty data gracefully', () => {
+      initializeComponent({ items: emptyPagedResult });
+
+      expect(component.itemsResult()).toEqual(emptyPagedResult);
+      expect(component.itemsResult()?.items.length).toBe(0);
+    });
+
+    it('should show empty state when no items', () => {
+      initializeComponent({ items: emptyPagedResult });
+
+      // Component should display empty state UI - no item rows
+      const tableRows = fixture.nativeElement.querySelectorAll('tbody tr.item-row');
+      expect(tableRows.length).toBe(0);
+    });
+  });
+
+  describe('Error State', () => {
+    it('should set error state on API failure', () => {
+      mockInventoryService.getItems.and.returnValue(throwError(() => new Error('API Error')));
+      fixture.detectChanges();
+
+      expect(component.error()).toBe('Failed to load inventory items. Please try again.');
+    });
+
+    it('should clear error before loading', () => {
+      component.error.set('Previous error');
+      
+      mockInventoryService.getItems.and.returnValue(of(mockPagedResult));
+      component.loadItems();
+
+      expect(component.error()).toBeNull();
+    });
+  });
+
+  describe('Navigation', () => {
+    it('should navigate to create new item', () => {
+      component.createNewItem();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/inventory/new']);
+    });
+
+    it('should navigate to view item', () => {
+      component.viewItem('item1');
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/inventory', 'item1']);
+    });
+
+    it('should navigate to edit item', () => {
+      component.editItem('item1');
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/inventory', 'item1', 'edit']);
+    });
+  });
+
+  describe('Filtering', () => {
+    beforeEach(() => {
+      initializeComponent();
+      mockInventoryService.getItems.calls.reset();
+    });
+
+    it('should apply filters and reset to page 1', () => {
+      component.currentPage.set(3);
+      component.searchQuery = 'test';
+      
+      component.applyFilters();
+
+      expect(component.currentPage()).toBe(1);
+      expect(mockInventoryService.getItems).toHaveBeenCalled();
+    });
+
+    it('should include search query in params', () => {
+      component.searchQuery = 'test search';
+      component.applyFilters();
+
+      expect(mockInventoryService.getItems).toHaveBeenCalledWith(
+        jasmine.objectContaining({ search: 'test search' })
+      );
+    });
+
+    it('should include status filter in params', () => {
+      component.selectedStatus = 'Available';
+      component.applyFilters();
+
+      expect(mockInventoryService.getItems).toHaveBeenCalledWith(
+        jasmine.objectContaining({ status: 'Available' })
+      );
+    });
+
+    it('should include condition filter in params', () => {
+      component.selectedCondition = 'New';
+      component.applyFilters();
+
+      expect(mockInventoryService.getItems).toHaveBeenCalledWith(
+        jasmine.objectContaining({ condition: 'New' })
+      );
+    });
+
+    it('should include category filter in params', () => {
+      component.selectedCategory = 'Electronics';
+      component.applyFilters();
+
+      expect(mockInventoryService.getItems).toHaveBeenCalledWith(
+        jasmine.objectContaining({ category: 'Electronics' })
+      );
+    });
+
+    it('should include price range in params', () => {
+      component.priceMin = 10;
+      component.priceMax = 100;
+      component.applyFilters();
+
+      expect(mockInventoryService.getItems).toHaveBeenCalledWith(
+        jasmine.objectContaining({ priceMin: 10, priceMax: 100 })
+      );
+    });
+
+    it('should clear all filters', () => {
+      component.searchQuery = 'test';
+      component.selectedStatus = 'Available';
+      component.selectedCondition = 'New';
+      component.selectedCategory = 'Electronics';
+      component.priceMin = 10;
+      component.priceMax = 100;
+      component.sortBy = 'Price';
+      component.sortDirection = 'asc';
+
+      component.clearFilters();
+
+      expect(component.searchQuery).toBe('');
+      expect(component.selectedStatus).toBe('');
+      expect(component.selectedCondition).toBe('');
+      expect(component.selectedCategory).toBe('');
+      expect(component.priceMin).toBeNull();
+      expect(component.priceMax).toBeNull();
+      expect(component.sortBy).toBe('CreatedAt');
+      expect(component.sortDirection).toBe('desc');
+    });
+  });
+
+  describe('Sorting', () => {
+    beforeEach(() => {
+      initializeComponent();
+      mockInventoryService.getItems.calls.reset();
+    });
+
+    it('should toggle sort direction when clicking same column', () => {
+      component.sortBy = 'Price';
+      component.sortDirection = 'desc';
+
+      component.setSorting('Price');
+
+      expect(component.sortDirection).toBe('asc');
+    });
+
+    it('should set new column and default to desc', () => {
+      component.sortBy = 'CreatedAt';
+      component.sortDirection = 'asc';
+
+      component.setSorting('Price');
+
+      expect(component.sortBy).toBe('Price');
+      expect(component.sortDirection).toBe('desc');
+    });
+
+    it('should reload items after sorting', () => {
+      component.setSorting('Title');
+
+      expect(mockInventoryService.getItems).toHaveBeenCalled();
+    });
+  });
+
+  describe('Pagination', () => {
+    beforeEach(() => {
+      initializeComponent();
+      mockInventoryService.getItems.calls.reset();
+    });
+
+    it('should go to specified page', () => {
+      component.goToPage(3);
+
+      expect(component.currentPage()).toBe(3);
+      expect(mockInventoryService.getItems).toHaveBeenCalled();
+    });
+
+    it('should reset to page 1 when changing page size', () => {
+      component.currentPage.set(5);
+      component.pageSize = 50;
+
+      component.changePageSize();
+
+      expect(component.currentPage()).toBe(1);
+      expect(mockInventoryService.getItems).toHaveBeenCalled();
+    });
+
+    it('should compute visible pages correctly', () => {
+      const multiPageResult: PagedResult<ItemListDto> = {
+        ...mockPagedResult,
+        totalPages: 10,
+        page: 5
+      };
+      component.itemsResult.set(multiPageResult);
+      component.currentPage.set(5);
+
+      const pages = component.visiblePages();
+
+      expect(pages).toContain(3);
+      expect(pages).toContain(4);
+      expect(pages).toContain(5);
+      expect(pages).toContain(6);
+      expect(pages).toContain(7);
+    });
+
+    it('should return empty array when no result', () => {
+      component.itemsResult.set(null);
+
+      expect(component.visiblePages()).toEqual([]);
+    });
+  });
+
+  describe('Item Actions', () => {
+    beforeEach(() => {
+      initializeComponent();
+    });
+
+    it('should mark item as removed with confirmation', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      mockInventoryService.updateItemStatus.and.returnValue(of({ success: true, data: null }));
+
+      component.markAsRemoved(mockItems[0]);
+
+      expect(window.confirm).toHaveBeenCalled();
+      expect(mockInventoryService.updateItemStatus).toHaveBeenCalledWith(
+        'item1',
+        jasmine.objectContaining({ status: 'Removed' })
+      );
+    });
+
+    it('should not mark item as removed when cancelled', () => {
+      spyOn(window, 'confirm').and.returnValue(false);
+
+      component.markAsRemoved(mockItems[0]);
+
+      expect(mockInventoryService.updateItemStatus).not.toHaveBeenCalled();
+    });
+
+    it('should delete item with confirmation', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      mockInventoryService.deleteItem.and.returnValue(of({ success: true, data: null }));
+
+      component.deleteItem(mockItems[0]);
+
+      expect(window.confirm).toHaveBeenCalled();
+      expect(mockInventoryService.deleteItem).toHaveBeenCalledWith('item1');
+    });
+
+    it('should not delete item when cancelled', () => {
+      spyOn(window, 'confirm').and.returnValue(false);
+
+      component.deleteItem(mockItems[0]);
+
+      expect(mockInventoryService.deleteItem).not.toHaveBeenCalled();
+    });
+
+    it('should set error on delete failure', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      mockInventoryService.deleteItem.and.returnValue(throwError(() => new Error('Delete failed')));
+
+      component.deleteItem(mockItems[0]);
+
+      expect(component.error()).toBe('Failed to delete item.');
+    });
+
+    it('should set error on status update failure', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      mockInventoryService.updateItemStatus.and.returnValue(throwError(() => new Error('Update failed')));
+
+      component.markAsRemoved(mockItems[0]);
+
+      expect(component.error()).toBe('Failed to update item status.');
+    });
+  });
+
+  describe('Helper Methods', () => {
+    it('should get condition class', () => {
+      expect(component.getConditionClass(ItemCondition.New)).toBe('condition-new');
+      expect(component.getConditionClass(ItemCondition.LikeNew)).toBe('condition-like-new');
+      expect(component.getConditionClass(ItemCondition.Good)).toBe('condition-good');
+    });
+
+    it('should get condition label', () => {
+      expect(component.getConditionLabel(ItemCondition.LikeNew)).toBe('Like New');
+      expect(component.getConditionLabel(ItemCondition.New)).toBe('New');
+    });
+
+    it('should get status class', () => {
+      expect(component.getStatusClass(ItemStatus.Available)).toBe('status-available');
+      expect(component.getStatusClass(ItemStatus.Sold)).toBe('status-sold');
+    });
+
+    it('should return paged result', () => {
+      initializeComponent();
+      expect(component.pagedResult()).toEqual(mockPagedResult);
+    });
+  });
+
+  describe('Responsive Design', () => {
+    it('should handle window resize gracefully', () => {
+      initializeComponent();
+
+      // Simulate window resize
+      window.dispatchEvent(new Event('resize'));
+      fixture.detectChanges();
+
+      // Component should remain functional
+      expect(component.itemsResult()).toBe(mockPagedResult);
+    });
   });
 });

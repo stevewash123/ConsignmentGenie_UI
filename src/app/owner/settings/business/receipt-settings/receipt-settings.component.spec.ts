@@ -1,5 +1,5 @@
-import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ReceiptSettingsComponent, ReceiptSettings } from './receipt-settings.component';
 import { environment } from '../../../../../environments/environment';
@@ -8,6 +8,8 @@ describe('ReceiptSettingsComponent', () => {
   let component: ReceiptSettingsComponent;
   let fixture: ComponentFixture<ReceiptSettingsComponent>;
   let httpMock: HttpTestingController;
+
+  const apiUrl = `${environment.apiUrl}/api/organizations/receipt-settings`;
 
   const mockReceiptSettings: ReceiptSettings = {
     header: {
@@ -52,6 +54,9 @@ describe('ReceiptSettingsComponent', () => {
         ReceiptSettingsComponent,
         ReactiveFormsModule,
         HttpClientTestingModule
+      ],
+      providers: [
+        FormBuilder
       ]
     }).compileComponents();
 
@@ -64,49 +69,61 @@ describe('ReceiptSettingsComponent', () => {
     httpMock.verify();
   });
 
+  /**
+   * Helper function to flush the initial GET request triggered by ngOnInit
+   */
+  function flushInitialLoad(mockData: ReceiptSettings | null = null) {
+    const req = httpMock.expectOne(apiUrl);
+    expect(req.request.method).toBe('GET');
+    if (mockData) {
+      req.flush(mockData);
+    } else {
+      req.error(new ProgressEvent('error'), { status: 404 });
+    }
+  }
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   it('should initialize form with default values', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
 
     const form = component.receiptForm();
-    expect(form.get('header.includeLogo')?.value).toBe(true);
-    expect(form.get('content.layoutStyle')?.value).toBe('detailed');
-    expect(form.get('print.autoPrint')?.value).toBe(true);
+    expect(form).toBeTruthy();
+    expect(form!.get('header.includeLogo')?.value).toBe(true);
+    expect(form!.get('content.layoutStyle')?.value).toBe('detailed');
+    expect(form!.get('print.autoPrint')?.value).toBe(true);
   });
 
-  it('should load existing settings on init', async () => {
-    component.ngOnInit();
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/receipt-settings`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockReceiptSettings);
+  it('should load existing settings on init', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad(mockReceiptSettings);
+    tick();
 
     expect(component.settings()).toEqual(mockReceiptSettings);
-  });
+  }));
 
-  it('should handle missing settings gracefully', async () => {
-    component.ngOnInit();
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/receipt-settings`);
-    req.error(new ProgressEvent('error'), { status: 404 });
+  it('should handle missing settings gracefully', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad();
+    tick();
 
     // Should not show error message for missing settings
     expect(component.errorMessage()).toBe('');
-  });
+  }));
 
-  it('should save receipt settings', async () => {
-    component.ngOnInit();
+  it('should save receipt settings', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad();
+    tick();
 
-    // Skip the initial load request
-    const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/receipt-settings`);
-    loadReq.error(new ProgressEvent('error'), { status: 404 });
+    // Start save operation (don't await - we need to flush the request)
+    component.onSave();
+    tick();
 
-    await component.onSave();
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/receipt-settings`);
+    const req = httpMock.expectOne(apiUrl);
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(jasmine.objectContaining({
       header: jasmine.any(Object),
@@ -117,31 +134,35 @@ describe('ReceiptSettingsComponent', () => {
       lastUpdated: jasmine.any(Date)
     }));
     req.flush({});
+    tick();
 
     expect(component.successMessage()).toBe('Receipt settings saved successfully');
     expect(component.saving()).toBe(false);
-  });
+  }));
 
-  it('should handle save error', async () => {
-    component.ngOnInit();
+  it('should handle save error', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad();
+    tick();
 
-    // Skip the initial load request
-    const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/receipt-settings`);
-    loadReq.error(new ProgressEvent('error'), { status: 404 });
+    // Start save operation
+    component.onSave();
+    tick();
 
-    await component.onSave();
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/receipt-settings`);
+    const req = httpMock.expectOne(apiUrl);
+    expect(req.request.method).toBe('PUT');
     req.error(new ProgressEvent('error'));
+    tick();
 
     expect(component.errorMessage()).toBe('Failed to save receipt settings');
     expect(component.saving()).toBe(false);
-  });
+  }));
 
   it('should compute character counts correctly', () => {
     const form = component.receiptForm();
+    expect(form).toBeTruthy();
 
-    form.patchValue({
+    form!.patchValue({
       footer: {
         customMessage: 'Test message',
         returnPolicyText: 'Return policy'
@@ -161,18 +182,51 @@ describe('ReceiptSettingsComponent', () => {
     expect(component.successMessage()).toContain('Receipt preview would open here');
   });
 
-  it('should validate form before saving', async () => {
+  it('should validate form before saving', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad();
+    tick();
+
     // Make form invalid by exceeding character limits
     const form = component.receiptForm();
-    form.patchValue({
+    form!.patchValue({
       footer: {
         customMessage: 'x'.repeat(201) // Exceeds 200 character limit
       }
     });
 
-    await component.onSave();
+    component.onSave();
+    tick();
 
     expect(component.errorMessage()).toBe('Please correct the validation errors before saving');
-    httpMock.expectNone(`${environment.apiUrl}/api/organizations/receipt-settings`);
-  });
+    // No PUT request should be made
+    httpMock.expectNone(req => req.method === 'PUT');
+  }));
+
+  it('should populate form when settings are loaded', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad(mockReceiptSettings);
+    tick();
+
+    const form = component.receiptForm();
+    expect(form!.get('footer.customMessage')?.value).toBe('Thank you for shopping with us!');
+    expect(form!.get('header.dateFormat')?.value).toBe('MM/dd/yyyy');
+    expect(form!.get('print.printerWidth')?.value).toBe(80);
+  }));
+
+  it('should clear success message after timeout', fakeAsync(() => {
+    component['showSuccess']('Test message');
+    expect(component.successMessage()).toBe('Test message');
+
+    tick(5100);
+    expect(component.successMessage()).toBe('');
+  }));
+
+  it('should clear error message after timeout', fakeAsync(() => {
+    component['showError']('Test error');
+    expect(component.errorMessage()).toBe('Test error');
+
+    tick(5100);
+    expect(component.errorMessage()).toBe('');
+  }));
 });

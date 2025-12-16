@@ -68,31 +68,31 @@ describe('NotificationPreferencesComponent', () => {
   });
 
   it('should initialize component on init', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should initialize form', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
     expect(component.preferencesForm).toBeDefined();
   });
 
   it('should handle save preferences', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
     spyOn(component, 'savePreferences');
     component.savePreferences();
     expect(component.savePreferences).toHaveBeenCalled();
   });
 
   it('should reset form', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
     const originalValue = component.preferencesForm.value;
     component.resetForm();
     expect(component.preferencesForm.value).toEqual(originalValue);
   });
 
   it('should handle master email toggle', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
     component.onMasterEmailToggle();
     expect(component.preferencesForm).toBeDefined();
   });
