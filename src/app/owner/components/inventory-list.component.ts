@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { ItemFormModalComponent } from './item-form-modal.component';
+import { BulkImportModalComponent } from './bulk-import-modal.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import {
@@ -19,7 +20,7 @@ import {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemFormModalComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemFormModalComponent, BulkImportModalComponent],
   templateUrl: './inventory-list.component.html',
   styles: [`
     .inventory-container {
@@ -59,6 +60,28 @@ import {
 
     .add-button:hover {
       background: #2563eb;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .bulk-upload-button {
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .bulk-upload-button:hover {
+      background: #4b5563;
     }
 
     .filters-section {
@@ -532,6 +555,7 @@ export class InventoryListComponent implements OnInit {
   // Modal state
   isAddModalOpen = false;
   isEditModalOpen = false;
+  isBulkImportModalOpen = false;
   editingItem: ItemListDto | null = null;
 
 
@@ -648,6 +672,10 @@ export class InventoryListComponent implements OnInit {
     this.isAddModalOpen = true;
   }
 
+  openBulkUpload() {
+    this.isBulkImportModalOpen = true;
+  }
+
   viewItem(id: string) {
     this.router.navigate(['/owner/inventory', id]);
   }
@@ -723,9 +751,20 @@ export class InventoryListComponent implements OnInit {
     this.editingItem = null;
   }
 
+  closeBulkImportModal() {
+    this.isBulkImportModalOpen = false;
+  }
+
   onItemSaved(item: ItemListDto) {
     // Refresh the list after saving
     this.loadItems();
+  }
+
+  onItemsImported(items: any[]) {
+    // Mock import - just refresh the list to simulate new items being added
+    console.log('Items imported (mock):', items);
+    this.loadItems(); // Refresh the list
+    this.closeBulkImportModal();
   }
 
   // Make Math.min available to template

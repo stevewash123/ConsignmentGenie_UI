@@ -1,0 +1,139 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">📦 Import Items</h2>
+      <button class="close-button" (click)="close()" type="button">×</button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <!-- Upload Section -->
+      <div
+        class="upload-section"
+        [class.dragover]="isDragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        *ngIf="!selectedFile()">
+
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Import Items from CSV</div>
+        <div class="upload-description">
+          Drag and drop your CSV file here, or click to browse for a file.<br>
+          Make sure your CSV matches our template format.
+        </div>
+
+        <div class="upload-buttons">
+          <button class="btn btn-primary" (click)="fileInput.click()">
+            Choose File
+          </button>
+          <button class="btn btn-secondary" (click)="downloadTemplate()">
+            📥 Download Template
+          </button>
+        </div>
+
+        <input
+          #fileInput
+          type="file"
+          accept=".csv"
+          class="file-input"
+          (change)="onFileSelected($event)">
+      </div>
+
+      <!-- Processing State -->
+      <div *ngIf="isProcessing()" class="upload-section">
+        <div class="upload-icon">⏳</div>
+        <div class="upload-title">Processing CSV...</div>
+        <div class="upload-description">Please wait while we validate your data.</div>
+      </div>
+
+      <!-- Preview Section -->
+      <div class="preview-section" *ngIf="selectedFile() && !isProcessing() && summary()">
+        <!-- File Info -->
+        <div style="margin-bottom: 1rem;">
+          <strong>File:</strong> {{ selectedFile()!.name }}
+          <button class="btn btn-secondary" style="margin-left: 1rem; font-size: 0.75rem; padding: 0.25rem 0.5rem;" (click)="reset(); selectedFile.set(null)">
+            Choose Different File
+          </button>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-box">
+          <div class="summary-row">
+            <span class="summary-label">Total Rows:</span>
+            <span class="summary-value">{{ summary()!.totalRows }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Valid Items:</span>
+            <span class="summary-value valid-count">{{ summary()!.validRows }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Errors:</span>
+            <span class="summary-value error-count">{{ summary()!.errorRows }}</span>
+          </div>
+        </div>
+
+        <!-- Preview Table -->
+        <div style="max-height: 400px; overflow-y: auto;">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Row</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Consignor #</th>
+                <th>Category</th>
+                <th>Condition</th>
+                <th>Errors</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of importData(); trackBy: trackByRowNumber">
+                <td class="status-cell">
+                  <span [class]="row.isValid ? 'status-valid' : 'status-error'">
+                    {{ row.isValid ? '✅' : '❌' }}
+                  </span>
+                </td>
+                <td>{{ row.rowNumber }}</td>
+                <td>{{ row.data.Name }}</td>
+                <td>{{ row.data.Price }}</td>
+                <td>{{ row.data.ConsignorNumber }}</td>
+                <td>{{ row.data.Category }}</td>
+                <td>{{ row.data.Condition }}</td>
+                <td>
+                  <ul class="error-list" *ngIf="!row.isValid">
+                    <li class="error-item" *ngFor="let error of row.errors">{{ error }}</li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer" *ngIf="selectedFile() && !isProcessing() && summary()">
+      <div class="footer-left">
+        <button
+          class="btn btn-secondary"
+          (click)="downloadErrorReport()"
+          *ngIf="summary()!.errorRows > 0">
+          📥 Download Error Report
+        </button>
+      </div>
+
+      <div class="footer-right">
+        <button class="btn btn-secondary" (click)="close()">Cancel</button>
+        <button
+          class="btn btn-success"
+          (click)="importValidItems()"
+          [disabled]="!hasValidItems()">
+          Import {{ summary()!.validRows }} Valid Items
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

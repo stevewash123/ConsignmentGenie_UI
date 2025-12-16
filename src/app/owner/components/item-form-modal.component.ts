@@ -426,9 +426,16 @@ export class ItemFormModalComponent implements OnInit {
       error: (error) => {
         console.error('Error saving item:', error);
         if (error.error?.errors) {
-          this.errors = error.error.errors;
+          // Ensure errors is always an object, not an array
+          if (Array.isArray(error.error.errors)) {
+            this.errors = { general: error.error.errors.join(', ') };
+          } else if (typeof error.error.errors === 'object') {
+            this.errors = error.error.errors;
+          } else {
+            this.errors = { general: error.error.errors.toString() };
+          }
         } else {
-          this.errors['general'] = error.error?.message || 'Failed to save item. Please try again.';
+          this.errors = { general: error.error?.message || 'Failed to save item. Please try again.' };
         }
         this.isSubmitting = false;
       },

@@ -4,9 +4,14 @@
   <!-- Page Header -->
   <div class="page-header">
     <h1>Inventory Management</h1>
-    <button class="add-button" (click)="createNewItem()">
-      📦 Add New Item
-    </button>
+    <div class="header-buttons">
+      <button class="bulk-upload-button" (click)="openBulkUpload()">
+        📤 Bulk Upload
+      </button>
+      <button class="add-button" (click)="createNewItem()">
+        📦 Add New Item
+      </button>
+    </div>
   </div>
 
   <!-- Filters Section -->
@@ -70,7 +75,7 @@
   <!-- Inventory Content -->
   <div *ngIf="!isInventoryLoading()">
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!itemsResult() || itemsResult()!.Items.length === 0">
+    <div class="empty-state" *ngIf="!itemsResult() || !itemsResult()!.Items || itemsResult()!.Items.length === 0">
       <div class="empty-state-icon">📦</div>
       <div class="empty-state-title">No Inventory Items Found</div>
       <div class="empty-state-description">
@@ -82,7 +87,7 @@
     </div>
 
     <!-- Inventory List -->
-    <div *ngIf="itemsResult() && itemsResult()!.Items.length > 0">
+    <div *ngIf="itemsResult() && itemsResult()!.Items && itemsResult()!.Items.length > 0">
       <!-- Content Header -->
       <div class="content-header">
         <div class="results-info">
@@ -206,4 +211,11 @@
   (closeModal)="closeEditModal()"
   (itemSaved)="onItemSaved($event)">
 </app-item-form-modal>
+
+<!-- Bulk Import Modal -->
+<app-bulk-import-modal
+  [isOpen]="isBulkImportModalOpen"
+  (closeModal)="closeBulkImportModal()"
+  (itemsImported)="onItemsImported($event)">
+</app-bulk-import-modal>
 </app-owner-layout>
