@@ -328,3 +328,18 @@ export interface EarningsSummary {
   payoutCountThisMonth: number;
   nextPayoutDate: Date | null;
 }
+
+// Statement Month Model - for simplified monthly download UX
+export interface StatementMonth {
+  year: number;
+  month: number;
+  monthName: string;        // "December 2024"
+  salesCount: number;
+  totalEarnings: number;
+  payoutCount: number;
+  isDownloading?: boolean;  // UI state for download button
+}
+
+export interface StatementListResponse {
+  statements: StatementMonth[];
+}
