@@ -199,6 +199,38 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getRoute: (n, role) => `/${role}/analytics`,
     allowedRoles: ['admin']
   },
+  new_owner_signup: {
+    icon: '🏪',
+    color: 'blue',
+    getTitle: () => 'New Shop Signup',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
+    allowedRoles: ['admin']
+  },
+  support_ticket_opened: {
+    icon: '🎫',
+    color: 'yellow',
+    getTitle: () => 'Support Ticket Opened',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => n.referenceId ? `/${role}/support/${n.referenceId}` : `/${role}/support`,
+    allowedRoles: ['admin']
+  },
+  support_ticket_assigned: {
+    icon: '🎫',
+    color: 'yellow',
+    getTitle: () => 'Support Ticket Assigned',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => n.referenceId ? `/${role}/support/${n.referenceId}` : `/${role}/support`,
+    allowedRoles: ['admin']
+  },
+  trial_expiring: {
+    icon: '⏰',
+    color: 'yellow',
+    getTitle: () => 'Trial Expiring',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
+    allowedRoles: ['admin']
+  },
 
   // Customer types
   order_confirmed: {

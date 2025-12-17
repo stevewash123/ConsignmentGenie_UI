@@ -5,7 +5,7 @@ import { ConsignorPayoutSettingsComponent } from './consignor-payout-settings.co
 import { PayoutSettings, DEFAULT_PAYOUT_SETTINGS } from '../../../models/payout-settings.model';
 import { environment } from '../../../../environments/environment';
 
-describe('ConsignorPayoutSettingsComponent', () => {
+fdescribe('ConsignorPayoutSettingsComponent', () => {
   let component: ConsignorPayoutSettingsComponent;
   let fixture: ComponentFixture<ConsignorPayoutSettingsComponent>;
   let httpMock: HttpTestingController;

@@ -11,6 +11,8 @@ export type NotificationType =
   // Admin types
   | 'new_owner_request' | 'owner_approved' | 'subscription_created'
   | 'subscription_cancelled' | 'system_error' | 'daily_platform_summary'
+  | 'new_owner_signup' | 'support_ticket_opened' | 'support_ticket_assigned'
+  | 'subscription_failed' | 'trial_expiring'
   // Customer types
   | 'order_confirmed' | 'order_ready_pickup' | 'order_shipped';
 
