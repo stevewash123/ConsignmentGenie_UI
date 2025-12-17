@@ -31,6 +31,22 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/inventory-list.component').then(m => m.InventoryListComponent)
   },
   {
+    path: 'inventory/new',
+    loadComponent: () => import('./components/inventory-add.component').then(m => m.InventoryAddComponent)
+  },
+  {
+    path: 'inventory/bulk-upload',
+    loadComponent: () => import('./components/inventory-bulk-upload.component').then(m => m.InventoryBulkUploadComponent)
+  },
+  {
+    path: 'inventory/:id',
+    loadComponent: () => import('./components/inventory-detail.component').then(m => m.InventoryDetailComponent)
+  },
+  {
+    path: 'inventory/:id/edit',
+    loadComponent: () => import('./components/inventory-edit.component').then(m => m.InventoryEditComponent)
+  },
+  {
     path: 'record-sale',
     loadComponent: () => import('./components/record-sale.component').then(m => m.RecordSaleComponent)
   },
@@ -49,6 +65,10 @@ export const ownerRoutes: Routes = [
   {
     path: 'payouts/check-clearance',
     loadComponent: () => import('./components/manual-check-clearance.component').then(m => m.ManualCheckClearanceComponent)
+  },
+  {
+    path: 'notifications',
+    loadComponent: () => import('./pages/owner-notifications.component').then(m => m.OwnerNotificationsComponent)
   },
   {
     path: 'settings',
@@ -72,6 +92,20 @@ export const ownerRoutes: Routes = [
           {
             path: '',
             redirectTo: 'basic-info',
+            pathMatch: 'full'
+          }
+        ]
+      },
+      {
+        path: 'profile',
+        children: [
+          {
+            path: 'branding',
+            loadComponent: () => import('./settings/profile/branding/branding.component').then(m => m.BrandingComponent)
+          },
+          {
+            path: '',
+            redirectTo: 'branding',
             pathMatch: 'full'
           }
         ]
@@ -123,8 +157,46 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./settings/subscription/subscription-settings.component').then(m => m.SubscriptionSettingsComponent)
       },
       {
+        path: 'consignor-management',
+        children: [
+          {
+            path: 'store-codes',
+            loadComponent: () => import('./settings/consignor-management/store-codes/store-codes.component').then(m => m.StoreCodesComponent)
+          },
+          {
+            path: 'approval-workflow',
+            loadComponent: () => import('./settings/consignor-management/approval-workflow/approval-workflow.component').then(m => m.ApprovalWorkflowComponent)
+          },
+          {
+            path: 'permissions',
+            loadComponent: () => import('./settings/consignor-management/permissions/permissions.component').then(m => m.PermissionsComponent)
+          }
+        ]
+      },
+      {
         path: 'integrations',
-        loadComponent: () => import('./settings/integrations/integrations-settings.component').then(m => m.IntegrationsSettingsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./settings/integrations/integrations-settings.component').then(m => m.IntegrationsSettingsComponent)
+          },
+          {
+            path: 'inventory-sales',
+            loadComponent: () => import('./settings/integrations/inventory-sales/inventory-sales.component').then(m => m.InventorySalesComponent)
+          },
+          {
+            path: 'accounting',
+            loadComponent: () => import('./settings/integrations/accounting/accounting.component').then(m => m.AccountingComponent)
+          },
+          {
+            path: 'payments',
+            loadComponent: () => import('./settings/integrations/payments/payments.component').then(m => m.PaymentsComponent)
+          },
+          {
+            path: 'banking',
+            loadComponent: () => import('./settings/integrations/banking/banking.component').then(m => m.BankingComponent)
+          }
+        ]
       },
       {
         path: 'account',

@@ -8,6 +8,10 @@
             <p>View and manage all inventory items</p>
           </div>
           <div class="header-actions">
+            <button class="btn-secondary" (click)="bulkUpload()" title="Upload multiple items at once">
+              <span class="btn-icon">📤</span>
+              Bulk Upload
+            </button>
             <button class="btn-primary" (click)="createNewItem()">
               <span class="btn-icon">📦</span>
               Add New Item

@@ -47,6 +47,11 @@ import {
       margin: 0;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
     .btn-primary, .btn-secondary {
       display: flex;
       align-items: center;
@@ -578,6 +583,10 @@ export class InventoryListComponent implements OnInit {
     this.router.navigate(['/owner/inventory/new']);
   }
 
+  bulkUpload() {
+    this.router.navigate(['/owner/inventory/bulk-upload']);
+  }
+
   viewItem(id: string) {
     this.router.navigate(['/owner/inventory', id]);
   }
@@ -624,7 +633,9 @@ export class InventoryListComponent implements OnInit {
   }
 
   getConditionClass(condition: ItemCondition): string {
-    return `condition-${condition.toLowerCase().replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+    // Insert dash between camelCase words, then lowercase
+    // e.g., "LikeNew" -> "Like-New" -> "like-new" -> "condition-like-new"
+    return `condition-${condition.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}`;
   }
 
   getConditionLabel(condition: ItemCondition): string {

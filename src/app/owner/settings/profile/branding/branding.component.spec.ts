@@ -1,7 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { BrowserTestingModule } from '@angular/platform-browser/testing';
-import { of, throwError, BehaviorSubject } from 'rxjs';
 
 import { BrandingComponent } from './branding.component';
 import { BrandingService } from '../../../../services/branding.service';
@@ -63,65 +62,82 @@ describe('BrandingComponent', () => {
     mockBrandingService = TestBed.inject(BrandingService) as jasmine.SpyObj<BrandingService>;
   });
 
+  /**
+   * Helper to initialize component and wait for async operations
+   */
+  function initializeComponent(brandingData: StoreBranding | null = null) {
+    if (brandingData) {
+      mockBrandingService.getBranding.and.returnValue(Promise.resolve(brandingData));
+    } else {
+      mockBrandingService.getBranding.and.returnValue(Promise.resolve(null));
+    }
+    fixture.detectChanges();
+    tick(); // Allow the promise to resolve
+    fixture.detectChanges();
+  }
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize form with default values', () => {
-    mockBrandingService.getBranding.and.returnValue(Promise.resolve(null));
-    fixture.detectChanges();
+  it('should initialize form with default values', fakeAsync(() => {
+    initializeComponent(null);
 
     expect(component.brandingForm).toBeDefined();
     expect(component.brandingForm.get('colors.primary')?.value).toBe('#3b82f6');
     expect(component.brandingForm.get('typography.headingFont')?.value).toBe('Inter');
     expect(component.brandingForm.get('style.theme')?.value).toBe('professional');
-  });
+  }));
 
-  it('should load existing branding settings on init', async () => {
-    mockBrandingService.getBranding.and.returnValue(Promise.resolve(mockStoreBranding));
-
-    component.ngOnInit();
-    await fixture.whenStable();
-    fixture.detectChanges();
+  it('should load existing branding settings on init', fakeAsync(() => {
+    initializeComponent(mockStoreBranding);
 
     expect(mockBrandingService.getBranding).toHaveBeenCalled();
     expect(component.currentLogo()).toBe(mockStoreBranding.logo.url);
     expect(component.brandingForm.get('colors.primary')?.value).toBe(mockStoreBranding.colors.primary);
-  });
+  }));
 
-  it('should handle loading error', async () => {
+  it('should handle loading error', fakeAsync(() => {
     mockBrandingService.getBranding.and.returnValue(Promise.reject('Error loading'));
-    spyOn(component, 'showError' as any);
+    spyOn<any>(component, 'showError');
 
-    component.ngOnInit();
-    await fixture.whenStable();
+    fixture.detectChanges();
+    tick();
 
     expect(component['showError']).toHaveBeenCalledWith('Failed to load branding settings');
-  });
+  }));
 
-  it('should save branding settings successfully', async () => {
+  it('should save branding settings successfully', fakeAsync(() => {
+    initializeComponent(null);
+
     mockBrandingService.saveBranding.and.returnValue(Promise.resolve(mockStoreBranding));
     component.brandingForm.patchValue(mockStoreBranding);
-    spyOn(component, 'showSuccess' as any);
+    spyOn<any>(component, 'showSuccess');
 
-    await component.onSave();
+    component.onSave();
+    tick();
 
     expect(mockBrandingService.saveBranding).toHaveBeenCalled();
     expect(component['showSuccess']).toHaveBeenCalledWith('Branding settings saved successfully');
     expect(component.saving()).toBe(false);
-  });
+  }));
 
-  it('should handle save error', async () => {
+  it('should handle save error', fakeAsync(() => {
+    initializeComponent(null);
+
     mockBrandingService.saveBranding.and.returnValue(Promise.reject('Save error'));
-    spyOn(component, 'showError' as any);
+    spyOn<any>(component, 'showError');
 
-    await component.onSave();
+    component.onSave();
+    tick();
 
     expect(component['showError']).toHaveBeenCalledWith('Failed to save branding settings');
     expect(component.saving()).toBe(false);
-  });
+  }));
 
-  it('should validate logo file size on upload', () => {
+  it('should validate logo file size on upload', fakeAsync(() => {
+    initializeComponent(null);
+
     const largeMockFile = new File([''], 'large-logo.png', {
       type: 'image/png',
       lastModified: Date.now()
@@ -130,14 +146,16 @@ describe('BrandingComponent', () => {
     Object.defineProperty(largeMockFile, 'size', { value: 3 * 1024 * 1024 });
 
     const mockEvent = { target: { files: [largeMockFile] } } as any;
-    spyOn(component, 'showError' as any);
+    spyOn<any>(component, 'showError');
 
     component.onLogoSelect(mockEvent);
 
     expect(component['showError']).toHaveBeenCalledWith('Logo file must be less than 2MB');
-  });
+  }));
 
-  it('should validate logo file type on upload', () => {
+  it('should validate logo file type on upload', fakeAsync(() => {
+    initializeComponent(null);
+
     const invalidMockFile = new File([''], 'logo.txt', {
       type: 'text/plain',
       lastModified: Date.now()
@@ -145,52 +163,63 @@ describe('BrandingComponent', () => {
     Object.defineProperty(invalidMockFile, 'size', { value: 1024 });
 
     const mockEvent = { target: { files: [invalidMockFile] } } as any;
-    spyOn(component, 'showError' as any);
+    spyOn<any>(component, 'showError');
 
     component.onLogoSelect(mockEvent);
 
     expect(component['showError']).toHaveBeenCalledWith('Logo must be PNG, JPG, or SVG format');
-  });
+  }));
 
-  it('should upload logo successfully', async () => {
+  it('should upload logo successfully', fakeAsync(() => {
+    initializeComponent(null);
+
     const mockFile = new File([''], 'logo.png', { type: 'image/png' });
     Object.defineProperty(mockFile, 'size', { value: 1024 });
 
     const uploadResult = { url: 'https://example.com/new-logo.png', dimensions: { width: 200, height: 50 } };
     mockBrandingService.uploadLogo.and.returnValue(Promise.resolve(uploadResult));
-    spyOn(component, 'showSuccess' as any);
+    spyOn<any>(component, 'showSuccess');
 
-    await component['uploadLogo'](mockFile);
+    component['uploadLogo'](mockFile);
+    tick();
 
     expect(mockBrandingService.uploadLogo).toHaveBeenCalledWith(mockFile);
     expect(component.currentLogo()).toBe(uploadResult.url);
     expect(component['showSuccess']).toHaveBeenCalledWith('Logo uploaded successfully');
-  });
+  }));
 
-  it('should remove logo with confirmation', async () => {
+  it('should remove logo with confirmation', fakeAsync(() => {
+    initializeComponent(null);
+
     spyOn(window, 'confirm').and.returnValue(true);
     mockBrandingService.removeLogo.and.returnValue(Promise.resolve());
-    spyOn(component, 'showSuccess' as any);
+    spyOn<any>(component, 'showSuccess');
     component.currentLogo.set('https://example.com/logo.png');
 
-    await component.removeLogo();
+    component.removeLogo();
+    tick();
 
     expect(mockBrandingService.removeLogo).toHaveBeenCalled();
     expect(component.currentLogo()).toBe('');
     expect(component['showSuccess']).toHaveBeenCalledWith('Logo removed successfully');
-  });
+  }));
 
-  it('should not remove logo if user cancels confirmation', async () => {
+  it('should not remove logo if user cancels confirmation', fakeAsync(() => {
+    initializeComponent(null);
+
     spyOn(window, 'confirm').and.returnValue(false);
     component.currentLogo.set('https://example.com/logo.png');
 
-    await component.removeLogo();
+    component.removeLogo();
+    tick();
 
     expect(mockBrandingService.removeLogo).not.toHaveBeenCalled();
     expect(component.currentLogo()).toBe('https://example.com/logo.png');
-  });
+  }));
 
-  it('should apply color preset correctly', () => {
+  it('should apply color preset correctly', fakeAsync(() => {
+    initializeComponent(null);
+
     const preset: ColorPreset = {
       name: 'Test Preset',
       primary: '#ff0000',
@@ -206,7 +235,7 @@ describe('BrandingComponent', () => {
     expect(component.brandingForm.get('colors.primary')?.value).toBe(preset.primary);
     expect(component.brandingForm.get('colors.secondary')?.value).toBe(preset.secondary);
     expect(component.brandingForm.get('colors.accent')?.value).toBe(preset.accent);
-  });
+  }));
 
   it('should have color presets available', () => {
     expect(component.colorPresets).toBeDefined();
@@ -230,56 +259,63 @@ describe('BrandingComponent', () => {
     expect(console.log).toHaveBeenCalledWith('Preview storefront with current branding settings');
   });
 
-  it('should show success message and clear after timeout', (done) => {
+  it('should show success message and clear after timeout', fakeAsync(() => {
     component['showSuccess']('Test success');
 
     expect(component.successMessage()).toBe('Test success');
     expect(component.errorMessage()).toBe('');
 
-    setTimeout(() => {
-      expect(component.successMessage()).toBe('');
-      done();
-    }, 5100);
-  });
+    tick(5100);
 
-  it('should show error message and clear after timeout', (done) => {
+    expect(component.successMessage()).toBe('');
+  }));
+
+  it('should show error message and clear after timeout', fakeAsync(() => {
     component['showError']('Test error');
 
     expect(component.errorMessage()).toBe('Test error');
     expect(component.successMessage()).toBe('');
 
-    setTimeout(() => {
-      expect(component.errorMessage()).toBe('');
-      done();
-    }, 5100);
-  });
+    tick(5100);
 
-  it('should disable save button when form is invalid', () => {
-    component.brandingForm.get('colors.primary')?.setValue('invalid-color');
+    expect(component.errorMessage()).toBe('');
+  }));
+
+  it('should disable save button when form is invalid', fakeAsync(() => {
+    initializeComponent(null);
+
+    component.brandingForm.get('colors.primary')?.setValue('');
+    component.brandingForm.get('colors.primary')?.markAsTouched();
     fixture.detectChanges();
 
     const saveButton = fixture.nativeElement.querySelector('button[type="submit"]');
-    expect(saveButton.disabled).toBe(true);
-  });
+    expect(saveButton?.disabled).toBe(true);
+  }));
 
-  it('should disable save button when saving', () => {
+  it('should disable save button when saving', fakeAsync(() => {
+    initializeComponent(null);
+
     component.saving.set(true);
     fixture.detectChanges();
 
     const saveButton = fixture.nativeElement.querySelector('button[type="submit"]');
-    expect(saveButton.disabled).toBe(true);
-  });
+    expect(saveButton?.disabled).toBe(true);
+  }));
 
-  it('should display current logo when available', () => {
+  it('should display current logo when available', fakeAsync(() => {
+    initializeComponent(null);
+
     component.currentLogo.set('https://example.com/logo.png');
     fixture.detectChanges();
 
     const logoImg = fixture.nativeElement.querySelector('.current-logo img');
     expect(logoImg).toBeTruthy();
-    expect(logoImg.src).toBe('https://example.com/logo.png');
-  });
+    expect(logoImg?.src).toBe('https://example.com/logo.png');
+  }));
 
-  it('should display upload zone when no logo', () => {
+  it('should display upload zone when no logo', fakeAsync(() => {
+    initializeComponent(null);
+
     component.currentLogo.set('');
     fixture.detectChanges();
 
@@ -288,23 +324,27 @@ describe('BrandingComponent', () => {
 
     expect(uploadZone).toBeTruthy();
     expect(currentLogo).toBeFalsy();
-  });
+  }));
 
-  it('should display success message', () => {
+  it('should display success message', fakeAsync(() => {
+    initializeComponent(null);
+
     component.successMessage.set('Test success message');
     fixture.detectChanges();
 
     const successMsg = fixture.nativeElement.querySelector('.message.success');
     expect(successMsg).toBeTruthy();
-    expect(successMsg.textContent).toContain('Test success message');
-  });
+    expect(successMsg?.textContent).toContain('Test success message');
+  }));
 
-  it('should display error message', () => {
+  it('should display error message', fakeAsync(() => {
+    initializeComponent(null);
+
     component.errorMessage.set('Test error message');
     fixture.detectChanges();
 
     const errorMsg = fixture.nativeElement.querySelector('.message.error');
     expect(errorMsg).toBeTruthy();
-    expect(errorMsg.textContent).toContain('Test error message');
-  });
+    expect(errorMsg?.textContent).toContain('Test error message');
+  }));
 });

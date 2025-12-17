@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { AppLayoutComponent } from '../../shared/components/app-layout.component';
+import { OwnerLayoutComponent } from './owner-layout.component';
 
 interface OrganizationSettings {
   id: string;
@@ -31,7 +31,7 @@ interface SquareAuthResponse {
 @Component({
   selector: 'app-owner-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppLayoutComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
   templateUrl: './owner-settings.component.html',
   styles: [`
     .settings-container {

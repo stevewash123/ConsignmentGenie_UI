@@ -83,7 +83,7 @@ export interface BusinessPolicies {
   styleUrls: ['./policies.component.css']
 })
 export class PoliciesComponent implements OnInit {
-  policiesForm = signal<FormGroup>(this.createForm());
+  policiesForm = signal<FormGroup | null>(null); // Will be set up in constructor
   policies = signal<BusinessPolicies | null>(null);
   saving = signal(false);
   successMessage = signal('');
@@ -94,19 +94,25 @@ export class PoliciesComponent implements OnInit {
 
   // Character counting for text areas
   bookingInstructionsLength = computed(() => {
-    const value = this.policiesForm().get('appointments.bookingInstructions')?.value || '';
+    const form = this.policiesForm();
+    if (!form) return 0;
+    const value = form.get('appointments.bookingInstructions')?.value || '';
     return value.length;
   });
 
   returnConditionsLength = computed(() => {
-    const value = this.policiesForm().get('returns.conditions')?.value || '';
+    const form = this.policiesForm();
+    if (!form) return 0;
+    const value = form.get('returns.conditions')?.value || '';
     return value.length;
   });
 
   constructor(
     private fb: FormBuilder,
     private http: HttpClient
-  ) {}
+  ) {
+    this.policiesForm.set(this.createForm());
+  }
 
   ngOnInit() {
     this.loadPolicies();
@@ -165,7 +171,7 @@ export class PoliciesComponent implements OnInit {
         closeTime: ['18:00']
       }));
     });
-    form.get('storeHours')?.get('schedule')?.setValue(scheduleGroup.value);
+    (form.get('storeHours') as FormGroup).setControl('schedule', scheduleGroup);
 
     // Initialize payment methods
     const methodsArray = form.get('payments.acceptedMethods') as FormArray;
@@ -248,7 +254,9 @@ export class PoliciesComponent implements OnInit {
   }
 
   getSelectedPaymentMethods(): string[] {
-    const methodsArray = this.policiesForm().get('payments.acceptedMethods') as FormArray;
+    const form = this.policiesForm();
+    if (!form) return [];
+    const methodsArray = form.get('payments.acceptedMethods') as FormArray;
     const selected: string[] = [];
     this.paymentMethods.forEach((method, index) => {
       if (methodsArray.at(index).value) {
@@ -259,12 +267,15 @@ export class PoliciesComponent implements OnInit {
   }
 
   async onSave() {
-    if (this.policiesForm().invalid) {
+    const form = this.policiesForm();
+    if (!form) return;
+
+    if (form.invalid) {
       this.showError('Please correct the validation errors before saving');
       return;
     }
 
-    const formValue = this.policiesForm().value;
+    const formValue = form.value;
 
     // Build schedule object
     const schedule: any = {};

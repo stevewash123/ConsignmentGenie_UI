@@ -47,11 +47,13 @@ export interface NotificationQueryParams {
 }
 
 export interface PagedResult<T> {
-  items: T[];
-  totalItems: number;
+  data: T[];
+  totalCount: number;
   totalPages: number;
-  currentPage: number;
+  page: number;
   pageSize: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 export interface NotificationPreferencesDto {
