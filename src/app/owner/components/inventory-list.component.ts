@@ -47,6 +47,11 @@ import {
       margin: 0;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
     .btn-primary, .btn-secondary {
       display: flex;
       align-items: center;
@@ -576,6 +581,10 @@ export class InventoryListComponent implements OnInit {
 
   createNewItem() {
     this.router.navigate(['/owner/inventory/new']);
+  }
+
+  bulkUpload() {
+    this.router.navigate(['/owner/inventory/bulk-upload']);
   }
 
   viewItem(id: string) {

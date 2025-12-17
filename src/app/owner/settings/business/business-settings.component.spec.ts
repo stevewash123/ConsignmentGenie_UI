@@ -3,9 +3,9 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
-import { InventoryListComponent } from './inventory-list.component';
-import { InventoryService } from '../../services/inventory.service';
-import { LoadingService } from '../../shared/services/loading.service';
+import { InventoryListComponent } from '../../components/inventory-list.component';
+import { InventoryService } from '../../../services/inventory.service';
+import { LoadingService } from '../../../shared/services/loading.service';
 import {
   ItemListDto,
   PagedResult,
@@ -13,7 +13,7 @@ import {
   ItemCondition,
   ItemStatus,
   ApiResponse
-} from '../../models/inventory.model';
+} from '../../../models/inventory.model';
 
 describe('InventoryListComponent', () => {
   let component: InventoryListComponent;
