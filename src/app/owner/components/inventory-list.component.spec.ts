@@ -23,13 +23,13 @@ describe('InventoryListComponent - Simplified Design', () => {
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   const mockCategories: CategoryDto[] = [
-    { id: 'cat1', name: 'Electronics', displayOrder: 1, isActive: true, createdAt: new Date() },
-    { id: 'cat2', name: 'Clothing', displayOrder: 2, isActive: true, createdAt: new Date() }
+    { CategoryId: 'cat1', Name: 'Electronics', DisplayOrder: 1, ItemCount: 5 },
+    { CategoryId: 'cat2', Name: 'Clothing', DisplayOrder: 2, ItemCount: 3 }
   ];
 
   const mockItems: ItemListDto[] = [
     {
-      itemId: 'item1',
+      ItemId: 'item1',
       sku: 'SKU001',
       title: 'Test Item 1',
       description: 'This is a test item description',
@@ -45,7 +45,7 @@ describe('InventoryListComponent - Simplified Design', () => {
       commissionRate: 0.4
     },
     {
-      itemId: 'item2',
+      ItemId: 'item2',
       sku: 'SKU002',
       title: 'Test Item 2',
       description: 'Another test item',
@@ -63,7 +63,7 @@ describe('InventoryListComponent - Simplified Design', () => {
   ];
 
   const mockPagedResult: PagedResult<ItemListDto> = {
-    items: mockItems,
+    Items: mockItems,
     totalCount: 2,
     page: 1,
     pageSize: 25,
@@ -191,7 +191,7 @@ describe('InventoryListComponent - Simplified Design', () => {
 
   describe('Empty State Handling', () => {
     const emptyPagedResult: PagedResult<ItemListDto> = {
-      items: [],
+      Items: [],
       totalCount: 0,
       page: 1,
       pageSize: 25,
@@ -223,7 +223,7 @@ describe('InventoryListComponent - Simplified Design', () => {
       fixture.detectChanges();
 
       // The empty state message should appear when no items are available
-      expect(component.itemsResult()?.items.length).toBe(0);
+      expect(component.itemsResult()?.Items.length).toBe(0);
     });
   });
 
