@@ -107,7 +107,7 @@
                 [disabled]="isSubmitting"
                 required>
                 <option value="">Select Category</option>
-                <option *ngFor="let category of categories()" [value]="category.Id">
+                <option *ngFor="let category of categories()" [value]="category.CategoryId">
                   {{ category.Name }}
                 </option>
               </select>

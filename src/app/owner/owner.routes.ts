@@ -111,6 +111,11 @@ export const ownerRoutes: Routes = [
         path: 'consignor-management/permissions',
         loadComponent: () => import('./settings/consignor-management/permissions/permissions.component').then(m => m.PermissionsComponent)
       },
+      // Inventory Management subsections
+      {
+        path: 'inventory-management/categories',
+        loadComponent: () => import('./settings/inventory/categories.component').then(m => m.CategoriesComponent)
+      },
       // Integrations subsections
       {
         path: 'integrations/inventory-sales',

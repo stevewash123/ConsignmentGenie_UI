@@ -328,6 +328,20 @@ export class SettingsLayoutComponent implements OnInit {
       ]
     },
     {
+      id: 'inventory-management',
+      label: 'Inventory Management',
+      icon: '📦',
+      description: 'Categories, conditions, and organization',
+      children: [
+        {
+          id: 'categories',
+          label: 'Categories',
+          route: 'inventory-management/categories',
+          description: 'Manage item categories and organization'
+        }
+      ]
+    },
+    {
       id: 'integrations',
       label: 'Integrations',
       icon: '🔗',

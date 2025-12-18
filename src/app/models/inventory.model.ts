@@ -155,11 +155,10 @@ export enum ItemStatus {
 }
 
 export interface CategoryDto {
-  Id: string;
+  CategoryId: string;
   Name: string;
   DisplayOrder: number;
-  IsActive: boolean;
-  CreatedAt: Date;
+  ItemCount?: number;
 }
 
 export interface CreateCategoryRequest {
@@ -172,12 +171,22 @@ export interface UpdateCategoryRequest {
   displayOrder: number;
 }
 
+export interface ReorderCategoriesRequest {
+  CategoryIds: string[];
+}
+
 export interface CategoryUsageDto {
-  categoryId: string;
-  categoryName: string;
-  itemCount: number;
-  availableItemCount: number;
-  soldItemCount: number;
+  CategoryId: string;
+  CategoryName: string;
+  ItemCount: number;
+  AvailableItemCount: number;
+  SoldItemCount: number;
+}
+
+export interface LookupItem {
+  id: string;
+  name: string;
+  count?: number;
 }
 
 export interface ApiResponse<T> {

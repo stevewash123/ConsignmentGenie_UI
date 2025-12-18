@@ -57,7 +57,7 @@
 
         <select class="filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
           <option value="">All Categories</option>
-          @for (category of categories(); track category.Id) {
+          @for (category of categories(); track category.CategoryId) {
             <option [value]="category.Name">{{ category.Name }}</option>
           }
         </select>
