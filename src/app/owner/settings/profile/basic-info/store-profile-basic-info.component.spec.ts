@@ -1,5 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { StoreProfileBasicInfoComponent } from './store-profile-basic-info.component';
 import { environment } from '../../../../../environments/environment';
@@ -9,9 +9,12 @@ describe('StoreProfileBasicInfoComponent', () => {
   let fixture: ComponentFixture<StoreProfileBasicInfoComponent>;
   let httpMock: HttpTestingController;
 
+  const apiUrl = `${environment.apiUrl}/api/organization/profile`;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StoreProfileBasicInfoComponent, ReactiveFormsModule, HttpClientTestingModule]
+      imports: [StoreProfileBasicInfoComponent, ReactiveFormsModule, HttpClientTestingModule],
+      providers: [FormBuilder]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StoreProfileBasicInfoComponent);
@@ -23,12 +26,26 @@ describe('StoreProfileBasicInfoComponent', () => {
     httpMock.verify();
   });
 
+  /**
+   * Helper function to flush the initial GET request triggered by ngOnInit
+   */
+  function flushInitialLoad(mockData: any = null) {
+    const req = httpMock.expectOne(apiUrl);
+    expect(req.request.method).toBe('GET');
+    if (mockData) {
+      req.flush(mockData);
+    } else {
+      req.error(new ProgressEvent('error'), { status: 404 });
+    }
+  }
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   it('should initialize form with validators', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
 
     const form = component.basicInfoForm;
     expect(form).toBeDefined();
@@ -43,7 +60,7 @@ describe('StoreProfileBasicInfoComponent', () => {
     expect(form.get('address.zipCode')?.hasError('required')).toBe(true);
   });
 
-  it('should load profile data on init', () => {
+  it('should load profile data on init', fakeAsync(() => {
     const mockProfile = {
       ShopName: 'Test Shop',
       ShopDescription: 'A test shop',
@@ -57,11 +74,9 @@ describe('StoreProfileBasicInfoComponent', () => {
       ShopZip: '12345'
     };
 
-    component.ngOnInit();
-
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/organization/profile`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockProfile);
+    fixture.detectChanges();
+    flushInitialLoad(mockProfile);
+    tick();
 
     // Verify form is populated
     expect(component.basicInfoForm.get('storeName')?.value).toBe('Test Shop');
@@ -74,10 +89,12 @@ describe('StoreProfileBasicInfoComponent', () => {
     expect(component.basicInfoForm.get('address.city')?.value).toBe('Test City');
     expect(component.basicInfoForm.get('address.state')?.value).toBe('TX');
     expect(component.basicInfoForm.get('address.zipCode')?.value).toBe('12345');
-  });
+  }));
 
   it('should validate phone number format', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
+
     const phoneControl = component.basicInfoForm.get('contact.phone');
 
     // Valid phone numbers
@@ -99,7 +116,9 @@ describe('StoreProfileBasicInfoComponent', () => {
   });
 
   it('should validate email format', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
+
     const emailControl = component.basicInfoForm.get('contact.email');
 
     // Valid emails
@@ -112,7 +131,9 @@ describe('StoreProfileBasicInfoComponent', () => {
   });
 
   it('should validate website URL format', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
+
     const websiteControl = component.basicInfoForm.get('contact.website');
 
     // Valid URLs
@@ -128,7 +149,9 @@ describe('StoreProfileBasicInfoComponent', () => {
   });
 
   it('should validate ZIP code format', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
+
     const zipControl = component.basicInfoForm.get('address.zipCode');
 
     // Valid ZIP codes
@@ -147,7 +170,8 @@ describe('StoreProfileBasicInfoComponent', () => {
   });
 
   it('should calculate character count correctly', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
 
     component.basicInfoForm.get('storeName')?.setValue('Test Store');
     expect(component.getCharacterCount('storeName')).toBe(10);
@@ -157,7 +181,8 @@ describe('StoreProfileBasicInfoComponent', () => {
   });
 
   it('should enforce character limits', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
 
     const longStoreName = 'a'.repeat(101); // Exceeds 100 character limit
     component.basicInfoForm.get('storeName')?.setValue(longStoreName);
@@ -168,8 +193,10 @@ describe('StoreProfileBasicInfoComponent', () => {
     expect(component.basicInfoForm.get('description')?.hasError('maxlength')).toBe(true);
   });
 
-  it('should save form data successfully', async () => {
-    component.ngOnInit();
+  it('should save form data successfully', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad();
+    tick();
 
     // Fill form with valid data
     component.basicInfoForm.patchValue({
@@ -191,8 +218,9 @@ describe('StoreProfileBasicInfoComponent', () => {
     });
 
     component.onSave();
+    tick();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/organization/profile`);
+    const req = httpMock.expectOne(apiUrl);
     expect(req.request.method).toBe('PUT');
 
     const expectedData = {
@@ -210,25 +238,29 @@ describe('StoreProfileBasicInfoComponent', () => {
 
     expect(req.request.body).toEqual(expectedData);
     req.flush({});
+    tick();
 
     expect(component.successMessage()).toBe('Basic information saved successfully');
-  });
+  }));
 
   it('should not save invalid form', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
+    flushInitialLoad();
 
     // Leave required fields empty
     component.onSave();
 
-    // No HTTP request should be made
-    httpMock.expectNone(`${environment.apiUrl}/api/organization/profile`);
+    // No PUT request should be made (only the initial GET was made)
+    httpMock.expectNone(req => req.method === 'PUT');
 
     // Form should be marked as touched
     expect(component.basicInfoForm.get('storeName')?.touched).toBe(true);
   });
 
-  it('should handle save errors', () => {
-    component.ngOnInit();
+  it('should handle save errors', fakeAsync(() => {
+    fixture.detectChanges();
+    flushInitialLoad();
+    tick();
 
     // Fill form with valid data
     component.basicInfoForm.patchValue({
@@ -250,25 +282,29 @@ describe('StoreProfileBasicInfoComponent', () => {
     });
 
     component.onSave();
+    tick();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/organization/profile`);
+    const req = httpMock.expectOne(apiUrl);
+    expect(req.request.method).toBe('PUT');
     req.error(new ErrorEvent('Network error'));
+    tick();
 
     expect(component.errorMessage()).toBe('Failed to save basic information');
-  });
+  }));
 
   it('should display preview message', () => {
+    fixture.detectChanges();
+    flushInitialLoad();
+
     component.onPreview();
     expect(component.successMessage()).toBe('Preview functionality will be implemented in a future update');
   });
 
-  it('should clear messages after timeout', (done) => {
+  it('should clear messages after timeout', fakeAsync(() => {
     component['showSuccess']('Test message');
     expect(component.successMessage()).toBe('Test message');
 
-    setTimeout(() => {
-      expect(component.successMessage()).toBe('');
-      done();
-    }, 5100);
-  });
+    tick(5100);
+    expect(component.successMessage()).toBe('');
+  }));
 });

@@ -103,11 +103,11 @@ export class ConsignorService {
   }
 
   validateInvitation(token: string): Observable<InvitationValidationResponse> {
-    return this.http.get<InvitationValidationResponse>(`${environment.apiUrl}/invitations/validate/${token}`);
+    return this.http.get<InvitationValidationResponse>(`${environment.apiUrl}/api/invitations/validate/${token}`);
   }
 
   registerFromInvitation(request: ConsignorRegistrationRequest): Observable<RegistrationResult> {
-    return this.http.post<RegistrationResult>(`${environment.apiUrl}/invitations/register`, request);
+    return this.http.post<RegistrationResult>(`${environment.apiUrl}/api/invitations/register`, request);
   }
 
   createBalanceAdjustment(consignorId: string, request: CreateBalanceAdjustmentRequest): Observable<BalanceAdjustmentResponse> {

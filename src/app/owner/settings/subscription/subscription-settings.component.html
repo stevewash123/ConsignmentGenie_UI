@@ -1,20 +1,224 @@
+<div class="subscription-settings">
+  <div class="settings-header">
+    <h2>Subscription & Billing</h2>
+    <p>Manage your ConsignmentGenie plan, payment method, and billing history</p>
+  </div>
 
-    <div class="subscription-settings">
-      <div class="settings-header">
-        <h2>Subscription & Billing</h2>
-        <p>Manage your ConsignmentGenie plan, payment method, and billing history</p>
+  <div *ngIf="billingInfo()" class="subscription-content">
+    <!-- Current Plan -->
+    <div class="form-section">
+      <h3>Current Plan</h3>
+
+      <div class="current-plan">
+        <div class="plan-info">
+          <h4>{{ billingInfo()!.currentPlan.name }}</h4>
+          <div class="plan-price">
+            ${{ billingInfo()!.currentPlan.price }}
+            <span class="billing-cycle">/ {{ billingInfo()!.currentPlan.billingCycle }}</span>
+          </div>
+          <div class="next-billing">
+            Next billing: {{ billingInfo()!.nextBillingDate | date:'mediumDate' }}
+          </div>
+        </div>
+
+        <div class="plan-actions">
+          <button type="button" class="btn btn-outline" (click)="showPlanOptions = !showPlanOptions">
+            {{ showPlanOptions ? 'Hide' : 'Change Plan' }}
+          </button>
+        </div>
       </div>
 
-      <div class="coming-soon">
-        <h3>🚧 Coming Soon</h3>
-        <p>Subscription management features are currently under development. This page will include:</p>
-        <ul>
-          <li>Current plan details and features</li>
-          <li>Plan upgrade/downgrade options</li>
-          <li>Payment method management</li>
-          <li>Billing history and invoices</li>
-          <li>Usage statistics and limits</li>
+      <div class="plan-features">
+        <h5>Plan Features</h5>
+        <ul class="features-list">
+          <li *ngFor="let feature of billingInfo()!.currentPlan.features">
+            <span class="feature-check">✓</span>
+            {{ feature }}
+          </li>
         </ul>
       </div>
     </div>
-  
+
+    <!-- Usage Statistics -->
+    <div class="form-section">
+      <h3>Current Usage</h3>
+
+      <div class="usage-grid">
+        <div class="usage-item">
+          <div class="usage-label">Consignors</div>
+          <div class="usage-bar">
+            <div class="usage-progress"
+                 [style.width.%]="getUsagePercentage('consignors')"></div>
+          </div>
+          <div class="usage-text">
+            {{ billingInfo()!.usage.consignors.current }}
+            <span *ngIf="billingInfo()!.usage.consignors.limit">
+              / {{ billingInfo()!.usage.consignors.limit }}
+            </span>
+            <span *ngIf="!billingInfo()!.usage.consignors.limit">
+              (Unlimited)
+            </span>
+          </div>
+        </div>
+
+        <div class="usage-item">
+          <div class="usage-label">Items</div>
+          <div class="usage-bar">
+            <div class="usage-progress"
+                 [style.width.%]="getUsagePercentage('items')"></div>
+          </div>
+          <div class="usage-text">
+            {{ billingInfo()!.usage.items.current }}
+            <span *ngIf="billingInfo()!.usage.items.limit">
+              / {{ billingInfo()!.usage.items.limit }}
+            </span>
+            <span *ngIf="!billingInfo()!.usage.items.limit">
+              (Unlimited)
+            </span>
+          </div>
+        </div>
+
+        <div class="usage-item">
+          <div class="usage-label">Locations</div>
+          <div class="usage-bar">
+            <div class="usage-progress"
+                 [style.width.%]="getUsagePercentage('locations')"></div>
+          </div>
+          <div class="usage-text">
+            {{ billingInfo()!.usage.locations.current }}
+            <span *ngIf="billingInfo()!.usage.locations.limit">
+              / {{ billingInfo()!.usage.locations.limit }}
+            </span>
+            <span *ngIf="!billingInfo()!.usage.locations.limit">
+              (Unlimited)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan Options (when changing) -->
+    <div class="form-section" *ngIf="showPlanOptions">
+      <h3>Available Plans</h3>
+
+      <div class="plans-grid">
+        <div *ngFor="let plan of availablePlans"
+             class="plan-card"
+             [class.current]="plan.id === billingInfo()?.currentPlan.id"
+             [class.selected]="selectedPlanId === plan.id">
+
+          <div class="plan-header">
+            <h4>{{ plan.name }}</h4>
+            <div class="plan-price">
+              ${{ plan.price }}
+              <span class="billing-cycle">/ {{ plan.billingCycle }}</span>
+            </div>
+          </div>
+
+          <ul class="plan-features-compact">
+            <li *ngFor="let feature of plan.features.slice(0, 3)">{{ feature }}</li>
+            <li *ngIf="plan.features.length > 3" class="more-features">
+              +{{ plan.features.length - 3 }} more features
+            </li>
+          </ul>
+
+          <div class="plan-actions">
+            <button
+              *ngIf="plan.id !== billingInfo()?.currentPlan.id"
+              type="button"
+              class="btn btn-primary"
+              (click)="selectPlan(plan.id)">
+              {{ getUpgradeText(plan) }}
+            </button>
+            <div *ngIf="plan.id === billingInfo()?.currentPlan.id" class="current-badge">
+              Current Plan
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="form-section">
+      <h3>Payment Method</h3>
+
+      <div class="payment-method">
+        <div class="method-info">
+          <div class="method-icon">
+            {{ billingInfo()!.paymentMethod.type === 'card' ? '💳' : '🏦' }}
+          </div>
+          <div class="method-details">
+            <div class="method-primary">
+              <span *ngIf="billingInfo()!.paymentMethod.brand" class="card-brand">
+                {{ billingInfo()!.paymentMethod.brand | titlecase }}
+              </span>
+              ending in {{ billingInfo()!.paymentMethod.last4 }}
+            </div>
+            <div *ngIf="billingInfo()!.paymentMethod.expiryMonth" class="method-secondary">
+              Expires {{ billingInfo()!.paymentMethod.expiryMonth }}/{{ billingInfo()!.paymentMethod.expiryYear }}
+            </div>
+          </div>
+        </div>
+
+        <div class="method-actions">
+          <button type="button" class="btn btn-outline" (click)="updatePaymentMethod()">
+            Update Payment Method
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Billing History -->
+    <div class="form-section">
+      <h3>Billing History</h3>
+
+      <div class="billing-history">
+        <div *ngIf="billingInfo()!.billingHistory.length === 0" class="no-history">
+          No billing history available
+        </div>
+
+        <div *ngFor="let bill of billingInfo()!.billingHistory" class="billing-item">
+          <div class="billing-date">
+            {{ bill.date | date:'mediumDate' }}
+          </div>
+          <div class="billing-description">
+            {{ bill.description }}
+          </div>
+          <div class="billing-amount">
+            ${{ bill.amount }}
+          </div>
+          <div class="billing-status" [class]="'status-' + bill.status">
+            {{ bill.status | titlecase }}
+          </div>
+          <div class="billing-actions">
+            <button
+              *ngIf="bill.downloadUrl"
+              type="button"
+              class="btn-link"
+              (click)="downloadInvoice(bill.id)">
+              Download
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button *ngIf="selectedPlanId && selectedPlanId !== billingInfo()?.currentPlan.id"
+              type="button"
+              class="btn btn-primary"
+              (click)="confirmPlanChange()">
+        Confirm Plan Change
+      </button>
+
+      <button type="button" class="btn btn-danger" (click)="cancelSubscription()">
+        Cancel Subscription
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading()" class="loading-state">
+    <p>Loading subscription details...</p>
+  </div>
+</div>

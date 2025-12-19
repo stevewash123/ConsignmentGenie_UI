@@ -8,7 +8,7 @@
       <div class="settings-form" *ngIf="settings()">
         <!-- Channel Selection -->
         <div class="form-section">
-          <h3>How do you sell to customers?</h3>
+          <h3>How would you like to sell to customers?</h3>
 
           <div class="channel-options">
             <label
@@ -168,32 +168,87 @@
           <h3>ConsignmentGenie Storefront</h3>
 
           <div class="form-group">
-            <label for="storeUrl">Your Store URL</label>
-            <div class="url-input">
-              <span class="url-prefix">consignmentgenie.com/shop/</span>
-              <input
-                type="text"
-                id="storeUrl"
-                [(ngModel)]="settings()!.cgStorefront!.storeSlug"
-                name="storeSlug"
-                class="form-input url-slug"
-                placeholder="your-store-name">
-              <span class="url-status">✓ Available</span>
-            </div>
-          </div>
+            <label>Store URL Configuration</label>
+            <div class="url-options">
+              <!-- ConsignmentGenie Subdomain Option -->
+              <div class="url-option" [class.selected]="settings()?.cgStorefront?.useCustomDomain !== 'true'">
+                <label class="radio-label">
+                  <input
+                    type="radio"
+                    value="false"
+                    [(ngModel)]="settings()!.cgStorefront!.useCustomDomain"
+                    name="domainType">
+                  <span class="radio-mark"></span>
+                  <div class="option-content">
+                    <div class="option-title">Use ConsignmentGenie subdomain (Recommended)</div>
+                    <div class="option-description">Free, instant setup with SSL included</div>
+                  </div>
+                </label>
+                <div class="url-input" *ngIf="settings()?.cgStorefront?.useCustomDomain !== 'true'">
+                  <span class="url-prefix">consignmentgenie.com/shop/</span>
+                  <input
+                    type="text"
+                    [(ngModel)]="settings()!.cgStorefront!.storeSlug"
+                    name="storeSlug"
+                    class="form-input url-slug"
+                    placeholder="your-store-name">
+                  <span class="url-status">✓ Available</span>
+                </div>
+              </div>
 
-          <div class="form-group">
-            <label for="customDomain">Custom Domain (optional)</label>
-            <input
-              type="url"
-              id="customDomain"
-              [(ngModel)]="settings()!.cgStorefront!.customDomain"
-              name="customDomain"
-              class="form-input"
-              placeholder="shop.yourstore.com">
-            <div class="domain-status" [class.verified]="settings()?.cgStorefront?.dnsVerified">
-              {{ settings()?.cgStorefront?.dnsVerified ? '✅ DNS verified' : '⚠️ DNS not verified' }}
-              <button *ngIf="!settings()?.cgStorefront?.dnsVerified" class="btn-link" (click)="verifyDns()">Verify DNS</button>
+              <!-- Custom Domain Option -->
+              <div class="url-option" [class.selected]="settings()?.cgStorefront?.useCustomDomain === 'true'">
+                <label class="radio-label">
+                  <input
+                    type="radio"
+                    value="true"
+                    [(ngModel)]="settings()!.cgStorefront!.useCustomDomain"
+                    name="domainType">
+                  <span class="radio-mark"></span>
+                  <div class="option-content">
+                    <div class="option-title">Use your own domain</div>
+                    <div class="option-description">Professional branding with your domain name</div>
+                  </div>
+                </label>
+                <div class="custom-domain-setup" *ngIf="settings()?.cgStorefront?.useCustomDomain === 'true'">
+                  <input
+                    type="url"
+                    [(ngModel)]="settings()!.cgStorefront!.customDomain"
+                    name="customDomain"
+                    class="form-input"
+                    placeholder="shop.yourstore.com">
+
+                  <div class="domain-status" [class.verified]="settings()?.cgStorefront?.dnsVerified">
+                    <div class="status-indicator">
+                      {{ settings()?.cgStorefront?.dnsVerified ? '✅ DNS verified' : '⚠️ DNS not verified' }}
+                    </div>
+                    <button *ngIf="!settings()?.cgStorefront?.dnsVerified" class="btn-link" (click)="verifyDns()">
+                      Verify DNS
+                    </button>
+                  </div>
+
+                  <!-- DNS Setup Instructions -->
+                  <div class="dns-instructions" *ngIf="settings()?.cgStorefront?.customDomain && !settings()?.cgStorefront?.dnsVerified">
+                    <div class="instruction-header">
+                      <strong>DNS Setup Instructions</strong>
+                    </div>
+                    <div class="instruction-content">
+                      <p>To use your custom domain, add these DNS records with your domain registrar:</p>
+                      <div class="dns-records">
+                        <div class="dns-record">
+                          <div class="record-type">Type: <strong>CNAME</strong></div>
+                          <div class="record-name">Name: <strong>shop</strong> (or your subdomain)</div>
+                          <div class="record-value">Value: <strong>storefront.consignmentgenie.com</strong></div>
+                        </div>
+                      </div>
+                      <div class="instruction-note">
+                        <strong>Note:</strong> DNS changes can take up to 24 hours to propagate.
+                        Click "Verify DNS" above once you've added the record.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -299,7 +354,7 @@
             <div>
               <strong>No online storefront</strong>
               <p>You've chosen to manage sales manually. Record transactions in the POS section.</p>
-              <p>Want to sell online? Choose Square, Shopify, or CG Storefront above.</p>
+              <p>Want to sell online? Choose Square or ConsignmentGenie Storefront above.</p>
             </div>
           </div>
 
@@ -334,9 +389,29 @@
         <!-- Actions -->
         <div class="form-actions">
           <button type="button" class="btn-secondary" (click)="loadSettings()">Cancel</button>
-          <button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="isSaving()">
+          <button
+            type="button"
+            class="btn-primary"
+            (click)="saveSettings()"
+            [disabled]="isSaving() || !hasConfigurableSettings()">
             {{ isSaving() ? 'Saving...' : 'Save Changes' }}
           </button>
+        </div>
+
+        <!-- Channel-specific info for non-configurable channels -->
+        <div class="channel-info" *ngIf="!hasConfigurableSettings()">
+          <div class="info-box">
+            <span class="info-icon">ℹ️</span>
+            <div>
+              <strong>Settings managed externally</strong>
+              <p *ngIf="settings()?.selectedChannel === 'square'">
+                Square integration settings are configured through the Square dashboard and sync automatically.
+              </p>
+              <p *ngIf="settings()?.selectedChannel === 'in_store_only'">
+                In-store only mode requires manual transaction entry through the POS system.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

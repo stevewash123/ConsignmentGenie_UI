@@ -10,20 +10,20 @@
     <section class="form-section" formGroupName="storeHours">
       <h3>Store Hours</h3>
 
-      <div class="hours-schedule">
-        <div *ngFor="let day of weekDays" class="day-hours">
+      <div class="hours-schedule" formGroupName="schedule">
+        <div *ngFor="let day of weekDays" class="day-hours" [formGroupName]="day">
           <label class="day-label">{{ day }}</label>
 
           <label class="open-toggle checkbox-label">
-            <input type="checkbox" [formControlName]="'schedule.' + day + '.isOpen'">
+            <input type="checkbox" formControlName="isOpen">
             <span class="checkmark"></span>
             Open
           </label>
 
           <div class="time-inputs" *ngIf="policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">
-            <input type="time" [formControlName]="'schedule.' + day + '.openTime'" class="form-input time-input">
+            <input type="time" formControlName="openTime" class="form-input time-input">
             <span class="time-separator">to</span>
-            <input type="time" [formControlName]="'schedule.' + day + '.closeTime'" class="form-input time-input">
+            <input type="time" formControlName="closeTime" class="form-input time-input">
           </div>
 
           <span class="closed-indicator" *ngIf="!policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">
