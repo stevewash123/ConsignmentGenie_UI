@@ -1,6 +1,7 @@
 import { Component, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { Consignor } from '../../models/consignor.model';
 import { ConsignorService } from '../../services/consignor.service';
 import { ENTITY_LABELS } from '../constants/labels';
@@ -220,7 +221,10 @@ export class InviteConsignorModalComponent {
     useShopDefault: new FormControl(true)
   });
 
-  constructor(private ConsignorService: ConsignorService) {}
+  constructor(
+    private ConsignorService: ConsignorService,
+    private toastr: ToastrService
+  ) {}
 
   close(): void {
     this.closed.emit();
@@ -256,8 +260,17 @@ export class InviteConsignorModalComponent {
         next: (response) => {
           this.isSubmitting.set(false);
           if (response.success) {
-            this.close();
-            this.consignorAdded.emit(null); // Trigger refresh of consignor list
+            // Show success toast with invited person's details
+            const invitedName = inviteData.name !== inviteData.email ? inviteData.name : inviteData.email;
+            this.toastr.success(`Invitation sent to ${invitedName}`, 'Consignor Invited', {
+              timeOut: 5000
+            });
+
+            // Reset form but keep modal open for additional invites
+            this.inviteForm.reset();
+
+            // Trigger refresh of consignor list
+            this.consignorAdded.emit(null);
           } else {
             console.error('Invite failed:', response.message);
             // TODO: Show error message to user
