@@ -128,9 +128,24 @@ describe('InviteConsignorModalComponent', () => {
       email: 'test@test.com',
       commissionRate: 50
     });
+
+    spyOn(component.consignorAdded, 'emit');
     component.submitManual();
-    // TODO: Manual consignor creation not yet implemented
-    // Once implemented, should verify createConsignor was called
-    expect(component.isSubmitting()).toBe(true);
+
+    expect(mockConsignorService.createConsignor).toHaveBeenCalledWith({
+      name: 'Test consignor',
+      email: 'test@test.com',
+      phone: undefined,
+      commissionRate: 0.5 // 50% converted to decimal
+    });
+    expect(mockToastrService.success).toHaveBeenCalledWith(
+      'Test consignor has been added successfully',
+      'Consignor Created',
+      { timeOut: 5000 }
+    );
+    expect(component.consignorAdded.emit).toHaveBeenCalledWith({} as any);
+    expect(component.manualForm.get('firstName')?.value).toBeNull();
+    expect(component.manualForm.get('lastName')?.value).toBeNull();
+    expect(component.manualForm.get('email')?.value).toBeNull();
   });
 });

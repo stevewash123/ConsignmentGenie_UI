@@ -7,12 +7,14 @@ export const ENTITY_LABELS = {
 
   // Page titles
   consignorManagement: 'Consignor Management',
+  providerManagement: 'Consignor Management', // Legacy alias
   consignorDetails: 'Consignor Details',
 
   // Actions
   addConsignor: 'Add Consignor',
   addConsignorManually: 'Add Consignor Manually',
   inviteConsignor: 'Invite Consignor',
+  inviteProvider: 'Invite Consignor', // Legacy alias
   editConsignor: 'Edit Consignor',
   viewConsignor: 'View Consignor',
 
