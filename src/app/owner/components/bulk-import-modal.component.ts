@@ -241,6 +241,78 @@ export interface ImportSummary {
       margin-bottom: 0.25rem;
     }
 
+    /* Compact table styles */
+    .compact-header {
+      font-size: 0.85rem;
+      padding: 0.5rem;
+    }
+
+    .compact-cell {
+      padding: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .compact-icon {
+      font-size: 1rem;
+    }
+
+    /* Row highlighting */
+    .row-valid {
+      background-color: #ffffff;
+    }
+
+    .row-error {
+      background-color: #fef2f2;
+    }
+
+    /* Pagination styles */
+    .pagination-info {
+      margin-bottom: 1rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .table-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .page-info {
+      color: #6b7280;
+      font-size: 0.875rem;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.875rem;
+      border-radius: 0.375rem;
+      border: 1px solid #d1d5db;
+      background: white;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .btn-sm:hover:not(:disabled) {
+      background: #f9fafb;
+    }
+
+    .btn-sm:disabled {
+      background: #f9fafb;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+
     .modal-footer {
       padding: 1rem 2rem 2rem;
       display: flex;
@@ -319,6 +391,10 @@ export class BulkImportModalComponent {
   summary = signal<ImportSummary | null>(null);
   isProcessing = signal(false);
   isDragOver = signal(false);
+
+  // Pagination
+  currentPage = signal(1);
+  pageSize = signal(25);
 
   // Sample template data
   private sampleCsvData = `Name,Description,SKU,Price,ConsignorNumber,Category,Condition,ReceivedDate,Location,Notes
@@ -547,5 +623,36 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
 
   trackByRowNumber(index: number, row: ImportRow): number {
     return row.rowNumber;
+  }
+
+  // Pagination methods
+  paginatedData() {
+    const data = this.importData();
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / this.pageSize());
+    const startIndex = (this.currentPage() - 1) * this.pageSize();
+    const endIndex = Math.min(startIndex + this.pageSize(), totalItems);
+    const items = data.slice(startIndex, endIndex);
+
+    return {
+      items,
+      totalItems,
+      totalPages,
+      startIndex,
+      endIndex
+    };
+  }
+
+  previousPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
+
+  nextPage() {
+    const totalPages = this.paginatedData().totalPages;
+    if (this.currentPage() < totalPages) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InventoryService } from '../../services/inventory.service';
 import { ConsignorService } from '../../services/consignor.service';
+import { ConditionService, ConditionOption } from '../../services/condition.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import {
   CreateItemRequest,
@@ -261,29 +262,28 @@ export class ItemFormModalComponent implements OnInit {
     price: null as number | null,
     consignorId: '',
     categoryId: '',
-    condition: ItemCondition.Good
+    condition: 'Good', // Default condition from API
+    receivedDate: '',
+    expirationDate: ''
   };
 
   // Data sources
   consignors = signal<Consignor[]>([]);
   categories = signal<CategoryDto[]>([]);
 
+  // Default consignment period in days
+  readonly DEFAULT_CONSIGNMENT_PERIOD = 90;
+  conditionOptions = signal<ConditionOption[]>([]);
+
   // State
   isSubmitting = false;
   errors: Record<string, string> = {};
-
-  // Condition options
-  conditionOptions: { value: ItemCondition; label: string }[] = [
-    { value: ItemCondition.New, label: 'New' },
-    { value: ItemCondition.LikeNew, label: 'Like New' },
-    { value: ItemCondition.Good, label: 'Good' },
-    { value: ItemCondition.Fair, label: 'Fair' },
-    { value: ItemCondition.Poor, label: 'Poor' }
-  ];
+  isLoadingConditions = false;
 
   constructor(
     private inventoryService: InventoryService,
     private consignorService: ConsignorService,
+    private conditionService: ConditionService,
     public loadingService: LoadingService
   ) {}
 
@@ -324,6 +324,19 @@ export class ItemFormModalComponent implements OnInit {
         console.error('Error loading categories:', error);
       }
     });
+
+    // Load conditions
+    this.isLoadingConditions = true;
+    this.conditionService.getAll().subscribe({
+      next: (conditions) => {
+        this.conditionOptions.set(conditions || []);
+        this.isLoadingConditions = false;
+      },
+      error: (error) => {
+        console.error('Error loading conditions:', error);
+        this.isLoadingConditions = false;
+      }
+    });
   }
 
   private populateForm() {
@@ -335,12 +348,20 @@ export class ItemFormModalComponent implements OnInit {
         price: this.editingItem.Price,
         consignorId: this.editingItem.ConsignorId,
         categoryId: '', // Will need to map category name to ID
-        condition: this.editingItem.Condition
+        condition: this.editingItem.Condition,
+        receivedDate: (this.editingItem as any).ReceivedDate || new Date().toISOString().split('T')[0],
+        expirationDate: (this.editingItem as any).ExpirationDate || ''
       };
+
+      // Calculate expiration date if missing
+      if (!this.formData.expirationDate && this.formData.receivedDate) {
+        this.formData.expirationDate = this.calculateExpirationDate(this.formData.receivedDate);
+      }
     }
   }
 
   private resetForm() {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     this.formData = {
       title: '',
       description: '',
@@ -348,7 +369,9 @@ export class ItemFormModalComponent implements OnInit {
       price: null,
       consignorId: '',
       categoryId: '',
-      condition: ItemCondition.Good
+      condition: 'Good',
+      receivedDate: today,
+      expirationDate: this.calculateExpirationDate(today)
     };
     this.errors = {};
   }
@@ -393,7 +416,9 @@ export class ItemFormModalComponent implements OnInit {
       price: this.formData.price!,
       consignorId: this.formData.consignorId,
       category: '', // Will be populated from categoryId lookup
-      condition: this.formData.condition
+      condition: this.formData.condition,
+      receivedDate: this.formData.receivedDate ? new Date(this.formData.receivedDate) : new Date(),
+      expirationDate: this.formData.expirationDate ? new Date(this.formData.expirationDate) : new Date()
     };
 
     const operation = this.editingItem
@@ -465,5 +490,23 @@ export class ItemFormModalComponent implements OnInit {
       return this.editingItem ? 'Updating...' : 'Adding...';
     }
     return this.editingItem ? 'Update Item' : 'Add Item';
+  }
+
+  // Calculate expiration date based on received date + default period
+  calculateExpirationDate(receivedDate: string): string {
+    if (!receivedDate) return '';
+
+    const received = new Date(receivedDate);
+    const expiration = new Date(received);
+    expiration.setDate(expiration.getDate() + this.DEFAULT_CONSIGNMENT_PERIOD);
+
+    return expiration.toISOString().split('T')[0]; // YYYY-MM-DD format
+  }
+
+  // Handle received date changes to auto-update expiration
+  onReceivedDateChange(): void {
+    if (this.formData.receivedDate) {
+      this.formData.expirationDate = this.calculateExpirationDate(this.formData.receivedDate);
+    }
   }
 }

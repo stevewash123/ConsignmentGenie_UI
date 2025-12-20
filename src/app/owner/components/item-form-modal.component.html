@@ -125,14 +125,52 @@
               name="condition"
               class="form-select"
               [(ngModel)]="formData.condition"
-              [disabled]="isSubmitting"
+              [disabled]="isSubmitting || isLoadingConditions"
               required>
-              <option *ngFor="let option of conditionOptions" [value]="option.value">
+              <option value="" disabled>
+                {{ isLoadingConditions ? 'Loading conditions...' : 'Select Condition' }}
+              </option>
+              <option *ngFor="let option of conditionOptions()" [value]="option.value">
                 {{ option.label }}
               </option>
             </select>
             <div class="form-error" *ngIf="errors['condition']">
               {{ errors['condition'] }}
+            </div>
+          </div>
+
+          <!-- Consignment Dates Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="receivedDate" class="form-label">Received Date</label>
+              <input
+                type="date"
+                id="receivedDate"
+                name="receivedDate"
+                class="form-input"
+                [(ngModel)]="formData.receivedDate"
+                (change)="onReceivedDateChange()"
+                [disabled]="isSubmitting">
+              <div class="form-error" *ngIf="errors['receivedDate']">
+                {{ errors['receivedDate'] }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="expirationDate" class="form-label">Expiration Date</label>
+              <input
+                type="date"
+                id="expirationDate"
+                name="expirationDate"
+                class="form-input"
+                [(ngModel)]="formData.expirationDate"
+                [disabled]="isSubmitting">
+              <div class="form-helper-text">
+                ({{ DEFAULT_CONSIGNMENT_PERIOD }} days from received)
+              </div>
+              <div class="form-error" *ngIf="errors['expirationDate']">
+                {{ errors['expirationDate'] }}
+              </div>
             </div>
           </div>
 

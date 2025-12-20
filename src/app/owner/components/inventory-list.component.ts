@@ -2,10 +2,14 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { ItemFormModalComponent } from './item-form-modal.component';
 import { BulkImportModalComponent } from './bulk-import-modal.component';
+import { StatusChangeModalComponent } from './status-change-modal.component';
 import { InventoryService } from '../../services/inventory.service';
+import { ConditionService, ConditionOption } from '../../services/condition.service';
+import { ItemStatusService, StatusOption, StatusAction, getAvailableActions } from '../../services/item-status.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import {
   ItemListDto,
@@ -20,7 +24,7 @@ import {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemFormModalComponent, BulkImportModalComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemFormModalComponent, BulkImportModalComponent, StatusChangeModalComponent],
   templateUrl: './inventory-list.component.html',
   styles: [`
     .inventory-container {
@@ -524,16 +528,40 @@ import {
         gap: 1rem;
       }
     }
+
+    /* Expiration Status Styles */
+    .expiration-value {
+      font-weight: 500;
+    }
+
+    .expiration-normal {
+      color: #4b5563;
+    }
+
+    .expiration-warning {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .expiration-expired {
+      color: #ef4444;
+      font-weight: 700;
+    }
   `]
 })
 export class InventoryListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
+  private conditionService = inject(ConditionService);
+  private itemStatusService = inject(ItemStatusService);
+  private toastr = inject(ToastrService);
   private router = inject(Router);
   private loadingService = inject(LoadingService);
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
   categories = signal<CategoryDto[]>([]);
+  conditionOptions = signal<ConditionOption[]>([]);
+  statusOptions = signal<StatusOption[]>([]);
   error = signal<string | null>(null);
 
   isInventoryLoading(): boolean {
@@ -545,6 +573,7 @@ export class InventoryListComponent implements OnInit {
   selectedStatus = '';
   selectedCondition = '';
   selectedCategory = '';
+  selectedExpiration = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
   sortBy = 'CreatedAt';
@@ -580,6 +609,8 @@ export class InventoryListComponent implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
+    this.loadConditions();
+    this.loadStatuses();
     this.loadItems();
   }
 
@@ -591,6 +622,24 @@ export class InventoryListComponent implements OnInit {
         }
       },
       error: (err) => console.error('Failed to load categories:', err)
+    });
+  }
+
+  private loadConditions() {
+    this.conditionService.getAll().subscribe({
+      next: (conditions) => {
+        this.conditionOptions.set(conditions);
+      },
+      error: (err) => console.error('Failed to load conditions:', err)
+    });
+  }
+
+  private loadStatuses() {
+    this.itemStatusService.getStatuses().subscribe({
+      next: (response: any) => {
+        this.statusOptions.set(response.data || response);
+      },
+      error: (err) => console.error('Failed to load statuses:', err)
     });
   }
 
@@ -614,7 +663,36 @@ export class InventoryListComponent implements OnInit {
 
     this.inventoryService.getItems(params).subscribe({
       next: (result) => {
-        this.itemsResult.set(result);
+        // Apply client-side expiration filtering
+        let filteredItems = result.Items;
+
+        if (this.selectedExpiration) {
+          filteredItems = filteredItems.filter(item => {
+            const expirationDate = (item as any).ExpirationDate;
+            if (!expirationDate) return false;
+
+            const expDate = new Date(expirationDate);
+            const today = new Date();
+            const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+            if (this.selectedExpiration === 'expiring-soon') {
+              return daysUntil >= 0 && daysUntil <= this.EXPIRATION_WARNING_DAYS;
+            } else if (this.selectedExpiration === 'expired') {
+              return daysUntil < 0;
+            }
+
+            return true;
+          });
+        }
+
+        // Create filtered result
+        const filteredResult = {
+          ...result,
+          Items: filteredItems,
+          TotalCount: filteredItems.length
+        };
+
+        this.itemsResult.set(filteredResult);
       },
       error: (err) => {
         this.error.set('Failed to load inventory items. Please try again.');
@@ -636,6 +714,7 @@ export class InventoryListComponent implements OnInit {
     this.selectedStatus = '';
     this.selectedCondition = '';
     this.selectedCategory = '';
+    this.selectedExpiration = '';
     this.priceMin = null;
     this.priceMax = null;
     this.sortBy = 'CreatedAt';
@@ -730,14 +809,77 @@ export class InventoryListComponent implements OnInit {
   }
 
   getConditionLabel(condition: ItemCondition): string {
-    switch (condition) {
-      case ItemCondition.LikeNew: return 'Like New';
-      default: return condition;
-    }
+    const conditionOption = this.conditionOptions().find(opt => opt.value === condition);
+    return conditionOption ? conditionOption.label : condition;
   }
 
-  getStatusClass(status: ItemStatus): string {
+  getStatusClass(status: string): string {
     return `status-${status.toLowerCase()}`;
+  }
+
+  getStatusEmoji(status: string): string {
+    const emojis: Record<string, string> = {
+      'Available': '🟢',
+      'Sold': '🔵',
+      'Returned': '⚪',
+      'Removed': '🔴',
+      'Expired': '🟠'
+    };
+    return emojis[status] || '⚪';
+  }
+
+  getAvailableStatusActions(status: string): StatusAction[] {
+    return getAvailableActions(status);
+  }
+
+  getStatusActionIcon(action: string): string {
+    const icons: Record<string, string> = {
+      'Returned': '↩️',
+      'Removed': '🗑️',
+      'Available': '♻️'
+    };
+    return icons[action] || '';
+  }
+
+  getStatusCount(status: string): number {
+    const items = this.itemsResult()?.Items || [];
+    return items.filter(item => item.Status === status).length;
+  }
+
+  // Status change modal state
+  isStatusChangeModalOpen = false;
+  selectedItemForStatus: ItemListDto | null = null;
+  selectedStatusAction: StatusAction | null = null;
+
+  openStatusChangeModal(item: ItemListDto, action: StatusAction) {
+    this.selectedItemForStatus = item;
+    this.selectedStatusAction = action;
+    this.isStatusChangeModalOpen = true;
+  }
+
+  closeStatusChangeModal() {
+    this.isStatusChangeModalOpen = false;
+    this.selectedItemForStatus = null;
+    this.selectedStatusAction = null;
+  }
+
+  onStatusChanged(event: { item: ItemListDto; newStatus: string; reason?: string }) {
+    const currentItems = this.itemsResult();
+    if (currentItems) {
+      const updatedItems = currentItems.Items.map(item =>
+        item.ItemId === event.item.ItemId
+          ? { ...item, Status: event.newStatus as ItemStatus }
+          : item
+      );
+
+      this.itemsResult.set({
+        ...currentItems,
+        Items: updatedItems
+      });
+    }
+
+    this.toastr.success(`Item marked as ${event.newStatus}`, 'Status Updated');
+    this.closeStatusChangeModal();
   }
 
   // Modal event handlers
@@ -765,6 +907,75 @@ export class InventoryListComponent implements OnInit {
     console.log('Items imported (mock):', items);
     this.loadItems(); // Refresh the list
     this.closeBulkImportModal();
+  }
+
+  // Expiration utility methods
+  private readonly EXPIRATION_WARNING_DAYS = 7;
+
+  getExpirationDisplay(item: ItemListDto): string {
+    const expirationDate = (item as any).ExpirationDate;
+    if (!expirationDate) return '—';
+
+    const expDate = new Date(expirationDate);
+    const today = new Date();
+    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil < 0) {
+      return '🔴 EXPIRED';
+    }
+
+    if (daysUntil <= this.EXPIRATION_WARNING_DAYS) {
+      return `⚠️ ${expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    }
+
+    return expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  getExpirationClass(item: ItemListDto): string {
+    const expirationDate = (item as any).ExpirationDate;
+    if (!expirationDate) return '';
+
+    const expDate = new Date(expirationDate);
+    const today = new Date();
+    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil < 0) {
+      return 'expiration-expired';
+    }
+
+    if (daysUntil <= this.EXPIRATION_WARNING_DAYS) {
+      return 'expiration-warning';
+    }
+
+    return 'expiration-normal';
+  }
+
+  getExpiringSoonCount(): number {
+    const items = this.itemsResult()?.Items || [];
+    return items.filter(item => {
+      const expirationDate = (item as any).ExpirationDate;
+      if (!expirationDate) return false;
+
+      const expDate = new Date(expirationDate);
+      const today = new Date();
+      const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      return daysUntil >= 0 && daysUntil <= this.EXPIRATION_WARNING_DAYS;
+    }).length;
+  }
+
+  getExpiredCount(): number {
+    const items = this.itemsResult()?.Items || [];
+    return items.filter(item => {
+      const expirationDate = (item as any).ExpirationDate;
+      if (!expirationDate) return false;
+
+      const expDate = new Date(expirationDate);
+      const today = new Date();
+      const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      return daysUntil < 0;
+    }).length;
   }
 
   // Make Math.min available to template

@@ -74,35 +74,41 @@
           </div>
         </div>
 
+        <!-- Pagination Info -->
+        <div class="pagination-info" *ngIf="paginatedData().totalItems > pageSize()">
+          Showing {{ paginatedData().startIndex + 1 }}-{{ paginatedData().endIndex }} of {{ paginatedData().totalItems }} items
+        </div>
+
         <!-- Preview Table -->
-        <div style="max-height: 400px; overflow-y: auto;">
+        <div class="table-container">
           <table class="preview-table">
             <thead>
               <tr>
-                <th>Status</th>
-                <th>Row</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Consignor #</th>
-                <th>Category</th>
-                <th>Condition</th>
-                <th>Errors</th>
+                <th class="compact-header">Status</th>
+                <th class="compact-header">Row</th>
+                <th class="compact-header">Name</th>
+                <th class="compact-header">Price</th>
+                <th class="compact-header">Consignor #</th>
+                <th class="compact-header">Category</th>
+                <th class="compact-header">Condition</th>
+                <th class="compact-header">Errors</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let row of importData(); trackBy: trackByRowNumber">
-                <td class="status-cell">
-                  <span [class]="row.isValid ? 'status-valid' : 'status-error'">
+              <tr *ngFor="let row of paginatedData().items; trackBy: trackByRowNumber"
+                  [class]="row.isValid ? 'row-valid' : 'row-error'">
+                <td class="status-cell compact-cell">
+                  <span [class]="row.isValid ? 'status-valid' : 'status-error'" class="compact-icon">
                     {{ row.isValid ? '✅' : '❌' }}
                   </span>
                 </td>
-                <td>{{ row.rowNumber }}</td>
-                <td>{{ row.data.Name }}</td>
-                <td>{{ row.data.Price }}</td>
-                <td>{{ row.data.ConsignorNumber }}</td>
-                <td>{{ row.data.Category }}</td>
-                <td>{{ row.data.Condition }}</td>
-                <td>
+                <td class="compact-cell">{{ row.rowNumber }}</td>
+                <td class="compact-cell">{{ row.data.Name }}</td>
+                <td class="compact-cell">{{ row.data.Price }}</td>
+                <td class="compact-cell">{{ row.data.ConsignorNumber }}</td>
+                <td class="compact-cell">{{ row.data.Category }}</td>
+                <td class="compact-cell">{{ row.data.Condition }}</td>
+                <td class="compact-cell">
                   <ul class="error-list" *ngIf="!row.isValid">
                     <li class="error-item" *ngFor="let error of row.errors">{{ error }}</li>
                   </ul>
@@ -110,6 +116,17 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" *ngIf="paginatedData().totalPages > 1">
+          <button class="btn btn-sm"
+                  [disabled]="currentPage() <= 1"
+                  (click)="previousPage()">Previous</button>
+          <span class="page-info">Page {{ currentPage() }} of {{ paginatedData().totalPages }}</span>
+          <button class="btn btn-sm"
+                  [disabled]="currentPage() >= paginatedData().totalPages"
+                  (click)="nextPage()">Next</button>
         </div>
       </div>
     </div>

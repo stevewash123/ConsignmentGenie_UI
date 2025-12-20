@@ -34,25 +34,25 @@
           <option value="title">Title A-Z</option>
           <option value="price">Price: High to Low</option>
           <option value="sku">SKU</option>
+          <option value="condition">Condition</option>
         </select>
       </div>
 
       <!-- Status Filters -->
       <div class="status-filters">
+
         <select class="filter-select" [(ngModel)]="selectedStatus" (change)="applyFilters()">
           <option value="">All Statuses</option>
-          <option value="Available">Available</option>
-          <option value="Sold">Sold</option>
-          <option value="Removed">Removed</option>
+          @for (status of statusOptions(); track status.value) {
+            <option [value]="status.value">{{ getStatusEmoji(status.value) }} {{ status.label }} ({{ getStatusCount(status.value) }})</option>
+          }
         </select>
 
         <select class="filter-select" [(ngModel)]="selectedCondition" (change)="applyFilters()">
           <option value="">All Conditions</option>
-          <option value="New">New</option>
-          <option value="LikeNew">Like New</option>
-          <option value="Good">Good</option>
-          <option value="Fair">Fair</option>
-          <option value="Poor">Poor</option>
+          @for (condition of conditionOptions(); track condition.value) {
+            <option [value]="condition.value">{{ condition.label }}</option>
+          }
         </select>
 
         <select class="filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
@@ -60,6 +60,12 @@
           @for (category of categories(); track category.CategoryId) {
             <option [value]="category.Name">{{ category.Name }}</option>
           }
+        </select>
+
+        <select class="filter-select" [(ngModel)]="selectedExpiration" (change)="applyFilters()">
+          <option value="">All Items</option>
+          <option value="expiring-soon">⚠️ Expiring Soon ({{ getExpiringSoonCount() }})</option>
+          <option value="expired">🔴 Expired ({{ getExpiredCount() }})</option>
         </select>
       </div>
 
@@ -113,8 +119,8 @@
             <div class="inventory-header">
               <h3 class="inventory-title">{{ item.Title }}</h3>
               <div class="inventory-badges">
-                <span class="status-badge" [class]="'status-' + item.Status.toLowerCase()">
-                  {{ item.Status }}
+                <span class="status-badge" [class]="getStatusClass(item.Status)">
+                  {{ getStatusEmoji(item.Status) }} {{ item.Status }}
                 </span>
                 <span class="condition-badge" [class]="getConditionClass(item.Condition)">
                   {{ getConditionLabel(item.Condition) }}
@@ -138,6 +144,12 @@
                 <span class="meta-label">Received:</span>
                 <span class="meta-value">{{ item.ReceivedDate | date:'MMM d, y' }}</span>
               </div>
+              <div class="meta-row">
+                <span class="meta-label">Expires:</span>
+                <span class="meta-value expiration-value" [ngClass]="getExpirationClass(item)">
+                  {{ getExpirationDisplay(item) }}
+                </span>
+              </div>
             </div>
             <div class="inventory-price">
               ${{ item.Price | number:'1.2-2' }}
@@ -151,9 +163,11 @@
             <button class="action-button" (click)="editItem(item.ItemId)" title="Edit">
               ✏️ Edit
             </button>
-            @if (item.Status === 'Available') {
-              <button class="action-button" (click)="markAsRemoved(item)" title="Mark as Removed">
-                📦 Remove
+            @for (action of getAvailableStatusActions(item.Status); track action.action) {
+              <button class="action-button"
+                      (click)="openStatusChangeModal(item, action)"
+                      [title]="action.label">
+                {{ getStatusActionIcon(action.action) }} {{ action.label }}
               </button>
             }
             <button class="action-button danger" (click)="deleteItem(item)" title="Delete">
@@ -218,4 +232,13 @@
   (closeModal)="closeBulkImportModal()"
   (itemsImported)="onItemsImported($event)">
 </app-bulk-import-modal>
+
+<!-- Status Change Modal -->
+<app-status-change-modal
+  [isOpen]="isStatusChangeModalOpen"
+  [item]="selectedItemForStatus"
+  [statusAction]="selectedStatusAction"
+  (closeModal)="closeStatusChangeModal()"
+  (statusChanged)="onStatusChanged($event)">
+</app-status-change-modal>
 </app-owner-layout>
