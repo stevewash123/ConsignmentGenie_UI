@@ -178,6 +178,7 @@ export interface StatementListDto {
   periodLabel: string;
   itemsSold: number;
   totalEarnings: number;
+  payoutCount: number;
   closingBalance: number;
   status: string;
   hasPdf: boolean;

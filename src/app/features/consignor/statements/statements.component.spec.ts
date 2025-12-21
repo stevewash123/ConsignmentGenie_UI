@@ -38,7 +38,7 @@ describe('StatementsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         StatementsComponent,
-        RouterTestingModule.withRoutes([])
+        RouterTestingModule
       ],
       providers: [
         { provide: MockStatementService, useValue: statementServiceSpy }
@@ -70,16 +70,17 @@ describe('StatementsComponent', () => {
     expect(component.error).toBeNull();
   });
 
-  it('should show loading state initially', () => {
+  it('should show loading state initially', fakeAsync(() => {
     component.loading = true;
     component.error = null;
     component.statements = [];
     fixture.detectChanges();
+    tick();
 
     const loadingElement = fixture.nativeElement.querySelector('.loading-container');
     expect(loadingElement).toBeTruthy();
     expect(loadingElement.textContent).toContain('Loading statements...');
-  });
+  }));
 
   it('should handle service error', () => {
     const errorMessage = 'Service error';
@@ -95,33 +96,36 @@ describe('StatementsComponent', () => {
     expect(console.error).toHaveBeenCalledWith('Error loading statements:', jasmine.any(Error));
   });
 
-  it('should show error state when error occurs', () => {
+  it('should show error state when error occurs', fakeAsync(() => {
     component.error = 'Test error message';
     component.loading = false;
     component.statements = [];
     fixture.detectChanges();
+    tick();
 
     const errorElement = fixture.nativeElement.querySelector('.error-container');
     expect(errorElement).toBeTruthy();
     expect(errorElement.textContent).toContain('Test error message');
-  });
+  }));
 
-  it('should show empty state when no statements', () => {
+  it('should show empty state when no statements', fakeAsync(() => {
     component.statements = [];
     component.loading = false;
     component.error = null;
     fixture.detectChanges();
+    tick();
 
     const emptyElement = fixture.nativeElement.querySelector('.empty-state');
     expect(emptyElement).toBeTruthy();
     expect(emptyElement.textContent).toContain('No statements available yet');
-  });
+  }));
 
-  it('should display statements table when data is loaded', () => {
+  it('should display statements table when data is loaded', fakeAsync(() => {
     component.statements = mockStatements;
     component.loading = false;
     component.error = null;
     fixture.detectChanges();
+    tick();
 
     const tableElement = fixture.nativeElement.querySelector('.statements-table');
     expect(tableElement).toBeTruthy();
@@ -135,7 +139,7 @@ describe('StatementsComponent', () => {
     expect(firstRow.textContent).toContain('12');
     expect(firstRow.textContent).toContain('$485.00');
     expect(firstRow.textContent).toContain('2');
-  });
+  }));
 
   it('should handle PDF download successfully', () => {
     const mockBlob = new Blob(['test'], { type: 'application/pdf' });
@@ -191,11 +195,12 @@ describe('StatementsComponent', () => {
     expect(statement.isDownloading).toBeFalse();
   }));
 
-  it('should show PDF button in correct states', () => {
+  it('should show PDF button in correct states', fakeAsync(() => {
     component.statements = mockStatements;
     component.loading = false;
     component.error = null;
     fixture.detectChanges();
+    tick();
 
     const buttons = fixture.nativeElement.querySelectorAll('.pdf-button');
     expect(buttons.length).toBe(2);
@@ -207,10 +212,11 @@ describe('StatementsComponent', () => {
     // Test downloading state
     component.statements[0].isDownloading = true;
     fixture.detectChanges();
+    tick();
 
     expect(buttons[0].textContent).toContain('Generating...');
     expect(buttons[0].disabled).toBeTrue();
-  });
+  }));
 
   it('should track statements correctly', () => {
     const statement = mockStatements[0];
@@ -218,29 +224,32 @@ describe('StatementsComponent', () => {
     expect(key).toBe('2024-12');
   });
 
-  it('should retry loading when try again button is clicked', () => {
+  it('should retry loading when try again button is clicked', fakeAsync(() => {
     component.error = 'Test error';
     component.loading = false;
     component.statements = [];
     fixture.detectChanges();
+    tick();
 
     const tryAgainButton = fixture.nativeElement.querySelector('.error-container .btn');
     expect(tryAgainButton).toBeTruthy();
     tryAgainButton.click();
+    tick();
 
     expect(mockStatementService.getMonthlyStatements).toHaveBeenCalledTimes(2);
-  });
+  }));
 
-  it('should navigate back to dashboard when back button is clicked', () => {
+  it('should navigate back to dashboard when back button is clicked', fakeAsync(() => {
     component.statements = [];
     component.loading = false;
     component.error = null;
     fixture.detectChanges();
+    tick();
 
     const backButton = fixture.nativeElement.querySelector('.back-button');
     expect(backButton).toBeTruthy();
     expect(backButton.getAttribute('routerLink')).toBe('/consignor/dashboard');
-  });
+  }));
 
   it('should properly clean up subscriptions on destroy', () => {
     spyOn(component['destroy$'], 'next');

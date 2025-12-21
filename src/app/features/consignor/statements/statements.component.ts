@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { MockStatementService } from '../services/mock-statement.service';
-import { StatementMonth } from '../../../consignor/models/consignor.models';
+import { Subject, takeUntil, map } from 'rxjs';
+import { ProviderPortalService } from '../../../consignor/services/consignor-portal.service';
+import { StatementMonth, StatementListDto } from '../../../consignor/models/consignor.models';
 
 @Component({
   selector: 'app-statements',
@@ -20,7 +20,7 @@ export class StatementsComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   constructor(
-    private statementService: MockStatementService
+    private providerPortalService: ProviderPortalService
   ) {}
 
   ngOnInit() {
@@ -36,16 +36,19 @@ export class StatementsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    this.statementService.getMonthlyStatements()
-      .pipe(takeUntil(this.destroy$))
+    this.providerPortalService.getStatements()
+      .pipe(
+        takeUntil(this.destroy$),
+        map((statementList: StatementListDto[]) => this.transformToStatementMonths(statementList))
+      )
       .subscribe({
-        next: (response) => {
-          this.statements = response.statements;
+        next: (statements) => {
+          this.statements = statements;
           this.loading = false;
         },
         error: (error) => {
           console.error('Error loading statements:', error);
-          this.error = 'Failed to load statements. Please try again later.';
+          this.error = 'Unable to load statements. Please try again.';
           this.loading = false;
         }
       });
@@ -58,7 +61,7 @@ export class StatementsComponent implements OnInit, OnDestroy {
 
     statement.isDownloading = true;
 
-    this.statementService.downloadMonthlyPdf(statement.year, statement.month)
+    this.providerPortalService.downloadStatementPdfByPeriod(statement.year, statement.month)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {
@@ -67,7 +70,7 @@ export class StatementsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error downloading PDF:', error);
-          alert('Failed to download PDF. Please try again.');
+          this.handleDownloadError(error, statement);
           statement.isDownloading = false;
         }
       });
@@ -86,5 +89,54 @@ export class StatementsComponent implements OnInit, OnDestroy {
 
   trackByStatement(index: number, statement: StatementMonth): string {
     return `${statement.year}-${statement.month}`;
+  }
+
+  private transformToStatementMonths(statementList: StatementListDto[]): StatementMonth[] {
+    // Group statements by year/month and aggregate counts
+    const monthMap = new Map<string, StatementMonth>();
+
+    statementList.forEach(stmt => {
+      const date = new Date(stmt.periodStart);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const key = `${year}-${month}`;
+      const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      if (monthMap.has(key)) {
+        const existing = monthMap.get(key)!;
+        existing.salesCount += stmt.itemsSold;
+        existing.totalEarnings += stmt.totalEarnings;
+        existing.payoutCount += 1; // Count this statement as activity
+      } else {
+        monthMap.set(key, {
+          year,
+          month,
+          monthName,
+          salesCount: stmt.itemsSold,
+          totalEarnings: stmt.totalEarnings,
+          payoutCount: 1
+        });
+      }
+    });
+
+    return Array.from(monthMap.values())
+      .sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return b.month - a.month;
+      });
+  }
+
+  private handleDownloadError(error: any, statement: StatementMonth): void {
+    let message = 'Failed to download PDF. Please try again.';
+
+    if (error.status === 404) {
+      message = 'Statement not available for this month.';
+    } else if (error.status === 0) {
+      message = 'Download failed. Please check your connection and try again.';
+    } else if (error.status >= 500) {
+      message = 'Statement is taking longer than usual. Please try again.';
+    }
+
+    alert(message);
   }
 }

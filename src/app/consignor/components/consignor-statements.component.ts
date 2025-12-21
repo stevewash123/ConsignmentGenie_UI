@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { MockConsignorStatementService } from '../services/mock-consignor-statement.service';
+import { StatementService } from '../../services/statement.service';
 import { StatementListDto } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
@@ -335,7 +335,7 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private statementService: MockConsignorStatementService,
+    private statementService: StatementService,
     public loadingService: LoadingService
   ) {}
 
@@ -381,7 +381,7 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {
-          this.downloadFile(blob, `${statement.statementNumber}.pdf`);
+          this.statementService.downloadFile(blob, `${statement.statementNumber}.pdf`);
         },
         error: (error) => {
           console.error('Error downloading PDF:', error);
@@ -391,17 +391,6 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
           this.loadingService.stop(LOADING_KEYS.STATEMENT_PDF);
         }
       });
-  }
-
-  private downloadFile(blob: Blob, filename: string) {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
   }
 
   isNewStatement(statement: StatementListDto): boolean {
