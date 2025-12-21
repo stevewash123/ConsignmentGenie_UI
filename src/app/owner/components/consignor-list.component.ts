@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ConsignorService, PendingInvitation } from '../../services/consignor.service';
 import { Consignor } from '../../models/consignor.model';
 import { InviteConsignorModalComponent } from '../../shared/components/invite-consignor-modal.component';
+import { BulkInviteConsignorModalComponent } from '../../shared/components/bulk-invite-consignor-modal.component';
 import { ENTITY_LABELS } from '../../shared/constants/labels';
 import { ConsignorStatus } from '../../models/consignor.model';
 import { OwnerLayoutComponent } from './owner-layout.component';
@@ -15,7 +16,7 @@ import { AgreementService } from '../../services/agreement.service';
 @Component({
   selector: 'app-consignor-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule, InviteConsignorModalComponent, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule, InviteConsignorModalComponent, BulkInviteConsignorModalComponent, OwnerLayoutComponent],
   templateUrl: './consignor-list.component.html',
   styles: [`
     .consignor-list-container {
@@ -500,6 +501,7 @@ export class ConsignorListComponent implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
   statusFilter: 'all' | 'active' | 'invited' | 'inactive' = 'all';
   isInviteModalVisible = signal(false);
+  isBulkInviteModalVisible = signal(false);
   labels = ENTITY_LABELS;
   private consignorsLoaded = false;
   private invitationsLoaded = false;
@@ -777,8 +779,21 @@ export class ConsignorListComponent implements OnInit {
     this.isInviteModalVisible.set(false);
   }
 
+  showBulkInviteModal(): void {
+    this.isBulkInviteModalVisible.set(true);
+  }
+
+  hideBulkInviteModal(): void {
+    this.isBulkInviteModalVisible.set(false);
+  }
+
   onConsignorAdded(consignor: Consignor): void {
     console.log('Consignor added successfully:', consignor);
+    this.loadData(); // Refresh both lists
+  }
+
+  onBulkInvitesSent(): void {
+    console.log('Bulk invitations sent successfully');
     this.loadData(); // Refresh both lists
   }
 

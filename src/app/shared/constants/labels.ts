@@ -15,6 +15,7 @@ export const ENTITY_LABELS = {
   addConsignorManually: 'Add Consignor Manually',
   inviteConsignor: 'Invite Consignor',
   inviteProvider: 'Invite Consignor', // Legacy alias
+  bulkInviteConsignors: 'Bulk Invite Consignors',
   editConsignor: 'Edit Consignor',
   viewConsignor: 'View Consignor',
 

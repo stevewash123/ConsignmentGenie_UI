@@ -4,9 +4,14 @@
         <!-- Page Header -->
         <div class="header">
           <h1 class="page-title">👥 {{ labels.providerManagement }}</h1>
-          <button class="btn-primary" (click)="showInviteModal()">
-            {{ labels.inviteProvider }}
-          </button>
+          <div class="header-actions">
+            <button class="btn-secondary" (click)="showBulkInviteModal()">
+              📄 Bulk Invite
+            </button>
+            <button class="btn-primary" (click)="showInviteModal()">
+              {{ labels.inviteProvider }}
+            </button>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -109,5 +114,12 @@
         (closed)="hideInviteModal()"
         (consignorAdded)="onConsignorAdded($event)">
       </app-invite-consignor-modal>
+
+      <!-- Bulk Invite Consignor Modal -->
+      <app-bulk-invite-consignor-modal
+        *ngIf="isBulkInviteModalVisible()"
+        (closed)="hideBulkInviteModal()"
+        (invitesSent)="onBulkInvitesSent()">
+      </app-bulk-invite-consignor-modal>
     </app-owner-layout>
   
