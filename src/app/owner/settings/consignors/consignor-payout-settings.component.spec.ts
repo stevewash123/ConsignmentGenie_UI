@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ConsignorPayoutSettingsComponent } from './consignor-payout-settings.component';
 import { PayoutSettings, DEFAULT_PAYOUT_SETTINGS } from '../../../models/payout-settings.model';
 import { environment } from '../../../../environments/environment';
 
-fdescribe('ConsignorPayoutSettingsComponent', () => {
+describe('ConsignorPayoutSettingsComponent', () => {
   let component: ConsignorPayoutSettingsComponent;
   let fixture: ComponentFixture<ConsignorPayoutSettingsComponent>;
   let httpMock: HttpTestingController;
@@ -93,48 +93,57 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize form with default values', () => {
+  it('should initialize form with default values', fakeAsync(() => {
     component.ngOnInit();
+
+    // Handle the HTTP request
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
+    req.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     const form = component.payoutForm;
     expect(form.get('schedule.frequency')?.value).toBe('weekly');
     expect(form.get('thresholds.minimumAmount')?.value).toBe(25.00);
     expect(form.get('paymentMethods.defaultMethod')?.value).toBe('check');
     expect(form.get('automation.autoGeneratePayouts')?.value).toBe(false);
-  });
+  }));
 
-  it('should load existing settings on init', async () => {
+  it('should load existing settings on init', fakeAsync(() => {
     component.ngOnInit();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     expect(req.request.method).toBe('GET');
     req.flush(mockPayoutSettings);
+    tick();
 
     expect(component.settings()).toEqual(mockPayoutSettings);
     expect(component.payoutForm.get('schedule.frequency')?.value).toBe('weekly');
     expect(component.payoutForm.get('thresholds.minimumAmount')?.value).toBe(25.00);
-  });
+  }));
 
-  it('should handle missing settings gracefully and use defaults', async () => {
+  it('should handle missing settings gracefully and use defaults', fakeAsync(() => {
     component.ngOnInit();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     req.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     // Should use default settings without error
     expect(component.errorMessage()).toBe('');
     expect(component.payoutForm.get('schedule.frequency')?.value).toBe('weekly');
     expect(component.payoutForm.get('thresholds.minimumAmount')?.value).toBe(25.00);
-  });
+  }));
 
-  it('should save payout settings', async () => {
+  it('should save payout settings', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
-    await component.onSave();
+    component.onSave();
+    tick();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     expect(req.request.method).toBe('PUT');
@@ -149,33 +158,38 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
       lastUpdated: jasmine.any(Date)
     }));
     req.flush({});
+    tick();
 
     expect(component.successMessage()).toBe('Payout settings saved successfully');
     expect(component.saving()).toBe(false);
-  });
+  }));
 
-  it('should handle save error', async () => {
+  it('should handle save error', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
-    await component.onSave();
+    component.onSave();
+    tick();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     req.error(new ProgressEvent('error'));
+    tick();
 
     expect(component.errorMessage()).toBe('Failed to save payout settings');
     expect(component.saving()).toBe(false);
-  });
+  }));
 
-  it('should update day selectors when frequency changes', () => {
+  it('should update day selectors when frequency changes', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     const form = component.payoutForm;
 
@@ -192,14 +206,15 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
 
     expect(form.get('schedule.dayOfWeek')?.value).toBe(5);
     expect(form.get('schedule.dayOfMonth')?.value).toBeNull();
-  });
+  }));
 
-  it('should toggle payment methods correctly', () => {
+  it('should toggle payment methods correctly', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     // Test toggling check method
     component.onPaymentMethodToggle(0, false); // Disable check method
@@ -207,14 +222,15 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     const methodsArray = component.paymentMethodsArray;
     expect(methodsArray.at(0).get('enabled')?.value).toBe(false);
     expect(component.payoutForm.get('paymentMethods.checkMailingEnabled')?.value).toBe(false);
-  });
+  }));
 
-  it('should validate that at least one payment method is enabled', () => {
+  it('should validate that at least one payment method is enabled', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     // Disable all payment methods
     const methodsArray = component.paymentMethodsArray;
@@ -223,14 +239,15 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     }
 
     expect(component.errorMessage()).toBe('At least one payment method must be enabled');
-  });
+  }));
 
-  it('should validate form before saving with invalid data', async () => {
+  it('should validate form before saving with invalid data', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     // Make form invalid by setting negative minimum amount
     const form = component.payoutForm;
@@ -240,18 +257,20 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
       }
     });
 
-    await component.onSave();
+    component.onSave();
+    tick();
 
     expect(component.errorMessage()).toBe('Please correct the validation errors before saving');
     httpMock.expectNone(`${environment.apiUrl}/api/organizations/payout-settings`);
-  });
+  }));
 
-  it('should validate processing days limits', () => {
+  it('should validate processing days limits', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     const form = component.payoutForm;
 
@@ -266,14 +285,15 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     // Test valid value
     form.get('schedule.processingDays')?.setValue(3);
     expect(form.get('schedule.processingDays')?.valid).toBe(true);
-  });
+  }));
 
-  it('should validate hold period days limits', () => {
+  it('should validate hold period days limits', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     const form = component.payoutForm;
 
@@ -288,14 +308,15 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     // Test valid value
     form.get('thresholds.holdPeriodDays')?.setValue(14);
     expect(form.get('thresholds.holdPeriodDays')?.valid).toBe(true);
-  });
+  }));
 
-  it('should validate minimum payout amount limits', () => {
+  it('should validate minimum payout amount limits', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     const form = component.payoutForm;
 
@@ -310,7 +331,7 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     // Test valid value
     form.get('thresholds.minimumAmount')?.setValue(25);
     expect(form.get('thresholds.minimumAmount')?.valid).toBe(true);
-  });
+  }));
 
   it('should show automation options when auto-generate is enabled', () => {
     fixture.detectChanges();
@@ -327,12 +348,13 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     expect(autoApproveInput).toBeTruthy();
   });
 
-  it('should properly initialize payment methods array', () => {
+  it('should properly initialize payment methods array', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     const methodsArray = component.paymentMethodsArray;
     expect(methodsArray.length).toBe(4);
@@ -343,7 +365,7 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     expect(methods).toContain('cash');
     expect(methods).toContain('store_credit');
     expect(methods).toContain('ach');
-  });
+  }));
 
   it('should clear messages after timeout', (done) => {
     component['showSuccess']('Test success');
@@ -355,12 +377,13 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     }, 5100);
   });
 
-  it('should compute form errors correctly', () => {
+  it('should compute form errors correctly', fakeAsync(() => {
     component.ngOnInit();
 
     // Skip the initial load request
     const loadReq = httpMock.expectOne(`${environment.apiUrl}/api/organizations/payout-settings`);
     loadReq.error(new ProgressEvent('error'), { status: 404 });
+    tick();
 
     const form = component.payoutForm;
 
@@ -376,5 +399,5 @@ fdescribe('ConsignorPayoutSettingsComponent', () => {
     expect(errors.length).toBeGreaterThan(0);
     expect(errors.some(error => error.includes('positive'))).toBe(true);
     expect(errors.some(error => error.includes('90 days'))).toBe(true);
-  });
+  }));
 });
