@@ -1,21 +1,21 @@
 
     <div class="auth-method-selector">
-      <!-- OAuth consignors -->
-      <div class="oauth-consignors" *ngIf="availableconsignors().length > 0">
+      <!-- OAuth Providers -->
+      <div class="oauth-providers" *ngIf="availableProviders().length > 0">
         <button
-          *ngFor="let consignor of availableconsignors()"
+          *ngFor="let provider of availableProviders()"
           type="button"
-          class="consignor-button"
-          [class]="'consignor-' + consignor.id"
-          (click)="handleProviderAuth(consignor.id)"
+          class="provider-button"
+          [class]="'provider-' + provider.id"
+          (click)="handleProviderAuth(provider.id)"
           [disabled]="isLoading()">
-          <span class="consignor-icon">{{ consignor.icon }}</span>
-          <span class="consignor-text">Continue with {{ consignor.name }}</span>
+          <span class="provider-icon">{{ provider.icon }}</span>
+          <span class="provider-text">Continue with {{ provider.name }}</span>
         </button>
       </div>
 
       <!-- Divider (only shown if both OAuth and email/password are available) -->
-      <div class="auth-divider" *ngIf="availableconsignors().length > 0 && showEmailPassword">
+      <div class="auth-divider" *ngIf="availableProviders().length > 0 && showEmailPassword">
         <hr class="divider-line">
         <span class="divider-text">or</span>
         <hr class="divider-line">

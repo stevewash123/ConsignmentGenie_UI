@@ -217,7 +217,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
 
   handleProviderAuth(event: ProviderAuthEvent): void {
     this.isProcessing.set(true);
-    this.selectedProvider = event.consignor;
+    this.selectedProvider = event.provider;
 
     // TODO: Implement OAuth flow
     setTimeout(() => {
