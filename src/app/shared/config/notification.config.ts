@@ -2,7 +2,7 @@ import { NotificationType, UserRole, NotificationDto } from '../models/notificat
 
 export interface NotificationTypeConfig {
   icon: string;
-  color: 'green' | 'blue' | 'yellow' | 'red' | 'purple' | 'gray';
+  color: 'green' | 'blue' | 'yellow' | 'red' | 'purple' | 'gray' | 'orange';
   getTitle: (notification: NotificationDto) => string;
   getMessage: (notification: NotificationDto) => string;
   getRoute: (notification: NotificationDto, role: UserRole) => string | null;
@@ -118,12 +118,14 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     allowedRoles: ['owner']
   },
   subscription_failed: {
-    icon: '❌',
+    icon: '🚨',
     color: 'red',
     getTitle: () => 'Subscription Payment Failed',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/settings/billing`,
-    allowedRoles: ['owner']
+    getRoute: (n, role) => role === 'admin' ?
+      (n.referenceId ? `/${role}/subscriptions/${n.referenceId}` : `/${role}/subscriptions`) :
+      `/${role}/settings/billing`,
+    allowedRoles: ['owner', 'admin']
   },
   square_sync_error: {
     icon: '❌',
@@ -176,11 +178,11 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     allowedRoles: ['admin']
   },
   subscription_cancelled: {
-    icon: '❌',
-    color: 'red',
+    icon: '💔',
+    color: 'gray',
     getTitle: () => 'Subscription Cancelled',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => n.referenceId ? `/${role}/subscriptions/${n.referenceId}` : `/${role}/subscriptions`,
+    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
     allowedRoles: ['admin']
   },
   system_error: {
@@ -225,7 +227,7 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
   },
   trial_expiring: {
     icon: '⏰',
-    color: 'yellow',
+    color: 'orange',
     getTitle: () => 'Trial Expiring',
     getMessage: (n) => n.message,
     getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
@@ -274,6 +276,7 @@ export function getNotificationIconClass(type: NotificationType): string {
     blue: 'statement-ready',
     yellow: 'payout-pending',
     red: 'payout-pending',
+    orange: 'payout-pending',
     purple: 'default',
     gray: 'default'
   };
