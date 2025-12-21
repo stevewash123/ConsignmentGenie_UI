@@ -37,44 +37,17 @@
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="shopName">Business/Shop Name *</label>
-                  <input
-                    id="shopName"
-                    type="text"
-                    formControlName="shopName"
-                    [class.error]="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched"
-                    placeholder="Main Street Consignment">
-                  <div class="error-message"
-                       *ngIf="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched">
-                    Business name is required
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="subdomain">Shop URL *</label>
-                  <div class="subdomain-input-wrapper">
-                    <input
-                      id="subdomain"
-                      type="text"
-                      formControlName="subdomain"
-                      [class.error]="profileForm.get('subdomain')?.invalid && profileForm.get('subdomain')?.touched"
-                      placeholder="myshop">
-                    <span class="subdomain-suffix">.consignmentgenie.com</span>
-                  </div>
-                  <div class="form-hint">This will be your shop's web address</div>
-                  <div class="validation-message" *ngIf="subdomainValidationMessage()"
-                       [class.success]="subdomainValidationMessage().includes('✓')"
-                       [class.error]="subdomainValidationMessage().includes('✗')">
-                    <span *ngIf="isValidatingSubdomain()" class="validation-spinner"></span>
-                    {{ subdomainValidationMessage() }}
-                  </div>
-                  <div class="error-message"
-                       *ngIf="profileForm.get('subdomain')?.invalid && profileForm.get('subdomain')?.touched">
-                    <span *ngIf="profileForm.get('subdomain')?.errors?.['required']">Shop URL is required</span>
-                    <span *ngIf="profileForm.get('subdomain')?.errors?.['pattern']">Only letters, numbers, and dashes allowed</span>
-                  </div>
+              <div class="form-group">
+                <label for="shopName">Business/Shop Name *</label>
+                <input
+                  id="shopName"
+                  type="text"
+                  formControlName="shopName"
+                  [class.error]="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched"
+                  placeholder="Main Street Consignment">
+                <div class="error-message"
+                     *ngIf="profileForm.get('shopName')?.invalid && profileForm.get('shopName')?.touched">
+                  Business name is required
                 </div>
               </div>
             </div>

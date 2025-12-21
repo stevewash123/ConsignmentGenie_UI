@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { SquareIntegrationService } from '../../../services/square-integration.service';
 
 export interface SquareStatus {
@@ -13,10 +14,24 @@ export interface SquareStatus {
   error?: string;
 }
 
+export interface QuickBooksStatus {
+  isConnected: boolean;
+  companyName?: string;
+  companyId?: string;
+  syncFrequency?: string;
+  lastSync?: Date;
+  error?: string;
+  accountMappings?: {
+    salesAccount?: string;
+    payoutAccount?: string;
+    expenseAccount?: string;
+  };
+}
+
 @Component({
   selector: 'app-integrations',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './integrations-settings.component.html',
   styleUrls: ['./integrations-settings.component.css']
 })
@@ -27,10 +42,17 @@ export class IntegrationsComponent implements OnInit {
     isConnected: false
   });
 
+  quickBooksStatus = signal<QuickBooksStatus>({
+    isConnected: false,
+    syncFrequency: 'daily'
+  });
+
   isLoading = signal(false);
+  isSaving = signal(false);
 
   ngOnInit() {
     this.loadSquareStatus();
+    this.loadQuickBooksStatus();
   }
 
   private async loadSquareStatus() {
@@ -143,5 +165,130 @@ export class IntegrationsComponent implements OnInit {
 
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  }
+
+  private async loadQuickBooksStatus() {
+    // Mock QuickBooks status for now
+    // In a real implementation, this would call a QuickBooks service
+    this.quickBooksStatus.set({
+      isConnected: false,
+      syncFrequency: 'daily',
+      accountMappings: {
+        salesAccount: undefined,
+        payoutAccount: undefined,
+        expenseAccount: undefined
+      }
+    });
+  }
+
+  async connectQuickBooks() {
+    this.isLoading.set(true);
+    try {
+      // Mock connection for now
+      // In a real implementation, this would initiate QuickBooks OAuth
+      console.log('Connecting to QuickBooks...');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      this.quickBooksStatus.set({
+        isConnected: true,
+        companyName: 'Sample Company',
+        companyId: 'QB-123456',
+        syncFrequency: 'daily',
+        accountMappings: {
+          salesAccount: 'Sales Income',
+          payoutAccount: 'Payouts Payable',
+          expenseAccount: 'Commission Expense'
+        }
+      });
+    } catch (error) {
+      console.error('Failed to connect to QuickBooks:', error);
+      this.quickBooksStatus.update(status => ({
+        ...status,
+        error: 'Failed to connect'
+      }));
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async disconnectQuickBooks() {
+    if (!this.quickBooksStatus().isConnected) {
+      return;
+    }
+
+    if (!confirm('Are you sure you want to disconnect from QuickBooks?')) {
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      // Mock disconnection
+      await new Promise(resolve => setTimeout(resolve, 500));
+      this.quickBooksStatus.set({
+        isConnected: false,
+        syncFrequency: 'daily',
+        accountMappings: {
+          salesAccount: undefined,
+          payoutAccount: undefined,
+          expenseAccount: undefined
+        }
+      });
+    } catch (error) {
+      console.error('Failed to disconnect from QuickBooks:', error);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async saveIntegrationSettings() {
+    this.isSaving.set(true);
+    try {
+      // Mock save operation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Integration settings saved');
+    } catch (error) {
+      console.error('Failed to save integration settings:', error);
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  updateSyncFrequency(frequency: string) {
+    this.quickBooksStatus.update(status => ({
+      ...status,
+      syncFrequency: frequency
+    }));
+  }
+
+  async syncQuickBooksNow() {
+    if (!this.quickBooksStatus().isConnected) {
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      // Mock sync operation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      this.quickBooksStatus.update(status => ({
+        ...status,
+        lastSync: new Date()
+      }));
+      console.log('QuickBooks sync completed');
+    } catch (error) {
+      console.error('Failed to sync QuickBooks:', error);
+      this.quickBooksStatus.update(status => ({
+        ...status,
+        error: 'Sync failed'
+      }));
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  configureAccountMapping() {
+    // Mock account mapping configuration
+    console.log('Opening account mapping configuration...');
+    // In a real implementation, this would open a modal or navigate to a configuration page
   }
 }

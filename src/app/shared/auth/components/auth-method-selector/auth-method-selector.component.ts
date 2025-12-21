@@ -10,6 +10,7 @@ export interface ProviderAuthEvent {
 export interface CredentialsEvent {
   email: string;
   password: string;
+  passwordConfirm: string;
 }
 
 @Component({
@@ -147,6 +148,17 @@ export interface CredentialsEvent {
       color: #9ca3af;
     }
 
+    .form-input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .error-text {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
     @media (max-width: 480px) {
       .consignor-button {
         padding: 0.75rem 1rem;
@@ -163,17 +175,24 @@ export class AuthMethodSelectorComponent {
   @Input() enabledProviders: string[] = ['google', 'facebook'];
   @Input() showEmailPassword: boolean = true;
   @Input() isLoading = signal(false);
+  @Input() prefilledEmail: string = '';
+  @Input() emailReadonly: boolean = false;
 
   @Output() onProviderAuth = new EventEmitter<ProviderAuthEvent>();
   @Output() onCredentials = new EventEmitter<CredentialsEvent>();
 
   email = '';
   password = '';
+  passwordConfirm = '';
 
   availableconsignors = signal<AuthProvider[]>([]);
 
   ngOnInit() {
     this.updateAvailableconsignors();
+    if (this.prefilledEmail) {
+      this.email = this.prefilledEmail;
+      this.onCredentialsChange();
+    }
   }
 
   ngOnChanges() {
@@ -195,11 +214,16 @@ export class AuthMethodSelectorComponent {
   }
 
   onCredentialsChange() {
-    if (this.email && this.password) {
+    if (this.email && this.password && this.passwordConfirm) {
       this.onCredentials.emit({
         email: this.email,
-        password: this.password
+        password: this.password,
+        passwordConfirm: this.passwordConfirm
       });
     }
+  }
+
+  get passwordsMatch(): boolean {
+    return this.password === this.passwordConfirm || !this.passwordConfirm;
   }
 }

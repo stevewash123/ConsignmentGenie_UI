@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { AppLayoutComponent } from '../../shared/components/app-layout.component';
+import { OwnerLayoutComponent } from '../components/owner-layout.component';
 import { filter } from 'rxjs/operators';
 
 interface SettingsSubMenuItem {
@@ -23,7 +23,7 @@ interface SettingsMenuItem {
 @Component({
   selector: 'app-settings-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppLayoutComponent],
+  imports: [CommonModule, RouterModule, OwnerLayoutComponent],
   templateUrl: './settings-layout.component.html',
   styles: [`
     .settings-layout {
@@ -238,14 +238,14 @@ export class SettingsLayoutComponent implements OnInit {
         {
           id: 'branding',
           label: 'Branding',
-          route: 'store-profile/branding',
+          route: 'profile/branding',
           description: 'Logo, colors, shop description'
         },
         {
-          id: 'domain-settings',
-          label: 'Domain Settings',
-          route: 'store-profile/domain-settings',
-          description: 'Custom domain configuration'
+          id: 'online-storefront',
+          label: 'Online Storefront',
+          route: 'storefront',
+          description: 'Online store configuration and integrations'
         }
       ]
     },
@@ -258,19 +258,19 @@ export class SettingsLayoutComponent implements OnInit {
         {
           id: 'tax-settings',
           label: 'Tax Settings',
-          route: 'business-settings/tax-settings',
+          route: 'business/tax-settings',
           description: 'Tax rates and calculations'
         },
         {
           id: 'receipt-settings',
           label: 'Receipt Settings',
-          route: 'business-settings/receipt-settings',
+          route: 'business/receipt-settings',
           description: 'Receipt templates and formatting'
         },
         {
           id: 'policies',
           label: 'Shop Policies',
-          route: 'business-settings/policies',
+          route: 'business/policies',
           description: 'Return, refund, and general policies'
         }
       ]
@@ -284,19 +284,13 @@ export class SettingsLayoutComponent implements OnInit {
         {
           id: 'defaults',
           label: 'Default Terms',
-          route: 'consignor-settings/defaults',
+          route: 'consignors',
           description: 'Commission rates, time periods'
-        },
-        {
-          id: 'agreements',
-          label: 'Agreements',
-          route: 'consignor-settings/agreements',
-          description: 'Agreement templates and settings'
         },
         {
           id: 'payout-settings',
           label: 'Payout Settings',
-          route: 'consignor-settings/payout-settings',
+          route: 'consignors/payout-settings',
           description: 'Payout schedules and preferences'
         }
       ]
@@ -368,13 +362,13 @@ export class SettingsLayoutComponent implements OnInit {
         {
           id: 'notifications',
           label: 'Notifications',
-          route: 'account-settings/notifications',
+          route: 'account/notifications',
           description: 'Personal notification preferences'
         },
         {
           id: 'license',
           label: 'License',
-          route: 'account-settings/license',
+          route: 'subscription',
           description: 'Subscription and license information'
         }
       ]

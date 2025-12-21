@@ -144,7 +144,7 @@
                     </span>
                   </td>
                   <td class="commission-cell">
-                    \${{ transaction.providerAmount | number:'1.2-2' }}
+                    \${{ transaction.consignorAmount | number:'1.2-2' }}
                   </td>
                   <td class="shop-amount-cell">
                     \${{ transaction.shopAmount | number:'1.2-2' }}
@@ -268,7 +268,7 @@
                       <div class="commission-breakdown compact">
                         <div class="breakdown-row">
                           <span>consignor ({{ transaction.consignorsplitPercentage }}%)</span>
-                          <span class="amount consignor-amount">\${{ transaction.providerAmount | number:'1.2-2' }}</span>
+                          <span class="amount consignor-amount">\${{ transaction.consignorAmount | number:'1.2-2' }}</span>
                         </div>
                         <div class="breakdown-row">
                           <span>Shop ({{ 100 - transaction.consignorsplitPercentage }}%)</span>

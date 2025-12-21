@@ -36,7 +36,7 @@ export const consignorRoutes: Routes = [
       },
       {
         path: 'statements',
-        loadComponent: () => import('./components/consignor-statements.component').then(m => m.ConsignorStatementsComponent)
+        loadComponent: () => import('./components/monthly-statements.component').then(m => m.MonthlyStatementsComponent)
       },
       {
         path: 'statements/:id',

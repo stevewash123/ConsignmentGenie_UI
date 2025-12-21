@@ -40,6 +40,9 @@ describe('ItemSearchComponent', () => {
   beforeEach(async () => {
     const recordSaleServiceSpy = jasmine.createSpyObj('RecordSaleService', ['getAvailableItems']);
 
+    // Set default return value for all calls to getAvailableItems
+    recordSaleServiceSpy.getAvailableItems.and.returnValue(of(mockItems));
+
     await TestBed.configureTestingModule({
       imports: [ItemSearchComponent, CommonModule, FormsModule],
       providers: [
