@@ -1,0 +1,176 @@
+.modal-overlay {
+  backdrop-filter: blur(2px);
+  animation: fadeInOverlay 0.2s ease-out;
+}
+
+.modal-container {
+  animation: slideInModal 0.3s ease-out;
+  transform-origin: center;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+  to {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Action option styling
+.action-option {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="radio"] {
+    &:checked {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Price comparison styling
+.price-summary {
+  .price-row {
+    &:last-child {
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// Item summary styling
+.item-summary {
+  .item-image img {
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Email integration styling
+.email-info {
+  border-left: 4px solid theme('colors.blue.400');
+}
+
+// Error message styling
+.error-message {
+  border-left: 4px solid theme('colors.red.400');
+  animation: shakeError 0.5s ease-in-out;
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+// Button styling enhancements
+.modal-footer button {
+  transition: all 0.15s ease-in-out;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+// Focus states for accessibility
+.action-option:focus-within {
+  ring: 2px;
+  ring-color: theme('colors.blue.500');
+  ring-offset: 2px;
+}
+
+// Mobile responsiveness
+@media (max-width: 640px) {
+  .modal-container {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .item-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .price-row {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .action-option {
+    border-width: 3px;
+  }
+
+  .modal-container {
+    border: 2px solid theme('colors.gray.800');
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-container,
+  .action-option,
+  .error-message,
+  .item-summary .item-image img {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+// Custom scrollbar for modal body if needed
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: theme('colors.gray.100');
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.400');
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.500');
+}

@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { ProviderPortalService } from '../services/consignor-portal.service';
-import { ProviderPayoutDetail } from '../models/consignor.models';
+import { MockConsignorPayoutService } from '../services/mock-consignor-payout.service';
+import { ConsignorPayoutDetail } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -143,6 +143,69 @@ import { LOADING_KEYS } from '../constants/loading-keys';
       font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
       font-size: 0.875rem;
       color: #3b82f6;
+    }
+
+    .summary-breakdown {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-breakdown h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .breakdown-table {
+      max-width: 400px;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .breakdown-row:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-row.total {
+      border-top: 2px solid #e5e7eb;
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+      border-bottom: none;
+    }
+
+    .breakdown-label {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .breakdown-label.total-label {
+      font-weight: 600;
+      color: #111827;
+      font-size: 1.1rem;
+    }
+
+    .breakdown-value {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .breakdown-value.negative {
+      color: #dc2626;
+    }
+
+    .breakdown-value.total-value {
+      font-size: 1.1rem;
+      color: #059669;
     }
 
     .items-section {
@@ -344,7 +407,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
   `]
 })
 export class ConsignorPayoutDetailComponent implements OnInit {
-  payoutDetail: ProviderPayoutDetail | null = null;
+  payoutDetail: ConsignorPayoutDetail | null = null;
   error: string | null = null;
   payoutId: string;
 
@@ -352,7 +415,7 @@ export class ConsignorPayoutDetailComponent implements OnInit {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private ConsignorService: ProviderPortalService,
+    private payoutService: MockConsignorPayoutService,
     private route: ActivatedRoute,
     public loadingService: LoadingService
   ) {
@@ -369,13 +432,14 @@ export class ConsignorPayoutDetailComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.PAYOUT_DETAIL);
     this.error = null;
 
-    this.ConsignorService.getMyPayout(this.payoutId).subscribe({
+    this.payoutService.getPayoutDetail(this.payoutId).subscribe({
       next: (detail) => {
         this.payoutDetail = detail;
       },
       error: (err) => {
         this.error = 'Failed to load payout details. Please try again.';
         console.error('Payout detail error:', err);
+        this.loadingService.stop(LOADING_KEYS.PAYOUT_DETAIL);
       },
       complete: () => {
         this.loadingService.stop(LOADING_KEYS.PAYOUT_DETAIL);
@@ -405,5 +469,24 @@ export class ConsignorPayoutDetailComponent implements OnInit {
 
   printPayout() {
     window.print();
+  }
+
+  downloadReceipt() {
+    if (!this.payoutDetail) return;
+
+    this.payoutService.downloadPayoutReceipt(this.payoutDetail.payoutId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `payout_${this.payoutDetail!.payoutNumber}_receipt.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Download error:', err);
+        // Could show a toast notification here
+      }
+    });
   }
 }

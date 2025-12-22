@@ -2,8 +2,14 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
+import { ItemFormModalComponent } from './item-form-modal.component';
+import { BulkImportModalComponent } from './bulk-import-modal.component';
+import { StatusChangeModalComponent } from './status-change-modal.component';
 import { InventoryService } from '../../services/inventory.service';
+import { ConditionService, ConditionOption } from '../../services/condition.service';
+import { ItemStatusService, StatusOption, StatusAction, getAvailableActions } from '../../services/item-status.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import {
   ItemListDto,
@@ -18,13 +24,16 @@ import {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemFormModalComponent, BulkImportModalComponent, StatusChangeModalComponent],
   templateUrl: './inventory-list.component.html',
   styles: [`
-    .inventory-page {
-      padding: 2rem;
-      max-width: 1400px;
+    .inventory-container {
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 2rem;
+      background: #f9fafb;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
     .page-header {
@@ -32,408 +41,486 @@ import {
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #e5e7eb;
     }
 
     .page-header h1 {
-      color: #059669;
-      margin-bottom: 0.5rem;
       font-size: 2rem;
-    }
-
-    .page-header p {
-      color: #6b7280;
+      font-weight: 700;
+      color: #111827;
       margin: 0;
     }
 
-    .header-actions {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .btn-primary, .btn-secondary {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .add-button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
       padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+      font-size: 0.875rem;
       font-weight: 600;
       cursor: pointer;
-      border: none;
-      transition: all 0.2s;
+      white-space: nowrap;
     }
 
-    .btn-primary {
-      background: #059669;
+    .add-button:hover {
+      background: #2563eb;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .bulk-upload-button {
+      background: #6b7280;
       color: white;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
     }
 
-    .btn-primary:hover {
-      background: #047857;
-    }
-
-    .btn-secondary {
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #d1d5db;
-    }
-
-    .btn-secondary:hover {
-      background: #e5e7eb;
+    .bulk-upload-button:hover {
+      background: #4b5563;
     }
 
     .filters-section {
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 1rem;
       padding: 1.5rem;
       margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .filter-row {
+    .filters-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      align-items: end;
+      grid-template-columns: 1fr auto auto;
+      gap: 1.5rem;
+      align-items: center;
     }
 
-    .filter-group {
+    .search-sort-container {
       display: flex;
-      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
     }
 
-    .filter-group label {
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 0.5rem;
-      font-size: 0.875rem;
+    .search-container {
+      position: relative;
     }
 
-    .filter-input, .filter-select {
-      padding: 0.5rem;
+    .search-input {
       border: 1px solid #d1d5db;
-      border-radius: 6px;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
       font-size: 0.875rem;
+      width: 300px;
     }
 
-    .filter-input:focus, .filter-select:focus {
-      outline: none;
-      border-color: #059669;
-      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      pointer-events: none;
     }
 
-    .results-section {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      overflow: hidden;
+    .status-filters {
+      display: flex;
+      gap: 1rem;
     }
 
-    .section-header {
+    .filter-select {
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      min-width: 120px;
+    }
+
+    .clear-button {
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .clear-button:hover {
+      background: #4b5563;
+    }
+
+    .content-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 1.5rem;
     }
 
-    .section-header h2 {
-      color: #1f2937;
-      font-size: 1.25rem;
-      margin: 0;
+    .results-info {
+      color: #6b7280;
+      font-size: 0.875rem;
     }
 
     .page-size-select {
-      padding: 0.5rem;
       border: 1px solid #d1d5db;
-      border-radius: 6px;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
     }
 
-    .table-container {
-      overflow-x: auto;
+    .inventory-list {
+      display: grid;
+      gap: 1rem;
     }
 
-    .inventory-table {
-      width: 100%;
-      border-collapse: collapse;
+    .inventory-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 1rem;
+      align-items: start;
+      transition: all 0.2s ease;
     }
 
-    .inventory-table th {
-      background: #f9fafb;
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: #374151;
-      font-size: 0.875rem;
-      border-bottom: 1px solid #e5e7eb;
+    .inventory-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
     }
 
-    .inventory-table th.sortable {
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .inventory-table th.sortable:hover {
-      background: #f3f4f6;
-    }
-
-    .sort-indicator {
-      opacity: 0.3;
-      margin-left: 0.5rem;
-    }
-
-    .sort-indicator.active {
-      opacity: 1;
-      color: #059669;
-    }
-
-    .item-row {
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .item-row:hover {
-      background: #f9fafb;
-    }
-
-    .item-row td {
-      padding: 1rem;
-      vertical-align: top;
-    }
-
-    .image-cell {
-      width: 60px;
-      text-align: center;
-    }
-
-    .item-thumbnail {
-      width: 40px;
-      height: 40px;
+    .inventory-thumbnail {
+      width: 80px;
+      height: 80px;
+      border-radius: 0.5rem;
       object-fit: cover;
-      border-radius: 6px;
+      border: 1px solid #e5e7eb;
     }
 
-    .no-image {
-      width: 40px;
-      height: 40px;
+    .inventory-info {
+      min-width: 0;
+    }
+
+    .inventory-header {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f3f4f6;
-      border-radius: 6px;
-      color: #6b7280;
-      font-size: 1.2rem;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 0.75rem;
     }
 
-    .sku-cell {
-      font-family: 'Courier New', monospace;
+    .inventory-title {
+      font-size: 1.125rem;
       font-weight: 600;
-      color: #374151;
-      font-size: 0.875rem;
+      color: #111827;
+      margin: 0;
+      line-height: 1.3;
     }
 
-    .item-info {
+    .inventory-badges {
       display: flex;
-      flex-direction: column;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
-    .item-title {
-      font-weight: 600;
-      color: #1f2937;
-      margin-bottom: 0.25rem;
-    }
-
-    .item-description {
-      color: #6b7280;
-      font-size: 0.875rem;
-    }
-
-    .condition-badge, .status-badge {
-      display: inline-block;
+    .status-badge {
       padding: 0.25rem 0.5rem;
-      border-radius: 4px;
+      border-radius: 0.375rem;
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.025em;
     }
 
-    .condition-new { background: #dcfce7; color: #166534; }
-    .condition-like-new { background: #dbeafe; color: #1e40af; }
-    .condition-good { background: #fef3c7; color: #92400e; }
-    .condition-fair { background: #fed7aa; color: #9a3412; }
-    .condition-poor { background: #fecaca; color: #991b1b; }
+    .status-available {
+      background: #d1fae5;
+      color: #065f46;
+    }
 
-    .status-available { background: #dcfce7; color: #166534; }
-    .status-sold { background: #fef3c7; color: #92400e; }
-    .status-removed { background: #f3f4f6; color: #6b7280; }
+    .status-sold {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
 
-    .item-price {
+    .status-removed {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .condition-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #1f2937;
-      font-size: 1rem;
+      background: #f3f4f6;
+      color: #374151;
     }
 
-    .consignor-info {
-      display: flex;
-      flex-direction: column;
+    .condition-new {
+      background: #d1fae5;
+      color: #065f46;
     }
 
-    .consignor-name {
-      font-weight: 600;
-      color: #1f2937;
-      margin-bottom: 0.25rem;
+    .condition-like-new {
+      background: #dbeafe;
+      color: #1d4ed8;
     }
 
-    .date-cell {
-      color: #6b7280;
+    .condition-good {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .condition-fair {
+      background: #fed7aa;
+      color: #9a3412;
+    }
+
+    .condition-poor {
+      background: #fecaca;
+      color: #991b1b;
+    }
+
+    .inventory-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
       font-size: 0.875rem;
     }
 
-    .action-buttons {
+    .meta-row {
       display: flex;
       gap: 0.5rem;
     }
 
-    .btn-icon {
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: #f3f4f6;
-      border-radius: 6px;
-      cursor: pointer;
+    .meta-label {
+      color: #6b7280;
+      font-weight: 500;
+      min-width: 70px;
+    }
+
+    .meta-value {
+      color: #374151;
+      font-weight: 600;
+    }
+
+    .inventory-price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #059669;
+    }
+
+    .inventory-actions {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.875rem;
-      transition: all 0.2s;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-self: start;
     }
 
-    .btn-icon:hover {
-      background: #e5e7eb;
+    .action-button {
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
     }
 
-    .btn-icon.danger:hover {
-      background: #fee2e2;
-      color: #dc2626;
+    .action-button:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    .action-button.primary {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .action-button.primary:hover {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+
+    .action-button.danger {
+      background: #ef4444;
+      color: white;
+      border-color: #ef4444;
+    }
+
+    .action-button.danger:hover {
+      background: #dc2626;
+      border-color: #dc2626;
     }
 
     .pagination {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      gap: 1rem;
-      padding: 1.5rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
       border-top: 1px solid #e5e7eb;
     }
 
-    .page-btn {
-      padding: 0.5rem 1rem;
-      border: 1px solid #d1d5db;
-      background: white;
-      border-radius: 6px;
-      cursor: pointer;
+    .pagination-info {
+      color: #6b7280;
       font-size: 0.875rem;
-      transition: all 0.2s;
     }
 
-    .page-btn:hover:not(:disabled) {
-      background: #f3f4f6;
-    }
-
-    .page-btn.active {
-      background: #059669;
-      color: white;
-      border-color: #059669;
-    }
-
-    .page-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .page-numbers {
+    .pagination-controls {
       display: flex;
       gap: 0.5rem;
     }
 
-    .loading-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem;
-      color: #6b7280;
+    .pagination-button {
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
     }
 
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #e5e7eb;
-      border-top: 3px solid #059669;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
+    .pagination-button:hover:not(.disabled) {
+      background: #f9fafb;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .pagination-button.active {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .pagination-button.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem;
-      color: #6b7280;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .empty-state p {
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state-description {
+      color: #6b7280;
+      font-size: 1rem;
+      line-height: 1.5;
       margin-bottom: 2rem;
-      font-size: 1.1rem;
+    }
+
+    .empty-state-button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .empty-state-button:hover {
+      background: #2563eb;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      color: #6b7280;
+      font-size: 1rem;
     }
 
     @media (max-width: 768px) {
-      .inventory-page {
+      .inventory-container {
         padding: 1rem;
       }
 
       .page-header {
         flex-direction: column;
         gap: 1rem;
-        align-items: stretch;
+        align-items: flex-start;
       }
 
-      .filter-row {
+      .filters-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .search-sort-container {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .status-filters {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .content-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .inventory-card {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .inventory-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .inventory-meta {
         grid-template-columns: 1fr;
       }
 
-      .section-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
-      }
-
-      .inventory-table {
-        font-size: 0.875rem;
-      }
-
-      .inventory-table th,
-      .inventory-table td {
-        padding: 0.75rem 0.5rem;
-      }
-
-      .action-buttons {
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-
-      .btn-icon {
-        width: 28px;
-        height: 28px;
-        font-size: 0.75rem;
+      .inventory-actions {
+        flex-direction: row;
+        justify-content: center;
       }
 
       .pagination {
@@ -442,16 +529,39 @@ import {
       }
     }
 
+    /* Expiration Status Styles */
+    .expiration-value {
+      font-weight: 500;
+    }
+
+    .expiration-normal {
+      color: #4b5563;
+    }
+
+    .expiration-warning {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .expiration-expired {
+      color: #ef4444;
+      font-weight: 700;
+    }
   `]
 })
 export class InventoryListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
+  private conditionService = inject(ConditionService);
+  private itemStatusService = inject(ItemStatusService);
+  private toastr = inject(ToastrService);
   private router = inject(Router);
   private loadingService = inject(LoadingService);
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
   categories = signal<CategoryDto[]>([]);
+  conditionOptions = signal<ConditionOption[]>([]);
+  statusOptions = signal<StatusOption[]>([]);
   error = signal<string | null>(null);
 
   isInventoryLoading(): boolean {
@@ -463,12 +573,19 @@ export class InventoryListComponent implements OnInit {
   selectedStatus = '';
   selectedCondition = '';
   selectedCategory = '';
+  selectedExpiration = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
   sortBy = 'CreatedAt';
   sortDirection = 'desc';
   currentPage = signal(1);
   pageSize = 25;
+
+  // Modal state
+  isAddModalOpen = false;
+  isEditModalOpen = false;
+  isBulkImportModalOpen = false;
+  editingItem: ItemListDto | null = null;
 
 
   // Computed values
@@ -477,7 +594,7 @@ export class InventoryListComponent implements OnInit {
     if (!result) return [];
 
     const current = this.currentPage();
-    const total = result.totalPages;
+    const total = result.TotalPages;
     const pages: number[] = [];
 
     let start = Math.max(1, current - 2);
@@ -492,6 +609,8 @@ export class InventoryListComponent implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
+    this.loadConditions();
+    this.loadStatuses();
     this.loadItems();
   }
 
@@ -503,6 +622,24 @@ export class InventoryListComponent implements OnInit {
         }
       },
       error: (err) => console.error('Failed to load categories:', err)
+    });
+  }
+
+  private loadConditions() {
+    this.conditionService.getAll().subscribe({
+      next: (conditions) => {
+        this.conditionOptions.set(conditions);
+      },
+      error: (err) => console.error('Failed to load conditions:', err)
+    });
+  }
+
+  private loadStatuses() {
+    this.itemStatusService.getStatuses().subscribe({
+      next: (response: any) => {
+        this.statusOptions.set(response.data || response);
+      },
+      error: (err) => console.error('Failed to load statuses:', err)
     });
   }
 
@@ -526,7 +663,36 @@ export class InventoryListComponent implements OnInit {
 
     this.inventoryService.getItems(params).subscribe({
       next: (result) => {
-        this.itemsResult.set(result);
+        // Apply client-side expiration filtering
+        let filteredItems = result.Items;
+
+        if (this.selectedExpiration) {
+          filteredItems = filteredItems.filter(item => {
+            const expirationDate = (item as any).ExpirationDate;
+            if (!expirationDate) return false;
+
+            const expDate = new Date(expirationDate);
+            const today = new Date();
+            const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+            if (this.selectedExpiration === 'expiring-soon') {
+              return daysUntil >= 0 && daysUntil <= this.EXPIRATION_WARNING_DAYS;
+            } else if (this.selectedExpiration === 'expired') {
+              return daysUntil < 0;
+            }
+
+            return true;
+          });
+        }
+
+        // Create filtered result
+        const filteredResult = {
+          ...result,
+          Items: filteredItems,
+          TotalCount: filteredItems.length
+        };
+
+        this.itemsResult.set(filteredResult);
       },
       error: (err) => {
         this.error.set('Failed to load inventory items. Please try again.');
@@ -548,6 +714,7 @@ export class InventoryListComponent implements OnInit {
     this.selectedStatus = '';
     this.selectedCondition = '';
     this.selectedCategory = '';
+    this.selectedExpiration = '';
     this.priceMin = null;
     this.priceMax = null;
     this.sortBy = 'CreatedAt';
@@ -580,7 +747,12 @@ export class InventoryListComponent implements OnInit {
   }
 
   createNewItem() {
-    this.router.navigate(['/owner/inventory/new']);
+    this.editingItem = null;
+    this.isAddModalOpen = true;
+  }
+
+  openBulkUpload() {
+    this.isBulkImportModalOpen = true;
   }
 
   bulkUpload() {
@@ -591,18 +763,22 @@ export class InventoryListComponent implements OnInit {
     this.router.navigate(['/owner/inventory', id]);
   }
 
-  editItem(id: string) {
-    this.router.navigate(['/owner/inventory', id, 'edit']);
+  editItem(itemId: string) {
+    const item = this.itemsResult()?.Items.find(i => i.ItemId === itemId);
+    if (item) {
+      this.editingItem = item;
+      this.isEditModalOpen = true;
+    }
   }
 
   markAsRemoved(item: ItemListDto) {
-    if (confirm(`Mark "${item.title}" as removed?`)) {
+    if (confirm(`Mark "${item.Title}" as removed?`)) {
       const request: UpdateItemStatusRequest = {
         status: 'Removed',
         reason: 'Marked as removed from inventory list'
       };
 
-      this.inventoryService.updateItemStatus(item.itemId, request).subscribe({
+      this.inventoryService.updateItemStatus(item.ItemId, request).subscribe({
         next: (response) => {
           if (response.success) {
             this.loadItems(); // Refresh the list
@@ -617,8 +793,8 @@ export class InventoryListComponent implements OnInit {
   }
 
   deleteItem(item: ItemListDto) {
-    if (confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
-      this.inventoryService.deleteItem(item.itemId).subscribe({
+    if (confirm(`Are you sure you want to delete "${item.Title}"? This action cannot be undone.`)) {
+      this.inventoryService.deleteItem(item.ItemId).subscribe({
         next: (response) => {
           if (response.success) {
             this.loadItems(); // Refresh the list
@@ -639,13 +815,176 @@ export class InventoryListComponent implements OnInit {
   }
 
   getConditionLabel(condition: ItemCondition): string {
-    switch (condition) {
-      case ItemCondition.LikeNew: return 'Like New';
-      default: return condition;
-    }
+    const conditionOption = this.conditionOptions().find(opt => opt.value === condition);
+    return conditionOption ? conditionOption.label : condition;
   }
 
-  getStatusClass(status: ItemStatus): string {
+  getStatusClass(status: string): string {
     return `status-${status.toLowerCase()}`;
   }
+
+  getStatusEmoji(status: string): string {
+    const emojis: Record<string, string> = {
+      'Available': '🟢',
+      'Sold': '🔵',
+      'Returned': '⚪',
+      'Removed': '🔴',
+      'Expired': '🟠'
+    };
+    return emojis[status] || '⚪';
+  }
+
+  getAvailableStatusActions(status: string): StatusAction[] {
+    return getAvailableActions(status);
+  }
+
+  getStatusActionIcon(action: string): string {
+    const icons: Record<string, string> = {
+      'Returned': '↩️',
+      'Removed': '🗑️',
+      'Available': '♻️'
+    };
+    return icons[action] || '';
+  }
+
+  getStatusCount(status: string): number {
+    const items = this.itemsResult()?.Items || [];
+    return items.filter(item => item.Status === status).length;
+  }
+
+  // Status change modal state
+  isStatusChangeModalOpen = false;
+  selectedItemForStatus: ItemListDto | null = null;
+  selectedStatusAction: StatusAction | null = null;
+
+  openStatusChangeModal(item: ItemListDto, action: StatusAction) {
+    this.selectedItemForStatus = item;
+    this.selectedStatusAction = action;
+    this.isStatusChangeModalOpen = true;
+  }
+
+  closeStatusChangeModal() {
+    this.isStatusChangeModalOpen = false;
+    this.selectedItemForStatus = null;
+    this.selectedStatusAction = null;
+  }
+
+  onStatusChanged(event: { item: ItemListDto; newStatus: string; reason?: string }) {
+    const currentItems = this.itemsResult();
+    if (currentItems) {
+      const updatedItems = currentItems.Items.map(item =>
+        item.ItemId === event.item.ItemId
+          ? { ...item, Status: event.newStatus as ItemStatus }
+          : item
+      );
+
+      this.itemsResult.set({
+        ...currentItems,
+        Items: updatedItems
+      });
+    }
+
+    this.toastr.success(`Item marked as ${event.newStatus}`, 'Status Updated');
+    this.closeStatusChangeModal();
+  }
+
+  // Modal event handlers
+  closeAddModal() {
+    this.isAddModalOpen = false;
+    this.editingItem = null;
+  }
+
+  closeEditModal() {
+    this.isEditModalOpen = false;
+    this.editingItem = null;
+  }
+
+  closeBulkImportModal() {
+    this.isBulkImportModalOpen = false;
+  }
+
+  onItemSaved(item: ItemListDto) {
+    // Refresh the list after saving
+    this.loadItems();
+  }
+
+  onItemsImported(items: any[]) {
+    // Mock import - just refresh the list to simulate new items being added
+    console.log('Items imported (mock):', items);
+    this.loadItems(); // Refresh the list
+    this.closeBulkImportModal();
+  }
+
+  // Expiration utility methods
+  private readonly EXPIRATION_WARNING_DAYS = 7;
+
+  getExpirationDisplay(item: ItemListDto): string {
+    const expirationDate = (item as any).ExpirationDate;
+    if (!expirationDate) return '—';
+
+    const expDate = new Date(expirationDate);
+    const today = new Date();
+    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil < 0) {
+      return '🔴 EXPIRED';
+    }
+
+    if (daysUntil <= this.EXPIRATION_WARNING_DAYS) {
+      return `⚠️ ${expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    }
+
+    return expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  getExpirationClass(item: ItemListDto): string {
+    const expirationDate = (item as any).ExpirationDate;
+    if (!expirationDate) return '';
+
+    const expDate = new Date(expirationDate);
+    const today = new Date();
+    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil < 0) {
+      return 'expiration-expired';
+    }
+
+    if (daysUntil <= this.EXPIRATION_WARNING_DAYS) {
+      return 'expiration-warning';
+    }
+
+    return 'expiration-normal';
+  }
+
+  getExpiringSoonCount(): number {
+    const items = this.itemsResult()?.Items || [];
+    return items.filter(item => {
+      const expirationDate = (item as any).ExpirationDate;
+      if (!expirationDate) return false;
+
+      const expDate = new Date(expirationDate);
+      const today = new Date();
+      const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      return daysUntil >= 0 && daysUntil <= this.EXPIRATION_WARNING_DAYS;
+    }).length;
+  }
+
+  getExpiredCount(): number {
+    const items = this.itemsResult()?.Items || [];
+    return items.filter(item => {
+      const expirationDate = (item as any).ExpirationDate;
+      if (!expirationDate) return false;
+
+      const expDate = new Date(expirationDate);
+      const today = new Date();
+      const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      return daysUntil < 0;
+    }).length;
+  }
+
+  // Make Math.min available to template
+  Math = Math;
 }
+// Story 00-inventory-browser-redesign: Commit marker for story tracking

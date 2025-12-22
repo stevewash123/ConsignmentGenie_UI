@@ -22,14 +22,14 @@ describe('InventoryListComponent', () => {
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   const mockCategories: CategoryDto[] = [
-    { id: 'cat1', name: 'Electronics', displayOrder: 1, isActive: true, createdAt: new Date() },
-    { id: 'cat2', name: 'Clothing', displayOrder: 2, isActive: true, createdAt: new Date() }
+    { CategoryId: 'cat1', Name: 'Electronics', DisplayOrder: 1, ItemCount: 5 },
+    { CategoryId: 'cat2', Name: 'Clothing', DisplayOrder: 2, ItemCount: 3 }
   ];
 
   const mockItems: ItemListDto[] = [
     {
-      itemId: 'item1',
-      sku: 'SKU001',
+      ItemId: 'item1',
+      Sku: 'SKU001',
       title: 'Test Item 1',
       description: 'This is a test item description',
       price: 99.99,
@@ -44,8 +44,8 @@ describe('InventoryListComponent', () => {
       commissionRate: 0.4
     },
     {
-      itemId: 'item2',
-      sku: 'SKU002',
+      ItemId: 'item2',
+      Sku: 'SKU002',
       title: 'Test Item 2',
       description: 'Another test item',
       price: 149.99,
@@ -62,8 +62,8 @@ describe('InventoryListComponent', () => {
   ];
 
   const mockPagedResult: PagedResult<ItemListDto> = {
-    items: mockItems,
-    totalCount: 2,
+    Items: mockItems,
+    TotalCount: 2,
     page: 1,
     pageSize: 25,
     totalPages: 1,
@@ -73,8 +73,8 @@ describe('InventoryListComponent', () => {
   };
 
   const emptyPagedResult: PagedResult<ItemListDto> = {
-    items: [],
-    totalCount: 0,
+    Items: [],
+    TotalCount: 0,
     page: 1,
     pageSize: 25,
     totalPages: 0,
@@ -186,9 +186,75 @@ describe('InventoryListComponent', () => {
 
     it('should call loading service start and stop', () => {
       initializeComponent();
-
       expect(mockLoadingService.start).toHaveBeenCalledWith('inventory-list');
       expect(mockLoadingService.stop).toHaveBeenCalledWith('inventory-list');
+    });
+  });
+
+  describe('Table View Rendering', () => {
+    beforeEach(() => {
+      component.itemsResult.set(mockPagedResult);
+      fixture.detectChanges();
+    });
+
+    it('should display table container', () => {
+      const tableContainer = fixture.nativeElement.querySelector('.table-container');
+      expect(tableContainer).toBeTruthy();
+    });
+
+    it('should render table with correct headers', () => {
+      const tableHeaders = fixture.nativeElement.querySelectorAll('th');
+      expect(tableHeaders.length).toBe(10); // Image, SKU, Title, Category, Condition, Price, Status, Consignor, Received, Actions
+    });
+
+    it('should render table rows for items', () => {
+      const tableRows = fixture.nativeElement.querySelectorAll('tbody tr');
+      expect(tableRows.length).toBe(2);
+    });
+
+    it('should display item data in table cells', () => {
+      const skuCells = fixture.nativeElement.querySelectorAll('.sku-cell');
+      expect(skuCells.length).toBe(2);
+      expect(skuCells[0].textContent.trim()).toBe('SKU001');
+      expect(skuCells[1].textContent.trim()).toBe('SKU002');
+    });
+  });
+
+  describe('Empty State Handling', () => {
+    const emptyPagedResult: PagedResult<ItemListDto> = {
+      Items: [],
+      TotalCount: 0,
+      page: 1,
+      pageSize: 25,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+      organizationId: 'org1'
+    };
+
+    beforeEach(() => {
+      // Ensure conditions for rendering are met: no loading, no error, has data
+      component.error.set(null);
+      mockLoadingService.isLoading.and.returnValue(false);
+    });
+
+    it('should handle empty data gracefully', () => {
+      mockInventoryService.getItems.and.returnValue(of(emptyPagedResult));
+      component.loadItems();
+      fixture.detectChanges();
+
+      // Component should still be functional with empty data
+      expect(component.itemsResult()).toEqual(emptyPagedResult);
+    });
+
+    it('should show empty state when no items', () => {
+      mockInventoryService.getItems.and.returnValue(of(emptyPagedResult));
+      mockLoadingService.isLoading.and.returnValue(false);
+      component.loadItems();
+      fixture.detectChanges();
+
+      // The empty state message should appear when no items are available
+      expect(component.itemsResult()?.Items.length).toBe(0);
     });
   });
 

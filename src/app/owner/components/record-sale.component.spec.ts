@@ -126,7 +126,8 @@ describe('RecordSaleComponent', () => {
 
     const expectedSaleRequest: SaleRequest = {
       items: [mockCartItem],
-      paymentType: 'Cash'
+      paymentType: 'Cash',
+      customerEmail: undefined
     };
 
     expect(mockRecordSaleService.completeSale).toHaveBeenCalledWith(expectedSaleRequest);

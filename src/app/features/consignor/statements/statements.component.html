@@ -1,0 +1,72 @@
+<div class="statements-container">
+  <!-- Header -->
+  <div class="statements-header">
+    <button
+      routerLink="/consignor/dashboard"
+      class="back-button"
+      type="button">
+      ← Dashboard
+    </button>
+    <h1>Monthly Statements</h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading statements...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h3>Unable to load statements</h3>
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadStatements()">Try Again</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && statements.length === 0" class="empty-state">
+    <div class="empty-icon">📄</div>
+    <h3>No statements available yet</h3>
+    <p>Statements are generated for months<br>with sales or payout activity.</p>
+  </div>
+
+  <!-- Statements Table -->
+  <div *ngIf="!loading && !error && statements.length > 0" class="statements-table-container">
+    <table class="statements-table">
+      <thead>
+        <tr>
+          <th>MONTH</th>
+          <th>SALES</th>
+          <th>EARNINGS</th>
+          <th>PAYOUTS</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let statement of statements; trackBy: trackByStatement"
+          class="statement-row">
+          <td class="month-cell">{{ statement.monthName }}</td>
+          <td class="sales-cell">{{ statement.salesCount }}</td>
+          <td class="earnings-cell">{{ statement.totalEarnings | currency }}</td>
+          <td class="payouts-cell">{{ statement.payoutCount }}</td>
+          <td class="action-cell">
+            <button
+              class="pdf-button"
+              [disabled]="statement.isDownloading"
+              (click)="downloadPdf(statement)">
+              <span *ngIf="!statement.isDownloading">PDF</span>
+              <span *ngIf="statement.isDownloading" class="generating">Generating...</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Footer Info -->
+    <div class="footer-info">
+      <p>Showing months with activity</p>
+    </div>
+  </div>
+</div>

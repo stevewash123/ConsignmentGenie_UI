@@ -48,9 +48,34 @@ export interface ItemPriceChangeRequestDto {
 
 export interface ItemReturnRequestDto {
   id: string;
-  requestDate: Date;
-  reason: string;
-  status: 'pending' | 'approved' | 'declined';
+  itemId: string;
+  itemName: string;
+  itemThumbnailUrl: string;
+
+  consignorId: string;
+  consignorName: string;
+  consignorPhone?: string;
+  consignorEmail: string;
+
+  reason: 'no_longer_selling' | 'need_it_back' | 'other';
+  notes?: string;
+  preferredPickup: string;
+
+  status: 'pending' | 'ready' | 'completed' | 'declined';
+  submittedDate: Date;
+  readyDate?: Date;
+  completedDate?: Date;
+  declinedDate?: Date;
+  declineReason?: string;
+
+  pickupInstructions?: string;
+}
+
+export interface CreateReturnRequestDto {
+  itemId: string;
+  reason: 'no_longer_selling' | 'need_it_back' | 'other';
+  notes?: string;
+  preferredPickup: string;
 }
 
 export interface ConsignorItemDetailDto extends ConsignorItemDto {
@@ -649,5 +674,141 @@ export class MockConsignorItemService {
       status: 'rejected',
       reviewedAt: new Date()
     }).pipe(delay(400));
+  }
+
+  // Return Request Methods
+  requestItemReturn(itemId: string, request: CreateReturnRequestDto): Observable<ItemReturnRequestDto> {
+    const item = this.mockItems.find(i => i.id === itemId);
+    if (!item) {
+      throw new Error('Item not found');
+    }
+
+    const returnRequest: ItemReturnRequestDto = {
+      id: `return-${Date.now()}`,
+      itemId: itemId,
+      itemName: item.name,
+      itemThumbnailUrl: item.primaryImageUrl,
+
+      consignorId: 'consignor-123',
+      consignorName: 'Jane Doe',
+      consignorEmail: 'jane@example.com',
+      consignorPhone: '(555) 123-4567',
+
+      reason: request.reason,
+      notes: request.notes,
+      preferredPickup: request.preferredPickup,
+
+      status: 'pending',
+      submittedDate: new Date()
+    };
+
+    // Update item to have pending return request
+    const itemIndex = this.mockItems.findIndex(i => i.id === itemId);
+    if (itemIndex >= 0) {
+      this.mockItems[itemIndex] = {
+        ...this.mockItems[itemIndex],
+        status: 'pending_return' as any
+      };
+    }
+
+    return of(returnRequest).pipe(delay(800));
+  }
+
+  getReturnRequests(status?: 'pending' | 'ready' | 'completed' | 'declined' | 'all'): Observable<ItemReturnRequestDto[]> {
+    const mockReturnRequests: ItemReturnRequestDto[] = [
+      {
+        id: 'return-1',
+        itemId: '1',
+        itemName: 'Vintage Coach Handbag',
+        itemThumbnailUrl: 'https://via.placeholder.com/300x300?text=Coach+Bag',
+
+        consignorId: 'consignor-1',
+        consignorName: 'Jane Doe',
+        consignorEmail: 'jane@example.com',
+        consignorPhone: '(555) 123-4567',
+
+        reason: 'no_longer_selling',
+        notes: 'Moving out of state and need to pack up belongings.',
+        preferredPickup: 'Weekday afternoons (2pm-6pm)',
+
+        status: 'pending',
+        submittedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      },
+      {
+        id: 'return-2',
+        itemId: '6',
+        itemName: 'Leather Boots',
+        itemThumbnailUrl: 'https://via.placeholder.com/300x300?text=Leather+Boots',
+
+        consignorId: 'consignor-2',
+        consignorName: 'Bob Smith',
+        consignorEmail: 'bob@example.com',
+
+        reason: 'need_it_back',
+        notes: 'Weather turned cold, need my boots back!',
+        preferredPickup: 'Contact me',
+
+        status: 'pending',
+        submittedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+      },
+      {
+        id: 'return-3',
+        itemId: '3',
+        itemName: 'Designer Watch',
+        itemThumbnailUrl: 'https://via.placeholder.com/300x300?text=Designer+Watch',
+
+        consignorId: 'consignor-3',
+        consignorName: 'Amy Johnson',
+        consignorEmail: 'amy@example.com',
+
+        reason: 'other',
+        notes: 'Changed my mind about selling',
+        preferredPickup: 'Weekend mornings (10am-1pm)',
+
+        status: 'ready',
+        submittedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
+        readyDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // ready since 1 day ago
+        pickupInstructions: 'Come to the front counter during store hours (10am-6pm). Ask for your item by name. Bring ID.'
+      }
+    ];
+
+    let filteredRequests = mockReturnRequests;
+    if (status && status !== 'all') {
+      filteredRequests = filteredRequests.filter(req => req.status === status);
+    }
+
+    return of(filteredRequests).pipe(delay(300));
+  }
+
+  getPendingReturnRequestsCount(): Observable<number> {
+    return this.getReturnRequests('pending').pipe(
+      map(requests => requests.length)
+    );
+  }
+
+  markReturnRequestReady(requestId: string, instructions: string): Observable<any> {
+    return of({
+      id: requestId,
+      status: 'ready',
+      readyDate: new Date(),
+      pickupInstructions: instructions
+    }).pipe(delay(500));
+  }
+
+  markReturnRequestComplete(requestId: string): Observable<any> {
+    return of({
+      id: requestId,
+      status: 'completed',
+      completedDate: new Date()
+    }).pipe(delay(500));
+  }
+
+  declineReturnRequest(requestId: string, reason: string): Observable<any> {
+    return of({
+      id: requestId,
+      status: 'declined',
+      declinedDate: new Date(),
+      declineReason: reason
+    }).pipe(delay(500));
   }
 }

@@ -48,7 +48,7 @@ describe('NotificationConfig', () => {
         expect(config.icon).toBeDefined();
         expect(typeof config.icon).toBe('string');
         expect(config.color).toBeDefined();
-        expect(['green', 'blue', 'yellow', 'red', 'purple', 'gray']).toContain(config.color);
+        expect(['green', 'blue', 'yellow', 'red', 'purple', 'gray', 'orange']).toContain(config.color);
         expect(typeof config.getTitle).toBe('function');
         expect(typeof config.getMessage).toBe('function');
         expect(typeof config.getRoute).toBe('function');
@@ -135,6 +135,63 @@ describe('NotificationConfig', () => {
 
     it('should return default class for invalid type', () => {
       expect(getNotificationIconClass('invalid_type' as NotificationType)).toBe('default');
+    });
+  });
+
+  describe('admin notification types', () => {
+    it('should configure new_owner_signup correctly', () => {
+      const config = notificationConfig.new_owner_signup;
+      expect(config.icon).toBe('🏪');
+      expect(config.color).toBe('blue');
+      expect(config.getTitle(mockNotification)).toBe('New Shop Signup');
+      expect(config.getRoute(mockNotification, 'admin')).toBe('/admin/owners/org-1');
+      expect(config.allowedRoles).toEqual(['admin']);
+    });
+
+    it('should configure support_ticket_opened correctly', () => {
+      const config = notificationConfig.support_ticket_opened;
+      expect(config.icon).toBe('🎫');
+      expect(config.color).toBe('yellow');
+      expect(config.getTitle(mockNotification)).toBe('Support Ticket Opened');
+      expect(config.getRoute(mockNotification, 'admin')).toBe('/admin/support/ref-1');
+      expect(config.allowedRoles).toEqual(['admin']);
+    });
+
+    it('should configure support_ticket_assigned correctly', () => {
+      const config = notificationConfig.support_ticket_assigned;
+      expect(config.icon).toBe('🎫');
+      expect(config.color).toBe('yellow');
+      expect(config.getTitle(mockNotification)).toBe('Support Ticket Assigned');
+      expect(config.getRoute(mockNotification, 'admin')).toBe('/admin/support/ref-1');
+      expect(config.allowedRoles).toEqual(['admin']);
+    });
+
+    it('should configure subscription_failed correctly for admin', () => {
+      const config = notificationConfig.subscription_failed;
+      expect(config.icon).toBe('🚨');
+      expect(config.color).toBe('red');
+      expect(config.getTitle(mockNotification)).toBe('Subscription Payment Failed');
+      expect(config.getRoute(mockNotification, 'admin')).toBe('/admin/subscriptions/ref-1');
+      expect(config.allowedRoles).toContain('admin');
+      expect(config.allowedRoles).toContain('owner');
+    });
+
+    it('should configure subscription_cancelled correctly', () => {
+      const config = notificationConfig.subscription_cancelled;
+      expect(config.icon).toBe('💔');
+      expect(config.color).toBe('gray');
+      expect(config.getTitle(mockNotification)).toBe('Subscription Cancelled');
+      expect(config.getRoute(mockNotification, 'admin')).toBe('/admin/owners/org-1');
+      expect(config.allowedRoles).toEqual(['admin']);
+    });
+
+    it('should configure trial_expiring correctly', () => {
+      const config = notificationConfig.trial_expiring;
+      expect(config.icon).toBe('⏰');
+      expect(config.color).toBe('orange');
+      expect(config.getTitle(mockNotification)).toBe('Trial Expiring');
+      expect(config.getRoute(mockNotification, 'admin')).toBe('/admin/owners/org-1');
+      expect(config.allowedRoles).toEqual(['admin']);
     });
   });
 

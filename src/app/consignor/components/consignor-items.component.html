@@ -18,6 +18,30 @@
           <h2>My Items</h2>
         </div>
 
+        <!-- Search Bar -->
+        <div class="search-section">
+          <div class="search-container">
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (keyup.enter)="searchItems()"
+              placeholder="Search items by title, SKU, or description..."
+              class="search-input">
+            <button
+              (click)="searchItems()"
+              class="search-btn"
+              [disabled]="loadingService.isLoading(KEYS.ITEMS_LIST)">
+              🔍
+            </button>
+            <button
+              *ngIf="searchTerm"
+              (click)="clearSearch()"
+              class="clear-btn">
+              ✕
+            </button>
+          </div>
+        </div>
+
         <!-- Status Filter Tabs -->
         <div class="filter-tabs">
           <button

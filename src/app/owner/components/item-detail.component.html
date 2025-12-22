@@ -1,0 +1,203 @@
+<app-owner-layout>
+  <div class="item-detail-page">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <button class="back-button" (click)="goBack()">
+          ← Back to Inventory
+        </button>
+        <h1 *ngIf="item()">{{ item()!.title }}</h1>
+        <h1 *ngIf="isLoading()">Loading...</h1>
+      </div>
+      <div class="header-actions" *ngIf="item()">
+        <button class="btn-secondary" (click)="editItem()">
+          <span class="btn-icon">✏️</span>
+          Edit Item
+        </button>
+        <button class="btn-primary" (click)="openPriceChangeModal()" *ngIf="item()!.status === 'Available'">
+          <span class="btn-icon">💰</span>
+          Change Price
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading()">
+      <div class="loading-spinner"></div>
+      <p>Loading item details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="error()">
+      <div class="error-icon">⚠️</div>
+      <h2>Error Loading Item</h2>
+      <p>{{ error() }}</p>
+      <button class="btn-primary" (click)="goBack()">Back to Inventory</button>
+    </div>
+
+    <!-- Item Details -->
+    <div class="item-content" *ngIf="item() && !isLoading() && !error()">
+      <div class="item-layout">
+        <!-- Left Column - Images -->
+        <div class="item-images">
+          <div class="primary-image">
+            <img
+              *ngIf="item()!.images && item()!.images.length > 0"
+              [src]="item()!.images[0].imageUrl"
+              [alt]="item()!.title"
+              class="main-image">
+            <div class="no-image" *ngIf="!item()!.images || item()!.images.length === 0">
+              📷<br>
+              <span>No Image</span>
+            </div>
+          </div>
+
+          <div class="thumbnail-list" *ngIf="item()!.images && item()!.images.length > 1">
+            <img
+              *ngFor="let image of item()!.images; let i = index"
+              [src]="image.imageUrl"
+              [alt]="item()!.title + ' - Image ' + (i + 1)"
+              class="thumbnail"
+              [class.active]="i === 0">
+          </div>
+        </div>
+
+        <!-- Right Column - Details -->
+        <div class="item-info">
+          <!-- Basic Info -->
+          <div class="info-section">
+            <div class="price-info">
+              <div class="current-price">{{ formatCurrency(item()!.price) }}</div>
+              <div class="price-breakdown">
+                <div class="breakdown-item">
+                  <span class="label">Shop Amount:</span>
+                  <span class="value">{{ formatCurrency(item()!.shopAmount) }}</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="label">Consignor Amount:</span>
+                  <span class="value">{{ formatCurrency(item()!.consignorAmount) }}</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="label">Commission Rate:</span>
+                  <span class="value">{{ item()!.commissionRate }}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="status-badges">
+              <span class="status-badge" [class]="getStatusClass(item()!.status)">
+                {{ item()!.status }}
+              </span>
+              <span class="condition-badge" [class]="getConditionClass(item()!.condition)">
+                {{ getConditionLabel(item()!.condition) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Consignor Info -->
+          <div class="info-section">
+            <h3>Consignor Information</h3>
+            <div class="consignor-info">
+              <div class="info-row">
+                <span class="label">Name:</span>
+                <span class="value">{{ item()!.consignorName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Commission Rate:</span>
+                <span class="value">{{ item()!.commissionRate }}% (Consignor gets {{ formatCurrency(item()!.consignorAmount) }})</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item Details -->
+          <div class="info-section">
+            <h3>Item Details</h3>
+            <div class="details-grid">
+              <div class="detail-item" *ngIf="item()!.sku">
+                <span class="label">SKU:</span>
+                <span class="value">{{ item()!.sku }}</span>
+              </div>
+              <div class="detail-item" *ngIf="item()!.category">
+                <span class="label">Category:</span>
+                <span class="value">{{ item()!.category }}</span>
+              </div>
+              <div class="detail-item" *ngIf="item()!.brand">
+                <span class="label">Brand:</span>
+                <span class="value">{{ item()!.brand }}</span>
+              </div>
+              <div class="detail-item" *ngIf="item()!.size">
+                <span class="label">Size:</span>
+                <span class="value">{{ item()!.size }}</span>
+              </div>
+              <div class="detail-item" *ngIf="item()!.color">
+                <span class="label">Color:</span>
+                <span class="value">{{ item()!.color }}</span>
+              </div>
+              <div class="detail-item" *ngIf="item()!.materials">
+                <span class="label">Materials:</span>
+                <span class="value">{{ item()!.materials }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Received:</span>
+                <span class="value">{{ formatDate(item()!.receivedDate) }}</span>
+              </div>
+              <div class="detail-item" *ngIf="item()!.listedDate">
+                <span class="label">Listed:</span>
+                <span class="value">{{ formatDate(item()!.listedDate) }} ({{ getDaysListed() }} days ago)</span>
+              </div>
+              <div class="detail-item" *ngIf="item()!.location">
+                <span class="label">Location:</span>
+                <span class="value">{{ item()!.location }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="info-section" *ngIf="item()!.description">
+            <h3>Description</h3>
+            <p class="description">{{ item()!.description }}</p>
+          </div>
+
+          <!-- Pricing History -->
+          <div class="info-section" *ngIf="item()!.originalPrice && item()!.originalPrice !== item()!.price">
+            <h3>Pricing History</h3>
+            <div class="pricing-history">
+              <div class="price-change">
+                <span class="label">Original Price:</span>
+                <span class="value">{{ formatCurrency(item()!.originalPrice) }}</span>
+              </div>
+              <div class="price-change">
+                <span class="label">Current Price:</span>
+                <span class="value">{{ formatCurrency(item()!.price) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="info-section" *ngIf="item()!.notes || item()!.internalNotes">
+            <h3>Notes</h3>
+            <div class="notes">
+              <div class="note" *ngIf="item()!.notes">
+                <strong>Public Notes:</strong>
+                <p>{{ item()!.notes }}</p>
+              </div>
+              <div class="note" *ngIf="item()!.internalNotes">
+                <strong>Internal Notes:</strong>
+                <p>{{ item()!.internalNotes }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Change Modal -->
+    <app-initiate-price-change
+      *ngIf="showPriceChangeModal() && item()"
+      [isVisible]="showPriceChangeModal"
+      [item]="item()!"
+      (close)="closePriceChangeModal()"
+      (priceChangeSubmitted)="onPriceChangeSubmitted()">
+    </app-initiate-price-change>
+  </div>
+</app-owner-layout>

@@ -60,6 +60,10 @@
                 <span class="summary-value earnings">{{ statement.totalEarnings | currency }}</span>
               </div>
               <div class="summary-row">
+                <span class="summary-label">Payouts</span>
+                <span class="summary-value">{{ statement.payoutCount }}</span>
+              </div>
+              <div class="summary-row">
                 <span class="summary-label">Closing Balance</span>
                 <span class="summary-value balance">{{ statement.closingBalance | currency }}</span>
               </div>

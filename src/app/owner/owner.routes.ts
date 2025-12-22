@@ -67,6 +67,14 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/manual-check-clearance.component').then(m => m.ManualCheckClearanceComponent)
   },
   {
+    path: 'price-requests',
+    loadComponent: () => import('./components/price-requests/price-request-list.component').then(m => m.PriceRequestListComponent)
+  },
+  {
+    path: 'return-requests',
+    loadComponent: () => import('./components/return-requests-list.component').then(m => m.ReturnRequestsListComponent)
+  },
+  {
     path: 'notifications',
     loadComponent: () => import('./pages/owner-notifications.component').then(m => m.OwnerNotificationsComponent)
   },
@@ -151,6 +159,10 @@ export const ownerRoutes: Routes = [
             loadComponent: () => import('./settings/consignors/consignor-payout-settings.component').then(m => m.ConsignorPayoutSettingsComponent)
           }
         ]
+      },
+      {
+        path: 'inventory-management/categories',
+        loadComponent: () => import('./settings/inventory/categories.component').then(m => m.CategoriesComponent)
       },
       {
         path: 'subscription',

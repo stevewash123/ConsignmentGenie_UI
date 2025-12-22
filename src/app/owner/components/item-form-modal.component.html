@@ -1,0 +1,217 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onOverlayClick($event)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3>{{ getTitle() }}</h3>
+      <button type="button" class="close-btn" (click)="close()" [disabled]="isSubmitting">
+        ✕
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <form (ngSubmit)="onSubmit()" #itemForm="ngForm">
+        <div class="form-grid">
+          <!-- General Error -->
+          <div class="form-error" *ngIf="errors['general']">
+            {{ errors['general'] }}
+          </div>
+
+          <!-- Title -->
+          <div class="form-group full-width">
+            <label for="title" class="form-label required">Item Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              class="form-input"
+              [(ngModel)]="formData.title"
+              [disabled]="isSubmitting"
+              placeholder="Enter item title"
+              maxlength="200"
+              required>
+            <div class="form-error" *ngIf="errors['title']">
+              {{ errors['title'] }}
+            </div>
+          </div>
+
+          <!-- SKU and Price Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sku" class="form-label required">SKU</label>
+              <input
+                type="text"
+                id="sku"
+                name="sku"
+                class="form-input"
+                [(ngModel)]="formData.sku"
+                [disabled]="isSubmitting"
+                placeholder="Item SKU"
+                maxlength="50"
+                required>
+              <div class="form-error" *ngIf="errors['sku']">
+                {{ errors['sku'] }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="price" class="form-label required">Price</label>
+              <div class="price-input-group">
+                <span class="currency-symbol">$</span>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  class="form-input"
+                  [(ngModel)]="formData.price"
+                  [disabled]="isSubmitting"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  required>
+              </div>
+              <div class="form-error" *ngIf="errors['price']">
+                {{ errors['price'] }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Consignor and Category Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="consignorId" class="form-label required">Consignor</label>
+              <select
+                id="consignorId"
+                name="consignorId"
+                class="form-select"
+                [(ngModel)]="formData.consignorId"
+                [disabled]="isSubmitting"
+                required>
+                <option value="">Select Consignor</option>
+                <option *ngFor="let consignor of consignors()" [value]="consignor.id">
+                  {{ consignor.name }} ({{ consignor.consignorNumber || consignor.id }})
+                </option>
+              </select>
+              <div class="form-error" *ngIf="errors['consignorId']">
+                {{ errors['consignorId'] }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="categoryId" class="form-label required">Category</label>
+              <select
+                id="categoryId"
+                name="categoryId"
+                class="form-select"
+                [(ngModel)]="formData.categoryId"
+                [disabled]="isSubmitting"
+                required>
+                <option value="">Select Category</option>
+                <option *ngFor="let category of categories()" [value]="category.CategoryId">
+                  {{ category.Name }}
+                </option>
+              </select>
+              <div class="form-error" *ngIf="errors['categoryId']">
+                {{ errors['categoryId'] }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Condition -->
+          <div class="form-group">
+            <label for="condition" class="form-label required">Condition</label>
+            <select
+              id="condition"
+              name="condition"
+              class="form-select"
+              [(ngModel)]="formData.condition"
+              [disabled]="isSubmitting || isLoadingConditions"
+              required>
+              <option value="" disabled>
+                {{ isLoadingConditions ? 'Loading conditions...' : 'Select Condition' }}
+              </option>
+              <option *ngFor="let option of conditionOptions()" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <div class="form-error" *ngIf="errors['condition']">
+              {{ errors['condition'] }}
+            </div>
+          </div>
+
+          <!-- Consignment Dates Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="receivedDate" class="form-label">Received Date</label>
+              <input
+                type="date"
+                id="receivedDate"
+                name="receivedDate"
+                class="form-input"
+                [(ngModel)]="formData.receivedDate"
+                (change)="onReceivedDateChange()"
+                [disabled]="isSubmitting">
+              <div class="form-error" *ngIf="errors['receivedDate']">
+                {{ errors['receivedDate'] }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="expirationDate" class="form-label">Expiration Date</label>
+              <input
+                type="date"
+                id="expirationDate"
+                name="expirationDate"
+                class="form-input"
+                [(ngModel)]="formData.expirationDate"
+                [disabled]="isSubmitting">
+              <div class="form-helper-text">
+                ({{ DEFAULT_CONSIGNMENT_PERIOD }} days from received)
+              </div>
+              <div class="form-error" *ngIf="errors['expirationDate']">
+                {{ errors['expirationDate'] }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group full-width">
+            <label for="description" class="form-label">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              class="form-textarea"
+              [(ngModel)]="formData.description"
+              [disabled]="isSubmitting"
+              placeholder="Optional item description"
+              maxlength="1000"
+              rows="4">
+            </textarea>
+            <div class="form-error" *ngIf="errors['description']">
+              {{ errors['description'] }}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="close()"
+        [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting">
+        <div class="loading-spinner" *ngIf="isSubmitting"></div>
+        {{ getSubmitText() }}
+      </button>
+    </div>
+  </div>
+</div>

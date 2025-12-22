@@ -72,6 +72,64 @@ import { LOADING_KEYS } from '../constants/loading-keys';
       margin: 0 0 2rem 0;
     }
 
+    .search-section {
+      margin-bottom: 2rem;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      max-width: 600px;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      padding: 0.5rem;
+      background: transparent;
+    }
+
+    .search-input::placeholder {
+      color: #9ca3af;
+    }
+
+    .search-btn,
+    .clear-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background 0.2s ease;
+    }
+
+    .clear-btn {
+      background: #6b7280;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .search-btn:hover:not(:disabled) {
+      background: #2563eb;
+    }
+
+    .clear-btn:hover {
+      background: #4b5563;
+    }
+
+    .search-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
     .filter-tabs {
       display: flex;
       gap: 0.5rem;
@@ -343,6 +401,7 @@ export class ConsignorItemsComponent implements OnInit {
   currentPage = 1;
   pageSize = 20;
   commissionRate = 50;
+  searchTerm = '';
 
   // Counts for tabs
   totalItemsCount = 0;
@@ -373,6 +432,10 @@ export class ConsignorItemsComponent implements OnInit {
       query.status = this.selectedStatus;
     }
 
+    if (this.searchTerm.trim()) {
+      query.search = this.searchTerm.trim();
+    }
+
     this.ConsignorService.getMyItems(query).subscribe({
       next: (result) => {
         this.itemsResult = result;
@@ -399,6 +462,17 @@ export class ConsignorItemsComponent implements OnInit {
 
   filterByStatus(status: string | null) {
     this.selectedStatus = status;
+    this.currentPage = 1;
+    this.loadItems();
+  }
+
+  searchItems() {
+    this.currentPage = 1;
+    this.loadItems();
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
     this.currentPage = 1;
     this.loadItems();
   }

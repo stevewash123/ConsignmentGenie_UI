@@ -30,7 +30,7 @@
           <div class="summary-grid">
             <div class="summary-item">
               <div class="label">Payout Date</div>
-              <div class="value">{{formatFullDate(payoutDetail.payoutDate)}}</div>
+              <div class="value">{{formatFullDate(payoutDetail.paymentDate)}}</div>
             </div>
             <div class="summary-item">
               <div class="label">Amount</div>
@@ -42,15 +42,38 @@
             </div>
             <div class="summary-item">
               <div class="label">Items Included</div>
-              <div class="value">{{payoutDetail.itemCount}} items</div>
+              <div class="value">{{payoutDetail.items.length}} items</div>
             </div>
             <div class="summary-item" *ngIf="payoutDetail.paymentReference">
               <div class="label">Payment Reference</div>
               <div class="value reference">{{payoutDetail.paymentReference}}</div>
             </div>
             <div class="summary-item">
-              <div class="label">Period</div>
-              <div class="value">{{formatFullDate(payoutDetail.periodStart)}} - {{formatFullDate(payoutDetail.periodEnd)}}</div>
+              <div class="label">Status</div>
+              <div class="value">{{payoutDetail.status === 'received' ? 'Received' : 'Sent'}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout Summary Breakdown -->
+        <div class="summary-breakdown">
+          <h3>Summary</h3>
+          <div class="breakdown-table">
+            <div class="breakdown-row">
+              <span class="breakdown-label">Gross Sales:</span>
+              <span class="breakdown-value">\${{payoutDetail.grossSales.toFixed(2)}}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Your Split ({{payoutDetail.consignorSplitPercent}}%):</span>
+              <span class="breakdown-value">\${{payoutDetail.consignorShare.toFixed(2)}}</span>
+            </div>
+            <div class="breakdown-row" *ngIf="payoutDetail.fees > 0">
+              <span class="breakdown-label">{{payoutDetail.feeDescription || 'Fees'}}:</span>
+              <span class="breakdown-value negative">-\${{payoutDetail.fees.toFixed(2)}}</span>
+            </div>
+            <div class="breakdown-row total">
+              <span class="breakdown-label total-label">Net Payout:</span>
+              <span class="breakdown-value total-value">\${{payoutDetail.netPayout.toFixed(2)}}</span>
             </div>
           </div>
         </div>
@@ -69,19 +92,19 @@
 
             <div class="table-row" *ngFor="let item of payoutDetail.items">
               <div class="col date-col">
-                {{formatDate(item.saleDate)}}
+                {{formatDate(item.soldDate)}}
               </div>
               <div class="col item-col">
                 <div class="item-info">
-                  <div class="item-title">{{item.itemTitle}}</div>
-                  <div class="item-sku">{{item.itemSku}}</div>
+                  <div class="item-title">{{item.itemName}}</div>
+                  <div class="item-sku">Item ID: {{item.itemId}}</div>
                 </div>
               </div>
               <div class="col price-col">
                 \${{item.salePrice.toFixed(2)}}
               </div>
               <div class="col earnings-col">
-                \${{item.myEarnings.toFixed(2)}}
+                \${{item.consignorEarnings.toFixed(2)}}
               </div>
             </div>
 
@@ -104,7 +127,10 @@
         <!-- Footer Actions -->
         <div class="footer-actions">
           <a routerLink="/consignor/payouts" class="btn-secondary">Back to Payouts</a>
-          <button class="btn-primary" (click)="printPayout()">Print Receipt</button>
+          <div>
+            <button class="btn-primary" (click)="downloadReceipt()" style="margin-right: 0.5rem;">Download PDF</button>
+            <button class="btn-primary" (click)="printPayout()">Print Receipt</button>
+          </div>
         </div>
       </div>
 

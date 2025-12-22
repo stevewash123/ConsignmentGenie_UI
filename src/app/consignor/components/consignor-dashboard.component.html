@@ -7,18 +7,15 @@
       </div>
 
       <div class="dashboard-content" *ngIf="dashboard">
+        <!-- Earnings Widget -->
+        <app-earnings-widget></app-earnings-widget>
+
         <!-- Metrics Cards -->
         <div class="metrics-grid">
           <div class="metric-card">
             <div class="metric-title">MY ITEMS</div>
             <div class="metric-title">ON FLOOR</div>
             <div class="metric-value">{{dashboard.availableItems}}</div>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-title">PENDING</div>
-            <div class="metric-title">EARNINGS</div>
-            <div class="metric-value">\${{dashboard.pendingBalance.toFixed(2)}}</div>
           </div>
 
           <div class="metric-card">
@@ -63,7 +60,7 @@
         <div class="section">
           <div class="section-header">
             <h3>Last Payout</h3>
-            <a routerLink="/consignor/payouts" class="view-all-link">View All →</a>
+            <a routerLink="/consignor/payouts" class="view-all-link">View Payout History →</a>
           </div>
           <div class="payout-info" *ngIf="dashboard.lastPayout">
             <div class="payout-row">
