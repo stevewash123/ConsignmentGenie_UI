@@ -1,0 +1,148 @@
+<div class="onboarding-page">
+  <div class="container">
+    <div class="onboarding-card" *ngIf="shopData() as shop">
+      <!-- Header -->
+      <div class="header">
+        <a [routerLink]="['/']" class="back-link">← Back</a>
+        <h1>Welcome to {{ shop.shopName }}!</h1>
+        <p class="subtitle">Before you can consign items, please complete the following:</p>
+      </div>
+
+      <!-- Inventory Submission Info -->
+      <div class="info-section">
+        <div class="info-header">
+          <span class="info-icon">📦</span>
+          <h3>INVENTORY SUBMISSION</h3>
+        </div>
+        <p class="inventory-mode">{{ getInventoryModeMessage() }}</p>
+      </div>
+
+      <form [formGroup]="onboardingForm" (ngSubmit)="onSubmit()">
+        <!-- Consignment Agreement Section -->
+        <div class="agreement-section" *ngIf="shop.consignmentAgreement">
+          <h3>CONSIGNMENT AGREEMENT</h3>
+          <div class="agreement-content">
+            <div class="agreement-text" [innerHTML]="shop.consignmentAgreement.content"></div>
+          </div>
+
+          <div class="agreement-checkbox">
+            <label>
+              <input
+                type="checkbox"
+                formControlName="agreementAccepted"
+                [class.error]="onboardingForm.get('agreementAccepted')?.invalid && onboardingForm.get('agreementAccepted')?.touched"
+              >
+              <span class="checkbox-label">I have read and agree to the consignment agreement</span>
+            </label>
+            <div class="error-message" *ngIf="onboardingForm.get('agreementAccepted')?.invalid && onboardingForm.get('agreementAccepted')?.touched">
+              You must accept the consignment agreement to proceed.
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout Method Section -->
+        <div class="payout-section">
+          <h3>PAYOUT METHOD</h3>
+          <p class="payout-description">How would you like to receive your earnings?</p>
+
+          <div class="payout-options">
+            <!-- Check Option -->
+            <label class="payout-option">
+              <input
+                type="radio"
+                formControlName="payoutMethod"
+                [value]="PayoutMethod.Check"
+                name="payoutMethod"
+              >
+              <div class="option-content">
+                <span class="option-title">Check (mailed to address on file)</span>
+              </div>
+            </label>
+
+            <!-- Direct Deposit Option -->
+            <label class="payout-option">
+              <input
+                type="radio"
+                formControlName="payoutMethod"
+                [value]="PayoutMethod.DirectDeposit"
+                name="payoutMethod"
+              >
+              <div class="option-content">
+                <span class="option-title">Direct Deposit (ACH)</span>
+              </div>
+            </label>
+
+            <!-- Store Credit Option -->
+            <label class="payout-option">
+              <input
+                type="radio"
+                formControlName="payoutMethod"
+                [value]="PayoutMethod.StoreCredit"
+                name="payoutMethod"
+              >
+              <div class="option-content">
+                <span class="option-title">Store Credit (can be used for purchases)</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Bank Details for Direct Deposit -->
+          <div class="bank-details" *ngIf="onboardingForm.get('payoutMethod')?.value === PayoutMethod.DirectDeposit">
+            <div class="form-group">
+              <label for="accountNumber">Account Number</label>
+              <input
+                id="accountNumber"
+                type="text"
+                formControlName="accountNumber"
+                placeholder="Enter your account number"
+                [class.error]="onboardingForm.get('accountNumber')?.invalid && onboardingForm.get('accountNumber')?.touched"
+              >
+              <div class="error-message" *ngIf="onboardingForm.get('accountNumber')?.invalid && onboardingForm.get('accountNumber')?.touched">
+                Please enter a valid account number.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="routingNumber">Routing Number</label>
+              <input
+                id="routingNumber"
+                type="text"
+                formControlName="routingNumber"
+                placeholder="Enter your 9-digit routing number"
+                maxlength="9"
+                pattern="[0-9]*"
+                [class.error]="onboardingForm.get('routingNumber')?.invalid && onboardingForm.get('routingNumber')?.touched"
+              >
+              <div class="error-message" *ngIf="onboardingForm.get('routingNumber')?.invalid && onboardingForm.get('routingNumber')?.touched">
+                Please enter a valid 9-digit routing number.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="alert error" *ngIf="errorMessage()">
+          {{ errorMessage() }}
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="submit-btn"
+            [disabled]="onboardingForm.invalid || isSubmitting()"
+          >
+            <span *ngIf="!isSubmitting()">Complete & Start Consigning</span>
+            <span *ngIf="isSubmitting()">Processing...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-card" *ngIf="!shopData()">
+      <div class="loading-spinner"></div>
+      <p>Loading shop information...</p>
+    </div>
+  </div>
+</div>

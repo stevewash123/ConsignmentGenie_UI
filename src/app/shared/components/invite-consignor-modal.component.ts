@@ -1,6 +1,7 @@
 import { Component, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { Consignor } from '../../models/consignor.model';
 import { ConsignorService } from '../../services/consignor.service';
 import { ENTITY_LABELS } from '../constants/labels';
@@ -220,7 +221,10 @@ export class InviteConsignorModalComponent {
     useShopDefault: new FormControl(true)
   });
 
-  constructor(private ConsignorService: ConsignorService) {}
+  constructor(
+    private ConsignorService: ConsignorService,
+    private toastr: ToastrService
+  ) {}
 
   close(): void {
     this.closed.emit();
@@ -256,17 +260,25 @@ export class InviteConsignorModalComponent {
         next: (response) => {
           this.isSubmitting.set(false);
           if (response.success) {
-            this.close();
-            this.consignorAdded.emit(null); // Trigger refresh of consignor list
+            // Show success toast with invited person's details
+            const invitedName = inviteData.name !== inviteData.email ? inviteData.name : inviteData.email;
+            this.toastr.success(`Invitation sent to ${invitedName}`, 'Consignor Invited', {
+              timeOut: 5000
+            });
+
+            // Reset form but keep modal open for additional invites
+            this.inviteForm.reset();
+
+            // Trigger refresh of consignor list
+            this.consignorAdded.emit(null);
           } else {
-            console.error('Invite failed:', response.message);
-            // TODO: Show error message to user
+            this.toastr.error(response.message || 'Failed to send invitation', 'Invitation Failed');
           }
         },
         error: (error) => {
           this.isSubmitting.set(false);
-          console.error('Invite error:', error);
-          // TODO: Show error message to user
+          const errorMessage = error.error?.message || 'An unexpected error occurred while sending the invitation';
+          this.toastr.error(errorMessage, 'Invitation Failed');
         }
       });
     }
@@ -281,19 +293,31 @@ export class InviteConsignorModalComponent {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email!,
         phone: formData.phone || undefined,
-        commissionRate: (formData.commissionRate! / 100), // Convert percentage to decimal
-        status: 'active' as const
+        commissionRate: (formData.commissionRate! / 100) // Convert percentage to decimal
       };
 
-      // TODO: Implement manual add API call
-      console.log('Creating manual consignor:', manualData);
+      // Create consignor via API call
+      this.ConsignorService.createConsignor(manualData).subscribe({
+        next: (createdConsignor) => {
+          this.isSubmitting.set(false);
 
-      // Simulate API call
-      setTimeout(() => {
-        this.isSubmitting.set(false);
-        this.close();
-        // TODO: Show success message and refresh consignor list
-      }, 1000);
+          // Show success toast with created consignor's details
+          this.toastr.success(`${manualData.name} has been added successfully`, 'Consignor Created', {
+            timeOut: 5000
+          });
+
+          // Reset form but keep modal open for additional consignors
+          this.manualForm.reset({ useShopDefault: true, commissionRate: 60 });
+
+          // Trigger refresh of consignor list
+          this.consignorAdded.emit(createdConsignor);
+        },
+        error: (error) => {
+          this.isSubmitting.set(false);
+          const errorMessage = error.error?.message || 'An unexpected error occurred while creating the consignor';
+          this.toastr.error(errorMessage, 'Creation Failed');
+        }
+      });
     }
   }
 }

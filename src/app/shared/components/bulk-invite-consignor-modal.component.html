@@ -1,0 +1,181 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ labels.bulkInviteConsignors || 'Bulk Invite Consignors' }}</h2>
+      <button class="close-btn" (click)="close()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="description">
+        Invite multiple consignors at once by uploading a CSV file or entering emails manually.
+        Each consignor will receive a personal invitation email.
+      </p>
+
+      <!-- Input Method Tabs -->
+      <div class="input-methods">
+        <div class="method-tabs">
+          <button
+            type="button"
+            class="method-tab"
+            [class.active]="inputMethod === 'csv'"
+            (click)="setInputMethod('csv')"
+          >
+            📁 CSV Upload
+          </button>
+          <button
+            type="button"
+            class="method-tab"
+            [class.active]="inputMethod === 'text'"
+            (click)="setInputMethod('text')"
+          >
+            ✏️ Manual Entry
+          </button>
+        </div>
+
+        <form [formGroup]="bulkForm">
+          <!-- CSV Upload Method -->
+          <div *ngIf="inputMethod === 'csv'" class="form-group">
+            <label for="csvFile">Upload CSV File</label>
+            <input
+              id="csvFile"
+              type="file"
+              accept=".csv"
+              class="form-input file-input"
+              (change)="onFileSelected($event)"
+            />
+            <div class="help-text">
+              Upload a CSV file with email addresses. The file should have one email per row,
+              or multiple columns with an 'email' column header.
+            </div>
+          </div>
+
+          <!-- Manual Text Entry Method -->
+          <div *ngIf="inputMethod === 'text'" class="form-group">
+            <label for="emailText">Email Addresses</label>
+            <textarea
+              id="emailText"
+              formControlName="emailText"
+              class="form-textarea"
+              rows="6"
+              placeholder="Enter email addresses (one per line)&#10;&#10;example1@example.com&#10;example2@example.com&#10;example3@example.com"
+              (input)="onTextChanged()"
+            ></textarea>
+            <div class="help-text">
+              Enter one email address per line. Invalid email addresses will be highlighted in red.
+            </div>
+          </div>
+
+          <!-- Personal Message -->
+          <div class="form-group">
+            <label for="personalMessage">Personal Message (optional)</label>
+            <textarea
+              id="personalMessage"
+              formControlName="personalMessage"
+              class="form-textarea"
+              rows="3"
+              placeholder="Hi! I'd like to invite you to consign with us..."
+            ></textarea>
+            <div class="help-text">
+              This message will be included in all invitation emails.
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Email Preview -->
+      <div *ngIf="emails().length > 0 || invalidEmails().length > 0" class="email-preview">
+        <h4>Email Preview ({{ emails().length }} valid, {{ invalidEmails().length }} invalid)</h4>
+
+        <div class="email-list">
+          <span
+            *ngFor="let email of emails()"
+            class="email-tag"
+          >
+            {{ email }}
+          </span>
+          <span
+            *ngFor="let email of invalidEmails()"
+            class="email-tag error"
+            title="Invalid email format"
+          >
+            {{ email }} ❌
+          </span>
+        </div>
+      </div>
+
+      <!-- Processing Progress -->
+      <div *ngIf="isProcessing()" class="progress-section">
+        <h4>Sending Invitations...</h4>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+        </div>
+        <div>{{ progressPercent() | number:'1.0-0' }}% complete</div>
+        <div class="help-text">{{ currentProcessing() }}</div>
+      </div>
+
+      <!-- Results Summary -->
+      <div *ngIf="showResults()" class="results-section">
+        <h4>Invitation Results</h4>
+
+        <div class="result-summary">
+          <div class="result-stat success">
+            <span class="number">{{ results().successful }}</span>
+            <span class="label">Successful</span>
+          </div>
+          <div class="result-stat error">
+            <span class="number">{{ results().failed }}</span>
+            <span class="label">Failed</span>
+          </div>
+          <div class="result-stat">
+            <span class="number">{{ emails().length }}</span>
+            <span class="label">Total Attempted</span>
+          </div>
+        </div>
+
+        <!-- Error Details -->
+        <div *ngIf="results().errors.length > 0">
+          <h5>Failed Invitations:</h5>
+          <div class="error-list">
+            <div
+              *ngFor="let error of results().errors"
+              class="error-item"
+            >
+              <span class="error-email">{{ error.email }}</span>
+              <span class="error-message">{{ error.error }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="close()"
+          [disabled]="isProcessing()"
+        >
+          {{ showResults() ? 'Close' : 'Cancel' }}
+        </button>
+
+        <button
+          *ngIf="showResults()"
+          type="button"
+          class="btn-secondary"
+          (click)="resetForm()"
+        >
+          Send More Invites
+        </button>
+
+        <button
+          *ngIf="!showResults()"
+          type="button"
+          class="btn-primary"
+          [disabled]="!canSubmit()"
+          (click)="submitBulkInvite()"
+        >
+          {{ isProcessing() ? 'Sending...' : 'Send ' + emails().length + ' Invitations' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

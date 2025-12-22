@@ -112,6 +112,10 @@ export const routes: Routes = [
     loadComponent: () => import('./owner/components/consignor-registration-step2.component').then(m => m.ConsignorRegistrationStep2Component)
   },
   {
+    path: 'consignor/join-shop',
+    loadComponent: () => import('./auth/consignor-shop-onboarding.component').then(m => m.ConsignorShopOnboardingComponent)
+  },
+  {
     path: 'register/success',
     loadComponent: () => import('./auth/register-success.component').then(m => m.RegisterSuccessComponent)
   },

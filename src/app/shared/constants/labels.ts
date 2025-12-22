@@ -6,32 +6,33 @@ export const ENTITY_LABELS = {
   consignors: 'Consignors',
 
   // Page titles
-  providerManagement: 'Consignor Management',
-  providerDetails: 'Consignor Details',
+  consignorManagement: 'Consignor Management',
+  providerManagement: 'Consignor Management', // Legacy alias
+  consignorDetails: 'Consignor Details',
 
   // Actions
-  addProvider: 'Add Consignor',
-  addProviderManually: 'Add Consignor Manually',
-  inviteProvider: 'Invite Consignor',
-  editProvider: 'Edit Consignor',
-  viewProvider: 'View Consignor',
-  inviteConsignor: 'Invite Consignor',
+  addConsignor: 'Add Consignor',
   addConsignorManually: 'Add Consignor Manually',
+  inviteConsignor: 'Invite Consignor',
+  inviteProvider: 'Invite Consignor', // Legacy alias
+  bulkInviteConsignors: 'Bulk Invite Consignors',
+  editConsignor: 'Edit Consignor',
+  viewConsignor: 'View Consignor',
 
   // Messages
   noconsignorsFound: 'No consignors found.',
-  inviteFirstProvider: 'Invite your first consignor',
-  providerInvited: 'Consignor invitation sent!',
-  providerAdded: 'Consignor added successfully!',
-  providerUpdated: 'Consignor updated successfully!',
-  providerDeactivated: 'Consignor deactivated.',
-  providerReactivated: 'Consignor reactivated.',
+  inviteFirstConsignor: 'Invite your first consignor',
+  consignorInvited: 'Consignor invitation sent!',
+  consignorAdded: 'Consignor added successfully!',
+  consignorUpdated: 'Consignor updated successfully!',
+  consignorDeactivated: 'Consignor deactivated.',
+  consignorReactivated: 'Consignor reactivated.',
 
   // Form labels
-  providerEmail: 'Consignor Email',
-  providerName: 'Consignor Name',
-  providerPhone: 'Consignor Phone',
-  providerCommission: 'Consignor Commission Rate',
+  consignorEmail: 'Consignor Email',
+  consignorName: 'Consignor Name',
+  consignorPhone: 'Consignor Phone',
+  consignorCommission: 'Consignor Commission Rate',
 
   // Status
   ConsignorStatusActive: 'Active',

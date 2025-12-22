@@ -49,6 +49,25 @@ export interface PendingInvitation {
   status: 'pending' | 'expired' | 'cancelled';
 }
 
+export interface BulkInvitationRequest {
+  invitations: ConsignorInvitationRequest[];
+  personalMessage?: string;
+}
+
+export interface BulkInvitationResponse {
+  success: boolean;
+  message: string;
+  results: {
+    successful: number;
+    failed: number;
+    details: {
+      email: string;
+      success: boolean;
+      message: string;
+    }[];
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -88,6 +107,10 @@ export class ConsignorService {
 
   inviteConsignor(invitation: ConsignorInvitationRequest): Observable<ConsignorInvitationResponse> {
     return this.http.post<ConsignorInvitationResponse>(`${this.apiUrl}/invitations`, invitation);
+  }
+
+  bulkInviteConsignors(bulkRequest: BulkInvitationRequest): Observable<BulkInvitationResponse> {
+    return this.http.post<BulkInvitationResponse>(`${this.apiUrl}/invitations/bulk`, bulkRequest);
   }
 
   getPendingInvitations(): Observable<PendingInvitation[]> {
