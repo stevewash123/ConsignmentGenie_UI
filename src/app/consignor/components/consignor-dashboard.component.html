@@ -2,8 +2,8 @@
     <div class="consignor-dashboard">
       <!-- Welcome Section -->
       <div class="welcome-section">
-        <h1>{{dashboard?.shopName || 'consignor Portal'}}</h1>
-        <h2>Welcome back, {{dashboard?.providerName || 'consignor'}}!</h2>
+        <h1>{{dashboard?.shopName || 'Consignor Dashboard'}}</h1>
+        <h2>Welcome back, {{dashboard?.providerName || 'Consignor'}}!</h2>
       </div>
 
       <div class="dashboard-content" *ngIf="dashboard">
@@ -84,7 +84,6 @@
       <!-- Error State -->
       <div class="error" *ngIf="error">
         <p>{{error}}</p>
-        <button (click)="loadDashboard()">Retry</button>
       </div>
     </div>
   

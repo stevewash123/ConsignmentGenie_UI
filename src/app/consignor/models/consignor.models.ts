@@ -344,3 +344,67 @@ export interface StatementMonth {
 export interface StatementListResponse {
   statements: StatementMonth[];
 }
+
+// Item Request Models
+export interface ItemRequest {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  brand?: string;
+  size?: string;
+  color?: string;
+  condition: string;
+  measurements?: string;
+  suggestedPrice?: number;
+  minAcceptablePrice?: number;
+  originalPurchasePrice?: number;
+  consignorNotes?: string;
+  status: string;
+  rejectionReason?: string;
+  ownerNotes?: string;
+  approvedPrice?: number;
+  approvedCategory?: string;
+  resubmissionCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  images: ItemRequestImage[];
+}
+
+export interface ItemRequestImage {
+  id: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  displayOrder: number;
+  isPrimary: boolean;
+}
+
+export interface CreateItemRequest {
+  name: string;
+  description?: string;
+  category?: string;
+  brand?: string;
+  size?: string;
+  color?: string;
+  condition: string;
+  measurements?: string;
+  suggestedPrice?: number;
+  minAcceptablePrice?: number;
+  originalPurchasePrice?: number;
+  consignorNotes?: string;
+  images?: CreateItemRequestImage[];
+}
+
+export interface CreateItemRequestImage {
+  imageUrl: string;
+  thumbnailUrl?: string;
+  displayOrder: number;
+  isPrimary: boolean;
+}
+
+export interface ItemRequestQuery {
+  status?: string;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}

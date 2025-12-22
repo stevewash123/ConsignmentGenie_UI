@@ -14,6 +14,18 @@
               <a routerLink="/owner/inventory" routerLinkActive="active">Inventory</a>
               <a routerLink="/owner/sales" routerLinkActive="active">Sales</a>
               <a routerLink="/owner/payouts" routerLinkActive="active">Payouts</a>
+              <div class="nav-link-with-badge">
+                <a routerLink="/owner/price-requests" routerLinkActive="active">Price Requests</a>
+                <span class="nav-badge" [class.no-count]="pendingRequestsCount() === 0">
+                  {{pendingRequestsCount()}}
+                </span>
+              </div>
+              <div class="nav-link-with-badge">
+                <a routerLink="/owner/return-requests" routerLinkActive="active">Return Requests</a>
+                <span class="nav-badge" [class.no-count]="pendingReturnRequestsCount() === 0">
+                  {{pendingReturnRequestsCount()}}
+                </span>
+              </div>
               <a routerLink="/owner/reports" routerLinkActive="active">Reports</a>
               <a routerLink="/owner/notifications" routerLinkActive="active">Notifications</a>
             </div>

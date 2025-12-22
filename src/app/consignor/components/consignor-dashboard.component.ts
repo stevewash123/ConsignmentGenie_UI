@@ -217,7 +217,7 @@ export class ConsignorDashboardComponent implements OnInit {
         this.dashboard = data;
       },
       error: (err) => {
-        this.error = 'Failed to load dashboard data. Please try again.';
+        this.error = 'Upload Inventory';
         console.error('Dashboard error:', err);
       }
     });

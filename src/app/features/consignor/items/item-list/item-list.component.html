@@ -1,0 +1,187 @@
+<div class="my-items-page">
+  <div class="page-header">
+    <h1>My Items</h1>
+    <div class="notifications" *ngIf="getPriceChangeRequestsCount() > 0">
+      <div class="price-request-alert">
+        ⚠️ {{ getPriceChangeRequestsCount() }} item(s) need your response for price changes
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="filter-tabs">
+    <button
+      class="filter-tab"
+      [class.active]="selectedStatus === null"
+      (click)="onFilterByStatus(null)">
+      All ({{ getStatusCount('all') }})
+    </button>
+    <button
+      class="filter-tab"
+      [class.active]="selectedStatus === 'available'"
+      (click)="onFilterByStatus('available')">
+      Available ({{ getStatusCount('available') }})
+    </button>
+    <button
+      class="filter-tab"
+      [class.active]="selectedStatus === 'sold'"
+      (click)="onFilterByStatus('sold')">
+      Sold ({{ getStatusCount('sold') }})
+    </button>
+    <button
+      class="filter-tab"
+      [class.active]="selectedStatus === 'returned'"
+      (click)="onFilterByStatus('returned')">
+      Returned ({{ getStatusCount('returned') }})
+    </button>
+    <button
+      class="filter-tab"
+      [class.active]="selectedStatus === 'expired'"
+      (click)="onFilterByStatus('expired')">
+      Expired ({{ getStatusCount('expired') }})
+    </button>
+  </div>
+
+  <!-- Search and Sort Controls -->
+  <div class="controls">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Search items..."
+        [value]="searchText"
+        (input)="onSearchInput($event)"
+        class="search-input">
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <div class="sort-controls">
+      <label class="sort-label">Sort:</label>
+      <div class="sort-dropdown">
+        <button class="sort-button" [attr.aria-expanded]="false">
+          {{ getCurrentSortDisplay() }} ▼
+        </button>
+        <div class="sort-menu">
+          <button
+            class="sort-option"
+            [class.active]="sortField === 'listedDate' && sortDirection === 'desc'"
+            (click)="onSortChange('listedDate')">
+            Newest First {{ getSortIcon('listedDate') }}
+          </button>
+          <button
+            class="sort-option"
+            [class.active]="sortField === 'listedDate' && sortDirection === 'asc'"
+            (click)="sortField === 'listedDate' ? onSortChange('listedDate') : null">
+            Oldest First {{ sortField === 'listedDate' && sortDirection === 'asc' ? '✓' : '' }}
+          </button>
+          <button
+            class="sort-option"
+            [class.active]="sortField === 'price' && sortDirection === 'desc'"
+            (click)="onSortChange('price')">
+            Price High-Low {{ getSortIcon('price') }}
+          </button>
+          <button
+            class="sort-option"
+            [class.active]="sortField === 'price' && sortDirection === 'asc'"
+            (click)="sortField === 'price' ? onSortChange('price') : null">
+            Price Low-High {{ sortField === 'price' && sortDirection === 'asc' ? '✓' : '' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="success-message" *ngIf="showSuccessMessage">
+    <span class="success-text">✓ {{ successMessage }}</span>
+    <button class="dismiss-success" (click)="dismissSuccessMessage()">×</button>
+  </div>
+
+  <!-- Active Filters Display -->
+  <div class="active-filters" *ngIf="getActiveFiltersText()">
+    <span class="filters-text">{{ getActiveFiltersText() }}</span>
+    <button class="clear-filters" (click)="clearFilters()">Clear Filters</button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading items...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error">
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadItems()">Try Again</button>
+  </div>
+
+  <!-- Items Grid -->
+  <div class="items-grid" *ngIf="!loading && !error && hasItems()">
+    <app-item-card
+      *ngFor="let item of itemsResponse!.items"
+      [item]="item"
+      (itemClick)="onItemClick($event)"
+      (respondToPriceChange)="onRespondToPriceChange($event)">
+    </app-item-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && !error && !hasItems() && itemsResponse">
+    <div class="empty-icon">📦</div>
+    <h3 class="empty-title">No items found</h3>
+    <p class="empty-message">
+      <span *ngIf="!getActiveFiltersText()">
+        You haven't consigned any items yet.
+      </span>
+      <span *ngIf="getActiveFiltersText()">
+        No items match your current filters.
+      </span>
+    </p>
+    <button
+      class="clear-filters"
+      *ngIf="getActiveFiltersText()"
+      (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="itemsResponse && itemsResponse.totalPages > 1">
+    <button
+      class="pagination-btn"
+      [disabled]="currentPage === 1"
+      (click)="onPageChange(currentPage - 1)">
+      ← Previous
+    </button>
+
+    <span class="pagination-info">
+      Page {{ currentPage }} of {{ itemsResponse.totalPages }}
+      ({{ itemsResponse.totalCount }} items)
+    </span>
+
+    <button
+      class="pagination-btn"
+      [disabled]="currentPage === itemsResponse.totalPages"
+      (click)="onPageChange(currentPage + 1)">
+      Next →
+    </button>
+  </div>
+
+  <!-- Load More for Mobile -->
+  <div class="load-more" *ngIf="itemsResponse && itemsResponse.totalPages > 1">
+    <button
+      class="load-more-btn"
+      [disabled]="currentPage === itemsResponse.totalPages"
+      (click)="onLoadMore()">
+      Load More
+    </button>
+  </div>
+
+  <!-- Price Change Response Modal -->
+  <app-respond-price-change
+    *ngIf="selectedItemForPriceResponse"
+    [item]="selectedItemForPriceResponse"
+    [isOpen]="showPriceChangeModal"
+    (close)="onClosePriceChangeModal()"
+    (submitted)="onPriceChangeSubmitted($event)">
+  </app-respond-price-change>
+</div>

@@ -1,0 +1,115 @@
+<!-- Modal Backdrop -->
+<div *ngIf="show" class="modal-backdrop" (click)="onCancel()">
+
+  <!-- Modal Content -->
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2>Request Item Return</h2>
+      <button
+        type="button"
+        class="close-btn"
+        (click)="onCancel()"
+        aria-label="Close modal">
+        ✕
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+
+      <!-- Item Summary -->
+      <div class="item-summary">
+        <div class="item-image">
+          <img
+            [src]="item.images[0]?.url || item.primaryImageUrl"
+            [alt]="item.name"
+            class="item-thumbnail">
+        </div>
+        <div class="item-details">
+          <h3>{{ item.name }}</h3>
+          <div class="item-meta">
+            <div class="meta-row">
+              <span class="meta-label">Current Price:</span>
+              <span class="meta-value">${{ item.listedPrice.toFixed(2) }}</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Days Listed:</span>
+              <span class="meta-value">{{ item.daysListed }}</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Status:</span>
+              <span class="meta-value status-available">Available</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Confirmation Message -->
+      <div class="confirmation-section">
+        <h4>Are you sure you want to retrieve this item?</h4>
+        <p class="confirmation-text">
+          The item will be removed from the sales floor and held for you to pick up.
+        </p>
+      </div>
+
+      <!-- Reason Input -->
+      <div class="reason-section">
+        <label for="reason" class="reason-label">
+          Reason (optional)
+        </label>
+        <textarea
+          id="reason"
+          name="reason"
+          [(ngModel)]="reason"
+          class="reason-textarea"
+          placeholder="Changed my mind about selling..."
+          [maxlength]="maxCharacters"
+          rows="3">
+        </textarea>
+        <div class="character-count">
+          {{ characterCount }} / {{ maxCharacters }}
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Info Notice -->
+      <div class="info-notice">
+        <div class="info-icon">ℹ️</div>
+        <div class="info-text">
+          You'll receive a notification when your item is ready for pickup.
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn-cancel"
+        (click)="onCancel()"
+        [disabled]="loading">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn-submit"
+        (click)="onSubmit()"
+        [disabled]="isSubmitDisabled">
+        <span *ngIf="loading" class="spinner"></span>
+        <span *ngIf="!loading">Request Return</span>
+        <span *ngIf="loading">Submitting...</span>
+      </button>
+    </div>
+
+  </div>
+</div>

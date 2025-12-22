@@ -52,7 +52,7 @@ export class AuthService {
     phone?: string;
     password: string;
     shopName: string;
-    subdomain: string;
+    subdomain?: string;
     address?: string;
     token?: string | null;
   }): Observable<{ success: boolean; message?: string; errors?: string[]; token?: string; userId?: string; email?: string; role?: any; organizationId?: string; organizationName?: string; expiresAt?: string }> {
@@ -99,7 +99,7 @@ export class AuthService {
     phone?: string;
     password: string;
     shopName: string;
-    subdomain: string;
+    subdomain?: string;
     address?: string;
     streetAddress?: string;
     city?: string;

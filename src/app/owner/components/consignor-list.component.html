@@ -43,6 +43,11 @@
                         <button class="btn-view" [routerLink]="['/owner/consignors', consignor.id]">
                           View
                         </button>
+                        <button class="btn-email"
+                                (click)="emailAgreement(consignor)"
+                                title="Email agreement">
+                          📧
+                        </button>
                       </div>
                     </td>
                   </tr>

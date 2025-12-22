@@ -1,0 +1,141 @@
+<div class="modal-backdrop" *ngIf="show" (click)="onCancel()">
+  <div class="request-price-change-modal" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>Request Price Change</h2>
+      <button type="button" (click)="onCancel()" class="close-button">
+        ✕
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-content">
+    <!-- Item Info -->
+    <div class="item-info">
+      <div class="item-image">
+        <img
+          [src]="item.images[0]?.url || '/assets/placeholder-item.jpg'"
+          [alt]="item.name"
+          loading="lazy">
+      </div>
+      <div class="item-details">
+        <h3>{{ item.name }}</h3>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Current Pricing -->
+    <div class="current-pricing">
+      <div class="pricing-row">
+        <span class="label">Current Price:</span>
+        <span class="value price">${{ item.listedPrice.toFixed(2) }}</span>
+      </div>
+      <div class="pricing-row">
+        <span class="label">Your Earnings ({{ item.splitPercentage }}%):</span>
+        <span class="value earnings">${{ item.consignorEarnings.toFixed(2) }}</span>
+      </div>
+      <div class="pricing-row">
+        <span class="label">Days Listed:</span>
+        <span class="value">{{ item.daysListed }}</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- New Price Input -->
+    <div class="price-change-section">
+      <div class="price-input">
+        <label for="requestedPrice">Requested New Price *</label>
+        <div class="input-wrapper">
+          <span class="currency-prefix">$</span>
+          <input
+            id="requestedPrice"
+            type="number"
+            step="0.01"
+            min="0.01"
+            [value]="requestedPrice"
+            (input)="onPriceChange($event)"
+            placeholder="0.00">
+        </div>
+      </div>
+
+      <!-- New Earnings Display -->
+      <div class="new-earnings-display" *ngIf="isPriceValid">
+        <div class="earnings-calculation">
+          <span class="label">Your New Earnings:</span>
+          <span class="value">${{ newEarnings.toFixed(2) }} ({{ item.splitPercentage }}%)</span>
+          <div class="earnings-change"
+               [class.increase]="isEarningsIncrease"
+               [class.decrease]="isEarningsDecrease">
+            <span class="arrow" *ngIf="isEarningsIncrease">↑</span>
+            <span class="arrow" *ngIf="isEarningsDecrease">↓</span>
+            <span class="amount" *ngIf="earningsChange !== 0">
+              {{ isEarningsIncrease ? '+' : '' }}${{ earningsChange.toFixed(2) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation Messages -->
+      <div class="validation-messages" *ngIf="!isPriceValid && requestedPrice > 0">
+        <p class="error-message" *ngIf="requestedPrice === item.listedPrice">
+          Price must be different from current price
+        </p>
+        <p class="error-message" *ngIf="requestedPrice <= 0">
+          Price must be greater than $0
+        </p>
+      </div>
+    </div>
+
+    <!-- Reason -->
+    <div class="reason-section">
+      <div class="reason-input">
+        <label for="reason">Reason for Change (optional)</label>
+        <textarea
+          id="reason"
+          [(ngModel)]="reason"
+          [maxlength]="maxCharacters"
+          rows="3"
+          placeholder="Example: Item hasn't moved in 45 days. Would like to get it sold before the holidays."></textarea>
+      </div>
+      <div class="character-count">
+        {{ characterCount }}/{{ maxCharacters }} characters
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Info Message -->
+    <div class="info-message">
+      <span class="info-icon">ℹ️</span>
+      <p>
+        The shop owner will review your request and may approve at your requested price,
+        suggest a different price, or keep the current price.
+      </p>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-alert" *ngIf="error">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error }}</p>
+    </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="loading">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="onSubmit()"
+        [disabled]="isSubmitDisabled"
+        [class.loading]="loading">
+        <span *ngIf="!loading">Submit Request</span>
+        <span *ngIf="loading">Submitting...</span>
+      </button>
+    </div>
+  </div>
+</div>

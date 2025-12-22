@@ -61,6 +61,54 @@
               </span>
             </div>
 
+            <!-- Pending Price Request Alert -->
+            <div class="pending-request-alert" *ngIf="mockItem?.pendingPriceRequest">
+              <div class="alert-icon">⏳</div>
+              <div class="alert-content">
+                <h4>Price Change Request Pending</h4>
+                <p>
+                  You requested: ${{mockItem.pendingPriceRequest.currentPrice.toFixed(2)}} →
+                  ${{mockItem.pendingPriceRequest.requestedPrice.toFixed(2)}}
+                </p>
+                <p class="alert-date">
+                  Submitted: {{formatPendingRequestDate(mockItem.pendingPriceRequest.requestDate)}}
+                </p>
+                <p class="alert-message">
+                  The shop owner will review your request soon.
+                </p>
+              </div>
+            </div>
+
+            <!-- Pending Return Request Alert -->
+            <div class="pending-request-alert" *ngIf="mockItem?.pendingReturnRequest && mockItem.pendingReturnRequest.status === 'pending'">
+              <div class="alert-icon">📦</div>
+              <div class="alert-content">
+                <h4>Return Request Pending</h4>
+                <p class="alert-date">
+                  Submitted: {{formatPendingRequestDate(mockItem.pendingReturnRequest.submittedDate)}}
+                </p>
+                <p class="alert-message">
+                  Status: Waiting for shop to prepare item
+                </p>
+                <p class="alert-message">
+                  You'll be notified when your item is ready for pickup.
+                </p>
+              </div>
+            </div>
+
+            <!-- Ready for Pickup Alert -->
+            <div class="ready-return-alert" *ngIf="mockItem?.pendingReturnRequest && mockItem.pendingReturnRequest.status === 'ready'">
+              <div class="alert-icon">✅</div>
+              <div class="alert-content">
+                <h4>Ready for Pickup!</h4>
+                <p>Your item is ready to be picked up.</p>
+                <div *ngIf="mockItem.pendingReturnRequest.pickupInstructions">
+                  <p><strong>Pickup Instructions:</strong></p>
+                  <p class="alert-message">{{mockItem.pendingReturnRequest.pickupInstructions}}</p>
+                </div>
+              </div>
+            </div>
+
             <!-- Pricing Information -->
             <div class="pricing-section">
               <div class="price-row">
@@ -74,6 +122,33 @@
               <div class="commission-note">
                 Your commission rate applies to this item
               </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="price-change-actions" *ngIf="mockItem && (item.status.toLowerCase() === 'available' || item.status.toLowerCase() === 'expired')">
+              <!-- Price Change Button (Available items only) -->
+              <button
+                *ngIf="item.status.toLowerCase() === 'available'"
+                type="button"
+                class="btn-request-price-change"
+                (click)="openPriceChangeModal()"
+                [disabled]="!canRequestPriceChange()"
+                [title]="mockItem.hasPendingPriceRequest ? 'You already have a pending price change request' : 'Request a price change for this item'">
+                <span *ngIf="!mockItem.hasPendingPriceRequest">Request Price Change</span>
+                <span *ngIf="mockItem.hasPendingPriceRequest">Price Change Pending</span>
+              </button>
+
+              <!-- Return Request Button (Available or Expired items) -->
+              <button
+                type="button"
+                class="btn-request-return"
+                (click)="openReturnRequestModal()"
+                [disabled]="!canRequestReturn()"
+                [title]="mockItem.pendingReturnRequest ? 'You already have a pending return request' : 'Request to get your item back'">
+                <span *ngIf="!mockItem.pendingReturnRequest">Request Return</span>
+                <span *ngIf="mockItem.pendingReturnRequest && mockItem.pendingReturnRequest.status === 'pending'">Return Request Pending</span>
+                <span *ngIf="mockItem.pendingReturnRequest && mockItem.pendingReturnRequest.status === 'ready'">Ready for Pickup</span>
+              </button>
             </div>
 
             <!-- Item Information -->
@@ -130,5 +205,20 @@
         <p>{{error}}</p>
         <button (click)="loadItem()">Retry</button>
       </div>
+
+      <!-- Price Change Request Modal -->
+      <app-request-price-change
+        *ngIf="mockItem"
+        [item]="mockItem"
+        [show]="showPriceChangeModal"
+        (closed)="onPriceChangeModalClosed($event)">
+      </app-request-price-change>
+
+      <!-- Return Request Modal -->
+      <app-return-request-modal
+        *ngIf="mockItem"
+        [item]="mockItem"
+        [isVisible]="showReturnRequestModal"
+        (closed)="onReturnRequestModalClosed($event)">
+      </app-return-request-modal>
     </div>
-  

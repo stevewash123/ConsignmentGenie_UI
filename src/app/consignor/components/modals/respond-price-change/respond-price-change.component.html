@@ -1,0 +1,178 @@
+<!-- Modal Overlay -->
+<div *ngIf="isVisible()" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <!-- Modal Container -->
+  <div class="modal-container bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+       (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        ⚠️ Price Change Response
+      </h2>
+      <button
+        type="button"
+        class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+        (click)="close.emit()"
+        aria-label="Close modal">
+        ✕
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body p-4 space-y-4">
+      <!-- Item Information -->
+      <div class="item-summary flex gap-3 p-3 bg-gray-50 rounded-lg">
+        <div class="item-image flex-shrink-0">
+          <img *ngIf="notification.itemImageUrl"
+               [src]="notification.itemImageUrl"
+               [alt]="notification.itemName"
+               class="w-16 h-16 object-cover rounded-lg">
+          <div *ngIf="!notification.itemImageUrl"
+               class="w-16 h-16 bg-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-2xl">
+            📷
+          </div>
+        </div>
+        <div class="item-details">
+          <h3 class="font-semibold text-gray-900">{{ notification.itemName }}</h3>
+          <p class="text-sm text-gray-600">Listed {{ notification.daysListed }} days ago</p>
+        </div>
+      </div>
+
+      <!-- Price Comparison -->
+      <div class="price-summary bg-blue-50 rounded-lg p-3">
+        <div class="price-row flex justify-between items-center py-1">
+          <span class="text-sm font-medium text-gray-700">Current Price:</span>
+          <span class="font-semibold text-gray-900">{{ formatCurrency(notification.currentPrice) }}</span>
+        </div>
+        <div class="price-row flex justify-between items-center py-1">
+          <span class="text-sm font-medium text-gray-700">Proposed Price:</span>
+          <span class="font-semibold text-red-600">{{ formatCurrency(notification.proposedPrice) }}</span>
+        </div>
+        <div class="price-row flex justify-between items-center py-1 border-t border-blue-200 mt-2 pt-2">
+          <span class="text-sm font-medium text-gray-700">Your Current Earnings:</span>
+          <span class="font-semibold text-gray-900">{{ formatCurrency(notification.consignorCurrentEarnings) }}</span>
+        </div>
+        <div class="price-row flex justify-between items-center py-1">
+          <span class="text-sm font-medium text-gray-700">Your New Earnings:</span>
+          <span class="font-semibold" [class.text-red-600]="getEarningsDifference() < 0" [class.text-green-600]="getEarningsDifference() > 0">
+            {{ formatCurrency(notification.consignorProposedEarnings) }}
+            <span class="text-xs">
+              ({{ getEarningsDifference() >= 0 ? '+' : '' }}{{ formatCurrency(getEarningsDifference()) }})
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Selection -->
+      <div class="actions-section">
+        <h4 class="font-medium text-gray-900 mb-3">Choose your response:</h4>
+
+        <!-- Accept Option -->
+        <label class="action-option flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all"
+               [class.border-green-500]="selectedAction() === 'accept'"
+               [class.bg-green-50]="selectedAction() === 'accept'"
+               [class.border-gray-200]="selectedAction() !== 'accept'">
+          <input type="radio"
+                 name="priceAction"
+                 value="accept"
+                 class="mt-1 text-green-600 focus:ring-green-500"
+                 [checked]="selectedAction() === 'accept'"
+                 (change)="selectAction('accept')">
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">{{ getActionTitle('accept') }}</div>
+            <div class="text-sm text-gray-600">{{ getActionDescription('accept') }}</div>
+          </div>
+        </label>
+
+        <!-- Keep Current Option -->
+        <label class="action-option flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all mt-2"
+               [class.border-gray-500]="selectedAction() === 'keep_current'"
+               [class.bg-gray-50]="selectedAction() === 'keep_current'"
+               [class.border-gray-200]="selectedAction() !== 'keep_current'">
+          <input type="radio"
+                 name="priceAction"
+                 value="keep_current"
+                 class="mt-1 text-gray-600 focus:ring-gray-500"
+                 [checked]="selectedAction() === 'keep_current'"
+                 (change)="selectAction('keep_current')">
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">{{ getActionTitle('keep_current') }}</div>
+            <div class="text-sm text-gray-600">{{ getActionDescription('keep_current') }}</div>
+          </div>
+        </label>
+
+        <!-- Decline and Retrieve Option -->
+        <label class="action-option flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all mt-2"
+               [class.border-red-500]="selectedAction() === 'decline_and_retrieve'"
+               [class.bg-red-50]="selectedAction() === 'decline_and_retrieve'"
+               [class.border-gray-200]="selectedAction() !== 'decline_and_retrieve'">
+          <input type="radio"
+                 name="priceAction"
+                 value="decline_and_retrieve"
+                 class="mt-1 text-red-600 focus:ring-red-500"
+                 [checked]="selectedAction() === 'decline_and_retrieve'"
+                 (change)="selectAction('decline_and_retrieve')">
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">{{ getActionTitle('decline_and_retrieve') }}</div>
+            <div class="text-sm text-gray-600">{{ getActionDescription('decline_and_retrieve') }}</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Optional Note -->
+      <div class="note-section">
+        <label for="consignorNote" class="block text-sm font-medium text-gray-700 mb-2">
+          Add a note (optional):
+        </label>
+        <textarea
+          id="consignorNote"
+          [(ngModel)]="consignorNote"
+          rows="3"
+          class="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Let the shop owner know your thoughts..."></textarea>
+      </div>
+
+      <!-- Email Integration Display -->
+      <div class="email-info bg-blue-50 p-3 rounded-lg">
+        <div class="flex items-center gap-2 text-sm text-blue-800">
+          📧 <span class="font-medium">Also sent via email</span>
+        </div>
+        <div class="flex gap-2 mt-2">
+          <button type="button"
+                  class="text-sm text-blue-600 hover:text-blue-800 underline">
+            View Email
+          </button>
+          <button type="button"
+                  class="text-sm text-blue-600 hover:text-blue-800 underline">
+            View Full Details
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="error-message bg-red-50 border border-red-200 rounded-lg p-3">
+        <div class="flex items-center gap-2 text-red-800">
+          <span>⚠️</span>
+          <span class="text-sm">{{ errorMessage() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer flex gap-3 p-4 border-t border-gray-200 bg-gray-50">
+      <button
+        type="button"
+        class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500"
+        (click)="close.emit()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="!isFormValid() || isSubmitting()"
+        (click)="handleSubmit()">
+        {{ buttonText() }}
+      </button>
+    </div>
+  </div>
+</div>

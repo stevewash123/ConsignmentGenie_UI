@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Change Proposal - {{itemName}}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; }
+        .header { background-color: #059669; color: white; padding: 20px; text-align: center; }
+        .content { padding: 30px; }
+        .item-summary { background-color: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+        .item-image { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; background-color: #e5e7eb; }
+        .item-info h3 { margin: 0 0 8px 0; color: #1f2937; }
+        .item-info p { margin: 0; color: #6b7280; font-size: 14px; }
+        .pricing-section { margin-bottom: 24px; }
+        .pricing-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
+        .pricing-row:last-child { border-bottom: none; }
+        .pricing-label { color: #6b7280; }
+        .pricing-value { font-weight: 600; color: #1f2937; }
+        .price-decrease { color: #dc2626; }
+        .owner-note { background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; margin: 24px 0; border-radius: 4px; }
+        .actions { margin: 32px 0; }
+        .action-button { display: inline-block; padding: 14px 24px; margin: 8px; text-decoration: none; border-radius: 8px; font-weight: 600; text-align: center; min-width: 140px; }
+        .accept-btn { background-color: #059669; color: white; }
+        .keep-btn { background-color: #6b7280; color: white; }
+        .decline-btn { background-color: #dc2626; color: white; }
+        .footer { background-color: #f9fafb; padding: 20px; text-align: center; font-size: 14px; color: #6b7280; }
+        @media (max-width: 600px) {
+            .item-summary { flex-direction: column; text-align: center; }
+            .pricing-row { flex-direction: column; gap: 4px; }
+            .action-button { display: block; margin: 8px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Price Change Proposal</h1>
+            <p>Your shop owner has proposed a price change for your item</p>
+        </div>
+
+        <div class="content">
+            <div class="item-summary">
+                {{#if itemImageUrl}}
+                <img src="{{itemImageUrl}}" alt="{{itemName}}" class="item-image">
+                {{else}}
+                <div class="item-image" style="display: flex; align-items: center; justify-content: center; font-size: 24px; color: #9ca3af;">📷</div>
+                {{/if}}
+                <div class="item-info">
+                    <h3>{{itemName}}</h3>
+                    <p>Listed {{daysListed}} days ago</p>
+                    <p>Commission Rate: {{commissionRate}}%</p>
+                </div>
+            </div>
+
+            <div class="pricing-section">
+                <h3>Current Pricing</h3>
+                <div class="pricing-row">
+                    <span class="pricing-label">Current Price:</span>
+                    <span class="pricing-value">${{currentPrice}}</span>
+                </div>
+                <div class="pricing-row">
+                    <span class="pricing-label">Your Current Earnings:</span>
+                    <span class="pricing-value">${{consignorCurrentEarnings}}</span>
+                </div>
+            </div>
+
+            <div class="pricing-section">
+                <h3>Proposed Pricing</h3>
+                <div class="pricing-row">
+                    <span class="pricing-label">Proposed Price:</span>
+                    <span class="pricing-value price-decrease">${{proposedPrice}}</span>
+                </div>
+                <div class="pricing-row">
+                    <span class="pricing-label">Your New Earnings:</span>
+                    <span class="pricing-value price-decrease">${{consignorProposedEarnings}}</span>
+                </div>
+                {{#if updatedMarketPrice}}
+                <div class="pricing-row">
+                    <span class="pricing-label">Updated Market Price:</span>
+                    <span class="pricing-value">${{updatedMarketPrice}}</span>
+                </div>
+                {{/if}}
+            </div>
+
+            {{#if ownerNote}}
+            <div class="owner-note">
+                <h4>Message from your shop owner:</h4>
+                <p>{{ownerNote}}</p>
+            </div>
+            {{/if}}
+
+            <div class="actions">
+                <h3>Choose Your Response</h3>
+                <p>Click one of the buttons below to respond to this proposal:</p>
+
+                <a href="{{acceptUrl}}" class="action-button accept-btn">
+                    ✅ Accept ${{proposedPrice}}
+                </a>
+
+                <a href="{{keepCurrentUrl}}" class="action-button keep-btn">
+                    📍 Keep Current ${{currentPrice}}
+                </a>
+
+                <a href="{{declineUrl}}" class="action-button decline-btn">
+                    📦 Decline & Retrieve Item
+                </a>
+            </div>
+
+            <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
+                <strong>Need more time to decide?</strong> You can also respond when you next log into your account.
+                This proposal will remain active until you respond.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>This email was sent regarding your consignment item at {{shopName}}.</p>
+            <p>If you have questions, please contact the shop directly.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<div class="modal-overlay" *ngIf="isVisible()" (click)="onOverlayClick($event)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modalTitle() }}</h3>
+      <button class="close-btn" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Item Summary -->
+      <div class="item-summary">
+        <div class="item-thumbnail">
+          <img
+            *ngIf="item.images && item.images.length > 0"
+            [src]="item.images[0].imageUrl"
+            [alt]="item.title"
+            class="thumbnail-image">
+          <div class="no-image" *ngIf="!item.images || item.images.length === 0">
+            📷
+          </div>
+        </div>
+        <div class="item-info">
+          <h4>{{ item.title }}</h4>
+          <p>Consignor: {{ item.consignorName }} ({{ item.commissionRate }}% split)</p>
+          <p *ngIf="item.listedDate">Days Listed: {{ getDaysListed() }}</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <form (ngSubmit)="onSubmit()" #priceChangeForm="ngForm">
+        <!-- Current Pricing -->
+        <div class="pricing-section">
+          <h4>Current Pricing</h4>
+          <div class="current-pricing">
+            <div class="price-row">
+              <span class="label">Current Price:</span>
+              <span class="value">{{ formatCurrency(item.price) }}</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Consignor Earnings:</span>
+              <span class="value">{{ formatCurrency(item.consignorAmount) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- New Pricing -->
+        <div class="pricing-section">
+          <h4>New Pricing</h4>
+          <div class="form-group">
+            <label for="newPrice">New Price *</label>
+            <div class="input-wrapper">
+              <span class="currency-symbol">$</span>
+              <input
+                type="number"
+                id="newPrice"
+                name="newPrice"
+                [(ngModel)]="newPrice"
+                step="0.01"
+                min="0.01"
+                required
+                class="form-control"
+                [class.error]="validationErrors()['price']"
+                placeholder="0.00">
+            </div>
+            <div class="error-message" *ngIf="validationErrors()['price']">
+              {{ validationErrors()['price'] }}
+            </div>
+          </div>
+
+          <div class="new-pricing" *ngIf="newPrice() > 0 && !isSamePrice()">
+            <div class="price-row">
+              <span class="label">New Consignor Earnings:</span>
+              <span class="value" [class.increase]="isIncrease()" [class.decrease]="isDecrease()">
+                {{ formatCurrency(newConsignorAmount()) }}
+                <span class="change-indicator" *ngIf="!isSamePrice()">
+                  {{ isIncrease() ? '↑' : '↓' }} {{ formatCurrency(Math.abs(earningsDifference())) }}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="updatedMarketPrice">Updated Market Price</label>
+            <div class="input-wrapper">
+              <span class="currency-symbol">$</span>
+              <input
+                type="number"
+                id="updatedMarketPrice"
+                name="updatedMarketPrice"
+                [(ngModel)]="updatedMarketPrice"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                placeholder="60.00">
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Price Direction Messaging -->
+        <div class="price-direction-message" *ngIf="!isSamePrice()">
+          <div class="message increase" *ngIf="isIncrease()">
+            <div class="icon">✅</div>
+            <div class="content">
+              <strong>Price INCREASE: Will be applied immediately.</strong>
+              <p>More money for the consignor!</p>
+            </div>
+          </div>
+
+          <div class="message decrease" *ngIf="isDecrease()">
+            <div class="icon">⚠️</div>
+            <div class="content">
+              <strong>Price DECREASE: Consignor approval required.</strong>
+              <p>They can accept, keep current price, or retrieve item.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Note Section -->
+        <div class="form-group" *ngIf="isDecrease()">
+          <label for="noteToConsignor">Note to consignor *</label>
+          <textarea
+            id="noteToConsignor"
+            name="noteToConsignor"
+            [(ngModel)]="noteToConsignor"
+            required
+            rows="4"
+            class="form-control"
+            [class.error]="validationErrors()['note']"
+            placeholder="This has been listed for {{ getDaysListed() }} days. A price reduction should help it move. Let me know what you'd like to do!">
+          </textarea>
+          <div class="error-message" *ngIf="validationErrors()['note']">
+            {{ validationErrors()['note'] }}
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="isIncrease()">
+          <label for="noteToConsignor">Note to consignor</label>
+          <textarea
+            id="noteToConsignor"
+            name="noteToConsignor"
+            [(ngModel)]="noteToConsignor"
+            rows="3"
+            class="form-control"
+            placeholder="Optional note about the price increase...">
+          </textarea>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" *ngIf="errorMessage()">
+          {{ errorMessage() }}
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="close.emit()">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn-primary"
+            [class.btn-increase]="isIncrease()"
+            [class.btn-decrease]="isDecrease()"
+            [disabled]="priceChangeForm.invalid || isSubmitting() || isSamePrice()">
+            {{ isSubmitting() ? 'Submitting...' : buttonText() }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
