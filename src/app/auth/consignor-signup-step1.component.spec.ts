@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -334,7 +335,7 @@ describe('ConsignorSignupStep1Component', () => {
       mockRouter.navigate.calls.reset();
 
       // This is the default case (no token, no storeCode) - use the existing component
-      component.ngOnInit();
+      fixture.detectChanges();
 
       // Should not redirect
       expect(mockRouter.navigate).not.toHaveBeenCalled();
@@ -389,7 +390,7 @@ describe('ConsignorSignupStep1Component - With Invitation Token', () => {
 
   it('should redirect to invitation registration when token and storeCode are present', () => {
     // Trigger ngOnInit
-    component.ngOnInit();
+    fixture.detectChanges();
 
     // Verify it redirects to the invitation registration route
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/register/consignor/invitation'], {
@@ -444,7 +445,7 @@ describe('ConsignorSignupStep1Component - With Token Only', () => {
   });
 
   it('should not redirect when only token is present', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
 
     // Should not redirect when storeCode is missing
     expect(mockRouter.navigate).not.toHaveBeenCalled();

@@ -60,7 +60,7 @@ export class NotificationService {
   }
 
   markAsRead(role: UserRole, notificationId: string): Observable<void> {
-    return this.http.post<void>(`${this.getApiPath(role)}/${notificationId}/mark-read`, {})
+    return this.http.post<void>(`${this.getApiPath(role)}/${notificationId}/read`, {})
       .pipe(
         tap(() => {
           const currentCount = this.unreadCountSubject.value;
@@ -70,7 +70,7 @@ export class NotificationService {
   }
 
   markAllAsRead(role: UserRole): Observable<void> {
-    return this.http.post<void>(`${this.getApiPath(role)}/mark-all-read`, {})
+    return this.http.post<void>(`${this.getApiPath(role)}/read-all`, {})
       .pipe(
         tap(() => this.unreadCountSubject.next(0))
       );

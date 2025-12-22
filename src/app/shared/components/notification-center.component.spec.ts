@@ -22,11 +22,13 @@ describe('NotificationCenterComponent', () => {
     mockLoadingService = jasmine.createSpyObj('LoadingService', ['isLoading', 'start', 'stop']);
 
     mockNotificationService.getNotifications.and.returnValue(of({
-      items: [],
-      totalItems: 0,
+      data: [],
+      totalCount: 0,
       totalPages: 0,
-      currentPage: 1,
-      pageSize: 20
+      page: 1,
+      pageSize: 20,
+      hasNextPage: false,
+      hasPreviousPage: false
     }));
     mockNotificationService.markAsRead.and.returnValue(of(undefined));
     mockNotificationService.markAllAsRead.and.returnValue(of(undefined));
@@ -100,11 +102,13 @@ describe('NotificationCenterComponent', () => {
   it('should go to page', () => {
     // Setup pagedResult with totalPages > 2 so goToPage(2) will work
     component.pagedResult = {
-      items: [],
-      totalItems: 25,
+      data: [],
+      totalCount: 25,
       totalPages: 3,
-      currentPage: 1,
-      pageSize: 10
+      page: 1,
+      pageSize: 10,
+      hasNextPage: false,
+      hasPreviousPage: false
     };
 
     component.goToPage(2);

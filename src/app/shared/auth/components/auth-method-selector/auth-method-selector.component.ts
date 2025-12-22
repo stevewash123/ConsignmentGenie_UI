@@ -1,15 +1,16 @@
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthProvider, getEnabledconsignors, getProviderById } from '../../config/auth-providers.config';
+import { AuthProvider, getEnabledProviders, getProviderById } from '../../config/auth-providers.config';
 
 export interface ProviderAuthEvent {
-  consignor: string;
+  provider: string;
 }
 
 export interface CredentialsEvent {
   email: string;
   password: string;
+  passwordConfirm: string;
 }
 
 @Component({
@@ -23,14 +24,14 @@ export interface CredentialsEvent {
       max-width: 400px;
     }
 
-    .oauth-consignors {
+    .oauth-providers {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       margin-bottom: 1.5rem;
     }
 
-    .consignor-button {
+    .provider-button {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -58,7 +59,7 @@ export interface CredentialsEvent {
       cursor: not-allowed;
     }
 
-    .consignor-icon {
+    .provider-icon {
       font-weight: 700;
       font-size: 1.1rem;
       width: 20px;
@@ -70,15 +71,15 @@ export interface CredentialsEvent {
       color: white;
     }
 
-    .consignor-google .consignor-icon {
+    .provider-google .provider-icon {
       background: #db4437;
     }
 
-    .consignor-facebook .consignor-icon {
+    .provider-facebook .provider-icon {
       background: #1877f2;
     }
 
-    .consignor-text {
+    .provider-text {
       flex: 1;
       text-align: center;
     }
@@ -147,13 +148,24 @@ export interface CredentialsEvent {
       color: #9ca3af;
     }
 
+    .form-input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .error-text {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
     @media (max-width: 480px) {
-      .consignor-button {
+      .provider-button {
         padding: 0.75rem 1rem;
         font-size: 0.9rem;
       }
 
-      .consignor-text {
+      .provider-text {
         font-size: 0.875rem;
       }
     }
@@ -163,43 +175,55 @@ export class AuthMethodSelectorComponent {
   @Input() enabledProviders: string[] = ['google', 'facebook'];
   @Input() showEmailPassword: boolean = true;
   @Input() isLoading = signal(false);
+  @Input() prefilledEmail: string = '';
+  @Input() emailReadonly: boolean = false;
 
   @Output() onProviderAuth = new EventEmitter<ProviderAuthEvent>();
   @Output() onCredentials = new EventEmitter<CredentialsEvent>();
 
   email = '';
   password = '';
+  passwordConfirm = '';
 
-  availableconsignors = signal<AuthProvider[]>([]);
+  availableProviders = signal<AuthProvider[]>([]);
 
   ngOnInit() {
-    this.updateAvailableconsignors();
+    this.updateAvailableProviders();
+    if (this.prefilledEmail) {
+      this.email = this.prefilledEmail;
+      this.onCredentialsChange();
+    }
   }
 
   ngOnChanges() {
-    this.updateAvailableconsignors();
+    this.updateAvailableProviders();
   }
 
-  private updateAvailableconsignors() {
-    const enabledProviders = getEnabledconsignors();
-    const filteredconsignors = enabledProviders.filter(consignor =>
-      this.enabledProviders.includes(consignor.id)
+  private updateAvailableProviders() {
+    const enabledProviders = getEnabledProviders();
+    const filteredProviders = enabledProviders.filter(provider =>
+      this.enabledProviders.includes(provider.id)
     );
-    this.availableconsignors.set(filteredconsignors);
+    this.availableProviders.set(filteredProviders);
   }
 
   handleProviderAuth(providerId: string) {
     if (this.isLoading()) return;
 
-    this.onProviderAuth.emit({ consignor: providerId });
+    this.onProviderAuth.emit({ provider: providerId });
   }
 
   onCredentialsChange() {
-    if (this.email && this.password) {
+    if (this.email && this.password && this.passwordConfirm) {
       this.onCredentials.emit({
         email: this.email,
-        password: this.password
+        password: this.password,
+        passwordConfirm: this.passwordConfirm
       });
     }
+  }
+
+  get passwordsMatch(): boolean {
+    return this.password === this.passwordConfirm || !this.passwordConfirm;
   }
 }

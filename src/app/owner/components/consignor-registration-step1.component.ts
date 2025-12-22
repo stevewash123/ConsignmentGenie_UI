@@ -173,7 +173,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
   selectedProvider: string | null = null;
 
   constructor(
-    private ConsignorService: ConsignorService,
+    private consignorService: ConsignorService,
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
@@ -194,7 +194,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
   }
 
   validateInvitation(): void {
-    this.ConsignorService.validateInvitation(this.invitationToken).subscribe({
+    this.consignorService.validateInvitation(this.invitationToken).subscribe({
       next: (response) => {
         this.isValidating.set(false);
 
@@ -217,7 +217,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
 
   handleProviderAuth(event: ProviderAuthEvent): void {
     this.isProcessing.set(true);
-    this.selectedProvider = event.consignor;
+    this.selectedProvider = event.provider;
 
     // TODO: Implement OAuth flow
     setTimeout(() => {
@@ -233,7 +233,10 @@ export class ConsignorRegistrationStep1Component implements OnInit {
   }
 
   hasValidCredentials(): boolean {
-    return !!(this.credentials?.email && this.credentials?.password);
+    return !!(this.credentials?.email &&
+              this.credentials?.password &&
+              this.credentials?.passwordConfirm &&
+              this.credentials.password === this.credentials.passwordConfirm);
   }
 
   proceedToStep2(): void {

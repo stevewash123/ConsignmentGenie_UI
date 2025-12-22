@@ -401,7 +401,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {
-          this.recentNotifications = result.items;
+          this.recentNotifications = result.data;
         },
         error: (error) => {
           console.error('Error loading notifications:', error);

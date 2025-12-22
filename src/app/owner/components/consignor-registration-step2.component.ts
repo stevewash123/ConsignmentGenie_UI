@@ -10,6 +10,7 @@ interface RegistrationData {
   credentials: {
     email: string;
     password: string;
+    passwordConfirm: string;
   };
   invitationDetails: {
     invitedName?: string;
@@ -276,7 +277,7 @@ export class ConsignorRegistrationStep2Component implements OnInit {
   shopName = signal('');
 
   constructor(
-    private ConsignorService: ConsignorService,
+    private consignorService: ConsignorService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -328,7 +329,7 @@ export class ConsignorRegistrationStep2Component implements OnInit {
       // Note: No address field as requested
     };
 
-    this.ConsignorService.registerFromInvitation(request).subscribe({
+    this.consignorService.registerFromInvitation(request).subscribe({
       next: (response) => {
         if (response.success) {
           this.isSubmitted.set(true);
@@ -350,7 +351,7 @@ export class ConsignorRegistrationStep2Component implements OnInit {
   }
 
   goToLogin(): void {
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   goToHome(): void {

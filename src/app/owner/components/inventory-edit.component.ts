@@ -1,0 +1,57 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
+import { OwnerLayoutComponent } from './owner-layout.component';
+
+@Component({
+  selector: 'app-inventory-edit',
+  standalone: true,
+  imports: [CommonModule, OwnerLayoutComponent],
+  template: `
+    <app-owner-layout>
+      <div class="inventory-edit-page">
+        <div class="page-header">
+          <div class="header-nav">
+            <button class="btn-back" (click)="goBack()">← Back to Inventory</button>
+          </div>
+          <h1>Edit Item</h1>
+          <p>Update inventory item details</p>
+        </div>
+
+        <div class="edit-placeholder">
+          <div class="placeholder-icon">✏️</div>
+          <h2>Item Edit Form Coming Soon</h2>
+          <p>This page will allow editing of all item properties including photos, pricing, and consignor assignment.</p>
+          <p class="item-id">Editing Item ID: {{ itemId }}</p>
+        </div>
+      </div>
+    </app-owner-layout>
+  `,
+  styles: [`
+    .inventory-edit-page {
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .page-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb; }
+    .btn-back { background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; color: #374151; }
+    .btn-back:hover { background: #e5e7eb; }
+    .page-header h1 { color: #059669; margin: 1rem 0 0.5rem 0; font-size: 2rem; }
+    .page-header p { color: #6b7280; margin: 0; }
+    .edit-placeholder { text-align: center; padding: 3rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #6b7280; }
+    .placeholder-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .edit-placeholder h2 { color: #1f2937; margin-bottom: 1rem; }
+    .item-id { font-family: monospace; background: #f3f4f6; padding: 0.5rem; border-radius: 4px; display: inline-block; margin-top: 1rem; }
+  `]
+})
+export class InventoryEditComponent {
+  itemId: string;
+
+  constructor(private router: Router, private route: ActivatedRoute) {
+    this.itemId = this.route.snapshot.params['id'] || 'N/A';
+  }
+
+  goBack() {
+    this.router.navigate(['/owner/inventory']);
+  }
+}

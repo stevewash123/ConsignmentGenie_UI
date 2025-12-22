@@ -26,11 +26,13 @@ describe('NotificationBellComponent', () => {
     // Setup method return values
     mockNotificationService.getUnreadCount.and.returnValue(of({ count: 1 }));
     mockNotificationService.getNotifications.and.returnValue(of({
-      items: [],
-      totalItems: 0,
+      data: [],
+      totalCount: 0,
       totalPages: 0,
-      currentPage: 1,
-      pageSize: 5
+      page: 1,
+      pageSize: 5,
+      hasNextPage: false,
+      hasPreviousPage: false
     }));
 
     mockLoadingService = jasmine.createSpyObj('LoadingService', ['isLoading', 'start', 'stop']);

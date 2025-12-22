@@ -3,16 +3,19 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationBellComponent } from '../../shared/components/notification-bell.component';
+import { AppFooterComponent } from '../../shared/components/app-footer.component';
 
 @Component({
   selector: 'app-consignor-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterOutlet, NotificationBellComponent],
+  imports: [CommonModule, RouterModule, RouterOutlet, NotificationBellComponent, AppFooterComponent],
   templateUrl: './consignor-layout.component.html',
   styles: [`
     .consignor-layout {
       min-height: 100vh;
       background: #f9fafb;
+      display: flex;
+      flex-direction: column;
     }
 
     .consignor-header {
@@ -161,6 +164,8 @@ import { NotificationBellComponent } from '../../shared/components/notification-
 
     .main-content {
       flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     @media (max-width: 768px) {

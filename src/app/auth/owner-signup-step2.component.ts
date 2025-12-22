@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
-import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-owner-signup-step2',
@@ -136,72 +135,11 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
       margin-top: 0.25rem;
     }
 
-    .subdomain-input-wrapper {
-      display: flex;
-      align-items: center;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      overflow: hidden;
-      background: white;
-      transition: border-color 0.2s;
-    }
-
-    .subdomain-input-wrapper:focus-within {
-      border-color: #047857;
-      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
-    }
-
-    .subdomain-input-wrapper input {
-      border: none !important;
-      box-shadow: none !important;
-      flex: 1;
-      min-width: 0;
-      padding: 0.75rem;
-      font-size: 1rem;
-    }
-
-    .subdomain-suffix {
-      background: #f9fafb;
-      padding: 0.75rem;
-      color: #6b7280;
-      border-left: 1px solid #e5e7eb;
-      font-size: 0.875rem;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
     .error-message {
       color: #ef4444;
       font-size: 0.875rem;
       margin-top: 0.25rem;
       font-weight: 500;
-    }
-
-    .validation-message {
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .validation-message.success {
-      color: #10b981;
-    }
-
-    .validation-message.error {
-      color: #ef4444;
-    }
-
-    .validation-spinner {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 1px solid #6b7280;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 1s ease-in-out infinite;
     }
 
 
@@ -298,8 +236,6 @@ export class OwnerSignupStep2Component implements OnInit {
   isSubmitting = signal(false);
   errorMessage = signal('');
   userEmail = '';
-  subdomainValidationMessage = signal('');
-  isValidatingSubdomain = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -309,7 +245,6 @@ export class OwnerSignupStep2Component implements OnInit {
     this.profileForm = this.fb.group({
       fullName: ['', [Validators.required]],
       shopName: ['', [Validators.required]],
-      subdomain: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9-]+$/)]],
       phone: [''],
       streetAddress: ['', [Validators.required]],
       city: ['', [Validators.required]],
@@ -332,9 +267,6 @@ export class OwnerSignupStep2Component implements OnInit {
       const authData = JSON.parse(authDataString);
       this.userEmail = authData.email;
     }
-
-    // Setup real-time subdomain validation
-    this.setupSubdomainValidation();
   }
 
   onSubmit() {
@@ -364,7 +296,6 @@ export class OwnerSignupStep2Component implements OnInit {
       phone: formValue.phone || '',
       password: authData.password,
       shopName: formValue.shopName,
-      subdomain: formValue.subdomain,
       // Combine address fields into single address string for now
       // (API may need to be updated to accept separate fields)
       address: `${formValue.streetAddress}, ${formValue.city}, ${formValue.state} ${formValue.zipCode}`,
@@ -415,41 +346,4 @@ export class OwnerSignupStep2Component implements OnInit {
     });
   }
 
-  private setupSubdomainValidation() {
-    const subdomainControl = this.profileForm.get('subdomain');
-    if (subdomainControl) {
-      subdomainControl.valueChanges
-        .pipe(
-          debounceTime(500),
-          distinctUntilChanged(),
-          filter(value => value && value.length >= 3)
-        )
-        .subscribe(subdomain => {
-          this.validateSubdomain(subdomain);
-        });
-    }
-  }
-
-  private validateSubdomain(subdomain: string) {
-    this.isValidatingSubdomain.set(true);
-    this.subdomainValidationMessage.set('');
-
-    this.authService.validateSubdomain(subdomain).subscribe({
-      next: (response) => {
-        if (response.success) {
-          if (response.data.isAvailable) {
-            this.subdomainValidationMessage.set('✓ Subdomain is available');
-          } else {
-            this.subdomainValidationMessage.set('✗ This subdomain is already taken');
-          }
-        }
-        this.isValidatingSubdomain.set(false);
-      },
-      error: (error) => {
-        console.error('Error validating subdomain:', error);
-        this.subdomainValidationMessage.set('Error checking subdomain availability');
-        this.isValidatingSubdomain.set(false);
-      }
-    });
-  }
 }
