@@ -17,6 +17,10 @@ export const adminRoutes: Routes = [
   {
     path: 'notifications',
     loadComponent: () => import('./pages/admin-notifications.component').then(m => m.AdminNotificationsComponent)
+  },
+  {
+    path: 'support-tickets',
+    loadComponent: () => import('./components/admin-ticket-list.component').then(m => m.AdminTicketListComponent)
   }
   // Note: Login is now handled by /login route in main app routing
 ];

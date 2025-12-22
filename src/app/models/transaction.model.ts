@@ -7,7 +7,7 @@ export interface Transaction {
 
   // Commission split
   consignorsplitPercentage: number;
-  providerAmount: number;
+  consignorAmount: number;
   shopAmount: number;
 
   // Navigation data

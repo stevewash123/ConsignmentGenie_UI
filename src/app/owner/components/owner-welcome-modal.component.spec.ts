@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -411,8 +412,9 @@ describe('OwnerWelcomeModalComponent', () => {
     });
 
     it('should have responsive classes for mobile', () => {
-      const stylesheet = document.head.querySelector('style');
-      const hasResponsiveStyles = stylesheet?.textContent?.includes('@media (max-width: 640px)');
+      // The component has inline styles, so we check the component's styles property
+      const componentStyles = (component as any).constructor.ɵcmp?.styles?.[0] || '';
+      const hasResponsiveStyles = componentStyles.includes('@media (max-width: 640px)');
       expect(hasResponsiveStyles).toBe(true);
     });
   });

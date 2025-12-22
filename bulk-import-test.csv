@@ -1,0 +1,17 @@
+Name,Description,SKU,Price,ConsignorNumber,Category,Condition,ReceivedDate,InvalidColumn
+"Vintage Blue Jeans","Classic 501 Levis in excellent condition","JEANS-001",45.99,472HK3,Clothing,LikeNew,2024-12-15,SomeValue
+"Winter Coat","Warm winter parka with hood","",89.50,472HK3,Outerwear,Good,2024-12-10,AnotherValue
+"Designer Handbag","Coach leather purse with original tags",BAG-001,125.00,472HK3,Accessories,New,2024-12-18,ThirdValue
+"Running Shoes","Nike Air Max size 9","SHOES-001",75.00,472HK3,Footwear,Good,2024-12-12,FourthValue
+"Kitchen Blender","Vitamix professional blender","KITCHEN-001",199.99,472HK3,Kitchen,LikeNew,2024-12-14,FifthValue
+"Coffee Table","Mid-century modern oak table","",150.00,472HK3,Furniture,Good,2024-12-11,SixthValue
+"Board Game","Settlers of Catan board game","GAME-001",35.00,472HK3,Toys,New,2024-12-16,SeventhValue
+"Silk Scarf","Hermes silk scarf in original box","SCARF-001",89.99,472HK3,Accessories,New,2024-12-17,EighthValue
+"Laptop Stand","Adjustable aluminum laptop stand","TECH-001",45.00,472HK3,Electronics,Good,2024-12-13,NinthValue
+"Ceramic Vase","Hand-painted ceramic vase","VASE-001",29.99,472HK3,Home,LikeNew,2024-12-19,TenthValue
+"","Missing name test","ERROR-001",25.00,472HK3,Accessories,Good,2024-12-15,ErrorValue1
+"Test Item","Valid item description","VALID-001",-15.00,472HK3,Accessories,Good,2024-12-15,ErrorValue2
+"Another Test","Description here","ERROR-003",50.00,999ZZ9,Accessories,Good,2024-12-15,ErrorValue3
+"Bad Condition Item","Testing invalid condition","ERROR-004",30.00,472HK3,Accessories,SuperNew,2024-12-15,ErrorValue4
+"Future Date Item","Testing future date","ERROR-005",40.00,472HK3,Accessories,Good,2025-12-15,ErrorValue5
+"Invalid Price","Price with text","ERROR-006",NotANumber,472HK3,Accessories,Good,2024-12-15,ErrorValue6

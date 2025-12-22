@@ -9,6 +9,9 @@ interface ConsignorSettings {
   autoApprove: boolean;
   signupUrl: string;
   inventoryPermissions: ConsignorInventoryPermissions;
+  defaults: ConsignorDefaults;
+  agreements: ConsignorAgreements;
+  notifications: ConsignorNotifications;
 }
 
 interface ConsignorInventoryPermissions {
@@ -16,6 +19,25 @@ interface ConsignorInventoryPermissions {
   canEditItems: boolean;
   canRemoveItems: boolean;
   canViewDetailedAnalytics: boolean;
+}
+
+interface ConsignorDefaults {
+  shopCommissionPercent: number;
+  consignmentPeriodDays: number;
+  retrievalPeriodDays: number;
+  unsoldItemPolicy: 'donate' | 'dispose' | 'return-to-consignor' | 'become-shop-property';
+}
+
+interface ConsignorAgreements {
+  autoSendOnRegistration: boolean;
+  requireBeforeItems: boolean;
+  templateCustomized: boolean; // Read-only status
+}
+
+interface ConsignorNotifications {
+  newConsignorRegistration: boolean;
+  itemSubmissions: boolean;
+  payoutRequests: boolean;
 }
 
 interface PendingInvitation {
@@ -30,7 +52,400 @@ interface PendingInvitation {
   selector: 'app-consignor-settings',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './consignor-settings.component.html',
+  template: `
+    <div class="consignor-settings">
+      <div class="settings-header">
+        <h2>Consignor Settings</h2>
+        <p>Manage how new consignors join your shop and configure approval settings</p>
+      </div>
+
+      <div class="settings-form" *ngIf="settings()">
+        <!-- Store Code -->
+        <div class="form-section">
+          <h3>Store Code</h3>
+          <p class="section-description">
+            Share this code with consignors to let them join your shop.
+          </p>
+
+          <div class="store-code-display">
+            <div class="code-box">
+              <span class="store-code">{{ settings()?.storeCode }}</span>
+            </div>
+            <div class="code-actions">
+              <button class="btn-secondary" (click)="copyStoreCode()">Copy Code</button>
+              <button class="btn-secondary" (click)="regenerateStoreCode()">Regenerate</button>
+            </div>
+          </div>
+
+          <div class="signup-link">
+            <label>Direct signup link:</label>
+            <div class="link-display">
+              <span class="signup-url">{{ settings()?.signupUrl }}</span>
+              <button class="btn-link" (click)="copySignupLink()">Copy Link</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consignor Approval -->
+        <div class="form-section">
+          <h3>Consignor Approval</h3>
+
+          <div class="approval-options">
+            <label class="radio-option" [class.selected]="settings()?.autoApprove">
+              <input
+                type="radio"
+                [value]="true"
+                [(ngModel)]="settings()!.autoApprove"
+                name="approvalType">
+              <div class="option-content">
+                <span class="option-title">Auto-approve new consignors</span>
+                <span class="option-description">New consignors can immediately start adding items</span>
+              </div>
+            </label>
+
+            <label class="radio-option" [class.selected]="!settings()?.autoApprove">
+              <input
+                type="radio"
+                [value]="false"
+                [(ngModel)]="settings()!.autoApprove"
+                name="approvalType">
+              <div class="option-content">
+                <span class="option-title">Require manual approval</span>
+                <span class="option-description">Review each consignor before they can add items</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Default Consignor Terms -->
+        <div class="form-section">
+          <h3>Default Consignor Terms</h3>
+          <p class="section-description">
+            These terms apply to all new consignors by default. You can customize them per consignor later.
+          </p>
+
+          <div class="form-group">
+            <label for="shopCommissionPercent">Shop Commission (%)</label>
+            <input
+              type="number"
+              id="shopCommissionPercent"
+              [(ngModel)]="settings()!.defaults.shopCommissionPercent"
+              name="shopCommissionPercent"
+              class="form-input number-input"
+              min="1"
+              max="99"
+              placeholder="50">
+            <div class="field-hint">Consignor receives the remaining percentage ({{ 100 - (settings()?.defaults?.shopCommissionPercent || 0) }}%)</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="consignmentPeriodDays">Consignment Period (days)</label>
+              <input
+                type="number"
+                id="consignmentPeriodDays"
+                [(ngModel)]="settings()!.defaults.consignmentPeriodDays"
+                name="consignmentPeriodDays"
+                class="form-input number-input"
+                min="1"
+                placeholder="90">
+              <div class="field-hint">How long items stay on sale</div>
+            </div>
+
+            <div class="form-group">
+              <label for="retrievalPeriodDays">Retrieval Period (days)</label>
+              <input
+                type="number"
+                id="retrievalPeriodDays"
+                [(ngModel)]="settings()!.defaults.retrievalPeriodDays"
+                name="retrievalPeriodDays"
+                class="form-input number-input"
+                min="1"
+                placeholder="14">
+              <div class="field-hint">How long consignors have to pick up unsold items</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="unsoldItemPolicy">Unclaimed Item Policy</label>
+            <select
+              id="unsoldItemPolicy"
+              [(ngModel)]="settings()!.defaults.unsoldItemPolicy"
+              name="unsoldItemPolicy"
+              class="form-select">
+              <option value="return-to-consignor">Return to consignor</option>
+              <option value="become-shop-property">Become shop property</option>
+              <option value="donate">Donate to charity</option>
+              <option value="dispose">Dispose of items</option>
+            </select>
+            <div class="field-hint">What happens to items left unclaimed after the retrieval period</div>
+          </div>
+        </div>
+
+        <!-- Agreement Settings -->
+        <div class="form-section">
+          <h3>Consignment Agreements</h3>
+          <p class="section-description">
+            Configure how consignment agreements are handled with new consignors.
+          </p>
+
+          <!-- Template Status Warning -->
+          <div class="agreement-status" *ngIf="!settings()?.agreements?.templateCustomized">
+            <div class="warning-banner">
+              <div class="warning-icon">⚠️</div>
+              <div class="warning-content">
+                <strong>Agreement template not customized.</strong>
+                <a href="/settings/integrations" class="warning-link">Edit Template</a> before enabling auto-send.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="permission-toggle">
+              <input
+                type="checkbox"
+                [(ngModel)]="settings()!.agreements.autoSendOnRegistration"
+                name="autoSendOnRegistration"
+                [disabled]="!settings()?.agreements?.templateCustomized">
+              <div class="toggle-switch"></div>
+              <div class="permission-content">
+                <span class="permission-title">Auto-send agreement when consignor registers</span>
+                <span class="permission-description">Automatically email agreement to new consignors</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="permission-toggle">
+              <input
+                type="checkbox"
+                [(ngModel)]="settings()!.agreements.requireBeforeItems"
+                name="requireBeforeItems">
+              <div class="toggle-switch"></div>
+              <div class="permission-content">
+                <span class="permission-title">Require signed agreement before item submission</span>
+                <span class="permission-description">Block item submission until agreement is on file</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Notification Preferences -->
+        <div class="form-section">
+          <h3>Notification Preferences</h3>
+          <p class="section-description">
+            Choose which consignor-related activities will send you email notifications.
+          </p>
+
+          <div class="permissions-grid">
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.notifications.newConsignorRegistration"
+                  name="newConsignorRegistration">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Notify me when new consignors register</span>
+                  <span class="permission-description">Get an email when someone joins your shop</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.notifications.itemSubmissions"
+                  name="itemSubmissions">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Notify me when consignors submit items</span>
+                  <span class="permission-description">Get an email when new items are submitted for approval</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.notifications.payoutRequests"
+                  name="payoutRequests">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Notify me when consignors request payouts</span>
+                  <span class="permission-description">Get an email when payouts are requested</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory Permissions -->
+        <div class="form-section">
+          <h3>Consignor Inventory Permissions</h3>
+          <p class="section-description">
+            Control what actions consignors can perform with their inventory items.
+          </p>
+
+          <div class="permissions-grid">
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canAddItems"
+                  name="canAddItems">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Add new items</span>
+                  <span class="permission-description">Allow consignors to submit new items for approval</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canEditItems"
+                  name="canEditItems">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Edit existing items</span>
+                  <span class="permission-description">Allow consignors to modify details of their approved items</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canRemoveItems"
+                  name="canRemoveItems">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">Remove/withdraw items</span>
+                  <span class="permission-description">Allow consignors to withdraw items from the shop</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="permission-item">
+              <label class="permission-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="settings()!.inventoryPermissions.canViewDetailedAnalytics"
+                  name="canViewDetailedAnalytics">
+                <div class="toggle-switch"></div>
+                <div class="permission-content">
+                  <span class="permission-title">View detailed analytics</span>
+                  <span class="permission-description">Allow consignors to see detailed sales metrics and performance data</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="permissions-note">
+            <div class="note-icon">💡</div>
+            <div class="note-content">
+              <strong>Note:</strong> Consignors can always view their basic inventory list and sale notifications.
+              These permissions control additional actions and data access.
+            </div>
+          </div>
+        </div>
+
+        <!-- Invite Consignors -->
+        <div class="form-section">
+          <h3>Invite Consignors</h3>
+
+          <div class="invite-form">
+            <div class="form-group">
+              <label for="inviteEmails">Email addresses (one per line)</label>
+              <textarea
+                id="inviteEmails"
+                [(ngModel)]="inviteEmailsText"
+                name="inviteEmails"
+                class="form-textarea invite-emails"
+                placeholder="jane@example.com&#10;bob@example.com"
+                rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="inviteMessage">Custom message (optional)</label>
+              <textarea
+                id="inviteMessage"
+                [(ngModel)]="customMessage"
+                name="inviteMessage"
+                class="form-textarea"
+                placeholder="Join our consignment family! We'd love to have your items in our shop..."
+                rows="3"></textarea>
+            </div>
+
+            <div class="invite-actions">
+              <button
+                class="btn-primary"
+                (click)="sendInvitations()"
+                [disabled]="isSending() || !inviteEmailsText.trim()">
+                {{ isSending() ? 'Sending...' : 'Send Invitations' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Invitations -->
+        <div class="form-section" *ngIf="pendingInvitations().length > 0">
+          <h3>Pending Invitations</h3>
+
+          <div class="invitations-list">
+            <div
+              *ngFor="let invitation of pendingInvitations()"
+              class="invitation-item"
+              [class]="'status-' + invitation.status">
+              <div class="invitation-info">
+                <div class="invitation-email">{{ invitation.email }}</div>
+                <div class="invitation-details">
+                  <span>Sent {{ invitation.sentAt | date:'MMM d' }}</span>
+                  <span class="separator">•</span>
+                  <span class="status" [class]="'status-' + invitation.status">
+                    {{ getInvitationStatusText(invitation) }}
+                  </span>
+                </div>
+              </div>
+              <div class="invitation-actions">
+                <button
+                  *ngIf="invitation.status === 'pending'"
+                  class="btn-secondary btn-small"
+                  (click)="resendInvitation(invitation.id)">
+                  Resend
+                </button>
+                <button
+                  class="btn-danger-outline btn-small"
+                  (click)="cancelInvitation(invitation.id)">
+                  {{ invitation.status === 'pending' ? 'Cancel' : 'Remove' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="loadSettings()">Cancel</button>
+          <button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="isSaving()">
+            {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages" *ngIf="successMessage() || errorMessage()">
+        <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+        <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+      </div>
+    </div>
+  `,
   styles: [`
     .consignor-settings {
       padding: 2rem;
@@ -301,6 +716,47 @@ interface PendingInvitation {
       font-weight: 600;
     }
 
+    /* Agreement Warning Banner */
+    .agreement-status {
+      margin-bottom: 1.5rem;
+    }
+
+    .warning-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      border-radius: 6px;
+    }
+
+    .warning-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .warning-content {
+      flex: 1;
+      font-size: 0.875rem;
+      color: #92400e;
+    }
+
+    .warning-content strong {
+      font-weight: 600;
+    }
+
+    .warning-link {
+      color: #3b82f6;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    .warning-link:hover {
+      color: #2563eb;
+    }
+
     /* Invite Form */
     .invite-form {
       background: #f9fafb;
@@ -323,6 +779,47 @@ interface PendingInvitation {
       color: #374151;
       margin-bottom: 0.5rem;
       font-size: 0.875rem;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+
+    .number-input {
+      max-width: 120px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .field-hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
     }
 
     .form-textarea {
@@ -512,63 +1009,6 @@ interface PendingInvitation {
       border: 1px solid #fecaca;
     }
 
-    /* Agreement Template */
-    .agreement-template {
-      display: flex;
-      gap: 2rem;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 1.5rem;
-      align-items: flex-start;
-    }
-
-    .template-info {
-      flex: 1;
-    }
-
-    .template-info h4 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 0.5rem;
-    }
-
-    .template-info p {
-      color: #6b7280;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-
-    .template-features {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .template-features li {
-      color: #374151;
-      font-size: 0.875rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .template-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .download-icon {
-      margin-right: 0.5rem;
-      font-size: 1.25rem;
-    }
-
     /* Responsive */
     @media (max-width: 768px) {
       .consignor-settings {
@@ -603,17 +1043,16 @@ interface PendingInvitation {
         gap: 0.75rem;
       }
 
-      .agreement-template {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .template-actions {
-        align-self: stretch;
-      }
-
       .permissions-grid {
         gap: 0.75rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .number-input {
+        max-width: none;
       }
 
       .permission-item {
@@ -660,6 +1099,22 @@ export class ConsignorSettingsComponent implements OnInit {
           canEditItems: true,
           canRemoveItems: false,
           canViewDetailedAnalytics: false
+        },
+        defaults: {
+          shopCommissionPercent: 50,
+          consignmentPeriodDays: 90,
+          retrievalPeriodDays: 14,
+          unsoldItemPolicy: 'return-to-consignor'
+        },
+        agreements: {
+          autoSendOnRegistration: false,
+          requireBeforeItems: false,
+          templateCustomized: false // Will be populated from API
+        },
+        notifications: {
+          newConsignorRegistration: true,
+          itemSubmissions: false,
+          payoutRequests: true
         }
       };
 
@@ -855,26 +1310,6 @@ export class ConsignorSettingsComponent implements OnInit {
     this.successMessage.set(message);
     this.errorMessage.set('');
     setTimeout(() => this.successMessage.set(''), 5000);
-  }
-
-  downloadTemplate() {
-    try {
-      // Create a temporary link element to trigger download
-      const link = document.createElement('a');
-      link.href = '/assets/consignment-agreement-template.pdf';
-      link.download = 'Consignment-Agreement-Template.pdf';
-      link.target = '_blank';
-
-      // Append to body, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      this.showSuccess('Template download started');
-    } catch (error) {
-      console.error('Error downloading template:', error);
-      this.showError('Failed to download template');
-    }
   }
 
   private showError(message: string) {

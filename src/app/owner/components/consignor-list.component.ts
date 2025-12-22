@@ -10,6 +10,7 @@ import { ENTITY_LABELS } from '../../shared/constants/labels';
 import { ConsignorStatus } from '../../models/consignor.model';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { LoadingService } from '../../shared/services/loading.service';
+import { AgreementService } from '../../services/agreement.service';
 
 @Component({
   selector: 'app-consignor-list',
@@ -414,6 +415,28 @@ import { LoadingService } from '../../shared/services/loading.service';
       box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
     }
 
+    .btn-email {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-email:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
     .loading, .no-consignors {
       text-align: center;
       padding: 4rem;
@@ -485,7 +508,11 @@ export class ConsignorListComponent implements OnInit {
     return this.loadingService.isLoading('consignors-list');
   }
 
-  constructor(private ConsignorService: ConsignorService, private loadingService: LoadingService) {}
+  constructor(
+    private ConsignorService: ConsignorService,
+    private loadingService: LoadingService,
+    private agreementService: AgreementService
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -753,6 +780,32 @@ export class ConsignorListComponent implements OnInit {
   onConsignorAdded(consignor: Consignor): void {
     console.log('Consignor added successfully:', consignor);
     this.loadData(); // Refresh both lists
+  }
+
+  emailAgreement(consignor: Consignor): void {
+    if (!consignor.email) {
+      alert('Consignor does not have an email address on file.');
+      return;
+    }
+
+    if (confirm(`Send consignment agreement to ${consignor.name} at ${consignor.email}?`)) {
+      this.agreementService.emailAgreement({
+        providerId: consignor.id.toString(),
+        emailAddress: consignor.email
+      }).subscribe({
+        next: (response) => {
+          if (response.success) {
+            alert(`Agreement sent successfully to ${consignor.email}`);
+          } else {
+            alert(`Failed to send agreement: ${response.message}`);
+          }
+        },
+        error: (error) => {
+          console.error('Error sending agreement:', error);
+          alert('Failed to send agreement. Please try again.');
+        }
+      });
+    }
   }
 
   private checkAndShowInviteModal(): void {

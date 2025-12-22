@@ -5,7 +5,7 @@
         <div class="header-container">
           <!-- Logo/Brand -->
           <div class="brand">
-            <h1 routerLink="/consignor/dashboard" class="brand-link">consignor Portal</h1>
+            <h1 routerLink="/consignor/dashboard" class="brand-link">Consignor Dashboard</h1>
           </div>
 
           <!-- Navigation -->
@@ -22,6 +22,12 @@
               routerLinkActive="active"
               class="nav-link">
               My Items
+            </a>
+            <a
+              routerLink="/consignor/item-requests"
+              routerLinkActive="active"
+              class="nav-link">
+              Item Requests
             </a>
             <a
               routerLink="/consignor/sales"
@@ -78,5 +84,7 @@
       <main class="main-content">
         <router-outlet></router-outlet>
       </main>
+
+      <app-footer></app-footer>
     </div>
   

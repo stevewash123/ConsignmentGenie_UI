@@ -31,6 +31,7 @@ interface StorefrontSettings {
   };
   cgStorefront?: {
     storeSlug: string;
+    useCustomDomain?: string; // Radio button selection: "false" = use CG subdomain, "true" = use custom domain
     customDomain?: string;
     dnsVerified: boolean;
     stripeConnected: boolean;
@@ -455,6 +456,184 @@ interface StorefrontSettings {
       padding: 1.5rem;
     }
 
+    /* URL Configuration Options */
+    .url-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .url-option {
+      border: 2px solid #f3f4f6;
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+      background: white;
+    }
+
+    .url-option:has(input[type="radio"]:checked) {
+      border-color: #3b82f6;
+      background: #f8fafc;
+    }
+
+    .url-option:has(input[type="radio"]:not(:checked)) {
+      background: #f9fafb;
+      opacity: 0.7;
+    }
+
+    /* Fallback for browsers that don't support :has() */
+    .url-option.selected {
+      border-color: #3b82f6;
+      background: #f8fafc;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+
+    .radio-label input[type="radio"] {
+      display: none;
+    }
+
+    .radio-mark {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #d1d5db;
+      border-radius: 50%;
+      background: white;
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+      position: relative;
+    }
+
+    input[type="radio"]:checked + .radio-mark {
+      border-color: #3b82f6;
+      background: #3b82f6;
+    }
+
+    input[type="radio"]:checked + .radio-mark::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+    }
+
+    .option-content {
+      flex: 1;
+    }
+
+    .option-title {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .option-description {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .url-input {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+
+    .url-prefix {
+      color: #6b7280;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+
+    .url-slug {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.875rem;
+    }
+
+    .url-status {
+      color: #10b981;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .custom-domain-setup {
+      margin-top: 1rem;
+    }
+
+    .domain-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .status-indicator {
+      font-size: 0.875rem;
+    }
+
+    .domain-status.verified .status-indicator {
+      color: #10b981;
+    }
+
+    .domain-status:not(.verified) .status-indicator {
+      color: #f59e0b;
+    }
+
+    .dns-instructions {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .instruction-header {
+      color: #92400e;
+      margin-bottom: 0.5rem;
+    }
+
+    .instruction-content {
+      color: #92400e;
+      font-size: 0.875rem;
+    }
+
+    .dns-records {
+      background: white;
+      border: 1px solid #fcd34d;
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin: 0.75rem 0;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+
+    .dns-record {
+      margin-bottom: 0.25rem;
+    }
+
+    .instruction-note {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #fcd34d;
+    }
+
     /* Form Elements */
     .form-group {
       margin-bottom: 1.5rem;
@@ -608,26 +787,35 @@ interface StorefrontSettings {
   `]
 })
 export class StorefrontSettingsComponent implements OnInit {
-  settings = signal<StorefrontSettings | null>(null);
+  settings = signal<StorefrontSettings | null>({
+    selectedChannel: 'cg_storefront',
+    cgStorefront: {
+      storeSlug: '',
+      useCustomDomain: "false",
+      dnsVerified: false,
+      stripeConnected: false,
+      primaryColor: '#3b82f6',
+      accentColor: '#10b981',
+      displayStoreHours: false,
+      storeHours: [],
+      metaTitle: '',
+      metaDescription: ''
+    }
+  });
   isSaving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
 
   channelOptions = [
     {
+      id: 'cg_storefront' as SalesChannel,
+      title: 'ConsignmentGenie Storefront',
+      description: 'Built-in online store (requires Stripe for accepting online payments)'
+    },
+    {
       id: 'square' as SalesChannel,
       title: 'Square',
       description: 'POS and online sales through Square'
-    },
-    {
-      id: 'shopify' as SalesChannel,
-      title: 'Shopify',
-      description: 'Online store powered by Shopify'
-    },
-    {
-      id: 'cg_storefront' as SalesChannel,
-      title: 'ConsignmentGenie Storefront',
-      description: 'Built-in online store (requires Stripe)'
     },
     {
       id: 'in_store_only' as SalesChannel,
@@ -646,10 +834,47 @@ export class StorefrontSettingsComponent implements OnInit {
     try {
       const response = await this.http.get<StorefrontSettings>(`${environment.apiUrl}/api/organization/storefront-settings`).toPromise();
       if (response) {
+        // Ensure backward compatibility for useCustomDomain
+        if (response.cgStorefront && response.cgStorefront.useCustomDomain === undefined) {
+          response.cgStorefront.useCustomDomain = "false";
+        }
         this.settings.set(response);
+      } else {
+        // Set default to ConsignmentGenie Storefront for new settings
+        this.settings.set({
+          selectedChannel: 'cg_storefront',
+          cgStorefront: {
+            storeSlug: '',
+            useCustomDomain: "false", // Default to ConsignmentGenie subdomain
+            dnsVerified: false,
+            stripeConnected: false,
+            primaryColor: '#3b82f6',
+            accentColor: '#10b981',
+            displayStoreHours: false,
+            storeHours: [],
+            metaTitle: '',
+            metaDescription: ''
+          }
+        });
       }
     } catch (error) {
       this.showError('Failed to load storefront settings');
+      // Set default even on error
+      this.settings.set({
+        selectedChannel: 'cg_storefront',
+        cgStorefront: {
+          storeSlug: '',
+          useCustomDomain: "false", // Default to ConsignmentGenie subdomain
+          dnsVerified: false,
+          stripeConnected: false,
+          primaryColor: '#3b82f6',
+          accentColor: '#10b981',
+          displayStoreHours: false,
+          storeHours: [],
+          metaTitle: '',
+          metaDescription: ''
+        }
+      });
     }
   }
 
@@ -669,6 +894,12 @@ export class StorefrontSettingsComponent implements OnInit {
 
   onChannelChange() {
     // Handle any channel-specific initialization
+  }
+
+  hasConfigurableSettings(): boolean {
+    const channel = this.settings()?.selectedChannel;
+    // Only CG Storefront has configurable settings that require saving
+    return channel === 'cg_storefront';
   }
 
   // Square methods

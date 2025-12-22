@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AccountSecurityComponent } from '../../../shared/auth/components/account-security/account-security.component';
 import { AuthService } from '../../../services/auth.service';
@@ -20,8 +21,109 @@ interface OwnerPinSettings {
 @Component({
   selector: 'app-account-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, AccountSecurityComponent],
-  templateUrl: './account-settings.component.html',
+  imports: [CommonModule, FormsModule, RouterModule, AccountSecurityComponent],
+  template: `
+    <div class="account-settings">
+      <div class="settings-header">
+        <h2>Account & Security</h2>
+        <p>Manage your personal information, authentication methods, and security settings</p>
+      </div>
+
+      <!-- Account Navigation -->
+      <div class="account-nav">
+        <a class="nav-link active" routerLink="/owner/settings/account">Account & Security</a>
+        <a class="nav-link" routerLink="/owner/settings/account/notifications">Notifications</a>
+      </div>
+
+      <!-- Profile Information -->
+      <div class="settings-section">
+        <h3>Profile Information</h3>
+        <div class="profile-form" *ngIf="userProfile()">
+          <div class="form-group">
+            <label for="fullName">Name</label>
+            <input
+              type="text"
+              id="fullName"
+              [(ngModel)]="userProfile()!.name"
+              class="form-input"
+              placeholder="Your full name">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              [(ngModel)]="userProfile()!.email"
+              class="form-input"
+              placeholder="your@email.com">
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-secondary" (click)="loadUserProfile()">Cancel</button>
+            <button class="btn-primary" (click)="saveProfile()" [disabled]="isSaving()">
+              {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Security Component -->
+      <div class="settings-section">
+        <app-account-security
+          [userId]="getCurrentUserId()"
+          [enabledProviders]="['google', 'facebook']"
+          [show2FA]="true"
+          [showActiveSessions]="true">
+        </app-account-security>
+      </div>
+
+      <!-- Owner PIN -->
+      <div class="settings-section">
+        <h3>Owner PIN (for POS Approvals)</h3>
+        <div class="pin-settings" *ngIf="pinSettings()">
+          <div class="pin-info">
+            <div class="pin-status">
+              <span class="pin-label">PIN:</span>
+              <span class="pin-display">{{ pinSettings()?.hasPin ? '••••' : 'Not set' }}</span>
+              <button class="btn-secondary" (click)="changePin()">
+                {{ pinSettings()?.hasPin ? 'Change PIN' : 'Set PIN' }}
+              </button>
+            </div>
+
+            <div class="pin-usage" *ngIf="pinSettings()?.hasPin">
+              <div class="usage-label">Used for:</div>
+              <ul class="usage-list">
+                <li *ngFor="let usage of pinSettings()?.usedFor">{{ usage }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-section danger-zone">
+        <h3>Danger Zone</h3>
+        <div class="danger-content">
+          <div class="danger-action">
+            <div class="danger-info">
+              <h4>⚠️ Delete Account</h4>
+              <p>This will permanently delete your shop, all inventory, consignor data, and sales history. This action cannot be undone.</p>
+            </div>
+            <button class="btn-danger" (click)="deleteAccount()">
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages" *ngIf="successMessage() || errorMessage()">
+        <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+        <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+      </div>
+    </div>
+  `,
   styles: [`
     .account-settings {
       padding: 2rem;
@@ -42,6 +144,34 @@ interface OwnerPinSettings {
     .settings-header p {
       color: #6b7280;
       font-size: 1rem;
+    }
+
+    /* Account Navigation */
+    .account-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0;
+    }
+
+    .nav-link {
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      color: #6b7280;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #374151;
+      border-bottom-color: #d1d5db;
+    }
+
+    .nav-link.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
     }
 
     .settings-section {

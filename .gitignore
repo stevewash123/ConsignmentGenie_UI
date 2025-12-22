@@ -45,3 +45,13 @@ Thumbs.db
 # .NET build outputs (for mixed projects)
 bin/
 obj/
+
+# Analysis and temporary files
+analyze_backlog.sh
+backlog_analysis.md
+feature_blockers_table.md
+
+# Worktree directories
+worktrees/01-test-crud/
+worktrees/03-status-management/
+worktrees/consignor-items/

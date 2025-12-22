@@ -1,0 +1,243 @@
+<div class="form-container">
+  <div class="form-header">
+    <h1>Submit Item for Consignment</h1>
+    <p>Fill out the form below to submit an item for review. You can upload up to 8 photos.</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <div class="error-title">Error</div>
+    <div class="error-message">{{ error }}</div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #itemForm="ngForm">
+    <!-- Basic Information -->
+    <div class="form-section">
+      <h2>Basic Information</h2>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="name" class="required">Item Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            [(ngModel)]="formData.name"
+            class="form-control"
+            placeholder="Enter the item name"
+            required
+            maxlength="200">
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select
+            id="category"
+            name="category"
+            [(ngModel)]="formData.category"
+            class="form-control">
+            <option value="">Select category</option>
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="condition" class="required">Condition</label>
+          <select
+            id="condition"
+            name="condition"
+            [(ngModel)]="formData.condition"
+            class="form-control"
+            required>
+            <option value="">Select condition</option>
+            <option *ngFor="let condition of conditions" [value]="condition.value">{{ condition.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="brand">Brand</label>
+          <input
+            type="text"
+            id="brand"
+            name="brand"
+            [(ngModel)]="formData.brand"
+            class="form-control"
+            placeholder="Enter brand name"
+            maxlength="100">
+        </div>
+
+        <div class="form-group">
+          <label for="size">Size</label>
+          <input
+            type="text"
+            id="size"
+            name="size"
+            [(ngModel)]="formData.size"
+            class="form-control"
+            placeholder="Enter size"
+            maxlength="50">
+        </div>
+
+        <div class="form-group">
+          <label for="color">Color</label>
+          <input
+            type="text"
+            id="color"
+            name="color"
+            [(ngModel)]="formData.color"
+            class="form-control"
+            placeholder="Enter primary color"
+            maxlength="50">
+        </div>
+
+        <div class="form-group full-width">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="formData.description"
+            class="form-control"
+            placeholder="Describe the item in detail"
+            rows="3"></textarea>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="measurements">Measurements</label>
+          <textarea
+            id="measurements"
+            name="measurements"
+            [(ngModel)]="formData.measurements"
+            class="form-control"
+            placeholder="Enter measurements (length, width, height, etc.)"
+            rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Information -->
+    <div class="form-section">
+      <h2>Pricing</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="suggestedPrice">Suggested Selling Price</label>
+          <input
+            type="number"
+            id="suggestedPrice"
+            name="suggestedPrice"
+            [(ngModel)]="formData.suggestedPrice"
+            class="form-control"
+            placeholder="0.00"
+            min="0"
+            step="0.01">
+        </div>
+
+        <div class="form-group">
+          <label for="minAcceptablePrice">Minimum Acceptable Price</label>
+          <input
+            type="number"
+            id="minAcceptablePrice"
+            name="minAcceptablePrice"
+            [(ngModel)]="formData.minAcceptablePrice"
+            class="form-control"
+            placeholder="0.00"
+            min="0"
+            step="0.01">
+        </div>
+
+        <div class="form-group full-width">
+          <label for="originalPurchasePrice">Original Purchase Price (Optional)</label>
+          <input
+            type="number"
+            id="originalPurchasePrice"
+            name="originalPurchasePrice"
+            [(ngModel)]="formData.originalPurchasePrice"
+            class="form-control"
+            placeholder="0.00"
+            min="0"
+            step="0.01">
+        </div>
+      </div>
+    </div>
+
+    <!-- Photos -->
+    <div class="form-section">
+      <h2>Photos</h2>
+      <div class="image-upload-section"
+           (drop)="onDrop($event)"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)">
+        <div class="upload-icon">📸</div>
+        <p>Drag and drop photos here, or click to select files</p>
+        <p class="text-sm text-gray-500">Maximum 8 photos, JPEG/PNG only</p>
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          (change)="onFileSelected($event)"
+          style="display: none"
+          #fileInput>
+        <button
+          type="button"
+          class="upload-button"
+          (click)="fileInput.click()">
+          Choose Photos
+        </button>
+      </div>
+
+      <div *ngIf="previewImages.length > 0" class="image-preview">
+        <div *ngFor="let image of previewImages; let i = index" class="image-preview-item">
+          <img [src]="image" [alt]="'Preview ' + (i + 1)">
+          <button
+            type="button"
+            class="image-remove"
+            (click)="removeImage(i)"
+            title="Remove image">
+            ×
+          </button>
+          <div *ngIf="formData.images && formData.images[i]?.isPrimary" class="primary-badge">
+            Primary
+          </div>
+          <button
+            type="button"
+            *ngIf="!formData.images?.[i]?.isPrimary"
+            (click)="setPrimaryImage(i)"
+            style="position: absolute; bottom: 0.5rem; left: 0.5rem; background: #3b82f6; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; cursor: pointer;">
+            Set Primary
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Notes -->
+    <div class="form-section">
+      <h2>Additional Information</h2>
+      <div class="form-group">
+        <label for="consignorNotes">Notes for Shop Owner</label>
+        <textarea
+          id="consignorNotes"
+          name="consignorNotes"
+          [(ngModel)]="formData.consignorNotes"
+          class="form-control"
+          placeholder="Any additional information about this item (condition details, history, etc.)"
+          rows="4"></textarea>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn-cancel"
+        (click)="cancel()"
+        [disabled]="isSubmitting">
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="isSubmitting || !itemForm.form.valid">
+        <span *ngIf="isSubmitting">Submitting...</span>
+        <span *ngIf="!isSubmitting">Submit for Review</span>
+      </button>
+    </div>
+  </form>
+</div>

@@ -116,6 +116,22 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/register-success.component').then(m => m.RegisterSuccessComponent)
   },
 
+  // Support ticket routes (authenticated users)
+  {
+    path: 'support-tickets',
+    children: [
+      {
+        path: '',
+        redirectTo: 'create',
+        pathMatch: 'full'
+      },
+      {
+        path: 'create',
+        loadComponent: () => import('./pages/create-support-ticket.component').then(m => m.CreateSupportTicketComponent)
+      }
+    ]
+  },
+
   // Unauthorized access route
   {
     path: 'unauthorized',
