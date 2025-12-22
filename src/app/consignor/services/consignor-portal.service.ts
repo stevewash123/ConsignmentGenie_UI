@@ -19,7 +19,10 @@ import {
   NotificationPreferencesDto,
   UpdateNotificationPreferencesRequest,
   StatementListDto,
-  StatementDto
+  StatementDto,
+  ItemRequest,
+  CreateItemRequest,
+  ItemRequestQuery
 } from '../models/consignor.models';
 
 @Injectable({
@@ -148,5 +151,37 @@ export class ProviderPortalService {
 
   regenerateStatement(statementId: string): Observable<StatementDto> {
     return this.http.post<StatementDto>(`${this.apiUrl}/statements/${statementId}/regenerate`, {});
+  }
+
+  // Item Requests
+  getMyItemRequests(query?: ItemRequestQuery): Observable<PagedResult<ItemRequest>> {
+    let params = new HttpParams();
+
+    if (query?.status) params = params.set('status', query.status);
+    if (query?.search) params = params.set('search', query.search);
+    if (query?.page) params = params.set('page', query.page.toString());
+    if (query?.pageSize) params = params.set('pageSize', query.pageSize.toString());
+
+    return this.http.get<PagedResult<ItemRequest>>(`${this.apiUrl}/item-requests`, { params });
+  }
+
+  getItemRequest(id: string): Observable<ItemRequest> {
+    return this.http.get<ItemRequest>(`${this.apiUrl}/item-requests/${id}`);
+  }
+
+  createItemRequest(request: CreateItemRequest): Observable<ItemRequest> {
+    return this.http.post<ItemRequest>(`${this.apiUrl}/item-requests`, request);
+  }
+
+  updateItemRequest(id: string, request: CreateItemRequest): Observable<ItemRequest> {
+    return this.http.put<ItemRequest>(`${this.apiUrl}/item-requests/${id}`, request);
+  }
+
+  withdrawItemRequest(id: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/item-requests/${id}/withdraw`, {});
+  }
+
+  deleteItemRequest(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/item-requests/${id}`);
   }
 }
