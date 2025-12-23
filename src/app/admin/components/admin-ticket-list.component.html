@@ -1,0 +1,196 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">Support Tickets</h1>
+    <div class="text-sm text-gray-500">
+      {{ filteredTickets.length }} of {{ tickets.length }} tickets
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow-sm border p-4">
+    <div class="flex flex-wrap gap-4">
+      <!-- Status Filter -->
+      <div class="flex items-center space-x-2">
+        <label for="status-filter" class="text-sm font-medium text-gray-700">Status:</label>
+        <select
+          id="status-filter"
+          [value]="selectedStatus"
+          (change)="onStatusFilterChange($any($event.target).value)"
+          class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option *ngFor="let status of statuses" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Assignment Filter -->
+      <div class="flex items-center space-x-2">
+        <label for="assignment-filter" class="text-sm font-medium text-gray-700">Assignment:</label>
+        <select
+          id="assignment-filter"
+          [value]="selectedAssignment"
+          (change)="onAssignmentFilterChange($any($event.target).value)"
+          class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option *ngFor="let assignment of assignments" [value]="assignment.value">
+            {{ assignment.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Refresh Button -->
+      <button
+        (click)="loadTickets()"
+        [disabled]="isLoading"
+        class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+      >
+        <span *ngIf="isLoading" class="inline-flex items-center">
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading...
+        </span>
+        <span *ngIf="!isLoading">Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading && tickets.length === 0" class="text-center py-12">
+    <div class="inline-flex items-center space-x-2 text-gray-600">
+      <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Loading tickets...</span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredTickets.length === 0 && tickets.length === 0" class="text-center py-12">
+    <div class="text-gray-400 mb-4">
+      <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No Support Tickets</h3>
+    <p class="text-gray-500">No support tickets have been submitted yet.</p>
+  </div>
+
+  <!-- No Results State -->
+  <div *ngIf="!isLoading && filteredTickets.length === 0 && tickets.length > 0" class="text-center py-12">
+    <div class="text-gray-400 mb-4">
+      <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No Matching Tickets</h3>
+    <p class="text-gray-500">No tickets match your current filter criteria.</p>
+  </div>
+
+  <!-- Tickets Table -->
+  <div *ngIf="!isLoading && filteredTickets.length > 0" class="bg-white rounded-lg shadow-sm border overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let ticket of filteredTickets" class="hover:bg-gray-50">
+            <!-- Ticket Info -->
+            <td class="px-6 py-4">
+              <div class="max-w-sm">
+                <div class="text-sm font-medium text-gray-900 truncate">{{ ticket.subject }}</div>
+                <div class="text-sm text-gray-500 truncate">by {{ ticket.submittedBy }}</div>
+              </div>
+            </td>
+
+            <!-- Category -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                {{ ticket.category }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ' + getStatusClass(ticket.status)">
+                {{ ticket.status.replace('_', ' ') }}
+              </span>
+            </td>
+
+            <!-- Priority -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [class]="'text-sm font-medium capitalize ' + getPriorityClass(ticket.priority)">
+                {{ ticket.priority }}
+              </span>
+            </td>
+
+            <!-- Assigned To -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [class]="ticket.assignedTo === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
+                {{ ticket.assignedTo }}
+              </span>
+            </td>
+
+            <!-- Submitted Date -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ formatDate(ticket.submittedAt) }}
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+              <!-- Reassign Button -->
+              <button
+                (click)="reassignTicket(ticket)"
+                class="text-indigo-600 hover:text-indigo-900"
+                title="Reassign ticket"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </button>
+
+              <!-- Status Update Dropdown -->
+              <div class="inline-block relative">
+                <select
+                  [value]="ticket.status"
+                  (change)="updateTicketStatus(ticket, $any($event.target).value)"
+                  class="appearance-none bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option *ngFor="let status of TICKET_STATUSES" [value]="status.value">
+                    {{ status.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- View Details Link -->
+              <a
+                [routerLink]="['/admin/support-tickets', ticket.id]"
+                class="text-blue-600 hover:text-blue-900"
+                title="View details"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
