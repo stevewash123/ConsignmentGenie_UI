@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 
@@ -39,10 +40,15 @@ describe('AdminDashboardComponent', () => {
       'getRecentSignups'
     ]);
 
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      queryParams: of({})
+    });
+
     await TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, AdminDashboardComponent, AdminLayoutComponent],
       providers: [
-        { provide: AdminService, useValue: spy }
+        { provide: AdminService, useValue: spy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy }
       ]
     }).compileComponents();
 
@@ -90,12 +96,13 @@ describe('AdminDashboardComponent', () => {
     });
 
     it('should handle metrics loading error gracefully', () => {
-      adminServiceMock.getMetrics.and.returnValue(throwError(() => new Error('API Error')));
+      const httpError = { status: 0, message: 'API Error' };
+      adminServiceMock.getMetrics.and.returnValue(throwError(httpError));
       spyOn(console, 'error');
 
       component.ngOnInit();
 
-      expect(console.error).toHaveBeenCalledWith('Error loading admin metrics:', jasmine.any(Error));
+      expect(console.error).toHaveBeenCalledWith('Error loading admin metrics:', httpError);
       expect(component.metrics()).toEqual({
         activeOrganizations: 8,
         newSignups: 3,
@@ -105,12 +112,13 @@ describe('AdminDashboardComponent', () => {
 
 
     it('should handle recent signups loading error gracefully', () => {
-      adminServiceMock.getRecentSignups.and.returnValue(throwError(() => new Error('API Error')));
+      const signupsError = { status: 0, message: 'API Error' };
+      adminServiceMock.getRecentSignups.and.returnValue(throwError(signupsError));
       spyOn(console, 'error');
 
       component.ngOnInit();
 
-      expect(console.error).toHaveBeenCalledWith('Error loading recent signups:', jasmine.any(Error));
+      expect(console.error).toHaveBeenCalledWith('Error loading recent signups:', signupsError);
       expect(component.recentSignups().length).toBeGreaterThan(0); // Should have mock fallback data
     });
   });

@@ -90,10 +90,11 @@ describe('InventoryListComponent', () => {
       'updateItemStatus',
       'deleteItem'
     ]);
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'isActive'], {
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'isActive', 'createUrlTree'], {
       events: of(),  // RouterLinkActive subscribes to router.events
       url: '/owner/inventory'
     });
+    routerSpy.createUrlTree.and.returnValue({} as any); // Mock UrlTree
     const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
       'start',
       'stop',
@@ -316,7 +317,8 @@ describe('InventoryListComponent', () => {
 
   describe('Error State', () => {
     it('should set error state on API failure', () => {
-      mockInventoryService.getItems.and.returnValue(throwError(() => new Error('API Error')));
+      const httpError = { status: 0, message: 'API Error' };
+      mockInventoryService.getItems.and.returnValue(throwError(httpError));
       fixture.detectChanges();
 
       expect(component.error()).toBe('Failed to load inventory items. Please try again.');
@@ -560,7 +562,8 @@ describe('InventoryListComponent', () => {
 
     it('should set error on delete failure', () => {
       spyOn(window, 'confirm').and.returnValue(true);
-      mockInventoryService.deleteItem.and.returnValue(throwError(() => new Error('Delete failed')));
+      const httpError = { status: 0, message: 'Delete failed' };
+      mockInventoryService.deleteItem.and.returnValue(throwError(httpError));
 
       component.deleteItem(mockItems[0]);
 
@@ -569,7 +572,8 @@ describe('InventoryListComponent', () => {
 
     it('should set error on status update failure', () => {
       spyOn(window, 'confirm').and.returnValue(true);
-      mockInventoryService.updateItemStatus.and.returnValue(throwError(() => new Error('Update failed')));
+      const httpError = { status: 0, message: 'Update failed' };
+      mockInventoryService.updateItemStatus.and.returnValue(throwError(httpError));
 
       component.markAsRemoved(mockItems[0]);
 

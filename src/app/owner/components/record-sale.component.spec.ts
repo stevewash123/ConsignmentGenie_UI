@@ -136,7 +136,8 @@ describe('RecordSaleComponent', () => {
   });
 
   it('should handle sale completion error', () => {
-    mockRecordSaleService.completeSale.and.returnValue(throwError(() => new Error('Network error')));
+    const httpError = { status: 0, message: 'Network error' };
+    mockRecordSaleService.completeSale.and.returnValue(throwError(httpError));
     component.cartItems.set([mockCartItem]);
 
     component.completeSale();
