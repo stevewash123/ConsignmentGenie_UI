@@ -71,14 +71,15 @@ describe('ItemSearchComponent', () => {
   }));
 
   it('should handle initial items loading error', fakeAsync(() => {
-    mockRecordSaleService.getAvailableItems.and.returnValue(throwError(() => new Error('Network error')));
+    const httpError = { status: 0, message: 'Network error' };
+    mockRecordSaleService.getAvailableItems.and.returnValue(throwError(httpError));
     spyOn(console, 'error');
 
     component.ngOnInit();
     tick(500);
 
     expect(component.isLoading()).toBe(false);
-    expect(console.error).toHaveBeenCalledWith('Failed to load items:', jasmine.any(Error));
+    expect(console.error).toHaveBeenCalledWith('Failed to load items:', httpError);
   }));
 
   it('should filter items by name', () => {
@@ -163,7 +164,8 @@ describe('ItemSearchComponent', () => {
     tick(500); // Complete initial load
 
     mockRecordSaleService.getAvailableItems.calls.reset();
-    mockRecordSaleService.getAvailableItems.and.returnValue(throwError(() => new Error('Search error')));
+    const searchError = { status: 0, message: 'Search error' };
+    mockRecordSaleService.getAvailableItems.and.returnValue(throwError(searchError));
     spyOn(console, 'error');
 
     const inputEvent = new Event('input');
@@ -176,7 +178,7 @@ describe('ItemSearchComponent', () => {
     tick(200);
 
     expect(component.isLoading()).toBe(false);
-    expect(console.error).toHaveBeenCalledWith('Search failed:', jasmine.any(Error));
+    expect(console.error).toHaveBeenCalledWith('Search failed:', searchError);
   }));
 
   it('should emit item selected event', () => {

@@ -235,7 +235,8 @@ describe('AuthInterceptor', () => {
 
         authServiceSpy.getToken.and.returnValue(originalToken);
         authServiceSpy.isTokenExpired.and.returnValue(false);
-        authServiceSpy.refreshToken.and.returnValue(throwError(() => new Error('Refresh failed')));
+        const refreshError = { status: 0, message: 'Refresh failed' };
+        authServiceSpy.refreshToken.and.returnValue(throwError(refreshError));
 
         httpClient.get('/api/users').subscribe({
           next: () => fail('should have failed'),
