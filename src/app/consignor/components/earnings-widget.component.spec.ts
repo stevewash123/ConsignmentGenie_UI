@@ -15,7 +15,7 @@ describe('EarningsWidgetComponent', () => {
     pendingTooltip: 'Expected payout date 1/2/2025',
     paidThisMonth: 485.00,
     payoutCountThisMonth: 2,
-    nextPayoutDate: new Date('2025-01-02')
+    nextPayoutDate: new Date('2025-01-02T12:00:00')
   };
 
   beforeEach(async () => {
@@ -125,7 +125,7 @@ describe('EarningsWidgetComponent', () => {
       pendingTooltip: 'Expected payout date 2/1/2025',
       paidThisMonth: 100.00,
       payoutCountThisMonth: 1,
-      nextPayoutDate: new Date('2025-02-01')
+      nextPayoutDate: new Date('2025-02-01T12:00:00')
     };
 
     mockEarningsService.getEarningsSummary.and.returnValue(of(singlePayoutEarnings));
@@ -136,7 +136,7 @@ describe('EarningsWidgetComponent', () => {
   });
 
   it('should show loading state', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary).pipe());
+    component.earningsSummary = null;
     component.loading = true;
     fixture.detectChanges();
 
@@ -171,7 +171,7 @@ describe('EarningsWidgetComponent', () => {
   });
 
   it('should format payout dates correctly', () => {
-    const testDate = new Date('2025-03-15');
+    const testDate = new Date('2025-03-15T12:00:00');
     const formatted = component.formatPayoutDate(testDate);
     expect(formatted).toBe('Mar 15');
   });

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ConditionService, ConditionOption } from './condition.service';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 describe('ConditionService', () => {
   let service: ConditionService;

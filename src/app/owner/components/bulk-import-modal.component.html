@@ -103,11 +103,11 @@
                   </span>
                 </td>
                 <td class="compact-cell">{{ row.rowNumber }}</td>
-                <td class="compact-cell">{{ row.data.Name }}</td>
-                <td class="compact-cell">{{ row.data.Price }}</td>
-                <td class="compact-cell">{{ row.data.ConsignorNumber }}</td>
-                <td class="compact-cell">{{ row.data.Category }}</td>
-                <td class="compact-cell">{{ row.data.Condition }}</td>
+                <td class="compact-cell">{{ row.data.name }}</td>
+                <td class="compact-cell">{{ row.data.price }}</td>
+                <td class="compact-cell">{{ row.data.consignorNumber }}</td>
+                <td class="compact-cell">{{ row.data.category }}</td>
+                <td class="compact-cell">{{ row.data.condition }}</td>
                 <td class="compact-cell">
                   <ul class="error-list" *ngIf="!row.isValid">
                     <li class="error-item" *ngFor="let error of row.errors">{{ error }}</li>

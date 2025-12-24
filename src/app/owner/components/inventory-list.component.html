@@ -57,8 +57,8 @@
 
         <select class="filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
           <option value="">All Categories</option>
-          @for (category of categories(); track category.CategoryId) {
-            <option [value]="category.Name">{{ category.Name }}</option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.name">{{ category.name }}</option>
           }
         </select>
 
@@ -81,7 +81,7 @@
   <!-- Inventory Content -->
   <div *ngIf="!isInventoryLoading()">
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!itemsResult() || !itemsResult()!.Items || itemsResult()!.Items.length === 0">
+    <div class="empty-state" *ngIf="!itemsResult() || !itemsResult()!.items || itemsResult()!.items.length === 0">
       <div class="empty-state-icon">📦</div>
       <div class="empty-state-title">No Inventory Items Found</div>
       <div class="empty-state-description">
@@ -93,11 +93,11 @@
     </div>
 
     <!-- Inventory List -->
-    <div *ngIf="itemsResult() && itemsResult()!.Items && itemsResult()!.Items.length > 0">
+    <div *ngIf="itemsResult() && itemsResult()!.items && itemsResult()!.items.length > 0">
       <!-- Content Header -->
       <div class="content-header">
         <div class="results-info">
-          Showing {{ ((currentPage() - 1) * pageSize) + 1 }}-{{ Math.min(currentPage() * pageSize, itemsResult()!.TotalCount) }} of {{ itemsResult()!.TotalCount }} items
+          Showing {{ ((currentPage() - 1) * pageSize) + 1 }}-{{ Math.min(currentPage() * pageSize, itemsResult()!.totalCount) }} of {{ itemsResult()!.totalCount }} items
         </div>
         <select [(ngModel)]="pageSize" (change)="changePageSize()" class="page-size-select">
           <option value="10">10 per page</option>
@@ -109,40 +109,40 @@
 
       <!-- Inventory Cards -->
       <div class="inventory-list">
-        <div class="inventory-card" *ngFor="let item of itemsResult()!.Items">
+        <div class="inventory-card" *ngFor="let item of itemsResult()!.items">
           <img
-            [src]="item.PrimaryImageUrl || 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=80&h=80&fit=crop'"
-            [alt]="item.Title"
+            [src]="item.primaryImageUrl || 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=80&h=80&fit=crop'"
+            [alt]="item.title"
             class="inventory-thumbnail">
 
           <div class="inventory-info">
             <div class="inventory-header">
-              <h3 class="inventory-title">{{ item.Title }}</h3>
+              <h3 class="inventory-title">{{ item.title }}</h3>
               <div class="inventory-badges">
-                <span class="status-badge" [class]="getStatusClass(item.Status)">
-                  {{ getStatusEmoji(item.Status) }} {{ item.Status }}
+                <span class="status-badge" [class]="getStatusClass(item.status)">
+                  {{ getStatusEmoji(item.status) }} {{ item.status }}
                 </span>
-                <span class="condition-badge" [class]="getConditionClass(item.Condition)">
-                  {{ getConditionLabel(item.Condition) }}
+                <span class="condition-badge" [class]="getConditionClass(item.condition)">
+                  {{ getConditionLabel(item.condition) }}
                 </span>
               </div>
             </div>
             <div class="inventory-meta">
               <div class="meta-row">
                 <span class="meta-label">SKU:</span>
-                <span class="meta-value">{{ item.Sku }}</span>
+                <span class="meta-value">{{ item.sku }}</span>
               </div>
               <div class="meta-row">
                 <span class="meta-label">Category:</span>
-                <span class="meta-value">{{ item.Category }}</span>
+                <span class="meta-value">{{ item.category }}</span>
               </div>
               <div class="meta-row">
                 <span class="meta-label">Consignor:</span>
-                <span class="meta-value">{{ item.ConsignorName }}</span>
+                <span class="meta-value">{{ item.consignorName }}</span>
               </div>
               <div class="meta-row">
                 <span class="meta-label">Received:</span>
-                <span class="meta-value">{{ item.ReceivedDate | date:'MMM d, y' }}</span>
+                <span class="meta-value">{{ item.receivedDate | date:'MMM d, y' }}</span>
               </div>
               <div class="meta-row">
                 <span class="meta-label">Expires:</span>
@@ -152,18 +152,18 @@
               </div>
             </div>
             <div class="inventory-price">
-              ${{ item.Price | number:'1.2-2' }}
+              ${{ item.price | number:'1.2-2' }}
             </div>
           </div>
 
           <div class="inventory-actions">
-            <button class="action-button primary" (click)="viewItem(item.ItemId)" title="View Details">
+            <button class="action-button primary" (click)="viewItem(item.itemId)" title="View Details">
               👁️ View
             </button>
-            <button class="action-button" (click)="editItem(item.ItemId)" title="Edit">
+            <button class="action-button" (click)="editItem(item.itemId)" title="Edit">
               ✏️ Edit
             </button>
-            @for (action of getAvailableStatusActions(item.Status); track action.action) {
+            @for (action of getAvailableStatusActions(item.status); track action.action) {
               <button class="action-button"
                       (click)="openStatusChangeModal(item, action)"
                       [title]="action.label">
@@ -178,9 +178,9 @@
       </div>
 
       <!-- Pagination -->
-      <div class="pagination" *ngIf="itemsResult()!.TotalPages > 1">
+      <div class="pagination" *ngIf="itemsResult()!.totalPages > 1">
         <div class="pagination-info">
-          Showing {{ ((currentPage() - 1) * pageSize) + 1 }}-{{ Math.min(currentPage() * pageSize, itemsResult()!.TotalCount) }} of {{ itemsResult()!.TotalCount }} items
+          Showing {{ ((currentPage() - 1) * pageSize) + 1 }}-{{ Math.min(currentPage() * pageSize, itemsResult()!.totalCount) }} of {{ itemsResult()!.totalCount }} items
         </div>
         <div class="pagination-controls">
           <button
@@ -199,9 +199,9 @@
           </button>
           <button
             class="pagination-button"
-            [class.disabled]="currentPage() === itemsResult()!.TotalPages"
+            [class.disabled]="currentPage() === itemsResult()!.totalPages"
             (click)="goToPage(currentPage() + 1)"
-            [disabled]="currentPage() === itemsResult()!.TotalPages">
+            [disabled]="currentPage() === itemsResult()!.totalPages">
             Next
           </button>
         </div>

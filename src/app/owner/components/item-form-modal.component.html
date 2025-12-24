@@ -107,8 +107,8 @@
                 [disabled]="isSubmitting"
                 required>
                 <option value="">Select Category</option>
-                <option *ngFor="let category of categories()" [value]="category.CategoryId">
-                  {{ category.Name }}
+                <option *ngFor="let category of categories()" [value]="category.id">
+                  {{ category.name }}
                 </option>
               </select>
               <div class="form-error" *ngIf="errors['categoryId']">

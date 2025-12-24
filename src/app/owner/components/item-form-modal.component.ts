@@ -342,15 +342,15 @@ export class ItemFormModalComponent implements OnInit {
   private populateForm() {
     if (this.editingItem) {
       this.formData = {
-        title: this.editingItem.Title,
-        description: this.editingItem.Description || '',
-        sku: this.editingItem.Sku,
-        price: this.editingItem.Price,
-        consignorId: this.editingItem.ConsignorId,
+        title: this.editingItem.title,
+        description: this.editingItem.description || '',
+        sku: this.editingItem.sku,
+        price: this.editingItem.price,
+        consignorId: this.editingItem.consignorId,
         categoryId: '', // Will need to map category name to ID
-        condition: this.editingItem.Condition,
-        receivedDate: (this.editingItem as any).ReceivedDate || new Date().toISOString().split('T')[0],
-        expirationDate: (this.editingItem as any).ExpirationDate || ''
+        condition: this.editingItem.condition,
+        receivedDate: (this.editingItem as any).receivedDate || new Date().toISOString().split('T')[0],
+        expirationDate: (this.editingItem as any).expirationDate || ''
       };
 
       // Calculate expiration date if missing
@@ -422,7 +422,7 @@ export class ItemFormModalComponent implements OnInit {
     };
 
     const operation = this.editingItem
-      ? this.inventoryService.updateItem(this.editingItem.ItemId, request as UpdateItemRequest)
+      ? this.inventoryService.updateItem(this.editingItem.itemId, request as UpdateItemRequest)
       : this.inventoryService.createItem(request as CreateItemRequest);
 
     operation.subscribe({
@@ -430,20 +430,20 @@ export class ItemFormModalComponent implements OnInit {
         // Convert ItemDetailDto to ItemListDto format for the parent component
         const itemDetailData = response.data;
         const itemListData: ItemListDto = {
-          ItemId: itemDetailData.ItemId,
-          Sku: itemDetailData.Sku,
-          Title: itemDetailData.Title,
-          Description: itemDetailData.Description,
-          Price: itemDetailData.Price,
-          Category: itemDetailData.Category,
-          Condition: itemDetailData.Condition,
-          Status: itemDetailData.Status,
-          PrimaryImageUrl: itemDetailData.Images?.[0]?.ImageUrl || null,
-          ReceivedDate: itemDetailData.ReceivedDate,
-          SoldDate: itemDetailData.SoldDate,
-          ConsignorId: itemDetailData.ConsignorId,
-          ConsignorName: itemDetailData.ConsignorName,
-          CommissionRate: itemDetailData.CommissionRate
+          itemId: itemDetailData.itemId,
+          sku: itemDetailData.sku,
+          title: itemDetailData.title,
+          description: itemDetailData.description,
+          price: itemDetailData.price,
+          category: itemDetailData.category,
+          condition: itemDetailData.condition,
+          status: itemDetailData.status,
+          primaryImageUrl: itemDetailData.images?.[0]?.imageUrl || null,
+          receivedDate: itemDetailData.receivedDate,
+          soldDate: itemDetailData.soldDate,
+          consignorId: itemDetailData.consignorId,
+          consignorName: itemDetailData.consignorName,
+          commissionRate: itemDetailData.commissionRate
         };
         this.itemSaved.emit(itemListData);
         this.close();

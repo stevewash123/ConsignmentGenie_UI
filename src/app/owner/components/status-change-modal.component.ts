@@ -229,7 +229,7 @@ export class StatusChangeModalComponent {
 
   getConfirmationMessage(): string {
     if (!this.statusAction || !this.item) return '';
-    return `Are you sure you want to mark "${this.item.Title}" as ${this.statusAction.action.toLowerCase()}?`;
+    return `Are you sure you want to mark "${this.item.title}" as ${this.statusAction.action.toLowerCase()}?`;
   }
 
   close() {
@@ -252,7 +252,7 @@ export class StatusChangeModalComponent {
     this.error = '';
 
     this.itemStatusService.changeStatus(
-      this.item.ItemId,
+      this.item.itemId,
       this.statusAction.action,
       this.reason || undefined
     ).subscribe({

@@ -214,7 +214,7 @@
             <label for="consignmentPeriod">Default Consignment Period</label>
             <select
               id="consignmentPeriod"
-              [(ngModel)]="settings()!.Items.DefaultConsignmentPeriodDays"
+              [(ngModel)]="settings()!.items.defaultConsignmentPeriodDays"
               name="consignmentPeriod"
               class="form-select">
               <option value="30">30 days</option>
@@ -230,19 +230,19 @@
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.Items.EnableAutoMarkdowns"
+                [(ngModel)]="settings()!.items.enableAutoMarkdowns"
                 name="enableMarkdowns">
               <span class="checkmark"></span>
               Enable automatic markdowns
             </label>
 
-            <div class="markdown-schedule" *ngIf="settings()?.Items.EnableAutoMarkdowns">
+            <div class="markdown-schedule" *ngIf="settings()?.items.enableAutoMarkdowns">
               <div class="markdown-item">
                 <span class="markdown-label">After 30 days:</span>
                 <div class="input-with-suffix">
                   <input
                     type="number"
-                    [(ngModel)]="settings()!.Items.MarkdownSchedule.After30Days"
+                    [(ngModel)]="settings()!.items.markdownSchedule.after30Days"
                     name="markdown30"
                     class="form-input markdown-input"
                     min="0"
@@ -257,7 +257,7 @@
                 <div class="input-with-suffix">
                   <input
                     type="number"
-                    [(ngModel)]="settings()!.Items.MarkdownSchedule.After60Days"
+                    [(ngModel)]="settings()!.items.markdownSchedule.after60Days"
                     name="markdown60"
                     class="form-input markdown-input"
                     min="0"
@@ -274,7 +274,7 @@
                     <input
                       type="radio"
                       value="donate"
-                      [(ngModel)]="settings()!.Items.MarkdownSchedule.After90DaysAction"
+                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
                       name="after90Action">
                     <span class="radio-mark"></span>
                     Donate
@@ -283,7 +283,7 @@
                     <input
                       type="radio"
                       value="return"
-                      [(ngModel)]="settings()!.Items.MarkdownSchedule.After90DaysAction"
+                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
                       name="after90Action">
                     <span class="radio-mark"></span>
                     Return to consignor

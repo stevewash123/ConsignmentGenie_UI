@@ -539,14 +539,14 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     const errors: string[] = [];
 
     // Required fields
-    if (!data.Name || data.Name.trim() === '') {
+    if (!data.name || data.name.trim() === '') {
       errors.push('Name is required');
     }
 
-    if (!data.Price || data.Price.trim() === '') {
+    if (!data.price || data.price.trim() === '') {
       errors.push('Price is required');
     } else {
-      const price = parseFloat(data.Price);
+      const price = parseFloat(data.price);
       if (isNaN(price) || price <= 0) {
         errors.push('Price must be a positive number');
       }
@@ -563,9 +563,9 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     }
 
     // Optional but validated if present
-    if (data.Condition && data.Condition.trim() !== '') {
+    if (data.condition && data.condition.trim() !== '') {
       const validConditions = ['New', 'LikeNew', 'Good', 'Fair', 'Poor'];
-      if (!validConditions.includes(data.Condition)) {
+      if (!validConditions.includes(data.condition)) {
         errors.push('Condition must be: New, LikeNew, Good, Fair, or Poor');
       }
     }

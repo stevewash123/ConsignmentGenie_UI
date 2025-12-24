@@ -189,9 +189,9 @@ export class CategoriesComponent implements OnInit {
 
   lookupItems = (): LookupItem[] => {
     return this.categories().map(category => ({
-      id: category.CategoryId,
-      name: category.Name,
-      count: category.ItemCount || 0
+      id: category.id,
+      name: category.name,
+      count: 0
     }));
   };
 
@@ -221,7 +221,7 @@ export class CategoriesComponent implements OnInit {
     this.clearMessages();
 
     // Check for duplicate names
-    if (this.categories().some(cat => cat.Name.toLowerCase() === name.toLowerCase())) {
+    if (this.categories().some(cat => cat.name.toLowerCase() === name.toLowerCase())) {
       this.showError('A category with this name already exists');
       return;
     }
@@ -247,7 +247,7 @@ export class CategoriesComponent implements OnInit {
   onRenameCategory(event: {id: string, name: string}) {
     this.clearMessages();
 
-    const category = this.categories().find(c => c.CategoryId === event.id);
+    const category = this.categories().find(c => c.id === event.id);
     if (!category) {
       this.showError('Category not found');
       return;
@@ -255,8 +255,8 @@ export class CategoriesComponent implements OnInit {
 
     // Check for duplicate names (excluding current category)
     if (this.categories().some(cat =>
-      cat.CategoryId !== event.id &&
-      cat.Name.toLowerCase() === event.name.toLowerCase()
+      cat.id !== event.id &&
+      cat.name.toLowerCase() === event.name.toLowerCase()
     )) {
       this.showError('A category with this name already exists');
       return;
@@ -264,7 +264,7 @@ export class CategoriesComponent implements OnInit {
 
     const request: UpdateCategoryRequest = {
       name: event.name,
-      displayOrder: category.DisplayOrder
+      displayOrder: category.displayOrder
     };
 
     this.categoryService.update(event.id, request).subscribe({
@@ -286,7 +286,7 @@ export class CategoriesComponent implements OnInit {
   onDeleteCategory(id: string) {
     this.clearMessages();
 
-    const category = this.categories().find(c => c.CategoryId === id);
+    const category = this.categories().find(c => c.id === id);
     if (!category) {
       this.showError('Category not found');
       return;
@@ -295,7 +295,7 @@ export class CategoriesComponent implements OnInit {
     this.categoryService.delete(id).subscribe({
       next: (response) => {
         if (response.success) {
-          this.showSuccess(`Category "${category.Name}" deleted successfully`);
+          this.showSuccess(`Category "${category.name}" deleted successfully`);
           this.loadCategories(); // Refresh the list
         } else {
           this.showError(response.message || 'Failed to delete category');
@@ -312,7 +312,7 @@ export class CategoriesComponent implements OnInit {
     this.clearMessages();
 
     const request: ReorderCategoriesRequest = {
-      CategoryIds: categoryIds
+      categoryIds: categoryIds
     };
 
     this.categoryService.reorder(request).subscribe({

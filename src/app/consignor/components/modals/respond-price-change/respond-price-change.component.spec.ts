@@ -67,7 +67,7 @@ describe('RespondPriceChangeComponent', () => {
   });
 
   it('should disable submit button when no action is selected', () => {
-    const submitButton = fixture.nativeElement.querySelector('button[type="button"]:last-child');
+    const submitButton = fixture.nativeElement.querySelector('.modal-footer button:last-child');
     expect(submitButton.disabled).toBeTruthy();
   });
 
@@ -75,7 +75,7 @@ describe('RespondPriceChangeComponent', () => {
     component.selectAction('accept');
     fixture.detectChanges();
 
-    const submitButton = fixture.nativeElement.querySelector('button[type="button"]:last-child');
+    const submitButton = fixture.nativeElement.querySelector('.modal-footer button:last-child');
     expect(submitButton.disabled).toBeFalsy();
   });
 
@@ -90,7 +90,7 @@ describe('RespondPriceChangeComponent', () => {
   it('should emit close event when cancel is clicked', () => {
     spyOn(component.close, 'emit');
 
-    const cancelButton = fixture.nativeElement.querySelector('button:first-child');
+    const cancelButton = fixture.nativeElement.querySelector('.modal-footer button:first-child');
     cancelButton.click();
 
     expect(component.close.emit).toHaveBeenCalled();

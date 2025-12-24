@@ -26,7 +26,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label for="defaultSplit">Default Split (Shop/Consignor)</label>
             <select
               id="defaultSplit"
-              [(ngModel)]="settings()!.Commission.DefaultSplit"
+              [(ngModel)]="settings()!.commission.defaultSplit"
               name="defaultSplit"
               class="form-select">
               <option value="70/30">70 / 30 - Shop keeps 70%, Consignor gets 30%</option>
@@ -40,7 +40,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.Commission.AllowCustomSplitsPerConsignor"
+                [(ngModel)]="settings()!.commission.allowCustomSplitsPerConsignor"
                 name="allowCustomConsignor">
               <span class="checkmark"></span>
               Allow custom splits per consignor
@@ -49,7 +49,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.Commission.AllowCustomSplitsPerItem"
+                [(ngModel)]="settings()!.commission.allowCustomSplitsPerItem"
                 name="allowCustomItem">
               <span class="checkmark"></span>
               Allow custom splits per item
@@ -67,11 +67,11 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
               <label
                 class="radio-label permission-option"
                 *ngFor="let option of submissionModeOptions"
-                [class.selected]="settings()?.ConsignorPermissions?.ItemSubmissionMode === option.value">
+                [class.selected]="settings()?.consignorPermissions?.itemSubmissionMode === option.value">
                 <input
                   type="radio"
                   [value]="option.value"
-                  [(ngModel)]="settings()!.ConsignorPermissions.ItemSubmissionMode"
+                  [(ngModel)]="settings()!.consignorPermissions.itemSubmissionMode"
                   name="itemSubmissionMode">
                 <span class="radio-mark"></span>
                 <div class="option-content">
@@ -93,7 +93,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
               <input
                 type="number"
                 id="salesTaxRate"
-                [(ngModel)]="settings()!.Tax.SalesTaxRate"
+                [(ngModel)]="settings()!.tax.salesTaxRate"
                 name="salesTaxRate"
                 class="form-input"
                 placeholder="8.25"
@@ -108,7 +108,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.Tax.TaxIncludedInPrices"
+                [(ngModel)]="settings()!.tax.taxIncludedInPrices"
                 name="taxIncluded">
               <span class="checkmark"></span>
               Tax is included in listed prices
@@ -117,7 +117,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.Tax.ChargeTaxOnShipping"
+                [(ngModel)]="settings()!.tax.chargeTaxOnShipping"
                 name="taxOnShipping">
               <span class="checkmark"></span>
               Charge tax on shipping
@@ -129,7 +129,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <input
               type="text"
               id="taxIdEin"
-              [(ngModel)]="settings()!.Tax.TaxIdEin"
+              [(ngModel)]="settings()!.tax.taxIdEin"
               name="taxIdEin"
               class="form-input"
               placeholder="12-3456789">
@@ -145,7 +145,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <input
               type="number"
               id="holdPeriod"
-              [(ngModel)]="settings()!.Payouts.HoldPeriodDays"
+              [(ngModel)]="settings()!.payouts.holdPeriodDays"
               name="holdPeriod"
               class="form-input"
               placeholder="7"
@@ -164,7 +164,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
               <input
                 type="number"
                 id="minimumPayout"
-                [(ngModel)]="settings()!.Payouts.MinimumAmount"
+                [(ngModel)]="settings()!.payouts.minimumAmount"
                 name="minimumPayout"
                 class="form-input"
                 placeholder="25.00"
@@ -187,7 +187,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
                 <input
                   type="radio"
                   value="NoRefunds"
-                  [(ngModel)]="settings()!.Payouts.RefundPolicy"
+                  [(ngModel)]="settings()!.payouts.refundPolicy"
                   name="refundPolicy">
                 <span class="radio-mark"></span>
                 No refunds
@@ -196,24 +196,24 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
                 <input
                   type="radio"
                   value="WithinDays"
-                  [(ngModel)]="settings()!.Payouts.RefundPolicy"
+                  [(ngModel)]="settings()!.payouts.refundPolicy"
                   name="refundPolicy">
                 <span class="radio-mark"></span>
                 Within <input
                   type="number"
-                  [(ngModel)]="settings()!.Payouts.RefundWindowDays"
+                  [(ngModel)]="settings()!.payouts.refundWindowDays"
                   name="refundWindowDays"
                   class="inline-input"
                   placeholder="7"
                   min="1"
                   max="90"
-                  [disabled]="settings()!.Payouts.RefundPolicy !== 'WithinDays'"> days of sale
+                  [disabled]="settings()!.payouts.refundPolicy !== 'WithinDays'"> days of sale
               </label>
               <label class="radio-label">
                 <input
                   type="radio"
                   value="UntilPayout"
-                  [(ngModel)]="settings()!.Payouts.RefundPolicy"
+                  [(ngModel)]="settings()!.payouts.refundPolicy"
                   name="refundPolicy">
                 <span class="radio-mark"></span>
                 Until consignor is paid (recommended)
@@ -231,7 +231,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label for="defaultPayoutMethod">Default Payout Method</label>
             <select
               id="defaultPayoutMethod"
-              [(ngModel)]="settings()!.Payouts.DefaultPayoutMethod"
+              [(ngModel)]="settings()!.payouts.defaultPayoutMethod"
               name="defaultPayoutMethod"
               class="form-select">
               <option value="Check">Check</option>
@@ -252,7 +252,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label for="consignmentPeriod">Default Consignment Period</label>
             <select
               id="consignmentPeriod"
-              [(ngModel)]="settings()!.Items.DefaultConsignmentPeriodDays"
+              [(ngModel)]="settings()!.items.defaultConsignmentPeriodDays"
               name="consignmentPeriod"
               class="form-select">
               <option value="30">30 days</option>
@@ -268,19 +268,19 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [(ngModel)]="settings()!.Items.EnableAutoMarkdowns"
+                [(ngModel)]="settings()!.items.enableAutoMarkdowns"
                 name="enableMarkdowns">
               <span class="checkmark"></span>
               Enable automatic markdowns
             </label>
 
-            <div class="markdown-schedule" *ngIf="settings()?.Items.EnableAutoMarkdowns">
+            <div class="markdown-schedule" *ngIf="settings()?.items.enableAutoMarkdowns">
               <div class="markdown-item">
                 <span class="markdown-label">After 30 days:</span>
                 <div class="input-with-suffix">
                   <input
                     type="number"
-                    [(ngModel)]="settings()!.Items.MarkdownSchedule.After30Days"
+                    [(ngModel)]="settings()!.items.markdownSchedule.after30Days"
                     name="markdown30"
                     class="form-input markdown-input"
                     min="0"
@@ -295,7 +295,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
                 <div class="input-with-suffix">
                   <input
                     type="number"
-                    [(ngModel)]="settings()!.Items.MarkdownSchedule.After60Days"
+                    [(ngModel)]="settings()!.items.markdownSchedule.after60Days"
                     name="markdown60"
                     class="form-input markdown-input"
                     min="0"
@@ -312,7 +312,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
                     <input
                       type="radio"
                       value="donate"
-                      [(ngModel)]="settings()!.Items.MarkdownSchedule.After90DaysAction"
+                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
                       name="after90Action">
                     <span class="radio-mark"></span>
                     Donate
@@ -321,7 +321,7 @@ import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces
                     <input
                       type="radio"
                       value="return"
-                      [(ngModel)]="settings()!.Items.MarkdownSchedule.After90DaysAction"
+                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
                       name="after90Action">
                     <span class="radio-mark"></span>
                     Return to consignor
@@ -735,9 +735,9 @@ export class BusinessSettingsComponent implements OnInit {
       const response = await this.http.get<BusinessSettings>(`${environment.apiUrl}/api/organization/business-settings`).toPromise();
       if (response) {
         // Ensure ConsignorPermissions section exists with default value for backwards compatibility
-        if (!response.ConsignorPermissions) {
-          response.ConsignorPermissions = {
-            ItemSubmissionMode: ItemSubmissionMode.ApprovalRequired
+        if (!response.consignorPermissions) {
+          response.consignorPermissions = {
+            itemSubmissionMode: ItemSubmissionMode.ApprovalRequired
           };
         }
         this.settings.set(response);
@@ -755,18 +755,18 @@ export class BusinessSettingsComponent implements OnInit {
     const errors: string[] = [];
 
     // Validation: HoldPeriodDays: ≥ 0, ≤ 90
-    if (settings.Payouts.HoldPeriodDays < 0 || settings.Payouts.HoldPeriodDays > 90) {
+    if (settings.payouts.holdPeriodDays < 0 || settings.payouts.holdPeriodDays > 90) {
       errors.push('Hold period must be between 0 and 90 days');
     }
 
     // Validation: MinimumAmount: ≥ 0, ≤ 10000
-    if (settings.Payouts.MinimumAmount < 0 || settings.Payouts.MinimumAmount > 10000) {
+    if (settings.payouts.minimumAmount < 0 || settings.payouts.minimumAmount > 10000) {
       errors.push('Minimum payout amount must be between $0 and $10,000');
     }
 
     // Validation: RefundWindowDays: ≥ 1, ≤ 90 (only if RefundPolicy = WithinDays)
-    if (settings.Payouts.RefundPolicy === 'WithinDays') {
-      if (!settings.Payouts.RefundWindowDays || settings.Payouts.RefundWindowDays < 1 || settings.Payouts.RefundWindowDays > 90) {
+    if (settings.payouts.refundPolicy === 'WithinDays') {
+      if (!settings.payouts.refundWindowDays || settings.payouts.refundWindowDays < 1 || settings.payouts.refundWindowDays > 90) {
         errors.push('Refund window must be between 1 and 90 days when using "Within Days" policy');
       }
     }

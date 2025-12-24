@@ -594,7 +594,7 @@ export class InventoryListComponent implements OnInit {
     if (!result) return [];
 
     const current = this.currentPage();
-    const total = result.TotalPages;
+    const total = result.totalPages;
     const pages: number[] = [];
 
     let start = Math.max(1, current - 2);
@@ -664,7 +664,7 @@ export class InventoryListComponent implements OnInit {
     this.inventoryService.getItems(params).subscribe({
       next: (result) => {
         // Apply client-side expiration filtering
-        let filteredItems = result.Items;
+        let filteredItems = result.items;
 
         if (this.selectedExpiration) {
           filteredItems = filteredItems.filter(item => {
@@ -689,7 +689,7 @@ export class InventoryListComponent implements OnInit {
         const filteredResult = {
           ...result,
           Items: filteredItems,
-          TotalCount: filteredItems.length
+          totalCount: filteredItems.length
         };
 
         this.itemsResult.set(filteredResult);
@@ -764,7 +764,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   editItem(itemId: string) {
-    const item = this.itemsResult()?.Items.find(i => i.ItemId === itemId);
+    const item = this.itemsResult()?.items.find(i => i.itemId === itemId);
     if (item) {
       this.editingItem = item;
       this.isEditModalOpen = true;
@@ -772,13 +772,13 @@ export class InventoryListComponent implements OnInit {
   }
 
   markAsRemoved(item: ItemListDto) {
-    if (confirm(`Mark "${item.Title}" as removed?`)) {
+    if (confirm(`Mark "${item.title}" as removed?`)) {
       const request: UpdateItemStatusRequest = {
         status: 'Removed',
         reason: 'Marked as removed from inventory list'
       };
 
-      this.inventoryService.updateItemStatus(item.ItemId, request).subscribe({
+      this.inventoryService.updateItemStatus(item.itemId, request).subscribe({
         next: (response) => {
           if (response.success) {
             this.loadItems(); // Refresh the list
@@ -793,8 +793,8 @@ export class InventoryListComponent implements OnInit {
   }
 
   deleteItem(item: ItemListDto) {
-    if (confirm(`Are you sure you want to delete "${item.Title}"? This action cannot be undone.`)) {
-      this.inventoryService.deleteItem(item.ItemId).subscribe({
+    if (confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
+      this.inventoryService.deleteItem(item.itemId).subscribe({
         next: (response) => {
           if (response.success) {
             this.loadItems(); // Refresh the list
@@ -848,8 +848,8 @@ export class InventoryListComponent implements OnInit {
   }
 
   getStatusCount(status: string): number {
-    const items = this.itemsResult()?.Items || [];
-    return items.filter(item => item.Status === status).length;
+    const items = this.itemsResult()?.items || [];
+    return items.filter(item => item.status === status).length;
   }
 
   // Status change modal state
@@ -872,15 +872,15 @@ export class InventoryListComponent implements OnInit {
   onStatusChanged(event: { item: ItemListDto; newStatus: string; reason?: string }) {
     const currentItems = this.itemsResult();
     if (currentItems) {
-      const updatedItems = currentItems.Items.map(item =>
-        item.ItemId === event.item.ItemId
-          ? { ...item, Status: event.newStatus as ItemStatus }
+      const updatedItems = currentItems.items.map(item =>
+        item.itemId === event.item.itemId
+          ? { ...item, status: event.newStatus as ItemStatus }
           : item
       );
 
       this.itemsResult.set({
         ...currentItems,
-        Items: updatedItems
+        items: updatedItems
       });
     }
 
@@ -957,7 +957,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   getExpiringSoonCount(): number {
-    const items = this.itemsResult()?.Items || [];
+    const items = this.itemsResult()?.items || [];
     return items.filter(item => {
       const expirationDate = (item as any).ExpirationDate;
       if (!expirationDate) return false;
@@ -971,7 +971,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   getExpiredCount(): number {
-    const items = this.itemsResult()?.Items || [];
+    const items = this.itemsResult()?.items || [];
     return items.filter(item => {
       const expirationDate = (item as any).ExpirationDate;
       if (!expirationDate) return false;

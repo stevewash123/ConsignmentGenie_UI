@@ -5,6 +5,7 @@ import { signal } from '@angular/core';
 import { ItemDetailComponent } from './item-detail.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
+import { ItemStatus, ItemCondition } from '../../models/inventory.model';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { InitiatePriceChangeComponent } from './modals/initiate-price-change/initiate-price-change.component';
 
@@ -26,8 +27,8 @@ describe('ItemDetailComponent', () => {
     shopAmount: 34.00,
     commissionRate: 60,
     consignorName: 'Jane Doe',
-    status: 'Available',
-    condition: 'New',
+    status: ItemStatus.Available,
+    condition: ItemCondition.New,
     images: [],
     receivedDate: new Date(),
     listedDate: new Date(),
@@ -112,7 +113,7 @@ describe('ItemDetailComponent', () => {
   });
 
   it('should format date correctly', () => {
-    const testDate = new Date('2023-12-07');
+    const testDate = new Date('2023-12-07T12:00:00');
     const formatted = component.formatDate(testDate);
     expect(formatted).toBe('Dec 7, 2023');
   });

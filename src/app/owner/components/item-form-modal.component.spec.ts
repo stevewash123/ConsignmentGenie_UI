@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { ItemFormModalComponent } from './item-form-modal.component';
 import { InventoryService } from '../../services/inventory.service';
 import { ConsignorService } from '../../services/consignor.service';
@@ -26,12 +26,24 @@ describe('ItemFormModalComponent', () => {
   ];
 
   const mockConsignors: Consignor[] = [
-    { id: '1', name: 'John Doe', email: 'john@example.com', phone: '123-456-7890', consignorNumber: 'C001' } as Consignor
+    {
+      id: 1,
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '123-456-7890',
+      consignorNumber: 'C001',
+      commissionRate: 0.6,
+      isActive: true,
+      status: 'active',
+      organizationId: 1,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as Consignor
   ];
 
   const mockCategories: CategoryDto[] = [
-    { CategoryId: '1', Name: 'Clothing' },
-    { CategoryId: '2', Name: 'Accessories' }
+    { id: '1', name: 'Clothing', displayOrder: 1, isActive: true, createdAt: new Date() },
+    { id: '2', name: 'Accessories', displayOrder: 2, isActive: true, createdAt: new Date() }
   ];
 
   beforeEach(async () => {
@@ -91,12 +103,12 @@ describe('ItemFormModalComponent', () => {
 
   it('should populate condition field when editing an item', () => {
     const mockItem = {
-      ItemId: '1',
-      Title: 'Test Item',
-      Sku: 'TEST-001',
-      Price: 25.99,
-      Condition: 'LikeNew',
-      ConsignorId: '1'
+      itemId: '1',
+      title: 'Test Item',
+      sku: 'TEST-001',
+      price: 25.99,
+      condition: 'LikeNew',
+      consignorId: '1'
     } as any;
 
     component.isOpen = true;
@@ -116,14 +128,16 @@ describe('ItemFormModalComponent', () => {
       price: 25.99,
       consignorId: '1',
       categoryId: '1',
-      condition: 'LikeNew'
+      condition: 'LikeNew',
+      receivedDate: new Date().toISOString().split('T')[0],
+      expirationDate: new Date().toISOString().split('T')[0]
     };
 
     const mockResponse = {
       data: {
-        ItemId: '1',
-        Title: 'Test Item',
-        Condition: 'LikeNew'
+        itemId: '1',
+        title: 'Test Item',
+        condition: 'LikeNew'
       }
     } as any;
 

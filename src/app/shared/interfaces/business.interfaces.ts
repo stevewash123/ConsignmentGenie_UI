@@ -9,35 +9,35 @@ export interface ConsignorPermissions {
 }
 
 export interface BusinessSettings {
-  Commission: {
-    DefaultSplit: string;
-    AllowCustomSplitsPerConsignor: boolean;
-    AllowCustomSplitsPerItem: boolean;
+  commission: {
+    defaultSplit: string;
+    allowCustomSplitsPerConsignor: boolean;
+    allowCustomSplitsPerItem: boolean;
   };
-  Tax: {
-    SalesTaxRate: number;
-    TaxIncludedInPrices: boolean;
-    ChargeTaxOnShipping: boolean;
-    TaxIdEin?: string;
+  tax: {
+    salesTaxRate: number;
+    taxIncludedInPrices: boolean;
+    chargeTaxOnShipping: boolean;
+    taxIdEin?: string;
   };
-  Payouts: {
-    Schedule: string;
-    MinimumAmount: number;
-    HoldPeriodDays: number;
-    RefundPolicy: 'NoRefunds' | 'WithinDays' | 'UntilPayout';
-    RefundWindowDays?: number;
-    DefaultPayoutMethod: 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit';
+  payouts: {
+    schedule: string;
+    minimumAmount: number;
+    holdPeriodDays: number;
+    refundPolicy: 'NoRefunds' | 'WithinDays' | 'UntilPayout';
+    refundWindowDays?: number;
+    defaultPayoutMethod: 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit';
   };
-  Items: {
-    DefaultConsignmentPeriodDays: number;
-    EnableAutoMarkdowns: boolean;
-    MarkdownSchedule: {
-      After30Days: number;
-      After60Days: number;
-      After90DaysAction: 'donate' | 'return';
+  items: {
+    defaultConsignmentPeriodDays: number;
+    enableAutoMarkdowns: boolean;
+    markdownSchedule: {
+      after30Days: number;
+      after60Days: number;
+      after90DaysAction: 'donate' | 'return';
     };
   };
-  ConsignorPermissions: {
-    ItemSubmissionMode: ItemSubmissionMode;
+  consignorPermissions: {
+    itemSubmissionMode: ItemSubmissionMode;
   };
 }
