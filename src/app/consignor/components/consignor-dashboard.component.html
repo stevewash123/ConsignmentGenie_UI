@@ -7,18 +7,15 @@
       </div>
 
       <div class="dashboard-content" *ngIf="dashboard">
+        <!-- Earnings Widget -->
+        <app-earnings-widget></app-earnings-widget>
+
         <!-- Metrics Cards -->
         <div class="metrics-grid">
           <div class="metric-card">
             <div class="metric-title">MY ITEMS</div>
             <div class="metric-title">ON FLOOR</div>
             <div class="metric-value">{{dashboard.availableItems}}</div>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-title">PENDING</div>
-            <div class="metric-title">EARNINGS</div>
-            <div class="metric-value">\${{dashboard.pendingBalance.toFixed(2)}}</div>
           </div>
 
           <div class="metric-card">

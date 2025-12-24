@@ -223,3 +223,11 @@ export interface StatementPayoutLineDto {
   paymentMethod: string;
   amount: number;
 }
+
+export interface EarningsSummary {
+  pending: number;
+  pendingTooltip: string;
+  paidThisMonth: number;
+  payoutCountThisMonth: number;
+  nextPayoutDate: Date | null;
+}
