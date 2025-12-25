@@ -22,14 +22,14 @@ describe('InventoryListComponent', () => {
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   const mockCategories: CategoryDto[] = [
-    { CategoryId: 'cat1', Name: 'Electronics', DisplayOrder: 1, ItemCount: 5 },
-    { CategoryId: 'cat2', Name: 'Clothing', DisplayOrder: 2, ItemCount: 3 }
+    { id: 'cat1', name: 'Electronics', displayOrder: 1, isActive: true, createdAt: new Date() },
+    { id: 'cat2', name: 'Clothing', displayOrder: 2, isActive: true, createdAt: new Date() }
   ];
 
   const mockItems: ItemListDto[] = [
     {
-      ItemId: 'item1',
-      Sku: 'SKU001',
+      itemId: 'item1',
+      sku: 'SKU001',
       title: 'Test Item 1',
       description: 'This is a test item description',
       price: 99.99,
@@ -44,8 +44,8 @@ describe('InventoryListComponent', () => {
       commissionRate: 0.4
     },
     {
-      ItemId: 'item2',
-      Sku: 'SKU002',
+      itemId: 'item2',
+      sku: 'SKU002',
       title: 'Test Item 2',
       description: 'Another test item',
       price: 149.99,
@@ -62,8 +62,8 @@ describe('InventoryListComponent', () => {
   ];
 
   const mockPagedResult: PagedResult<ItemListDto> = {
-    Items: mockItems,
-    TotalCount: 2,
+    items: mockItems,
+    totalCount: 2,
     page: 1,
     pageSize: 25,
     totalPages: 1,
@@ -73,8 +73,8 @@ describe('InventoryListComponent', () => {
   };
 
   const emptyPagedResult: PagedResult<ItemListDto> = {
-    Items: [],
-    TotalCount: 0,
+    items: [],
+    totalCount: 0,
     page: 1,
     pageSize: 25,
     totalPages: 0,
@@ -223,8 +223,8 @@ describe('InventoryListComponent', () => {
 
   describe('Empty State Handling', () => {
     const emptyPagedResult: PagedResult<ItemListDto> = {
-      Items: [],
-      TotalCount: 0,
+      items: [],
+      totalCount: 0,
       page: 1,
       pageSize: 25,
       totalPages: 0,
@@ -255,7 +255,7 @@ describe('InventoryListComponent', () => {
       fixture.detectChanges();
 
       // The empty state message should appear when no items are available
-      expect(component.itemsResult()?.Items.length).toBe(0);
+      expect(component.itemsResult()?.items.length).toBe(0);
     });
   });
 
