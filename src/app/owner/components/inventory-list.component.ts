@@ -2,14 +2,8 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
 import { OwnerLayoutComponent } from './owner-layout.component';
-import { ItemFormModalComponent } from './item-form-modal.component';
-import { BulkImportModalComponent } from './bulk-import-modal.component';
-import { StatusChangeModalComponent } from './status-change-modal.component';
 import { InventoryService } from '../../services/inventory.service';
-import { ConditionService, ConditionOption } from '../../services/condition.service';
-import { ItemStatusService, StatusOption, StatusAction, getAvailableActions } from '../../services/item-status.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import {
   ItemListDto,
@@ -24,16 +18,13 @@ import {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemFormModalComponent, BulkImportModalComponent, StatusChangeModalComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
   templateUrl: './inventory-list.component.html',
   styles: [`
-    .inventory-container {
-      max-width: 1200px;
-      margin: 0 auto;
+    .inventory-page {
       padding: 2rem;
-      background: #f9fafb;
-      min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     .page-header {
@@ -41,486 +32,408 @@ import {
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e5e7eb;
     }
 
     .page-header h1 {
+      color: #059669;
+      margin-bottom: 0.5rem;
       font-size: 2rem;
-      font-weight: 700;
-      color: #111827;
+    }
+
+    .page-header p {
+      color: #6b7280;
       margin: 0;
     }
 
-    .add-button {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 0.375rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .add-button:hover {
-      background: #2563eb;
-    }
-
-    .header-buttons {
+    .header-actions {
       display: flex;
       gap: 1rem;
-      align-items: center;
     }
 
-    .bulk-upload-button {
-      background: #6b7280;
-      color: white;
-      border: none;
-      border-radius: 0.375rem;
+    .btn-primary, .btn-secondary {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       padding: 0.75rem 1.5rem;
-      font-size: 0.875rem;
+      border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
-      white-space: nowrap;
+      border: none;
+      transition: all 0.2s;
     }
 
-    .bulk-upload-button:hover {
-      background: #4b5563;
+    .btn-primary {
+      background: #059669;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #047857;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
     }
 
     .filters-section {
       background: white;
-      border-radius: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       padding: 1.5rem;
       margin-bottom: 2rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .filters-row {
+    .filter-row {
       display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 1.5rem;
-      align-items: center;
-    }
-
-    .search-sort-container {
-      display: flex;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      align-items: center;
+      align-items: end;
     }
 
-    .search-container {
-      position: relative;
-    }
-
-    .search-input {
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-      font-size: 0.875rem;
-      width: 300px;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6b7280;
-      pointer-events: none;
-    }
-
-    .status-filters {
+    .filter-group {
       display: flex;
-      gap: 1rem;
+      flex-direction: column;
     }
 
-    .filter-select {
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.875rem;
-      min-width: 120px;
-    }
-
-    .clear-button {
-      background: #6b7280;
-      color: white;
-      border: none;
-      border-radius: 0.375rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
+    .filter-group label {
       font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
     }
 
-    .clear-button:hover {
-      background: #4b5563;
+    .filter-input, .filter-select {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
     }
 
-    .content-header {
+    .filter-input:focus, .filter-select:focus {
+      outline: none;
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .results-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
     }
 
-    .results-info {
-      color: #6b7280;
-      font-size: 0.875rem;
+    .section-header h2 {
+      color: #1f2937;
+      font-size: 1.25rem;
+      margin: 0;
     }
 
     .page-size-select {
+      padding: 0.5rem;
       border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
       font-size: 0.875rem;
     }
 
-    .inventory-list {
-      display: grid;
-      gap: 1rem;
+    .table-container {
+      overflow-x: auto;
     }
 
-    .inventory-card {
-      background: white;
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      display: grid;
-      grid-template-columns: 80px 1fr auto;
-      gap: 1rem;
-      align-items: start;
-      transition: all 0.2s ease;
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
     }
 
-    .inventory-card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transform: translateY(-1px);
-    }
-
-    .inventory-thumbnail {
-      width: 80px;
-      height: 80px;
-      border-radius: 0.5rem;
-      object-fit: cover;
-      border: 1px solid #e5e7eb;
-    }
-
-    .inventory-info {
-      min-width: 0;
-    }
-
-    .inventory-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      margin-bottom: 0.75rem;
-    }
-
-    .inventory-title {
-      font-size: 1.125rem;
+    .inventory-table th {
+      background: #f9fafb;
+      padding: 1rem;
+      text-align: left;
       font-weight: 600;
-      color: #111827;
-      margin: 0;
-      line-height: 1.3;
+      color: #374151;
+      font-size: 0.875rem;
+      border-bottom: 1px solid #e5e7eb;
     }
 
-    .inventory-badges {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
+    .inventory-table th.sortable {
+      cursor: pointer;
+      user-select: none;
     }
 
-    .status-badge {
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
-    }
-
-    .status-available {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .status-sold {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .status-removed {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .condition-badge {
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.75rem;
-      font-weight: 600;
+    .inventory-table th.sortable:hover {
       background: #f3f4f6;
-      color: #374151;
     }
 
-    .condition-new {
-      background: #d1fae5;
-      color: #065f46;
+    .sort-indicator {
+      opacity: 0.3;
+      margin-left: 0.5rem;
     }
 
-    .condition-like-new {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .condition-good {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .condition-fair {
-      background: #fed7aa;
-      color: #9a3412;
-    }
-
-    .condition-poor {
-      background: #fecaca;
-      color: #991b1b;
-    }
-
-    .inventory-meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.875rem;
-    }
-
-    .meta-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .meta-label {
-      color: #6b7280;
-      font-weight: 500;
-      min-width: 70px;
-    }
-
-    .meta-value {
-      color: #374151;
-      font-weight: 600;
-    }
-
-    .inventory-price {
-      font-size: 1.25rem;
-      font-weight: 700;
+    .sort-indicator.active {
+      opacity: 1;
       color: #059669;
     }
 
-    .inventory-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      align-self: start;
+    .item-row {
+      border-bottom: 1px solid #e5e7eb;
     }
 
-    .action-button {
-      background: white;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.75rem;
+    .item-row:hover {
+      background: #f9fafb;
+    }
+
+    .item-row td {
+      padding: 1rem;
+      vertical-align: top;
+    }
+
+    .image-cell {
+      width: 60px;
+      text-align: center;
+    }
+
+    .item-thumbnail {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .no-image {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f3f4f6;
+      border-radius: 6px;
+      color: #6b7280;
+      font-size: 1.2rem;
+    }
+
+    .sku-cell {
+      font-family: 'Courier New', monospace;
       font-weight: 600;
       color: #374151;
+      font-size: 0.875rem;
+    }
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-title {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .item-description {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .condition-badge, .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .condition-new { background: #dcfce7; color: #166534; }
+    .condition-like-new { background: #dbeafe; color: #1e40af; }
+    .condition-good { background: #fef3c7; color: #92400e; }
+    .condition-fair { background: #fed7aa; color: #9a3412; }
+    .condition-poor { background: #fecaca; color: #991b1b; }
+
+    .status-available { background: #dcfce7; color: #166534; }
+    .status-sold { background: #fef3c7; color: #92400e; }
+    .status-removed { background: #f3f4f6; color: #6b7280; }
+
+    .item-price {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 1rem;
+    }
+
+    .consignor-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .consignor-name {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .date-cell {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 6px;
       cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      transition: all 0.2s;
     }
 
-    .action-button:hover {
-      background: #f9fafb;
-      border-color: #9ca3af;
+    .btn-icon:hover {
+      background: #e5e7eb;
     }
 
-    .action-button.primary {
-      background: #3b82f6;
-      color: white;
-      border-color: #3b82f6;
-    }
-
-    .action-button.primary:hover {
-      background: #2563eb;
-      border-color: #2563eb;
-    }
-
-    .action-button.danger {
-      background: #ef4444;
-      color: white;
-      border-color: #ef4444;
-    }
-
-    .action-button.danger:hover {
-      background: #dc2626;
-      border-color: #dc2626;
+    .btn-icon.danger:hover {
+      background: #fee2e2;
+      color: #dc2626;
     }
 
     .pagination {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      margin-top: 2rem;
-      padding-top: 1.5rem;
+      gap: 1rem;
+      padding: 1.5rem;
       border-top: 1px solid #e5e7eb;
     }
 
-    .pagination-info {
-      color: #6b7280;
-      font-size: 0.875rem;
-    }
-
-    .pagination-controls {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .pagination-button {
-      background: white;
+    .page-btn {
+      padding: 0.5rem 1rem;
       border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
+      background: white;
+      border-radius: 6px;
       cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
     }
 
-    .pagination-button:hover:not(.disabled) {
-      background: #f9fafb;
+    .page-btn:hover:not(:disabled) {
+      background: #f3f4f6;
     }
 
-    .pagination-button.active {
-      background: #3b82f6;
+    .page-btn.active {
+      background: #059669;
       color: white;
-      border-color: #3b82f6;
+      border-color: #059669;
     }
 
-    .pagination-button.disabled {
+    .page-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
+    .page-numbers {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem;
+      color: #6b7280;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #059669;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .empty-state-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
-
-    .empty-state-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 1rem;
-    }
-
-    .empty-state-description {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem;
       color: #6b7280;
-      font-size: 1rem;
-      line-height: 1.5;
+    }
+
+    .empty-state p {
       margin-bottom: 2rem;
-    }
-
-    .empty-state-button {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .empty-state-button:hover {
-      background: #2563eb;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 3rem 2rem;
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      color: #6b7280;
-      font-size: 1rem;
+      font-size: 1.1rem;
     }
 
     @media (max-width: 768px) {
-      .inventory-container {
+      .inventory-page {
         padding: 1rem;
       }
 
       .page-header {
         flex-direction: column;
         gap: 1rem;
-        align-items: flex-start;
+        align-items: stretch;
       }
 
-      .filters-row {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-
-      .search-sort-container {
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .search-input {
-        width: 100%;
-      }
-
-      .status-filters {
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .content-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-      }
-
-      .inventory-card {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        text-align: center;
-      }
-
-      .inventory-header {
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: center;
-      }
-
-      .inventory-meta {
+      .filter-row {
         grid-template-columns: 1fr;
       }
 
-      .inventory-actions {
-        flex-direction: row;
-        justify-content: center;
+      .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .inventory-table {
+        font-size: 0.875rem;
+      }
+
+      .inventory-table th,
+      .inventory-table td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .btn-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
       }
 
       .pagination {
@@ -529,39 +442,16 @@ import {
       }
     }
 
-    /* Expiration Status Styles */
-    .expiration-value {
-      font-weight: 500;
-    }
-
-    .expiration-normal {
-      color: #4b5563;
-    }
-
-    .expiration-warning {
-      color: #f59e0b;
-      font-weight: 600;
-    }
-
-    .expiration-expired {
-      color: #ef4444;
-      font-weight: 700;
-    }
   `]
 })
 export class InventoryListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
-  private conditionService = inject(ConditionService);
-  private itemStatusService = inject(ItemStatusService);
-  private toastr = inject(ToastrService);
   private router = inject(Router);
   private loadingService = inject(LoadingService);
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
   categories = signal<CategoryDto[]>([]);
-  conditionOptions = signal<ConditionOption[]>([]);
-  statusOptions = signal<StatusOption[]>([]);
   error = signal<string | null>(null);
 
   isInventoryLoading(): boolean {
@@ -573,19 +463,12 @@ export class InventoryListComponent implements OnInit {
   selectedStatus = '';
   selectedCondition = '';
   selectedCategory = '';
-  selectedExpiration = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
   sortBy = 'CreatedAt';
   sortDirection = 'desc';
   currentPage = signal(1);
   pageSize = 25;
-
-  // Modal state
-  isAddModalOpen = false;
-  isEditModalOpen = false;
-  isBulkImportModalOpen = false;
-  editingItem: ItemListDto | null = null;
 
 
   // Computed values
@@ -609,8 +492,6 @@ export class InventoryListComponent implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
-    this.loadConditions();
-    this.loadStatuses();
     this.loadItems();
   }
 
@@ -622,24 +503,6 @@ export class InventoryListComponent implements OnInit {
         }
       },
       error: (err) => console.error('Failed to load categories:', err)
-    });
-  }
-
-  private loadConditions() {
-    this.conditionService.getAll().subscribe({
-      next: (conditions) => {
-        this.conditionOptions.set(conditions);
-      },
-      error: (err) => console.error('Failed to load conditions:', err)
-    });
-  }
-
-  private loadStatuses() {
-    this.itemStatusService.getStatuses().subscribe({
-      next: (response: any) => {
-        this.statusOptions.set(response.data || response);
-      },
-      error: (err) => console.error('Failed to load statuses:', err)
     });
   }
 
@@ -663,36 +526,7 @@ export class InventoryListComponent implements OnInit {
 
     this.inventoryService.getItems(params).subscribe({
       next: (result) => {
-        // Apply client-side expiration filtering
-        let filteredItems = result.items;
-
-        if (this.selectedExpiration) {
-          filteredItems = filteredItems.filter(item => {
-            const expirationDate = (item as any).ExpirationDate;
-            if (!expirationDate) return false;
-
-            const expDate = new Date(expirationDate);
-            const today = new Date();
-            const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-            if (this.selectedExpiration === 'expiring-soon') {
-              return daysUntil >= 0 && daysUntil <= this.EXPIRATION_WARNING_DAYS;
-            } else if (this.selectedExpiration === 'expired') {
-              return daysUntil < 0;
-            }
-
-            return true;
-          });
-        }
-
-        // Create filtered result
-        const filteredResult = {
-          ...result,
-          Items: filteredItems,
-          totalCount: filteredItems.length
-        };
-
-        this.itemsResult.set(filteredResult);
+        this.itemsResult.set(result);
       },
       error: (err) => {
         this.error.set('Failed to load inventory items. Please try again.');
@@ -714,7 +548,6 @@ export class InventoryListComponent implements OnInit {
     this.selectedStatus = '';
     this.selectedCondition = '';
     this.selectedCategory = '';
-    this.selectedExpiration = '';
     this.priceMin = null;
     this.priceMax = null;
     this.sortBy = 'CreatedAt';
@@ -747,12 +580,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   createNewItem() {
-    this.editingItem = null;
-    this.isAddModalOpen = true;
-  }
-
-  openBulkUpload() {
-    this.isBulkImportModalOpen = true;
+    this.router.navigate(['/owner/inventory/new']);
   }
 
   bulkUpload() {
@@ -763,12 +591,8 @@ export class InventoryListComponent implements OnInit {
     this.router.navigate(['/owner/inventory', id]);
   }
 
-  editItem(itemId: string) {
-    const item = this.itemsResult()?.items.find(i => i.itemId === itemId);
-    if (item) {
-      this.editingItem = item;
-      this.isEditModalOpen = true;
-    }
+  editItem(id: string) {
+    this.router.navigate(['/owner/inventory', id, 'edit']);
   }
 
   markAsRemoved(item: ItemListDto) {
@@ -815,176 +639,13 @@ export class InventoryListComponent implements OnInit {
   }
 
   getConditionLabel(condition: ItemCondition): string {
-    const conditionOption = this.conditionOptions().find(opt => opt.value === condition);
-    return conditionOption ? conditionOption.label : condition;
+    switch (condition) {
+      case ItemCondition.LikeNew: return 'Like New';
+      default: return condition;
+    }
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: ItemStatus): string {
     return `status-${status.toLowerCase()}`;
   }
-
-  getStatusEmoji(status: string): string {
-    const emojis: Record<string, string> = {
-      'Available': '🟢',
-      'Sold': '🔵',
-      'Returned': '⚪',
-      'Removed': '🔴',
-      'Expired': '🟠'
-    };
-    return emojis[status] || '⚪';
-  }
-
-  getAvailableStatusActions(status: string): StatusAction[] {
-    return getAvailableActions(status);
-  }
-
-  getStatusActionIcon(action: string): string {
-    const icons: Record<string, string> = {
-      'Returned': '↩️',
-      'Removed': '🗑️',
-      'Available': '♻️'
-    };
-    return icons[action] || '';
-  }
-
-  getStatusCount(status: string): number {
-    const items = this.itemsResult()?.items || [];
-    return items.filter(item => item.status === status).length;
-  }
-
-  // Status change modal state
-  isStatusChangeModalOpen = false;
-  selectedItemForStatus: ItemListDto | null = null;
-  selectedStatusAction: StatusAction | null = null;
-
-  openStatusChangeModal(item: ItemListDto, action: StatusAction) {
-    this.selectedItemForStatus = item;
-    this.selectedStatusAction = action;
-    this.isStatusChangeModalOpen = true;
-  }
-
-  closeStatusChangeModal() {
-    this.isStatusChangeModalOpen = false;
-    this.selectedItemForStatus = null;
-    this.selectedStatusAction = null;
-  }
-
-  onStatusChanged(event: { item: ItemListDto; newStatus: string; reason?: string }) {
-    const currentItems = this.itemsResult();
-    if (currentItems) {
-      const updatedItems = currentItems.items.map(item =>
-        item.itemId === event.item.itemId
-          ? { ...item, status: event.newStatus as ItemStatus }
-          : item
-      );
-
-      this.itemsResult.set({
-        ...currentItems,
-        items: updatedItems
-      });
-    }
-
-    this.toastr.success(`Item marked as ${event.newStatus}`, 'Status Updated');
-    this.closeStatusChangeModal();
-  }
-
-  // Modal event handlers
-  closeAddModal() {
-    this.isAddModalOpen = false;
-    this.editingItem = null;
-  }
-
-  closeEditModal() {
-    this.isEditModalOpen = false;
-    this.editingItem = null;
-  }
-
-  closeBulkImportModal() {
-    this.isBulkImportModalOpen = false;
-  }
-
-  onItemSaved(item: ItemListDto) {
-    // Refresh the list after saving
-    this.loadItems();
-  }
-
-  onItemsImported(items: any[]) {
-    // Mock import - just refresh the list to simulate new items being added
-    console.log('Items imported (mock):', items);
-    this.loadItems(); // Refresh the list
-    this.closeBulkImportModal();
-  }
-
-  // Expiration utility methods
-  private readonly EXPIRATION_WARNING_DAYS = 7;
-
-  getExpirationDisplay(item: ItemListDto): string {
-    const expirationDate = (item as any).ExpirationDate;
-    if (!expirationDate) return '—';
-
-    const expDate = new Date(expirationDate);
-    const today = new Date();
-    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (daysUntil < 0) {
-      return '🔴 EXPIRED';
-    }
-
-    if (daysUntil <= this.EXPIRATION_WARNING_DAYS) {
-      return `⚠️ ${expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-    }
-
-    return expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  getExpirationClass(item: ItemListDto): string {
-    const expirationDate = (item as any).ExpirationDate;
-    if (!expirationDate) return '';
-
-    const expDate = new Date(expirationDate);
-    const today = new Date();
-    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (daysUntil < 0) {
-      return 'expiration-expired';
-    }
-
-    if (daysUntil <= this.EXPIRATION_WARNING_DAYS) {
-      return 'expiration-warning';
-    }
-
-    return 'expiration-normal';
-  }
-
-  getExpiringSoonCount(): number {
-    const items = this.itemsResult()?.items || [];
-    return items.filter(item => {
-      const expirationDate = (item as any).ExpirationDate;
-      if (!expirationDate) return false;
-
-      const expDate = new Date(expirationDate);
-      const today = new Date();
-      const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-      return daysUntil >= 0 && daysUntil <= this.EXPIRATION_WARNING_DAYS;
-    }).length;
-  }
-
-  getExpiredCount(): number {
-    const items = this.itemsResult()?.items || [];
-    return items.filter(item => {
-      const expirationDate = (item as any).ExpirationDate;
-      if (!expirationDate) return false;
-
-      const expDate = new Date(expirationDate);
-      const today = new Date();
-      const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-      return daysUntil < 0;
-    }).length;
-  }
-
-  // Make Math.min available to template
-  Math = Math;
 }
-// Story 00-inventory-browser-redesign: Commit marker for story tracking
