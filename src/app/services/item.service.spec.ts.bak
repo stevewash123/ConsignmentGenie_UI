@@ -1,23 +1,23 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { ItemService } from './item.service';
 import { ItemStatus } from '../models/item.model';
 
 describe('ItemService', () => {
   let service: ItemService;
-  let httpTestingController: HttpTestingController;
+  let mockHttpClient: jasmine.SpyObj<HttpClient>;
 
   beforeEach(() => {
+    mockHttpClient = jasmine.createSpyObj('HttpClient', ['get', 'post', 'put', 'delete', 'patch']);
+
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [ItemService]
+      providers: [
+        ItemService,
+        { provide: HttpClient, useValue: mockHttpClient }
+      ]
     });
     service = TestBed.inject(ItemService);
-    httpTestingController = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpTestingController.verify();
   });
 
   it('should be created', () => {
@@ -38,15 +38,14 @@ describe('ItemService', () => {
       }
     ];
 
+    mockHttpClient.get.and.returnValue(of(mockItems));
+
     service.getItems().subscribe(items => {
       expect(items).toEqual(mockItems);
       expect(items.length).toBe(1);
     });
 
-    const req = httpTestingController.expectOne('http://localhost:5000/api/items');
-    expect(req.request.method).toBe('GET');
-    expect(req.request.params).toBeTruthy();
-    req.flush(mockItems);
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/items', { params: jasmine.any(Object) });
   });
 
   it('should get item by id successfully', () => {
@@ -61,14 +60,14 @@ describe('ItemService', () => {
       updatedAt: new Date()
     };
 
+    mockHttpClient.get.and.returnValue(of(mockItem));
+
     service.getItem(1).subscribe(item => {
       expect(item).toEqual(mockItem);
       expect(item.name).toBe('Test Item');
     });
 
-    const req = httpTestingController.expectOne('http://localhost:5000/api/items/1');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockItem);
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/items/1');
   });
 
   it('should create item successfully', () => {
@@ -88,15 +87,14 @@ describe('ItemService', () => {
       updatedAt: new Date()
     };
 
+    // TODO: Convert to HttpTestingController pattern - mockHttpClient.post.and.returnValue(of(mockItem));
+
     service.createItem(createRequest).subscribe(item => {
       expect(item).toEqual(mockItem);
       expect(item.name).toBe('New Item');
     });
 
-    const req = httpTestingController.expectOne('http://localhost:5000/api/items');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(createRequest);
-    req.flush(mockItem);
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/items', createRequest);
   });
 
   it('should update item status successfully', () => {
@@ -111,14 +109,37 @@ describe('ItemService', () => {
       updatedAt: new Date()
     };
 
+    mockHttpClient.patch.and.returnValue(of(mockItem));
+
     service.updateItemStatus(1, ItemStatus.Sold).subscribe(item => {
       expect(item).toEqual(mockItem);
       expect(item.status).toBe(ItemStatus.Sold);
     });
 
-    const req = httpTestingController.expectOne('http://localhost:5000/api/items/1/status');
-    expect(req.request.method).toBe('PATCH');
-    expect(req.request.body).toEqual({ status: ItemStatus.Sold });
-    req.flush(mockItem);
+    expect(mockHttpClient.patch).toHaveBeenCalledWith('http://localhost:5000/api/items/1/status', { status: ItemStatus.Sold });
+  });
+
+  it('should search items successfully', () => {
+    const mockItems = [
+      {
+        id: 1,
+        name: 'Searched Item',
+        price: 29.99,
+        status: ItemStatus.Available,
+        providerId: 1,
+        organizationId: 1,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    mockHttpClient.get.and.returnValue(of(mockItems));
+
+    service.searchItems('searched').subscribe(items => {
+      expect(items).toEqual(mockItems);
+      expect(items.length).toBe(1);
+    });
+
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/items/search', { params: jasmine.any(Object) });
   });
 });

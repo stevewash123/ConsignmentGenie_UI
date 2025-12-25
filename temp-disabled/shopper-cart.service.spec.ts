@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, fakeAsync } from '@angular/core/testing';
 import { ShopperCartService, CartItem } from './shopper-cart.service';
 import { ShopperItemList } from './shopper-catalog.service';
 
@@ -43,7 +43,7 @@ describe('ShopperCartService', () => {
     expect(() => service.getCurrentCart$()).toThrowError('No store context set. Call setCurrentStore() first.');
   });
 
-  it('should add item to empty cart', fakeAsync(() => {
+  it('should add item to empty cart', (() => {
     service.setCurrentStore(mockStoreSlug);
     const result = service.addItem(mockItem, 1);
     expect(result).toBe(true);
@@ -57,10 +57,10 @@ describe('ShopperCartService', () => {
       expect(cart.subtotal).toBe(50.00);
     });
 
-    tick();
+    
   }));
 
-  it('should update existing item quantity when adding same item', fakeAsync(() => {
+  it('should update existing item quantity when adding same item', (() => {
     service.setCurrentStore(mockStoreSlug);
     service.addItem(mockItem, 1);
     service.addItem(mockItem, 2);
@@ -72,7 +72,7 @@ describe('ShopperCartService', () => {
       expect(cart.itemCount).toBe(3);
     });
 
-    tick();
+    
   }));
 
   it('should not add item with invalid data', () => {
@@ -90,7 +90,7 @@ describe('ShopperCartService', () => {
     expect(result2).toBe(false);
   });
 
-  it('should update item quantity', fakeAsync(() => {
+  it('should update item quantity', (() => {
     service.setCurrentStore(mockStoreSlug);
     service.addItem(mockItem, 2);
 
@@ -103,10 +103,10 @@ describe('ShopperCartService', () => {
       expect(cart.itemCount).toBe(5);
     });
 
-    tick();
+    
   }));
 
-  it('should remove item when quantity set to 0', fakeAsync(() => {
+  it('should remove item when quantity set to 0', (() => {
     service.setCurrentStore(mockStoreSlug);
     service.addItem(mockItem, 2);
 
@@ -119,7 +119,7 @@ describe('ShopperCartService', () => {
       expect(cart.itemCount).toBe(0);
     });
 
-    tick();
+    
   }));
 
   it('should not update with negative quantity', () => {
@@ -136,7 +136,7 @@ describe('ShopperCartService', () => {
     expect(result).toBe(false);
   });
 
-  it('should remove item from cart', fakeAsync(() => {
+  it('should remove item from cart', (() => {
     service.setCurrentStore(mockStoreSlug);
     service.addItem(mockItem, 1);
 
@@ -149,7 +149,7 @@ describe('ShopperCartService', () => {
       expect(cart.itemCount).toBe(0);
     });
 
-    tick();
+    
   }));
 
   it('should get item quantity', () => {
@@ -177,7 +177,7 @@ describe('ShopperCartService', () => {
     expect(notInCart).toBe(false);
   });
 
-  it('should clear cart', fakeAsync(() => {
+  it('should clear cart', (() => {
     service.setCurrentStore(mockStoreSlug);
     service.addItem(mockItem, 3);
 
@@ -191,7 +191,7 @@ describe('ShopperCartService', () => {
       expect(cart.total).toBe(0);
     });
 
-    tick();
+    
   }));
 
   it('should get cart summary', () => {

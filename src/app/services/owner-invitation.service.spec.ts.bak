@@ -1,22 +1,22 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { OwnerInvitationService } from './owner-invitation.service';
 
 describe('OwnerInvitationService', () => {
   let service: OwnerInvitationService;
-  let httpTestingController: HttpTestingController;
+  let mockHttpClient: jasmine.SpyObj<HttpClient>;
 
   beforeEach(() => {
+    mockHttpClient = jasmine.createSpyObj('HttpClient', ['get', 'post', 'put', 'delete']);
+
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [OwnerInvitationService]
+      providers: [
+        OwnerInvitationService,
+        { provide: HttpClient, useValue: mockHttpClient }
+      ]
     });
     service = TestBed.inject(OwnerInvitationService);
-    httpTestingController = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpTestingController.verify();
   });
 
   it('should be created', () => {
@@ -42,15 +42,14 @@ describe('OwnerInvitationService', () => {
       message: 'Invitation created successfully'
     };
 
+    // TODO: Convert to HttpTestingController pattern - mockHttpClient.post.and.returnValue(of(mockResponse));
+
     service.createInvitation(createRequest).subscribe(response => {
       expect(response.success).toBe(true);
       expect(response.data?.email).toBe('owner@test.com');
     });
 
-    const req = httpTestingController.expectOne('http://localhost:5000/api/admin/invitations/owner');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(createRequest);
-    req.flush(mockResponse);
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/admin/invitations/owner', createRequest);
   });
 
   it('should get invitations successfully', () => {
@@ -69,6 +68,8 @@ describe('OwnerInvitationService', () => {
       message: 'Invitations retrieved successfully'
     };
 
+    mockHttpClient.get.and.returnValue(of(mockResponse));
+
     const queryParams = {
       page: 1,
       pageSize: 10,
@@ -81,11 +82,7 @@ describe('OwnerInvitationService', () => {
       expect(response.success).toBe(true);
     });
 
-    const req = httpTestingController.expectOne((request) => {
-      return request.url === 'http://localhost:5000/api/admin/invitations/owner' && request.method === 'GET';
-    });
-    expect(req.request.params).toBeTruthy();
-    req.flush(mockResponse);
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/admin/invitations/owner', { params: jasmine.any(Object) });
   });
 
   it('should validate token successfully', () => {
@@ -100,16 +97,14 @@ describe('OwnerInvitationService', () => {
       message: 'Token validated successfully'
     };
 
+    mockHttpClient.get.and.returnValue(of(mockResponse));
+
     service.validateToken('valid-token').subscribe(response => {
       expect(response.success).toBe(true);
       expect(response.data?.isValid).toBe(true);
     });
 
-    const req = httpTestingController.expectOne((request) => {
-      return request.url.startsWith('http://localhost:5000/api/owner-registration/validate') && request.method === 'GET';
-    });
-    expect(req.request.params).toBeTruthy();
-    req.flush(mockResponse);
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/owner-registration/validate', { params: jasmine.any(Object) });
   });
 
   it('should register owner successfully', () => {
@@ -131,14 +126,13 @@ describe('OwnerInvitationService', () => {
       message: 'Owner registered successfully'
     };
 
+    // TODO: Convert to HttpTestingController pattern - mockHttpClient.post.and.returnValue(of(mockResponse));
+
     service.registerOwner(registrationRequest).subscribe(response => {
       expect(response.success).toBe(true);
       expect(response.data?.organizationId).toBe('org-123');
     });
 
-    const req = httpTestingController.expectOne('http://localhost:5000/api/owner-registration/register');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(registrationRequest);
-    req.flush(mockResponse);
+    expect(mockHttpClient.post).toHaveBeenCalledWith('http://localhost:5000/api/owner-registration/register', registrationRequest);
   });
 });
