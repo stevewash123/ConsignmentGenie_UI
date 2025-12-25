@@ -121,6 +121,7 @@ export interface ItemQueryParams {
   status?: string;
   condition?: string;
   consignorId?: string;
+  expiration?: string;
   priceMin?: number;
   priceMax?: number;
   createdAfter?: Date;

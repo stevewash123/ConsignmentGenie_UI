@@ -587,6 +587,30 @@ describe('InventoryListComponent', () => {
       initializeComponent();
       expect(component.pagedResult()).toEqual(mockPagedResult);
     });
+
+    it('should display expiration text correctly', () => {
+      const today = new Date();
+      const futureDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+      const soonDate = new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000); // 5 days
+      const expiredDate = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000); // 2 days ago
+
+      expect(component.getExpirationDisplayText(undefined)).toBe('—');
+      expect(component.getExpirationDisplayText(futureDate)).toContain(futureDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      expect(component.getExpirationDisplayText(soonDate)).toContain('⚠️');
+      expect(component.getExpirationDisplayText(expiredDate)).toBe('🔴 EXPIRED');
+    });
+
+    it('should return correct expiration status classes', () => {
+      const today = new Date();
+      const futureDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+      const soonDate = new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000); // 5 days
+      const expiredDate = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000); // 2 days ago
+
+      expect(component.getExpirationStatusClass(undefined)).toBe('');
+      expect(component.getExpirationStatusClass(futureDate)).toBe('expiration-normal');
+      expect(component.getExpirationStatusClass(soonDate)).toBe('expiration-warning');
+      expect(component.getExpirationStatusClass(expiredDate)).toBe('expiration-expired');
+    });
   });
 
   describe('Responsive Design', () => {

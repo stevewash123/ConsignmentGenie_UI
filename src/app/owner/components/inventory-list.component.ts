@@ -290,6 +290,26 @@ import {
       font-size: 0.875rem;
     }
 
+    .expiration-cell {
+      color: #6b7280;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .expiration-expired {
+      color: #dc2626 !important;
+      font-weight: 600;
+    }
+
+    .expiration-warning {
+      color: #ea580c !important;
+      font-weight: 600;
+    }
+
+    .expiration-normal {
+      color: #6b7280;
+    }
+
     .action-buttons {
       display: flex;
       gap: 0.5rem;
@@ -463,6 +483,7 @@ export class InventoryListComponent implements OnInit {
   selectedStatus = '';
   selectedCondition = '';
   selectedCategory = '';
+  selectedExpiration = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
   sortBy = 'CreatedAt';
@@ -521,6 +542,7 @@ export class InventoryListComponent implements OnInit {
     if (this.selectedStatus) params.status = this.selectedStatus;
     if (this.selectedCondition) params.condition = this.selectedCondition;
     if (this.selectedCategory) params.category = this.selectedCategory;
+    if (this.selectedExpiration) params.expiration = this.selectedExpiration;
     if (this.priceMin !== null) params.priceMin = this.priceMin;
     if (this.priceMax !== null) params.priceMax = this.priceMax;
 
@@ -548,6 +570,7 @@ export class InventoryListComponent implements OnInit {
     this.selectedStatus = '';
     this.selectedCondition = '';
     this.selectedCategory = '';
+    this.selectedExpiration = '';
     this.priceMin = null;
     this.priceMax = null;
     this.sortBy = 'CreatedAt';
@@ -647,5 +670,45 @@ export class InventoryListComponent implements OnInit {
 
   getStatusClass(status: ItemStatus): string {
     return `status-${status.toLowerCase()}`;
+  }
+
+  getExpirationDisplayText(expirationDate?: Date): string {
+    if (!expirationDate) {
+      return '—';
+    }
+
+    const expDate = new Date(expirationDate);
+    const today = new Date();
+    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil < 0) {
+      return '🔴 EXPIRED';
+    }
+
+    if (daysUntil <= 7) {
+      return `⚠️ ${expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    }
+
+    return expDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  getExpirationStatusClass(expirationDate?: Date): string {
+    if (!expirationDate) {
+      return '';
+    }
+
+    const today = new Date();
+    const expDate = new Date(expirationDate);
+    const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil < 0) {
+      return 'expiration-expired';
+    }
+
+    if (daysUntil <= 7) {
+      return 'expiration-warning';
+    }
+
+    return 'expiration-normal';
   }
 }

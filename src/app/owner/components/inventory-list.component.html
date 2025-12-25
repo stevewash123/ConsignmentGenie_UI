@@ -61,6 +61,16 @@
                 }
               </select>
             </div>
+            <div class="filter-group">
+              <label for="selectedExpiration">Expiration</label>
+              <select id="selectedExpiration" [(ngModel)]="selectedExpiration" (change)="applyFilters()" class="filter-select">
+                <option value="">All Items</option>
+                <option value="expiring-soon">⚠️ Expiring Soon (≤7 days)</option>
+                <option value="expired">🔴 Expired</option>
+                <option value="this-month">This Month</option>
+                <option value="next-month">Next Month</option>
+              </select>
+            </div>
             <button class="btn-secondary" (click)="clearFilters()">
               Clear Filters
             </button>
@@ -114,6 +124,12 @@
                       {{ sortDirection === 'asc' ? '↑' : '↓' }}
                     </span>
                   </th>
+                  <th (click)="setSorting('expirationDate')" class="sortable">
+                    Expires
+                    <span class="sort-indicator" [class.active]="sortBy === 'expirationDate'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -156,6 +172,9 @@
                   </td>
                   <td class="date-cell">
                     {{ item.receivedDate | date:'MMM d, y' }}
+                  </td>
+                  <td class="expiration-cell" [class]="getExpirationStatusClass(item.expirationDate)">
+                    {{ getExpirationDisplayText(item.expirationDate) }}
                   </td>
                   <td class="actions-cell">
                     <div class="action-buttons">
