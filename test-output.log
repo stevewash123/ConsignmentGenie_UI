@@ -1,0 +1,81 @@
+❯ Building...
+✔ Building...
+Initial chunk files                                        | Names                                                   |  Raw size
+chunk-GZKRQVIO.js                                          | -                                                       |   2.51 MB | 
+spec-app-owner-components-inventory-list.component.spec.js | spec-app-owner-components-inventory-list.component.spec |   1.42 MB | 
+polyfills.js                                               | polyfills                                               |   1.03 MB | 
+jasmine-cleanup-1.js                                       | jasmine-cleanup-1                                       |  67.20 kB | 
+test_main.js                                               | test_main                                               |  21.79 kB | 
+styles.css                                                 | styles                                                  |   6.10 kB | 
+chunk-TTULUY32.js                                          | -                                                       |   1.99 kB | 
+jasmine-cleanup-0.js                                       | jasmine-cleanup-0                                       | 519 bytes | 
+
+                                                           | Initial total                                           |   5.06 MB
+
+Application bundle generation complete. [35.181 seconds] - 2025-12-26T18:52:05.832Z
+
+[32m26 12 2025 13:52:07.228:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9876/
+[32m26 12 2025 13:52:07.230:INFO [launcher]: [39mLaunching browsers ChromeHeadless with concurrency unlimited
+[32m26 12 2025 13:52:07.335:INFO [launcher]: [39mStarting browser ChromeHeadless
+[32m26 12 2025 13:52:20.399:INFO [Chrome Headless 140.0.0.0 (Linux 0.0.0)]: [39mConnected on socket uruh2hgbTQ_z4mOFAAAB with id 69784550
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 61[32m SUCCESS[39m (0 secs / 0 secs)
+[1A[2KERROR: [36m'Error loading items:', Error: API Error
+Error: API Error
+    at http://localhost:9876/base/src/app/owner/components/inventory-list.component.spec.ts:308:70
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at InventoryListComponent2.loadItems (http://localhost:9876/base/src/app/owner/components/inventory-list.component.ts:565:44)
+    at UserContext.<anonymous> (http://localhost:9876/base/src/app/owner/components/inventory-list.component.spec.ts:310:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/base/node_modules/zone.js/fesm2015/zone.js:398:28)
+    at _ProxyZoneSpec.onInvoke (http://localhost:9876/base/node_modules/zone.js/fesm2015/zone-testing.js:2132:39)[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 61[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading items:', Error: API Error
+Error: API Error
+    at http://localhost:9876/base/src/app/owner/components/inventory-list.component.spec.ts:308:70
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at InventoryListComponent2.loadItems (http://localhost:9876/base/src/app/owner/components/inventory-list.component.ts:565:44)
+    at UserContext.<anonymous> (http://localhost:9876/base/src/app/owner/components/inventory-list.component.spec.ts:310:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/base/node_modules/zone.js/fesm2015/zone.js:398:28)
+    at _ProxyZoneSpec.onInvoke (http://localhost:9876/base/node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 1 of 61[32m SUCCESS[39m (0 secs / 0.424 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 2 of 61[32m SUCCESS[39m (0 secs / 0.465 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 3 of 61[32m SUCCESS[39m (0 secs / 0.497 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 4 of 61[32m SUCCESS[39m (0 secs / 0.528 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 5 of 61[32m SUCCESS[39m (0 secs / 0.556 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 6 of 61[32m SUCCESS[39m (0 secs / 0.582 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 7 of 61 (skipped 4)[32m SUCCESS[39m (0 secs / 0.607 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 8 of 61 (skipped 4)[32m SUCCESS[39m (0 secs / 0.626 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 9 of 61 (skipped 4)[32m SUCCESS[39m (0 secs / 0.643 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 10 of 61 (skipped 4)[32m SUCCESS[39m (0 secs / 0.659 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 11 of 61 (skipped 4)[32m SUCCESS[39m (0 secs / 0.852 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 12 of 61 (skipped 4)[32m SUCCESS[39m (0 secs / 0.873 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 13 of 61 (skipped 10)[32m SUCCESS[39m (0 secs / 0.952 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 14 of 61 (skipped 32)[32m SUCCESS[39m (0 secs / 0.966 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 15 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.619 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 16 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.633 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 17 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.649 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 18 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.665 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 19 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.684 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 20 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.704 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 21 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.721 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 22 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.735 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 23 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.75 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 24 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.761 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 25 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.773 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 26 of 61 (skipped 35)[32m SUCCESS[39m (0 secs / 1.786 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 26 of 61 (skipped 35)[32m SUCCESS[39m (1.953 secs / 1.786 secs)
+[32mTOTAL: 26 SUCCESS[39m
+
+=============================== Coverage summary ===============================
+Statements   : 21.85% ( 158/723 )
+Branches     : 10.37% ( 22/212 )
+Functions    : 12.08% ( 36/298 )
+Lines        : 22.12% ( 150/678 )
+================================================================================

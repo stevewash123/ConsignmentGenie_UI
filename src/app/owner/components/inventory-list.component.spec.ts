@@ -13,6 +13,7 @@ import {
   ItemStatus,
   ApiResponse
 } from '../../models/inventory.model';
+import { ImportedItem } from './inventory-list.component';
 
 describe('InventoryListComponent', () => {
   let component: InventoryListComponent;
@@ -623,6 +624,107 @@ describe('InventoryListComponent', () => {
 
       // Component should remain functional
       expect(component.itemsResult()).toBe(mockPagedResult);
+    });
+  });
+
+  describe('Bulk Import Functionality', () => {
+    beforeEach(() => {
+      initializeComponent();
+    });
+
+    it('should open bulk import modal', () => {
+      expect(component.isBulkImportModalOpen()).toBe(false);
+
+      component.openBulkImport();
+
+      expect(component.isBulkImportModalOpen()).toBe(true);
+    });
+
+    it('should close bulk import modal', () => {
+      component.openBulkImport();
+      expect(component.isBulkImportModalOpen()).toBe(true);
+
+      component.closeBulkImportModal();
+
+      expect(component.isBulkImportModalOpen()).toBe(false);
+    });
+
+    it('should handle imported items with proper typing', () => {
+      mockInventoryService.getItems.calls.reset();
+
+      const importedItems: ImportedItem[] = [
+        {
+          name: 'Test Import Item 1',
+          description: 'Imported via CSV',
+          sku: 'IMP001',
+          price: '29.99',
+          consignorNumber: '123AB4',
+          category: 'Electronics',
+          condition: 'New',
+          receivedDate: '2024-01-01',
+          location: 'Shelf A',
+          notes: 'Test import'
+        },
+        {
+          name: 'Test Import Item 2',
+          price: '49.99',
+          consignorNumber: '456CD7'
+        }
+      ];
+
+      component.onItemsImported(importedItems);
+
+      // Should refresh inventory after import
+      expect(mockInventoryService.getItems).toHaveBeenCalled();
+      // Should close modal after import
+      expect(component.isBulkImportModalOpen()).toBe(false);
+    });
+
+    it('should handle empty imported items array', () => {
+      mockInventoryService.getItems.calls.reset();
+
+      const emptyItems: ImportedItem[] = [];
+
+      component.onItemsImported(emptyItems);
+
+      // Should not refresh inventory for empty import
+      expect(mockInventoryService.getItems).not.toHaveBeenCalled();
+      // Should still close modal
+      expect(component.isBulkImportModalOpen()).toBe(false);
+    });
+
+    it('should accept properly typed ImportedItem objects', () => {
+      // This test verifies TypeScript compilation with correct types
+      const mockImportedItem: ImportedItem = {
+        name: 'Typed Item',
+        price: '99.99',
+        consignorNumber: '789XY1'
+      };
+
+      // Should compile without TypeScript errors
+      expect(() => component.onItemsImported([mockImportedItem])).not.toThrow();
+    });
+
+    it('should handle imported items with all optional properties', () => {
+      const fullImportedItem: ImportedItem = {
+        name: 'Complete Item',
+        description: 'Full description',
+        sku: 'FULL001',
+        price: '199.99',
+        consignorNumber: '111AA2',
+        category: 'Clothing',
+        condition: 'LikeNew',
+        receivedDate: '2024-01-15',
+        location: 'Rack B',
+        notes: 'Complete import data'
+      };
+
+      mockInventoryService.getItems.calls.reset();
+
+      component.onItemsImported([fullImportedItem]);
+
+      expect(mockInventoryService.getItems).toHaveBeenCalled();
+      expect(component.isBulkImportModalOpen()).toBe(false);
     });
   });
 });

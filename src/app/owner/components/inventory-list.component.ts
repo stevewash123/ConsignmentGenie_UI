@@ -16,6 +16,20 @@ import {
   UpdateItemStatusRequest
 } from '../../models/inventory.model';
 
+// Define interface for imported CSV data structure
+export interface ImportedItem {
+  name: string;
+  description?: string;
+  sku?: string;
+  price: string;
+  consignorNumber: string;
+  category?: string;
+  condition?: string;
+  receivedDate?: string;
+  location?: string;
+  notes?: string;
+}
+
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
@@ -616,7 +630,7 @@ export class InventoryListComponent implements OnInit {
     this.isBulkImportModalOpen.set(false);
   }
 
-  onItemsImported(items: any[]) {
+  onItemsImported(items: ImportedItem[]) {
     if (items && items.length > 0) {
       this.loadItems(); // Refresh inventory list
     }

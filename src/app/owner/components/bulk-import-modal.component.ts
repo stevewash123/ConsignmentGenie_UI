@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ImportedItem } from './inventory-list.component';
 
 export interface ImportRow {
   rowNumber: number;
@@ -383,7 +384,7 @@ export interface ImportSummary {
 export class BulkImportModalComponent {
   @Input() isOpen = false;
   @Output() closeModal = new EventEmitter<void>();
-  @Output() itemsImported = new EventEmitter<any[]>();
+  @Output() itemsImported = new EventEmitter<ImportedItem[]>();
 
   // State
   selectedFile = signal<File | null>(null);

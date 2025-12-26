@@ -44,6 +44,22 @@ src/
 1. **Use Chrome MCP to debug as needed** - Available for web debugging and testing
 2. **Find a similar component before adding a new one** - Check services, code styles, and existing patterns
 
+## Build & Test Commands
+
+**Always force fresh log files when piping output to avoid outdated results:**
+```bash
+# Fresh build with new log file
+rm -f build-output.log && npx ng build 2>&1 | tee build-output.log
+
+# Fresh test run with new log file
+rm -f test-output.log && npx ng test --watch=false --browsers=ChromeHeadless 2>&1 | tee test-output.log
+
+# Fresh lint check with new log file
+rm -f lint-output.log && npx ng lint 2>&1 | tee lint-output.log
+```
+
+**Why this matters:** Piping to existing log files can give outdated results. Always `rm -f logfile.log &&` before command to ensure fresh output.
+
 ## Environment Configuration
 - **Windows Development**: `environment.ts` - Points to localhost API
 - **WSL Development**: `environment.development.ts` - Points to WSL API endpoints
