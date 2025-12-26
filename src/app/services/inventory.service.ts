@@ -88,6 +88,10 @@ export class InventoryService {
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/items/bulk-status`, { itemIds, status, reason });
   }
 
+  bulkCreateItems(items: CreateItemRequest[]): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/items/bulk-import`, { items });
+  }
+
   // Metrics endpoint
   getInventoryMetrics(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/items/metrics`);

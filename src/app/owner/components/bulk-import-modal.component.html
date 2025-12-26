@@ -143,12 +143,13 @@
       </div>
 
       <div class="footer-right">
-        <button class="btn btn-secondary" (click)="close()">Cancel</button>
+        <button class="btn btn-secondary" (click)="close()" [disabled]="isImporting()">Cancel</button>
         <button
           class="btn btn-success"
           (click)="importValidItems()"
-          [disabled]="!hasValidItems()">
-          Import {{ summary()!.validRows }} Valid Items
+          [disabled]="!hasValidItems() || isImporting()">
+          <span *ngIf="isImporting()">⏳ Importing...</span>
+          <span *ngIf="!isImporting()">Import {{ summary()!.validRows }} Valid Items</span>
         </button>
       </div>
     </div>

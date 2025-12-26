@@ -1,6 +1,11 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin, catchError, of } from 'rxjs';
 import { ImportedItem } from './inventory-list.component';
+import { InventoryService } from '../../services/inventory.service';
+import { ConsignorService } from '../../services/consignor.service';
+import { CreateItemRequest, ItemCondition } from '../../models/inventory.model';
+import { Consignor } from '../../models/consignor.model';
 
 export interface ImportRow {
   rowNumber: number;
@@ -381,10 +386,14 @@ export interface ImportSummary {
     }
   `]
 })
-export class BulkImportModalComponent {
+export class BulkImportModalComponent implements OnInit {
   @Input() isOpen = false;
   @Output() closeModal = new EventEmitter<void>();
   @Output() itemsImported = new EventEmitter<ImportedItem[]>();
+
+  // Services
+  private inventoryService = inject(InventoryService);
+  private consignorService = inject(ConsignorService);
 
   // State
   selectedFile = signal<File | null>(null);
@@ -392,6 +401,8 @@ export class BulkImportModalComponent {
   summary = signal<ImportSummary | null>(null);
   isProcessing = signal(false);
   isDragOver = signal(false);
+  isImporting = signal(false);
+  consignors = signal<Consignor[]>([]);
 
   // Pagination
   currentPage = signal(1);
@@ -413,6 +424,22 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     this.importData.set([]);
     this.summary.set(null);
     this.isProcessing.set(false);
+    this.isImporting.set(false);
+  }
+
+  ngOnInit() {
+    this.loadConsignors();
+  }
+
+  private loadConsignors() {
+    this.consignorService.getConsignors().subscribe({
+      next: (consignors) => {
+        this.consignors.set(consignors);
+      },
+      error: (error) => {
+        console.error('Error loading consignors:', error);
+      }
+    });
   }
 
   onFileSelected(event: Event) {
@@ -611,13 +638,92 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
 
   importValidItems() {
     const validRows = this.importData().filter(row => row.isValid);
-    const items = validRows.map(row => row.data);
+    if (validRows.length === 0) {
+      alert('No valid items to import.');
+      return;
+    }
 
-    // Emit the valid items for mock import
-    this.itemsImported.emit(items);
+    this.isImporting.set(true);
 
-    alert(`Successfully imported ${items.length} items!`);
-    this.close();
+    // Convert ImportedItem data to CreateItemRequest format
+    const consignorLookup = new Map<string, string>();
+    this.consignors().forEach(c => {
+      if (c.consignorNumber) {
+        consignorLookup.set(c.consignorNumber.toUpperCase(), c.id.toString());
+      }
+    });
+
+    const createRequests: CreateItemRequest[] = validRows
+      .map(row => this.convertToCreateItemRequest(row.data, consignorLookup))
+      .filter(req => req !== null) as CreateItemRequest[];
+
+    if (createRequests.length === 0) {
+      this.isImporting.set(false);
+      alert('No items could be converted for import. Check consignor numbers.');
+      return;
+    }
+
+    // Create items using individual API calls (fallback until bulk API is ready)
+    const createObservables = createRequests.map(request =>
+      this.inventoryService.createItem(request).pipe(
+        catchError(error => {
+          console.error('Error creating item:', error);
+          return of(null);
+        })
+      )
+    );
+
+    forkJoin(createObservables).subscribe({
+      next: (results) => {
+        const successful = results.filter(r => r !== null).length;
+        const failed = results.length - successful;
+
+        this.isImporting.set(false);
+
+        if (successful > 0) {
+          this.itemsImported.emit(validRows.map(r => r.data));
+          alert(`Import completed! ${successful} items created successfully${failed > 0 ? `, ${failed} failed` : ''}.`);
+          this.close();
+        } else {
+          alert('Import failed. No items were created.');
+        }
+      },
+      error: (error) => {
+        this.isImporting.set(false);
+        console.error('Error during bulk import:', error);
+        alert('Import failed due to an error. Please try again.');
+      }
+    });
+  }
+
+  private convertToCreateItemRequest(data: any, consignorLookup: Map<string, string>): CreateItemRequest | null {
+    const consignorId = consignorLookup.get(data.consignorNumber?.toUpperCase());
+    if (!consignorId) {
+      console.warn(`Consignor not found for number: ${data.consignorNumber}`);
+      return null;
+    }
+
+    // Convert condition string to ItemCondition enum
+    const conditionMap: { [key: string]: ItemCondition } = {
+      'New': ItemCondition.New,
+      'LikeNew': ItemCondition.LikeNew,
+      'Good': ItemCondition.Good,
+      'Fair': ItemCondition.Fair,
+      'Poor': ItemCondition.Poor
+    };
+
+    return {
+      consignorId,
+      title: data.name,
+      description: data.description || undefined,
+      sku: data.sku || undefined,
+      price: parseFloat(data.price),
+      category: data.category || 'General',
+      condition: conditionMap[data.condition] || ItemCondition.Good,
+      receivedDate: data.receivedDate ? new Date(data.receivedDate) : new Date(),
+      location: data.location || undefined,
+      notes: data.notes || undefined
+    };
   }
 
   hasValidItems(): boolean {
