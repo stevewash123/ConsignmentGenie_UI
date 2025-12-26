@@ -616,8 +616,8 @@ export class InventoryListComponent implements OnInit {
     this.isBulkImportModalOpen.set(false);
   }
 
-  onItemsImported(count: number) {
-    if (count > 0) {
+  onItemsImported(items: any[]) {
+    if (items && items.length > 0) {
       this.loadItems(); // Refresh inventory list
     }
     this.closeBulkImportModal();
