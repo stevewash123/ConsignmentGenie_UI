@@ -428,16 +428,19 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
   }
 
   ngOnInit() {
+    console.log('🔧 BulkImportModal: Initializing, loading consignors...');
     this.loadConsignors();
   }
 
   private loadConsignors() {
+    console.log('📡 BulkImportModal: Calling consignorService.getConsignors()');
     this.consignorService.getConsignors().subscribe({
       next: (consignors) => {
+        console.log(`✅ BulkImportModal: Loaded ${consignors.length} consignors:`, consignors.map(c => ({ id: c.id, name: c.name, consignorNumber: c.consignorNumber })));
         this.consignors.set(consignors);
       },
       error: (error) => {
-        console.error('Error loading consignors:', error);
+        console.error('❌ BulkImportModal: Error loading consignors:', error);
       }
     });
   }
@@ -637,8 +640,12 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
   }
 
   importValidItems() {
+    console.log('🚀 BulkImportModal: Starting import process...');
     const validRows = this.importData().filter(row => row.isValid);
+    console.log(`📊 BulkImportModal: Found ${validRows.length} valid rows to import`);
+
     if (validRows.length === 0) {
+      console.warn('⚠️ BulkImportModal: No valid items to import');
       alert('No valid items to import.');
       return;
     }
@@ -652,22 +659,28 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
         consignorLookup.set(c.consignorNumber.toUpperCase(), c.id.toString());
       }
     });
+    console.log('🔍 BulkImportModal: Consignor lookup map:', Object.fromEntries(consignorLookup));
 
     const createRequests: CreateItemRequest[] = validRows
       .map(row => this.convertToCreateItemRequest(row.data, consignorLookup))
       .filter(req => req !== null) as CreateItemRequest[];
 
+    console.log(`🔄 BulkImportModal: Converted ${createRequests.length} items to CreateItemRequest format:`, createRequests);
+
     if (createRequests.length === 0) {
       this.isImporting.set(false);
+      console.error('❌ BulkImportModal: No items could be converted for import. Check consignor numbers.');
       alert('No items could be converted for import. Check consignor numbers.');
       return;
     }
 
     // Create items using individual API calls (fallback until bulk API is ready)
-    const createObservables = createRequests.map(request =>
+    console.log(`📡 BulkImportModal: Making ${createRequests.length} API calls to create items...`);
+    const createObservables = createRequests.map((request, index) =>
       this.inventoryService.createItem(request).pipe(
         catchError(error => {
-          console.error('Error creating item:', error);
+          console.error(`❌ BulkImportModal: Error creating item ${index + 1}:`, error);
+          console.error(`❌ BulkImportModal: Failed request data:`, request);
           return of(null);
         })
       )
@@ -675,9 +688,11 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
 
     forkJoin(createObservables).subscribe({
       next: (results) => {
+        console.log('📊 BulkImportModal: API responses received:', results);
         const successful = results.filter(r => r !== null).length;
         const failed = results.length - successful;
 
+        console.log(`✅ BulkImportModal: Import completed - ${successful} successful, ${failed} failed`);
         this.isImporting.set(false);
 
         if (successful > 0) {
@@ -685,21 +700,25 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
           alert(`Import completed! ${successful} items created successfully${failed > 0 ? `, ${failed} failed` : ''}.`);
           this.close();
         } else {
+          console.error('❌ BulkImportModal: All import attempts failed');
           alert('Import failed. No items were created.');
         }
       },
       error: (error) => {
         this.isImporting.set(false);
-        console.error('Error during bulk import:', error);
+        console.error('💥 BulkImportModal: Fatal error during bulk import:', error);
         alert('Import failed due to an error. Please try again.');
       }
     });
   }
 
   private convertToCreateItemRequest(data: any, consignorLookup: Map<string, string>): CreateItemRequest | null {
+    console.log('🔄 BulkImportModal: Converting item data:', data);
     const consignorId = consignorLookup.get(data.consignorNumber?.toUpperCase());
+
     if (!consignorId) {
-      console.warn(`Consignor not found for number: ${data.consignorNumber}`);
+      console.warn(`⚠️ BulkImportModal: Consignor not found for number: ${data.consignorNumber}`);
+      console.log('🔍 BulkImportModal: Available consignor numbers:', Array.from(consignorLookup.keys()));
       return null;
     }
 
@@ -712,7 +731,7 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
       'Poor': ItemCondition.Poor
     };
 
-    return {
+    const request = {
       consignorId,
       title: data.name,
       description: data.description || undefined,
@@ -724,6 +743,9 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
       location: data.location || undefined,
       notes: data.notes || undefined
     };
+
+    console.log(`✅ BulkImportModal: Converted item "${data.name}" to CreateItemRequest:`, request);
+    return request;
   }
 
   hasValidItems(): boolean {
