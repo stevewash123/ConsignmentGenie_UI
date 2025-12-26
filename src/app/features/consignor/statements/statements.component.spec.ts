@@ -2,22 +2,55 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { RouterTestingModule } from '@angular/router/testing';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { StatementsComponent } from './statements.component';
-import { MockStatementService } from '../services/mock-statement.service';
-import { StatementMonth, StatementListResponse } from '../../../consignor/models/consignor.models';
+import { ConsignorPortalService } from '../../../consignor/services/consignor-portal.service';
+import { StatementListDto, StatementMonth } from '../../../consignor/models/consignor.models';
 
 describe('StatementsComponent', () => {
   let component: StatementsComponent;
   let fixture: ComponentFixture<StatementsComponent>;
-  let mockStatementService: jasmine.SpyObj<MockStatementService>;
+  let consignorPortalServiceSpy: jasmine.SpyObj<ConsignorPortalService>;
 
-  const mockStatements: StatementMonth[] = [
+  const mockStatementListDtos: StatementListDto[] = [
+    {
+      statementId: '1',
+      statementNumber: 'ST-2024-12-001',
+      periodStart: new Date('2024-12-01'),
+      periodEnd: new Date('2024-12-31'),
+      periodLabel: 'December 2024',
+      itemsSold: 12,
+      totalEarnings: 485.00,
+      payoutCount: 2,
+      closingBalance: 485.00,
+      status: 'Final',
+      hasPdf: true,
+      generatedAt: new Date('2024-12-31')
+    },
+    {
+      statementId: '2',
+      statementNumber: 'ST-2024-11-001',
+      periodStart: new Date('2024-11-01'),
+      periodEnd: new Date('2024-11-30'),
+      periodLabel: 'November 2024',
+      itemsSold: 8,
+      totalEarnings: 312.50,
+      payoutCount: 1,
+      closingBalance: 312.50,
+      status: 'Final',
+      hasPdf: true,
+      generatedAt: new Date('2024-11-30')
+    }
+  ];
+
+  // Expected transformed result
+  const expectedStatementMonths: StatementMonth[] = [
     {
       year: 2024,
       month: 12,
       monthName: 'December 2024',
       salesCount: 12,
       totalEarnings: 485.00,
-      payoutCount: 2
+      payoutCount: 1,
+      isDownloading: false
     },
     {
       year: 2024,
@@ -25,14 +58,15 @@ describe('StatementsComponent', () => {
       monthName: 'November 2024',
       salesCount: 8,
       totalEarnings: 312.50,
-      payoutCount: 1
+      payoutCount: 1,
+      isDownloading: false
     }
   ];
 
   beforeEach(async () => {
-    const statementServiceSpy = jasmine.createSpyObj('MockStatementService', [
-      'getMonthlyStatements',
-      'downloadMonthlyPdf'
+    consignorPortalServiceSpy = jasmine.createSpyObj('ConsignorPortalService', [
+      'getStatements',
+      'downloadStatementPdfByPeriod'
     ]);
 
     await TestBed.configureTestingModule({
@@ -41,20 +75,17 @@ describe('StatementsComponent', () => {
         RouterTestingModule
       ],
       providers: [
-        { provide: MockStatementService, useValue: statementServiceSpy }
+        { provide: ConsignorPortalService, useValue: consignorPortalServiceSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StatementsComponent);
     component = fixture.componentInstance;
-    mockStatementService = TestBed.inject(MockStatementService) as jasmine.SpyObj<MockStatementService>;
   });
 
   beforeEach(() => {
     // Set up default successful response
-    mockStatementService.getMonthlyStatements.and.returnValue(
-      of({ statements: mockStatements } as StatementListResponse)
-    );
+    consignorPortalServiceSpy.getStatements.and.returnValue(of(mockStatementListDtos));
   });
 
   it('should create', () => {
@@ -64,8 +95,11 @@ describe('StatementsComponent', () => {
   it('should load statements on init', () => {
     component.ngOnInit();
 
-    expect(mockStatementService.getMonthlyStatements).toHaveBeenCalled();
-    expect(component.statements).toEqual(mockStatements);
+    expect(consignorPortalServiceSpy.getStatements).toHaveBeenCalled();
+    expect(component.statements.length).toBe(2);
+    expect(component.statements[0].year).toBe(2024);
+    expect(component.statements[0].month).toBe(12);
+    expect(component.statements[0].monthName).toBe('December 2024');
     expect(component.loading).toBeFalse();
     expect(component.error).toBeNull();
   });
@@ -84,7 +118,7 @@ describe('StatementsComponent', () => {
 
   it('should handle service error', () => {
     const errorMessage = 'Service error';
-    mockStatementService.getMonthlyStatements.and.returnValue(
+    consignorPortalServiceSpy.getStatements.and.returnValue(
       throwError(() => new Error(errorMessage))
     );
     spyOn(console, 'error').and.stub();
@@ -121,7 +155,7 @@ describe('StatementsComponent', () => {
   }));
 
   it('should display statements table when data is loaded', fakeAsync(() => {
-    component.statements = mockStatements;
+    component.statements = expectedStatementMonths;
     component.loading = false;
     component.error = null;
     fixture.detectChanges();
@@ -143,14 +177,14 @@ describe('StatementsComponent', () => {
 
   it('should handle PDF download successfully', () => {
     const mockBlob = new Blob(['test'], { type: 'application/pdf' });
-    mockStatementService.downloadMonthlyPdf.and.returnValue(of(mockBlob));
+    consignorPortalServiceSpy.downloadStatementPdfByPeriod.and.returnValue(of(mockBlob));
 
     spyOn(component as any, 'downloadFile');
 
-    const statement = mockStatements[0];
+    const statement = expectedStatementMonths[0];
     component.downloadPdf(statement);
 
-    expect(mockStatementService.downloadMonthlyPdf).toHaveBeenCalledWith(2024, 12);
+    expect(consignorPortalServiceSpy.downloadStatementPdfByPeriod).toHaveBeenCalledWith(2024, 12);
     expect((component as any).downloadFile).toHaveBeenCalledWith(
       mockBlob,
       'statement-2024-12.pdf'
@@ -158,13 +192,13 @@ describe('StatementsComponent', () => {
   });
 
   it('should handle PDF download error', () => {
-    mockStatementService.downloadMonthlyPdf.and.returnValue(
+    consignorPortalServiceSpy.downloadStatementPdfByPeriod.and.returnValue(
       throwError(() => new Error('Download failed'))
     );
     spyOn(window, 'alert');
     spyOn(console, 'error').and.stub();
 
-    const statement = { ...mockStatements[0] };
+    const statement = { ...expectedStatementMonths[0] };
     component.downloadPdf(statement);
 
     expect(window.alert).toHaveBeenCalledWith('Failed to download PDF. Please try again.');
@@ -173,19 +207,19 @@ describe('StatementsComponent', () => {
   });
 
   it('should prevent download when already downloading', () => {
-    const statement = { ...mockStatements[0], isDownloading: true };
+    const statement = { ...expectedStatementMonths[0], isDownloading: true };
 
     component.downloadPdf(statement);
 
-    expect(mockStatementService.downloadMonthlyPdf).not.toHaveBeenCalled();
+    expect(consignorPortalServiceSpy.downloadStatementPdfByPeriod).not.toHaveBeenCalled();
   });
 
   it('should set downloading state during PDF generation', fakeAsync(() => {
     const mockBlob = new Blob(['test'], { type: 'application/pdf' });
-    mockStatementService.downloadMonthlyPdf.and.returnValue(of(mockBlob));
+    consignorPortalServiceSpy.downloadStatementPdfByPeriod.and.returnValue(of(mockBlob));
     spyOn(component as any, 'downloadFile');
 
-    const statement = { ...mockStatements[0] };
+    const statement = { ...expectedStatementMonths[0] };
 
     component.downloadPdf(statement);
     expect(statement.isDownloading).toBeTrue();
@@ -196,7 +230,7 @@ describe('StatementsComponent', () => {
   }));
 
   it('should show PDF button in correct states', fakeAsync(() => {
-    component.statements = mockStatements;
+    component.statements = expectedStatementMonths;
     component.loading = false;
     component.error = null;
     fixture.detectChanges();
@@ -219,7 +253,7 @@ describe('StatementsComponent', () => {
   }));
 
   it('should track statements correctly', () => {
-    const statement = mockStatements[0];
+    const statement = expectedStatementMonths[0];
     const key = component.trackByStatement(0, statement);
     expect(key).toBe('2024-12');
   });
@@ -236,7 +270,7 @@ describe('StatementsComponent', () => {
     tryAgainButton.click();
     tick();
 
-    expect(mockStatementService.getMonthlyStatements).toHaveBeenCalledTimes(2);
+    expect(consignorPortalServiceSpy.getStatements).toHaveBeenCalledTimes(2);
   }));
 
   it('should navigate back to dashboard when back button is clicked', fakeAsync(() => {

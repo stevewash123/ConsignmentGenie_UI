@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { ItemRequest } from '../models/consignor.models';
 
 @Component({
@@ -304,7 +304,7 @@ export class ItemRequestDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private consignorService: ProviderPortalService
+    private consignorService: ConsignorPortalService
   ) {}
 
   ngOnInit() {

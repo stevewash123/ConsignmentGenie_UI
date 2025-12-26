@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { ProviderItem, PagedResult, ProviderItemQuery } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
@@ -410,7 +410,7 @@ export class ConsignorItemsComponent implements OnInit {
   removedCount = 0;
 
   constructor(
-    private ConsignorService: ProviderPortalService,
+    private ConsignorService: ConsignorPortalService,
     public loadingService: LoadingService
   ) {}
 

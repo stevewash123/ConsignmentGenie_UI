@@ -1,19 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ProviderPortalService } from './consignor-portal.service';
+import { ConsignorPortalService } from './consignor-portal.service';
 import { environment } from '../../../environments/environment';
 
-describe('ProviderPortalService', () => {
-  let service: ProviderPortalService;
+describe('ConsignorPortalService', () => {
+  let service: ConsignorPortalService;
   let httpMock: HttpTestingController;
   const apiUrl = `${environment.apiUrl}/api/consignor`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ProviderPortalService]
+      providers: [ConsignorPortalService]
     });
-    service = TestBed.inject(ProviderPortalService);
+    service = TestBed.inject(ConsignorPortalService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 

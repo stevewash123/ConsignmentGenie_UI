@@ -28,7 +28,7 @@ import {
 @Injectable({
   providedIn: 'root'
 })
-export class ProviderPortalService {
+export class ConsignorPortalService {
   private apiUrl = `${environment.apiUrl}/api/consignor`;
 
   constructor(private http: HttpClient) {}

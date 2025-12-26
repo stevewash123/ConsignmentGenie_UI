@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { CreateItemRequest } from '../models/consignor.models';
 
 @Component({
@@ -304,7 +304,7 @@ export class SubmitItemRequestComponent implements OnInit {
   previewImages: string[] = [];
 
   constructor(
-    private consignorService: ProviderPortalService,
+    private consignorService: ConsignorPortalService,
     private router: Router
   ) {}
 

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, map } from 'rxjs';
-import { ProviderPortalService } from '../../../consignor/services/consignor-portal.service';
+import { ConsignorPortalService } from '../../../consignor/services/consignor-portal.service';
 import { StatementMonth, StatementListDto } from '../../../consignor/models/consignor.models';
 
 @Component({
@@ -20,7 +20,7 @@ export class StatementsComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   constructor(
-    private providerPortalService: ProviderPortalService
+    private consignorPortalService: ConsignorPortalService
   ) {}
 
   ngOnInit() {
@@ -36,7 +36,7 @@ export class StatementsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    this.providerPortalService.getStatements()
+    this.consignorPortalService.getStatements()
       .pipe(
         takeUntil(this.destroy$),
         map((statementList: StatementListDto[]) => this.transformToStatementMonths(statementList))
@@ -61,7 +61,7 @@ export class StatementsComponent implements OnInit, OnDestroy {
 
     statement.isDownloading = true;
 
-    this.providerPortalService.downloadStatementPdfByPeriod(statement.year, statement.month)
+    this.consignorPortalService.downloadStatementPdfByPeriod(statement.year, statement.month)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { ProviderItemDetail } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
@@ -491,7 +491,7 @@ export class ConsignorItemDetailComponent implements OnInit {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private ConsignorService: ProviderPortalService,
+    private ConsignorService: ConsignorPortalService,
     private mockService: MockConsignorItemService,
     private route: ActivatedRoute,
     public loadingService: LoadingService

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { ProviderProfile, UpdateProviderProfile } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
@@ -328,7 +328,7 @@ export class ConsignorProfileComponent implements OnInit {
   payoutNotifications = true;
 
   constructor(
-    private ConsignorService: ProviderPortalService,
+    private ConsignorService: ConsignorPortalService,
     public loadingService: LoadingService
   ) {}
 

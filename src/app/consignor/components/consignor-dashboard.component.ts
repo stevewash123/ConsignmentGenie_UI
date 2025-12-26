@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { ProviderDashboard } from '../models/consignor.models';
 import { EarningsWidgetComponent } from './earnings-widget.component';
 
@@ -204,7 +204,7 @@ export class ConsignorDashboardComponent implements OnInit {
   dashboard: ProviderDashboard | null = null;
   error: string | null = null;
 
-  constructor(private ConsignorService: ProviderPortalService) {}
+  constructor(private ConsignorService: ConsignorPortalService) {}
 
   ngOnInit() {
     this.loadDashboard();

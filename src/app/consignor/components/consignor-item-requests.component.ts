@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProviderPortalService } from '../services/consignor-portal.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { ItemRequest, ItemRequestQuery, PagedResult } from '../models/consignor.models';
 
 @Component({
@@ -382,7 +382,7 @@ export class ConsignorItemRequestsComponent implements OnInit {
     { value: 'withdrawn', label: 'Withdrawn' }
   ];
 
-  constructor(private consignorService: ProviderPortalService) {}
+  constructor(private consignorService: ConsignorPortalService) {}
 
   ngOnInit() {
     this.loadRequests();

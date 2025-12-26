@@ -11,6 +11,7 @@ export interface ItemListDto {
   status: ItemStatus;
   primaryImageUrl?: string;
   receivedDate: Date;
+  expirationDate?: Date;
   soldDate?: Date;
   consignorId: string;
   consignorName: string;

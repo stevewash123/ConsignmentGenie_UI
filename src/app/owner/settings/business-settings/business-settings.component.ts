@@ -5,32 +5,32 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
 interface BusinessSettings {
-  Commission: {
-    DefaultSplit: string;
-    AllowCustomSplitsPerConsignor: boolean;
-    AllowCustomSplitsPerItem: boolean;
+  commission: {
+    defaultSplit: string;
+    allowCustomSplitsPerConsignor: boolean;
+    allowCustomSplitsPerItem: boolean;
   };
-  Tax: {
-    SalesTaxRate: number;
-    TaxIncludedInPrices: boolean;
-    ChargeTaxOnShipping: boolean;
-    TaxIdEin?: string;
+  tax: {
+    salesTaxRate: number;
+    taxIncludedInPrices: boolean;
+    chargeTaxOnShipping: boolean;
+    taxIdEin?: string;
   };
-  Payouts: {
-    Schedule: string;
-    MinimumAmount: number;
-    HoldPeriodDays: number;
-    RefundPolicy: 'NoRefunds' | 'WithinDays' | 'UntilPayout';
-    RefundWindowDays?: number;
-    DefaultPayoutMethod: 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit';
+  payouts: {
+    schedule: string;
+    minimumAmount: number;
+    holdPeriodDays: number;
+    refundPolicy: 'NoRefunds' | 'WithinDays' | 'UntilPayout';
+    refundWindowDays?: number;
+    defaultPayoutMethod: 'Check' | 'Cash' | 'DirectDeposit' | 'PayPal' | 'Venmo' | 'StoreCredit';
   };
-  Items: {
-    DefaultConsignmentPeriodDays: number;
-    EnableAutoMarkdowns: boolean;
-    MarkdownSchedule: {
-      After30Days: number;
-      After60Days: number;
-      After90DaysAction: 'donate' | 'return';
+  items: {
+    defaultConsignmentPeriodDays: number;
+    enableAutoMarkdowns: boolean;
+    markdownSchedule: {
+      after30Days: number;
+      after60Days: number;
+      after90DaysAction: 'donate' | 'return';
     };
   };
 }
@@ -386,18 +386,18 @@ export class BusinessSettingsComponent implements OnInit {
     const errors: string[] = [];
 
     // Validation: HoldPeriodDays: ≥ 0, ≤ 90
-    if (settings.Payouts.HoldPeriodDays < 0 || settings.Payouts.HoldPeriodDays > 90) {
+    if (settings.payouts.holdPeriodDays < 0 || settings.payouts.holdPeriodDays > 90) {
       errors.push('Hold period must be between 0 and 90 days');
     }
 
     // Validation: MinimumAmount: ≥ 0, ≤ 10000
-    if (settings.Payouts.MinimumAmount < 0 || settings.Payouts.MinimumAmount > 10000) {
+    if (settings.payouts.minimumAmount < 0 || settings.payouts.minimumAmount > 10000) {
       errors.push('Minimum payout amount must be between $0 and $10,000');
     }
 
     // Validation: RefundWindowDays: ≥ 1, ≤ 90 (only if RefundPolicy = WithinDays)
-    if (settings.Payouts.RefundPolicy === 'WithinDays') {
-      if (!settings.Payouts.RefundWindowDays || settings.Payouts.RefundWindowDays < 1 || settings.Payouts.RefundWindowDays > 90) {
+    if (settings.payouts.refundPolicy === 'WithinDays') {
+      if (!settings.payouts.refundWindowDays || settings.payouts.refundWindowDays < 1 || settings.payouts.refundWindowDays > 90) {
         errors.push('Refund window must be between 1 and 90 days when using "Within Days" policy');
       }
     }
