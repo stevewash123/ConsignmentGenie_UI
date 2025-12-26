@@ -8,7 +8,7 @@
             <p>View and manage all inventory items</p>
           </div>
           <div class="header-actions">
-            <button class="btn-secondary" (click)="bulkUpload()" title="Upload multiple items at once">
+            <button class="btn-secondary" (click)="openBulkImport()" title="Upload multiple items at once">
               <span class="btn-icon">📤</span>
               Bulk Upload
             </button>
@@ -243,4 +243,11 @@
 
       </div>
     </app-owner-layout>
+
+    <!-- Bulk Import Modal -->
+    <app-bulk-import-modal
+      [isOpen]="isBulkImportModalOpen()"
+      (closeModal)="closeBulkImportModal()"
+      (itemsImported)="onItemsImported($event)">
+    </app-bulk-import-modal>
   

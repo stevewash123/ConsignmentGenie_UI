@@ -35,10 +35,6 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/inventory-add.component').then(m => m.InventoryAddComponent)
   },
   {
-    path: 'inventory/bulk-upload',
-    loadComponent: () => import('./components/inventory-bulk-upload.component').then(m => m.InventoryBulkUploadComponent)
-  },
-  {
     path: 'inventory/:id',
     loadComponent: () => import('./components/inventory-detail.component').then(m => m.InventoryDetailComponent)
   },

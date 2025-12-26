@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OwnerLayoutComponent } from './owner-layout.component';
+import { BulkImportModalComponent } from './bulk-import-modal.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import {
@@ -18,7 +19,7 @@ import {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, BulkImportModalComponent],
   templateUrl: './inventory-list.component.html',
   styles: [`
     .inventory-page {
@@ -473,6 +474,7 @@ export class InventoryListComponent implements OnInit {
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
   categories = signal<CategoryDto[]>([]);
   error = signal<string | null>(null);
+  isBulkImportModalOpen = signal(false);
 
   isInventoryLoading(): boolean {
     return this.loadingService.isLoading('inventory-list');
@@ -606,8 +608,19 @@ export class InventoryListComponent implements OnInit {
     this.router.navigate(['/owner/inventory/new']);
   }
 
-  bulkUpload() {
-    this.router.navigate(['/owner/inventory/bulk-upload']);
+  openBulkImport() {
+    this.isBulkImportModalOpen.set(true);
+  }
+
+  closeBulkImportModal() {
+    this.isBulkImportModalOpen.set(false);
+  }
+
+  onItemsImported(count: number) {
+    if (count > 0) {
+      this.loadItems(); // Refresh inventory list
+    }
+    this.closeBulkImportModal();
   }
 
   viewItem(id: string) {
