@@ -17,17 +17,18 @@ import {
 } from '../../models/inventory.model';
 
 // Define interface for imported CSV data structure
+// Note: CSV headers are PascalCase (Name, Price, ConsignorNumber) but converted to camelCase internally
 export interface ImportedItem {
-  name: string;
-  description?: string;
-  sku?: string;
-  price: string;
-  consignorNumber: string;
-  category?: string;
-  condition?: string;
-  receivedDate?: string;
-  location?: string;
-  notes?: string;
+  name: string;              // from CSV "Name"
+  description?: string;      // from CSV "Description"
+  sku?: string;              // from CSV "SKU"
+  price: string;             // from CSV "Price" (string, needs parsing)
+  consignorNumber: string;   // from CSV "ConsignorNumber"
+  category?: string;         // from CSV "Category"
+  condition?: string;        // from CSV "Condition"
+  receivedDate?: string;     // from CSV "ReceivedDate"
+  location?: string;         // from CSV "Location"
+  notes?: string;            // from CSV "Notes"
 }
 
 @Component({

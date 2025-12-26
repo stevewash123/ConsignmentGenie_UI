@@ -481,7 +481,9 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
 
       const rowData: any = {};
       headers.forEach((header, index) => {
-        rowData[header] = values[index] || '';
+        // Convert header to camelCase
+        const camelCaseHeader = header.charAt(0).toLowerCase() + header.slice(1);
+        rowData[camelCaseHeader] = values[index] || '';
       });
 
       const validation = this.validateRow(rowData, i + 1);
@@ -539,7 +541,7 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
   private validateRow(data: any, rowNumber: number): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    // Required fields
+    // Required fields - now using camelCase properties
     if (!data.name || data.name.trim() === '') {
       errors.push('Name is required');
     }
@@ -547,18 +549,18 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     if (!data.price || data.price.trim() === '') {
       errors.push('Price is required');
     } else {
-      const price = parseFloat(data.price);
-      if (isNaN(price) || price <= 0) {
+      const priceValue = parseFloat(data.price);
+      if (isNaN(priceValue) || priceValue <= 0) {
         errors.push('Price must be a positive number');
       }
     }
 
-    if (!data.ConsignorNumber || data.ConsignorNumber.trim() === '') {
+    if (!data.consignorNumber || data.consignorNumber.trim() === '') {
       errors.push('ConsignorNumber is required');
     } else {
       // Pattern: NNNLLN (3 digits, 2 letters, 1 number)
       const pattern = /^\d{3}[A-Z]{2}\d$/;
-      if (!pattern.test(data.ConsignorNumber.toUpperCase())) {
+      if (!pattern.test(data.consignorNumber.toUpperCase())) {
         errors.push('ConsignorNumber must be format NNNLLN (e.g., 472HK3)');
       }
     }
