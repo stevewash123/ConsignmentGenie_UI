@@ -228,9 +228,14 @@ export class ConsignorRegistrationComponent implements OnInit {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
+    const nameParts = this.registration.name.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
     const request: ConsignorRegistrationRequest = {
       invitationToken: this.invitationToken,
-      fullName: this.registration.name,
+      firstName: firstName,
+      lastName: lastName,
       email: this.registration.email,
       password: this.registration.password,
       phone: this.registration.phone,
