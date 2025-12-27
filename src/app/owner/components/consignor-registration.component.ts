@@ -240,6 +240,7 @@ export class ConsignorRegistrationComponent implements OnInit {
       password: this.registration.password,
       phone: this.registration.phone,
       address: this.registration.address
+      // Note: This component doesn't collect city/state/zip yet
     };
 
     this.ConsignorService.registerFromInvitation(request).subscribe({

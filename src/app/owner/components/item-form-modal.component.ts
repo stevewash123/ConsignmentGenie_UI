@@ -262,7 +262,7 @@ export class ItemFormModalComponent implements OnInit {
     price: null as number | null,
     consignorId: '',
     categoryId: '',
-    condition: 'Good', // Default condition from API
+    condition: ItemCondition.Good, // Default condition from API
     receivedDate: '',
     expirationDate: ''
   };
@@ -369,7 +369,7 @@ export class ItemFormModalComponent implements OnInit {
       price: null,
       consignorId: '',
       categoryId: '',
-      condition: 'Good',
+      condition: ItemCondition.Good,
       receivedDate: today,
       expirationDate: this.calculateExpirationDate(today)
     };

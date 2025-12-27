@@ -735,6 +735,7 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     const conditionMap: { [key: string]: ItemCondition } = {
       'New': ItemCondition.New,
       'LikeNew': ItemCondition.LikeNew,
+      'Like New': ItemCondition.LikeNew, // Handle space variant
       'Good': ItemCondition.Good,
       'Fair': ItemCondition.Fair,
       'Poor': ItemCondition.Poor

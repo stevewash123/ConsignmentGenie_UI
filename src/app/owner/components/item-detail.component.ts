@@ -93,8 +93,12 @@ export class ItemDetailComponent implements OnInit {
 
   getConditionLabel(condition: ItemCondition): string {
     switch (condition) {
+      case ItemCondition.New: return 'New';
       case ItemCondition.LikeNew: return 'Like New';
-      default: return condition;
+      case ItemCondition.Good: return 'Good';
+      case ItemCondition.Fair: return 'Fair';
+      case ItemCondition.Poor: return 'Poor';
+      default: return 'Unknown';
     }
   }
 

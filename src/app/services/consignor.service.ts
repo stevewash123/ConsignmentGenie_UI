@@ -35,6 +35,9 @@ export interface ConsignorRegistrationRequest {
   password: string;
   phone?: string;
   address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
 }
 
 export interface RegistrationResult {

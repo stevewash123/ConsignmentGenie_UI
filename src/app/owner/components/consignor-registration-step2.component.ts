@@ -349,8 +349,11 @@ export class ConsignorRegistrationStep2Component implements OnInit {
       lastName: this.details.lastName,
       email: regData.credentials.email,
       password: regData.credentials.password,
-      phone: this.details.phone
-      // Note: Address fields not yet wired up to API
+      phone: this.details.phone,
+      address: this.details.address,
+      city: this.details.city,
+      state: this.details.state,
+      zipCode: this.details.zipCode
     };
 
     this.consignorService.registerFromInvitation(request).subscribe({
