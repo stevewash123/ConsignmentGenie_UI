@@ -34,3 +34,20 @@ export interface CreateConsignorRequest {
 export interface UpdateConsignorRequest extends CreateConsignorRequest {
   isActive: boolean;
 }
+
+export interface ConsignorListDto {
+  consignorId: number;
+  consignorNumber: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  commissionRate: number;
+  status: string;
+  activeItemCount: number;
+  totalItemCount: number;
+  pendingBalance: number;
+  totalEarnings: number;
+  hasPortalAccess: boolean;
+  contractOnFile: boolean;
+  createdAt: string;
+}

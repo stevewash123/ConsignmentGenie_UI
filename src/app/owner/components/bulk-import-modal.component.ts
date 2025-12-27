@@ -654,7 +654,11 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
 
     // Convert ImportedItem data to CreateItemRequest format
     const consignorLookup = new Map<string, string>();
-    this.consignors().forEach(c => {
+    const consignorsList = this.consignors();
+
+    console.log('🔍 BulkImportModal: Consignors data:', consignorsList);
+
+    consignorsList.forEach(c => {
       if (c.consignorNumber) {
         consignorLookup.set(c.consignorNumber.toUpperCase(), c.id.toString());
       }

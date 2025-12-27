@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Consignor, CreateConsignorRequest, UpdateConsignorRequest } from '../models/consignor.model';
+import { map } from 'rxjs/operators';
+import { Consignor, ConsignorListDto, CreateConsignorRequest, UpdateConsignorRequest } from '../models/consignor.model';
 import { BalanceAdjustment, CreateBalanceAdjustmentRequest, BalanceAdjustmentResponse, ConsignorBalance } from '../models/balance-adjustment.model';
+import { PagedResult } from '../models/inventory.model';
 import { environment } from '../../environments/environment';
 
 export interface ConsignorInvitationRequest {
@@ -78,7 +80,31 @@ export class ConsignorService {
   constructor(private http: HttpClient) {}
 
   getConsignors(): Observable<Consignor[]> {
-    return this.http.get<Consignor[]>(this.apiUrl);
+    return this.http.get<PagedResult<ConsignorListDto>>(this.apiUrl).pipe(
+      map(response => response.items.map(dto => this.transformToConsignor(dto)))
+    );
+  }
+
+  private transformToConsignor(dto: ConsignorListDto): Consignor {
+    return {
+      id: dto.consignorId,
+      name: dto.fullName,
+      email: dto.email || '',
+      phone: dto.phone,
+      address: undefined, // Not provided in DTO
+      commissionRate: dto.commissionRate,
+      preferredPaymentMethod: undefined, // Not provided in DTO
+      paymentDetails: undefined, // Not provided in DTO
+      notes: undefined, // Not provided in DTO
+      isActive: dto.status === 'active',
+      status: dto.status as 'active' | 'invited' | 'inactive',
+      organizationId: 0, // Not provided in DTO
+      consignorNumber: dto.consignorNumber,
+      createdAt: new Date(dto.createdAt),
+      updatedAt: new Date(dto.createdAt), // Use same as created since updated not provided
+      invitedAt: undefined, // Not provided in DTO
+      activatedAt: undefined // Not provided in DTO
+    };
   }
 
   getConsignor(id: number): Observable<Consignor> {
