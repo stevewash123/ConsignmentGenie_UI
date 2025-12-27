@@ -48,7 +48,7 @@ interface ProviderDetails {
       background: white;
       border-radius: 12px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
+      max-width: 600px;
       width: 100%;
       padding: 2.5rem;
     }
@@ -99,7 +99,18 @@ interface ProviderDetails {
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
     }
 
     .form-group label {
@@ -112,7 +123,7 @@ interface ProviderDetails {
 
     .form-control {
       width: 100%;
-      padding: 0.875rem;
+      padding: 0.65rem;
       border: 2px solid #e5e7eb;
       border-radius: 8px;
       font-size: 1rem;
@@ -334,7 +345,8 @@ export class ConsignorRegistrationStep2Component implements OnInit {
 
     const request: ConsignorRegistrationRequest = {
       invitationToken: regData.invitationToken,
-      fullName: `${this.details.firstName} ${this.details.lastName}`.trim(),
+      firstName: this.details.firstName,
+      lastName: this.details.lastName,
       email: regData.credentials.email,
       password: regData.credentials.password,
       phone: this.details.phone

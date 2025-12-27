@@ -15,37 +15,39 @@
 
         <!-- Profile Form -->
         <form (ngSubmit)="onSubmit()" #profileForm="ngForm" *ngIf="!isSubmitted()">
-          <div class="form-group">
-            <label for="firstName">First Name *</label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              [(ngModel)]="details.firstName"
-              required
-              #firstNameField="ngModel"
-              class="form-control"
-              [class.error]="firstNameField.invalid && firstNameField.touched"
-              placeholder="Enter your first name">
-            <div class="error-message" *ngIf="firstNameField.invalid && firstNameField.touched">
-              First name is required
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name *</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                [(ngModel)]="details.firstName"
+                required
+                #firstNameField="ngModel"
+                class="form-control"
+                [class.error]="firstNameField.invalid && firstNameField.touched"
+                placeholder="Enter your first name">
+              <div class="error-message" *ngIf="firstNameField.invalid && firstNameField.touched">
+                First name is required
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="lastName">Last Name *</label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              [(ngModel)]="details.lastName"
-              required
-              #lastNameField="ngModel"
-              class="form-control"
-              [class.error]="lastNameField.invalid && lastNameField.touched"
-              placeholder="Enter your last name">
-            <div class="error-message" *ngIf="lastNameField.invalid && lastNameField.touched">
-              Last name is required
+            <div class="form-group">
+              <label for="lastName">Last Name *</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                [(ngModel)]="details.lastName"
+                required
+                #lastNameField="ngModel"
+                class="form-control"
+                [class.error]="lastNameField.invalid && lastNameField.touched"
+                placeholder="Enter your last name">
+              <div class="error-message" *ngIf="lastNameField.invalid && lastNameField.touched">
+                Last name is required
+              </div>
             </div>
           </div>
 
@@ -59,7 +61,6 @@
               #phoneField="ngModel"
               class="form-control"
               placeholder="(555) 123-4567">
-            <div class="form-hint">Optional - helps the shop owner contact you</div>
           </div>
 
           <div class="form-group">
@@ -87,8 +88,8 @@
               placeholder="Your city">
           </div>
 
-          <div style="display: flex; gap: 1rem;">
-            <div class="form-group" style="flex: 1;">
+          <div class="form-row">
+            <div class="form-group">
               <label for="state">State (Work in Progress)</label>
               <input
                 type="text"
@@ -100,7 +101,7 @@
                 placeholder="CA">
             </div>
 
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group">
               <label for="zipCode">ZIP Code (Work in Progress)</label>
               <input
                 type="text"
