@@ -48,6 +48,8 @@ export interface ImportSummary {
       width: 100%;
       max-width: 1200px;
       max-height: 90vh;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
@@ -58,6 +60,7 @@ export interface ImportSummary {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     .modal-title {
@@ -85,7 +88,8 @@ export interface ImportSummary {
     .modal-body {
       padding: 2rem;
       overflow-y: auto;
-      max-height: calc(90vh - 140px);
+      flex: 1;
+      min-height: 0;
     }
 
     .upload-section {
@@ -325,6 +329,7 @@ export interface ImportSummary {
       justify-content: space-between;
       gap: 1rem;
       border-top: 1px solid #e5e7eb;
+      flex-shrink: 0;
     }
 
     .footer-left {
