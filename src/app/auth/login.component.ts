@@ -16,7 +16,7 @@ interface LoginData {
   token: string;
   userId: string;
   email: string;
-  role: number;
+  role: number | string;
   organizationId: string;
   organizationName: string;
   expiresAt: string;
@@ -366,7 +366,7 @@ export class LoginComponent {
         this.authService.loadStoredAuth();
 
         // Role-based redirection
-        this.redirectBasedOnRole(loginData.role.toString(), loginData.email);
+        this.redirectBasedOnRole(loginData.role, loginData.email);
       }
     } catch (error: any) {
       console.error('Login error:', error);
