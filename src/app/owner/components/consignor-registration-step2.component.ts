@@ -20,8 +20,13 @@ interface RegistrationData {
 }
 
 interface ProviderDetails {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
 }
 
 @Component({
@@ -266,8 +271,13 @@ interface ProviderDetails {
 export class ConsignorRegistrationStep2Component implements OnInit {
   registrationData = signal<RegistrationData | null>(null);
   details: ProviderDetails = {
-    fullName: '',
-    phone: ''
+    firstName: '',
+    lastName: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: ''
   };
 
   isSubmitting = signal(false);
@@ -298,7 +308,9 @@ export class ConsignorRegistrationStep2Component implements OnInit {
 
       // Pre-fill name if available from invitation
       if (parsedData.invitationDetails.invitedName) {
-        this.details.fullName = parsedData.invitationDetails.invitedName;
+        const nameParts = parsedData.invitationDetails.invitedName.trim().split(' ');
+        this.details.firstName = nameParts[0] || '';
+        this.details.lastName = nameParts.slice(1).join(' ') || '';
       }
     } catch (error) {
       console.error('Error parsing registration data:', error);
@@ -322,11 +334,11 @@ export class ConsignorRegistrationStep2Component implements OnInit {
 
     const request: ConsignorRegistrationRequest = {
       invitationToken: regData.invitationToken,
-      fullName: this.details.fullName,
+      fullName: `${this.details.firstName} ${this.details.lastName}`.trim(),
       email: regData.credentials.email,
       password: regData.credentials.password,
       phone: this.details.phone
-      // Note: No address field as requested
+      // Note: Address fields not yet wired up to API
     };
 
     this.consignorService.registerFromInvitation(request).subscribe({
