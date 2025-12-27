@@ -234,6 +234,8 @@ export class LoginSimpleComponent implements OnInit {
     // Use correct passwords for each account type
     if (email === 'admin@microsaasbuilders.com') {
       this.password = 'admin123';  // Admin password from AdminController
+    } else if (email === 'owner1@microsaasbuilders.com') {
+      this.password = 'oldCity2220';  // Owner password
     } else {
       this.password = 'password123';  // Default for other accounts
     }
@@ -319,20 +321,40 @@ export class LoginSimpleComponent implements OnInit {
     // Standard role-based routing
     switch (role) {
       case 'Admin':
-        this.router.navigate(['/admin/dashboard']);
+        console.log('Navigating to /admin/dashboard');
+        this.router.navigate(['/admin/dashboard']).then(
+          success => console.log('Admin navigation success:', success),
+          error => console.error('Admin navigation failed:', error)
+        );
         break;
       case 'Owner':
-        this.router.navigate(['/owner/dashboard']);
+        console.log('Navigating to /owner/dashboard');
+        this.router.navigate(['/owner/dashboard']).then(
+          success => console.log('Owner navigation success:', success),
+          error => console.error('Owner navigation failed:', error)
+        );
         break;
       case 'consignor':
-        this.router.navigate(['/consignor/dashboard']);
+        console.log('Navigating to /consignor/dashboard');
+        this.router.navigate(['/consignor/dashboard']).then(
+          success => console.log('Consignor navigation success:', success),
+          error => console.error('Consignor navigation failed:', error)
+        );
         break;
       case 'Customer':
-        this.router.navigate(['/customer/dashboard']);
+        console.log('Navigating to /customer/dashboard');
+        this.router.navigate(['/customer/dashboard']).then(
+          success => console.log('Customer navigation success:', success),
+          error => console.error('Customer navigation failed:', error)
+        );
         break;
       default:
         console.warn('Unknown role:', role);
-        this.router.navigate(['/owner/dashboard']);
+        console.log('Navigating to /owner/dashboard (default)');
+        this.router.navigate(['/owner/dashboard']).then(
+          success => console.log('Default navigation success:', success),
+          error => console.error('Default navigation failed:', error)
+        );
     }
   }
 

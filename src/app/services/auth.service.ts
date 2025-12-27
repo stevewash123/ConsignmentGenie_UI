@@ -23,20 +23,43 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, request)
       .pipe(
         tap(response => {
-          // Handle wrapped API response format
-          const authData = this.extractAuthData(response);
-          this.setAuthData(authData);
+          console.log('AuthService: Raw login response:', response);
+
+          try {
+            // Handle wrapped API response format
+            const authData = this.extractAuthData(response);
+            console.log('AuthService: Extracted auth data:', authData);
+
+            this.setAuthData(authData);
+            console.log('AuthService: Auth data set successfully');
+          } catch (error) {
+            console.error('AuthService: Error in login tap operator:', error);
+            console.error('AuthService: Response that caused error:', response);
+            // Re-throw to trigger error callback in component
+            throw error;
+          }
+        }),
+        catchError(error => {
+          console.error('AuthService: Login HTTP error:', error);
+          throw error;
         })
       );
   }
 
   private extractAuthData(response: LoginResponse): AuthResponse {
+    console.log('AuthService: Extracting auth data from response:', response);
+
     // Type guard to check if it's a wrapped response
     if ('success' in response && 'data' in response) {
-      return response.data;
+      console.log('AuthService: Found wrapped response, extracting data field');
+      const extracted = response.data;
+      console.log('AuthService: Extracted data:', extracted);
+      return extracted;
     }
+
     // Otherwise it's a direct AuthResponse
-    return response;
+    console.log('AuthService: Using response directly as AuthResponse');
+    return response as AuthResponse;
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
@@ -244,25 +267,50 @@ export class AuthService {
   }
 
   private setAuthData(response: AuthResponse): void {
-    // Create user object from response data
-    const userData = {
-      userId: response.userId,
-      email: response.email,
-      role: response.role,
-      organizationId: response.organizationId,
-      organizationName: response.organizationName
-    };
+    console.log('AuthService: Setting auth data, input response:', response);
 
-    localStorage.setItem('auth_token', response.token);
-    localStorage.setItem('user_data', JSON.stringify(userData));
-    localStorage.setItem('tokenExpiry', response.expiresAt);
+    try {
+      // Create user object from response data
+      const userData = {
+        userId: response.userId,
+        email: response.email,
+        role: response.role,
+        organizationId: response.organizationId,
+        organizationName: response.organizationName
+      };
 
-    this.currentUserSubject.next(userData as any);
-    this.tokenInfo.set({
-      token: response.token,
-      expiresAt: new Date(response.expiresAt)
-    });
-    this.isLoggedIn.set(true);
+      console.log('AuthService: Created userData:', userData);
+
+      // Check for required fields
+      if (!response.token) {
+        throw new Error('Missing token in auth response');
+      }
+      if (!response.expiresAt) {
+        throw new Error('Missing expiresAt in auth response');
+      }
+
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('user_data', JSON.stringify(userData));
+      localStorage.setItem('tokenExpiry', response.expiresAt);
+      console.log('AuthService: Stored auth data in localStorage');
+
+      this.currentUserSubject.next(userData as any);
+      console.log('AuthService: Updated currentUserSubject');
+
+      this.tokenInfo.set({
+        token: response.token,
+        expiresAt: new Date(response.expiresAt)
+      });
+      console.log('AuthService: Set tokenInfo signal');
+
+      this.isLoggedIn.set(true);
+      console.log('AuthService: Set isLoggedIn to true');
+
+    } catch (error) {
+      console.error('AuthService: Error in setAuthData:', error);
+      console.error('AuthService: Input response was:', response);
+      throw error;
+    }
   }
 
   public loadStoredAuth(): void {
