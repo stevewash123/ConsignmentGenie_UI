@@ -366,7 +366,7 @@ export class LoginComponent {
         this.authService.loadStoredAuth();
 
         // Role-based redirection
-        this.redirectBasedOnRole(loginData.role, loginData.email);
+        this.redirectBasedOnRole(loginData.role.toString(), loginData.email);
       }
     } catch (error: any) {
       console.error('Login error:', error);
