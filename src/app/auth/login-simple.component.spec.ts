@@ -17,6 +17,7 @@ describe('LoginSimpleComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
       events: EMPTY // Observable that emits no values
     });
+    routerSpy.navigate.and.returnValue(Promise.resolve(true));
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['login']);
     const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
       'start',
@@ -69,7 +70,7 @@ describe('LoginSimpleComponent', () => {
   describe('onSubmit', () => {
     beforeEach(() => {
       component.email = 'test@example.com';
-      component.password = 'password123';
+      component.password = 'oldCity2220';
     });
 
     it('should handle successful login with wrapped response format', () => {
@@ -99,7 +100,7 @@ describe('LoginSimpleComponent', () => {
 
       expect(mockAuthService.login).toHaveBeenCalledWith({
         email: 'test@example.com',
-        password: 'password123'
+        password: 'oldCity2220'
       });
       expect((component as any).redirectBasedOnUser).toHaveBeenCalledWith(mockUser);
     });

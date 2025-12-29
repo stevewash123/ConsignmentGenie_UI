@@ -18,7 +18,8 @@ describe('RecordSaleComponent', () => {
       sku: 'TEST-001',
       price: 10.00,
       consignorName: 'Test Consignor',
-      status: 'Available'
+      status: 'Available',
+      category: 'Electronics'
     },
     quantity: 1
   };

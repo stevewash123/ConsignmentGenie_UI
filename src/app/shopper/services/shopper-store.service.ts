@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { ItemCategoryDto } from '../../models/inventory.model';
 
 export interface StoreInfoDto {
   organizationId: string;
@@ -38,11 +39,7 @@ export interface PublicItemDetailDto extends PublicItemDto {
   isAvailable: boolean;
 }
 
-export interface CategoryDto {
-  id: string;
-  name: string;
-  itemCount: number;
-}
+// Removed CategoryDto - using ItemCategoryDto from inventory.model.ts instead
 
 export interface ShopItemQueryParams {
   category?: string;
@@ -137,8 +134,8 @@ export class ShopperStoreService {
   /**
    * Get store categories
    */
-  getCategories(storeSlug: string): Observable<CategoryDto[]> {
-    return this.http.get<ApiResponse<CategoryDto[]>>(
+  getCategories(storeSlug: string): Observable<ItemCategoryDto[]> {
+    return this.http.get<ApiResponse<ItemCategoryDto[]>>(
       `${this.API_URL}/api/shop/${storeSlug}/categories`
     ).pipe(
       map(response => response.data || []),

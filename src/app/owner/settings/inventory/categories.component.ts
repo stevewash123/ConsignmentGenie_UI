@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../../services/category.service';
 import { LoadingService } from '../../../shared/services/loading.service';
 import { LookupManagementComponent } from '../../../shared/components/lookup-management.component';
-import { CategoryDto, LookupItem, CreateCategoryRequest, UpdateCategoryRequest, ReorderCategoriesRequest, ItemCategoryDto, CreateItemCategoryDto, UpdateItemCategoryDto } from '../../../models/inventory.model';
+import { LookupItem, ItemCategoryDto, CreateItemCategoryDto, UpdateItemCategoryDto } from '../../../models/inventory.model';
 
 @Component({
   selector: 'app-categories',

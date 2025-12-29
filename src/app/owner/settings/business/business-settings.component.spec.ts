@@ -9,7 +9,7 @@ import { LoadingService } from '../../../shared/services/loading.service';
 import {
   ItemListDto,
   PagedResult,
-  CategoryDto,
+  ItemCategoryDto,
   ItemCondition,
   ItemStatus,
   ApiResponse
@@ -22,9 +22,25 @@ describe('InventoryListComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>;
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
-  const mockCategories: CategoryDto[] = [
-    { id: 'cat1', name: 'Electronics', displayOrder: 1, isActive: true, createdAt: new Date() },
-    { id: 'cat2', name: 'Clothing', displayOrder: 2, isActive: true, createdAt: new Date() }
+  const mockCategories: ItemCategoryDto[] = [
+    {
+      id: 'cat1',
+      name: 'Electronics',
+      sortOrder: 1,
+      isActive: true,
+      subCategoryCount: 0,
+      itemCount: 5,
+      createdAt: new Date()
+    },
+    {
+      id: 'cat2',
+      name: 'Clothing',
+      sortOrder: 2,
+      isActive: true,
+      subCategoryCount: 0,
+      itemCount: 3,
+      createdAt: new Date()
+    }
   ];
 
   const mockItems: ItemListDto[] = [
@@ -129,7 +145,7 @@ describe('InventoryListComponent', () => {
     mockInventoryService.getCategories.and.returnValue(of({
       success: true,
       data: mockCategories
-    } as ApiResponse<CategoryDto[]>));
+    } as ApiResponse<ItemCategoryDto[]>));
     mockLoadingService.isLoading.and.returnValue(false);
   });
 

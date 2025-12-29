@@ -31,6 +31,9 @@ describe('EarningsWidgetComponent', () => {
     fixture = TestBed.createComponent(EarningsWidgetComponent);
     component = fixture.componentInstance;
     mockEarningsService = TestBed.inject(MockEarningsService) as jasmine.SpyObj<MockEarningsService>;
+
+    // Set default mock return value to prevent subscription errors
+    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
   });
 
   it('should create', () => {

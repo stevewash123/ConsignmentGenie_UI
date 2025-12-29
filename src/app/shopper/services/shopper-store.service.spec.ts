@@ -199,9 +199,33 @@ describe('ShopperStoreService', () => {
   describe('getCategories', () => {
     it('should get categories successfully', () => {
       const mockCategories = [
-        { id: '1', name: 'Electronics', itemCount: 25 },
-        { id: '2', name: 'Clothing', itemCount: 45 },
-        { id: '3', name: 'Books', itemCount: 12 }
+        {
+          id: '1',
+          name: 'Electronics',
+          itemCount: 25,
+          isActive: true,
+          sortOrder: 1,
+          subCategoryCount: 0,
+          createdAt: new Date()
+        },
+        {
+          id: '2',
+          name: 'Clothing',
+          itemCount: 45,
+          isActive: true,
+          sortOrder: 2,
+          subCategoryCount: 0,
+          createdAt: new Date()
+        },
+        {
+          id: '3',
+          name: 'Books',
+          itemCount: 12,
+          isActive: true,
+          sortOrder: 3,
+          subCategoryCount: 0,
+          createdAt: new Date()
+        }
       ];
 
       const mockResponse = {

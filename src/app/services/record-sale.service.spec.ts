@@ -29,8 +29,9 @@ describe('RecordSaleService Integration', () => {
           title: 'Test Item',
           sku: 'TEST-001',
           price: 10.00,
-          consignor: { name: 'Test Consignor' },
-          status: 'Available'
+          consignorName: 'Test Consignor',
+          status: 'Available',
+          category: 'Electronics'
         }
       ],
       totalCount: 1,
@@ -75,7 +76,8 @@ describe('RecordSaleService Integration', () => {
           sku: 'TEST-001',
           price: 10.00,
           consignorName: 'Test Consignor',
-          status: 'Available'
+          status: 'Available',
+          category: 'Electronics'
         },
         quantity: 1
       }],
@@ -123,7 +125,8 @@ describe('RecordSaleService Integration', () => {
           sku: 'TEST-001',
           price: 10.00,
           consignorName: 'Test Consignor',
-          status: 'Available'
+          status: 'Available',
+          category: 'Electronics'
         },
         quantity: 1
       }],

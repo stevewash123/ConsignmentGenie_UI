@@ -10,10 +10,8 @@ import {
   UpdateItemStatusRequest,
   ItemQueryParams,
   PagedResult,
-  CategoryDto,
-  CreateCategoryRequest,
-  UpdateCategoryRequest,
-  CategoryUsageDto,
+  CreateItemCategoryDto,
+  UpdateItemCategoryDto,
   ItemCategoryDto,
   ApiResponse
 } from '../models/inventory.model';
@@ -108,27 +106,23 @@ export class InventoryService {
     return this.http.get<ApiResponse<ItemCategoryDto[]>>(`${this.apiUrl}/itemcategories`);
   }
 
-  getCategory(id: string): Observable<ApiResponse<CategoryDto>> {
-    return this.http.get<ApiResponse<CategoryDto>>(`${this.apiUrl}/categories/${id}`);
+  getCategory(id: string): Observable<ApiResponse<ItemCategoryDto>> {
+    return this.http.get<ApiResponse<ItemCategoryDto>>(`${this.apiUrl}/itemcategories/${id}`);
   }
 
-  createCategory(category: CreateCategoryRequest): Observable<ApiResponse<CategoryDto>> {
-    return this.http.post<ApiResponse<CategoryDto>>(`${this.apiUrl}/categories`, category);
+  createCategory(category: CreateItemCategoryDto): Observable<ApiResponse<ItemCategoryDto>> {
+    return this.http.post<ApiResponse<ItemCategoryDto>>(`${this.apiUrl}/itemcategories`, category);
   }
 
-  updateCategory(id: string, category: UpdateCategoryRequest): Observable<ApiResponse<CategoryDto>> {
-    return this.http.put<ApiResponse<CategoryDto>>(`${this.apiUrl}/categories/${id}`, category);
+  updateCategory(id: string, category: UpdateItemCategoryDto): Observable<ApiResponse<ItemCategoryDto>> {
+    return this.http.put<ApiResponse<ItemCategoryDto>>(`${this.apiUrl}/itemcategories/${id}`, category);
   }
 
   deleteCategory(id: string): Observable<ApiResponse<any>> {
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/categories/${id}`);
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/itemcategories/${id}`);
   }
 
   reorderCategories(categoryOrders: { categoryId: string; displayOrder: number }[]): Observable<ApiResponse<any>> {
-    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/categories/reorder`, { categoryOrders });
-  }
-
-  getCategoryUsageStats(): Observable<ApiResponse<CategoryUsageDto[]>> {
-    return this.http.get<ApiResponse<CategoryUsageDto[]>>(`${this.apiUrl}/categories/usage-stats`);
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/itemcategories/reorder`, { categoryOrders });
   }
 }

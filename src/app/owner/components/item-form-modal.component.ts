@@ -9,7 +9,6 @@ import {
   CreateItemRequest,
   UpdateItemRequest,
   ItemListDto,
-  CategoryDto,
   ItemCategoryDto,
   ItemCondition
 } from '../../models/inventory.model';

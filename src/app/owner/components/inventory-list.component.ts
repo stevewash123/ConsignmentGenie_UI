@@ -12,7 +12,6 @@ import {
   PagedResult,
   ItemCondition,
   ItemStatus,
-  CategoryDto,
   ItemCategoryDto,
   UpdateItemStatusRequest
 } from '../../models/inventory.model';

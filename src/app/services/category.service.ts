@@ -3,11 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
-  CategoryDto,
-  CreateCategoryRequest,
-  UpdateCategoryRequest,
-  ReorderCategoriesRequest,
-  CategoryUsageDto,
   ItemCategoryDto,
   CreateItemCategoryDto,
   UpdateItemCategoryDto,
@@ -43,15 +38,5 @@ export class CategoryService {
     return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${id}`);
   }
 
-  // Legacy methods kept for backward compatibility (can be removed later)
-  reorder(request: ReorderCategoriesRequest): Observable<ApiResponse<any>> {
-    // Note: ItemCategories doesn't have a reorder endpoint, using sortOrder instead
-    // This method is kept for compatibility but may need special handling
-    throw new Error('Reorder not supported with ItemCategories - use sortOrder in update instead');
-  }
-
-  getUsageStats(): Observable<ApiResponse<CategoryUsageDto[]>> {
-    // Legacy method - ItemCategories includes usage data in the main response
-    throw new Error('Usage stats integrated into main getAll() response for ItemCategories');
-  }
+  // Legacy methods removed - ItemCategories includes sortOrder and counts in main response
 }

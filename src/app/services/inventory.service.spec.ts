@@ -57,7 +57,7 @@ describe('InventoryService', () => {
       expect(response.success).toBe(true);
     });
 
-    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/categories');
+    expect(mockHttpClient.get).toHaveBeenCalledWith('http://localhost:5000/api/itemcategories');
   });
 
   it('should get inventory metrics successfully', () => {

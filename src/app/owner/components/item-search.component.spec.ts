@@ -17,7 +17,8 @@ describe('ItemSearchComponent', () => {
       sku: 'TEST-001',
       price: 10.00,
       consignorName: 'Test Consignor 1',
-      status: 'Available'
+      status: 'Available',
+      category: 'Electronics'
     },
     {
       id: '2',
@@ -25,7 +26,8 @@ describe('ItemSearchComponent', () => {
       sku: 'TEST-002',
       price: 20.00,
       consignorName: 'Test Consignor 2',
-      status: 'Available'
+      status: 'Available',
+      category: 'Electronics'
     },
     {
       id: '3',
@@ -33,7 +35,8 @@ describe('ItemSearchComponent', () => {
       sku: 'WIDGET-001',
       price: 30.00,
       consignorName: 'Widget Maker',
-      status: 'Available'
+      status: 'Available',
+      category: 'Electronics'
     }
   ];
 
@@ -120,7 +123,8 @@ describe('ItemSearchComponent', () => {
       sku: `SKU-${i}`,
       price: 10.00,
       consignorName: `Consignor ${i}`,
-      status: 'Available'
+      status: 'Available',
+      category: 'Electronics'
     }));
 
     component.allItems.set(manyItems);

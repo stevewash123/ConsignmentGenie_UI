@@ -212,26 +212,51 @@ describe('RespondPriceChangeComponent', () => {
   });
 
   it('should format dates correctly', () => {
-    const testDate = new Date('2024-12-01');
-    expect(component.formatDate(testDate)).toBe('Dec 1, 2024');
+    // Mock the test to avoid timezone issues
+    jasmine.clock().install();
+    jasmine.clock().mockDate(new Date('2024-12-01T12:00:00Z'));
+
+    const testDate = new Date('2024-12-01T12:00:00Z');
+    const formatted = component.formatDate(testDate);
+    expect(formatted).toBe('Dec 1, 2024');
+
+    jasmine.clock().uninstall();
   });
 
   it('should calculate days until expiry correctly', () => {
+    // Create item with future expiry date relative to today
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 5); // 5 days from now
+
+    component.item = {
+      ...mockItem,
+      priceChangeRequest: {
+        ...mockItem.priceChangeRequest!,
+        expiresDate: futureDate
+      }
+    };
+
     const futureDays = component.getDaysUntilExpiry();
     expect(futureDays).toBeGreaterThan(0);
+    expect(futureDays).toBeLessThanOrEqual(6); // Should be around 5, allow for some variance
   });
 
   it('should identify expiring soon correctly', () => {
+    jasmine.clock().install();
+    jasmine.clock().mockDate(new Date('2024-12-10'));
+
     // Mock a request expiring in 1 day
     component.item = {
       ...mockItem,
       priceChangeRequest: {
         ...mockItem.priceChangeRequest!,
-        expiresDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // 1 day from now
+        expiresDate: new Date('2024-12-11') // 1 day from mocked current date
       }
     };
 
     expect(component.isExpiringSoon()).toBeTruthy();
+
+    jasmine.clock().uninstall();
   });
 
   it('should reset form correctly', () => {

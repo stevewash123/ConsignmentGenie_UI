@@ -12,6 +12,7 @@ export interface Item {
   price: number;
   consignorName: string;
   status: string;
+  category: string;
 }
 
 @Component({

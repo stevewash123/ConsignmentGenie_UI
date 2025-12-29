@@ -167,14 +167,14 @@ export class RecordSaleService {
     return this.getTaxRate().pipe(
       switchMap(taxRate => {
         const requestBody = {
-          Items: request.items.map(cartItem => ({
-            ItemId: cartItem.item.id,
-            Quantity: cartItem.quantity,
-            UnitPrice: cartItem.item.price
+          items: request.items.map(cartItem => ({
+            itemId: cartItem.item.id,
+            quantity: cartItem.quantity,
+            unitPrice: cartItem.item.price
           })),
-          PaymentType: request.paymentType,
-          TaxRate: taxRate,
-          CustomerEmail: request.customerEmail || undefined
+          paymentType: request.paymentType,
+          taxRate: taxRate,
+          customerEmail: request.customerEmail || undefined
         };
 
         return this.http.post<{
