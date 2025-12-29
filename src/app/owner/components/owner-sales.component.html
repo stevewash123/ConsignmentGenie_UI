@@ -58,22 +58,22 @@
         <div class="summary-cards" *ngIf="summary()">
           <div class="summary-card total">
             <h3>Total Sales</h3>
-            <div class="summary-value">\${{ summary()!.totalSales | number:'1.2-2' }}</div>
+            <div class="summary-value">${{ summary()!.totalSales | number:'1.2-2' }}</div>
             <div class="summary-detail">{{ summary()!.transactionCount }} transactions</div>
           </div>
           <div class="summary-card shop">
             <h3>Shop Revenue</h3>
-            <div class="summary-value">\${{ summary()!.totalShopAmount | number:'1.2-2' }}</div>
+            <div class="summary-value">${{ summary()!.totalShopAmount | number:'1.2-2' }}</div>
             <div class="summary-detail">After commissions</div>
           </div>
           <div class="summary-card consignor">
             <h3>consignor Payouts</h3>
-            <div class="summary-value">\${{ summary()!.totalProviderAmount | number:'1.2-2' }}</div>
+            <div class="summary-value">${{ summary()!.totalProviderAmount | number:'1.2-2' }}</div>
             <div class="summary-detail">Commissions owed</div>
           </div>
           <div class="summary-card average">
             <h3>Average Sale</h3>
-            <div class="summary-value">\${{ summary()!.averageTransactionValue | number:'1.2-2' }}</div>
+            <div class="summary-value">${{ summary()!.averageTransactionValue | number:'1.2-2' }}</div>
             <div class="summary-detail">Per transaction</div>
           </div>
         </div>
@@ -133,9 +133,9 @@
                     </div>
                   </td>
                   <td class="price-cell">
-                    <div class="sale-price">\${{ transaction.salePrice | number:'1.2-2' }}</div>
+                    <div class="sale-price">${{ transaction.salePrice | number:'1.2-2' }}</div>
                     <div class="tax-amount" *ngIf="transaction.salesTaxAmount">
-                      +\${{ transaction.salesTaxAmount | number:'1.2-2' }} tax
+                      +${{ transaction.salesTaxAmount | number:'1.2-2' }} tax
                     </div>
                   </td>
                   <td class="payment-cell">
@@ -144,10 +144,10 @@
                     </span>
                   </td>
                   <td class="commission-cell">
-                    \${{ transaction.consignorAmount | number:'1.2-2' }}
+                    ${{ transaction.consignorAmount | number:'1.2-2' }}
                   </td>
                   <td class="shop-amount-cell">
-                    \${{ transaction.shopAmount | number:'1.2-2' }}
+                    ${{ transaction.shopAmount | number:'1.2-2' }}
                   </td>
                   <td class="actions-cell">
                     <div class="action-buttons">
@@ -230,7 +230,7 @@
                     </div>
                   </div>
                   <div class="header-amount">
-                    <div class="sale-total">\${{ transaction.salePrice | number:'1.2-2' }}</div>
+                    <div class="sale-total">${{ transaction.salePrice | number:'1.2-2' }}</div>
                     <div class="payment-method">
                       <span class="payment-badge" [class]="'payment-' + transaction.paymentMethod.toLowerCase()">
                         {{ transaction.paymentMethod }}
@@ -253,11 +253,11 @@
                         </div>
                         <div class="detail-row">
                           <label>Original Price:</label>
-                          <span class="amount">\${{ transaction.item.originalPrice | number:'1.2-2' }}</span>
+                          <span class="amount">${{ transaction.item.originalPrice | number:'1.2-2' }}</span>
                         </div>
                         <div class="detail-row" *ngIf="transaction.salesTaxAmount">
                           <label>Sales Tax:</label>
-                          <span class="amount">\${{ transaction.salesTaxAmount | number:'1.2-2' }}</span>
+                          <span class="amount">${{ transaction.salesTaxAmount | number:'1.2-2' }}</span>
                         </div>
                       </div>
                     </div>
@@ -268,11 +268,11 @@
                       <div class="commission-breakdown compact">
                         <div class="breakdown-row">
                           <span>consignor ({{ transaction.consignorsplitPercentage }}%)</span>
-                          <span class="amount consignor-amount">\${{ transaction.consignorAmount | number:'1.2-2' }}</span>
+                          <span class="amount consignor-amount">${{ transaction.consignorAmount | number:'1.2-2' }}</span>
                         </div>
                         <div class="breakdown-row">
                           <span>Shop ({{ 100 - transaction.consignorsplitPercentage }}%)</span>
-                          <span class="amount shop-amount">\${{ transaction.shopAmount | number:'1.2-2' }}</span>
+                          <span class="amount shop-amount">${{ transaction.shopAmount | number:'1.2-2' }}</span>
                         </div>
                       </div>
                     </div>

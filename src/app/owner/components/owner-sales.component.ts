@@ -1095,12 +1095,12 @@ export class OwnerSalesComponent implements OnInit {
     this.transactionService.getTransactions(this.buildQueryParams()).subscribe({
       next: (result) => {
         this.pagedResult.set(result);
+        this.loadingService.stop('owner-sales');
       },
       error: (error) => {
         console.error('Failed to load transactions:', error);
-      },
-      complete: () => {
         this.loadingService.stop('owner-sales');
+        this.showNotification('Failed to load transactions. Please try again.', 'error', 'Error Loading Data');
       }
     });
   }
@@ -1294,7 +1294,7 @@ export class OwnerSalesComponent implements OnInit {
     this.showConfirmDialog = true;
     this.confirmDialog = {
       title: 'Update Transaction',
-      message: `Are you sure you want to update this transaction? The sale price will change from $${transaction.salePrice.toFixed(2)} to $${this.editForm_salePrice.toFixed(2)}.`,
+      message: `Are you sure you want to update this transaction? The sale price will change from ${transaction.salePrice.toFixed(2)} to ${this.editForm_salePrice.toFixed(2)}.`,
       confirmText: 'Update Transaction',
       cancelText: 'Cancel',
       isDestructive: false,

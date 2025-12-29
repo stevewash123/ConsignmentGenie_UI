@@ -185,7 +185,7 @@
                       </div>
                       <div class="item-details">
                         <h4>{{ item.item.title }}</h4>
-                        <p class="item-price">\${{ item.item.price }}</p>
+                        <p class="item-price">${{ item.item.price }}</p>
                         <div class="quantity-controls">
                           <button (click)="updateQuantity(item.itemId, item.quantity - 1)">-</button>
                           <span>{{ item.quantity }}</span>
@@ -199,7 +199,7 @@
 
                 <div class="cart-footer">
                   <div class="cart-total">
-                    <strong>Total: \${{ cartService.totalAmount() }}</strong>
+                    <strong>Total: ${{ cartService.totalAmount() }}</strong>
                   </div>
                   <div class="cart-actions">
                     <a [routerLink]="['/customer/cart']" (click)="closeCart()" class="view-cart-button">

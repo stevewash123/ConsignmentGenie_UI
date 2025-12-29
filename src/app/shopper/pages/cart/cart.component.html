@@ -56,9 +56,9 @@
               </div>
 
               <div class="item-price">
-                <span class="price" data-cy="item-total-price">\${{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+                <span class="price" data-cy="item-total-price">${{ (item.price * item.quantity) | number:'1.2-2' }}</span>
                 <span class="unit-price" *ngIf="item.quantity > 1">
-                  (\${{ item.price | number:'1.2-2' }} each)
+                  (${{ item.price | number:'1.2-2' }} each)
                 </span>
               </div>
 
@@ -79,17 +79,17 @@
 
               <div class="summary-row">
                 <span>Subtotal ({{ cart.itemCount }} items)</span>
-                <span data-cy="cart-subtotal">\${{ cart.subtotal | number:'1.2-2' }}</span>
+                <span data-cy="cart-subtotal">${{ cart.subtotal | number:'1.2-2' }}</span>
               </div>
 
               <div class="summary-row">
                 <span>Tax (estimated)</span>
-                <span data-cy="cart-tax">\${{ cart.tax | number:'1.2-2' }}</span>
+                <span data-cy="cart-tax">${{ cart.tax | number:'1.2-2' }}</span>
               </div>
 
               <div class="summary-row total">
                 <span>Total</span>
-                <span data-cy="cart-total">\${{ cart.total | number:'1.2-2' }}</span>
+                <span data-cy="cart-total">${{ cart.total | number:'1.2-2' }}</span>
               </div>
 
               <div class="checkout-actions">

@@ -11,6 +11,7 @@ export interface Item {
   price: number;
   consignorName: string;
   status: string;
+  category: string;
 }
 
 export interface CartItem {
@@ -38,21 +39,21 @@ interface ShopProfile {
 
 // Mock data as specified in requirements
 const mockItems: Item[] = [
-  { id: '1', name: 'Vintage Lamp', sku: 'ITM-00001', price: 45.00, consignorName: 'Jane Smith', status: 'Available' },
-  { id: '2', name: 'Blue Ceramic Vase', sku: 'ITM-00002', price: 22.00, consignorName: 'Bob Johnson', status: 'Available' },
-  { id: '3', name: 'Oak Rocking Chair', sku: 'ITM-00003', price: 89.00, consignorName: 'Jane Smith', status: 'Available' },
-  { id: '4', name: 'Silver Ring', sku: 'ITM-00004', price: 35.00, consignorName: 'Alice Brown', status: 'Available' },
-  { id: '5', name: 'Antique Mirror', sku: 'ITM-00005', price: 120.00, consignorName: 'Bob Johnson', status: 'Available' },
-  { id: '6', name: 'Leather Handbag', sku: 'ITM-00006', price: 67.00, consignorName: 'Carol Davis', status: 'Available' },
-  { id: '7', name: 'Crystal Glasses Set', sku: 'ITM-00007', price: 156.00, consignorName: 'David Wilson', status: 'Available' },
-  { id: '8', name: 'Wooden Picture Frame', sku: 'ITM-00008', price: 18.00, consignorName: 'Alice Brown', status: 'Available' },
-  { id: '9', name: 'Vintage Scarf', sku: 'ITM-00009', price: 29.00, consignorName: 'Jane Smith', status: 'Available' },
-  { id: '10', name: 'Brass Candlesticks', sku: 'ITM-00010', price: 43.00, consignorName: 'Bob Johnson', status: 'Available' },
-  { id: '11', name: 'Porcelain Figurine', sku: 'ITM-00011', price: 78.00, consignorName: 'Carol Davis', status: 'Available' },
-  { id: '12', name: 'Wooden Jewelry Box', sku: 'ITM-00012', price: 52.00, consignorName: 'David Wilson', status: 'Available' },
-  { id: '13', name: 'Vintage Tea Set', sku: 'ITM-00013', price: 134.00, consignorName: 'Alice Brown', status: 'Available' },
-  { id: '14', name: 'Quilted Throw', sku: 'ITM-00014', price: 95.00, consignorName: 'Jane Smith', status: 'Available' },
-  { id: '15', name: 'Cast Iron Skillet', sku: 'ITM-00015', price: 38.00, consignorName: 'Bob Johnson', status: 'Available' }
+  { id: '1', name: 'Vintage Lamp', sku: 'ITM-00001', price: 45.00, consignorName: 'Jane Smith', status: 'Available', category: 'Home & Garden' },
+  { id: '2', name: 'Blue Ceramic Vase', sku: 'ITM-00002', price: 22.00, consignorName: 'Bob Johnson', status: 'Available', category: 'Home & Garden' },
+  { id: '3', name: 'Oak Rocking Chair', sku: 'ITM-00003', price: 89.00, consignorName: 'Jane Smith', status: 'Available', category: 'Furniture' },
+  { id: '4', name: 'Silver Ring', sku: 'ITM-00004', price: 35.00, consignorName: 'Alice Brown', status: 'Available', category: 'Jewelry' },
+  { id: '5', name: 'Antique Mirror', sku: 'ITM-00005', price: 120.00, consignorName: 'Bob Johnson', status: 'Available', category: 'Home & Garden' },
+  { id: '6', name: 'Leather Handbag', sku: 'ITM-00006', price: 67.00, consignorName: 'Carol Davis', status: 'Available', category: 'Fashion' },
+  { id: '7', name: 'Crystal Glasses Set', sku: 'ITM-00007', price: 156.00, consignorName: 'David Wilson', status: 'Available', category: 'Kitchen & Dining' },
+  { id: '8', name: 'Wooden Picture Frame', sku: 'ITM-00008', price: 18.00, consignorName: 'Alice Brown', status: 'Available', category: 'Home & Garden' },
+  { id: '9', name: 'Vintage Scarf', sku: 'ITM-00009', price: 29.00, consignorName: 'Jane Smith', status: 'Available', category: 'Fashion' },
+  { id: '10', name: 'Brass Candlesticks', sku: 'ITM-00010', price: 43.00, consignorName: 'Bob Johnson', status: 'Available', category: 'Home & Garden' },
+  { id: '11', name: 'Porcelain Figurine', sku: 'ITM-00011', price: 78.00, consignorName: 'Carol Davis', status: 'Available', category: 'Collectibles' },
+  { id: '12', name: 'Wooden Jewelry Box', sku: 'ITM-00012', price: 52.00, consignorName: 'David Wilson', status: 'Available', category: 'Jewelry' },
+  { id: '13', name: 'Vintage Tea Set', sku: 'ITM-00013', price: 134.00, consignorName: 'Alice Brown', status: 'Available', category: 'Kitchen & Dining' },
+  { id: '14', name: 'Quilted Throw', sku: 'ITM-00014', price: 95.00, consignorName: 'Jane Smith', status: 'Available', category: 'Home & Garden' },
+  { id: '15', name: 'Cast Iron Skillet', sku: 'ITM-00015', price: 38.00, consignorName: 'Bob Johnson', status: 'Available', category: 'Kitchen & Dining' }
 ];
 
 // Mock tax rate (from shop settings)
@@ -81,12 +82,13 @@ export class RecordSaleService {
 
     return this.http.get<{
       items: {
-        id: string;
+        itemId: string;
         title: string;
         sku: string;
         price: number;
-        consignor: { name: string };
+        consignorName: string;
         status: string;
+        category: string;
       }[];
       totalCount: number;
       page: number;
@@ -94,13 +96,19 @@ export class RecordSaleService {
     }>(`${environment.apiUrl}/api/items?${params.toString()}`).pipe(
       map(response => {
         // Map API response to our Item interface
+        if (!response || !response.items || !Array.isArray(response.items)) {
+          console.warn('Invalid API response structure:', response);
+          return [];
+        }
+
         return response.items.map(item => ({
-          id: item.id,
+          id: item.itemId,
           name: item.title,
           sku: item.sku,
           price: item.price,
-          consignorName: item.consignor.name,
-          status: item.status
+          consignorName: item.consignorName || 'Unknown',
+          status: item.status,
+          category: item.category || 'Uncategorized'
         }));
       }),
       catchError(error => {
@@ -159,14 +167,14 @@ export class RecordSaleService {
     return this.getTaxRate().pipe(
       switchMap(taxRate => {
         const requestBody = {
-          items: request.items.map(cartItem => ({
-            itemId: cartItem.item.id,
-            quantity: cartItem.quantity,
-            unitPrice: cartItem.item.price
+          Items: request.items.map(cartItem => ({
+            ItemId: cartItem.item.id,
+            Quantity: cartItem.quantity,
+            UnitPrice: cartItem.item.price
           })),
-          paymentType: request.paymentType,
-          taxRate: taxRate,
-          customerEmail: request.customerEmail || undefined
+          PaymentType: request.paymentType,
+          TaxRate: taxRate,
+          CustomerEmail: request.customerEmail || undefined
         };
 
         return this.http.post<{

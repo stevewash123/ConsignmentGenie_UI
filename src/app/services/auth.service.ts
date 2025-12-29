@@ -253,7 +253,23 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      console.log('AuthService: Retrieved token from localStorage');
+      // Decode JWT to check contents (for debugging)
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('AuthService: Decoded token payload:', payload);
+        console.log('AuthService: Token contains nameid:', !!payload.nameid);
+        console.log('AuthService: Token contains sub:', !!payload.sub);
+        console.log('AuthService: Token contains userId:', !!payload.userId);
+      } catch (error) {
+        console.error('AuthService: Failed to decode token:', error);
+      }
+    } else {
+      console.log('AuthService: No token found in localStorage');
+    }
+    return token;
   }
 
   getCurrentUser(): User | null {

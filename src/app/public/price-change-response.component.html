@@ -1,0 +1,106 @@
+<div class="response-page">
+  <div class="container">
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading()">
+      <div class="loading-spinner"></div>
+      <h2>Processing your response...</h2>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="error() && !isLoading()">
+      <div class="error-icon">⚠️</div>
+      <h2>Unable to Process Response</h2>
+      <p>{{ error() }}</p>
+      <div class="actions">
+        <a href="/login" class="btn-primary">Log In to Your Account</a>
+      </div>
+    </div>
+
+    <!-- Confirmation Form -->
+    <div class="confirmation-form" *ngIf="!isLoading() && !error() && !isCompleted()">
+      <div class="header">
+        <h1>Confirm Your Decision</h1>
+        <p>You're responding to a price change proposal for:</p>
+      </div>
+
+      <div class="item-summary" *ngIf="notification()">
+        <div class="item-thumbnail">
+          <img
+            *ngIf="notification()!.itemImageUrl"
+            [src]="notification()!.itemImageUrl"
+            [alt]="notification()!.itemName"
+            class="thumbnail-image">
+          <div class="no-image" *ngIf="!notification()!.itemImageUrl">📷</div>
+        </div>
+        <div class="item-info">
+          <h3>{{ notification()!.itemName }}</h3>
+          <p>Listed {{ notification()!.daysListed }} days ago</p>
+        </div>
+      </div>
+
+      <div class="pricing-summary" *ngIf="notification()">
+        <div class="pricing-row">
+          <span class="label">Current Price:</span>
+          <span class="value">${{ notification()!.currentPrice | number:'1.2-2' }}</span>
+        </div>
+        <div class="pricing-row">
+          <span class="label">Proposed Price:</span>
+          <span class="value decrease">${{ notification()!.proposedPrice | number:'1.2-2' }}</span>
+        </div>
+        <div class="pricing-row">
+          <span class="label">Your Current Earnings:</span>
+          <span class="value">${{ notification()!.consignorCurrentEarnings | number:'1.2-2' }}</span>
+        </div>
+        <div class="pricing-row">
+          <span class="label">Your New Earnings:</span>
+          <span class="value decrease">${{ notification()!.consignorProposedEarnings | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="action-confirmation">
+        <div class="selected-action" [class]="getActionClass()">
+          <div class="action-icon">{{ getActionIcon() }}</div>
+          <div class="action-text">
+            <h3>{{ getActionTitle() }}</h3>
+            <p>{{ getActionDescription() }}</p>
+          </div>
+        </div>
+
+        <div class="note-section">
+          <label for="consignorNote">Add a note (optional):</label>
+          <textarea
+            id="consignorNote"
+            [(ngModel)]="consignorNote"
+            rows="3"
+            placeholder="Let the shop owner know your thoughts..."
+            class="form-control">
+          </textarea>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-secondary" (click)="goBack()">
+            Change My Mind
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            [class]="getActionClass() + '-btn'"
+            (click)="confirmAction()"
+            [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Confirming...' : 'Confirm Decision' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div class="success-state" *ngIf="isCompleted() && !error()">
+      <div class="success-icon">✅</div>
+      <h2>Response Submitted!</h2>
+      <p class="success-message">{{ successMessage() }}</p>
+      <div class="actions">
+        <a href="/login" class="btn-primary">Access Your Account</a>
+      </div>
+    </div>
+  </div>
+</div>

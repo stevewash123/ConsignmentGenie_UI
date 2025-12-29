@@ -17,7 +17,7 @@
             <small>Add items from the search panel</small>
           </div>
         } @else {
-          @for (cartItem of cartItems(); track cartItem.item.id) {
+          @for (cartItem of cartItems(); track cartItem.item.id || cartItem.item.sku || $index) {
             <div class="cart-item">
               <div class="item-info">
                 <div class="item-name">{{ cartItem.item.name }}</div>
@@ -25,12 +25,12 @@
                 <div class="item-consignor">{{ cartItem.item.consignorName }}</div>
               </div>
               <div class="item-actions">
-                <div class="item-price">\${{ cartItem.item.price | number:'1.2-2' }}</div>
+                <div class="item-price">${{ cartItem.item.price | number:'1.2-2' }}</div>
                 <button
                   class="remove-button"
                   (click)="removeItem(cartItem.item.id)"
                   title="Remove from cart">
-                  <i class="fas fa-times"></i>
+                  ×
                 </button>
               </div>
             </div>
@@ -43,61 +43,61 @@
         <div class="totals-section">
           <div class="totals-line">
             <span>Subtotal:</span>
-            <span class="amount">\${{ subtotal() | number:'1.2-2' }}</span>
+            <span class="amount">${{ subtotal() | number:'1.2-2' }}</span>
           </div>
           <div class="totals-line">
             <span>Tax ({{ (taxRate() * 100) | number:'1.1-1' }}%):</span>
-            <span class="amount">\${{ taxAmount() | number:'1.2-2' }}</span>
+            <span class="amount">${{ taxAmount() | number:'1.2-2' }}</span>
           </div>
           <div class="totals-line total-line">
             <span>TOTAL:</span>
-            <span class="amount total-amount">\${{ total() | number:'1.2-2' }}</span>
+            <span class="amount total-amount">${{ total() | number:'1.2-2' }}</span>
           </div>
-        </div>
-
-        <!-- Payment Section -->
-        <div class="payment-section">
-          <div class="payment-type">
-            <label for="paymentType">Payment Type:</label>
-            <select
-              id="paymentType"
-              [ngModel]="selectedPaymentType"
-              (ngModelChange)="onPaymentTypeChange($event)"
-              class="payment-select">
-              <option value="Cash">Cash</option>
-              <option value="Card">Card</option>
-              <option value="Check">Check</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div class="customer-email">
-            <label for="customerEmail">Customer Email (optional):</label>
-            <input
-              type="email"
-              id="customerEmail"
-              [ngModel]="customerEmail"
-              (ngModelChange)="onCustomerEmailChange($event)"
-              placeholder="customer@email.com"
-              class="email-input">
-          </div>
-        </div>
-
-        <!-- Complete Sale Button -->
-        <div class="complete-section">
-          <button
-            class="complete-button"
-            [disabled]="isLoading()"
-            (click)="onCompleteSale()">
-            @if (isLoading()) {
-              <i class="fas fa-spinner fa-spin"></i>
-              Processing...
-            } @else {
-              <i class="fas fa-check"></i>
-              Complete Sale
-            }
-          </button>
         </div>
       }
+
+      <!-- Payment Section -->
+      <div class="payment-section">
+        <div class="payment-type">
+          <label for="paymentType">Payment Type:</label>
+          <select
+            id="paymentType"
+            [ngModel]="selectedPaymentType"
+            (ngModelChange)="onPaymentTypeChange($event)"
+            class="payment-select">
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="Check">Check</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="customer-email">
+          <label for="customerEmail">Customer Email (optional):</label>
+          <input
+            type="email"
+            id="customerEmail"
+            [ngModel]="customerEmail"
+            (ngModelChange)="onCustomerEmailChange($event)"
+            placeholder="customer@email.com"
+            class="email-input">
+        </div>
+      </div>
+
+      <!-- Complete Sale Button -->
+      <div class="complete-section">
+        <button
+          class="complete-button"
+          [disabled]="isLoading() || cartItems().length === 0"
+          (click)="onCompleteSale()">
+          @if (isLoading()) {
+            <i class="fas fa-spinner fa-spin"></i>
+            Processing...
+          } @else {
+            <i class="fas fa-check"></i>
+            Complete Sale
+          }
+        </button>
+      </div>
     </div>
   

@@ -156,6 +156,7 @@ export enum ItemStatus {
   Removed = 'Removed'
 }
 
+// Legacy Categories interfaces (to be phased out)
 export interface CategoryDto {
   id: string;
   name: string;
@@ -184,6 +185,40 @@ export interface CategoryUsageDto {
   itemCount: number;
   availableItemCount: number;
   soldItemCount: number;
+}
+
+// Modern ItemCategory interfaces (using /api/itemcategories)
+export interface ItemCategoryDto {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  isActive: boolean;
+  parentCategoryId?: string;
+  sortOrder: number;
+  defaultCommissionRate?: number;
+  subCategoryCount: number;
+  itemCount: number;
+  createdAt: Date;
+}
+
+export interface CreateItemCategoryDto {
+  name: string;
+  description?: string;
+  color?: string;
+  parentCategoryId?: string;
+  sortOrder?: number;
+  defaultCommissionRate?: number;
+}
+
+export interface UpdateItemCategoryDto {
+  name: string;
+  description?: string;
+  color?: string;
+  parentCategoryId?: string;
+  sortOrder: number;
+  defaultCommissionRate?: number;
+  isActive: boolean;
 }
 
 export interface LookupItem {

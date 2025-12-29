@@ -72,7 +72,7 @@
 
               <div class="item-pricing">
                 <div class="price-display">
-                  <span class="current-price">\${{ item.price | number:'1.2-2' }}</span>
+                  <span class="current-price">${{ item.price | number:'1.2-2' }}</span>
                 </div>
                 <div class="availability-status" [class.available]="item.isAvailable">
                   <span *ngIf="item.isAvailable" class="available-badge">Available</span>

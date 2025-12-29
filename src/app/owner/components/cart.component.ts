@@ -21,10 +21,11 @@ export interface CartItem {
   templateUrl: './cart.component.html',
   styles: [`
     .cart-container {
-      height: 100%;
       display: flex;
       flex-direction: column;
       background: #f8f9fa;
+      max-height: 600px;
+      height: auto;
     }
 
     .cart-header {
@@ -53,10 +54,11 @@ export interface CartItem {
     }
 
     .cart-items {
-      flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 0;
-      min-height: 200px;
+      max-height: 300px;
+      flex-shrink: 0;
     }
 
     .empty-cart {
@@ -64,10 +66,10 @@ export interface CartItem {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100%;
+      height: 120px;
       color: #6c757d;
       text-align: center;
-      padding: 40px 20px;
+      padding: 20px 20px;
     }
 
     .empty-cart i {
@@ -152,6 +154,9 @@ export interface CartItem {
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s ease;
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1;
     }
 
     .remove-button:hover {
@@ -164,6 +169,7 @@ export interface CartItem {
       background: white;
       border-top: 2px solid #e9ecef;
       padding: 20px;
+      flex-shrink: 0;
     }
 
     .totals-line {
@@ -196,6 +202,7 @@ export interface CartItem {
       background: white;
       padding: 20px;
       border-top: 1px solid #e9ecef;
+      flex-shrink: 0;
     }
 
     .payment-type {
@@ -253,6 +260,7 @@ export interface CartItem {
       background: white;
       padding: 20px;
       border-top: 1px solid #e9ecef;
+      flex-shrink: 0;
     }
 
     .complete-button {

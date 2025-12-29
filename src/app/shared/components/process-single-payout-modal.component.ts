@@ -176,7 +176,7 @@ export class ProcessSinglePayoutModalComponent implements OnInit, OnChanges {
       // Call the API endpoint (to be implemented)
       const response = await this.processPayoutApi(request);
 
-      this.toastr.success(`Payout of $${form.amount.toFixed(2)} processed successfully!`);
+      this.toastr.success(`Payout of ${form.amount.toFixed(2)} processed successfully!`);
       this.onSuccess.emit(response);
       this.closeModal();
 

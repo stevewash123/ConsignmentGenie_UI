@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
+import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { ConfirmationDialogComponent } from './shared/components/confirmation-dialog.component';
 import { LoadingService } from './shared/services/loading.service';
 
@@ -16,6 +17,9 @@ export class App {
   isLoading$: Observable<boolean>;
 
   constructor(private loadingService: LoadingService) {
-    this.isLoading$ = this.loadingService.anyLoading$;
+    this.isLoading$ = this.loadingService.anyLoading$.pipe(
+      startWith(false),
+      distinctUntilChanged()
+    );
   }
 }

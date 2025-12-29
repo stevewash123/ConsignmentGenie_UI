@@ -21,7 +21,7 @@ export class MockEarningsService {
     // Determine tooltip logic based on story requirements
     let pendingTooltip: string;
     if (pendingAmount < this.minimumPayoutAmount) {
-      pendingTooltip = `Minimum payout amount is $${this.minimumPayoutAmount.toFixed(2)}`;
+      pendingTooltip = `Minimum payout amount is ${this.minimumPayoutAmount.toFixed(2)}`;
     } else if (nextPayoutDate) {
       pendingTooltip = `Expected payout date ${nextPayoutDate.toLocaleDateString('en-US', {
         month: 'numeric',
@@ -63,7 +63,7 @@ export class MockEarningsService {
 
     const summary: EarningsSummary = {
       pending: pendingAmount,
-      pendingTooltip: `Minimum payout amount is $${this.minimumPayoutAmount.toFixed(2)}`,
+      pendingTooltip: `Minimum payout amount is ${this.minimumPayoutAmount.toFixed(2)}`,
       paidThisMonth: 245.00,
       payoutCountThisMonth: 1,
       nextPayoutDate

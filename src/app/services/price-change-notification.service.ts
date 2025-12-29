@@ -193,10 +193,10 @@ export class PriceChangeNotificationService {
     let message = '';
     switch (action) {
       case 'accept':
-        message = `Price updated to $${notification.proposedPrice.toFixed(2)}. Your new earnings: $${notification.consignorProposedEarnings.toFixed(2)}`;
+        message = `Price updated to ${notification.proposedPrice.toFixed(2)}. Your new earnings: ${notification.consignorProposedEarnings.toFixed(2)}`;
         break;
       case 'keep_current':
-        message = `Item will continue at current price of $${notification.currentPrice.toFixed(2)}`;
+        message = `Item will continue at current price of ${notification.currentPrice.toFixed(2)}`;
         break;
       case 'decline_and_retrieve':
         message = 'Item has been marked for pickup. Please contact the shop to arrange collection.';

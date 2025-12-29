@@ -354,7 +354,7 @@ export class BatchPayoutModalComponent implements OnInit {
         <div class="summary">
           <h3>Summary</h3>
           <p><strong>Total Payouts:</strong> ${result.count}</p>
-          <p><strong>Total Amount:</strong> <span class="amount">$${result.totalAmount.toFixed(2)}</span></p>
+          <p><strong>Total Amount:</strong> <span class="amount">${result.totalAmount.toFixed(2)}</span></p>
           <p><strong>Payment Method:</strong> ${result.payouts[0]?.method || 'Various'}</p>
         </div>
 
@@ -371,7 +371,7 @@ export class BatchPayoutModalComponent implements OnInit {
             ${result.payouts.map(payout => `
               <tr>
                 <td>${payout.consignorName}</td>
-                <td class="amount">$${payout.amount.toFixed(2)}</td>
+                <td class="amount">${payout.amount.toFixed(2)}</td>
                 <td>${payout.method}</td>
                 <td>${payout.payoutNumber}</td>
               </tr>

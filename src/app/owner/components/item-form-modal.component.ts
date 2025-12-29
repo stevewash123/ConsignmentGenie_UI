@@ -10,6 +10,7 @@ import {
   UpdateItemRequest,
   ItemListDto,
   CategoryDto,
+  ItemCategoryDto,
   ItemCondition
 } from '../../models/inventory.model';
 import { Consignor } from '../../models/consignor.model';
@@ -269,7 +270,7 @@ export class ItemFormModalComponent implements OnInit {
 
   // Data sources
   consignors = signal<Consignor[]>([]);
-  categories = signal<CategoryDto[]>([]);
+  categories = signal<ItemCategoryDto[]>([]);
 
   // Default consignment period in days
   readonly DEFAULT_CONSIGNMENT_PERIOD = 90;

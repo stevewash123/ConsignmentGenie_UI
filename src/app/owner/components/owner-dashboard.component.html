@@ -11,7 +11,7 @@
           <div class="metric-card">
             <div class="metric-content">
               <h3>Inventory Value</h3>
-              <div class="metric-value">\${{ summary()!.inventoryValue | number:'1.2-2' }}</div>
+              <div class="metric-value">${{ summary()!.inventoryValue | number:'1.2-2' }}</div>
             </div>
           </div>
 
@@ -19,7 +19,7 @@
              [ngClass]="{ 'has-pending': summary()!.pendingPayoutCount > 0 }">
             <div class="metric-content">
               <h3>Pending Payouts</h3>
-              <div class="metric-value">\${{ summary()!.pendingPayouts | number:'1.2-2' }}</div>
+              <div class="metric-value">${{ summary()!.pendingPayouts | number:'1.2-2' }}</div>
               <span *ngIf="summary()!.pendingPayoutCount > 0" class="action-hint">→ Click to process</span>
             </div>
           </a>
@@ -66,8 +66,8 @@
                 <div class="col-date">{{ transaction.date | date:'short' }}</div>
                 <div class="col-item">{{ transaction.itemName }}</div>
                 <div class="col-consignor">{{ transaction.consignor }}</div>
-                <div class="col-amount">\${{ transaction.amount | number:'1.2-2' }}</div>
-                <div class="col-commission">\${{ transaction.commission | number:'1.2-2' }}</div>
+                <div class="col-amount">${{ transaction.amount | number:'1.2-2' }}</div>
+                <div class="col-commission">${{ transaction.commission | number:'1.2-2' }}</div>
               </div>
             </div>
           </div>

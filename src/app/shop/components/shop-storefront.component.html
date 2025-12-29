@@ -57,7 +57,7 @@
               </div>
 
               <div class="item-footer">
-                <div class="item-price">\${{ item.price | number:'1.2-2' }}</div>
+                <div class="item-price">${{ item.price | number:'1.2-2' }}</div>
                 <button
                   [disabled]="!item.isAvailable"
                   class="btn btn-primary"

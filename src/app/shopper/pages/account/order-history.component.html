@@ -30,10 +30,10 @@
                     (error)="onImageError($event)">
                   <div class="item-details">
                     <h4>{{ item.name }}</h4>
-                    <p>Qty: {{ item.quantity }} × \${{ item.price | number:'1.2-2' }}</p>
+                    <p>Qty: {{ item.quantity }} × ${{ item.price | number:'1.2-2' }}</p>
                   </div>
                   <div class="item-total">
-                    \${{ (item.price * item.quantity) | number:'1.2-2' }}
+                    ${{ (item.price * item.quantity) | number:'1.2-2' }}
                   </div>
                 </div>
               </div>
@@ -41,11 +41,11 @@
               <div class="order-summary">
                 <div class="summary-row">
                   <span>Subtotal:</span>
-                  <span>\${{ order.subtotal | number:'1.2-2' }}</span>
+                  <span>${{ order.subtotal | number:'1.2-2' }}</span>
                 </div>
                 <div class="summary-row" *ngIf="order.shipping > 0">
                   <span>Shipping:</span>
-                  <span>\${{ order.shipping | number:'1.2-2' }}</span>
+                  <span>${{ order.shipping | number:'1.2-2' }}</span>
                 </div>
                 <div class="summary-row" *ngIf="order.shipping === 0">
                   <span>Shipping:</span>
@@ -53,11 +53,11 @@
                 </div>
                 <div class="summary-row">
                   <span>Tax:</span>
-                  <span>\${{ order.tax | number:'1.2-2' }}</span>
+                  <span>${{ order.tax | number:'1.2-2' }}</span>
                 </div>
                 <div class="summary-row total">
                   <span>Total:</span>
-                  <span>\${{ order.total | number:'1.2-2' }}</span>
+                  <span>${{ order.total | number:'1.2-2' }}</span>
                 </div>
               </div>
 

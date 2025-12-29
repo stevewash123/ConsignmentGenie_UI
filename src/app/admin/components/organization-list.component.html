@@ -81,7 +81,7 @@
                 </td>
                 <td class="text-center">{{ org.userCount }}</td>
                 <td class="text-center">{{ org.itemCount }}</td>
-                <td class="text-right">\${{ org.monthlyRevenue.toLocaleString() }}</td>
+                <td class="text-right">${{ org.monthlyRevenue.toLocaleString() }}</td>
                 <td>{{ org.createdAt | date:'short' }}</td>
                 <td>{{ getTimeAgo(org.lastActivity) }}</td>
                 <td class="actions">

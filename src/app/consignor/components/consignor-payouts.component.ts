@@ -694,7 +694,7 @@ export class ConsignorPayoutsComponent implements OnInit {
 
     switch (this.requestStatus.reason) {
       case 'below_minimum':
-        return `Minimum payout amount is $${this.requestStatus.minimumAmount?.toFixed(2) || '0.00'}`;
+        return `Minimum payout amount is ${this.requestStatus.minimumAmount?.toFixed(2) || '0.00'}`;
       case 'pending_request':
         const date = this.requestStatus.pendingRequestDate ? this.formatDate(this.requestStatus.pendingRequestDate) : 'recently';
         return `You have a pending request from ${date}`;

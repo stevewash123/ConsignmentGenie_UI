@@ -103,7 +103,7 @@
                 <div class="order-content">
                   <div class="order-items">
                     {{ order.itemCount }} item{{ order.itemCount !== 1 ? 's' : '' }} ·
-                    <span class="order-total">\${{ order.total.toFixed(2) }}</span>
+                    <span class="order-total">${{ order.total.toFixed(2) }}</span>
                   </div>
                   <div class="order-status" [class]="'status-' + order.status.toLowerCase()">
                     {{ order.statusText }}

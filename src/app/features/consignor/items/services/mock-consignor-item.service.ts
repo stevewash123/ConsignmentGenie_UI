@@ -247,7 +247,7 @@ export class MockConsignorItemService {
         item.priceChangeRequest = undefined; // Remove the request
         return of({
           success: true,
-          message: `Price updated to $${item.listedPrice.toFixed(2)}. Your new earnings: $${item.consignorEarnings.toFixed(2)}.`
+          message: `Price updated to ${item.listedPrice.toFixed(2)}. Your new earnings: ${item.consignorEarnings.toFixed(2)}.`
         }).pipe(delay(500));
 
       case 'keep_current':

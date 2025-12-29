@@ -1,11 +1,15 @@
 import { Component, EventEmitter, Input, Output, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { forkJoin, catchError, of } from 'rxjs';
 import { ImportedItem } from './inventory-list.component';
 import { InventoryService } from '../../services/inventory.service';
 import { ConsignorService } from '../../services/consignor.service';
 import { CreateItemRequest, ItemCondition } from '../../models/inventory.model';
 import { Consignor } from '../../models/consignor.model';
+import { BulkImportResultsModalComponent, BulkImportResult } from './bulk-import-results-modal.component';
+import { environment } from '../../../environments/environment';
 
 export interface ImportRow {
   rowNumber: number;
@@ -25,7 +29,7 @@ export interface ImportSummary {
 @Component({
   selector: 'app-bulk-import-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, BulkImportResultsModalComponent],
   templateUrl: './bulk-import-modal.component.html',
   styles: [`
     .modal-overlay {
@@ -47,7 +51,7 @@ export interface ImportSummary {
       border-radius: 12px;
       width: 100%;
       max-width: 1200px;
-      max-height: 90vh;
+      max-height: 95vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -251,6 +255,22 @@ export interface ImportSummary {
       margin-bottom: 0.25rem;
     }
 
+    /* Selective row height: only edited row gets taller */
+    .preview-table tbody tr {
+      transition: height 0.2s ease, background-color 0.2s ease;
+    }
+
+    /* Non-editing rows stay compact */
+    .preview-table tbody tr:not(.editing) {
+      height: 3rem;
+    }
+
+    /* Editing row gets taller to accommodate inputs */
+    .preview-table tbody tr.editing {
+      height: auto;
+      min-height: 4rem;
+    }
+
     /* Compact table styles */
     .compact-header {
       font-size: 0.85rem;
@@ -258,12 +278,63 @@ export interface ImportSummary {
     }
 
     .compact-cell {
-      padding: 0.5rem;
+      vertical-align: top;
+      padding: 0.375rem 0.5rem;
       font-size: 0.85rem;
+      box-sizing: border-box;
+    }
+
+    /* Compact cells in non-editing rows */
+    tr:not(.editing) .compact-cell {
+      height: 3rem;
+      overflow: hidden;
+    }
+
+    /* Cells in editing rows can expand */
+    tr.editing .compact-cell {
+      height: auto;
+      min-height: 3rem;
     }
 
     .compact-icon {
       font-size: 1rem;
+    }
+
+    /* Edit inputs with comfortable sizing */
+    .edit-input,
+    .edit-select {
+      width: 100%;
+      height: 2.5rem;
+      padding: 0.375rem 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      background-color: white;
+      box-sizing: border-box;
+      margin: 0;
+    }
+
+    /* Error lists with proper spacing in compact rows */
+    .error-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Error items in non-editing rows stay compact */
+    tr:not(.editing) .error-list {
+      max-height: 2.25rem;
+      overflow-y: auto;
+    }
+
+    .error-item {
+      color: #dc2626;
+      font-size: 0.75rem;
+      background: #fef2f2;
+      padding: 0.125rem 0.25rem;
+      border-radius: 2px;
+      margin-bottom: 0.125rem;
+      line-height: 1.2;
     }
 
     /* Row highlighting */
@@ -389,6 +460,344 @@ export interface ImportSummary {
         justify-content: center;
       }
     }
+
+    /* Duplicate Warning Styles */
+    .duplicate-warning {
+      display: flex;
+      align-items: flex-start;
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      gap: 0.75rem;
+    }
+
+    .warning-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .warning-content {
+      flex: 1;
+    }
+
+    .warning-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 0.5rem;
+    }
+
+    .warning-text {
+      color: #78350f;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+
+    /* Default Consignor Section */
+    .default-consignor-section {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .default-consignor-header {
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #374151;
+      margin: 0;
+    }
+
+    .section-description {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .default-consignor-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .consignor-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .select-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .consignor-dropdown {
+      width: 280px;
+      padding: 0.375rem 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      background-color: white;
+      font-size: 0.875rem;
+      color: #374151;
+    }
+
+    .consignor-dropdown:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Radio Group Styles */
+    .radio-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .radio-label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+
+    .radio-options {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.875rem;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .radio-option input[type="radio"] {
+      margin: 0;
+    }
+
+    .radio-group.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .radio-group.disabled .radio-option {
+      color: #9ca3af;
+    }
+
+    /* Fixed Summary Footer Styles */
+    .fixed-summary-footer {
+      background-color: #f8fafc;
+      border-top: 2px solid #e2e8f0;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .summary-value.valid-count {
+      color: #059669;
+    }
+
+    .summary-value.error-count {
+      color: #dc2626;
+    }
+
+    .summary-value.import-count {
+      color: #2563eb;
+    }
+
+    /* Default Consignor Indicators */
+    .default-consignor {
+      background-color: #eff6ff;
+      position: relative;
+    }
+
+    .default-indicator {
+      color: #2563eb;
+      font-weight: bold;
+      margin-left: 0.25rem;
+    }
+
+    /* In-Grid Editing Styles */
+    .actions-header {
+      width: 100px;
+    }
+
+    .actions-cell {
+      padding: 0.25rem 0.5rem !important;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.25rem;
+      justify-content: center;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+
+    .action-btn:hover {
+      background-color: #f3f4f6;
+    }
+
+    .edit-btn:hover {
+      background-color: #eff6ff;
+    }
+
+    .delete-btn:hover {
+      background-color: #fef2f2;
+    }
+
+    .save-btn:hover {
+      background-color: #f0f9f0;
+    }
+
+    .cancel-btn:hover {
+      background-color: #fef2f2;
+    }
+
+    .editable-cell {
+      position: relative;
+      min-width: 120px;
+    }
+
+    .editing {
+      background-color: #fefce8 !important;
+    }
+
+    /* Fix grid jumpiness with absolute heights */
+    .preview-table tbody tr {
+      height: 3rem !important;
+      transition: background-color 0.2s ease;
+    }
+
+    .compact-cell {
+      vertical-align: top;
+      height: 3rem;
+      padding: 0.375rem 0.5rem;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .editable-cell {
+      height: 3rem;
+    }
+
+    /* Edit inputs sized to fit exactly in cell */
+    .edit-input,
+    .edit-select {
+      width: 100%;
+      height: 2.25rem;
+      padding: 0.25rem 0.375rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      background-color: white;
+      box-sizing: border-box;
+      margin: 0;
+    }
+
+    .edit-input:focus,
+    .edit-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Error list with controlled height */
+    .error-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 2.25rem;
+      overflow-y: auto;
+    }
+
+    .error-item {
+      color: #dc2626;
+      font-size: 0.75rem;
+      background: #fef2f2;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      margin-bottom: 0.125rem;
+      line-height: 1.2;
+    }
+
+    /* Edit hint fits in same space */
+    .edit-hint {
+      font-style: italic;
+      color: #6b7280;
+      font-size: 0.75rem;
+      line-height: 2.25rem;
+    }
+
+    /* Visual indicator for recently edited row */
+    .recently-saved {
+      background-color: #f0f9ff !important;
+      transition: background-color 0.5s ease;
+    }
+
+    /* Ensure action buttons stay centered in fixed height */
+    .actions-cell {
+      padding: 0.375rem 0.5rem !important;
+      height: 3rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.25rem;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
   `]
 })
 export class BulkImportModalComponent implements OnInit {
@@ -399,6 +808,7 @@ export class BulkImportModalComponent implements OnInit {
   // Services
   private inventoryService = inject(InventoryService);
   private consignorService = inject(ConsignorService);
+  private http = inject(HttpClient);
 
   // State
   selectedFile = signal<File | null>(null);
@@ -408,6 +818,26 @@ export class BulkImportModalComponent implements OnInit {
   isDragOver = signal(false);
   isImporting = signal(false);
   consignors = signal<Consignor[]>([]);
+
+  // Results modal
+  showResultsModal = signal(false);
+  importResults = signal<BulkImportResult | null>(null);
+
+  // Duplicate detection
+  isDuplicateFile = signal(false);
+  duplicateInfo = signal<{lastUploadDate: string, lastFileName: string} | null>(null);
+  showDuplicateWarning = signal(false);
+  firstDataRow = signal<string>('');
+
+  // Default consignor for unmatched items
+  defaultConsignorId = signal<string | null>(null);
+  useDefaultConsignor = signal(false);
+  defaultConsignorMode = signal<'missing' | 'missing-and-errors' | 'all'>('missing');
+
+  // In-grid editing state
+  editingRowId = signal<number | null>(null);
+  editingData = signal<any>({});
+  recentlySavedRowId = signal<number | null>(null);
 
   // Pagination
   currentPage = signal(1);
@@ -430,6 +860,44 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     this.summary.set(null);
     this.isProcessing.set(false);
     this.isImporting.set(false);
+    this.showResultsModal.set(false);
+    this.importResults.set(null);
+
+    // Reset default consignor settings
+    this.defaultConsignorId.set(null);
+    this.useDefaultConsignor.set(false);
+
+    // Reset duplicate detection
+    this.isDuplicateFile.set(false);
+    this.duplicateInfo.set(null);
+    this.showDuplicateWarning.set(false);
+    this.firstDataRow.set('');
+  }
+
+  showImportResults(result: BulkImportResult) {
+    this.importResults.set(result);
+    this.showResultsModal.set(true);
+  }
+
+  onResultsModalClosed() {
+    // Check if import was successful before clearing the results
+    const results = this.importResults();
+    const shouldCloseMainModal = results?.success && results.successfulImports > 0;
+
+    this.showResultsModal.set(false);
+    this.importResults.set(null);
+
+    // If import was successful, close the main modal too
+    if (shouldCloseMainModal) {
+      this.close();
+    }
+  }
+
+  onSendToNotifications(result: BulkImportResult) {
+    console.log('📧 BulkImportModal: Send to Notifications clicked:', result);
+    // TODO: Implement notification service integration
+    // For now, just close the modal
+    this.onResultsModalClosed();
   }
 
   ngOnInit() {
@@ -506,6 +974,13 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     }
 
     const headers = this.parseCsvRow(lines[0]);
+    // Store first data row for duplicate detection
+    const firstDataRow = lines[1];
+    this.firstDataRow.set(firstDataRow);
+
+    // Check for duplicate file before processing
+    this.checkForDuplicateFile(firstDataRow, lines.length - 1);
+
     const rows: ImportRow[] = [];
     let validCount = 0;
     let errorCount = 0;
@@ -521,7 +996,7 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
         rowData[camelCaseHeader] = values[index] || '';
       });
 
-      const validation = this.validateRow(rowData, i + 1);
+      const validation = this.validateRowData(rowData);
       const row: ImportRow = {
         rowNumber: i,
         data: rowData,
@@ -544,36 +1019,200 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     });
   }
 
-  private parseCsvRow(row: string): string[] {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
+  private checkForDuplicateFile(firstDataRow: string, rowCount: number) {
+    if (!this.selectedFile()) return;
 
-    for (let i = 0; i < row.length; i++) {
-      const char = row[i];
+    const request = {
+      fileName: this.selectedFile()!.name,
+      firstDataRow,
+      rowCount
+    };
 
-      if (char === '"' && !inQuotes) {
-        inQuotes = true;
-      } else if (char === '"' && inQuotes) {
-        if (row[i + 1] === '"') {
-          current += '"';
-          i++; // Skip next quote
-        } else {
-          inQuotes = false;
+    this.http.post<{ isDuplicate: boolean; lastUploadDate?: string; lastFileName?: string }>
+      (`${environment.apiUrl}/api/items/check-duplicate`, request)
+      .subscribe({
+        next: (response) => {
+          this.isDuplicateFile.set(response.isDuplicate);
+          if (response.isDuplicate && response.lastUploadDate && response.lastFileName) {
+            this.duplicateInfo.set({
+              lastUploadDate: response.lastUploadDate,
+              lastFileName: response.lastFileName
+            });
+            this.showDuplicateWarning.set(true);
+          }
+        },
+        error: (error) => {
+          console.error('Error checking for duplicate file:', error);
+          // Continue with normal processing even if duplicate check fails
         }
-      } else if (char === ',' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-
-    result.push(current.trim());
-    return result;
+      });
   }
 
-  private validateRow(data: any, rowNumber: number): { isValid: boolean; errors: string[] } {
+  dismissDuplicateWarning() {
+    this.showDuplicateWarning.set(false);
+  }
+
+  onDefaultConsignorChange(value: string) {
+    this.defaultConsignorId.set(value || null);
+    this.useDefaultConsignor.set(!!value);
+
+    // Trigger re-calculation of importable items and clear ConsignorNumber errors
+    if (value) {
+      this.updateRowErrorsForDefaultConsignor();
+    }
+  }
+
+  onDefaultConsignorModeChange(mode: 'missing' | 'missing-and-errors' | 'all') {
+    this.defaultConsignorMode.set(mode);
+    // Re-run error clearing logic when mode changes
+    if (this.defaultConsignorId()) {
+      this.updateRowErrorsForDefaultConsignor();
+    }
+  }
+
+  willUseDefaultConsignor(row: ImportRow): boolean {
+    if (!this.defaultConsignorId()) return false;
+
+    const mode = this.defaultConsignorMode();
+
+    switch (mode) {
+      case 'missing':
+        return !row.data.consignorNumber;
+      case 'missing-and-errors':
+        return !row.data.consignorNumber || !row.isValid;
+      case 'all':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  getDisplayConsignorNumber(row: ImportRow): string {
+    if (this.willUseDefaultConsignor(row)) {
+      const defaultConsignor = this.consignors().find(c => c.id.toString() === this.defaultConsignorId());
+      return defaultConsignor ? defaultConsignor.consignorNumber : row.data.consignorNumber || '';
+    }
+    return row.data.consignorNumber || '';
+  }
+
+  // In-grid editing methods
+  startEditRow(row: ImportRow) {
+    this.editingRowId.set(row.rowNumber);
+    this.editingData.set({
+      name: row.data.name,
+      price: row.data.price,
+      category: row.data.category,
+      condition: row.data.condition
+    });
+  }
+
+  cancelEdit() {
+    this.editingRowId.set(null);
+    this.editingData.set({});
+  }
+
+  saveEdit() {
+    const rowId = this.editingRowId();
+    const editData = this.editingData();
+
+    if (rowId === null) return;
+
+    // Update the import data
+    const updatedData = this.importData().map(row => {
+      if (row.rowNumber === rowId) {
+        const updatedRow = {
+          ...row,
+          data: {
+            ...row.data,
+            ...editData
+          }
+        };
+
+        // Re-validate the row after editing
+        return this.validateRow(updatedRow);
+      }
+      return row;
+    });
+
+    this.importData.set(updatedData);
+
+    // Recalculate summary
+    this.recalculateSummary(updatedData);
+
+    // Show visual feedback for saved row
+    this.recentlySavedRowId.set(rowId);
+    setTimeout(() => this.recentlySavedRowId.set(null), 2000);
+
+    // Exit edit mode
+    this.cancelEdit();
+  }
+
+  deleteRow(rowNumber: number) {
+    const updatedData = this.importData().filter(row => row.rowNumber !== rowNumber);
+    this.importData.set(updatedData);
+    this.recalculateSummary(updatedData);
+
+    // If deleting the currently edited row, cancel edit
+    if (this.editingRowId() === rowNumber) {
+      this.cancelEdit();
+    }
+  }
+
+  isEditing(row: ImportRow): boolean {
+    return this.editingRowId() === row.rowNumber;
+  }
+
+  isRecentlySaved(row: ImportRow): boolean {
+    return this.recentlySavedRowId() === row.rowNumber;
+  }
+
+  updateEditField(field: string, value: string) {
+    this.editingData.update(data => ({
+      ...data,
+      [field]: value
+    }));
+  }
+
+  private validateRow(row: ImportRow): ImportRow {
+    const errors: string[] = [];
+
+    if (!row.data.name || row.data.name.trim() === '') {
+      errors.push('Name is required');
+    }
+
+    if (!row.data.price || isNaN(parseFloat(row.data.price)) || parseFloat(row.data.price) <= 0) {
+      errors.push('Valid price is required');
+    }
+
+    if (!row.data.category || row.data.category.trim() === '') {
+      errors.push('Category is required');
+    }
+
+    const validConditions = ['New', 'LikeNew', 'Good', 'Fair', 'Poor'];
+    if (!row.data.condition || !validConditions.includes(row.data.condition)) {
+      errors.push('Valid condition is required');
+    }
+
+    return {
+      ...row,
+      errors,
+      isValid: errors.length === 0
+    };
+  }
+
+  private recalculateSummary(data: ImportRow[]) {
+    const validCount = data.filter(row => row.isValid).length;
+    const errorCount = data.filter(row => !row.isValid).length;
+
+    this.summary.set({
+      totalRows: data.length,
+      validRows: validCount,
+      errorRows: errorCount,
+      errors: []
+    });
+  }
+
+  private validateRowData(data: any): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     // Required fields - now using camelCase properties
@@ -610,6 +1249,80 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
 
     return { isValid: errors.length === 0, errors };
   }
+
+  private updateRowErrorsForDefaultConsignor() {
+    // Update error display to hide errors for items that would use default consignor
+    const updatedData = this.importData().map(row => {
+      const willUseDefault = this.willUseDefaultConsignor(row);
+
+      if (!willUseDefault) {
+        return row; // Keep original errors if not using default
+      }
+
+      const mode = this.defaultConsignorMode();
+      let filteredErrors = [...row.errors];
+
+      // Always remove ConsignorNumber errors when using default
+      filteredErrors = filteredErrors.filter(error =>
+        !error.includes('ConsignorNumber') &&
+        !error.toLowerCase().includes('consignor')
+      );
+
+      // For 'missing-and-errors' and 'all' modes, clear ALL errors since default will handle
+      if (mode === 'missing-and-errors' || mode === 'all') {
+        filteredErrors = [];
+      }
+
+      return {
+        ...row,
+        errors: filteredErrors,
+        isValid: filteredErrors.length === 0
+      };
+    });
+
+    this.importData.set(updatedData);
+
+    // Recalculate summary
+    const validCount = updatedData.filter(row => row.isValid).length;
+    const errorCount = updatedData.filter(row => !row.isValid).length;
+
+    this.summary.set({
+      totalRows: updatedData.length,
+      validRows: validCount,
+      errorRows: errorCount,
+      errors: []
+    });
+  }
+
+  private parseCsvRow(row: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < row.length; i++) {
+      const char = row[i];
+
+      if (char === '"' && !inQuotes) {
+        inQuotes = true;
+      } else if (char === '"' && inQuotes) {
+        if (row[i + 1] === '"') {
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          inQuotes = false;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    result.push(current.trim());
+    return result;
+  }
+
 
   downloadTemplate() {
     const blob = new Blob([this.sampleCsvData], { type: 'text/csv' });
@@ -651,7 +1364,14 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
 
     if (validRows.length === 0) {
       console.warn('⚠️ BulkImportModal: No valid items to import');
-      alert('No valid items to import.');
+      this.showImportResults({
+        success: false,
+        successfulImports: 0,
+        failedImports: 0,
+        totalItems: 0,
+        errors: ['No valid items to import.'],
+        message: 'Import failed: No valid items found.'
+      });
       return;
     }
 
@@ -670,6 +1390,7 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     });
     console.log('🔍 BulkImportModal: Consignor lookup map:', Object.fromEntries(consignorLookup));
 
+    // Process all valid rows (convertToCreateItemRequest will handle default consignor logic)
     const createRequests: CreateItemRequest[] = validRows
       .map(row => this.convertToCreateItemRequest(row.data, consignorLookup))
       .filter(req => req !== null) as CreateItemRequest[];
@@ -679,56 +1400,100 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     if (createRequests.length === 0) {
       this.isImporting.set(false);
       console.error('❌ BulkImportModal: No items could be converted for import. Check consignor numbers.');
-      alert('No items could be converted for import. Check consignor numbers.');
+      this.showImportResults({
+        success: false,
+        successfulImports: 0,
+        failedImports: validRows.length,
+        totalItems: validRows.length,
+        errors: ['No items could be converted for import. Check consignor numbers.'],
+        message: 'Import failed: Invalid consignor numbers.'
+      });
       return;
     }
 
-    // Create items using individual API calls (fallback until bulk API is ready)
-    console.log(`📡 BulkImportModal: Making ${createRequests.length} API calls to create items...`);
-    const createObservables = createRequests.map((request, index) =>
-      this.inventoryService.createItem(request).pipe(
-        catchError(error => {
-          console.error(`❌ BulkImportModal: Error creating item ${index + 1}:`, error);
-          console.error(`❌ BulkImportModal: Failed request data:`, request);
-          return of(null);
-        })
-      )
-    );
+    // Use proper bulk API for efficient processing
+    console.log(`📡 BulkImportModal: Making bulk API call to create ${createRequests.length} items...`);
 
-    forkJoin(createObservables).subscribe({
-      next: (results) => {
-        console.log('📊 BulkImportModal: API responses received:', results);
-        const successful = results.filter(r => r !== null).length;
-        const failed = results.length - successful;
-
-        console.log(`✅ BulkImportModal: Import completed - ${successful} successful, ${failed} failed`);
+    this.inventoryService.bulkCreateItems(
+      createRequests,
+      this.selectedFile()?.name,
+      this.firstDataRow()
+    ).subscribe({
+      next: (response) => {
+        console.log('📊 BulkImportModal: Bulk API response received:', response);
         this.isImporting.set(false);
 
-        if (successful > 0) {
-          this.itemsImported.emit(validRows.map(r => r.data));
-          alert(`Import completed! ${successful} items created successfully${failed > 0 ? `, ${failed} failed` : ''}.`);
-          this.close();
+        if (response.success) {
+          const result = response.data;
+          console.log(`✅ BulkImportModal: Import completed - ${result.successfulImports} successful, ${result.failedImports} failed`);
+
+          if (result.successfulImports > 0) {
+            this.itemsImported.emit(validRows.map(r => r.data));
+          }
+
+          // Show results modal for all cases - success, partial success, or complete failure
+          this.showImportResults({
+            success: result.successfulImports > 0,
+            successfulImports: result.successfulImports,
+            failedImports: result.failedImports,
+            totalItems: result.successfulImports + result.failedImports,
+            errors: result.errors || [],
+            message: result.successfulImports > 0
+              ? (result.failedImports > 0
+                ? `Import completed with some errors: ${result.successfulImports} successful, ${result.failedImports} failed.`
+                : `Import completed successfully! ${result.successfulImports} items created.`)
+              : 'Import failed. No items were created.'
+          });
         } else {
-          console.error('❌ BulkImportModal: All import attempts failed');
-          alert('Import failed. No items were created.');
+          console.error('❌ BulkImportModal: Bulk API returned error:', response.message);
+          this.showImportResults({
+            success: false,
+            successfulImports: 0,
+            failedImports: createRequests.length,
+            totalItems: createRequests.length,
+            errors: [response.message || 'Unknown error occurred'],
+            message: `Import failed: ${response.message}`
+          });
         }
       },
       error: (error) => {
         this.isImporting.set(false);
         console.error('💥 BulkImportModal: Fatal error during bulk import:', error);
-        alert('Import failed due to an error. Please try again.');
+
+        let errorMessage = 'Import failed due to an error. Please try again.';
+        if (error.status === 401) {
+          errorMessage = 'Import failed: Authentication error. Please login again.';
+        } else if (error.status === 500) {
+          errorMessage = `Import failed: Server error. ${error.error?.message || 'Please try again.'}`;
+        }
+
+        this.showImportResults({
+          success: false,
+          successfulImports: 0,
+          failedImports: createRequests.length,
+          totalItems: createRequests.length,
+          errors: [errorMessage],
+          message: errorMessage
+        });
       }
     });
   }
 
   private convertToCreateItemRequest(data: any, consignorLookup: Map<string, string>): CreateItemRequest | null {
     console.log('🔄 BulkImportModal: Converting item data:', data);
-    const consignorId = consignorLookup.get(data.consignorNumber?.toUpperCase());
+    let consignorId = consignorLookup.get(data.consignorNumber?.toUpperCase());
 
     if (!consignorId) {
       console.warn(`⚠️ BulkImportModal: Consignor not found for number: ${data.consignorNumber}`);
       console.log('🔍 BulkImportModal: Available consignor numbers:', Array.from(consignorLookup.keys()));
-      return null;
+
+      // Use default consignor if enabled and available
+      if (this.useDefaultConsignor() && this.defaultConsignorId()) {
+        consignorId = this.defaultConsignorId();
+        console.log(`🔄 BulkImportModal: Using default consignor ${consignorId} for item "${data.name}"`);
+      } else {
+        return null;
+      }
     }
 
     // Convert condition string to ItemCondition enum
@@ -759,7 +1524,36 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
   }
 
   hasValidItems(): boolean {
-    return this.summary()?.validRows > 0;
+    return this.getImportableItemsCount() > 0;
+  }
+
+  getImportableItemsCount(): number {
+    const data = this.importData();
+    if (!data.length) return 0;
+
+    const consignorLookup = new Map<string, string>();
+    this.consignors().forEach(c => {
+      if (c.consignorNumber) {
+        consignorLookup.set(c.consignorNumber.toUpperCase(), c.id.toString());
+      }
+    });
+
+    let count = 0;
+
+    for (const row of data) {
+      if (!row.isValid) continue; // Skip rows with validation errors
+
+      const hasMatchingConsignor = consignorLookup.has(row.data.consignorNumber?.toUpperCase());
+
+      if (hasMatchingConsignor) {
+        count++; // Item has valid consignor match
+      } else if (this.useDefaultConsignor() && this.defaultConsignorId()) {
+        count++; // Item would use default consignor
+      }
+      // Skip items without consignor match and no default consignor set
+    }
+
+    return count;
   }
 
   trackByRowNumber(index: number, row: ImportRow): number {

@@ -88,7 +88,7 @@
               }
               @if (minPrice || maxPrice) {
                 <span class="filter-tag">
-                  Price: \${{ minPrice || 0 }} - \${{ maxPrice || '∞' }}
+                  Price: ${{ minPrice || 0 }} - ${{ maxPrice || '∞' }}
                   <button type="button" (click)="clearPriceFilter()">&times;</button>
                 </span>
               }
@@ -178,9 +178,9 @@
                   </div>
 
                   <div class="product-price">
-                    <span class="current-price">\${{ product.price }}</span>
+                    <span class="current-price">${{ product.price }}</span>
                     @if (product.originalPrice && product.originalPrice > product.price) {
-                      <span class="original-price">\${{ product.originalPrice }}</span>
+                      <span class="original-price">${{ product.originalPrice }}</span>
                       <span class="discount">
                         {{ ((product.originalPrice - product.price) / product.originalPrice * 100) | number:'1.0-0' }}% off
                       </span>

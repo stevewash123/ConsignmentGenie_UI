@@ -342,7 +342,7 @@ export class ConsignorStatementModalComponent implements OnInit {
         <div class="separator">
           <div class="line-item">
             <span>OPENING BALANCE (${statement.fromDate.toLocaleDateString()})</span>
-            <span class="amount">$${statement.openingBalance.toFixed(2)}</span>
+            <span class="amount">${statement.openingBalance.toFixed(2)}</span>
           </div>
         </div>
 
@@ -359,15 +359,15 @@ export class ConsignorStatementModalComponent implements OnInit {
               <tr>
                 <td>${sale.date.toLocaleDateString()}</td>
                 <td>${sale.itemName}</td>
-                <td class="amount">$${sale.salePrice.toFixed(2)}</td>
-                <td class="amount">$${sale.consignorShare.toFixed(2)}</td>
+                <td class="amount">${sale.salePrice.toFixed(2)}</td>
+                <td class="amount">${sale.consignorShare.toFixed(2)}</td>
               </tr>
             `).join('')}
           </table>
           <div class="total-line">
             <div class="line-item">
               <span>TOTAL SALES (${statement.sales.length} items)</span>
-              <span class="amount">$${statement.totalSales.toFixed(2)}</span>
+              <span class="amount">${statement.totalSales.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -378,13 +378,13 @@ export class ConsignorStatementModalComponent implements OnInit {
             ${statement.adjustments.map(adj => `
               <div class="line-item">
                 <span>${adj.date.toLocaleDateString()} ${adj.description}</span>
-                <span class="amount">$${adj.amount.toFixed(2)}</span>
+                <span class="amount">${adj.amount.toFixed(2)}</span>
               </div>
             `).join('')}
             <div class="total-line">
               <div class="line-item">
                 <span>TOTAL ADJUSTMENTS</span>
-                <span class="amount">$${statement.totalAdjustments.toFixed(2)}</span>
+                <span class="amount">${statement.totalAdjustments.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -396,20 +396,20 @@ export class ConsignorStatementModalComponent implements OnInit {
             ${statement.payouts.map(payout => `
               <div class="line-item">
                 <span>${payout.date.toLocaleDateString()} ${payout.method} ${payout.reference || ''}</span>
-                <span class="amount">$${payout.amount.toFixed(2)}</span>
+                <span class="amount">${payout.amount.toFixed(2)}</span>
               </div>
             `).join('')}
             <div class="total-line">
               <div class="line-item">
                 <span>TOTAL PAYOUTS</span>
-                <span class="amount">$${statement.totalPayouts.toFixed(2)}</span>
+                <span class="amount">${statement.totalPayouts.toFixed(2)}</span>
               </div>
             </div>
           </div>
         ` : ''}
 
         <div class="balance-section">
-          CLOSING BALANCE (${statement.toDate.toLocaleDateString()}): $${statement.closingBalance.toFixed(2)}
+          CLOSING BALANCE (${statement.toDate.toLocaleDateString()}): ${statement.closingBalance.toFixed(2)}
         </div>
 
         <div class="footer">

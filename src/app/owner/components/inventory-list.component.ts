@@ -13,6 +13,7 @@ import {
   ItemCondition,
   ItemStatus,
   CategoryDto,
+  ItemCategoryDto,
   UpdateItemStatusRequest
 } from '../../models/inventory.model';
 
@@ -53,9 +54,10 @@ export interface ImportedItem {
     }
 
     .page-header h1 {
-      color: #059669;
+      color: #1f2937;
       margin-bottom: 0.5rem;
       font-size: 2rem;
+      font-weight: 600;
     }
 
     .page-header p {
@@ -177,13 +179,13 @@ export interface ImportedItem {
     }
 
     .inventory-table th {
-      background: #f9fafb;
+      background: #f1f5f9;
       padding: 1rem;
       text-align: left;
-      font-weight: 600;
+      font-weight: 500;
       color: #374151;
-      font-size: 0.875rem;
-      border-bottom: 1px solid #e5e7eb;
+      font-size: 1rem;
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .inventory-table th.sortable {
@@ -274,15 +276,17 @@ export interface ImportedItem {
       text-transform: uppercase;
     }
 
-    .condition-new { background: #dcfce7; color: #166534; }
-    .condition-like-new { background: #dbeafe; color: #1e40af; }
-    .condition-good { background: #fef3c7; color: #92400e; }
-    .condition-fair { background: #fed7aa; color: #9a3412; }
-    .condition-poor { background: #fecaca; color: #991b1b; }
+    /* Condition badges: Quality-based (green=best to red=worst) */
+    .condition-new { background: #dcfce7; color: #166534; }        /* Green - Perfect */
+    .condition-like-new { background: #d1fae5; color: #065f46; }   /* Light green - Excellent */
+    .condition-good { background: #fef3c7; color: #92400e; }       /* Yellow - Good */
+    .condition-fair { background: #fed7aa; color: #9a3412; }       /* Orange - Fair */
+    .condition-poor { background: #fecaca; color: #991b1b; }       /* Red - Poor */
 
-    .status-available { background: #dcfce7; color: #166534; }
-    .status-sold { background: #fef3c7; color: #92400e; }
-    .status-removed { background: #f3f4f6; color: #6b7280; }
+    /* Status badges: Business logic (blue=active, green=success, gray=inactive) */
+    .status-available { background: #dbeafe; color: #1d4ed8; }     /* Blue - Active/Available */
+    .status-sold { background: #dcfce7; color: #166534; }          /* Green - Success/Completed */
+    .status-removed { background: #f3f4f6; color: #6b7280; }       /* Gray - Inactive/Removed */
 
     .item-price {
       font-weight: 600;
@@ -299,6 +303,130 @@ export interface ImportedItem {
       font-weight: 600;
       color: #1f2937;
       margin-bottom: 0.25rem;
+    }
+
+    .consignor-name.clickable {
+      color: #2563eb;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+
+    .consignor-name.clickable:hover {
+      color: #1d4ed8;
+    }
+
+    /* Compact table design styles */
+    .inventory-table.compact-design {
+      font-size: 0.875rem;
+    }
+
+    .inventory-table.compact-design th {
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.5rem;
+    }
+
+    .inventory-table.compact-design td {
+      padding: 0.375rem 0.5rem;
+      vertical-align: top;
+    }
+
+    /* Row styling */
+    .item-row {
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .item-row.even {
+      background-color: #f9fafb;
+    }
+
+    /* Cell-specific styling */
+    .title-sku-cell {
+      width: 22%;
+    }
+
+    .item-title {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.125rem;
+      line-height: 1.2;
+    }
+
+    .item-sku {
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      color: #4b5563;
+      font-weight: 600;
+    }
+
+    .category-status-cell {
+      width: 18%;
+    }
+
+    .category {
+      margin-bottom: 0.125rem;
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .price-condition-cell {
+      width: 15%;
+    }
+
+    .consignor-cell {
+      width: 15%;
+    }
+
+    .actions-cell {
+      width: 12%;
+      text-align: center;
+    }
+
+    .actions-cell th {
+      text-align: center;
+    }
+
+    .item-price {
+      font-weight: 600;
+      color: #059669;
+      margin-bottom: 0.125rem;
+    }
+
+    .condition {
+      font-size: 0.75rem;
+    }
+
+    .dates-cell {
+      width: 18%;
+    }
+
+    .received-date {
+      margin-bottom: 0.125rem;
+      color: #4b5563;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .expires-date {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+
+    /* Action buttons horizontal row */
+    .compact-design .action-buttons {
+      display: flex;
+      flex-direction: row;
+      gap: 0.25rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .compact-design .btn-icon {
+      padding: 0.25rem;
+      font-size: 0.8rem;
     }
 
     .date-cell {
@@ -431,6 +559,128 @@ export interface ImportedItem {
       font-size: 1.1rem;
     }
 
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .legend-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      color: #4a5568;
+    }
+
+    .legend-toggle:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .legend-icon {
+      font-size: 1rem;
+    }
+
+    /* Color Guide Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: #6b7280;
+      transition: all 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .modal-legend-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-legend-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .modal-legend-section h4 {
+      margin: 0 0 1rem 0;
+      color: #374151;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .modal-legend-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .modal-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-legend-text {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
     @media (max-width: 768px) {
       .inventory-page {
         padding: 1rem;
@@ -450,6 +700,15 @@ export interface ImportedItem {
         flex-direction: column;
         gap: 1rem;
         align-items: stretch;
+      }
+
+      .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .legend-items {
+        grid-template-columns: 1fr;
       }
 
       .inventory-table {
@@ -487,9 +746,10 @@ export class InventoryListComponent implements OnInit {
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
-  categories = signal<CategoryDto[]>([]);
+  categories = signal<ItemCategoryDto[]>([]);
   error = signal<string | null>(null);
   isBulkImportModalOpen = signal(false);
+  isColorGuideModalOpen = signal(false);
 
   isInventoryLoading(): boolean {
     return this.loadingService.isLoading('inventory-list');
@@ -503,7 +763,7 @@ export class InventoryListComponent implements OnInit {
   selectedExpiration = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
-  sortBy = 'CreatedAt';
+  sortBy = 'sku';
   sortDirection = 'desc';
   currentPage = signal(1);
   pageSize = 25;
@@ -590,7 +850,7 @@ export class InventoryListComponent implements OnInit {
     this.selectedExpiration = '';
     this.priceMin = null;
     this.priceMax = null;
-    this.sortBy = 'CreatedAt';
+    this.sortBy = 'sku';
     this.sortDirection = 'desc';
     this.applyFilters();
   }
@@ -631,6 +891,14 @@ export class InventoryListComponent implements OnInit {
     this.isBulkImportModalOpen.set(false);
   }
 
+  openColorGuideModal() {
+    this.isColorGuideModalOpen.set(true);
+  }
+
+  closeColorGuideModal() {
+    this.isColorGuideModalOpen.set(false);
+  }
+
   onItemsImported(items: ImportedItem[]) {
     if (items && items.length > 0) {
       this.loadItems(); // Refresh inventory list
@@ -644,6 +912,12 @@ export class InventoryListComponent implements OnInit {
 
   editItem(id: string) {
     this.router.navigate(['/owner/inventory', id, 'edit']);
+  }
+
+  viewConsignor(consignorId?: string) {
+    if (consignorId) {
+      this.router.navigate(['/owner/consignors', consignorId]);
+    }
   }
 
   markAsRemoved(item: ItemListDto) {

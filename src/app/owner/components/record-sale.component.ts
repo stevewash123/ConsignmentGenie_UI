@@ -43,7 +43,8 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
       display: grid;
       grid-template-columns: 1fr 400px;
       gap: 30px;
-      min-height: 600px;
+      min-height: 500px;
+      align-items: start;
     }
 
     .item-search-panel {

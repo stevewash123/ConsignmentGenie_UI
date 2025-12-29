@@ -14,6 +14,7 @@ import {
   CreateCategoryRequest,
   UpdateCategoryRequest,
   CategoryUsageDto,
+  ItemCategoryDto,
   ApiResponse
 } from '../models/inventory.model';
 
@@ -88,8 +89,13 @@ export class InventoryService {
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/items/bulk-status`, { itemIds, status, reason });
   }
 
-  bulkCreateItems(items: CreateItemRequest[]): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/items/bulk-import`, { items });
+  bulkCreateItems(items: CreateItemRequest[], fileName?: string, firstDataRow?: string): Observable<ApiResponse<any>> {
+    const request = {
+      items,
+      fileName,
+      firstDataRow
+    };
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/items/bulk-import`, request);
   }
 
   // Metrics endpoint
@@ -97,9 +103,9 @@ export class InventoryService {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/items/metrics`);
   }
 
-  // Categories API
-  getCategories(): Observable<ApiResponse<CategoryDto[]>> {
-    return this.http.get<ApiResponse<CategoryDto[]>>(`${this.apiUrl}/categories`);
+  // Categories API (now using ItemCategories)
+  getCategories(): Observable<ApiResponse<ItemCategoryDto[]>> {
+    return this.http.get<ApiResponse<ItemCategoryDto[]>>(`${this.apiUrl}/itemcategories`);
   }
 
   getCategory(id: string): Observable<ApiResponse<CategoryDto>> {

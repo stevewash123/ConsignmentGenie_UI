@@ -1,0 +1,17 @@
+Name,Description,SKU,Price,Category,Condition,ReceivedDate,InvalidColumn
+"Antique Bookshelf","Solid wood bookshelf from the 1940s","BOOK-001",185.00,Furniture,Good,2024-12-20,Value1
+"Digital Camera","Canon EOS R5 with lens kit","",1299.99,Electronics,LikeNew,2024-12-21,Value2
+"Leather Jacket","Vintage motorcycle leather jacket",JACKET-001,220.00,Clothing,Good,2024-12-19,Value3
+"Garden Tools Set","Complete gardening tools with case","GARDEN-001",89.00,Outdoor,New,2024-12-22,Value4
+"Art Print","Framed Monet Water Lilies reproduction","ART-001",65.50,Home,New,2024-12-18,Value5
+"Exercise Bike","Peloton bike with accessories","",899.00,Fitness,Good,2024-12-17,Value6
+"Chess Set","Handcrafted wooden chess set","CHESS-001",125.00,Games,LikeNew,2024-12-23,Value7
+"Watch Collection","Vintage Seiko watch collection","WATCH-001",450.00,Jewelry,Good,2024-12-16,Value8
+"Yoga Mat","Premium cork yoga mat","YOGA-001",78.00,Fitness,New,2024-12-24,Value9
+"Cooking Pot Set","All-clad stainless steel pots","COOK-001",320.00,Kitchen,LikeNew,2024-12-15,Value10
+"","Missing item name","ERROR-001",45.00,Miscellaneous,Good,2024-12-15,ErrorValue1
+"Broken Item","Item with negative price","ERROR-002",-25.00,Electronics,Fair,2024-12-15,ErrorValue2
+"Valid Item","Good item with valid data","GOOD-001",35.99,Books,New,2024-12-20,ErrorValue3
+"Invalid Condition","Item with bad condition value","ERROR-003",50.00,Tools,Terrible,2024-12-15,ErrorValue4
+"Future Item","Item received in future","ERROR-004",75.00,Sports,Good,2025-06-15,ErrorValue5
+"Text Price","Item with non-numeric price","ERROR-005",FiftyDollars,Home,Good,2024-12-15,ErrorValue6

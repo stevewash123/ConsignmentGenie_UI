@@ -24,6 +24,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error) => {
       console.log('HTTP Error:', error.status, error.message);
+      console.log('Failed request URL:', req.url);
+      console.log('Error details:', error);
       if (error.status === 401 && token) {
         return authService.refreshToken().pipe(
           switchMap((authResponse) => {

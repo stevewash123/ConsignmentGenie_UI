@@ -51,26 +51,72 @@
       <!-- Preview Section -->
       <div class="preview-section" *ngIf="selectedFile() && !isProcessing() && summary()">
         <!-- File Info -->
-        <div style="margin-bottom: 1rem;">
+        <div style="margin-bottom: 0.5rem;">
           <strong>File:</strong> {{ selectedFile()!.name }}
           <button class="btn btn-secondary" style="margin-left: 1rem; font-size: 0.75rem; padding: 0.25rem 0.5rem;" (click)="reset(); selectedFile.set(null)">
             Choose Different File
           </button>
         </div>
 
-        <!-- Summary -->
-        <div class="summary-box">
-          <div class="summary-row">
-            <span class="summary-label">Total Rows:</span>
-            <span class="summary-value">{{ summary()!.totalRows }}</span>
+        <!-- Duplicate File Warning -->
+        <div class="duplicate-warning" *ngIf="showDuplicateWarning() && duplicateInfo()">
+          <div class="warning-icon">⚠️</div>
+          <div class="warning-content">
+            <div class="warning-title">Potential Duplicate File Detected</div>
+            <div class="warning-text">
+              This file appears similar to "{{ duplicateInfo()!.lastFileName }}" uploaded on {{ duplicateInfo()!.lastUploadDate }}.
+              You can still proceed if this is a different file or contains new data.
+            </div>
+            <button class="btn btn-sm btn-secondary" (click)="dismissDuplicateWarning()">
+              Dismiss Warning
+            </button>
           </div>
-          <div class="summary-row">
-            <span class="summary-label">Valid Items:</span>
-            <span class="summary-value valid-count">{{ summary()!.validRows }}</span>
-          </div>
-          <div class="summary-row">
-            <span class="summary-label">Errors:</span>
-            <span class="summary-value error-count">{{ summary()!.errorRows }}</span>
+        </div>
+
+
+        <!-- Default Consignor Selection -->
+        <div class="default-consignor-section" *ngIf="summary()!.errorRows > 0">
+          <div class="default-consignor-controls">
+            <div class="consignor-selector">
+              <label for="defaultConsignor" class="select-label">Default Consignor:</label>
+              <select
+                id="defaultConsignor"
+                [value]="defaultConsignorId() || ''"
+                (change)="onDefaultConsignorChange($any($event.target).value)"
+                class="consignor-dropdown">
+                <option value="">No Default - Skip Unmatched Items</option>
+                <option *ngFor="let consignor of consignors()" [value]="consignor.id">
+                  {{ consignor.consignorNumber }} - {{ consignor.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="radio-group" [class.disabled]="!defaultConsignorId()">
+              <label class="radio-label">Apply to:</label>
+              <div class="radio-options">
+                <label class="radio-option">
+                  <input type="radio" name="defaultMode" value="missing"
+                         [checked]="defaultConsignorMode() === 'missing'"
+                         [disabled]="!defaultConsignorId()"
+                         (change)="onDefaultConsignorModeChange('missing')" />
+                  <span>Missing consignors only</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="defaultMode" value="missing-and-errors"
+                         [checked]="defaultConsignorMode() === 'missing-and-errors'"
+                         [disabled]="!defaultConsignorId()"
+                         (change)="onDefaultConsignorModeChange('missing-and-errors')" />
+                  <span>Missing and errors</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="defaultMode" value="all"
+                         [checked]="defaultConsignorMode() === 'all'"
+                         [disabled]="!defaultConsignorId()"
+                         (change)="onDefaultConsignorModeChange('all')" />
+                  <span>All items</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -92,30 +138,143 @@
                 <th class="compact-header">Category</th>
                 <th class="compact-header">Condition</th>
                 <th class="compact-header">Errors</th>
+                <th class="compact-header actions-header">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let row of paginatedData().items; trackBy: trackByRowNumber"
-                  [class]="row.isValid ? 'row-valid' : 'row-error'">
+                  [class]="row.isValid ? 'row-valid' : 'row-error'"
+                  [class.editing]="isEditing(row)"
+                  [class.recently-saved]="isRecentlySaved(row)">
                 <td class="status-cell compact-cell">
                   <span [class]="row.isValid ? 'status-valid' : 'status-error'" class="compact-icon">
                     {{ row.isValid ? '✅' : '❌' }}
                   </span>
                 </td>
                 <td class="compact-cell">{{ row.rowNumber }}</td>
-                <td class="compact-cell">{{ row.data.name }}</td>
-                <td class="compact-cell">{{ row.data.price }}</td>
-                <td class="compact-cell">{{ row.data.consignorNumber }}</td>
-                <td class="compact-cell">{{ row.data.category }}</td>
-                <td class="compact-cell">{{ row.data.condition }}</td>
+
+                <!-- Name cell -->
+                <td class="compact-cell editable-cell">
+                  <span *ngIf="!isEditing(row)">{{ row.data.name }}</span>
+                  <input *ngIf="isEditing(row)"
+                         type="text"
+                         class="edit-input"
+                         [value]="editingData().name"
+                         (input)="updateEditField('name', $any($event.target).value)"
+                         (keydown.escape)="cancelEdit()"
+                         (keydown.enter)="saveEdit()"
+                         placeholder="Item name">
+                </td>
+
+                <!-- Price cell -->
+                <td class="compact-cell editable-cell">
+                  <span *ngIf="!isEditing(row)">{{ row.data.price }}</span>
+                  <input *ngIf="isEditing(row)"
+                         type="number"
+                         step="0.01"
+                         class="edit-input"
+                         [value]="editingData().price"
+                         (input)="updateEditField('price', $any($event.target).value)"
+                         (keydown.escape)="cancelEdit()"
+                         (keydown.enter)="saveEdit()"
+                         placeholder="0.00">
+                </td>
+
+                <!-- Consignor cell -->
+                <td class="compact-cell" [class.default-consignor]="willUseDefaultConsignor(row)">
+                  {{ getDisplayConsignorNumber(row) }}
+                  <span *ngIf="willUseDefaultConsignor(row)" class="default-indicator" title="Will use default consignor">*</span>
+                </td>
+
+                <!-- Category cell -->
+                <td class="compact-cell editable-cell">
+                  <span *ngIf="!isEditing(row)">{{ row.data.category }}</span>
+                  <input *ngIf="isEditing(row)"
+                         type="text"
+                         class="edit-input"
+                         [value]="editingData().category"
+                         (input)="updateEditField('category', $any($event.target).value)"
+                         (keydown.escape)="cancelEdit()"
+                         (keydown.enter)="saveEdit()"
+                         placeholder="Category">
+                </td>
+
+                <!-- Condition cell -->
+                <td class="compact-cell editable-cell">
+                  <span *ngIf="!isEditing(row)">{{ row.data.condition }}</span>
+                  <select *ngIf="isEditing(row)"
+                          class="edit-select"
+                          [value]="editingData().condition"
+                          (change)="updateEditField('condition', $any($event.target).value)">
+                    <option value="">Select condition</option>
+                    <option value="New">New</option>
+                    <option value="LikeNew">Like New</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Poor">Poor</option>
+                  </select>
+                </td>
+
+                <!-- Errors cell -->
                 <td class="compact-cell">
-                  <ul class="error-list" *ngIf="!row.isValid">
+                  <ul class="error-list" *ngIf="!row.isValid && !isEditing(row)">
                     <li class="error-item" *ngFor="let error of row.errors">{{ error }}</li>
                   </ul>
+                  <span *ngIf="isEditing(row)" class="edit-hint">Editing...</span>
+                </td>
+
+                <!-- Actions cell -->
+                <td class="compact-cell actions-cell">
+                  <div class="action-buttons" *ngIf="!isEditing(row)">
+                    <button class="action-btn edit-btn"
+                            (click)="startEditRow(row)"
+                            title="Edit row">
+                      ✏️
+                    </button>
+                    <button class="action-btn delete-btn"
+                            (click)="deleteRow(row.rowNumber)"
+                            title="Delete row">
+                      🗑️
+                    </button>
+                  </div>
+                  <div class="action-buttons" *ngIf="isEditing(row)">
+                    <button class="action-btn save-btn"
+                            (click)="saveEdit()"
+                            title="Save changes">
+                      ✅
+                    </button>
+                    <button class="action-btn cancel-btn"
+                            (click)="cancelEdit()"
+                            title="Cancel editing">
+                      ❌
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Fixed Summary Footer -->
+        <div class="fixed-summary-footer">
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">Total:</span>
+              <span class="summary-value">{{ summary()!.totalRows }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Valid:</span>
+              <span class="summary-value valid-count">{{ summary()!.validRows }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Errors:</span>
+              <span class="summary-value error-count">{{ summary()!.errorRows }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Will Import:</span>
+              <span class="summary-value import-count">{{ getImportableItemsCount() }}</span>
+            </div>
+          </div>
         </div>
 
         <!-- Pagination Controls -->
@@ -149,9 +308,17 @@
           (click)="importValidItems()"
           [disabled]="!hasValidItems() || isImporting()">
           <span *ngIf="isImporting()">⏳ Importing...</span>
-          <span *ngIf="!isImporting()">Import {{ summary()!.validRows }} Valid Items</span>
+          <span *ngIf="!isImporting()">Import {{ getImportableItemsCount() }} Items</span>
         </button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Results Modal -->
+<app-bulk-import-results-modal
+  *ngIf="showResultsModal() && importResults()"
+  [result]="importResults()!"
+  (closed)="onResultsModalClosed()"
+  (sendToNotificationsClicked)="onSendToNotifications($event)">
+</app-bulk-import-results-modal>

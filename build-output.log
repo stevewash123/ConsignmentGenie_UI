@@ -3,30 +3,30 @@
 Initial chunk files   | Names                                 |  Raw size | Estimated transfer size
 chunk-3KSK7MFB.js     | -                                     | 202.27 kB |                58.50 kB
 chunk-ZF7JVKGV.js     | -                                     |  92.56 kB |                23.33 kB
-main-HAZ44VI3.js      | main                                  |  77.16 kB |                20.30 kB
+main-YZVMWQWF.js      | main                                  |  78.38 kB |                20.62 kB
 chunk-6TGDTLUN.js     | -                                     |  52.88 kB |                10.21 kB
 polyfills-5CFQRCPP.js | polyfills                             |  34.59 kB |                11.33 kB
 chunk-5RFRGXAJ.js     | -                                     |  23.53 kB |                 5.11 kB
 chunk-BUPXPMBS.js     | -                                     |  18.14 kB |                 5.34 kB
-chunk-IVR2A5IE.js     | -                                     |   5.61 kB |                 1.34 kB
+chunk-AJXR5T34.js     | -                                     |   7.32 kB |                 1.74 kB
 styles-BBURD7AU.css   | styles                                |   5.38 kB |                 1.78 kB
 chunk-B36XDIKS.js     | -                                     |   1.37 kB |               523 bytes
 chunk-4CLCTAJ7.js     | -                                     | 830 bytes |               830 bytes
 chunk-PNYO4DZE.js     | -                                     | 711 bytes |               711 bytes
 chunk-MUTJNURO.js     | -                                     | 386 bytes |               386 bytes
 
-                      | Initial total                         | 515.40 kB |               139.71 kB
+                      | Initial total                         | 518.33 kB |               140.42 kB
 
 Lazy chunk files      | Names                                 |  Raw size | Estimated transfer size
-chunk-DMG2K37Y.js     | consignor-balance-dashboard-component |  79.51 kB |                14.68 kB
+chunk-PID6J5LW.js     | consignor-balance-dashboard-component |  79.51 kB |                14.69 kB
+chunk-2UOZXTLL.js     | inventory-list-component              |  72.93 kB |                15.19 kB
 chunk-RKW26UYL.js     | price-request-list-component          |  51.42 kB |                 8.29 kB
 chunk-6VJRGB7Q.js     | item-list-component                   |  51.30 kB |                10.37 kB
-chunk-PTN4HKWJ.js     | consignor-list-component              |  48.18 kB |                10.44 kB
+chunk-42H6Z3K4.js     | consignor-list-component              |  48.18 kB |                10.44 kB
 chunk-PDY4EQLN.js     | consignor-item-detail-component       |  46.02 kB |                 8.81 kB
 chunk-2ZKSPDHI.js     | consignor-payouts-component           |  44.08 kB |                 8.97 kB
-chunk-7VEF2HAZ.js     | inventory-list-component              |  41.67 kB |                10.03 kB
 chunk-SPOIKSE7.js     | owner-sales-component                 |  41.52 kB |                 8.61 kB
-chunk-MA2J3WPF.js     | owner-approval-component              |  40.50 kB |                 8.53 kB
+chunk-LSIY6QHM.js     | owner-approval-component              |  40.50 kB |                 8.55 kB
 chunk-B67A2OY3.js     | storefront-settings-component         |  38.25 kB |                 7.68 kB
 chunk-7QJ72VSR.js     | consignor-settings-component          |  30.88 kB |                 6.83 kB
 chunk-QQPVQVHD.js     | payout-history-component              |  29.33 kB |                 6.36 kB
@@ -35,9 +35,9 @@ chunk-2QM3YJLU.js     | consignor-payout-settings-component   |  28.58 kB |     
 chunk-EPRXSB7F.js     | store-layout-component                |  28.27 kB |                 5.05 kB
 ...and 109 more lazy chunks files. Use "--verbose" to show all the files.
 
-Application bundle generation complete. [56.527 seconds] - 2025-12-26T19:42:45.773Z
+Application bundle generation complete. [52.603 seconds] - 2025-12-28T17:40:26.490Z
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 500.00 kB was not met by 15.40 kB with a total of 515.40 kB.[0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 500.00 kB was not met by 18.32 kB with a total of 518.33 kB.[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:scss;a01d650562a091684c1ff2b0ba9eca85a84d621fb1c461b282dfc978a31f6d76;/mnt/c/Projects/ConsignmentGenie/ConsignmentGenie_UI/src/app/owner/components/owner-sales.component.ts exceeded maximum budget. Budget 12.00 kB was not met by 312 bytes with a total of 12.31 kB.[0m

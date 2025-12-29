@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../../services/category.service';
 import { LoadingService } from '../../../shared/services/loading.service';
 import { LookupManagementComponent } from '../../../shared/components/lookup-management.component';
-import { CategoryDto, LookupItem, CreateCategoryRequest, UpdateCategoryRequest, ReorderCategoriesRequest } from '../../../models/inventory.model';
+import { CategoryDto, LookupItem, CreateCategoryRequest, UpdateCategoryRequest, ReorderCategoriesRequest, ItemCategoryDto, CreateItemCategoryDto, UpdateItemCategoryDto } from '../../../models/inventory.model';
 
 @Component({
   selector: 'app-categories',
@@ -173,7 +173,7 @@ export class CategoriesComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private loadingService = inject(LoadingService);
 
-  categories = signal<CategoryDto[]>([]);
+  categories = signal<ItemCategoryDto[]>([]);
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
 
@@ -191,7 +191,7 @@ export class CategoriesComponent implements OnInit {
     return this.categories().map(category => ({
       id: category.id,
       name: category.name,
-      count: 0
+      count: category.itemCount
     }));
   };
 
@@ -226,7 +226,10 @@ export class CategoriesComponent implements OnInit {
       return;
     }
 
-    const request: CreateCategoryRequest = { name };
+    const request: CreateItemCategoryDto = {
+      name,
+      sortOrder: this.categories().length + 1
+    };
 
     this.categoryService.create(request).subscribe({
       next: (response) => {
@@ -262,9 +265,14 @@ export class CategoriesComponent implements OnInit {
       return;
     }
 
-    const request: UpdateCategoryRequest = {
+    const request: UpdateItemCategoryDto = {
       name: event.name,
-      displayOrder: category.displayOrder
+      description: category.description,
+      color: category.color,
+      parentCategoryId: category.parentCategoryId,
+      sortOrder: category.sortOrder,
+      defaultCommissionRate: category.defaultCommissionRate,
+      isActive: category.isActive
     };
 
     this.categoryService.update(event.id, request).subscribe({
@@ -311,24 +319,12 @@ export class CategoriesComponent implements OnInit {
   onReorderCategories(categoryIds: string[]) {
     this.clearMessages();
 
-    const request: ReorderCategoriesRequest = {
-      categoryIds: categoryIds
-    };
+    // ItemCategories doesn't support bulk reordering - would need individual updates
+    this.showError('Reordering not supported yet - please edit individual categories to change order');
 
-    this.categoryService.reorder(request).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.showSuccess('Categories reordered successfully');
-          this.loadCategories(); // Refresh the list
-        } else {
-          this.showError(response.message || 'Failed to reorder categories');
-        }
-      },
-      error: (error) => {
-        console.error('Error reordering categories:', error);
-        this.showError('Failed to reorder categories. Please try again.');
-      }
-    });
+    // TODO: Implement individual category updates with sortOrder changes
+    // For now, just refresh to reset any UI changes
+    this.loadCategories();
   }
 
   private showError(message: string) {

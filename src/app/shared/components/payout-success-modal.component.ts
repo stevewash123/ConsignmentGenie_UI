@@ -141,7 +141,7 @@ export class PayoutSuccessModalComponent {
         <div class="content">
           <div class="row highlight">
             <span class="label">Paid:</span>
-            <span class="value amount">$${this.payoutData.amount.toFixed(2)} to ${this.payoutData.consignorName}</span>
+            <span class="value amount">${this.payoutData.amount.toFixed(2)} to ${this.payoutData.consignorName}</span>
           </div>
 
           <div class="row">
