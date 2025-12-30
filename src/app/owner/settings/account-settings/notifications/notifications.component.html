@@ -1,10 +1,200 @@
-<div class="section">
-  <h2 class="section-title">Account Notifications</h2>
-  <p class="section-description">Manage your personal notification preferences and alerts</p>
+<div class="notifications-section">
+  <header class="section-header">
+    <h2 class="section-title">Notification Settings</h2>
+    <p class="section-description">Choose which notifications you want to receive and how you want to receive them</p>
+  </header>
 
-  <div class="placeholder">
-    <h3>🔔 Account Notification Settings</h3>
-    <p>Email alerts, SMS notifications, system updates, security notifications</p>
-    <p><em>Component placeholder - implementation pending</em></p>
+  <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+  <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+
+  <div *ngIf="isLoading()" class="loading">
+    <p>Loading notification settings...</p>
+  </div>
+
+  <div *ngIf="!isLoading()">
+    <form [formGroup]="notificationsForm" (ngSubmit)="saveNotificationSettings()">
+      <!-- Contact Information -->
+      <section class="form-section">
+        <h3>Contact Information</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="primaryEmail">Primary Email Address</label>
+            <input id="primaryEmail"
+                   type="email"
+                   formControlName="primaryEmail"
+                   class="form-input"
+                   [class.error]="isFieldInvalid('primaryEmail')"
+                   placeholder="your@email.com">
+            <div class="error-message" *ngIf="isFieldInvalid('primaryEmail')">
+              Please enter a valid email address
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number (for SMS)</label>
+            <input id="phoneNumber"
+                   type="tel"
+                   formControlName="phoneNumber"
+                   class="form-input"
+                   placeholder="+1 (555) 123-4567">
+            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
+              Required for SMS notifications
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notification Preferences Grid -->
+      <section class="form-section">
+        <h3>What notifications do you want to receive?</h3>
+
+        <div class="notification-grid">
+          <div class="grid-header">
+            <div class="notification-type-header">Notification Type</div>
+            <div class="channel-header">Email</div>
+            <div class="channel-header">SMS</div>
+          </div>
+
+          <!-- Business Operations -->
+          <div class="notification-category">
+            <div class="category-title">Business Operations</div>
+          </div>
+
+          <div class="notification-row" *ngFor="let notification of businessNotifications; trackBy: trackByNotificationKey">
+            <div class="notification-type">
+              <div class="notification-name">{{ notification.name }}</div>
+              <div class="notification-description">{{ notification.description }}</div>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'email_' + notification.key"
+                     [id]="'email_' + notification.key">
+              <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'sms_' + notification.key"
+                     [id]="'sms_' + notification.key"
+                     [disabled]="!notificationsForm.get('phoneNumber')?.value">
+              <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
+            </div>
+          </div>
+
+          <!-- Consignor Management -->
+          <div class="notification-category">
+            <div class="category-title">Consignor Management</div>
+          </div>
+
+          <div class="notification-row" *ngFor="let notification of consignorNotifications; trackBy: trackByNotificationKey">
+            <div class="notification-type">
+              <div class="notification-name">{{ notification.name }}</div>
+              <div class="notification-description">{{ notification.description }}</div>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'email_' + notification.key"
+                     [id]="'email_' + notification.key">
+              <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'sms_' + notification.key"
+                     [id]="'sms_' + notification.key"
+                     [disabled]="!notificationsForm.get('phoneNumber')?.value">
+              <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
+            </div>
+          </div>
+
+          <!-- Sales & Inventory -->
+          <div class="notification-category">
+            <div class="category-title">Sales & Inventory</div>
+          </div>
+
+          <div class="notification-row" *ngFor="let notification of salesNotifications; trackBy: trackByNotificationKey">
+            <div class="notification-type">
+              <div class="notification-name">{{ notification.name }}</div>
+              <div class="notification-description">{{ notification.description }}</div>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'email_' + notification.key"
+                     [id]="'email_' + notification.key">
+              <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'sms_' + notification.key"
+                     [id]="'sms_' + notification.key"
+                     [disabled]="!notificationsForm.get('phoneNumber')?.value">
+              <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
+            </div>
+          </div>
+
+          <!-- System & Security -->
+          <div class="notification-category">
+            <div class="category-title">System & Security</div>
+          </div>
+
+          <div class="notification-row" *ngFor="let notification of systemNotifications; trackBy: trackByNotificationKey">
+            <div class="notification-type">
+              <div class="notification-name">{{ notification.name }}</div>
+              <div class="notification-description">{{ notification.description }}</div>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'email_' + notification.key"
+                     [id]="'email_' + notification.key">
+              <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [formControlName]="'sms_' + notification.key"
+                     [id]="'sms_' + notification.key"
+                     [disabled]="!notificationsForm.get('phoneNumber')?.value">
+              <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; padding: 1rem; margin-top: 1.5rem;">
+          <p style="color: #1e40af; font-size: 0.875rem; margin: 0;">
+            <strong>Note:</strong> SMS notifications require a valid phone number. Some carriers may charge for SMS messages.
+          </p>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="form-section">
+        <h3>Quick Actions</h3>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button type="button" (click)="enableAllEmail()" class="btn-secondary">
+            Enable All Email
+          </button>
+          <button type="button" (click)="disableAllEmail()" class="btn-secondary">
+            Disable All Email
+          </button>
+          <button type="button" (click)="enableAllSms()" class="btn-secondary" [disabled]="!notificationsForm.get('phoneNumber')?.value">
+            Enable All SMS
+          </button>
+          <button type="button" (click)="disableAllSms()" class="btn-secondary">
+            Disable All SMS
+          </button>
+        </div>
+      </section>
+
+      <!-- Save Actions -->
+      <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+        <button type="button" (click)="loadNotificationSettings()" class="btn-secondary">
+          Reset Changes
+        </button>
+        <button type="submit"
+                class="btn-primary"
+                [disabled]="!notificationsForm.valid || isSaving()">
+          {{ isSaving() ? 'Saving...' : 'Save Notification Settings' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

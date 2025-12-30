@@ -1,183 +1,64 @@
-<div class="p-6">
-  <div class="max-w-4xl mx-auto">
-    <header class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Approval Workflow</h2>
-      <p class="text-gray-600">Configure how new consignors are approved to start selling items</p>
-    </header>
+<div class="approval-workflow-section">
+  <header class="section-header">
+    <h2 class="section-title">Approval Workflow</h2>
+    <p class="section-description">Configure how new consignors are approved to start selling items</p>
+  </header>
 
-    <form [formGroup]="approvalForm" (ngSubmit)="onSave()" class="space-y-6">
+  <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+  <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
 
-      <!-- Approval Settings -->
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">⚙️ Approval Settings</h3>
+  <div *ngIf="isLoading()" class="loading">
+    <p>Loading workflow settings...</p>
+  </div>
 
-        <div class="space-y-4">
-          <!-- Auto Approval Toggle -->
-          <div class="flex items-start space-x-3">
+  <div *ngIf="!isLoading()">
+    <section class="form-section">
+      <h3>Approval Process</h3>
+
+      <form [formGroup]="approvalForm" (ngSubmit)="saveWorkflowSettings()">
+        <div class="checkbox-group">
+          <div class="checkbox-item">
             <input type="checkbox"
-                   id="autoApprove"
-                   formControlName="autoApprove"
-                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <div class="flex-1">
-              <label for="autoApprove" class="text-sm font-medium text-gray-900">
+                   id="autoApproveNewConsignors"
+                   formControlName="autoApproveNewConsignors">
+            <div>
+              <label for="autoApproveNewConsignors" class="checkbox-label">
                 Auto-approve new consignors
               </label>
-              <p class="text-sm text-gray-500">
+              <div class="checkbox-description">
                 New consignors can immediately start adding items without manual review
-              </p>
-            </div>
-          </div>
-
-          <!-- Manual Review Toggle -->
-          <div class="flex items-start space-x-3" [class.opacity-50]="approvalForm.get('autoApprove')?.value">
-            <input type="checkbox"
-                   id="requireManualReview"
-                   formControlName="requireManualReview"
-                   [disabled]="approvalForm.get('autoApprove')?.value"
-                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <div class="flex-1">
-              <label for="requireManualReview" class="text-sm font-medium text-gray-900">
-                Require manual approval for new consignors
-              </label>
-              <p class="text-sm text-gray-500">
-                Review each new consignor before they can add items to your store
-              </p>
-            </div>
-          </div>
-
-          <!-- Notification Toggle -->
-          <div class="flex items-start space-x-3">
-            <input type="checkbox"
-                   id="notifyOnNewSignup"
-                   formControlName="notifyOnNewSignup"
-                   class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <div class="flex-1">
-              <label for="notifyOnNewSignup" class="text-sm font-medium text-gray-900">
-                Notify me when new consignors sign up
-              </label>
-              <p class="text-sm text-gray-500">
-                Receive email notifications for new consignor registrations
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Approval Criteria -->
-        <div class="mt-6 border-t pt-6" *ngIf="!approvalForm.get('autoApprove')?.value">
-          <h4 class="text-md font-medium text-gray-900 mb-3">Approval Criteria</h4>
-          <div>
-            <label for="approvalCriteria" class="block text-sm font-medium text-gray-700 mb-2">
-              What do you look for when approving consignors?
-            </label>
-            <textarea id="approvalCriteria"
-                      formControlName="approvalCriteria"
-                      rows="3"
-                      placeholder="e.g., Quality of items, brand alignment, condition standards..."
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-            <p class="text-xs text-gray-500 mt-1">This helps you maintain consistent approval decisions</p>
-          </div>
-        </div>
-
-        <!-- Auto-Approval Info -->
-        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md" *ngIf="approvalForm.get('autoApprove')?.value">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <span class="text-yellow-400">⚠️</span>
-            </div>
-            <div class="ml-3">
-              <h4 class="text-sm font-medium text-yellow-800">Auto-Approval Enabled</h4>
-              <div class="mt-2 text-sm text-yellow-700">
-                <ul class="list-disc list-inside space-y-1">
-                  <li>New consignors can immediately start adding items</li>
-                  <li>You can still review and manage consignors after they join</li>
-                  <li>Consider setting default inventory permissions carefully</li>
-                </ul>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="mt-6 flex justify-end">
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" (click)="loadWorkflowSettings()" class="btn-secondary">
+            Reset Changes
+          </button>
           <button type="submit"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-            💾 Save Approval Settings
+                  class="btn-primary"
+                  [disabled]="!approvalForm.valid || isSaving()">
+            {{ isSaving() ? 'Saving...' : 'Save Settings' }}
           </button>
         </div>
+      </form>
+
+      <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 1rem; margin-top: 1.5rem;"
+           *ngIf="approvalForm.get('autoApproveNewConsignors')?.value">
+        <h4 style="color: #92400e; font-weight: 600; margin-bottom: 0.5rem;">Auto-Approval Enabled</h4>
+        <p style="color: #92400e; font-size: 0.875rem; margin: 0;">
+          New consignors can immediately start adding items. You can review and manage consignors in the main Consignors section.
+        </p>
       </div>
-    </form>
 
-    <!-- Pending Approvals Queue -->
-    <div class="mt-8" *ngIf="!approvalForm.get('autoApprove')?.value">
-      <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900">📋 Pending Approvals</h3>
-          <p class="text-sm text-gray-600 mt-1">Consignors waiting for approval to start selling</p>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Consignor
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Signup Date
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Items Submitted
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let consignor of pendingApprovals; trackBy: trackByConsignorId">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ consignor.consignorName }}</div>
-                  <div class="text-sm text-gray-500">{{ consignor.email }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ consignor.signupDate | date:'short' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ consignor.itemsSubmitted }} items
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                  <button (click)="approveConsignor(consignor.id)"
-                          class="px-3 py-1 bg-green-600 text-white text-xs rounded-md hover:bg-green-700 transition-colors">
-                    ✅ Approve
-                  </button>
-                  <button (click)="rejectConsignor(consignor.id)"
-                          class="px-3 py-1 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 transition-colors">
-                    ❌ Reject
-                  </button>
-                </td>
-              </tr>
-
-              <tr *ngIf="pendingApprovals.length === 0">
-                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                  <div class="text-center">
-                    <p class="text-sm">No pending approvals</p>
-                    <p class="text-xs">New consignor registrations will appear here</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; padding: 1rem; margin-top: 1.5rem;"
+           *ngIf="!approvalForm.get('autoApproveNewConsignors')?.value">
+        <h4 style="color: #1e40af; font-weight: 600; margin-bottom: 0.5rem;">Manual Approval Required</h4>
+        <p style="color: #1e40af; font-size: 0.875rem; margin: 0;">
+          New consignors will need your approval before they can add items. Check the Consignors section to review pending requests.
+        </p>
       </div>
-    </div>
-
-    <!-- Auto-Approval Active Message -->
-    <div class="mt-8" *ngIf="approvalForm.get('autoApprove')?.value">
-      <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <div class="text-green-600 text-2xl mb-2">✨</div>
-        <h3 class="text-lg font-medium text-green-900 mb-2">Auto-Approval is Active</h3>
-        <p class="text-green-700">New consignors are automatically approved and can start adding items immediately.</p>
-        <p class="text-sm text-green-600 mt-2">You can review and manage all consignors in the main Consignors section.</p>
-      </div>
-    </div>
+    </section>
   </div>
 </div>

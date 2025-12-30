@@ -1,157 +1,149 @@
-<div class="p-6">
-  <div class="max-w-4xl mx-auto">
-    <header class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Store Codes & Invitations</h2>
-      <p class="text-gray-600">Manage your store code and send invitations to consignors</p>
-    </header>
+<div class="store-codes-section">
+  <header class="section-header">
+    <h2 class="section-title">Store Codes & Invitations</h2>
+    <p class="section-description">Manage your store code and send invitations to consignors</p>
+  </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+  <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
 
-      <!-- Store Code Section -->
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">🏷️ Store Code</h3>
+  <div *ngIf="isLoading()" class="loading">
+    <p>Loading store code information...</p>
+  </div>
 
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Current Store Code</label>
-            <div class="flex items-center space-x-2">
-              <div class="flex-1 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 font-mono text-lg">
-                {{ currentStoreCode }}
-              </div>
-              <button (click)="copyStoreCode()"
-                      class="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
-                Copy
-              </button>
-            </div>
-          </div>
+  <div *ngIf="!isLoading()">
+    <!-- Store Code Section -->
+    <section class="form-section">
+      <h3>Store Code</h3>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Direct Signup Link</label>
-            <div class="flex items-center space-x-2">
-              <div class="flex-1 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 text-sm break-all">
-                {{ directSignupUrl }}
-              </div>
-              <button (click)="copySignupUrl()"
-                      class="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
-                Copy
-              </button>
-            </div>
-          </div>
-
-          <div class="border-t pt-4">
-            <button (click)="generateNewStoreCode()"
-                    class="w-full px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors">
-              🔄 Generate New Store Code
-            </button>
-            <p class="text-xs text-gray-500 mt-2">
-              ⚠️ Generating a new code will invalidate the current one and any pending invitations
-            </p>
-          </div>
+      <div class="store-code-display" *ngIf="storeCode(); else noStoreCode">
+        <div class="code-value">{{ storeCode()?.currentCode }}</div>
+        <div style="color: #6b7280; font-size: 0.75rem; margin-bottom: 1rem;">
+          Created: {{ storeCode()?.createdAt | date:'short' }}
+          <span *ngIf="storeCode()?.expiresAt">
+            | Expires: {{ storeCode()?.expiresAt | date:'short' }}
+          </span>
         </div>
-      </div>
 
-      <!-- Send Invitation Section -->
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">✉️ Send Invitation</h3>
-
-        <form [formGroup]="storeCodesForm" (ngSubmit)="sendInvitation()" class="space-y-4">
-          <div>
-            <label for="newInviteEmail" class="block text-sm font-medium text-gray-700 mb-2">
-              Consignor Email Address
-            </label>
-            <input id="newInviteEmail"
-                   type="email"
-                   formControlName="newInviteEmail"
-                   placeholder="artist@email.com"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-          </div>
-
-          <button type="submit"
-                  [disabled]="!storeCodesForm.valid"
-                  class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-            📧 Send Invitation Email
+        <div class="form-row">
+          <button type="button" (click)="copyStoreCode()" class="btn-secondary">
+            Copy Store Code
           </button>
-        </form>
+          <button type="button" (click)="copySignupUrl()" class="btn-secondary">
+            Copy Signup URL
+          </button>
+          <button type="button" (click)="generateNewStoreCode()"
+                  class="btn-primary"
+                  [disabled]="isLoading()">
+            {{ isLoading() ? 'Generating...' : 'Generate New Code' }}
+          </button>
+        </div>
 
-        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <h4 class="text-sm font-medium text-blue-900 mb-1">What happens when you send an invitation?</h4>
-          <ul class="text-sm text-blue-800 space-y-1">
-            <li>• Email sent with your store code and signup link</li>
-            <li>• Invitation tracked until consignor signs up</li>
-            <li>• You can resend or cancel if needed</li>
-          </ul>
+        <p style="color: #6b7280; font-size: 0.75rem; margin-top: 0.5rem;">
+          ⚠️ Generating a new code will invalidate the current one and any pending invitations
+        </p>
+      </div>
+
+      <ng-template #noStoreCode>
+        <div class="empty-state">
+          <p>No store code available</p>
+          <button type="button" (click)="generateNewStoreCode()"
+                  class="btn-primary"
+                  [disabled]="isLoading()">
+            {{ isLoading() ? 'Generating...' : 'Generate Store Code' }}
+          </button>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- Send Invitation Section -->
+    <section class="form-section">
+      <h3>Send Invitation</h3>
+
+      <form [formGroup]="storeCodesForm" (ngSubmit)="sendInvitation()">
+        <div class="form-group">
+          <label for="newInviteEmail">Consignor Email Address</label>
+          <input id="newInviteEmail"
+                 type="email"
+                 formControlName="newInviteEmail"
+                 class="form-input"
+                 [class.error]="isFieldInvalid('newInviteEmail')"
+                 placeholder="artist@email.com">
+          <div class="error-message" *ngIf="isFieldInvalid('newInviteEmail')">
+            Please enter a valid email address
+          </div>
+        </div>
+
+        <button type="submit"
+                class="btn-primary"
+                [disabled]="!storeCodesForm.valid || isSending()">
+          {{ isSending() ? 'Sending...' : 'Send Invitation' }}
+        </button>
+      </form>
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; margin-top: 1rem;">
+        <h4 style="font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">What happens when you send an invitation?</h4>
+        <ul style="color: #475569; font-size: 0.875rem; margin: 0; padding-left: 1rem;">
+          <li>Email sent with your store code and signup link</li>
+          <li>Invitation tracked until consignor signs up</li>
+          <li>You can resend or cancel if needed</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Invitations List -->
+    <section class="form-section">
+      <h3>Recent Invitations</h3>
+
+      <div class="invitation-list" *ngIf="invitations().length > 0; else noInvitations">
+        <div class="invitation-header">
+          <div style="flex: 2;">Email Address</div>
+          <div style="flex: 1;">Sent Date</div>
+          <div style="flex: 1;">Status</div>
+          <div style="flex: 1;">Actions</div>
+        </div>
+
+        <div class="invitation-item"
+             *ngFor="let invitation of invitations(); trackBy: trackByInvitationId">
+          <div class="invitation-info">
+            <div class="invitation-email">{{ invitation.email }}</div>
+            <div class="invitation-meta">
+              Sent: {{ invitation.sentAt | date:'short' }}
+              <span *ngIf="invitation.expiresAt">
+                | Expires: {{ invitation.expiresAt | date:'short' }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <span [class]="getStatusClass(invitation.status)">
+              {{ invitation.status | titlecase }}
+            </span>
+          </div>
+
+          <div class="invitation-actions">
+            <button *ngIf="invitation.status === 'pending'"
+                    type="button"
+                    (click)="resendInvitation(invitation)"
+                    class="btn-secondary btn-small">
+              Resend
+            </button>
+            <button *ngIf="invitation.status === 'pending'"
+                    type="button"
+                    (click)="cancelInvitation(invitation)"
+                    class="btn-secondary btn-small">
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Pending Invitations -->
-    <div class="mt-8">
-      <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900">📋 Pending Invitations</h3>
+      <ng-template #noInvitations>
+        <div class="empty-state">
+          <p>No invitations sent yet</p>
+          <p style="font-size: 0.75rem;">Send an invitation above to get started</p>
         </div>
-
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email Address
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sent Date
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let invitation of pendingInvitations; trackBy: trackByEmail">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ invitation.email }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ invitation.sentAt | date:'short' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span [class]="'px-2 py-1 text-xs rounded-full ' + getStatusClass(invitation.status)">
-                    {{ invitation.status | titlecase }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                  <button *ngIf="invitation.status === 'pending'"
-                          (click)="resendInvitation(invitation.email)"
-                          class="text-blue-600 hover:text-blue-800 transition-colors">
-                    🔄 Resend
-                  </button>
-                  <button *ngIf="invitation.status === 'pending'"
-                          (click)="cancelInvitation(invitation.email)"
-                          class="text-red-600 hover:text-red-800 transition-colors">
-                    ❌ Cancel
-                  </button>
-                  <span *ngIf="invitation.status === 'expired'"
-                        class="text-gray-400">
-                    Expired
-                  </span>
-                </td>
-              </tr>
-
-              <tr *ngIf="pendingInvitations.length === 0">
-                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                  <div class="text-center">
-                    <p class="text-sm">No pending invitations</p>
-                    <p class="text-xs">Send an invitation above to get started</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      </ng-template>
+    </section>
   </div>
 </div>
