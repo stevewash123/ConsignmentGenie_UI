@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Consignor, ConsignorListDto, CreateConsignorRequest, UpdateConsignorRequest } from '../models/consignor.model';
+import { Consignor, ConsignorListDto, CreateConsignorRequest, UpdateConsignorRequest, ConsignorStatusChangeRequest, ConsignorStatusChangeResponse, PendingConsignorApproval, ConsignorApprovalRequest, ConsignorApprovalResponse } from '../models/consignor.model';
 import { BalanceAdjustment, CreateBalanceAdjustmentRequest, BalanceAdjustmentResponse, ConsignorBalance } from '../models/balance-adjustment.model';
 import { PagedResult } from '../models/inventory.model';
 import { environment } from '../../environments/environment';
@@ -47,7 +47,7 @@ export interface RegistrationResult {
 }
 
 export interface PendingInvitation {
-  id: number;
+  id: string;
   email: string;
   name?: string;
   sentAt: string;
@@ -91,7 +91,7 @@ export class ConsignorService {
 
   private transformToConsignor(dto: ConsignorListDto): Consignor {
     return {
-      id: dto.consignorId,
+      id: dto.consignorId.toString(),
       name: dto.fullName,
       email: dto.email || '',
       phone: dto.phone,
@@ -111,7 +111,7 @@ export class ConsignorService {
     };
   }
 
-  getConsignor(id: number): Observable<Consignor> {
+  getConsignor(id: string): Observable<Consignor> {
     return this.http.get<Consignor>(`${this.apiUrl}/${id}`);
   }
 
@@ -119,19 +119,19 @@ export class ConsignorService {
     return this.http.post<Consignor>(this.apiUrl, request);
   }
 
-  updateConsignor(id: number, request: UpdateConsignorRequest): Observable<Consignor> {
+  updateConsignor(id: string, request: UpdateConsignorRequest): Observable<Consignor> {
     return this.http.put<Consignor>(`${this.apiUrl}/${id}`, request);
   }
 
-  deleteConsignor(id: number): Observable<void> {
+  deleteConsignor(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  deactivateConsignor(id: number): Observable<Consignor> {
+  deactivateConsignor(id: string): Observable<Consignor> {
     return this.http.patch<Consignor>(`${this.apiUrl}/${id}/deactivate`, {});
   }
 
-  activateConsignor(id: number): Observable<Consignor> {
+  activateConsignor(id: string): Observable<Consignor> {
     return this.http.patch<Consignor>(`${this.apiUrl}/${id}/activate`, {});
   }
 
@@ -173,5 +173,19 @@ export class ConsignorService {
 
   getConsignorBalance(consignorId: string): Observable<ConsignorBalance> {
     return this.http.get<ConsignorBalance>(`${this.apiUrl}/${consignorId}/balance`);
+  }
+
+  // Status management methods
+  changeConsignorStatus(consignorId: number, request: ConsignorStatusChangeRequest): Observable<ConsignorStatusChangeResponse> {
+    return this.http.patch<ConsignorStatusChangeResponse>(`${this.apiUrl}/${consignorId}/status`, request);
+  }
+
+  // Approval workflow methods
+  getPendingApprovals(): Observable<PendingConsignorApproval[]> {
+    return this.http.get<PendingConsignorApproval[]>(`${this.apiUrl}/pending-approvals`);
+  }
+
+  processApproval(approvalId: number, request: ConsignorApprovalRequest): Observable<ConsignorApprovalResponse> {
+    return this.http.post<ConsignorApprovalResponse>(`${this.apiUrl}/approvals/${approvalId}`, request);
   }
 }

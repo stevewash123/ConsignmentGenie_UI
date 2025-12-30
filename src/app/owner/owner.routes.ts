@@ -27,6 +27,10 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/consignor-edit.component').then(m => m.ConsignorEditComponent)
   },
   {
+    path: 'pending-approvals',
+    loadComponent: () => import('./components/pending-approvals.component').then(m => m.PendingApprovalsComponent)
+  },
+  {
     path: 'inventory',
     loadComponent: () => import('./components/inventory-list.component').then(m => m.InventoryListComponent)
   },

@@ -3,12 +3,17 @@
       <div class="consignor-list-container">
         <!-- Page Header -->
         <div class="header">
-          <h1 class="page-title">👥 {{ labels.providerManagement }}</h1>
+          <h1 class="page-title">
+            <span>👥</span>
+            {{ labels.providerManagement }}
+          </h1>
           <div class="header-actions">
             <button class="btn-secondary" (click)="showBulkInviteModal()">
-              📄 Bulk Invite
+              <span>📄</span>
+              Bulk Invite
             </button>
             <button class="btn-primary" (click)="showInviteModal()">
+              <span>✉️</span>
               {{ labels.inviteProvider }}
             </button>
           </div>
@@ -16,7 +21,7 @@
 
         <!-- Loading State -->
         <div *ngIf="isconsignorsLoading()" class="loading">
-          Loading consignor data...
+          ⏳ Loading consignor data...
         </div>
 
         <!-- Content Sections -->
@@ -39,20 +44,45 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let consignor of consignors(); trackBy: trackByProvider">
-                    <td class="name-cell">{{ consignor.name }}</td>
+                  <tr *ngFor="let consignor of consignors(); trackBy: trackByProvider"
+                      [class.pending-approval]="isPendingApproval(consignor)">
+                    <td class="name-cell">
+                      {{ consignor.name }}
+                      <span *ngIf="isPendingApproval(consignor)" class="pending-badge">PENDING APPROVAL</span>
+                    </td>
                     <td class="email-cell">{{ consignor.email }}</td>
                     <td class="items-cell">{{ getProviderItemCount(consignor) }}</td>
                     <td class="actions-cell">
                       <div class="action-buttons">
-                        <button class="btn-view" [routerLink]="['/owner/consignors', consignor.id]">
-                          View
-                        </button>
-                        <button class="btn-email"
-                                (click)="emailAgreement(consignor)"
-                                title="Email agreement">
-                          📧
-                        </button>
+                        <!-- Approval buttons for pending consignors -->
+                        <ng-container *ngIf="isPendingApproval(consignor)">
+                          <button class="btn-approve" (click)="approveConsignor(consignor)">
+                            <span>✅</span>
+                            Approve
+                          </button>
+                          <button class="btn-reject" (click)="rejectConsignor(consignor)">
+                            <span>❌</span>
+                            Reject
+                          </button>
+                        </ng-container>
+
+                        <!-- Regular buttons for approved consignors -->
+                        <ng-container *ngIf="!isPendingApproval(consignor)">
+                          <button class="btn-view" [routerLink]="['/owner/consignors', consignor.id]">
+                            <span>👁️</span>
+                            View
+                          </button>
+                          <button class="btn-message"
+                                  (click)="sendMessage(consignor)"
+                                  title="Send message">
+                            <span>💬</span>
+                          </button>
+                          <button class="btn-email"
+                                  (click)="emailAgreement(consignor)"
+                                  title="Email agreement">
+                            <span>📧</span>
+                          </button>
+                        </ng-container>
                       </div>
                     </td>
                   </tr>
@@ -61,7 +91,7 @@
             </div>
 
             <div *ngIf="consignors().length === 0" class="empty-section">
-              <p>No active consignors yet</p>
+              <p>📭 No active consignors yet</p>
             </div>
           </div>
 
@@ -87,9 +117,11 @@
                     <td class="actions-cell">
                       <div class="action-buttons">
                         <button class="btn-resend" (click)="resendInvitation(invitation.id)">
+                          <span>🔄</span>
                           Resend
                         </button>
                         <button class="btn-cancel" (click)="cancelInvitation(invitation.id)">
+                          <span>❌</span>
                           Cancel
                         </button>
                       </div>
@@ -102,6 +134,7 @@
 
           <!-- Empty State for No Data -->
           <div *ngIf="consignors().length === 0 && pendingInvitations().length === 0" class="empty-state">
+            <h4>🚀 Get Started</h4>
             <p>No consignors yet. Invite your first consignor to get started.</p>
           </div>
 
