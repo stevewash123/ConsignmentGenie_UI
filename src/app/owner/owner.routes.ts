@@ -75,6 +75,10 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./pages/owner-notifications.component').then(m => m.OwnerNotificationsComponent)
   },
   {
+    path: 'account',
+    loadComponent: () => import('./account/account-information.component').then(m => m.AccountInformationComponent)
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./settings/settings-layout.component').then(m => m.SettingsLayoutComponent),
     children: [
@@ -207,17 +211,8 @@ export const ownerRoutes: Routes = [
         ]
       },
       {
-        path: 'account',
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('./settings/account/account-settings.component').then(m => m.AccountSettingsComponent)
-          },
-          {
-            path: 'notifications',
-            loadComponent: () => import('./settings/account-settings/notifications/notifications.component').then(m => m.AccountNotificationsComponent)
-          }
-        ]
+        path: 'notifications',
+        loadComponent: () => import('./settings/account-settings/notifications/notifications.component').then(m => m.AccountNotificationsComponent)
       }
     ]
   }
