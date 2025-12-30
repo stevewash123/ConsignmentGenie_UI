@@ -54,6 +54,7 @@ interface AccountInfo {
     consignors: { current: number; limit?: number; };
     items: { current: number; limit?: number; };
     locations: { current: number; limit?: number; };
+    integrations: { current: number; limit?: number; };
   };
   billingHistory: BillingHistory[];
 }
@@ -62,155 +63,7 @@ interface AccountInfo {
   selector: 'app-account-information',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="account-info-page">
-      <header class="page-header">
-        <h1>Account Information</h1>
-        <p>View your organization details, subscription plan, and usage statistics</p>
-      </header>
-
-      <div *ngIf="isLoading()" class="loading-state">
-        <p>Loading account information...</p>
-      </div>
-
-      <div *ngIf="accountInfo()" class="account-content">
-        <!-- Organization Details -->
-        <section class="info-section">
-          <h2>Organization</h2>
-
-          <div class="info-grid">
-            <div class="info-item">
-              <label>Organization Name</label>
-              <div class="info-value">{{ accountInfo()!.organization.name }}</div>
-            </div>
-
-            <div class="info-item">
-              <label>Business Type</label>
-              <div class="info-value">{{ getBusinessTypeLabel(accountInfo()!.organization.type) }}</div>
-            </div>
-
-            <div class="info-item">
-              <label>Account Created</label>
-              <div class="info-value">{{ accountInfo()!.organization.createdDate | date:'mediumDate' }}</div>
-            </div>
-
-            <div class="info-item">
-              <label>Last Login</label>
-              <div class="info-value">{{ accountInfo()!.organization.lastLoginDate | date:'short' }}</div>
-            </div>
-
-            <div class="info-item">
-              <label>Primary Contact</label>
-              <div class="info-value">
-                {{ accountInfo()!.organization.primaryContact.name }}<br>
-                <span class="text-secondary">{{ accountInfo()!.organization.primaryContact.email }}</span>
-                <span *ngIf="accountInfo()!.organization.primaryContact.phone" class="text-secondary"><br>{{ accountInfo()!.organization.primaryContact.phone }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <label>Total Locations</label>
-              <div class="info-value">{{ accountInfo()!.organization.totalLocations }}</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Current Plan -->
-        <section class="info-section">
-          <h2>Current Subscription</h2>
-
-          <div class="plan-overview">
-            <div class="plan-info">
-              <h3>{{ accountInfo()!.currentPlan.name }}</h3>
-              <div class="plan-price">
-                ${{ getTotalMonthlyPrice() }}
-                <span class="billing-cycle">/ {{ accountInfo()!.currentPlan.billingCycle }}</span>
-              </div>
-              <div class="pricing-breakdown">
-                <div class="breakdown-line">
-                  Base Platform: ${{ accountInfo()!.currentPlan.basePrice }}
-                </div>
-                <div class="breakdown-line" *ngIf="accountInfo()!.currentPlan.activeIntegrations.length > 0">
-                  {{ accountInfo()!.currentPlan.activeIntegrations.length }} Integration(s): ${{ accountInfo()!.currentPlan.activeIntegrations.length * accountInfo()!.currentPlan.integrationPrice }}
-                </div>
-                <div class="founder-badge" *ngIf="accountInfo()!.currentPlan.isFounder">
-                  🎉 Founder {{ accountInfo()!.currentPlan.founderTier }} Pricing (Locked Forever)
-                </div>
-              </div>
-              <div class="next-billing">
-                Next billing: {{ accountInfo()!.nextBillingDate | date:'mediumDate' }}
-              </div>
-            </div>
-
-            <div class="plan-features">
-              <h4>Plan Features</h4>
-              <ul class="features-list">
-                <li *ngFor="let feature of accountInfo()!.currentPlan.features">
-                  <span class="feature-check">✓</span>
-                  {{ feature }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <!-- Usage Statistics -->
-        <section class="info-section">
-          <h2>Current Usage</h2>
-
-          <div class="usage-grid">
-            <div class="usage-item" *ngFor="let type of getUsageTypes()">
-              <div class="usage-header">
-                <span class="usage-label">{{ type.label }}</span>
-                <span class="usage-numbers">
-                  {{ accountInfo()!.usage[type.key].current }}
-                  <span *ngIf="accountInfo()!.usage[type.key].limit"> / {{ accountInfo()!.usage[type.key].limit }}</span>
-                  <span *ngIf="!accountInfo()!.usage[type.key].limit"> / Unlimited</span>
-                </span>
-              </div>
-              <div class="usage-bar">
-                <div class="usage-progress"
-                     [style.width.%]="getUsagePercentage(type.key)"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Billing History -->
-        <section class="info-section">
-          <h2>Billing History</h2>
-
-          <div *ngIf="accountInfo()!.billingHistory.length === 0" class="no-history">
-            <p>No billing history available yet.</p>
-          </div>
-
-          <div *ngIf="accountInfo()!.billingHistory.length > 0" class="billing-table">
-            <div class="table-header">
-              <div>Date</div>
-              <div>Description</div>
-              <div>Amount</div>
-              <div>Status</div>
-              <div>Actions</div>
-            </div>
-
-            <div class="table-row" *ngFor="let invoice of accountInfo()!.billingHistory">
-              <div class="billing-date">{{ invoice.date | date:'shortDate' }}</div>
-              <div class="billing-description">{{ invoice.description }}</div>
-              <div class="billing-amount">\${{ invoice.amount }}</div>
-              <div class="billing-status" [class]="'status-' + invoice.status">{{ invoice.status }}</div>
-              <div class="billing-actions">
-                <button *ngIf="invoice.downloadUrl"
-                        class="btn-link"
-                        (click)="downloadInvoice(invoice.id)">
-                  Download
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-  `,
+  templateUrl: './account-information.component.html',
   styles: [`
     .account-info-page {
       padding: 2rem;
@@ -363,6 +216,72 @@ interface AccountInfo {
     .feature-check {
       color: #10b981;
       font-weight: bold;
+    }
+
+    .active-integrations {
+      margin-top: 2rem;
+    }
+
+    .active-integrations h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 1rem;
+    }
+
+    .integrations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .integration-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: #f9fafb;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .integration-info h5 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .integration-type {
+      font-size: 0.75rem;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .integration-status {
+      text-align: right;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-badge.active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .activated-date {
+      display: block;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
     }
 
     .usage-grid {
@@ -593,6 +512,7 @@ export class AccountInformationComponent implements OnInit {
         usage: {
           consignors: { current: 87 },
           items: { current: 2340 },
+          locations: { current: 1 },
           integrations: { current: 2 }
         },
         billingHistory: [
@@ -661,5 +581,9 @@ export class AccountInformationComponent implements OnInit {
   downloadInvoice(invoiceId: string) {
     console.log('Downloading invoice:', invoiceId);
     alert('Invoice download would start here');
+  }
+
+  openBillingPortal() {
+    alert('Stripe Customer Portal would open here');
   }
 }
