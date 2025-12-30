@@ -1,7 +1,7 @@
-export type ConsignorStatus = 'active' | 'invited' | 'inactive';
+export type ConsignorStatus = 'active' | 'invited' | 'inactive' | 'suspended' | 'closed' | 'pending';
 
 export interface Consignor {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone?: string;
@@ -33,6 +33,7 @@ export interface CreateConsignorRequest {
 
 export interface UpdateConsignorRequest extends CreateConsignorRequest {
   isActive: boolean;
+  status?: ConsignorStatus;
 }
 
 export interface ConsignorListDto {
@@ -50,4 +51,36 @@ export interface ConsignorListDto {
   hasPortalAccess: boolean;
   contractOnFile: boolean;
   createdAt: string;
+}
+
+export interface ConsignorStatusChangeRequest {
+  newStatus: ConsignorStatus;
+  reason?: string;
+}
+
+export interface ConsignorStatusChangeResponse {
+  success: boolean;
+  message: string;
+  updatedConsignor?: Consignor;
+}
+
+export interface PendingConsignorApproval {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  registrationDate: Date;
+  storeCode: string;
+  registrationInfo?: string;
+}
+
+export interface ConsignorApprovalRequest {
+  action: 'approve' | 'reject' | 'request_info';
+  message?: string;
+}
+
+export interface ConsignorApprovalResponse {
+  success: boolean;
+  message: string;
+  approvedConsignor?: Consignor;
 }

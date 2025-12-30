@@ -83,6 +83,20 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="commissionRate">Commission Rate (%) *</label>
+
+                <!-- Use Default Checkbox -->
+                <div class="checkbox-wrapper" style="margin-bottom: 0.5rem;">
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="useDefaultCommissionRate"
+                      (ngModelChange)="onUseDefaultCommissionChange()"
+                      name="useDefaultCommissionRate"
+                    >
+                    Use shop default rate ({{ defaultCommissionRate }}%)
+                  </label>
+                </div>
+
                 <input
                   type="number"
                   id="commissionRate"
@@ -95,8 +109,16 @@
                   #commissionField="ngModel"
                   class="form-control"
                   [class.error]="commissionField.invalid && commissionField.touched"
+                  [readonly]="useDefaultCommissionRate"
+                  [class.readonly]="useDefaultCommissionRate"
                   placeholder="50.0"
                 >
+
+                <!-- Commission Rate Hint -->
+                <small class="form-text commission-hint" [class.override]="isUsingCustomCommissionRate()">
+                  {{ getCommissionRateHint() }}
+                </small>
+
                 <div class="error-message" *ngIf="commissionField.invalid && commissionField.touched">
                   <span *ngIf="commissionField.errors?.['required']">Commission rate is required</span>
                   <span *ngIf="commissionField.errors?.['min']">Rate must be 0 or higher</span>
@@ -160,6 +182,21 @@
                 Active consignor
               </label>
               <small class="form-text">Inactive consignors cannot add new items or receive payouts</small>
+            </div>
+
+            <div class="form-group">
+              <label for="status">Consignor Status</label>
+              <select
+                id="status"
+                name="status"
+                [(ngModel)]="editData.status"
+                class="form-control"
+              >
+                <option *ngFor="let option of statusOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+              <small class="form-text">{{ getStatusDescription() }}</small>
             </div>
           </div>
 

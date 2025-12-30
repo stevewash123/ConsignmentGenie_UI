@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { ConsignorService } from '../../services/consignor.service';
-import { Consignor, UpdateConsignorRequest } from '../../models/consignor.model';
+import { Consignor, UpdateConsignorRequest, ConsignorStatus } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
@@ -176,13 +176,53 @@ import { LoadingService } from '../../shared/services/loading.service';
       padding: 2rem;
       color: #6c757d;
     }
+
+    /* Commission Override Styles */
+    .checkbox-wrapper {
+      margin-bottom: 0.5rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: normal;
+      color: #495057;
+      margin-bottom: 0;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .form-control.readonly {
+      background-color: #f8f9fa;
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .commission-hint {
+      display: block;
+      margin-top: 0.25rem;
+      font-style: italic;
+      color: #6c757d;
+    }
+
+    .commission-hint.override {
+      color: #fd7e14;
+      font-weight: 500;
+    }
   `]
 })
 export class ConsignorEditComponent implements OnInit {
-  providerId = signal<number>(0);
+  providerId = signal<string>('');
   isSubmitting = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+
+  // Commission override functionality
+  defaultCommissionRate = 50; // TODO: Get from shop settings
+  useDefaultCommissionRate = true;
 
   editData = {
     name: '',
@@ -193,8 +233,18 @@ export class ConsignorEditComponent implements OnInit {
     preferredPaymentMethod: '',
     paymentDetails: '',
     notes: '',
-    isActive: true
+    isActive: true,
+    status: 'active' as ConsignorStatus
   };
+
+  // Status options for dropdown
+  statusOptions = [
+    { value: 'active', label: 'Active', description: 'Can consign items' },
+    { value: 'invited', label: 'Invited', description: 'Invitation sent, awaiting registration' },
+    { value: 'pending', label: 'Pending Approval', description: 'Registered, awaiting approval' },
+    { value: 'inactive', label: 'Inactive', description: 'Cannot consign items' },
+    { value: 'suspended', label: 'Suspended', description: 'Temporarily blocked' }
+  ];
 
   isProviderLoading(): boolean {
     return this.loadingService.isLoading('consignor-edit');
@@ -210,7 +260,7 @@ export class ConsignorEditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
     if (id) {
-      this.providerId.set(parseInt(id));
+      this.providerId.set(id);
       this.loadProvider();
     }
   }
@@ -241,8 +291,12 @@ export class ConsignorEditComponent implements OnInit {
       preferredPaymentMethod: consignor.preferredPaymentMethod || '',
       paymentDetails: consignor.paymentDetails || '',
       notes: consignor.notes || '',
-      isActive: consignor.isActive
+      isActive: consignor.isActive,
+      status: consignor.status
     };
+
+    // Determine if using default commission rate
+    this.useDefaultCommissionRate = consignor.commissionRate === this.defaultCommissionRate;
   }
 
   onSubmit(): void {
@@ -261,7 +315,8 @@ export class ConsignorEditComponent implements OnInit {
       preferredPaymentMethod: this.editData.preferredPaymentMethod || undefined,
       paymentDetails: this.editData.paymentDetails || undefined,
       notes: this.editData.notes || undefined,
-      isActive: this.editData.isActive
+      isActive: this.editData.isActive,
+      status: this.editData.status
     };
 
     this.ConsignorService.updateConsignor(this.providerId(), updateRequest).subscribe({
@@ -281,5 +336,28 @@ export class ConsignorEditComponent implements OnInit {
         this.isSubmitting.set(false);
       }
     });
+  }
+
+  // Commission override methods
+  onUseDefaultCommissionChange(): void {
+    if (this.useDefaultCommissionRate) {
+      this.editData.commissionRate = this.defaultCommissionRate;
+    }
+  }
+
+  isUsingCustomCommissionRate(): boolean {
+    return !this.useDefaultCommissionRate;
+  }
+
+  getCommissionRateHint(): string {
+    if (this.useDefaultCommissionRate) {
+      return `Using shop default (${this.defaultCommissionRate}%)`;
+    }
+    return 'Custom override rate';
+  }
+
+  getStatusDescription(): string {
+    const selectedOption = this.statusOptions.find(option => option.value === this.editData.status);
+    return selectedOption?.description || '';
   }
 }

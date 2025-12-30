@@ -253,7 +253,7 @@ import { LoadingService } from '../../shared/services/loading.service';
 })
 export class ConsignorDetailComponent implements OnInit {
   consignor = signal<Consignor | null>(null);
-  providerId = signal<number>(0);
+  providerId = signal<string>('');
   isSubmitting = signal(false);
   errorMessage = signal('');
 
@@ -281,7 +281,7 @@ export class ConsignorDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
     if (id) {
-      this.providerId.set(parseInt(id));
+      this.providerId.set(id);
       this.loadProvider();
       this.loadStats();
       this.loadRecentActivity();

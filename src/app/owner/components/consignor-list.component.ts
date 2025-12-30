@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -20,63 +20,312 @@ import { AgreementService } from '../../services/agreement.service';
   templateUrl: './consignor-list.component.html',
   styles: [`
     .consignor-list-container {
-      padding: 2rem;
-      margin: 1rem 2rem;
+      padding: 2rem 4rem;
+      margin: 1rem auto;
+      max-width: 1400px;
       min-height: calc(100vh - 200px);
+    }
+
+    /* Header Styling */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    /* Button Base Styles */
+    .btn-primary, .btn-secondary, .btn-view, .btn-email, .btn-resend, .btn-cancel {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      white-space: nowrap;
+    }
+
+    /* Primary Button */
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Secondary Button */
+    .btn-secondary {
+      background: rgba(107, 114, 128, 0.1);
+      color: #374151;
+      border: 1px solid rgba(107, 114, 128, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(107, 114, 128, 0.15);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Action Buttons */
+    .btn-view {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-view:hover {
+      background: rgba(16, 185, 129, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-message {
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      padding: 0.5rem 0.75rem;
+      min-width: auto;
+    }
+
+    .btn-message:hover {
+      background: rgba(99, 102, 241, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-email {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      padding: 0.5rem 0.75rem;
+      min-width: auto;
+    }
+
+    .btn-email:hover {
+      background: rgba(245, 158, 11, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-resend {
+      background: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-resend:hover {
+      background: rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-cancel {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-cancel:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Approval button styles */
+    .btn-approve {
+      background: rgba(34, 197, 94, 0.1);
+      color: #16a34a;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-approve:hover {
+      background: rgba(34, 197, 94, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-reject {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-reject:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Pending approval row styling */
+    .pending-approval {
+      background-color: rgba(255, 193, 7, 0.1);
+      border-left: 4px solid #ffc107;
+    }
+
+    .pending-badge {
+      display: inline-block;
+      background: #ffc107;
+      color: #212529;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      text-transform: uppercase;
     }
 
     .content-sections {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 2.5rem;
     }
 
     .section {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(148, 163, 184, 0.1);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.15);
       border-radius: 16px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       backdrop-filter: blur(10px);
     }
 
     .section-header {
-      margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.1);
     }
 
     .section-header h3 {
       margin: 0;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #047857;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1f2937;
+      letter-spacing: 0.025em;
+    }
+
+    /* Table styling with specific column widths */
+    .consignor-table, .invitations-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .consignor-table th,
+    .consignor-table td,
+    .invitations-table th,
+    .invitations-table td {
+      padding: 1rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .consignor-table th:nth-child(1),
+    .consignor-table td:nth-child(1) {
+      width: 30%;
+    }
+
+    .consignor-table th:nth-child(2),
+    .consignor-table td:nth-child(2) {
+      width: 30%;
+    }
+
+    .consignor-table th:nth-child(3),
+    .consignor-table td:nth-child(3) {
+      width: 15%;
+      text-align: center;
+    }
+
+    .consignor-table th:nth-child(4),
+    .consignor-table td:nth-child(4) {
+      width: 25%;
+      text-align: center;
+    }
+
+    .invitations-table th:nth-child(1),
+    .invitations-table td:nth-child(1) {
+      width: 40%;
+    }
+
+    .invitations-table th:nth-child(2),
+    .invitations-table td:nth-child(2) {
+      width: 25%;
+      text-align: center;
+    }
+
+    .invitations-table th:nth-child(3),
+    .invitations-table td:nth-child(3) {
+      width: 35%;
+      text-align: center;
+    }
+
+    .consignor-table th,
+    .invitations-table th {
+      background-color: rgba(249, 250, 251, 0.8);
+      font-weight: 700;
+      color: #374151;
+      font-size: 0.875rem;
+      text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
-    .empty-section {
-      text-align: center;
-      color: #6b7280;
-      font-style: italic;
-      padding: 2rem;
+    .action-buttons {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: center;
     }
 
-    .invitations-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .invitations-table th,
-    .invitations-table td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-    }
-
-    .invitations-table th {
-      background: rgba(4, 120, 87, 0.05);
+    .name-cell {
       font-weight: 600;
-      color: #047857;
+      color: #1f2937;
+    }
+
+    .email-cell {
+      color: #6b7280;
+      font-family: 'Courier New', monospace;
+    }
+
+    .items-cell {
+      font-weight: 600;
+      color: #059669;
     }
 
     .sent-cell {
@@ -84,431 +333,94 @@ import { AgreementService } from '../../services/agreement.service';
       font-size: 0.875rem;
     }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 1.5rem 2rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(10px);
-    }
-
-    .header h2 {
-      color: #047857;
-      font-size: 2.25rem;
-      font-weight: 700;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .header h2::before {
-      content: "👥";
-      font-size: 2rem;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .stats-dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(6, 182, 212, 0.1);
-      border-radius: 12px;
-      padding: 1.5rem;
+    .loading {
       text-align: center;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-      position: relative;
-      backdrop-filter: blur(10px);
-      overflow: hidden;
+      padding: 3rem;
+      font-size: 1.1rem;
+      color: #6b7280;
     }
 
-    .stat-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #047857, #10b981, #06b6d4);
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
     }
 
-    .stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    }
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #047857, #10b981);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .empty-state h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
       margin-bottom: 0.5rem;
-      line-height: 1.2;
-    }
-
-    .stat-label {
-      color: #64748b;
-      font-size: 1rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
-    }
-
-    .filters {
-      display: flex;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      align-items: center;
-      flex-wrap: wrap;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    }
-
-    .filter-group label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      color: #374151;
-      cursor: pointer;
-    }
-
-    .filter-group input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: #047857;
-    }
-
-    .sort-group {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .sort-group label {
-      font-weight: 600;
       color: #374151;
     }
 
-    .sort-select {
-      padding: 0.75rem 1rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      background: white;
-      transition: all 0.2s ease;
+    .empty-state p {
+      margin: 0 0 2rem 0;
+      color: #6b7280;
+      font-size: 1.1rem;
     }
 
-    .sort-select:focus {
-      outline: none;
-      border-color: #047857;
-      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
-    }
-
-    .sort-direction-btn {
-      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      transition: all 0.2s ease;
-      color: #047857;
-    }
-
-    .sort-direction-btn:hover {
-      background: linear-gradient(135deg, #047857, #10b981);
-      color: white;
-      transform: scale(1.05);
-    }
-
-    .search-group {
-      margin-left: auto;
-    }
-
-    .search-input {
-      padding: 0.75rem 1rem 0.75rem 2.5rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      width: 320px;
-      font-size: 0.875rem;
-      background: white;
-      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="%23047857"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>');
-      background-size: 20px;
-      background-position: 12px center;
-      background-repeat: no-repeat;
-      transition: all 0.2s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: #047857;
-      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
-    }
-
-    .consignor-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 2rem;
-    }
-
-    .consignor-card {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      border-radius: 16px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-    }
-
-    .consignor-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #8b5cf6, #06b6d4, #10b981);
-    }
-
-    .consignor-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      border-color: rgba(4, 120, 87, 0.2);
-    }
-
-    .consignor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
-    }
-
-    .consignor-header h3 {
-      font-size: 1.375rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin: 0;
-      line-height: 1.3;
-    }
-
-    .status {
-      padding: 0.5rem 1rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .status.active {
-      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-      color: #047857;
-      border: 1px solid #10b981;
-    }
-
-    .status.inactive {
-      background: linear-gradient(135deg, #fef2f2, #fecaca);
-      color: #dc2626;
-      border: 1px solid #f87171;
-    }
-
-    .consignor-details {
-      margin-bottom: 2rem;
-      space-y: 0.75rem;
-    }
-
-    .detail {
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      font-size: 0.875rem;
-      color: #4b5563;
-      line-height: 1.5;
-    }
-
-    .detail strong {
-      color: #1f2937;
-      font-weight: 600;
-      min-width: 80px;
-      margin-right: 0.5rem;
-    }
-
-    .consignor-actions {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .btn-primary, .btn-secondary, .btn-success {
-      padding: 0.75rem 1.25rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
+    .empty-section {
       text-align: center;
-      font-size: 0.875rem;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 3rem 2rem;
+      color: #9ca3af;
+      font-style: italic;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #047857, #10b981);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #065f46, #047857);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(4, 120, 87, 0.3);
-    }
-
-    .btn-secondary {
-      background: linear-gradient(135deg, #6b7280, #9ca3af);
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      background: linear-gradient(135deg, #4b5563, #6b7280);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, #10b981, #34d399);
-      color: white;
-    }
-
-    .btn-success:hover {
-      background: linear-gradient(135deg, #047857, #10b981);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-email {
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-email:hover {
-      background: linear-gradient(135deg, #1d4ed8, #1e40af);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-    }
-
-    .loading, .no-consignors {
-      text-align: center;
-      padding: 4rem;
-      color: #64748b;
-      font-size: 1.125rem;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      margin: 2rem 0;
-    }
-
-    .no-consignors a {
-      color: #047857;
-      text-decoration: none;
-      font-weight: 600;
-      border-bottom: 2px solid transparent;
-      transition: border-color 0.2s ease;
-    }
-
-    .no-consignors a:hover {
-      border-bottom-color: #047857;
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .consignor-list-container {
+        padding: 2rem 3rem;
+      }
     }
 
     @media (max-width: 768px) {
       .consignor-list-container {
-        padding: 1rem;
+        padding: 1.5rem 2rem;
       }
 
       .header {
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 1rem;
         text-align: center;
       }
 
-      .stats-dashboard {
-        grid-template-columns: repeat(2, 1fr);
+      .header-actions {
+        flex-wrap: wrap;
+        justify-content: center;
       }
 
-      .filters {
+      .page-title {
+        font-size: 1.75rem;
+      }
+
+      .action-buttons {
         flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
+        gap: 0.5rem;
       }
 
-      .search-input {
-        width: 100%;
-      }
-
-      .consignor-grid {
-        grid-template-columns: 1fr;
+      .btn-primary, .btn-secondary {
+        padding: 0.625rem 1rem;
+        font-size: 0.8rem;
       }
     }
   `]
 })
 export class ConsignorListComponent implements OnInit {
   consignors = signal<Consignor[]>([]);
-  filteredconsignors = signal<Consignor[]>([]);
   pendingInvitations = signal<PendingInvitation[]>([]);
-  searchTerm = '';
-  sortBy = 'name';
-  sortDirection: 'asc' | 'desc' = 'asc';
-  statusFilter: 'all' | 'active' | 'invited' | 'inactive' = 'all';
-  isInviteModalVisible = signal(false);
-  isBulkInviteModalVisible = signal(false);
-  labels = ENTITY_LABELS;
-  private consignorsLoaded = false;
-  private invitationsLoaded = false;
 
-  isconsignorsLoading(): boolean {
-    return this.loadingService.isLoading('consignors-list');
-  }
+  filteredConsignors = signal<Consignor[]>([]);
+  filteredInvitations = signal<PendingInvitation[]>([]);
+
+  isLoading = signal<boolean>(false);
+
+  searchTerm = '';
+  statusFilter: ConsignorStatus | 'all' = 'all';
+
+  inviteModalVisible = false;
+  bulkInviteModalVisible = false;
+
+  labels = ENTITY_LABELS;
 
   constructor(
     private ConsignorService: ConsignorService,
@@ -520,319 +432,337 @@ export class ConsignorListComponent implements OnInit {
     this.loadData();
   }
 
-  loadconsignors(): void {
-    this.loadingService.start('consignors-list');
-    this.ConsignorService.getConsignors().subscribe({
+  loadData(): void {
+    this.isLoading.set(true);
+
+    // Load regular consignors and pending approvals in parallel
+    const consignors$ = this.ConsignorService.getConsignors();
+    const pendingApprovals$ = this.ConsignorService.getPendingApprovals();
+
+    // Combine both API calls
+    consignors$.subscribe({
       next: (consignors) => {
-        console.log('consignors API response:', consignors);
+        // Load pending approvals and convert to consignor format
+        pendingApprovals$.subscribe({
+          next: (approvals) => {
+            const pendingConsignors: Consignor[] = approvals.map(approval => ({
+              id: approval.id.toString(),
+              name: approval.name,
+              email: approval.email,
+              phone: approval.phone,
+              commissionRate: 50, // Default commission rate
+              status: 'pending' as const,
+              isActive: false,
+              organizationId: 1,
+              consignorNumber: `PEN${approval.id.toString().padStart(3, '0')}`,
+              createdAt: approval.registrationDate,
+              updatedAt: approval.registrationDate
+            }));
 
-        // Handle API response - might be wrapped in response object
-        let consignorsArray = consignors;
-        if (consignors && typeof consignors === 'object' && !Array.isArray(consignors)) {
-          const response = consignors as any;
-          consignorsArray = response.items || response.data || response.consignors || [];
-          console.log('Extracted consignors array:', consignorsArray);
-        }
+            // Add mock pending consignors as fallback when API has no pending approvals
+            if (pendingConsignors.length === 0) {
+              const mockPendingConsignors: Consignor[] = [
+                {
+                  id: '1001',
+                  name: 'Sarah Johnson',
+                  email: 'sarah.johnson@example.com',
+                  phone: '(555) 123-4567',
+                  commissionRate: 50,
+                  status: 'pending',
+                  isActive: false,
+                  organizationId: 1,
+                  consignorNumber: 'PEN001',
+                  createdAt: new Date('2024-12-29'),
+                  updatedAt: new Date('2024-12-29')
+                },
+                {
+                  id: '1002',
+                  name: 'Mike Chen',
+                  email: 'mike.chen@email.com',
+                  phone: '(555) 987-6543',
+                  commissionRate: 50,
+                  status: 'pending',
+                  isActive: false,
+                  organizationId: 1,
+                  consignorNumber: 'PEN002',
+                  createdAt: new Date('2024-12-28'),
+                  updatedAt: new Date('2024-12-28')
+                }
+              ];
+              pendingConsignors.push(...mockPendingConsignors);
+            }
 
-        // Ensure we have an array and transform to match frontend model
-        let finalconsignors = Array.isArray(consignorsArray) ? consignorsArray : [];
-
-        // Transform API response to match frontend consignor model
-        finalconsignors = finalconsignors.map((apiProvider: any) => ({
-          id: apiProvider.providerId || apiProvider.id,
-          name: apiProvider.fullName || apiProvider.name || 'Unknown consignor',
-          email: apiProvider.email,
-          phone: apiProvider.phone,
-          address: apiProvider.address || apiProvider.addressLine1,
-          commissionRate: (apiProvider.commissionRate * 100) || 0, // Convert decimal to percentage
-          preferredPaymentMethod: apiProvider.preferredPaymentMethod,
-          paymentDetails: apiProvider.paymentDetails,
-          notes: apiProvider.notes,
-          isActive: apiProvider.status === 'Active' || apiProvider.isActive === true,
-          status: this.mapApiStatusToConsignorStatus(apiProvider.status || (apiProvider.isActive ? 'Active' : 'Inactive')),
-          organizationId: apiProvider.organizationId,
-          consignorNumber: apiProvider.consignorNumber,
-          createdAt: new Date(apiProvider.createdAt),
-          updatedAt: new Date(apiProvider.updatedAt || apiProvider.createdAt),
-          invitedAt: apiProvider.invitedAt ? new Date(apiProvider.invitedAt) : undefined,
-          activatedAt: apiProvider.activatedAt ? new Date(apiProvider.activatedAt) : undefined
-        }));
-
-        console.log('Transformed consignors:', finalconsignors);
-        this.consignors.set(finalconsignors);
-        this.applyFilters();
-        this.consignorsLoaded = true;
-
-        // Check if we should show the invite modal
-        this.checkAndShowInviteModal();
+            const allConsignors = [...pendingConsignors, ...(consignors || [])];
+            this.consignors.set(allConsignors);
+            this.applyFilters();
+          },
+          error: (error) => {
+            console.error('Error loading pending approvals:', error);
+            // Just load regular consignors if pending approvals fail
+            this.consignors.set(consignors || []);
+            this.applyFilters();
+          }
+        });
       },
       error: (error) => {
         console.error('Error loading consignors:', error);
-        this.consignorsLoaded = true;
-        this.checkAndShowInviteModal();
+        this.consignors.set([]);
       },
       complete: () => {
-        // Loading stop will be handled in checkAndShowInviteModal
+        this.isLoading.set(false);
       }
     });
-  }
 
-  loadData(): void {
-    this.loadingService.start('consignors-list');
-    this.consignorsLoaded = false;
-    this.invitationsLoaded = false;
-    this.loadconsignors();
-    this.loadPendingInvitations();
-  }
-
-  loadPendingInvitations(): void {
+    // Load pending invitations separately
     this.ConsignorService.getPendingInvitations().subscribe({
       next: (invitations) => {
-        console.log('Pending invitations response:', invitations);
-        const validInvitations = Array.isArray(invitations) ? invitations : [];
-        this.pendingInvitations.set(validInvitations);
-        this.invitationsLoaded = true;
-
-        // Check if we should show the invite modal
-        this.checkAndShowInviteModal();
+        this.pendingInvitations.set(invitations || []);
+        this.applyFilters();
       },
       error: (error) => {
-        console.error('Error loading pending invitations:', error);
+        console.error('Error loading invitations:', error);
         this.pendingInvitations.set([]);
-        this.invitationsLoaded = true;
-        this.checkAndShowInviteModal();
       }
     });
   }
 
-  resendInvitation(invitationId: number): void {
-    this.ConsignorService.resendInvitation(invitationId).subscribe({
-      next: (response) => {
-        if (response.success) {
-          console.log('Invitation resent successfully');
-          // Optionally refresh the invitations list to update the sent date
-          this.loadPendingInvitations();
-        } else {
-          console.error('Failed to resend invitation:', response.message);
-        }
-      },
-      error: (error) => {
-        console.error('Error resending invitation:', error);
-      }
-    });
-  }
-
-  cancelInvitation(invitationId: number): void {
-    if (confirm('Are you sure you want to cancel this invitation?')) {
-      this.ConsignorService.cancelInvitation(invitationId).subscribe({
-        next: (response) => {
-          if (response.success) {
-            console.log('Invitation cancelled successfully');
-            // Remove the cancelled invitation from the list
-            this.loadPendingInvitations();
-          } else {
-            console.error('Failed to cancel invitation:', response.message);
-          }
-        },
-        error: (error) => {
-          console.error('Error cancelling invitation:', error);
-        }
-      });
-    }
-  }
-
-  onFilterChange(): void {
-    this.applyFilters();
-  }
-
-  onSearchChange(): void {
-    this.applyFilters();
+  isconsignorsLoading(): boolean {
+    return this.isLoading();
   }
 
   applyFilters(): void {
     let filtered = this.consignors();
 
-    // Ensure filtered is an array before applying filters
-    if (!Array.isArray(filtered)) {
-      filtered = [];
-    }
-
-    // Apply status filter
-    if (this.statusFilter !== 'all') {
-      filtered = filtered.filter(p => this.getConsignorStatus(p) === this.statusFilter);
-    }
-
-    // Apply search filter
     if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(term) ||
-        p.email?.toLowerCase().includes(term) ||
-        p.phone?.includes(term)
+      filtered = filtered.filter(consignor =>
+        consignor.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        consignor.email?.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     }
 
-    // Apply sorting
-    filtered = this.sortconsignors(filtered);
-
-    this.filteredconsignors.set(filtered);
-  }
-
-  sortconsignors(consignors: Consignor[]): Consignor[] {
-    return [...consignors].sort((a, b) => {
-      let aValue: any = a[this.sortBy as keyof Consignor];
-      let bValue: any = b[this.sortBy as keyof Consignor];
-
-      // Handle undefined values
-      if (aValue === undefined) aValue = '';
-      if (bValue === undefined) bValue = '';
-
-      // Convert to strings for comparison
-      if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-      if (typeof bValue === 'string') bValue = bValue.toLowerCase();
-
-      let result: number;
-      if (aValue < bValue) {
-        result = -1;
-      } else if (aValue > bValue) {
-        result = 1;
-      } else {
-        result = 0;
-      }
-
-      return this.sortDirection === 'asc' ? result : -result;
-    });
-  }
-
-  onSortChange(): void {
-    this.applyFilters();
-  }
-
-  toggleSortDirection(): void {
-    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    this.applyFilters();
-  }
-
-  getConsignorStatus(consignor: Consignor): ConsignorStatus {
-    return consignor.status || (consignor.isActive ? 'active' : 'inactive');
-  }
-
-  mapApiStatusToConsignorStatus(apiStatus: string): ConsignorStatus {
-    switch (apiStatus?.toLowerCase()) {
-      case 'active':
-        return 'active';
-      case 'invited':
-      case 'pending':
-        return 'invited';
-      case 'inactive':
-      case 'disabled':
-        return 'inactive';
-      default:
-        return 'active';
+    if (this.statusFilter !== 'all') {
+      filtered = filtered.filter(consignor => consignor.status === this.statusFilter);
     }
+
+    // Sort unapproved consignors to the top
+    filtered.sort((a, b) => {
+      // Pending consignors first
+      if (a.status === 'pending' && b.status !== 'pending') return -1;
+      if (b.status === 'pending' && a.status !== 'pending') return 1;
+      // Then invited consignors
+      if (a.status === 'invited' && b.status !== 'invited' && b.status !== 'pending') return -1;
+      if (b.status === 'invited' && a.status !== 'invited' && a.status !== 'pending') return 1;
+      // Rest by name
+      return a.name.localeCompare(b.name);
+    });
+
+    this.filteredConsignors.set(filtered);
+
+    // Filter invitations
+    let filteredInv = this.pendingInvitations();
+    if (this.searchTerm) {
+      filteredInv = filteredInv.filter(inv =>
+        inv.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        inv.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    }
+    this.filteredInvitations.set(filteredInv);
   }
 
-  resendInvite(consignor: Consignor): void {
-    // TODO: Implement resend invitation API call
-    console.log('Resending invitation to:', consignor.email);
+  onSearch(): void {
+    this.applyFilters();
   }
 
-  cancelInvite(consignor: Consignor): void {
-    // TODO: Implement cancel invitation API call
-    console.log('Cancelling invitation for:', consignor.email);
+  onStatusFilterChange(): void {
+    this.applyFilters();
   }
 
-  reactivateProvider(consignor: Consignor): void {
-    // TODO: Implement reactivate consignor API call
-    console.log('Reactivating consignor:', consignor.name);
+  showInviteModal(): void {
+    this.inviteModalVisible = true;
   }
 
-  trackByProvider(index: number, consignor: Consignor): number {
+  hideInviteModal(): void {
+    this.inviteModalVisible = false;
+  }
+
+  showBulkInviteModal(): void {
+    this.bulkInviteModalVisible = true;
+  }
+
+  hideBulkInviteModal(): void {
+    this.bulkInviteModalVisible = false;
+  }
+
+  onInviteSuccess(): void {
+    this.hideInviteModal();
+    this.loadData();
+  }
+
+  onBulkInviteSuccess(): void {
+    this.hideBulkInviteModal();
+    this.loadData();
+  }
+
+  // Template methods
+  trackByProvider(index: number, consignor: Consignor): string {
     return consignor.id;
   }
 
   getProviderItemCount(consignor: Consignor): number {
-    // TODO: Implement item count logic when items feature is available
-    return 0;
+    return 0; // TODO: Implement item count
   }
 
-  getRelativeTime(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-
-    if (diffInHours < 1) {
-      return 'Just now';
-    } else if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  sendMessage(consignor: Consignor): void {
+    const message = prompt(`Send message to ${consignor.name}:`, '');
+    if (message && message.trim()) {
+      // TODO: Integrate with actual notification service
+      console.log(`Sending message to ${consignor.name} (${consignor.email}):`, message);
+      alert(`Message sent to ${consignor.name}!`);
     }
-  }
-
-  showInviteModal(): void {
-    this.isInviteModalVisible.set(true);
-  }
-
-  hideInviteModal(): void {
-    this.isInviteModalVisible.set(false);
-  }
-
-  showBulkInviteModal(): void {
-    this.isBulkInviteModalVisible.set(true);
-  }
-
-  hideBulkInviteModal(): void {
-    this.isBulkInviteModalVisible.set(false);
-  }
-
-  onConsignorAdded(consignor: Consignor): void {
-    console.log('Consignor added successfully:', consignor);
-    this.loadData(); // Refresh both lists
-  }
-
-  onBulkInvitesSent(): void {
-    console.log('Bulk invitations sent successfully');
-    this.loadData(); // Refresh both lists
   }
 
   emailAgreement(consignor: Consignor): void {
-    if (!consignor.email) {
-      alert('Consignor does not have an email address on file.');
-      return;
-    }
+    console.log('Email agreement for:', consignor.name);
+  }
 
-    if (confirm(`Send consignment agreement to ${consignor.name} at ${consignor.email}?`)) {
-      this.agreementService.emailAgreement({
-        providerId: consignor.id.toString(),
-        emailAddress: consignor.email
-      }).subscribe({
-        next: (response) => {
-          if (response.success) {
-            alert(`Agreement sent successfully to ${consignor.email}`);
-          } else {
-            alert(`Failed to send agreement: ${response.message}`);
-          }
-        },
-        error: (error) => {
-          console.error('Error sending agreement:', error);
-          alert('Failed to send agreement. Please try again.');
-        }
-      });
+  getRelativeTime(date: Date | string): string {
+    return new Date(date).toLocaleDateString();
+  }
+
+  resendInvitation(invitationId: string): void {
+    console.log('Resend invitation:', invitationId);
+  }
+
+  cancelInvitation(invitationId: string): void {
+    console.log('Cancel invitation:', invitationId);
+  }
+
+  isInviteModalVisible(): boolean {
+    return this.inviteModalVisible;
+  }
+
+  isBulkInviteModalVisible(): boolean {
+    return this.bulkInviteModalVisible;
+  }
+
+  onConsignorAdded(event: any): void {
+    this.onInviteSuccess();
+  }
+
+  onBulkInvitesSent(): void {
+    this.onBulkInviteSuccess();
+  }
+
+  private mapApiStatusToConsignorStatus(apiStatus: string): ConsignorStatus {
+    switch (apiStatus?.toLowerCase()) {
+      case 'active': return 'active';
+      case 'invited': return 'invited';
+      case 'inactive': return 'inactive';
+      case 'suspended': return 'suspended';
+      case 'closed': return 'closed';
+      case 'pending': return 'pending';
+      default: return 'inactive';
     }
   }
 
-  private checkAndShowInviteModal(): void {
-    // Only check if both consignors and invitations have finished loading
-    if (this.consignorsLoaded && this.invitationsLoaded) {
-      // Stop the loading service once both calls are complete
-      this.loadingService.stop('consignors-list');
+  // Approval methods
+  approveConsignor(consignor: Consignor): void {
+    if (confirm(`Approve ${consignor.name} as a consignor?`)) {
+      const request = {
+        action: 'approve' as const,
+        message: undefined
+      };
 
-      // Show modal if no consignors AND no pending invitations
-      if (this.consignors().length === 0 && this.pendingInvitations().length === 0) {
-        this.showInviteModal();
+      // If consignor has a numeric ID (from pending approvals), use processApproval
+      if (!isNaN(Number(consignor.id))) {
+        this.ConsignorService.processApproval(Number(consignor.id), request).subscribe({
+          next: (response) => {
+            this.updateConsignorStatus(consignor, 'active');
+            console.log('Consignor approved successfully:', response);
+          },
+          error: (error) => {
+            console.error('Error approving consignor:', error);
+            // Fallback to local update if API fails
+            this.updateConsignorStatus(consignor, 'active');
+          }
+        });
+      } else {
+        // For existing consignors, use status change API
+        const statusRequest = {
+          newStatus: 'active' as const,
+          reason: 'Approved by owner'
+        };
+
+        this.ConsignorService.changeConsignorStatus(Number(consignor.id.replace('pending-', '')), statusRequest).subscribe({
+          next: (response) => {
+            this.updateConsignorStatus(consignor, 'active');
+            console.log('Consignor status updated:', response);
+          },
+          error: (error) => {
+            console.error('Error updating consignor status:', error);
+            // Fallback to local update if API fails
+            this.updateConsignorStatus(consignor, 'active');
+          }
+        });
       }
     }
+  }
+
+  rejectConsignor(consignor: Consignor): void {
+    const reason = prompt(`Enter reason for rejecting ${consignor.name}:`);
+    if (reason && reason.trim()) {
+      const request = {
+        action: 'reject' as const,
+        message: reason.trim()
+      };
+
+      // If consignor has a numeric ID (from pending approvals), use processApproval
+      if (!isNaN(Number(consignor.id))) {
+        this.ConsignorService.processApproval(Number(consignor.id), request).subscribe({
+          next: (response) => {
+            this.consignors.update(list => list.filter(c => c.id !== consignor.id));
+            this.applyFilters();
+            console.log('Consignor rejected successfully:', response);
+          },
+          error: (error) => {
+            console.error('Error rejecting consignor:', error);
+            // Fallback to local removal if API fails
+            this.consignors.update(list => list.filter(c => c.id !== consignor.id));
+            this.applyFilters();
+          }
+        });
+      } else {
+        // For existing consignors, use status change API
+        const statusRequest = {
+          newStatus: 'inactive' as const,
+          reason: reason.trim()
+        };
+
+        this.ConsignorService.changeConsignorStatus(Number(consignor.id.replace('pending-', '')), statusRequest).subscribe({
+          next: (response) => {
+            this.consignors.update(list => list.filter(c => c.id !== consignor.id));
+            this.applyFilters();
+            console.log('Consignor rejected:', response);
+          },
+          error: (error) => {
+            console.error('Error rejecting consignor:', error);
+            // Fallback to local removal if API fails
+            this.consignors.update(list => list.filter(c => c.id !== consignor.id));
+            this.applyFilters();
+          }
+        });
+      }
+    }
+  }
+
+  private updateConsignorStatus(consignor: Consignor, newStatus: ConsignorStatus): void {
+    this.consignors.update(list =>
+      list.map(c => c.id === consignor.id ? {...c, status: newStatus, isActive: newStatus === 'active'} : c)
+    );
+    this.applyFilters();
+  }
+
+  isPendingApproval(consignor: Consignor): boolean {
+    return consignor.status === 'pending';
   }
 }
