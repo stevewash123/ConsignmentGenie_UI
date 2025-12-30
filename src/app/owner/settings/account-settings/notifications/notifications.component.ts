@@ -16,6 +16,10 @@ interface NotificationSettings {
   phoneNumber?: string;
   emailPreferences: { [key: string]: boolean };
   smsPreferences: { [key: string]: boolean };
+  thresholds: {
+    highValueSale?: number;
+    lowInventory?: number;
+  };
 }
 
 @Component({
@@ -49,7 +53,7 @@ interface NotificationSettings {
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       padding: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .form-section h3 {
@@ -147,7 +151,7 @@ interface NotificationSettings {
       display: grid;
       grid-template-columns: 3fr 1fr 1fr;
       border-bottom: 1px solid #f3f4f6;
-      padding: 1rem;
+      padding: 0.5rem 1rem;
       align-items: center;
       transition: background-color 0.2s ease;
     }
@@ -167,13 +171,7 @@ interface NotificationSettings {
     .notification-name {
       font-weight: 500;
       color: #111827;
-      margin-bottom: 0.25rem;
-    }
-
-    .notification-description {
-      font-size: 0.75rem;
-      color: #6b7280;
-      line-height: 1.4;
+      cursor: help;
     }
 
     .notification-channel {
@@ -343,7 +341,9 @@ export class AccountNotificationsComponent implements OnInit {
   private initializeForm(): void {
     const formControls: any = {
       primaryEmail: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['']
+      phoneNumber: [''],
+      highValueSaleThreshold: [500, [Validators.min(0)]],
+      lowInventoryThreshold: [10, [Validators.min(0)]]
     };
 
     // Add form controls for each notification type
@@ -372,7 +372,9 @@ export class AccountNotificationsComponent implements OnInit {
         // Patch form with settings
         const formValue: any = {
           primaryEmail: settings.primaryEmail,
-          phoneNumber: settings.phoneNumber || ''
+          phoneNumber: settings.phoneNumber || '',
+          highValueSaleThreshold: settings.thresholds?.highValueSale || 500,
+          lowInventoryThreshold: settings.thresholds?.lowInventory || 10
         };
 
         // Set email preferences
@@ -422,7 +424,11 @@ export class AccountNotificationsComponent implements OnInit {
         primaryEmail: formData.primaryEmail,
         phoneNumber: formData.phoneNumber || undefined,
         emailPreferences,
-        smsPreferences
+        smsPreferences,
+        thresholds: {
+          highValueSale: formData.highValueSaleThreshold,
+          lowInventory: formData.lowInventoryThreshold
+        }
       };
 
       await this.http.put(`${environment.apiUrl}/api/user/notification-settings`, settings).toPromise();
@@ -435,74 +441,6 @@ export class AccountNotificationsComponent implements OnInit {
     }
   }
 
-  enableAllEmail(): void {
-    const allNotifications = [
-      ...this.businessNotifications,
-      ...this.consignorNotifications,
-      ...this.salesNotifications,
-      ...this.systemNotifications
-    ];
-
-    const updates: any = {};
-    allNotifications.forEach(notification => {
-      updates[`email_${notification.key}`] = true;
-    });
-
-    this.notificationsForm.patchValue(updates);
-  }
-
-  disableAllEmail(): void {
-    const allNotifications = [
-      ...this.businessNotifications,
-      ...this.consignorNotifications,
-      ...this.salesNotifications,
-      ...this.systemNotifications
-    ];
-
-    const updates: any = {};
-    allNotifications.forEach(notification => {
-      updates[`email_${notification.key}`] = false;
-    });
-
-    this.notificationsForm.patchValue(updates);
-  }
-
-  enableAllSms(): void {
-    if (!this.notificationsForm.get('phoneNumber')?.value) {
-      this.showError('Please enter a phone number first');
-      return;
-    }
-
-    const allNotifications = [
-      ...this.businessNotifications,
-      ...this.consignorNotifications,
-      ...this.salesNotifications,
-      ...this.systemNotifications
-    ];
-
-    const updates: any = {};
-    allNotifications.forEach(notification => {
-      updates[`sms_${notification.key}`] = true;
-    });
-
-    this.notificationsForm.patchValue(updates);
-  }
-
-  disableAllSms(): void {
-    const allNotifications = [
-      ...this.businessNotifications,
-      ...this.consignorNotifications,
-      ...this.salesNotifications,
-      ...this.systemNotifications
-    ];
-
-    const updates: any = {};
-    allNotifications.forEach(notification => {
-      updates[`sms_${notification.key}`] = false;
-    });
-
-    this.notificationsForm.patchValue(updates);
-  }
 
   trackByNotificationKey(index: number, notification: NotificationType): string {
     return notification.key;
