@@ -1,0 +1,1369 @@
+
+> temp-angular-project@0.0.1 test
+> ng test --watch=false --browsers=ChromeHeadless
+
+❯ Building...
+✔ Building...
+Initial chunk files                                                                                  | Names                                                                                             |  Raw size
+chunk-QC3KRBSG.js                                                                                    | -                                                                                                 |   2.29 MB | 
+polyfills.js                                                                                         | polyfills                                                                                         |   1.03 MB | 
+chunk-GU6YJVW5.js                                                                                    | -                                                                                                 | 546.14 kB | 
+chunk-Y4UAD3TW.js                                                                                    | -                                                                                                 | 242.88 kB | 
+spec-app-shared-components-confirmation-dialog.component.spec.js                                     | spec-app-shared-components-confirmation-dialog.component.spec                                     | 235.09 kB | 
+chunk-M4MUWFUC.js                                                                                    | -                                                                                                 | 230.84 kB | 
+chunk-FGTY5YTG.js                                                                                    | -                                                                                                 | 197.56 kB | 
+spec-app-owner-settings-consignors-consignor-payout-settings.component.spec.js                       | spec-app-owner-settings-consignors-consignor-payout-settings.component.spec                       | 161.27 kB | 
+chunk-KWGSOWWO.js                                                                                    | -                                                                                                 | 144.58 kB | 
+spec-app-consignor-components-consignor-payout-detail.component.spec.js                              | spec-app-consignor-components-consignor-payout-detail.component.spec                              | 142.07 kB | 
+chunk-GHEA2HHI.js                                                                                    | -                                                                                                 | 125.45 kB | 
+spec-app-owner-components-item-form-modal.component.spec.js                                          | spec-app-owner-components-item-form-modal.component.spec                                          | 119.38 kB | 
+spec-app-owner-settings-business-policies-policies.component.spec.js                                 | spec-app-owner-settings-business-policies-policies.component.spec                                 | 115.34 kB | 
+spec-app-auth-login-simple.component.spec.js                                                         | spec-app-auth-login-simple.component.spec                                                         | 114.43 kB | 
+chunk-GXNJKNOR.js                                                                                    | -                                                                                                 | 113.47 kB | 
+spec-app-owner-settings-profile-basic-info-store-profile-basic-info.component.spec.js                | spec-app-owner-settings-profile-basic-info-store-profile-basic-info.component.spec                | 106.29 kB | 
+spec-app-owner-settings-profile-branding-branding.component.spec.js                                  | spec-app-owner-settings-profile-branding-branding.component.spec                                  | 101.32 kB | 
+spec-app-auth-consignor-shop-onboarding.component.spec.js                                            | spec-app-auth-consignor-shop-onboarding.component.spec                                            |  99.87 kB | 
+spec-app-shared-components-notification-preferences.component.spec.js                                | spec-app-shared-components-notification-preferences.component.spec                                |  99.16 kB | 
+spec-app-features-consignor-items-item-list-item-list.component.spec.js                              | spec-app-features-consignor-items-item-list-item-list.component.spec                              |  98.98 kB | 
+spec-app-admin-components-admin-dashboard.component.spec.js                                          | spec-app-admin-components-admin-dashboard.component.spec                                          |  96.94 kB | 
+spec-app-shared-components-notification-center.component.spec.js                                     | spec-app-shared-components-notification-center.component.spec                                     |  96.94 kB | 
+chunk-XBVWIVJ7.js                                                                                    | -                                                                                                 |  96.31 kB | 
+chunk-XPJ3KLHV.js                                                                                    | -                                                                                                 |  96.29 kB | 
+spec-app-auth-login.component.spec.js                                                                | spec-app-auth-login.component.spec                                                                |  89.75 kB | 
+spec-app-owner-components-owner-welcome-modal.component.spec.js                                      | spec-app-owner-components-owner-welcome-modal.component.spec                                      |  88.05 kB | 
+spec-app-services-payout.service.spec.js                                                             | spec-app-services-payout.service.spec                                                             |  85.79 kB | 
+spec-app-shopper-services-shopper-cart.service.spec.js                                               | spec-app-shopper-services-shopper-cart.service.spec                                               |  85.68 kB | 
+chunk-YH62VVPQ.js                                                                                    | -                                                                                                 |  84.82 kB | 
+spec-app-shared-components-social-auth.component.spec.js                                             | spec-app-shared-components-social-auth.component.spec                                             |  84.49 kB | 
+spec-app-auth-consignor-signup-step1.component.spec.js                                               | spec-app-auth-consignor-signup-step1.component.spec                                               |  80.00 kB | 
+spec-app-auth-owner-signup-step2.component.spec.js                                                   | spec-app-auth-owner-signup-step2.component.spec                                                   |  76.43 kB | 
+spec-app-shopper-services-shopper-store.service.spec.js                                              | spec-app-shopper-services-shopper-store.service.spec                                              |  74.27 kB | 
+spec-app-shared-components-invite-consignor-modal.component.spec.js                                  | spec-app-shared-components-invite-consignor-modal.component.spec                                  |  71.65 kB | 
+spec-app-shopper-services-shopper-auth.service.spec.js                                               | spec-app-shopper-services-shopper-auth.service.spec                                               |  70.42 kB | 
+spec-app-owner-components-record-sale.component.spec.js                                              | spec-app-owner-components-record-sale.component.spec                                              |  70.14 kB | 
+spec-app-owner-settings-business-receipt-settings-receipt-settings.component.spec.js                 | spec-app-owner-settings-business-receipt-settings-receipt-settings.component.spec                 |  69.11 kB | 
+spec-app-owner-settings-business-tax-settings.component.spec.js                                      | spec-app-owner-settings-business-tax-settings.component.spec                                      |  68.56 kB | 
+jasmine-cleanup-1.js                                                                                 | jasmine-cleanup-1                                                                                 |  67.20 kB | 
+spec-app-auth-owner-signup-step1.component.spec.js                                                   | spec-app-auth-owner-signup-step1.component.spec                                                   |  66.11 kB | 
+chunk-6NGD3XEK.js                                                                                    | -                                                                                                 |  65.14 kB | 
+spec-app-auth-consignor-signup-step2.component.spec.js                                               | spec-app-auth-consignor-signup-step2.component.spec                                               |  65.03 kB | 
+chunk-BQ6SUOUW.js                                                                                    | -                                                                                                 |  64.99 kB | 
+spec-app-consignor-components-modals-respond-price-change-respond-price-change.component.spec.js     | spec-app-consignor-components-modals-respond-price-change-respond-price-change.component.spec     |  63.78 kB | 
+spec-app-owner-components-item-detail.component.spec.js                                              | spec-app-owner-components-item-detail.component.spec                                              |  61.81 kB | 
+spec-app-features-consignor-statements-statements.component.spec.js                                  | spec-app-features-consignor-statements-statements.component.spec                                  |  60.21 kB | 
+spec-app-consignor-components-earnings-widget.component.spec.js                                      | spec-app-consignor-components-earnings-widget.component.spec                                      |  58.49 kB | 
+chunk-VH3SX4HI.js                                                                                    | -                                                                                                 |  58.34 kB | 
+chunk-ZDRBW3RV.js                                                                                    | -                                                                                                 |  56.90 kB | 
+chunk-7DMDLFE2.js                                                                                    | -                                                                                                 |  54.37 kB | 
+chunk-ZSG2RAEQ.js                                                                                    | -                                                                                                 |  52.66 kB | 
+chunk-VBPQ4ZQN.js                                                                                    | -                                                                                                 |  52.23 kB | 
+chunk-WN7ZGOZL.js                                                                                    | -                                                                                                 |  52.01 kB | 
+spec-app-shopper-services-shopper-catalog.service.spec.js                                            | spec-app-shopper-services-shopper-catalog.service.spec                                            |  50.95 kB | 
+chunk-YIB63QJW.js                                                                                    | -                                                                                                 |  49.33 kB | 
+chunk-NLL3TU2I.js                                                                                    | -                                                                                                 |  47.82 kB | 
+spec-app-shared-components-app-header.component.spec.js                                              | spec-app-shared-components-app-header.component.spec                                              |  46.03 kB | 
+chunk-S65HBN4Q.js                                                                                    | -                                                                                                 |  45.34 kB | 
+chunk-4UWDIH2N.js                                                                                    | -                                                                                                 |  43.44 kB | 
+spec-app-auth-register-success.component.spec.js                                                     | spec-app-auth-register-success.component.spec                                                     |  42.68 kB | 
+chunk-VFE4EWVH.js                                                                                    | -                                                                                                 |  39.91 kB | 
+spec-app-services-auth.interceptor.spec.js                                                           | spec-app-services-auth.interceptor.spec                                                           |  36.15 kB | 
+spec-app-public-role-selection.component.spec.js                                                     | spec-app-public-role-selection.component.spec                                                     |  35.39 kB | 
+chunk-D6WYR3OL.js                                                                                    | -                                                                                                 |  34.22 kB | 
+spec-app-consignor-components-modals-request-return-request-return.component.spec.js                 | spec-app-consignor-components-modals-request-return-request-return.component.spec                 |  33.88 kB | 
+chunk-GNHI5VVQ.js                                                                                    | -                                                                                                 |  33.05 kB | 
+spec-app-auth-unauthorized.component.spec.js                                                         | spec-app-auth-unauthorized.component.spec                                                         |  31.75 kB | 
+chunk-D4CTRTY4.js                                                                                    | -                                                                                                 |  31.66 kB | 
+chunk-OAV43Q2L.js                                                                                    | -                                                                                                 |  27.54 kB | 
+spec-app-consignor-components-status-badge.component.spec.js                                         | spec-app-consignor-components-status-badge.component.spec                                         |  26.68 kB | 
+spec-app-features-consignor-services-mock-statement.service.spec.js                                  | spec-app-features-consignor-services-mock-statement.service.spec                                  |  26.61 kB | 
+spec-app-services-item.service.spec.js                                                               | spec-app-services-item.service.spec                                                               |  26.20 kB | 
+chunk-S7VPICC6.js                                                                                    | -                                                                                                 |  26.17 kB | 
+spec-app-services-owner-invitation.service.spec.js                                                   | spec-app-services-owner-invitation.service.spec                                                   |  25.75 kB | 
+spec-app-owner-components-inventory-list.component.spec.js                                           | spec-app-owner-components-inventory-list.component.spec                                           |  25.01 kB | 
+chunk-JJOKVDYP.js                                                                                    | -                                                                                                 |  23.85 kB | 
+spec-app-auth-register.component.spec.js                                                             | spec-app-auth-register.component.spec                                                             |  23.29 kB | 
+spec-app-owner-settings-business-business-settings.component.spec.js                                 | spec-app-owner-settings-business-business-settings.component.spec                                 |  22.72 kB | 
+chunk-KKYGMLVH.js                                                                                    | -                                                                                                 |  20.44 kB | 
+spec-app-shared-components-app-footer.component.spec.js                                              | spec-app-shared-components-app-footer.component.spec                                              |  15.80 kB | 
+chunk-CJUBKMKM.js                                                                                    | -                                                                                                 |  15.78 kB | 
+chunk-ZJ55NVWE.js                                                                                    | -                                                                                                 |  14.53 kB | 
+spec-app-services-auth.service.spec.js                                                               | spec-app-services-auth.service.spec                                                               |  12.68 kB | 
+chunk-3X2DJEUR.js                                                                                    | -                                                                                                 |  12.28 kB | 
+chunk-MGFNRQHB.js                                                                                    | -                                                                                                 |  12.22 kB | 
+spec-app-shared-services-onboarding.service.spec.js                                                  | spec-app-shared-services-onboarding.service.spec                                                  |  11.52 kB | 
+spec-app-shared-components-status-badge.component.spec.js                                            | spec-app-shared-components-status-badge.component.spec                                            |  10.52 kB | 
+spec-app-features-consignor-items-modals-respond-price-change-respond-price-change.component.spec.js | spec-app-features-consignor-items-modals-respond-price-change-respond-price-change.component.spec |   9.84 kB | 
+spec-app-owner-components-owner-footer.component.spec.js                                             | spec-app-owner-components-owner-footer.component.spec                                             |   9.69 kB | 
+spec-app-admin-components-admin-header.component.spec.js                                             | spec-app-admin-components-admin-header.component.spec                                             |   9.65 kB | 
+spec-app-owner-components-suggestion-box-modal.component.spec.js                                     | spec-app-owner-components-suggestion-box-modal.component.spec                                     |   9.61 kB | 
+spec-app-shared-config-notification.config.spec.js                                                   | spec-app-shared-config-notification.config.spec                                                   |   9.43 kB | 
+chunk-ISM5XWY5.js                                                                                    | -                                                                                                 |   8.89 kB | 
+spec-app-consignor-services-consignor-portal.service.spec.js                                         | spec-app-consignor-services-consignor-portal.service.spec                                         |   8.87 kB | 
+spec-app-owner-components-item-search.component.spec.js                                              | spec-app-owner-components-item-search.component.spec                                              |   8.73 kB | 
+chunk-AY7YTBV5.js                                                                                    | -                                                                                                 |   8.52 kB | 
+chunk-5GWJROO7.js                                                                                    | -                                                                                                 |   8.01 kB | 
+spec-app-shared-components-notification-bell.component.spec.js                                       | spec-app-shared-components-notification-bell.component.spec                                       |   7.84 kB | 
+spec-app-services-admin.service.spec.js                                                              | spec-app-services-admin.service.spec                                                              |   6.37 kB | 
+styles.css                                                                                           | styles                                                                                            |   6.10 kB | 
+spec-app-features-consignor-items-item-card-item-card.component.spec.js                              | spec-app-features-consignor-items-item-card-item-card.component.spec                              |   5.76 kB | 
+chunk-M25W6YJH.js                                                                                    | -                                                                                                 |   5.60 kB | 
+spec-app-owner-components-cart.component.spec.js                                                     | spec-app-owner-components-cart.component.spec                                                     |   5.41 kB | 
+spec-app-owner-components-modals-initiate-price-change-initiate-price-change.component.spec.js       | spec-app-owner-components-modals-initiate-price-change-initiate-price-change.component.spec       |   5.24 kB | 
+spec-app-services-record-sale.service.spec.js                                                        | spec-app-services-record-sale.service.spec                                                        |   4.82 kB | 
+chunk-4GDUE4W4.js                                                                                    | -                                                                                                 |   4.65 kB | 
+spec-app-features-consignor-items-services-mock-consignor-item.service.spec.js                       | spec-app-features-consignor-items-services-mock-consignor-item.service.spec                       |   4.50 kB | 
+spec-app-services-condition.service.spec.js                                                          | spec-app-services-condition.service.spec                                                          |   3.01 kB | 
+spec-app-shared-services-loading.service.spec.js                                                     | spec-app-shared-services-loading.service.spec                                                     |   2.96 kB | 
+chunk-BL6UH76H.js                                                                                    | -                                                                                                 |   2.63 kB | 
+spec-app-services-inventory.service.spec.js                                                          | spec-app-services-inventory.service.spec                                                          |   2.43 kB | 
+chunk-V6FC2DIM.js                                                                                    | -                                                                                                 |   2.42 kB | 
+spec-app-consignor-services-mock-consignor-item.service.spec.js                                      | spec-app-consignor-services-mock-consignor-item.service.spec                                      |   1.95 kB | 
+chunk-NH23O4G2.js                                                                                    | -                                                                                                 | 918 bytes | 
+test_main.js                                                                                         | test_main                                                                                         | 610 bytes | 
+jasmine-cleanup-0.js                                                                                 | jasmine-cleanup-0                                                                                 | 519 bytes | 
+
+                                                                                                     | Initial total                                                                                     |   9.84 MB
+
+Application bundle generation complete. [29.760 seconds] - 2025-12-29T18:14:19.444Z
+
+[32m29 12 2025 13:14:21.664:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9876/
+[32m29 12 2025 13:14:21.666:INFO [launcher]: [39mLaunching browsers ChromeHeadless with concurrency unlimited
+[32m29 12 2025 13:14:21.713:INFO [launcher]: [39mStarting browser ChromeHeadless
+[32m29 12 2025 13:14:23.922:INFO [Chrome Headless 140.0.0.0 (Linux 0.0.0)]: [39mConnected on socket MwznhInc5jqEdANJAAAB with id 88970636
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error saving basic info:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 0, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 0 ', error: ErrorEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error saving basic info:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 0, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 0 ', error: ErrorEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+ERROR: 'Error loading shop profile:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 404, statusText: 'Unknown Error', url: 'http://localhost:5000/api/organization/profile', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/organization/profile: 404 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KLOG: [36m'Facebook sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+LOG: 'Facebook sign in clicked'
+[1A[2KLOG: [36m'Google sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+LOG: 'Google sign in clicked'
+[1A[2KLOG: [36m'Twitter sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+LOG: 'Twitter sign in clicked'
+[1A[2KLOG: [36m'LinkedIn sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+LOG: 'LinkedIn sign in clicked'
+[1A[2KLOG: [36m'Apple sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 0 of 1096[32m SUCCESS[39m (0 secs / 0 secs)
+LOG: 'Apple sign in clicked'
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 1 of 1096[32m SUCCESS[39m (0 secs / 0.167 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 2 of 1096[32m SUCCESS[39m (0 secs / 0.197 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 3 of 1096[32m SUCCESS[39m (0 secs / 0.224 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 4 of 1096[32m SUCCESS[39m (0 secs / 0.256 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 5 of 1096[32m SUCCESS[39m (0 secs / 0.282 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 6 of 1096[32m SUCCESS[39m (0 secs / 0.306 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 7 of 1096[32m SUCCESS[39m (0 secs / 0.344 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 8 of 1096[32m SUCCESS[39m (0 secs / 0.366 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 9 of 1096[32m SUCCESS[39m (0 secs / 0.392 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 10 of 1096[32m SUCCESS[39m (0 secs / 0.414 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 11 of 1096[32m SUCCESS[39m (0 secs / 0.436 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 12 of 1096[32m SUCCESS[39m (0 secs / 0.449 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 13 of 1096[32m SUCCESS[39m (0 secs / 0.46 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 14 of 1096[32m SUCCESS[39m (0 secs / 0.478 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 15 of 1096[32m SUCCESS[39m (0 secs / 0.527 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 16 of 1096[32m SUCCESS[39m (0 secs / 0.537 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 17 of 1096[32m SUCCESS[39m (0 secs / 0.569 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 18 of 1096[32m SUCCESS[39m (0 secs / 0.582 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 19 of 1096[32m SUCCESS[39m (0 secs / 0.594 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 20 of 1096[32m SUCCESS[39m (0 secs / 0.603 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 21 of 1096[32m SUCCESS[39m (0 secs / 0.613 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 22 of 1096[32m SUCCESS[39m (0 secs / 0.621 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 23 of 1096[32m SUCCESS[39m (0 secs / 0.63 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 24 of 1096[32m SUCCESS[39m (0 secs / 0.639 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 25 of 1096[32m SUCCESS[39m (0 secs / 0.646 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 26 of 1096[32m SUCCESS[39m (0 secs / 0.655 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 27 of 1096[32m SUCCESS[39m (0 secs / 0.664 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 28 of 1096[32m SUCCESS[39m (0 secs / 0.678 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 29 of 1096[32m SUCCESS[39m (0 secs / 0.69 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 30 of 1096[32m SUCCESS[39m (0 secs / 0.698 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 31 of 1096[32m SUCCESS[39m (0 secs / 0.707 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 32 of 1096[32m SUCCESS[39m (0 secs / 0.716 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 33 of 1096[32m SUCCESS[39m (0 secs / 0.725 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 34 of 1096[32m SUCCESS[39m (0 secs / 0.734 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 35 of 1096[32m SUCCESS[39m (0 secs / 0.743 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 36 of 1096[32m SUCCESS[39m (0 secs / 0.751 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 37 of 1096[32m SUCCESS[39m (0 secs / 0.763 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 38 of 1096[32m SUCCESS[39m (0 secs / 0.775 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 39 of 1096[32m SUCCESS[39m (0 secs / 0.786 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 40 of 1096[32m SUCCESS[39m (0 secs / 0.795 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 41 of 1096[32m SUCCESS[39m (0 secs / 0.896 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 42 of 1096[32m SUCCESS[39m (0 secs / 0.901 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 43 of 1096[32m SUCCESS[39m (0 secs / 0.906 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 44 of 1096[32m SUCCESS[39m (0 secs / 0.91 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 45 of 1096[32m SUCCESS[39m (0 secs / 0.914 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 46 of 1096[32m SUCCESS[39m (0 secs / 0.92 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 47 of 1096[32m SUCCESS[39m (0 secs / 0.927 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 48 of 1096[32m SUCCESS[39m (0 secs / 0.932 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 49 of 1096[32m SUCCESS[39m (0 secs / 0.937 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 50 of 1096[32m SUCCESS[39m (0 secs / 0.942 secs)
+[1A[2KERROR: [36m'Error loading items:', Error: Service error
+Error: Service error
+    at http://localhost:9876/base/src/app/features/consignor/items/item-list/item-list.component.spec.ts:85:68
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/operators/takeUntil.ts:48:34
+    at SafeSubscriber.<anonymous> (http://localhost:9876/base/node_modules/rxjs/src/internal/util/lift.ts:24:18)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:217:22
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 50 of 1096[32m SUCCESS[39m (0 secs / 0.942 secs)
+ERROR: 'Error loading items:', Error: Service error
+Error: Service error
+    at http://localhost:9876/base/src/app/features/consignor/items/item-list/item-list.component.spec.ts:85:68
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/operators/takeUntil.ts:48:34
+    at SafeSubscriber.<anonymous> (http://localhost:9876/base/node_modules/rxjs/src/internal/util/lift.ts:24:18)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:217:22
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+[1A[2KERROR: [36m'Onboarding failed:', Object{message: 'Network error'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 50 of 1096[32m SUCCESS[39m (0 secs / 0.942 secs)
+ERROR: 'Onboarding failed:', Object{message: 'Network error'}
+[1A[2KERROR: [36m'Failed to load shop data:', Object{message: 'Shop not found'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 50 of 1096[32m SUCCESS[39m (0 secs / 0.942 secs)
+ERROR: 'Failed to load shop data:', Object{message: 'Shop not found'}
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 51 of 1096[32m SUCCESS[39m (0 secs / 1.373 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 52 of 1096[32m SUCCESS[39m (0 secs / 1.38 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 53 of 1096[32m SUCCESS[39m (0 secs / 1.386 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 54 of 1096[32m SUCCESS[39m (0 secs / 1.39 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 55 of 1096[32m SUCCESS[39m (0 secs / 1.395 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 56 of 1096[32m SUCCESS[39m (0 secs / 1.4 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 57 of 1096[32m SUCCESS[39m (0 secs / 1.406 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 58 of 1096[32m SUCCESS[39m (0 secs / 1.422 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 59 of 1096[32m SUCCESS[39m (0 secs / 1.456 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 60 of 1096[32m SUCCESS[39m (0 secs / 1.46 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 61 of 1096[32m SUCCESS[39m (0 secs / 1.475 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 62 of 1096[32m SUCCESS[39m (0 secs / 1.484 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 63 of 1096[32m SUCCESS[39m (0 secs / 1.495 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 64 of 1096[32m SUCCESS[39m (0 secs / 1.499 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 65 of 1096[32m SUCCESS[39m (0 secs / 1.509 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 66 of 1096[32m SUCCESS[39m (0 secs / 1.518 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 67 of 1096[32m SUCCESS[39m (0 secs / 1.522 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 68 of 1096[32m SUCCESS[39m (0 secs / 1.53 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 69 of 1096[32m SUCCESS[39m (0 secs / 1.534 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 70 of 1096[32m SUCCESS[39m (0 secs / 1.543 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 71 of 1096[32m SUCCESS[39m (0 secs / 1.55 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 72 of 1096[32m SUCCESS[39m (0 secs / 1.554 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 73 of 1096[32m SUCCESS[39m (0 secs / 1.557 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 74 of 1096[32m SUCCESS[39m (0 secs / 1.56 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 75 of 1096[32m SUCCESS[39m (0 secs / 1.563 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 76 of 1096[32m SUCCESS[39m (0 secs / 1.566 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 77 of 1096[32m SUCCESS[39m (0 secs / 1.569 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 78 of 1096[32m SUCCESS[39m (0 secs / 1.572 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 79 of 1096[32m SUCCESS[39m (0 secs / 1.654 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 80 of 1096[32m SUCCESS[39m (0 secs / 1.675 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 81 of 1096[32m SUCCESS[39m (0 secs / 1.688 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 82 of 1096[32m SUCCESS[39m (0 secs / 1.707 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 83 of 1096[32m SUCCESS[39m (0 secs / 1.727 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 84 of 1096[32m SUCCESS[39m (0 secs / 1.74 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 85 of 1096[32m SUCCESS[39m (0 secs / 1.759 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 86 of 1096[32m SUCCESS[39m (0 secs / 1.771 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 87 of 1096[32m SUCCESS[39m (0 secs / 1.79 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 88 of 1096[32m SUCCESS[39m (0 secs / 1.808 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 89 of 1096[32m SUCCESS[39m (0 secs / 1.829 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 90 of 1096[32m SUCCESS[39m (0 secs / 1.849 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 91 of 1096[32m SUCCESS[39m (0 secs / 1.868 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 92 of 1096[32m SUCCESS[39m (0 secs / 1.891 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 93 of 1096[32m SUCCESS[39m (0 secs / 1.91 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 94 of 1096[32m SUCCESS[39m (0 secs / 1.931 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 95 of 1096[32m SUCCESS[39m (0 secs / 1.952 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 96 of 1096[32m SUCCESS[39m (0 secs / 1.972 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 97 of 1096[32m SUCCESS[39m (0 secs / 1.992 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 98 of 1096[32m SUCCESS[39m (0 secs / 2.005 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 99 of 1096[32m SUCCESS[39m (0 secs / 2.019 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+[1A[2KLOG: [36m'NotificationBell component initialized for role: consignor'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+LOG: 'NotificationBell component initialized for role: consignor'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: consignor'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+LOG: 'NotificationBell component initialized for role: consignor'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: consignor'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+LOG: 'NotificationBell component initialized for role: consignor'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: consignor'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+LOG: 'NotificationBell component initialized for role: consignor'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: consignor'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+LOG: 'NotificationBell component initialized for role: consignor'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: consignor'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+LOG: 'NotificationBell component initialized for role: consignor'
+[1A[2KERROR: [36m'Error fetching items:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 0, statusText: 'Unknown Error', url: 'http://localhost:5000/api/items?status=Available', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/items?status=Available: 0 ', error: ProgressEvent{isTrusted: false}}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+ERROR: 'Error fetching items:', HttpErrorResponse{headers: _HttpHeaders{headers: Map{}, normalizedNames: Map{}, lazyInit: undefined, lazyUpdate: null}, status: 0, statusText: 'Unknown Error', url: 'http://localhost:5000/api/items?status=Available', ok: false, type: undefined, redirected: undefined, name: 'HttpErrorResponse', message: 'Http failure response for http://localhost:5000/api/items?status=Available: 0 ', error: ProgressEvent{isTrusted: false}}
+[1A[2KERROR: [36m'Payout detail error:', Error: Failed to load payout details
+Error: Failed to load payout details
+    at http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.spec.ts:109:72
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at ConsignorPayoutDetailComponent2.loadPayoutDetail (http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.ts:435:55)
+    at ConsignorPayoutDetailComponent2.ngOnInit (http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.ts:427:12)
+    at UserContext.<anonymous> (http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.spec.ts:111:15)
+    at _ZoneDelegate.invoke (http://localhost:9876/base/node_modules/zone.js/fesm2015/zone.js:398:28)[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 100 of 1096[32m SUCCESS[39m (0 secs / 2.041 secs)
+ERROR: 'Payout detail error:', Error: Failed to load payout details
+Error: Failed to load payout details
+    at http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.spec.ts:109:72
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at ConsignorPayoutDetailComponent2.loadPayoutDetail (http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.ts:435:55)
+    at ConsignorPayoutDetailComponent2.ngOnInit (http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.ts:427:12)
+    at UserContext.<anonymous> (http://localhost:9876/base/src/app/consignor/components/consignor-payout-detail.component.spec.ts:111:15)
+    at _ZoneDelegate.invoke (http://localhost:9876/base/node_modules/zone.js/fesm2015/zone.js:398:28)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 101 of 1096[32m SUCCESS[39m (0 secs / 2.068 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 102 of 1096[32m SUCCESS[39m (0 secs / 2.097 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 103 of 1096[32m SUCCESS[39m (0 secs / 2.104 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 104 of 1096[32m SUCCESS[39m (0 secs / 2.108 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 105 of 1096[32m SUCCESS[39m (0 secs / 2.112 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 106 of 1096[32m SUCCESS[39m (0 secs / 2.115 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 107 of 1096[32m SUCCESS[39m (0 secs / 2.118 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 108 of 1096[32m SUCCESS[39m (0 secs / 2.121 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 109 of 1096[32m SUCCESS[39m (0 secs / 2.124 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 110 of 1096[32m SUCCESS[39m (0 secs / 2.127 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 111 of 1096[32m SUCCESS[39m (0 secs / 2.131 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 112 of 1096[32m SUCCESS[39m (0 secs / 2.134 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 113 of 1096[32m SUCCESS[39m (0 secs / 2.138 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 114 of 1096[32m SUCCESS[39m (0 secs / 2.144 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 115 of 1096[32m SUCCESS[39m (0 secs / 2.148 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 116 of 1096[32m SUCCESS[39m (0 secs / 2.154 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 117 of 1096[32m SUCCESS[39m (0 secs / 2.158 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 118 of 1096[32m SUCCESS[39m (0 secs / 2.161 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) RecordSaleService Integration should call real API for completing sale FAILED[39m
+	Expected undefined to be 'Cash'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/services/record-sale.service.spec.ts:97:53)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	Expected undefined to be 'test@example.com'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/services/record-sale.service.spec.ts:98:55)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	TypeError: Cannot read properties of undefined (reading 'length')
+	    at UserContext.<anonymous> (src/app/services/record-sale.service.spec.ts:99:46)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	    at ZoneImpl.run (node_modules/zone.js/fesm2015/zone.js:113:43)
+	    at runInTestZone (node_modules/zone.js/fesm2015/zone-testing.js:216:38)
+	    at UserContext.<anonymous> (node_modules/zone.js/fesm2015/zone-testing.js:234:32)
+	    at <Jasmine>
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 119 of 1096[31m (1 FAILED)[39m (0 secs / 2.168 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) RecordSaleService Integration should call real API for available items FAILED[39m
+	Expected 'Unknown' to be 'Test Consignor'.
+	    at <Jasmine>
+	    at Object.next (src/app/services/record-sale.service.spec.ts:45:38)
+	    at ConsumerObserver.next (node_modules/rxjs/src/internal/Subscriber.ts:155:25)
+	    at SafeSubscriber._next (node_modules/rxjs/src/internal/Subscriber.ts:113:22)
+	    at SafeSubscriber.next (node_modules/rxjs/src/internal/Subscriber.ts:71:12)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 120 of 1096[31m (2 FAILED)[39m (0 secs / 2.171 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 121 of 1096[31m (2 FAILED)[39m (0 secs / 2.205 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 122 of 1096[31m (2 FAILED)[39m (0 secs / 2.212 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 123 of 1096[31m (2 FAILED)[39m (0 secs / 2.217 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 124 of 1096[31m (2 FAILED)[39m (0 secs / 2.255 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 125 of 1096[31m (2 FAILED)[39m (0 secs / 2.267 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 126 of 1096[31m (2 FAILED)[39m (0 secs / 2.28 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 127 of 1096[31m (2 FAILED)[39m (0 secs / 2.285 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 128 of 1096[31m (2 FAILED)[39m (0 secs / 2.29 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 129 of 1096[31m (2 FAILED)[39m (0 secs / 2.297 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 130 of 1096[31m (2 FAILED)[39m (0 secs / 2.303 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 131 of 1096[31m (2 FAILED)[39m (0 secs / 2.307 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 132 of 1096[31m (2 FAILED)[39m (0 secs / 2.312 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 133 of 1096[31m (2 FAILED)[39m (0 secs / 2.316 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 134 of 1096[31m (2 FAILED)[39m (0 secs / 2.321 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 135 of 1096[31m (2 FAILED)[39m (0 secs / 2.326 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 136 of 1096[31m (2 FAILED)[39m (0 secs / 2.337 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 137 of 1096[31m (2 FAILED)[39m (0 secs / 2.342 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 138 of 1096[31m (2 FAILED)[39m (0 secs / 2.373 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 139 of 1096[31m (2 FAILED)[39m (0 secs / 2.381 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 140 of 1096[31m (2 FAILED)[39m (0 secs / 2.391 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 141 of 1096[31m (2 FAILED)[39m (0 secs / 2.4 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 142 of 1096[31m (2 FAILED)[39m (0 secs / 2.407 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 143 of 1096[31m (2 FAILED)[39m (0 secs / 2.415 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 144 of 1096[31m (2 FAILED)[39m (0 secs / 2.429 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 145 of 1096[31m (2 FAILED)[39m (0 secs / 2.436 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 146 of 1096[31m (2 FAILED)[39m (0 secs / 2.444 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 147 of 1096[31m (2 FAILED)[39m (0 secs / 2.447 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 148 of 1096[31m (2 FAILED)[39m (0 secs / 2.756 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 149 of 1096[31m (2 FAILED)[39m (0 secs / 3.268 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+[1A[2KLOG: [36m'Owner registration response:', Object{success: true, role: 'owner', message: 'Success'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: true, role: 'owner', message: 'Success'}
+[1A[2KLOG: [36m'User logged in with role:', 'owner'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'User logged in with role:', 'owner'
+[1A[2KLOG: [36m'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}
+[1A[2KLOG: [36m'User logged in with role:', 'owner'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'User logged in with role:', 'owner'
+[1A[2KLOG: [36m'Owner registration response:', Object{success: false}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: false}
+[1A[2KLOG: [36m'Owner registration response:', Object{success: false, message: 'Shop name already exists'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: false, message: 'Shop name already exists'}
+[1A[2KLOG: [36m'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}
+[1A[2KLOG: [36m'User logged in with role:', 'owner'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'User logged in with role:', 'owner'
+[1A[2KLOG: [36m'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}
+[1A[2KLOG: [36m'User logged in with role:', 'owner'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'User logged in with role:', 'owner'
+[1A[2KLOG: [36m'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful'}
+[1A[2KLOG: [36m'User logged in with role:', 'owner'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'User logged in with role:', 'owner'
+[1A[2KLOG: [36m'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful', token: 'jwt-token-123'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Owner registration response:', Object{success: true, role: 'owner', message: 'Registration successful', token: 'jwt-token-123'}
+[1A[2KLOG: [36m'User logged in with role:', 'owner'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'User logged in with role:', 'owner'
+[1A[2KLOG: [36m'Auto-login successful, redirecting to owner dashboard'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Auto-login successful, redirecting to owner dashboard'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KLOG: [36m'Using default tax settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 150 of 1096[31m (2 FAILED)[39m (0 secs / 3.776 secs)
+LOG: 'Using default tax settings'
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 151 of 1096[31m (2 FAILED)[39m (0 secs / 4.286 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 152 of 1096[31m (2 FAILED)[39m (0 secs / 4.334 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 153 of 1096[31m (2 FAILED)[39m (0 secs / 4.356 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 154 of 1096[31m (2 FAILED)[39m (0 secs / 4.375 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 155 of 1096[31m (2 FAILED)[39m (0 secs / 4.394 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 156 of 1096[31m (2 FAILED)[39m (0 secs / 4.413 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 157 of 1096[31m (2 FAILED)[39m (0 secs / 4.429 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 158 of 1096[31m (2 FAILED)[39m (0 secs / 4.444 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 159 of 1096[31m (2 FAILED)[39m (0 secs / 4.459 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 160 of 1096[31m (2 FAILED)[39m (0 secs / 4.474 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 161 of 1096[31m (2 FAILED)[39m (0 secs / 4.49 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 162 of 1096[31m (2 FAILED)[39m (0 secs / 4.506 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 163 of 1096[31m (2 FAILED)[39m (0 secs / 4.522 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 164 of 1096[31m (2 FAILED)[39m (0 secs / 4.538 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 165 of 1096[31m (2 FAILED)[39m (0 secs / 4.554 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 166 of 1096[31m (2 FAILED)[39m (0 secs / 4.569 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 167 of 1096[31m (2 FAILED)[39m (0 secs / 4.585 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 168 of 1096[31m (2 FAILED)[39m (0 secs / 4.601 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 169 of 1096[31m (2 FAILED)[39m (0 secs / 4.616 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 170 of 1096[31m (2 FAILED)[39m (0 secs / 4.632 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 171 of 1096[31m (2 FAILED)[39m (0 secs / 4.648 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 172 of 1096[31m (2 FAILED)[39m (0 secs / 4.664 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 173 of 1096[31m (2 FAILED)[39m (0 secs / 4.719 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 174 of 1096[31m (2 FAILED)[39m (0 secs / 4.736 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 175 of 1096[31m (2 FAILED)[39m (0 secs / 4.739 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 176 of 1096[31m (2 FAILED)[39m (0 secs / 4.756 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 177 of 1096[31m (2 FAILED)[39m (0 secs / 4.773 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 178 of 1096[31m (2 FAILED)[39m (0 secs / 4.794 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 179 of 1096[31m (2 FAILED)[39m (0 secs / 4.812 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 180 of 1096[31m (2 FAILED)[39m (0 secs / 4.829 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 181 of 1096[31m (2 FAILED)[39m (0 secs / 4.848 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 182 of 1096[31m (2 FAILED)[39m (0 secs / 4.851 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 183 of 1096[31m (2 FAILED)[39m (0 secs / 4.868 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 184 of 1096[31m (2 FAILED)[39m (0 secs / 4.885 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 185 of 1096[31m (2 FAILED)[39m (0 secs / 4.902 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 186 of 1096[31m (2 FAILED)[39m (0 secs / 4.906 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 187 of 1096[31m (2 FAILED)[39m (0 secs / 4.922 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 188 of 1096[31m (2 FAILED)[39m (0 secs / 4.938 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 189 of 1096[31m (2 FAILED)[39m (0 secs / 4.956 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 190 of 1096[31m (2 FAILED)[39m (0 secs / 4.971 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 191 of 1096[31m (2 FAILED)[39m (0 secs / 4.976 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 192 of 1096[31m (2 FAILED)[39m (0 secs / 4.981 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 193 of 1096[31m (2 FAILED)[39m (0 secs / 4.985 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 194 of 1096[31m (2 FAILED)[39m (0 secs / 5.004 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 195 of 1096[31m (2 FAILED)[39m (0 secs / 5.01 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 196 of 1096[31m (2 FAILED)[39m (0 secs / 5.016 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 197 of 1096[31m (2 FAILED)[39m (0 secs / 5.021 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 198 of 1096[31m (2 FAILED)[39m (0 secs / 5.026 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 199 of 1096[31m (2 FAILED)[39m (0 secs / 5.031 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+[1A[2KLOG: [36m'Twitter sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Twitter sign in clicked'
+[1A[2KLOG: [36m'LinkedIn sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'LinkedIn sign in clicked'
+[1A[2KLOG: [36m'Facebook sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Facebook sign in clicked'
+[1A[2KLOG: [36m'Apple sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Apple sign in clicked'
+[1A[2KLOG: [36m'Google sign in clicked'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Google sign in clicked'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Using default payout settings'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Using default payout settings'
+[1A[2KLOG: [36m'Consignor registration successful:', Object{success: false, message: 'Registration failed'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Consignor registration successful:', Object{success: false, message: 'Registration failed'}
+[1A[2KLOG: [36m'Consignor registration successful:', Object{success: true}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Consignor registration successful:', Object{success: true}
+[1A[2KLOG: [36m'Consignor registration successful:', Object{success: false, message: 'Registration failed'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Consignor registration successful:', Object{success: false, message: 'Registration failed'}
+[1A[2KERROR: [36m'Consignor registration failed:', Object{message: 'Network error'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+ERROR: 'Consignor registration failed:', Object{message: 'Network error'}
+[1A[2KLOG: [36m'Consignor registration successful:', Object{success: false}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Consignor registration successful:', Object{success: false}
+[1A[2KLOG: [36m'Consignor registration successful:', Object{success: true}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Consignor registration successful:', Object{success: true}
+[1A[2KLOG: [36m'Consignor registration successful:', Object{success: true}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Consignor registration successful:', Object{success: true}
+[1A[2KLOG: [36m'Consignor registration successful:', Object{success: true}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 200 of 1096[31m (2 FAILED)[39m (0 secs / 5.038 secs)
+LOG: 'Consignor registration successful:', Object{success: true}
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 201 of 1096[31m (2 FAILED)[39m (0 secs / 5.065 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 202 of 1096[31m (2 FAILED)[39m (0 secs / 5.074 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 203 of 1096[31m (2 FAILED)[39m (0 secs / 5.085 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 204 of 1096[31m (2 FAILED)[39m (0 secs / 5.094 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 205 of 1096[31m (2 FAILED)[39m (0 secs / 5.103 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 206 of 1096[31m (2 FAILED)[39m (0 secs / 5.112 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 207 of 1096[31m (2 FAILED)[39m (0 secs / 5.121 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 208 of 1096[31m (2 FAILED)[39m (0 secs / 5.134 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 209 of 1096[31m (2 FAILED)[39m (0 secs / 5.144 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 210 of 1096[31m (2 FAILED)[39m (0 secs / 5.157 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 211 of 1096[31m (2 FAILED)[39m (0 secs / 5.175 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 212 of 1096[31m (2 FAILED)[39m (0 secs / 5.186 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 213 of 1096[31m (2 FAILED)[39m (0 secs / 5.198 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 214 of 1096[31m (2 FAILED)[39m (0 secs / 5.209 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 215 of 1096[31m (2 FAILED)[39m (0 secs / 5.221 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 216 of 1096[31m (2 FAILED)[39m (0 secs / 5.23 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 217 of 1096[31m (2 FAILED)[39m (0 secs / 5.238 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 218 of 1096[31m (2 FAILED)[39m (0 secs / 5.31 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 219 of 1096[31m (2 FAILED)[39m (0 secs / 5.343 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 220 of 1096[31m (2 FAILED)[39m (0 secs / 5.375 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 221 of 1096[31m (2 FAILED)[39m (0 secs / 5.405 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 222 of 1096[31m (2 FAILED)[39m (0 secs / 5.435 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 223 of 1096[31m (2 FAILED)[39m (0 secs / 5.465 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 224 of 1096[31m (2 FAILED)[39m (0 secs / 5.495 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 225 of 1096[31m (2 FAILED)[39m (0 secs / 5.515 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 226 of 1096[31m (2 FAILED)[39m (0 secs / 5.544 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 227 of 1096[31m (2 FAILED)[39m (0 secs / 5.583 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 228 of 1096[31m (2 FAILED)[39m (0 secs / 5.603 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 229 of 1096[31m (2 FAILED)[39m (0 secs / 5.631 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 230 of 1096[31m (2 FAILED)[39m (0 secs / 5.66 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 231 of 1096[31m (2 FAILED)[39m (0 secs / 5.688 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 232 of 1096[31m (2 FAILED)[39m (0 secs / 5.719 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 233 of 1096[31m (2 FAILED)[39m (0 secs / 5.752 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 234 of 1096[31m (2 FAILED)[39m (0 secs / 5.785 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 235 of 1096[31m (2 FAILED)[39m (0 secs / 5.805 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 236 of 1096[31m (2 FAILED)[39m (0 secs / 5.817 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 237 of 1096[31m (2 FAILED)[39m (0 secs / 5.83 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 238 of 1096[31m (2 FAILED)[39m (0 secs / 5.838 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 239 of 1096[31m (2 FAILED)[39m (0 secs / 5.846 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 240 of 1096[31m (2 FAILED)[39m (0 secs / 5.852 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 241 of 1096[31m (2 FAILED)[39m (0 secs / 5.859 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 242 of 1096[31m (2 FAILED)[39m (0 secs / 5.865 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 243 of 1096[31m (2 FAILED)[39m (0 secs / 5.872 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 244 of 1096[31m (2 FAILED)[39m (0 secs / 5.878 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 245 of 1096[31m (2 FAILED)[39m (0 secs / 5.884 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 246 of 1096[31m (2 FAILED)[39m (0 secs / 5.891 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 247 of 1096[31m (2 FAILED)[39m (0 secs / 5.899 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 248 of 1096[31m (2 FAILED)[39m (0 secs / 5.907 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 249 of 1096[31m (2 FAILED)[39m (0 secs / 5.914 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 250 of 1096[31m (2 FAILED)[39m (0 secs / 5.92 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 251 of 1096[31m (2 FAILED)[39m (0 secs / 5.929 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 252 of 1096[31m (2 FAILED)[39m (0 secs / 5.938 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 253 of 1096[31m (2 FAILED)[39m (0 secs / 5.944 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 254 of 1096[31m (2 FAILED)[39m (0 secs / 5.951 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 255 of 1096[31m (2 FAILED)[39m (0 secs / 5.959 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 256 of 1096[31m (2 FAILED)[39m (0 secs / 5.967 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 257 of 1096[31m (2 FAILED)[39m (0 secs / 5.973 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 258 of 1096[31m (2 FAILED)[39m (0 secs / 5.982 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 259 of 1096[31m (2 FAILED)[39m (0 secs / 5.989 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 260 of 1096[31m (2 FAILED)[39m (0 secs / 5.992 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 261 of 1096[31m (2 FAILED)[39m (0 secs / 5.995 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 262 of 1096[31m (2 FAILED)[39m (0 secs / 5.997 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 263 of 1096[31m (2 FAILED)[39m (0 secs / 5.999 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 264 of 1096[31m (2 FAILED)[39m (0 secs / 6.002 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 265 of 1096[31m (2 FAILED)[39m (0 secs / 6.004 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 266 of 1096[31m (2 FAILED)[39m (0 secs / 6.006 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 267 of 1096[31m (2 FAILED)[39m (0 secs / 6.008 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 268 of 1096[31m (2 FAILED)[39m (0 secs / 6.01 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 269 of 1096[31m (2 FAILED)[39m (0 secs / 6.012 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 270 of 1096[31m (2 FAILED)[39m (0 secs / 6.014 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 271 of 1096[31m (2 FAILED)[39m (0 secs / 6.016 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 272 of 1096[31m (2 FAILED)[39m (0 secs / 6.018 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 273 of 1096[31m (2 FAILED)[39m (0 secs / 6.02 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 274 of 1096[31m (2 FAILED)[39m (0 secs / 6.051 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 275 of 1096[31m (2 FAILED)[39m (0 secs / 6.054 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 276 of 1096[31m (2 FAILED)[39m (0 secs / 6.057 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 277 of 1096[31m (2 FAILED)[39m (0 secs / 6.059 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 278 of 1096[31m (2 FAILED)[39m (0 secs / 6.062 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 279 of 1096[31m (2 FAILED)[39m (0 secs / 6.065 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 280 of 1096[31m (2 FAILED)[39m (0 secs / 6.068 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) RequestReturnComponent should bind reason textarea correctly FAILED[39m
+	Expected '' to be 'Test reason'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/consignor/components/modals/request-return/request-return.component.spec.ts:149:28)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 281 of 1096[31m (3 FAILED)[39m (0 secs / 6.075 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 282 of 1096[31m (3 FAILED)[39m (0 secs / 6.079 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 283 of 1096[31m (3 FAILED)[39m (0 secs / 6.082 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 284 of 1096[31m (3 FAILED)[39m (0 secs / 6.088 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 285 of 1096[31m (3 FAILED)[39m (0 secs / 6.094 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 286 of 1096[31m (3 FAILED)[39m (0 secs / 6.097 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 287 of 1096[31m (3 FAILED)[39m (0 secs / 6.1 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 288 of 1096[31m (3 FAILED)[39m (0 secs / 6.101 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 289 of 1096[31m (3 FAILED)[39m (0 secs / 6.103 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 290 of 1096[31m (3 FAILED)[39m (0 secs / 6.105 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 291 of 1096[31m (3 FAILED)[39m (0 secs / 6.107 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 292 of 1096[31m (3 FAILED)[39m (0 secs / 6.109 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 293 of 1096[31m (3 FAILED)[39m (0 secs / 6.126 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 294 of 1096[31m (3 FAILED)[39m (0 secs / 6.13 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 295 of 1096[31m (3 FAILED)[39m (0 secs / 6.133 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 296 of 1096[31m (3 FAILED)[39m (0 secs / 6.138 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 297 of 1096[31m (3 FAILED)[39m (0 secs / 6.141 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) StatementsComponent should retry loading when loadStatements is called again FAILED[39m
+	Expected spy ConsignorPortalService.getStatements to have been called 2 times. It was called 1 times.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:253:53)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 298 of 1096[31m (4 FAILED)[39m (0 secs / 6.146 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) StatementsComponent should load statements on init FAILED[39m
+	Expected 11 to be 12.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:101:43)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	Expected 'November 2024' to be 'December 2024'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:102:47)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 299 of 1096[31m (5 FAILED)[39m (0 secs / 6.151 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KERROR: [36m'Error deleting item:', Object{status: 0, message: 'Delete failed'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+ERROR: 'Error deleting item:', Object{status: 0, message: 'Delete failed'}
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KERROR: [36m'Error updating item status:', Object{status: 0, message: 'Update failed'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+ERROR: 'Error updating item status:', Object{status: 0, message: 'Update failed'}
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 300 of 1096[31m (5 FAILED)[39m (0 secs / 6.154 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) StatementsComponent should display statements table when data is loaded FAILED[39m
+	Expected 1 to be 2.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:161:49)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 301 of 1096[31m (6 FAILED)[39m (0 secs / 6.158 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 302 of 1096[31m (6 FAILED)[39m (0 secs / 6.162 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 303 of 1096[31m (6 FAILED)[39m (0 secs / 6.166 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 304 of 1096[31m (6 FAILED)[39m (0 secs / 6.169 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) StatementsComponent should set downloading state during PDF generation FAILED[39m
+	Expected true to be false.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:217:37)
+	    at UserContext.fakeAsyncFn (node_modules/zone.js/fesm2015/zone-testing.js:1715:26)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 305 of 1096[31m (7 FAILED)[39m (0 secs / 6.174 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) StatementsComponent should handle PDF download successfully FAILED[39m
+	Expected spy ConsignorPortalService.downloadStatementPdfByPeriod to have been called with:
+	  [ 2024, 12 ]
+	but it was never called.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:175:68)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	Expected spy downloadFile to have been called with:
+	  [ [object Blob], 'statement-2024-12.pdf' ]
+	but it was never called.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:176:45)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 306 of 1096[31m (8 FAILED)[39m (0 secs / 6.18 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 307 of 1096[31m (8 FAILED)[39m (0 secs / 6.184 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) StatementsComponent should handle PDF download error FAILED[39m
+	Expected spy alert to have been called with:
+	  [ 'Failed to download PDF. Please try again.' ]
+	but it was never called.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:192:26)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	Expected true to be false.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:193:37)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	Expected spy error to have been called with:
+	  [ 'Error downloading PDF:', <jasmine.any(Error)> ]
+	but it was never called.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:194:27)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 308 of 1096[31m (9 FAILED)[39m (0 secs / 6.189 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) StatementsComponent should handle service error FAILED[39m
+	Expected 'Unable to load statements. Please try again.' to be 'Failed to load statements. Please try again later.'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/statements/statements.component.spec.ts:127:29)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 309 of 1096[31m (10 FAILED)[39m (0 secs / 6.194 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 310 of 1096[31m (10 FAILED)[39m (0 secs / 6.298 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 311 of 1096[31m (10 FAILED)[39m (0 secs / 6.305 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 312 of 1096[31m (10 FAILED)[39m (0 secs / 6.312 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 313 of 1096[31m (10 FAILED)[39m (0 secs / 6.332 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 314 of 1096[31m (10 FAILED)[39m (0 secs / 6.339 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 315 of 1096[31m (10 FAILED)[39m (0 secs / 6.35 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 316 of 1096[31m (10 FAILED)[39m (0 secs / 6.356 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 317 of 1096[31m (10 FAILED)[39m (0 secs / 6.361 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 318 of 1096[31m (10 FAILED)[39m (0 secs / 6.369 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 319 of 1096[31m (10 FAILED)[39m (0 secs / 6.375 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 320 of 1096[31m (10 FAILED)[39m (0 secs / 6.548 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) InventoryListComponent Component Creation should have default filter values FAILED[39m
+	Expected 'sku' to be 'CreatedAt'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/owner/settings/business/business-settings.component.spec.ts:186:32)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 321 of 1096[31m (11 FAILED)[39m (0 secs / 6.564 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 322 of 1096[31m (11 FAILED)[39m (0 secs / 6.584 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 323 of 1096[31m (11 FAILED)[39m (0 secs / 6.617 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 324 of 1096[31m (11 FAILED)[39m (0 secs / 6.642 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 325 of 1096[31m (11 FAILED)[39m (0 secs / 6.666 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 326 of 1096[31m (11 FAILED)[39m (0 secs / 6.689 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 327 of 1096[31m (11 FAILED)[39m (0 secs / 6.712 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 328 of 1096[31m (11 FAILED)[39m (0 secs / 6.734 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 329 of 1096[31m (11 FAILED)[39m (0 secs / 6.755 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) InventoryListComponent Filtering should clear all filters FAILED[39m
+	Expected 'sku' to be 'CreatedAt'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/owner/settings/business/business-settings.component.spec.ts:453:32)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 330 of 1096[31m (12 FAILED)[39m (0 secs / 6.778 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 331 of 1096[31m (12 FAILED)[39m (0 secs / 6.799 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 332 of 1096[31m (12 FAILED)[39m (0 secs / 6.82 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 333 of 1096[31m (12 FAILED)[39m (0 secs / 6.841 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 334 of 1096[31m (12 FAILED)[39m (0 secs / 6.861 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 335 of 1096[31m (12 FAILED)[39m (0 secs / 6.881 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 336 of 1096[31m (12 FAILED)[39m (0 secs / 6.902 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 337 of 1096[31m (12 FAILED)[39m (0 secs / 6.922 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 338 of 1096[31m (12 FAILED)[39m (0 secs / 6.944 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 339 of 1096[31m (12 FAILED)[39m (0 secs / 6.965 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 340 of 1096[31m (12 FAILED)[39m (0 secs / 6.987 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) InventoryListComponent Table View Rendering should render table with correct headers FAILED[39m
+	Expected 7 to be 10.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/owner/settings/business/business-settings.component.spec.ts:263:35)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 341 of 1096[31m (13 FAILED)[39m (0 secs / 7.008 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 342 of 1096[31m (13 FAILED)[39m (0 secs / 7.027 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) InventoryListComponent Table View Rendering should display SKU in table cells FAILED[39m
+	Expected 0 to be 2.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/owner/settings/business/business-settings.component.spec.ts:273:31)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	TypeError: Cannot read properties of undefined (reading 'textContent')
+	    at UserContext.<anonymous> (src/app/owner/settings/business/business-settings.component.spec.ts:274:26)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+	    at ZoneImpl.run (node_modules/zone.js/fesm2015/zone.js:113:43)
+	    at runInTestZone (node_modules/zone.js/fesm2015/zone-testing.js:216:38)
+	    at UserContext.<anonymous> (node_modules/zone.js/fesm2015/zone-testing.js:234:32)
+	    at <Jasmine>
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 343 of 1096[31m (14 FAILED)[39m (0 secs / 7.048 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 344 of 1096[31m (14 FAILED)[39m (0 secs / 7.069 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 345 of 1096[31m (14 FAILED)[39m (0 secs / 7.089 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 346 of 1096[31m (14 FAILED)[39m (0 secs / 7.11 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 347 of 1096[31m (14 FAILED)[39m (0 secs / 7.13 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 348 of 1096[31m (14 FAILED)[39m (0 secs / 7.15 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 349 of 1096[31m (14 FAILED)[39m (0 secs / 7.163 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+[1A[2KERROR: [36m'Error loading items:', Object{status: 0, message: 'API Error'}[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+ERROR: 'Error loading items:', Object{status: 0, message: 'API Error'}
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'🔧 BulkImportModal: Initializing, loading consignors...'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '🔧 BulkImportModal: Initializing, loading consignors...'
+[1A[2KLOG: [36m'📡 BulkImportModal: Calling consignorService.getConsignors()'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: '📡 BulkImportModal: Calling consignorService.getConsignors()'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KLOG: [36m'NotificationBell component initialized for role: admin'[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 350 of 1096[31m (14 FAILED)[39m (0 secs / 7.186 secs)
+LOG: 'NotificationBell component initialized for role: admin'
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 351 of 1096[31m (14 FAILED)[39m (0 secs / 7.202 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 352 of 1096[31m (14 FAILED)[39m (0 secs / 7.216 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 353 of 1096[31m (14 FAILED)[39m (0 secs / 7.233 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 354 of 1096[31m (14 FAILED)[39m (0 secs / 7.247 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 355 of 1096[31m (14 FAILED)[39m (0 secs / 7.26 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 356 of 1096[31m (14 FAILED)[39m (0 secs / 7.277 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 357 of 1096[31m (14 FAILED)[39m (0 secs / 7.293 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 358 of 1096[31m (14 FAILED)[39m (0 secs / 7.312 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 359 of 1096[31m (14 FAILED)[39m (0 secs / 7.332 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 360 of 1096[31m (14 FAILED)[39m (0 secs / 7.352 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 361 of 1096[31m (14 FAILED)[39m (0 secs / 7.37 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 362 of 1096[31m (14 FAILED)[39m (0 secs / 7.387 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 363 of 1096[31m (14 FAILED)[39m (0 secs / 7.401 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 364 of 1096[31m (14 FAILED)[39m (0 secs / 7.414 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 365 of 1096[31m (14 FAILED)[39m (0 secs / 7.433 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 366 of 1096[31m (14 FAILED)[39m (0 secs / 7.451 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 367 of 1096[31m (14 FAILED)[39m (0 secs / 7.472 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 368 of 1096[31m (14 FAILED)[39m (0 secs / 7.493 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 369 of 1096[31m (14 FAILED)[39m (0 secs / 7.513 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 370 of 1096[31m (14 FAILED)[39m (0 secs / 7.532 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 371 of 1096[31m (14 FAILED)[39m (0 secs / 7.552 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 372 of 1096[31m (14 FAILED)[39m (0 secs / 7.572 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 373 of 1096[31m (14 FAILED)[39m (0 secs / 7.592 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 374 of 1096[31m (14 FAILED)[39m (0 secs / 7.602 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 375 of 1096[31m (14 FAILED)[39m (0 secs / 7.618 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 376 of 1096[31m (14 FAILED)[39m (0 secs / 7.621 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 377 of 1096[31m (14 FAILED)[39m (0 secs / 7.633 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 378 of 1096[31m (14 FAILED)[39m (0 secs / 7.642 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 379 of 1096[31m (14 FAILED)[39m (0 secs / 7.651 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 380 of 1096[31m (14 FAILED)[39m (0 secs / 7.66 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 381 of 1096[31m (14 FAILED)[39m (0 secs / 7.664 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 382 of 1096[31m (14 FAILED)[39m (0 secs / 7.672 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 383 of 1096[31m (14 FAILED)[39m (0 secs / 7.68 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 384 of 1096[31m (14 FAILED)[39m (0 secs / 7.689 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 385 of 1096[31m (14 FAILED)[39m (0 secs / 7.698 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 386 of 1096[31m (14 FAILED)[39m (0 secs / 7.707 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 387 of 1096[31m (14 FAILED)[39m (0 secs / 7.715 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 388 of 1096[31m (14 FAILED)[39m (0 secs / 7.724 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 389 of 1096[31m (14 FAILED)[39m (0 secs / 7.733 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 390 of 1096[31m (14 FAILED)[39m (0 secs / 7.742 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 391 of 1096[31m (14 FAILED)[39m (0 secs / 7.75 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 392 of 1096[31m (14 FAILED)[39m (0 secs / 7.776 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 393 of 1096[31m (14 FAILED)[39m (0 secs / 7.782 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 394 of 1096[31m (14 FAILED)[39m (0 secs / 7.787 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 395 of 1096[31m (14 FAILED)[39m (0 secs / 7.791 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 396 of 1096[31m (14 FAILED)[39m (0 secs / 7.796 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 397 of 1096[31m (14 FAILED)[39m (0 secs / 7.801 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 398 of 1096[31m (14 FAILED)[39m (0 secs / 7.806 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 399 of 1096[31m (14 FAILED)[39m (0 secs / 7.81 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 400 of 1096[31m (14 FAILED)[39m (0 secs / 7.815 secs)
+[1A[2KERROR: [36m'Price change response error:', Error: Service error
+Error: Service error
+    at http://localhost:9876/base/src/app/features/consignor/items/modals/respond-price-change/respond-price-change.component.spec.ts:176:71
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/operators/takeUntil.ts:48:34
+    at SafeSubscriber.<anonymous> (http://localhost:9876/base/node_modules/rxjs/src/internal/util/lift.ts:24:18)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:217:22
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)[39m
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 400 of 1096[31m (14 FAILED)[39m (0 secs / 7.815 secs)
+ERROR: 'Price change response error:', Error: Service error
+Error: Service error
+    at http://localhost:9876/base/src/app/features/consignor/items/modals/respond-price-change/respond-price-change.component.spec.ts:176:71
+    at _Observable.init [as _subscribe] (http://localhost:9876/base/node_modules/rxjs/src/internal/observable/throwError.ts:123:68)
+    at _Observable._trySubscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:235:19)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:225:18
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+    at _Observable.subscribe (http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:211:5)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/operators/takeUntil.ts:48:34
+    at SafeSubscriber.<anonymous> (http://localhost:9876/base/node_modules/rxjs/src/internal/util/lift.ts:24:18)
+    at http://localhost:9876/base/node_modules/rxjs/src/internal/Observable.ts:217:22
+    at errorContext (http://localhost:9876/base/node_modules/rxjs/src/internal/util/errorContext.ts:29:5)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 401 of 1096[31m (14 FAILED)[39m (0 secs / 7.822 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 402 of 1096[31m (14 FAILED)[39m (0 secs / 7.829 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 403 of 1096[31m (14 FAILED)[39m (0 secs / 7.835 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 404 of 1096[31m (14 FAILED)[39m (0 secs / 7.84 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 405 of 1096[31m (14 FAILED)[39m (0 secs / 7.844 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 406 of 1096[31m (14 FAILED)[39m (0 secs / 7.848 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 407 of 1096[31m (14 FAILED)[39m (0 secs / 7.855 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 408 of 1096[31m (14 FAILED)[39m (0 secs / 7.863 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 409 of 1096[31m (14 FAILED)[39m (0 secs / 7.869 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 410 of 1096[31m (14 FAILED)[39m (0 secs / 7.874 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 411 of 1096[31m (14 FAILED)[39m (0 secs / 7.879 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 412 of 1096[31m (14 FAILED)[39m (0 secs / 7.884 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 413 of 1096[31m (14 FAILED)[39m (0 secs / 7.888 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 414 of 1096[31m (14 FAILED)[39m (0 secs / 7.892 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 415 of 1096[31m (14 FAILED)[39m (0 secs / 7.896 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 416 of 1096[31m (14 FAILED)[39m (0 secs / 7.9 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 417 of 1096[31m (14 FAILED)[39m (0 secs / 7.904 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 418 of 1096[31m (14 FAILED)[39m (0 secs / 7.916 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 419 of 1096[31m (14 FAILED)[39m (0 secs / 7.926 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 420 of 1096[31m (14 FAILED)[39m (0 secs / 7.934 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 421 of 1096[31m (14 FAILED)[39m (0 secs / 7.943 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 422 of 1096[31m (14 FAILED)[39m (0 secs / 7.952 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) RespondPriceChangeComponent should format dates correctly FAILED[39m
+	Expected 'Nov 30, 2024' to be 'Dec 1, 2024'.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/items/modals/respond-price-change/respond-price-change.component.spec.ts:216:44)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 423 of 1096[31m (15 FAILED)[39m (0 secs / 7.96 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 424 of 1096[31m (15 FAILED)[39m (0 secs / 7.968 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 425 of 1096[31m (15 FAILED)[39m (0 secs / 7.976 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 426 of 1096[31m (15 FAILED)[39m (0 secs / 7.984 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 427 of 1096[31m (15 FAILED)[39m (0 secs / 7.992 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 428 of 1096[31m (15 FAILED)[39m (0 secs / 8 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 429 of 1096[31m (15 FAILED)[39m (0 secs / 8.008 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 430 of 1096[31m (15 FAILED)[39m (0 secs / 8.016 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 431 of 1096[31m (15 FAILED)[39m (0 secs / 8.024 secs)
+[1A[2K[31mChrome Headless 140.0.0.0 (Linux 0.0.0) RespondPriceChangeComponent should calculate days until expiry correctly FAILED[39m
+	Expected -379 to be greater than 0.
+	    at <Jasmine>
+	    at UserContext.<anonymous> (src/app/features/consignor/items/modals/respond-price-change/respond-price-change.component.spec.ts:221:24)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:398:28)
+	    at _ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2132:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:397:34)
+Chrome Headless 140.0.0.0 (Linux 0.0.0): Executed 432 of 1096[31m (16 FAILED)[39m (0 secs / 8.033 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 433 of 1096[31m (16 FAILED)[39m (0 secs / 8.042 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 434 of 1096[31m (16 FAILED)[39m (0 secs / 8.05 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 435 of 1096[31m (16 FAILED)[39m (0 secs / 8.058 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 436 of 1096[31m (16 FAILED)[39m (0 secs / 8.066 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 437 of 1096[31m (16 FAILED)[39m (0 secs / 8.068 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 438 of 1096[31m (16 FAILED)[39m (0 secs / 8.07 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 439 of 1096[31m (16 FAILED)[39m (0 secs / 8.072 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 440 of 1096[31m (16 FAILED)[39m (0 secs / 8.074 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 441 of 1096[31m (16 FAILED)[39m (0 secs / 8.586 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 442 of 1096[31m (16 FAILED)[39m (0 secs / 8.893 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 443 of 1096[31m (16 FAILED)[39m (0 secs / 10.102 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 444 of 1096[31m (16 FAILED)[39m (0 secs / 11.308 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 445 of 1096[31m (16 FAILED)[39m (0 secs / 11.31 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 446 of 1096[31m (16 FAILED)[39m (0 secs / 12.523 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 447 of 1096[31m (16 FAILED)[39m (0 secs / 13.032 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 448 of 1096[31m (16 FAILED)[39m (0 secs / 13.544 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 449 of 1096[31m (16 FAILED)[39m (0 secs / 14.049 secs)
+[1A[2KChrome Headless 140.0.0.0 (Linux 0.0.0): Executed 450 of 1096[31m (16 FAILED)[39m (0 secs / 14.556 secs)

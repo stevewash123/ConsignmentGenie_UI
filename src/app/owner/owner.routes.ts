@@ -215,7 +215,7 @@ export const ownerRoutes: Routes = [
           },
           {
             path: 'notifications',
-            loadComponent: () => import('./settings/account/account-notifications.component').then(m => m.AccountNotificationsComponent)
+            loadComponent: () => import('./settings/account-settings/notifications/notifications.component').then(m => m.AccountNotificationsComponent)
           }
         ]
       }
