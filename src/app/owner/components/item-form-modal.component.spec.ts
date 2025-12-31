@@ -27,7 +27,7 @@ describe('ItemFormModalComponent', () => {
 
   const mockConsignors: Consignor[] = [
     {
-      id: 1,
+      id: '1',
       name: 'John Doe',
       email: 'john@example.com',
       phone: '123-456-7890',

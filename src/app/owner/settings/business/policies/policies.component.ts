@@ -22,56 +22,33 @@ export interface StoreHoursSettings {
   timezone: string;
 }
 
-export interface AppointmentSettings {
-  required: boolean;
-  walkInsAccepted: boolean;
-  leadTimeHours: number;
-  bookingInstructions?: string;
-}
 
 export interface ReturnSettings {
+  noReturns: boolean;
   periodDays: number;
   requiresReceipt: boolean;
   acceptsExchanges: boolean;
   storeCreditOnly: boolean;
-  conditions?: string;
-  exceptions?: string;
 }
 
 export interface PaymentSettings {
   acceptedMethods: string[];
   layawayAvailable: boolean;
   layawayTerms?: string;
-  pricingPolicy?: string;
 }
 
 export interface ConsignorPolicySettings {
-  itemAcceptanceCriteria?: string;
-  brandRestrictions?: string;
-  seasonalGuidelines?: string;
-  conditionRequirements?: string;
+  policies?: string;
+  notifyOnRegistration: boolean;
 }
 
-export interface CustomerServiceSettings {
-  responseTimeHours: number;
-  preferredContact: 'phone' | 'email' | 'either';
-  socialMediaGuidelines?: string;
-}
 
-export interface SafetySettings {
-  healthRequirements?: string;
-  capacityLimits?: string;
-  specialProcedures?: string;
-}
 
 export interface BusinessPolicies {
   storeHours: StoreHoursSettings;
-  appointments: AppointmentSettings;
   returns: ReturnSettings;
   payments: PaymentSettings;
   consignorPolicies: ConsignorPolicySettings;
-  customerService: CustomerServiceSettings;
-  safety: SafetySettings;
   lastUpdated: Date;
 }
 
@@ -93,17 +70,10 @@ export class PoliciesComponent implements OnInit {
   readonly paymentMethods = ['cash', 'credit', 'debit', 'check', 'mobile'];
 
   // Character counting for text areas
-  bookingInstructionsLength = computed(() => {
+  consignorPoliciesLength = computed(() => {
     const form = this.policiesForm();
     if (!form) return 0;
-    const value = form.get('appointments.bookingInstructions')?.value || '';
-    return value.length;
-  });
-
-  returnConditionsLength = computed(() => {
-    const form = this.policiesForm();
-    if (!form) return 0;
-    const value = form.get('returns.conditions')?.value || '';
+    const value = form.get('consignorPolicies.policies')?.value || '';
     return value.length;
   });
 
@@ -124,41 +94,21 @@ export class PoliciesComponent implements OnInit {
         schedule: this.fb.group({}),
         timezone: ['EST']
       }),
-      appointments: this.fb.group({
-        required: [false],
-        walkInsAccepted: [true],
-        leadTimeHours: [24],
-        bookingInstructions: ['', Validators.maxLength(300)]
-      }),
       returns: this.fb.group({
+        noReturns: [false],
         periodDays: [30, [Validators.min(0), Validators.max(365)]],
         requiresReceipt: [true],
         acceptsExchanges: [true],
-        storeCreditOnly: [false],
-        conditions: ['', Validators.maxLength(500)],
-        exceptions: ['', Validators.maxLength(300)]
+        storeCreditOnly: [false]
       }),
       payments: this.fb.group({
         acceptedMethods: this.fb.array([]),
         layawayAvailable: [false],
-        layawayTerms: ['', Validators.maxLength(300)],
-        pricingPolicy: ['', Validators.maxLength(300)]
+        layawayTerms: ['', Validators.maxLength(300)]
       }),
       consignorPolicies: this.fb.group({
-        itemAcceptanceCriteria: ['', Validators.maxLength(500)],
-        brandRestrictions: ['', Validators.maxLength(300)],
-        seasonalGuidelines: ['', Validators.maxLength(300)],
-        conditionRequirements: ['', Validators.maxLength(300)]
-      }),
-      customerService: this.fb.group({
-        responseTimeHours: [24],
-        preferredContact: ['either'],
-        socialMediaGuidelines: ['', Validators.maxLength(300)]
-      }),
-      safety: this.fb.group({
-        healthRequirements: ['', Validators.maxLength(300)],
-        capacityLimits: ['', Validators.maxLength(200)],
-        specialProcedures: ['', Validators.maxLength(400)]
+        policies: ['', Validators.maxLength(1000)],
+        notifyOnRegistration: [false]
       })
     });
 
@@ -214,16 +164,12 @@ export class PoliciesComponent implements OnInit {
         schedule: scheduleControls,
         timezone: policies.storeHours.timezone
       },
-      appointments: policies.appointments,
       returns: policies.returns,
       payments: {
         layawayAvailable: policies.payments.layawayAvailable,
-        layawayTerms: policies.payments.layawayTerms,
-        pricingPolicy: policies.payments.pricingPolicy
+        layawayTerms: policies.payments.layawayTerms
       },
-      consignorPolicies: policies.consignorPolicies,
-      customerService: policies.customerService,
-      safety: policies.safety
+      consignorPolicies: policies.consignorPolicies
     });
 
     // Update payment methods checkboxes
@@ -292,15 +238,12 @@ export class PoliciesComponent implements OnInit {
         schedule,
         timezone: formValue.storeHours.timezone
       },
-      appointments: formValue.appointments,
       returns: formValue.returns,
       payments: {
         ...formValue.payments,
         acceptedMethods: this.getSelectedPaymentMethods()
       },
       consignorPolicies: formValue.consignorPolicies,
-      customerService: formValue.customerService,
-      safety: formValue.safety,
       lastUpdated: new Date()
     };
 

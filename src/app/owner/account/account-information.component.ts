@@ -459,85 +459,141 @@ export class AccountInformationComponent implements OnInit {
   }
 
   private loadAccountInfo() {
-    // Mock data for now - in real app, load from API
-    setTimeout(() => {
-      const mockAccount: AccountInfo = {
-        organization: {
-          id: 'org_123',
-          name: 'Vintage Treasures Consignment',
-          type: 'consignment_shop',
-          createdDate: new Date('2024-01-15'),
-          lastLoginDate: new Date(),
-          totalLocations: 2,
-          primaryContact: {
-            name: 'Sarah Johnson',
-            email: 'sarah@vintagetreasures.com',
-            phone: '+1 (555) 123-4567'
-          }
-        },
-        currentPlan: {
-          id: 'base-platform',
-          name: 'Base Platform',
-          basePrice: 29,
-          billingCycle: 'monthly',
-          features: [
-            'Unlimited consignors',
-            'Unlimited items',
-            'Advanced reporting',
-            'Customer management',
-            'Sales tracking',
-            'Payout calculations'
-          ],
-          isFounder: true,
-          founderTier: 1,
-          activeIntegrations: [
-            {
-              id: 'quickbooks',
-              name: 'QuickBooks Online',
-              type: 'accounting',
-              isActive: true,
-              activatedDate: new Date('2024-02-15')
-            },
-            {
-              id: 'stripe',
-              name: 'Stripe Payments',
-              type: 'payments',
-              isActive: true,
-              activatedDate: new Date('2024-03-01')
-            }
-          ],
-          integrationPrice: 15
-        },
-        nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-        usage: {
-          consignors: { current: 87 },
-          items: { current: 2340 },
-          locations: { current: 1 },
-          integrations: { current: 2 }
-        },
-        billingHistory: [
-          {
-            id: 'inv_1',
-            date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-            amount: 59,
-            status: 'paid',
-            description: 'Base Platform ($29) + 2 Integrations ($30) - Founder 1 Pricing',
-            downloadUrl: '#'
-          },
-          {
-            id: 'inv_2',
-            date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-            amount: 59,
-            status: 'paid',
-            description: 'Base Platform ($29) + 2 Integrations ($30) - Founder 1 Pricing',
-            downloadUrl: '#'
-          }
-        ]
-      };
+    this.isLoading.set(true);
 
-      this.accountInfo.set(mockAccount);
-      this.isLoading.set(false);
-    }, 500);
+    this.http.get<any>(`${environment.apiUrl}/api/account/information`).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Map API response to component interface
+          const accountData: AccountInfo = {
+            organization: {
+              id: response.data.organization.id,
+              name: response.data.organization.shopName,
+              type: 'consignment_shop', // Default since API doesn't specify
+              createdDate: new Date(response.data.organization.createdAt),
+              lastLoginDate: new Date(), // Could be enhanced with real last login
+              totalLocations: 1, // Default for now
+              primaryContact: {
+                name: response.data.organization.ownerName,
+                email: response.data.organization.ownerEmail,
+                phone: undefined // Not provided in current API
+              }
+            },
+            currentPlan: {
+              id: response.data.currentPlan.planType,
+              name: this.formatPlanName(response.data.currentPlan.planType),
+              basePrice: response.data.currentPlan.basePrice,
+              billingCycle: 'monthly',
+              features: this.getPlanFeatures(response.data.currentPlan.planType),
+              isFounder: response.data.currentPlan.isFounder,
+              founderTier: response.data.currentPlan.founderTier ?
+                (parseInt(response.data.currentPlan.founderTier) === 1 || parseInt(response.data.currentPlan.founderTier) === 2 ?
+                  parseInt(response.data.currentPlan.founderTier) as 1 | 2 : undefined) : undefined,
+              activeIntegrations: response.data.currentPlan.activeIntegrations || [],
+              integrationPrice: response.data.currentPlan.integrationPrice
+            },
+            nextBillingDate: response.data.currentPlan.nextBillingDate ? new Date(response.data.currentPlan.nextBillingDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            usage: {
+              consignors: { current: response.data.usageStats.totalConsignors || 0 },
+              items: { current: response.data.usageStats.totalItems || 0 },
+              locations: { current: 1 },
+              integrations: { current: response.data.currentPlan.activeIntegrations?.length || 0 }
+            },
+            billingHistory: response.data.billingHistory || []
+          };
+
+          this.accountInfo.set(accountData);
+        } else {
+          console.error('Failed to load account info:', response.message);
+          this.loadFallbackData();
+        }
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading account info:', error);
+        this.loadFallbackData();
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private loadFallbackData() {
+    // Fallback mock data if API fails
+    const fallbackAccount: AccountInfo = {
+      organization: {
+        id: 'org_fallback',
+        name: 'Your Shop Name',
+        type: 'consignment_shop',
+        createdDate: new Date('2024-01-01'),
+        lastLoginDate: new Date(),
+        totalLocations: 1,
+        primaryContact: {
+          name: 'Shop Owner',
+          email: 'owner@yourshop.com'
+        }
+      },
+      currentPlan: {
+        id: 'basic',
+        name: 'Basic Plan',
+        basePrice: 49,
+        billingCycle: 'monthly',
+        features: ['Basic features'],
+        isFounder: false,
+        activeIntegrations: [],
+        integrationPrice: 20
+      },
+      nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      usage: {
+        consignors: { current: 0 },
+        items: { current: 0 },
+        locations: { current: 1 },
+        integrations: { current: 0 }
+      },
+      billingHistory: []
+    };
+    this.accountInfo.set(fallbackAccount);
+  }
+
+  private formatPlanName(planType: string): string {
+    switch (planType?.toLowerCase()) {
+      case 'basic': return 'Basic Plan';
+      case 'platform': return 'Platform Plan';
+      case 'enterprise': return 'Enterprise Plan';
+      default: return 'Standard Plan';
+    }
+  }
+
+  private getPlanFeatures(planType: string): string[] {
+    switch (planType?.toLowerCase()) {
+      case 'basic':
+        return [
+          'Basic consignor management',
+          'Item tracking',
+          'Simple reporting'
+        ];
+      case 'platform':
+        return [
+          'Unlimited consignors',
+          'Unlimited items',
+          'Advanced reporting',
+          'Customer management',
+          'Sales tracking',
+          'Payout calculations'
+        ];
+      case 'enterprise':
+        return [
+          'All Platform features',
+          'Multi-location support',
+          'Custom integrations',
+          'Priority support'
+        ];
+      default:
+        return [
+          'Standard features',
+          'Basic reporting',
+          'Customer support'
+        ];
+    }
   }
 
   getBusinessTypeLabel(type: string): string {

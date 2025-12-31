@@ -368,22 +368,29 @@ export class SettingsLayoutComponent implements OnInit {
       ]
     },
     {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: '🔔',
+      route: 'notifications',
+      description: 'SMS and email notification preferences for all events'
+    },
+    {
       id: 'account-settings',
       label: 'Account',
       icon: '👤',
-      description: 'Account notifications and license information',
+      description: 'Account profile and subscription information',
       children: [
         {
-          id: 'notifications',
-          label: 'Notifications',
-          route: 'account/notifications',
-          description: 'Personal notification preferences'
+          id: 'billing',
+          label: 'Billing & Subscription',
+          route: 'account/billing',
+          description: 'Subscription management and billing portal'
         },
         {
-          id: 'license',
-          label: 'License',
-          route: 'subscription',
-          description: 'Subscription and license information'
+          id: 'owner-contact-info',
+          label: 'Owner Contact Information',
+          route: 'account/owner-contact-info',
+          description: 'Business and personal contact information'
         }
       ]
     }

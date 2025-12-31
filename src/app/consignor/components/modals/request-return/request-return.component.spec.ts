@@ -140,12 +140,18 @@ describe('RequestReturnComponent', () => {
     expect(compiled.querySelector('.modal-content')).toBeTruthy();
   });
 
-  it('should bind reason textarea correctly', () => {
+  it('should bind reason textarea correctly', async () => {
     component.show = true;
-    component.reason = 'Test reason';
     fixture.detectChanges();
 
     const textarea = fixture.nativeElement.querySelector('textarea[name="reason"]') as HTMLTextAreaElement;
+
+    // Simulate user input to test the binding
+    textarea.value = 'Test reason';
+    textarea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(component.reason).toBe('Test reason');
     expect(textarea.value).toBe('Test reason');
   });
 

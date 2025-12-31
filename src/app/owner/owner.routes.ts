@@ -79,20 +79,12 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./pages/owner-notifications.component').then(m => m.OwnerNotificationsComponent)
   },
   {
-    path: 'account',
-    loadComponent: () => import('./account/account-information.component').then(m => m.AccountInformationComponent)
-  },
-  {
     path: 'settings',
     loadComponent: () => import('./settings/settings-layout.component').then(m => m.SettingsLayoutComponent),
     children: [
       {
         path: '',
         loadComponent: () => import('./settings/hub/settings-hub.component').then(m => m.SettingsHubComponent)
-      },
-      {
-        path: 'profile',
-        loadComponent: () => import('./settings/profile/shop-profile.component').then(m => m.ShopProfileComponent)
       },
       {
         path: 'store-profile',
@@ -169,10 +161,6 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./settings/inventory/categories.component').then(m => m.CategoriesComponent)
       },
       {
-        path: 'subscription',
-        loadComponent: () => import('./settings/subscription/subscription-settings.component').then(m => m.SubscriptionSettingsComponent)
-      },
-      {
         path: 'consignor-management',
         children: [
           {
@@ -216,7 +204,24 @@ export const ownerRoutes: Routes = [
       },
       {
         path: 'notifications',
-        loadComponent: () => import('./settings/account-settings/notifications/notifications.component').then(m => m.AccountNotificationsComponent)
+        loadComponent: () => import('./settings/notifications/notifications.component').then(m => m.AccountNotificationsComponent)
+      },
+      {
+        path: 'account',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./settings/account/account-settings.component').then(m => m.AccountSettingsComponent)
+          },
+          {
+            path: 'owner-contact-info',
+            loadComponent: () => import('./settings/account/owner-contact-info/owner-contact-info.component').then(m => m.OwnerContactInfoComponent)
+          },
+          {
+            path: 'billing',
+            loadComponent: () => import('./settings/account/license.component').then(m => m.LicenseComponent)
+          }
+        ]
       }
     ]
   }

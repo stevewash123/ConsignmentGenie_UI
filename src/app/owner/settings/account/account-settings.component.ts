@@ -32,7 +32,8 @@ interface OwnerPinSettings {
       <!-- Account Navigation -->
       <div class="account-nav">
         <a class="nav-link active" routerLink="/owner/settings/account">Account & Security</a>
-        <a class="nav-link" routerLink="/owner/settings/account/notifications">Notifications</a>
+        <a class="nav-link" routerLink="/owner/settings/account/billing">Billing & Subscription</a>
+        <a class="nav-link" routerLink="/owner/settings/account/owner-contact-info">Owner Contact Information</a>
       </div>
 
       <!-- Profile Information -->

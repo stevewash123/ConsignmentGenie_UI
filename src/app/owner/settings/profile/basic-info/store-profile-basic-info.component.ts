@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 
@@ -23,6 +23,12 @@ interface StoreBasicInfo {
   lastUpdated: Date;
 }
 
+interface OwnerContact {
+  name: string;
+  email: string;
+  phone?: string;
+}
+
 // Legacy API interface for compatibility
 interface ShopProfile {
   ShopName: string;
@@ -42,7 +48,7 @@ interface ShopProfile {
 @Component({
   selector: 'app-store-profile-basic-info',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   template: `
     <div class="basic-info-section">
       <header class="section-header">
@@ -83,13 +89,43 @@ interface ShopProfile {
               rows="4"
               maxlength="500"></textarea>
             <div class="char-count">{{ getCharacterCount('description') }}/500</div>
-            <div class="help-text">Help customers understand what makes your store unique</div>
+          </div>
+
+          <div class="form-group">
+            <label for="website">Website</label>
+            <input
+              id="website"
+              type="url"
+              formControlName="website"
+              class="form-input"
+              placeholder="https://www.yourstore.com">
+            <div *ngIf="basicInfoForm.get('website')?.invalid && basicInfoForm.get('website')?.touched"
+                 class="field-error">
+              <div *ngIf="basicInfoForm.get('website')?.hasError('pattern')">Please enter a valid website URL</div>
+            </div>
+            <div class="help-text">Include https:// for full website URLs</div>
           </div>
         </section>
 
-        <!-- Contact Information -->
+        <!-- Store Contact Information & Address -->
         <section class="form-section" formGroupName="contact">
-          <h3>Contact Information</h3>
+          <h3>Store Contact Information & Address</h3>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="useOwnerContact"
+                (change)="onUseOwnerContactChange()"
+                [ngModelOptions]="{standalone: true}"
+                class="checkbox-input">
+              <span class="checkbox-text">Use Owner's Contact Information</span>
+            </label>
+            <div class="help-text" *ngIf="ownerContact">
+              Owner: {{ ownerContact.name }} ({{ ownerContact.email }})
+              <span *ngIf="ownerContact.phone"> • {{ ownerContact.phone }}</span>
+            </div>
+          </div>
 
           <div class="form-row">
             <div class="form-group">
@@ -123,26 +159,9 @@ interface ShopProfile {
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="website">Website</label>
-            <input
-              id="website"
-              type="url"
-              formControlName="website"
-              class="form-input"
-              placeholder="https://www.yourstore.com">
-            <div *ngIf="basicInfoForm.get('contact.website')?.invalid && basicInfoForm.get('contact.website')?.touched"
-                 class="field-error">
-              <div *ngIf="basicInfoForm.get('contact.website')?.hasError('pattern')">Please enter a valid website URL</div>
-            </div>
-            <div class="help-text">Include https:// for full website URLs</div>
-          </div>
         </section>
 
-        <!-- Address -->
         <section class="form-section" formGroupName="address">
-          <h3>Location</h3>
-
           <div class="form-group">
             <label for="street1">Street Address *</label>
             <input
@@ -319,7 +338,7 @@ interface ShopProfile {
     .checkbox-label {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
       cursor: pointer;
       font-weight: 500;
       color: #374151;
@@ -367,6 +386,13 @@ interface ShopProfile {
 
     .form-input.ng-invalid.ng-touched, .form-textarea.ng-invalid.ng-touched, .form-select.ng-invalid.ng-touched {
       border-color: #dc2626;
+    }
+
+    .form-input:disabled, .form-textarea:disabled, .form-select:disabled {
+      background-color: #f9fafb;
+      color: #6b7280;
+      border-color: #d1d5db;
+      cursor: not-allowed;
     }
 
     .form-textarea {
@@ -479,6 +505,8 @@ export class StoreProfileBasicInfoComponent implements OnInit {
   saving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  ownerContact: OwnerContact | null = null;
+  useOwnerContact = true;
 
   states = [
     { code: 'AL', name: 'Alabama' },
@@ -541,16 +569,17 @@ export class StoreProfileBasicInfoComponent implements OnInit {
   ngOnInit() {
     this.initializeForm();
     this.loadProfile();
+    this.loadOwnerContact();
   }
 
   private initializeForm() {
     this.basicInfoForm = this.fb.group({
       storeName: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
+      website: ['', [this.urlValidator]],
       contact: this.fb.group({
         phone: ['', [Validators.required, this.phoneValidator]],
-        email: ['', [Validators.required, Validators.email]],
-        website: ['', [this.urlValidator]]
+        email: ['', [Validators.required, Validators.email]]
       }),
       address: this.fb.group({
         street1: ['', [Validators.required]],
@@ -561,6 +590,10 @@ export class StoreProfileBasicInfoComponent implements OnInit {
         showPublicly: [true]
       })
     });
+
+    // Set initial disabled state for contact fields since useOwnerContact defaults to true
+    this.basicInfoForm.get('contact.phone')?.disable();
+    this.basicInfoForm.get('contact.email')?.disable();
   }
 
   private phoneValidator(control: any) {
@@ -608,10 +641,10 @@ export class StoreProfileBasicInfoComponent implements OnInit {
     this.basicInfoForm.patchValue({
       storeName: profile.ShopName || '',
       description: profile.ShopDescription || '',
+      website: profile.ShopWebsite || '',
       contact: {
         phone: profile.ShopPhone || '',
-        email: profile.ShopEmail || '',
-        website: profile.ShopWebsite || ''
+        email: profile.ShopEmail || ''
       },
       address: {
         street1: profile.ShopAddress1 || '',
@@ -638,9 +671,9 @@ export class StoreProfileBasicInfoComponent implements OnInit {
       const profileData: Partial<ShopProfile> = {
         ShopName: formValue.storeName,
         ShopDescription: formValue.description,
+        ShopWebsite: formValue.website,
         ShopPhone: formValue.contact.phone,
         ShopEmail: formValue.contact.email,
-        ShopWebsite: formValue.contact.website,
         ShopAddress1: formValue.address.street1,
         ShopAddress2: formValue.address.street2,
         ShopCity: formValue.address.city,
@@ -655,6 +688,50 @@ export class StoreProfileBasicInfoComponent implements OnInit {
       this.showError('Failed to save basic information');
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  async loadOwnerContact() {
+    try {
+      const response = await this.http.get<any>(`${environment.apiUrl}/api/account/information`).toPromise();
+      if (response?.organization?.primaryContact) {
+        this.ownerContact = {
+          name: response.organization.primaryContact.name,
+          email: response.organization.primaryContact.email,
+          phone: response.organization.primaryContact.phone
+        };
+
+        // Since useOwnerContact defaults to true, populate contact fields
+        if (this.useOwnerContact) {
+          this.onUseOwnerContactChange();
+        }
+      }
+    } catch (error) {
+      console.error('Error loading owner contact:', error);
+    }
+  }
+
+  onUseOwnerContactChange() {
+    const phoneControl = this.basicInfoForm.get('contact.phone');
+    const emailControl = this.basicInfoForm.get('contact.email');
+
+    if (this.useOwnerContact) {
+      // Disable fields and populate with owner contact info
+      phoneControl?.disable();
+      emailControl?.disable();
+
+      if (this.ownerContact) {
+        this.basicInfoForm.patchValue({
+          contact: {
+            phone: this.ownerContact.phone || '',
+            email: this.ownerContact.email
+          }
+        });
+      }
+    } else {
+      // Enable fields for user input
+      phoneControl?.enable();
+      emailControl?.enable();
     }
   }
 

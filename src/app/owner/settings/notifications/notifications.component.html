@@ -13,63 +13,6 @@
 
   <div *ngIf="!isLoading()">
     <form [formGroup]="notificationsForm" (ngSubmit)="saveNotificationSettings()">
-      <!-- Contact Information -->
-      <section class="form-section">
-        <h3>Contact Information</h3>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="primaryEmail">Primary Email Address</label>
-            <input id="primaryEmail"
-                   type="email"
-                   formControlName="primaryEmail"
-                   class="form-input"
-                   [class.error]="isFieldInvalid('primaryEmail')"
-                   placeholder="your@email.com">
-            <div class="error-message" *ngIf="isFieldInvalid('primaryEmail')">
-              Please enter a valid email address
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="phoneNumber">Phone Number (for SMS)</label>
-            <input id="phoneNumber"
-                   type="tel"
-                   formControlName="phoneNumber"
-                   class="form-input"
-                   placeholder="+1 (555) 123-4567">
-          </div>
-        </div>
-      </section>
-
-      <!-- Threshold Settings -->
-      <section class="form-section">
-        <h3>Notification Thresholds</h3>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="highValueSaleThreshold">High Value Sale Threshold ($)</label>
-            <input id="highValueSaleThreshold"
-                   type="number"
-                   formControlName="highValueSaleThreshold"
-                   class="form-input"
-                   min="0"
-                   step="0.01"
-                   placeholder="500.00">
-          </div>
-
-          <div class="form-group">
-            <label for="lowInventoryThreshold">Low Inventory Threshold (items)</label>
-            <input id="lowInventoryThreshold"
-                   type="number"
-                   formControlName="lowInventoryThreshold"
-                   class="form-input"
-                   min="0"
-                   step="1"
-                   placeholder="10">
-          </div>
-        </div>
-      </section>
 
       <!-- Notification Preferences Grid -->
       <section class="form-section">
@@ -176,6 +119,35 @@
                      [disabled]="!notificationsForm.get('phoneNumber')?.value">
               <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notification Thresholds -->
+      <section class="form-section">
+        <h3>Notification Thresholds</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="highValueSaleThreshold">High Value Sale Threshold ($)</label>
+            <input id="highValueSaleThreshold"
+                   type="number"
+                   formControlName="highValueSaleThreshold"
+                   class="form-input"
+                   min="0"
+                   step="0.01"
+                   placeholder="500.00">
+          </div>
+
+          <div class="form-group">
+            <label for="lowInventoryThreshold">Low Inventory Threshold (items)</label>
+            <input id="lowInventoryThreshold"
+                   type="number"
+                   formControlName="lowInventoryThreshold"
+                   class="form-input"
+                   min="0"
+                   step="1"
+                   placeholder="10">
           </div>
         </div>
       </section>

@@ -10,25 +10,21 @@
     <section class="form-section" formGroupName="storeHours">
       <h3>Store Hours</h3>
 
-      <div class="hours-schedule" formGroupName="schedule">
-        <div *ngFor="let day of weekDays" class="day-hours" [formGroupName]="day">
-          <label class="day-label">{{ day }}</label>
-
-          <label class="open-toggle checkbox-label">
-            <input type="checkbox" formControlName="isOpen">
-            <span class="checkmark"></span>
-            Open
-          </label>
-
-          <div class="time-inputs" *ngIf="policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">
-            <input type="time" formControlName="openTime" class="form-input time-input">
-            <span class="time-separator">to</span>
-            <input type="time" formControlName="closeTime" class="form-input time-input">
+      <div class="hours-schedule compact" formGroupName="schedule">
+        <div *ngFor="let day of weekDays" class="day-hours-compact" [formGroupName]="day">
+          <div class="day-row">
+            <span class="day-label">{{ day.slice(0, 3) }}</span>
+            <label class="open-toggle">
+              <input type="checkbox" formControlName="isOpen">
+              Open
+            </label>
+            <div class="time-inputs" *ngIf="policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">
+              <input type="time" formControlName="openTime" class="time-input">
+              <span class="time-sep">-</span>
+              <input type="time" formControlName="closeTime" class="time-input">
+            </div>
+            <span class="closed-text" *ngIf="!policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">Closed</span>
           </div>
-
-          <span class="closed-indicator" *ngIf="!policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">
-            Closed
-          </span>
         </div>
       </div>
 
@@ -42,130 +38,61 @@
         </select>
       </div>
 
-      <div class="hours-preview">
-        <h4>Customer Display Preview</h4>
-        <div class="hours-display">
-          <div *ngFor="let day of weekDays" class="preview-day">
-            <span class="day">{{ day }}:</span>
-            <span class="hours" *ngIf="policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">
-              {{ formatHours(day) }}
-            </span>
-            <span class="closed" *ngIf="!policiesForm().get('storeHours.schedule.' + day + '.isOpen')?.value">
-              Closed
-            </span>
-          </div>
-        </div>
-      </div>
     </section>
 
-    <!-- Appointments -->
-    <section class="form-section" formGroupName="appointments">
-      <h3>Appointments & Visits</h3>
-
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="required">
-          <span class="checkmark"></span>
-          Appointment required for visits
-        </label>
-        <span class="help-text">Check if customers must schedule appointments</span>
-      </div>
-
-      <div class="form-group" *ngIf="!policiesForm().get('appointments.required')?.value">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="walkInsAccepted">
-          <span class="checkmark"></span>
-          Walk-ins welcome during business hours
-        </label>
-      </div>
-
-      <div class="form-group" *ngIf="policiesForm().get('appointments.required')?.value">
-        <label for="leadTimeHours">Minimum appointment lead time</label>
-        <select id="leadTimeHours" formControlName="leadTimeHours" class="form-select">
-          <option value="2">2 hours</option>
-          <option value="4">4 hours</option>
-          <option value="24">1 day</option>
-          <option value="48">2 days</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="bookingInstructions">Appointment booking instructions</label>
-        <textarea
-          id="bookingInstructions"
-          formControlName="bookingInstructions"
-          placeholder="Call us at (555) 123-4567 or email info@store.com to schedule..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
-        <span class="char-count">{{ bookingInstructionsLength() }}/300 characters</span>
-      </div>
-    </section>
 
     <!-- Returns & Exchanges -->
     <section class="form-section" formGroupName="returns">
       <h3>Returns & Exchanges</h3>
 
       <div class="form-group">
-        <label for="periodDays">Return period</label>
-        <div class="input-group">
-          <input
-            id="periodDays"
-            type="number"
-            min="0"
-            max="365"
-            formControlName="periodDays"
-            class="form-input">
-          <span class="input-suffix">days</span>
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="noReturns">
+          <span class="checkmark"></span>
+          No returns accepted (all sales final)
+        </label>
+      </div>
+
+      <div class="returns-details" *ngIf="!policiesForm().get('returns.noReturns')?.value">
+        <div class="form-group">
+          <label for="periodDays">Return period</label>
+          <div class="input-group">
+            <input
+              id="periodDays"
+              type="number"
+              min="0"
+              max="365"
+              formControlName="periodDays"
+              class="form-input">
+            <span class="input-suffix">days</span>
+          </div>
+          <span class="help-text">Number of days customers can return items</span>
         </div>
-        <span class="help-text">Number of days customers can return items</span>
-      </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="requiresReceipt">
-          <span class="checkmark"></span>
-          Receipt required for returns
-        </label>
-      </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="requiresReceipt">
+            <span class="checkmark"></span>
+            Receipt required for returns
+          </label>
+        </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="acceptsExchanges">
-          <span class="checkmark"></span>
-          Accept exchanges for different items
-        </label>
-      </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="acceptsExchanges">
+            <span class="checkmark"></span>
+            Accept exchanges for different items
+          </label>
+        </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="storeCreditOnly">
-          <span class="checkmark"></span>
-          Store credit only (no cash refunds)
-        </label>
-      </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="storeCreditOnly">
+            <span class="checkmark"></span>
+            Store credit only (no cash refunds)
+          </label>
+        </div>
 
-      <div class="form-group">
-        <label for="conditions">Return conditions</label>
-        <textarea
-          id="conditions"
-          formControlName="conditions"
-          placeholder="Items must be in original condition with tags attached..."
-          maxlength="500"
-          class="form-textarea"
-          rows="4"></textarea>
-        <span class="char-count">{{ returnConditionsLength() }}/500 characters</span>
-      </div>
-
-      <div class="form-group">
-        <label for="exceptions">Return exceptions</label>
-        <textarea
-          id="exceptions"
-          formControlName="exceptions"
-          placeholder="Final sale items, undergarments, and custom orders are non-returnable..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
       </div>
     </section>
 
@@ -204,16 +131,6 @@
           rows="3"></textarea>
       </div>
 
-      <div class="form-group">
-        <label for="pricingPolicy">Pricing policy</label>
-        <textarea
-          id="pricingPolicy"
-          formControlName="pricingPolicy"
-          placeholder="All sales final, prices as marked, no price matching..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
-      </div>
     </section>
 
     <!-- Consignor Policies -->
@@ -221,121 +138,28 @@
       <h3>Consignor Policies</h3>
 
       <div class="form-group">
-        <label for="itemAcceptanceCriteria">Item acceptance criteria</label>
+        <label for="policies">Consignor policies and guidelines</label>
         <textarea
-          id="itemAcceptanceCriteria"
-          formControlName="itemAcceptanceCriteria"
-          placeholder="We accept gently used clothing, accessories, and home decor..."
-          maxlength="500"
+          id="policies"
+          formControlName="policies"
+          placeholder="Describe your consignor policies including item acceptance criteria, condition requirements, brand restrictions, seasonal guidelines, commission rates, payment terms, etc..."
+          maxlength="1000"
           class="form-textarea"
-          rows="4"></textarea>
+          rows="8"></textarea>
+        <span class="char-count">{{ consignorPoliciesLength() }}/1000 characters</span>
       </div>
 
       <div class="form-group">
-        <label for="conditionRequirements">Item condition requirements</label>
-        <textarea
-          id="conditionRequirements"
-          formControlName="conditionRequirements"
-          placeholder="Items must be clean, in good repair, and free of odors..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="brandRestrictions">Brand restrictions</label>
-        <textarea
-          id="brandRestrictions"
-          formControlName="brandRestrictions"
-          placeholder="We do not accept fast fashion brands or items from..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="seasonalGuidelines">Seasonal guidelines</label>
-        <textarea
-          id="seasonalGuidelines"
-          formControlName="seasonalGuidelines"
-          placeholder="Accepting spring/summer items March-August..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="notifyOnRegistration">
+          <span class="checkmark"></span>
+          Send policies to consignors when they register
+        </label>
+        <span class="help-text">When checked, new consignors will receive these policies via email after registration</span>
       </div>
     </section>
 
-    <!-- Customer Service -->
-    <section class="form-section" formGroupName="customerService">
-      <h3>Customer Service</h3>
 
-      <div class="form-group">
-        <label for="responseTimeHours">Response time for inquiries</label>
-        <select id="responseTimeHours" formControlName="responseTimeHours" class="form-select">
-          <option value="4">Within 4 hours</option>
-          <option value="24">Within 24 hours</option>
-          <option value="48">Within 2 business days</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="preferredContact">Preferred contact method</label>
-        <select id="preferredContact" formControlName="preferredContact" class="form-select">
-          <option value="phone">Phone calls preferred</option>
-          <option value="email">Email preferred</option>
-          <option value="either">Phone or email</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="socialMediaGuidelines">Social media guidelines</label>
-        <textarea
-          id="socialMediaGuidelines"
-          formControlName="socialMediaGuidelines"
-          placeholder="Follow us on Instagram @storename for new arrivals..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
-      </div>
-    </section>
-
-    <!-- Safety & COVID Policies -->
-    <section class="form-section" formGroupName="safety">
-      <h3>Safety & Health Policies</h3>
-
-      <div class="form-group">
-        <label for="healthRequirements">Health requirements</label>
-        <textarea
-          id="healthRequirements"
-          formControlName="healthRequirements"
-          placeholder="Masks encouraged, hand sanitizer available..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="capacityLimits">Store capacity limits</label>
-        <textarea
-          id="capacityLimits"
-          formControlName="capacityLimits"
-          placeholder="Maximum 10 customers at one time..."
-          maxlength="200"
-          class="form-textarea"
-          rows="2"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="specialProcedures">Special procedures</label>
-        <textarea
-          id="specialProcedures"
-          formControlName="specialProcedures"
-          placeholder="Items are sanitized before display, fitting room protocols..."
-          maxlength="400"
-          class="form-textarea"
-          rows="3"></textarea>
-      </div>
-    </section>
 
     <div class="form-actions">
       <button type="button" (click)="previewPolicies()" class="btn-secondary">

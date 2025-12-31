@@ -1,0 +1,162 @@
+<div class="owner-contact-info">
+  <header class="settings-header">
+    <h2>Owner Contact Information</h2>
+    <p>Manage your business and personal contact details</p>
+  </header>
+
+  <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+  <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+
+  <div *ngIf="isLoading()" class="loading">
+    <p>Loading contact information...</p>
+  </div>
+
+  <form *ngIf="!isLoading()" [formGroup]="contactForm" (ngSubmit)="saveContactInfo()">
+
+    <!-- Business Information -->
+    <section class="form-section">
+      <h3>Business Information</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="businessName">Business Name</label>
+          <input
+            id="businessName"
+            type="text"
+            formControlName="businessName"
+            class="form-input"
+            [class.error]="isFieldInvalid('businessName')"
+            placeholder="Your business name">
+          <div *ngIf="getFieldError('businessName')" class="form-error">
+            {{ getFieldError('businessName') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ownerName">Owner Name</label>
+          <input
+            id="ownerName"
+            type="text"
+            formControlName="ownerName"
+            class="form-input"
+            [class.error]="isFieldInvalid('ownerName')"
+            placeholder="Your full name">
+          <div *ngIf="getFieldError('ownerName')" class="form-error">
+            {{ getFieldError('ownerName') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="form-input"
+            [class.error]="isFieldInvalid('email')"
+            placeholder="your@email.com">
+          <div *ngIf="getFieldError('email')" class="form-error">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            formControlName="phoneNumber"
+            class="form-input"
+            [class.error]="isFieldInvalid('phoneNumber')"
+            placeholder="(555) 123-4567">
+          <div *ngIf="getFieldError('phoneNumber')" class="form-error">
+            {{ getFieldError('phoneNumber') }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Business Address -->
+    <section class="form-section">
+      <h3>Business Address</h3>
+
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="street">Street Address</label>
+          <input
+            id="street"
+            type="text"
+            formControlName="street"
+            class="form-input"
+            [class.error]="isFieldInvalid('street')"
+            placeholder="123 Main Street">
+          <div *ngIf="getFieldError('street')" class="form-error">
+            {{ getFieldError('street') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city">City</label>
+          <input
+            id="city"
+            type="text"
+            formControlName="city"
+            class="form-input"
+            [class.error]="isFieldInvalid('city')"
+            placeholder="Portland">
+          <div *ngIf="getFieldError('city')" class="form-error">
+            {{ getFieldError('city') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="state">State</label>
+          <input
+            id="state"
+            type="text"
+            formControlName="state"
+            class="form-input"
+            [class.error]="isFieldInvalid('state')"
+            placeholder="OR"
+            maxlength="2">
+          <div *ngIf="getFieldError('state')" class="form-error">
+            {{ getFieldError('state') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="zipCode">ZIP Code</label>
+          <input
+            id="zipCode"
+            type="text"
+            formControlName="zipCode"
+            class="form-input"
+            [class.error]="isFieldInvalid('zipCode')"
+            placeholder="97201">
+          <div *ngIf="getFieldError('zipCode')" class="form-error">
+            {{ getFieldError('zipCode') }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Save Actions -->
+    <div class="form-actions">
+      <button type="button" (click)="resetForm()" class="btn-secondary">
+        Reset Changes
+      </button>
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="!contactForm.valid || isSaving()">
+        {{ isSaving() ? 'Saving...' : 'Save Contact Information' }}
+      </button>
+    </div>
+  </form>
+</div>

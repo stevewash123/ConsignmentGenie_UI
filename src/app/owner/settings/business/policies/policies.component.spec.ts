@@ -24,34 +24,20 @@ describe('PoliciesComponent', () => {
       },
       timezone: 'EST'
     },
-    appointments: {
-      required: false,
-      walkInsAccepted: true,
-      leadTimeHours: 24,
-      bookingInstructions: 'Call us to schedule'
-    },
     returns: {
+      noReturns: false,
       periodDays: 30,
       requiresReceipt: true,
       acceptsExchanges: true,
-      storeCreditOnly: false,
-      conditions: 'Items must be in original condition'
+      storeCreditOnly: false
     },
     payments: {
       acceptedMethods: ['cash', 'credit'],
-      layawayAvailable: false,
-      pricingPolicy: 'All sales final'
+      layawayAvailable: false
     },
     consignorPolicies: {
-      itemAcceptanceCriteria: 'Gently used items only',
-      conditionRequirements: 'Clean and odor-free'
-    },
-    customerService: {
-      responseTimeHours: 24,
-      preferredContact: 'email'
-    },
-    safety: {
-      healthRequirements: 'Masks encouraged'
+      policies: 'We accept gently used items in good condition. No fast fashion brands.',
+      notifyOnRegistration: true
     },
     lastUpdated: new Date('2025-01-01')
   };
@@ -121,17 +107,17 @@ describe('PoliciesComponent', () => {
       expect(form?.get('storeHours.timezone')?.value).toBe('EST');
     });
 
-    it('should initialize form with default appointment settings', () => {
+    it('should initialize form with default return settings including noReturns', () => {
       const form = component.policiesForm();
-      expect(form?.get('appointments.required')?.value).toBe(false);
-      expect(form?.get('appointments.walkInsAccepted')?.value).toBe(true);
-      expect(form?.get('appointments.leadTimeHours')?.value).toBe(24);
-    });
-
-    it('should initialize form with default return settings', () => {
-      const form = component.policiesForm();
+      expect(form?.get('returns.noReturns')?.value).toBe(false);
       expect(form?.get('returns.periodDays')?.value).toBe(30);
       expect(form?.get('returns.requiresReceipt')?.value).toBe(true);
+    });
+
+    it('should initialize form with default consignor policy settings', () => {
+      const form = component.policiesForm();
+      expect(form?.get('consignorPolicies.policies')?.value).toBe('');
+      expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(false);
     });
 
     it('should initialize form with default customer service settings', () => {
@@ -183,8 +169,10 @@ describe('PoliciesComponent', () => {
 
       const form = component.policiesForm();
       expect(form?.get('storeHours.timezone')?.value).toBe('EST');
-      expect(form?.get('appointments.required')?.value).toBe(false);
+      expect(form?.get('returns.noReturns')?.value).toBe(false);
       expect(form?.get('returns.periodDays')?.value).toBe(30);
+      expect(form?.get('consignorPolicies.policies')?.value).toBe('We accept gently used items in good condition. No fast fashion brands.');
+      expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(true);
     }));
 
     it('should update payment methods checkboxes from loaded policies', fakeAsync(() => {
@@ -221,12 +209,10 @@ describe('PoliciesComponent', () => {
       expect(req.request.method).toBe('PUT');
       expect(req.request.body).toEqual(jasmine.objectContaining({
         storeHours: jasmine.any(Object),
-        appointments: jasmine.any(Object),
         returns: jasmine.any(Object),
         payments: jasmine.any(Object),
         consignorPolicies: jasmine.any(Object),
         customerService: jasmine.any(Object),
-        safety: jasmine.any(Object),
         lastUpdated: jasmine.any(Date)
       }));
       req.flush({});
@@ -365,17 +351,6 @@ describe('PoliciesComponent', () => {
   });
 
   describe('Character Counts', () => {
-    it('should compute booking instructions length correctly', () => {
-      const form = component.policiesForm();
-      form?.patchValue({
-        appointments: {
-          bookingInstructions: 'Call us'
-        }
-      });
-
-      expect(component.bookingInstructionsLength()).toBe(7);
-    });
-
     it('should compute return conditions length correctly', () => {
       const form = component.policiesForm();
       form?.patchValue({
@@ -384,29 +359,40 @@ describe('PoliciesComponent', () => {
         }
       });
 
-      expect(component.returnConditionsLength()).toBe(13);
+      // returnConditionsLength method was removed
+    });
+
+    it('should compute consignor policies length correctly', () => {
+      const form = component.policiesForm();
+      form?.patchValue({
+        consignorPolicies: {
+          policies: 'We accept quality items only'
+        }
+      });
+
+      expect(component.consignorPoliciesLength()).toBe(28);
     });
 
     it('should return 0 for character counts when form is null', () => {
       component.policiesForm.set(null);
 
-      expect(component.bookingInstructionsLength()).toBe(0);
-      expect(component.returnConditionsLength()).toBe(0);
+      // returnConditionsLength method was removed
+      expect(component.consignorPoliciesLength()).toBe(0);
     });
 
     it('should return 0 for empty values', () => {
       const form = component.policiesForm();
       form?.patchValue({
-        appointments: {
-          bookingInstructions: ''
-        },
         returns: {
           conditions: ''
+        },
+        consignorPolicies: {
+          policies: ''
         }
       });
 
-      expect(component.bookingInstructionsLength()).toBe(0);
-      expect(component.returnConditionsLength()).toBe(0);
+      // returnConditionsLength method was removed
+      expect(component.consignorPoliciesLength()).toBe(0);
     });
   });
 
@@ -466,6 +452,144 @@ describe('PoliciesComponent', () => {
     });
   });
 
+  // NEW FUNCTIONALITY TESTS
+  describe('No Returns Functionality', () => {
+    it('should initialize with noReturns false by default', () => {
+      const form = component.policiesForm();
+      expect(form?.get('returns.noReturns')?.value).toBe(false);
+    });
+
+    it('should handle noReturns true in saved policies', fakeAsync(() => {
+      const noReturnsPolicies = {
+        ...mockPolicies,
+        returns: {
+          ...mockPolicies.returns,
+          noReturns: true
+        }
+      };
+
+      initializeComponent(noReturnsPolicies);
+
+      const form = component.policiesForm();
+      expect(form?.get('returns.noReturns')?.value).toBe(true);
+    }));
+
+    it('should save noReturns setting correctly', fakeAsync(() => {
+      initializeComponent(null);
+
+      const form = component.policiesForm();
+      form?.patchValue({
+        returns: {
+          noReturns: true
+        }
+      });
+
+      component.onSave();
+
+      const req = httpMock.expectOne(apiUrl);
+      expect(req.request.body.returns.noReturns).toBe(true);
+      req.flush({});
+      tick();
+    }));
+  });
+
+  describe('Simplified Consignor Policies', () => {
+    it('should have single policies text field by default', () => {
+      const form = component.policiesForm();
+      expect(form?.get('consignorPolicies.policies')?.value).toBe('');
+      expect(form?.get('consignorPolicies.policies')?.hasError('maxlength')).toBeFalsy();
+    });
+
+    it('should validate policies text length (max 1000 chars)', () => {
+      const form = component.policiesForm();
+      const longText = 'a'.repeat(1001);
+
+      form?.patchValue({
+        consignorPolicies: {
+          policies: longText
+        }
+      });
+
+      expect(form?.get('consignorPolicies.policies')?.hasError('maxlength')).toBe(true);
+    });
+
+    it('should accept policies text within limit', () => {
+      const form = component.policiesForm();
+      const validText = 'We accept quality items in good condition.';
+
+      form?.patchValue({
+        consignorPolicies: {
+          policies: validText
+        }
+      });
+
+      expect(form?.get('consignorPolicies.policies')?.hasError('maxlength')).toBeFalsy();
+    });
+  });
+
+  describe('Consignor Notification Feature', () => {
+    it('should initialize notifyOnRegistration as false by default', () => {
+      const form = component.policiesForm();
+      expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(false);
+    });
+
+    it('should toggle notification setting correctly', () => {
+      const form = component.policiesForm();
+
+      // Toggle on
+      form?.patchValue({
+        consignorPolicies: {
+          notifyOnRegistration: true
+        }
+      });
+      expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(true);
+
+      // Toggle off
+      form?.patchValue({
+        consignorPolicies: {
+          notifyOnRegistration: false
+        }
+      });
+      expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(false);
+    });
+
+    it('should save notification setting with policies', fakeAsync(() => {
+      initializeComponent(null);
+
+      const form = component.policiesForm();
+      form?.patchValue({
+        consignorPolicies: {
+          policies: 'Test policies text',
+          notifyOnRegistration: true
+        }
+      });
+
+      component.onSave();
+
+      const req = httpMock.expectOne(apiUrl);
+      expect(req.request.body.consignorPolicies.policies).toBe('Test policies text');
+      expect(req.request.body.consignorPolicies.notifyOnRegistration).toBe(true);
+      req.flush({});
+      tick();
+    }));
+
+    it('should load notification setting from saved policies', fakeAsync(() => {
+      const policiesWithNotification = {
+        ...mockPolicies,
+        consignorPolicies: {
+          policies: 'Saved policies text',
+          notifyOnRegistration: true
+        }
+      };
+
+      initializeComponent(policiesWithNotification);
+
+      const form = component.policiesForm();
+      expect(form?.get('consignorPolicies.policies')?.value).toBe('Saved policies text');
+      expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(true);
+    }));
+  });
+
   describe('Messages', () => {
     it('should clear success message after timeout', fakeAsync(() => {
       component['showSuccess']('Test success');
@@ -502,5 +626,84 @@ describe('PoliciesComponent', () => {
       expect(component.errorMessage()).toBe('New error');
       expect(component.successMessage()).toBe('');
     });
+  });
+});
+
+// FOCUSED TEST FOR SPECIFIC FUNCTIONALITY
+describe('PoliciesComponent - New Features Only', () => {
+  let component: PoliciesComponent;
+  let fixture: ComponentFixture<PoliciesComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        PoliciesComponent,
+        ReactiveFormsModule,
+        HttpClientTestingModule
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(PoliciesComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('should create component with new simplified structure', () => {
+    expect(component).toBeTruthy();
+    const form = component.policiesForm();
+
+    // Verify new structure exists
+    expect(form?.get('returns.noReturns')).toBeTruthy();
+    expect(form?.get('consignorPolicies.policies')).toBeTruthy();
+    expect(form?.get('consignorPolicies.notifyOnRegistration')).toBeTruthy();
+
+    // Verify old structure is removed
+    expect(form?.get('appointments')).toBeFalsy();
+    expect(form?.get('safety')).toBeFalsy();
+    expect(form?.get('consignorPolicies.itemAcceptanceCriteria')).toBeFalsy();
+  });
+
+  it('should calculate consignor policies character count', () => {
+    const form = component.policiesForm();
+    const testText = 'We accept vintage clothing and accessories';
+
+    form?.patchValue({
+      consignorPolicies: {
+        policies: testText
+      }
+    });
+
+    expect(component.consignorPoliciesLength()).toBe(testText.length);
+  });
+
+  it('should handle no returns policy correctly', () => {
+    const form = component.policiesForm();
+
+    // Initially no returns should be false
+    expect(form?.get('returns.noReturns')?.value).toBe(false);
+
+    // Set no returns to true
+    form?.patchValue({
+      returns: {
+        noReturns: true
+      }
+    });
+
+    expect(form?.get('returns.noReturns')?.value).toBe(true);
+  });
+
+  it('should handle consignor notification setting', () => {
+    const form = component.policiesForm();
+
+    // Initially should be false
+    expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(false);
+
+    // Set to true
+    form?.patchValue({
+      consignorPolicies: {
+        notifyOnRegistration: true
+      }
+    });
+
+    expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(true);
   });
 });
