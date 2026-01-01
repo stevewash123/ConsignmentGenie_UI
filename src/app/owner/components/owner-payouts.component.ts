@@ -68,9 +68,48 @@ import { ConsignorStatementModalComponent, ConsignorOption } from '../../shared/
       margin-bottom: 2rem;
     }
 
+    .pending-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
     .pending-section h2 {
       color: #1f2937;
-      margin-bottom: 1rem;
+      margin: 0;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .toggle-btn {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn:hover {
+      background: #f9fafb;
+    }
+
+    .toggle-btn.active {
+      background: #10b981;
+      color: white;
+      border-color: #10b981;
+    }
+
+    .toggle-btn svg {
+      width: 16px;
+      height: 16px;
     }
 
     .pending-grid {
@@ -80,10 +119,41 @@ import { ConsignorStatementModalComponent, ConsignorOption } from '../../shared/
     }
 
     .pending-card {
-      background: #fef3c7;
-      border: 1px solid #fbbf24;
+      background: #f0fdf4;
+      border: 1px solid #10b981;
       border-radius: 8px;
       padding: 1rem;
+    }
+
+    .pending-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .pending-table th,
+    .pending-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .pending-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .pending-table tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .pending-table .amount-cell {
+      font-weight: 600;
+      color: #047857;
     }
 
     .card-header {
@@ -96,12 +166,12 @@ import { ConsignorStatementModalComponent, ConsignorOption } from '../../shared/
     .card-header h3 {
       margin: 0;
       font-size: 1.1rem;
-      color: #92400e;
+      color: #047857;
     }
 
     .card-header .amount {
       font-weight: bold;
-      color: #92400e;
+      color: #047857;
       font-size: 1.2rem;
     }
 
@@ -507,7 +577,7 @@ export class OwnerPayoutsComponent implements OnInit {
   pageSize = 10;
 
   // Filters
-  selectedProviderId = '';
+  selectedConsignorId = '';
   selectedStatus = '';
   dateFrom = '';
   dateTo = '';
@@ -519,9 +589,12 @@ export class OwnerPayoutsComponent implements OnInit {
   showViewModal = false;
   showStatementModal = false;
 
+  // View toggle
+  pendingPayoutsViewMode: 'cards' | 'table' = 'cards';
+
   // Form data
   newPayout: Partial<CreatePayoutRequest> = {
-    providerId: '',
+    consignorId: '',
     payoutDate: new Date(),
     paymentMethod: '',
     paymentReference: '',
@@ -602,7 +675,7 @@ export class OwnerPayoutsComponent implements OnInit {
         sortDirection: this.sortDirection
       };
 
-      if (this.selectedProviderId) request.providerId = this.selectedProviderId;
+      if (this.selectedConsignorId) request.consignorId = this.selectedConsignorId;
       if (this.selectedStatus) request.status = this.selectedStatus as PayoutStatus;
       if (this.dateFrom) request.payoutDateFrom = new Date(this.dateFrom);
       if (this.dateTo) request.payoutDateTo = new Date(this.dateTo);
@@ -622,9 +695,9 @@ export class OwnerPayoutsComponent implements OnInit {
     }
   }
 
-  createPayoutForProvider(pending: PendingPayoutData) {
+  createPayoutForConsignor(pending: PendingPayoutData) {
     this.newPayout = {
-      providerId: pending.providerId,
+      consignorId: pending.consignorId,
       payoutDate: new Date(),
       paymentMethod: '',
       paymentReference: '',
@@ -638,13 +711,13 @@ export class OwnerPayoutsComponent implements OnInit {
 
   async createPayout() {
     try {
-      if (!this.newPayout.providerId || !this.newPayout.paymentMethod || !this.newPayout.transactionIds?.length) {
+      if (!this.newPayout.consignorId || !this.newPayout.paymentMethod || !this.newPayout.transactionIds?.length) {
         this.toastr.error('Please fill in all required fields');
         return;
       }
 
       const request: CreatePayoutRequest = {
-        providerId: this.newPayout.providerId!,
+        consignorId: this.newPayout.consignorId!,
         payoutDate: this.newPayout.payoutDate!,
         paymentMethod: this.newPayout.paymentMethod!,
         paymentReference: this.newPayout.paymentReference,

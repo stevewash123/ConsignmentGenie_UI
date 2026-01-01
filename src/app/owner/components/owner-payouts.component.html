@@ -28,7 +28,7 @@
       <!-- Filters -->
       <div class="filters-section">
         <div class="filter-row">
-          <select [(ngModel)]="selectedProviderId" (change)="loadPayouts()" class="form-select">
+          <select [(ngModel)]="selectedConsignorId" (change)="loadPayouts()" class="form-select">
             <option value="">All consignors</option>
             <option *ngFor="let consignor of consignors()" [value]="consignor.id">
               {{consignor.name}}
@@ -60,18 +60,44 @@
 
       <!-- Pending Payouts Section -->
       <div class="pending-section" *ngIf="pendingPayouts().length > 0">
-        <h2>Pending Payouts</h2>
-        <div class="pending-grid">
+        <div class="pending-section-header">
+          <h2>Pending Payouts</h2>
+          <div class="view-toggle">
+            <button
+              class="toggle-btn"
+              [class.active]="pendingPayoutsViewMode === 'cards'"
+              (click)="pendingPayoutsViewMode = 'cards'"
+              title="Card View"
+            >
+              <svg fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+              </svg>
+            </button>
+            <button
+              class="toggle-btn"
+              [class.active]="pendingPayoutsViewMode === 'table'"
+              (click)="pendingPayoutsViewMode = 'table'"
+              title="Table View"
+            >
+              <svg fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card View -->
+        <div class="pending-grid" *ngIf="pendingPayoutsViewMode === 'cards'">
           <div *ngFor="let pending of pendingPayouts()" class="pending-card">
             <div class="card-header">
-              <h3>{{pending.providerName}}</h3>
-              <span class="amount">\${{pending.pendingAmount.toFixed(2)}}</span>
+              <h3>{{pending.consignorName}}</h3>
+              <span class="amount">${{pending.pendingAmount.toFixed(2)}}</span>
             </div>
             <div class="card-body">
               <p><strong>Transactions:</strong> {{pending.transactionCount}}</p>
               <p><strong>Period:</strong> {{formatDate(pending.earliestSale)}} - {{formatDate(pending.latestSale)}}</p>
               <button
-                (click)="createPayoutForProvider(pending)"
+                (click)="createPayoutForConsignor(pending)"
                 class="btn btn-sm btn-success"
               >
                 Create Payout
@@ -79,6 +105,35 @@
             </div>
           </div>
         </div>
+
+        <!-- Table View -->
+        <table class="pending-table" *ngIf="pendingPayoutsViewMode === 'table'">
+          <thead>
+            <tr>
+              <th>Consignor</th>
+              <th>Amount</th>
+              <th>Transactions</th>
+              <th>Period</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pending of pendingPayouts()">
+              <td>{{pending.consignorName}}</td>
+              <td class="amount-cell">${{pending.pendingAmount.toFixed(2)}}</td>
+              <td>{{pending.transactionCount}}</td>
+              <td>{{formatDate(pending.earliestSale)}} - {{formatDate(pending.latestSale)}}</td>
+              <td>
+                <button
+                  (click)="createPayoutForConsignor(pending)"
+                  class="btn btn-sm btn-success"
+                >
+                  Create Payout
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Payouts Table -->
@@ -209,10 +264,10 @@
           <form (ngSubmit)="createPayout()">
             <div class="form-group">
               <label>consignor</label>
-              <select [(ngModel)]="newPayout.providerId" name="providerId" required class="form-control">
+              <select [(ngModel)]="newPayout.consignorId" name="consignorId" required class="form-control">
                 <option value="">Select consignor</option>
-                <option *ngFor="let pending of pendingPayouts()" [value]="pending.providerId">
-                  {{pending.providerName}} - \${{pending.pendingAmount.toFixed(2)}}
+                <option *ngFor="let pending of pendingPayouts()" [value]="pending.consignorId">
+                  {{pending.consignorName}} - \${{pending.pendingAmount.toFixed(2)}}
                 </option>
               </select>
             </div>
@@ -321,7 +376,7 @@
                     <td>{{transaction.itemName}}</td>
                     <td>{{formatDate(transaction.saleDate)}}</td>
                     <td>\${{transaction.salePrice.toFixed(2)}}</td>
-                    <td>\${{transaction.providerAmount.toFixed(2)}}</td>
+                    <td>\${{transaction.consignorAmount.toFixed(2)}}</td>
                     <td>\${{transaction.shopAmount.toFixed(2)}}</td>
                   </tr>
                 </tbody>
