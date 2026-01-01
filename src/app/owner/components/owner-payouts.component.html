@@ -263,11 +263,11 @@
         <div class="modal-body">
           <form (ngSubmit)="createPayout()">
             <div class="form-group">
-              <label>consignor</label>
+              <label>Consignor</label>
               <select [(ngModel)]="newPayout.consignorId" name="consignorId" required class="form-control">
                 <option value="">Select consignor</option>
                 <option *ngFor="let pending of pendingPayouts()" [value]="pending.consignorId">
-                  {{pending.consignorName}} - \${{pending.pendingAmount.toFixed(2)}}
+                  {{pending.consignorName}} - ${{pending.pendingAmount.toFixed(2)}}
                 </option>
               </select>
             </div>
@@ -291,15 +291,15 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label>Payment Reference (Optional)</label>
+            <div class="form-group" *ngIf="newPayout.paymentMethod === 'Check'">
+              <label>Check No.</label>
               <input type="text" [(ngModel)]="newPayout.paymentReference" name="paymentReference"
-                     class="form-control" placeholder="Transaction ID, Check #, etc.">
+                     class="form-control" placeholder="Check number">
             </div>
 
             <div class="form-group">
-              <label>Notes (Optional)</label>
-              <textarea [(ngModel)]="newPayout.notes" name="notes" class="form-control" rows="3"></textarea>
+              <label>Notes</label>
+              <textarea [(ngModel)]="newPayout.notes" name="notes" class="form-control" rows="3" placeholder="Additional details"></textarea>
             </div>
 
             <div class="form-actions">
