@@ -2,10 +2,13 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { BulkImportModalComponent } from './bulk-import-modal.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
+import { SquareIntegrationService } from '../../services/square-integration.service';
+import { environment } from '../../../environments/environment';
 import {
   ItemListDto,
   ItemQueryParams,
@@ -62,6 +65,56 @@ export interface ImportedItem {
     .page-header p {
       color: #6b7280;
       margin: 0;
+    }
+
+    .square-mode-indicator {
+      margin-top: 0.5rem;
+    }
+
+    .square-mode-indicator p {
+      color: #1d4ed8;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .square-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+      color: #1e40af;
+      padding: 0.375rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .badge-icon {
+      font-size: 1rem;
+    }
+
+    .square-mode-actions {
+      display: flex;
+      align-items: center;
+      margin-left: 1rem;
+    }
+
+    .square-note {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .square-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .square-link:hover {
+      color: #2563eb;
+      text-decoration: underline;
     }
 
     .header-actions {
@@ -741,7 +794,9 @@ export interface ImportedItem {
 export class InventoryListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private router = inject(Router);
+  private http = inject(HttpClient);
   private loadingService = inject(LoadingService);
+  private squareService = inject(SquareIntegrationService);
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
@@ -749,6 +804,7 @@ export class InventoryListComponent implements OnInit {
   error = signal<string | null>(null);
   isBulkImportModalOpen = signal(false);
   isColorGuideModalOpen = signal(false);
+  isLoading = signal(false);
 
   isInventoryLoading(): boolean {
     return this.loadingService.isLoading('inventory-list');
@@ -787,6 +843,12 @@ export class InventoryListComponent implements OnInit {
     return pages;
   });
 
+  // Check if Square inventory mode is active
+  isSquareInventoryMode = computed(() => {
+    const settings = this.squareService.getSquareUsageSettings();
+    return settings.inventoryChoice === 'square';
+  });
+
   ngOnInit() {
     this.loadCategories();
     this.loadItems();
@@ -822,12 +884,17 @@ export class InventoryListComponent implements OnInit {
     if (this.priceMin !== null) params.priceMin = this.priceMin;
     if (this.priceMax !== null) params.priceMax = this.priceMax;
 
+    // The InventoryService will automatically detect whether to use Square or CG native inventory
     this.inventoryService.getItems(params).subscribe({
       next: (result) => {
         this.itemsResult.set(result);
       },
       error: (err) => {
-        this.error.set('Failed to load inventory items. Please try again.');
+        if (this.isSquareInventoryMode()) {
+          this.error.set('Failed to load Square inventory items. Please ensure you are connected to Square and try again.');
+        } else {
+          this.error.set('Failed to load inventory items. Please try again.');
+        }
         console.error('Error loading items:', err);
       },
       complete: () => {
@@ -880,6 +947,10 @@ export class InventoryListComponent implements OnInit {
 
   createNewItem() {
     this.router.navigate(['/owner/inventory/new']);
+  }
+
+  manageCategories() {
+    this.router.navigate(['/owner/inventory/categories']);
   }
 
   openBulkImport() {
@@ -1015,5 +1086,29 @@ export class InventoryListComponent implements OnInit {
     }
 
     return 'expiration-normal';
+  }
+
+  manageSquareSettings() {
+    this.router.navigate(['/owner/settings/integrations/inventory']);
+  }
+
+  async refreshInventory() {
+    if (this.isSquareInventoryMode()) {
+      // Refresh Square inventory
+      this.isLoading.set(true);
+      try {
+        await this.http.post(`${environment.apiUrl}/api/owner/integrations/square/inventory/sync`, {}).toPromise();
+        // Reload the inventory list after sync
+        this.loadItems();
+      } catch (error) {
+        console.error('Failed to refresh Square inventory:', error);
+        this.error.set('Failed to refresh Square inventory. Please try again.');
+      } finally {
+        this.isLoading.set(false);
+      }
+    } else {
+      // Just reload CG native inventory
+      this.loadItems();
+    }
   }
 }

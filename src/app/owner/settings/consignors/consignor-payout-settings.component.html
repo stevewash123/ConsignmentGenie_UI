@@ -232,55 +232,19 @@
       </div>
     </section>
 
-    <!-- Notifications -->
+    <!-- Notifications Section REMOVED - All notifications enabled by default for MVP -->
+    <!--
     <section class="form-section" formGroupName="notifications">
       <h3>Notifications</h3>
-
-      <div class="checkbox-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="notifyConsignorOnCalculation">
-          <span class="checkmark"></span>
-          Notify consignors when payout is calculated
-        </label>
-
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="notifyConsignorOnPayment">
-          <span class="checkmark"></span>
-          Send payment confirmation when processed
-        </label>
-
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="notifyOwnerOnFailure">
-          <span class="checkmark"></span>
-          Alert shop owner when automatic payouts fail
-        </label>
-      </div>
-
-      <div class="form-group">
-        <h4>Statement Delivery</h4>
-
-        <div class="checkbox-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="emailStatementsEnabled">
-            <span class="checkmark"></span>
-            Email payout statements to consignors
-          </label>
-
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="printStatementsEnabled">
-            <span class="checkmark"></span>
-            Print statements for physical pickup
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label for="statementRetentionDays">Statement retention period (days)</label>
-          <input id="statementRetentionDays" type="number" formControlName="statementRetentionDays"
-                 class="form-input" min="30" max="2555" step="1" placeholder="730">
-          <span class="help-text">How long to keep statement records (30 days to 7 years)</span>
-        </div>
-      </div>
+      NOTE: This section was removed. All notification behaviors are now enabled by default:
+      - Notify consignors when payout is calculated
+      - Send payment confirmation when processed
+      - Alert shop owner when automatic payouts fail
+      - Email payout statements to consignors
+      - Print statements for physical pickup
+      Statement delivery and retention settings moved to Reports section.
     </section>
+    -->
 
     <!-- Report Configuration -->
     <section class="form-section" formGroupName="reports">

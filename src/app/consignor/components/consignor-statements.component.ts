@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { StatementService } from '../../services/statement.service';
-import { StatementListDto } from '../models/consignor.models';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
+import { StatementListDto, StatementMonth } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -328,14 +328,14 @@ import { LOADING_KEYS } from '../constants/loading-keys';
 export class ConsignorStatementsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  statements: StatementListDto[] = [];
+  statements: StatementMonth[] = [];
   error: string | null = null;
 
   // Expose for template
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private statementService: StatementService,
+    private consignorService: ConsignorPortalService,
     public loadingService: LoadingService
   ) {}
 
@@ -352,13 +352,17 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
     this.loadingService.start(LOADING_KEYS.STATEMENTS_LIST);
     this.error = null;
 
-    this.statementService.getStatements()
+    this.consignorService.getStatements()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (statements) => {
-          this.statements = statements.sort((a, b) =>
-            new Date(b.periodStart).getTime() - new Date(a.periodStart).getTime()
-          );
+        next: (response: any) => {
+          const statementsData = response.success ? response.data : response;
+          this.statements = statementsData.statements || [];
+          // Sort by year/month descending (most recent first)
+          this.statements.sort((a, b) => {
+            if (a.year !== b.year) return b.year - a.year;
+            return b.month - a.month;
+          });
         },
         error: (error) => {
           console.error('Error loading statements:', error);
@@ -370,44 +374,55 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
       });
   }
 
-  downloadPdf(statement: StatementListDto) {
-    if (!statement.hasPdf || this.loadingService.isLoading(LOADING_KEYS.STATEMENT_PDF)) {
+  downloadPdf(statement: StatementMonth) {
+    if (this.loadingService.isLoading(LOADING_KEYS.STATEMENT_PDF)) {
       return;
     }
 
+    // Set downloading state for UI feedback
+    statement.isDownloading = true;
     this.loadingService.start(LOADING_KEYS.STATEMENT_PDF);
 
-    this.statementService.downloadStatementPdf(statement.statementId)
+    this.consignorService.downloadStatementPdf(statement.year, statement.month)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {
-          this.statementService.downloadFile(blob, `${statement.statementNumber}.pdf`);
+          this.downloadFile(blob, `statement-${statement.year}-${statement.month.toString().padStart(2, '0')}.pdf`);
         },
         error: (error) => {
           console.error('Error downloading PDF:', error);
           alert('Failed to download PDF. Please try again.');
         },
         complete: () => {
+          statement.isDownloading = false;
           this.loadingService.stop(LOADING_KEYS.STATEMENT_PDF);
         }
       });
   }
 
-  isNewStatement(statement: StatementListDto): boolean {
-    const generatedDate = new Date(statement.generatedAt);
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    return generatedDate > threeDaysAgo;
+  private downloadFile(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 
-  getStatusClass(status: string): string {
-    return status.toLowerCase();
+  isNewStatement(statement: StatementMonth): boolean {
+    // Consider statements from the last 2 months as "new"
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // JavaScript months are 0-indexed
+
+    return statement.year === currentYear &&
+           Math.abs(statement.month - currentMonth) <= 1;
   }
 
-  formatDate(date: Date | string): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
+  formatDate(year: number, month: number): string {
+    const date = new Date(year, month - 1, 1); // month - 1 because JavaScript months are 0-indexed
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
       year: 'numeric'
     });
   }
@@ -417,15 +432,47 @@ export class ConsignorStatementsComponent implements OnInit, OnDestroy {
   }
 
   getCurrentBalance(): number {
-    // Return the most recent statement's closing balance
-    return this.statements.length > 0 ? this.statements[0].closingBalance : 0;
+    // Return the sum of all earnings for current balance calculation
+    return this.getTotalEarnings();
   }
 
   getTotalItemsSold(): number {
-    return this.statements.reduce((sum, statement) => sum + statement.itemsSold, 0);
+    return this.statements.reduce((sum, statement) => sum + statement.salesCount, 0);
   }
 
-  trackByStatementId(index: number, statement: StatementListDto): string {
-    return statement.statementId;
+  getTotalPayouts(): number {
+    return this.statements.reduce((sum, statement) => sum + statement.payoutCount, 0);
+  }
+
+  trackByStatementId(index: number, statement: StatementMonth): string {
+    return `${statement.year}-${statement.month}`;
+  }
+
+  getStatusClass(statement: StatementMonth): string {
+    return 'generated'; // All statements are generated
+  }
+
+  getStatementNumber(statement: StatementMonth): string {
+    return `${statement.year}${statement.month.toString().padStart(2, '0')}`;
+  }
+
+  getPeriodLabel(statement: StatementMonth): string {
+    return statement.monthName;
+  }
+
+  getPeriodStart(statement: StatementMonth): Date {
+    return new Date(statement.year, statement.month - 1, 1);
+  }
+
+  getPeriodEnd(statement: StatementMonth): Date {
+    return new Date(statement.year, statement.month, 0);
+  }
+
+  getGeneratedAt(statement: StatementMonth): Date {
+    return new Date(statement.year, statement.month, 1);
+  }
+
+  getStatementId(statement: StatementMonth): string {
+    return `${statement.year}-${statement.month}`;
   }
 }

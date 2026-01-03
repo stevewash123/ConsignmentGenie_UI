@@ -362,11 +362,11 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
         // Transform recent transactions to dashboard format
         const dashboardTransactions: DashboardTransaction[] = recentTransactions?.items?.map((t: Transaction) => ({
           id: t.id,
-          date: new Date(t.saleDate),
-          itemName: t.item.name,
-          consignor: t.consignor.name,
-          amount: t.salePrice,
-          commission: t.shopAmount
+          date: new Date(t.saleDate || t.transactionDate),
+          itemName: t.items?.[0]?.item?.title || 'N/A',
+          consignor: t.items?.[0]?.consignor?.name || 'N/A',
+          amount: t.salePrice || t.total,
+          commission: t.items?.[0]?.storeAmount || 0
         })) || [];
 
         const realSummary: ShopSummary = {

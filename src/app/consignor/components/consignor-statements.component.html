@@ -39,9 +39,9 @@
 
             <!-- Statement Header -->
             <div class="statement-header">
-              <h3 class="statement-period">{{ statement.periodLabel }}</h3>
-              <div class="statement-status" [class]="getStatusClass(statement.status)">
-                {{ statement.status }}
+              <h3 class="statement-period">{{ getPeriodLabel(statement) }}</h3>
+              <div class="statement-status" [class]="getStatusClass(statement)">
+                Generated
               </div>
             </div>
 
@@ -49,11 +49,11 @@
             <div class="statement-summary">
               <div class="summary-row">
                 <span class="summary-label">Statement #</span>
-                <span class="summary-value">{{ statement.statementNumber }}</span>
+                <span class="summary-value">{{ getStatementNumber(statement) }}</span>
               </div>
               <div class="summary-row">
                 <span class="summary-label">Items Sold</span>
-                <span class="summary-value">{{ statement.itemsSold }}</span>
+                <span class="summary-value">{{ statement.salesCount }}</span>
               </div>
               <div class="summary-row">
                 <span class="summary-label">Total Earnings</span>
@@ -65,19 +65,19 @@
               </div>
               <div class="summary-row">
                 <span class="summary-label">Closing Balance</span>
-                <span class="summary-value balance">{{ statement.closingBalance | currency }}</span>
+                <span class="summary-value balance">{{ statement.totalEarnings | currency }}</span>
               </div>
             </div>
 
             <!-- Statement Period -->
             <div class="statement-period-detail">
               <div class="period-dates">
-                <span class="period-start">{{ formatDate(statement.periodStart) }}</span>
+                <span class="period-start">{{ formatDate(getPeriodStart(statement).getFullYear(), getPeriodStart(statement).getMonth() + 1) }}</span>
                 <span class="period-separator">—</span>
-                <span class="period-end">{{ formatDate(statement.periodEnd) }}</span>
+                <span class="period-end">{{ formatDate(getPeriodEnd(statement).getFullYear(), getPeriodEnd(statement).getMonth() + 1) }}</span>
               </div>
               <div class="generated-date">
-                Generated {{ formatDate(statement.generatedAt) }}
+                Generated {{ formatDate(getGeneratedAt(statement).getFullYear(), getGeneratedAt(statement).getMonth() + 1) }}
               </div>
             </div>
 
@@ -85,17 +85,17 @@
             <div class="statement-actions">
               <button
                 class="btn btn-primary"
-                [routerLink]="['/consignor/statements', statement.statementId]">
+                [routerLink]="['/consignor/statements', getStatementId(statement)]">
                 View Details
               </button>
 
               <button
                 class="btn btn-secondary"
                 (click)="downloadPdf(statement)"
-                [disabled]="!statement.hasPdf || loadingService.isLoading(KEYS.STATEMENT_PDF)">
-                <span *ngIf="loadingService.isLoading(KEYS.STATEMENT_PDF)">Downloading...</span>
-                <span *ngIf="!loadingService.isLoading(KEYS.STATEMENT_PDF)">
-                  {{ statement.hasPdf ? 'Download PDF' : 'PDF Not Available' }}
+                [disabled]="statement.isDownloading || loadingService.isLoading(KEYS.STATEMENT_PDF)">
+                <span *ngIf="statement.isDownloading">Downloading...</span>
+                <span *ngIf="!statement.isDownloading">
+                  Download PDF
                 </span>
               </button>
             </div>

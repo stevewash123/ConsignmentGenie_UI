@@ -9,32 +9,12 @@ interface InventoryPermissions {
   canEditOwnItems: boolean;
   canRemoveOwnItems: boolean;
   canEditPrices: boolean;
-  canMarkAsSold: boolean;
-  canViewAllItems: boolean;
-  canManageCategories: boolean;
 }
 
-interface AnalyticsPermissions {
-  canViewBasicAnalytics: boolean;
-  canViewDetailedAnalytics: boolean;
-  canViewSalesHistory: boolean;
-  canViewPayoutHistory: boolean;
-  canExportReports: boolean;
-  canViewRevenue: boolean;
-}
 
-interface AccountPermissions {
-  canUpdateProfile: boolean;
-  canChangePaymentPreferences: boolean;
-  canCancelAccount: boolean;
-  canManageNotifications: boolean;
-  canContactSupport: boolean;
-}
 
 interface ConsignorPermissions {
   inventory: InventoryPermissions;
-  analytics: AnalyticsPermissions;
-  account: AccountPermissions;
   isActive: boolean;
   lastUpdated: Date;
 }
@@ -310,8 +290,6 @@ interface PermissionTemplate {
 export class PermissionsComponent implements OnInit {
   permissionsForm!: FormGroup;
   defaultPermissions = signal<ConsignorPermissions | null>(null);
-  permissionTemplates = signal<PermissionTemplate[]>([]);
-  selectedTemplate = signal<string>('');
   isLoading = signal(false);
   isSaving = signal(false);
   successMessage = signal('');
@@ -324,7 +302,6 @@ export class PermissionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
-    this.loadPermissionTemplates();
     this.loadDefaultPermissions();
   }
 
@@ -334,141 +311,12 @@ export class PermissionsComponent implements OnInit {
         canAddItems: [true],
         canEditOwnItems: [true],
         canRemoveOwnItems: [false],
-        canEditPrices: [true],
-        canMarkAsSold: [false],
-        canViewAllItems: [false],
-        canManageCategories: [false]
-      }),
-      analytics: this.fb.group({
-        canViewBasicAnalytics: [true],
-        canViewDetailedAnalytics: [false],
-        canViewSalesHistory: [true],
-        canViewPayoutHistory: [true],
-        canExportReports: [false],
-        canViewRevenue: [false]
-      }),
-      account: this.fb.group({
-        canUpdateProfile: [true],
-        canChangePaymentPreferences: [true],
-        canCancelAccount: [false],
-        canManageNotifications: [true],
-        canContactSupport: [true]
+        canEditPrices: [true]
       })
     });
   }
 
-  private async loadPermissionTemplates(): Promise<void> {
-    try {
-      const templates = await this.http.get<PermissionTemplate[]>(`${environment.apiUrl}/api/organization/permission-templates`).toPromise();
-      if (templates) {
-        this.permissionTemplates.set(templates);
-      }
-    } catch (error) {
-      this.setDefaultTemplates();
-    }
-  }
 
-  private setDefaultTemplates(): void {
-    const defaultTemplates: PermissionTemplate[] = [
-      {
-        name: 'Basic Consignor',
-        description: 'Standard permissions for new consignors',
-        permissions: {
-          inventory: {
-            canAddItems: true,
-            canEditOwnItems: true,
-            canRemoveOwnItems: false,
-            canEditPrices: true,
-            canMarkAsSold: false,
-            canViewAllItems: false,
-            canManageCategories: false
-          },
-          analytics: {
-            canViewBasicAnalytics: true,
-            canViewDetailedAnalytics: false,
-            canViewSalesHistory: true,
-            canViewPayoutHistory: true,
-            canExportReports: false,
-            canViewRevenue: false
-          },
-          account: {
-            canUpdateProfile: true,
-            canChangePaymentPreferences: true,
-            canCancelAccount: false,
-            canManageNotifications: true,
-            canContactSupport: true
-          },
-          isActive: true,
-          lastUpdated: new Date()
-        }
-      },
-      {
-        name: 'Trusted Consignor',
-        description: 'Enhanced permissions for established consignors',
-        permissions: {
-          inventory: {
-            canAddItems: true,
-            canEditOwnItems: true,
-            canRemoveOwnItems: true,
-            canEditPrices: true,
-            canMarkAsSold: true,
-            canViewAllItems: false,
-            canManageCategories: false
-          },
-          analytics: {
-            canViewBasicAnalytics: true,
-            canViewDetailedAnalytics: true,
-            canViewSalesHistory: true,
-            canViewPayoutHistory: true,
-            canExportReports: true,
-            canViewRevenue: true
-          },
-          account: {
-            canUpdateProfile: true,
-            canChangePaymentPreferences: true,
-            canCancelAccount: true,
-            canManageNotifications: true,
-            canContactSupport: true
-          },
-          isActive: true,
-          lastUpdated: new Date()
-        }
-      },
-      {
-        name: 'Restricted',
-        description: 'Limited permissions for trial or restricted consignors',
-        permissions: {
-          inventory: {
-            canAddItems: true,
-            canEditOwnItems: false,
-            canRemoveOwnItems: false,
-            canEditPrices: false,
-            canMarkAsSold: false,
-            canViewAllItems: false,
-            canManageCategories: false
-          },
-          analytics: {
-            canViewBasicAnalytics: false,
-            canViewDetailedAnalytics: false,
-            canViewSalesHistory: false,
-            canViewPayoutHistory: true,
-            canExportReports: false,
-            canViewRevenue: false
-          },
-          account: {
-            canUpdateProfile: true,
-            canChangePaymentPreferences: false,
-            canCancelAccount: false,
-            canManageNotifications: true,
-            canContactSupport: true
-          },
-          isActive: true,
-          lastUpdated: new Date()
-        }
-      }
-    ];
-    this.permissionTemplates.set(defaultTemplates);
-  }
 
   private async loadDefaultPermissions(): Promise<void> {
     try {
@@ -508,61 +356,12 @@ export class PermissionsComponent implements OnInit {
     }
   }
 
-  applyTemplate(template: PermissionTemplate): void {
-    this.selectedTemplate.set(template.name);
-    this.permissionsForm.patchValue(template.permissions);
-  }
 
   resetToDefaults(): void {
-    const defaultTemplate = this.permissionTemplates().find(t => t.name === 'Basic Consignor');
-    if (defaultTemplate) {
-      this.applyTemplate(defaultTemplate);
-    } else {
-      this.initializeForm();
-    }
-    this.selectedTemplate.set('');
+    this.initializeForm();
   }
 
-  async createCustomTemplate(): Promise<void> {
-    const name = prompt('Enter a name for this permission template:');
-    if (!name) return;
 
-    const description = prompt('Enter a description for this template:') || '';
-
-    const newTemplate: PermissionTemplate = {
-      name,
-      description,
-      permissions: {
-        ...this.permissionsForm.value,
-        isActive: true,
-        lastUpdated: new Date()
-      }
-    };
-
-    try {
-      await this.http.post(`${environment.apiUrl}/api/organization/permission-templates`, newTemplate).toPromise();
-      const currentTemplates = this.permissionTemplates();
-      this.permissionTemplates.set([...currentTemplates, newTemplate]);
-      this.showSuccess(`Template "${name}" created successfully`);
-    } catch (error) {
-      this.showError('Failed to create template');
-    }
-  }
-
-  getPermissionCount(): { enabled: number; total: number } {
-    const formValue = this.permissionsForm.value;
-    let enabled = 0;
-    let total = 0;
-
-    Object.values(formValue).forEach((group: any) => {
-      Object.values(group).forEach((permission: any) => {
-        total++;
-        if (permission) enabled++;
-      });
-    });
-
-    return { enabled, total };
-  }
 
   private showSuccess(message: string): void {
     this.successMessage.set(message);

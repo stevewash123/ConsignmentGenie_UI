@@ -5,17 +5,39 @@
         <div class="page-header">
           <div class="header-content">
             <h1>Inventory Management</h1>
-            <p>View and manage all inventory items</p>
+            <p *ngIf="!isSquareInventoryMode()">View and manage all inventory items</p>
+            <div *ngIf="isSquareInventoryMode()" class="square-mode-indicator">
+              <p>Viewing inventory from Square</p>
+              <div class="square-badge">
+                <span class="badge-icon">🔲</span>
+                <span class="badge-text">Square Integration Active</span>
+              </div>
+            </div>
           </div>
           <div class="header-actions">
-            <button class="btn-secondary" (click)="openBulkImport()" title="Upload multiple items at once">
+            <button *ngIf="isSquareInventoryMode()" class="btn-secondary" (click)="refreshInventory()" [disabled]="isLoading()" title="Refresh Square inventory data">
+              <span class="btn-icon">🔄</span>
+              {{ isLoading() ? 'Refreshing...' : 'Refresh' }}
+            </button>
+            <button *ngIf="isSquareInventoryMode()" class="btn-secondary" (click)="manageSquareSettings()" title="Configure Square inventory settings">
+              <span class="btn-icon">⚙️</span>
+              Square Settings
+            </button>
+            <button *ngIf="!isSquareInventoryMode()" class="btn-secondary" (click)="manageCategories()" title="Organize inventory with categories">
+              <span class="btn-icon">🏷️</span>
+              Manage Categories
+            </button>
+            <button *ngIf="!isSquareInventoryMode()" class="btn-secondary" (click)="openBulkImport()" title="Upload multiple items at once">
               <span class="btn-icon">📤</span>
               Bulk Upload
             </button>
-            <button class="btn-primary" (click)="createNewItem()">
+            <button *ngIf="!isSquareInventoryMode()" class="btn-primary" (click)="createNewItem()">
               <span class="btn-icon">📦</span>
               Add New Item
             </button>
+            <div *ngIf="isSquareInventoryMode()" class="square-mode-actions">
+              <p class="square-note">Items managed through Square. <a href="/owner/settings/integrations/inventory" class="square-link">Change settings</a></p>
+            </div>
           </div>
         </div>
 

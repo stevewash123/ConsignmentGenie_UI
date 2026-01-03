@@ -279,59 +279,51 @@ export class SettingsLayoutComponent implements OnInit {
       id: 'consignor-settings',
       label: 'Consignor Settings',
       icon: '👥',
-      description: 'Default terms, agreements, payout settings',
+      description: 'Default permissions and terms for consignors',
       children: [
+        {
+          id: 'permissions',
+          label: 'Default Permissions',
+          route: 'consignor-management/permissions',
+          description: 'Default inventory and analytics permissions for all consignors'
+        },
         {
           id: 'defaults',
           label: 'Default Terms',
           route: 'consignors',
           description: 'Commission rates, time periods'
         },
-        {
-          id: 'payout-settings',
-          label: 'Payout Settings',
-          route: 'consignors/payout-settings',
-          description: 'Payout schedules and preferences'
-        }
       ]
     },
     {
-      id: 'consignor-management',
-      label: 'Consignor Management',
-      icon: '👥',
-      description: 'Onboarding, invitations, store codes, approvals',
+      id: 'payouts',
+      label: 'Payout Settings',
+      icon: '💰',
+      description: 'Configure payout schedules, methods, and automation',
       children: [
         {
-          id: 'store-codes',
-          label: 'Store Codes & Invitations',
-          route: 'consignor-management/store-codes',
-          description: 'Store code generation and invitation management'
+          id: 'schedule-thresholds',
+          label: 'Schedule & Thresholds',
+          route: 'payouts/schedule-thresholds',
+          description: 'Payout frequency, minimum amounts, and hold periods'
         },
         {
-          id: 'approval-workflow',
-          label: 'Approval Workflow',
-          route: 'consignor-management/approval-workflow',
-          description: 'Auto-approval settings and pending approvals'
+          id: 'payment-methods',
+          label: 'Payment Methods',
+          route: 'payouts/payment-methods',
+          description: 'Available payment options and processing fees'
         },
         {
-          id: 'permissions',
-          label: 'Default Permissions',
-          route: 'consignor-management/permissions',
-          description: 'Default inventory and analytics permissions'
-        }
-      ]
-    },
-    {
-      id: 'inventory-management',
-      label: 'Inventory Management',
-      icon: '📦',
-      description: 'Categories, conditions, and organization',
-      children: [
+          id: 'automation',
+          label: 'Automation',
+          route: 'payouts/automation',
+          description: 'Automatic payout generation and approval settings'
+        },
         {
-          id: 'categories',
-          label: 'Categories',
-          route: 'inventory-management/categories',
-          description: 'Manage item categories and organization'
+          id: 'reports',
+          label: 'Reports & Statements',
+          route: 'payouts/reports',
+          description: 'Statement generation and formatting options'
         }
       ]
     },
@@ -342,10 +334,16 @@ export class SettingsLayoutComponent implements OnInit {
       description: 'External services and connections',
       children: [
         {
-          id: 'inventory-sales',
-          label: 'Inventory & Sales',
-          route: 'integrations/inventory-sales',
-          description: 'Square integration for inventory and sales'
+          id: 'inventory',
+          label: 'Inventory',
+          route: 'integrations/inventory',
+          description: 'Item management and tracking setup'
+        },
+        {
+          id: 'sales',
+          label: 'Sales',
+          route: 'integrations/sales',
+          description: 'POS systems and online storefronts'
         },
         {
           id: 'accounting',
@@ -360,10 +358,10 @@ export class SettingsLayoutComponent implements OnInit {
           description: 'Stripe, Square payment setup'
         },
         {
-          id: 'banking',
-          label: 'Banking',
-          route: 'integrations/banking',
-          description: 'Bank connections via Plaid'
+          id: 'payouts',
+          label: 'Payouts',
+          route: 'integrations/payouts',
+          description: 'Configure payout methods and banking integrations'
         }
       ]
     },

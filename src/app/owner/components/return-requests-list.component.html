@@ -1,23 +1,15 @@
-<div class="return-requests">
-  <!-- Navigation Header -->
-  <div class="nav-header">
-    <div class="header-content">
+<app-owner-layout>
+  <div class="return-requests-page">
+    <div class="page-header">
       <h1>
         Return Requests
         <span class="badge" [class.no-pending]="getPendingCount() === 0">
           {{getPendingCount()}} Pending
         </span>
       </h1>
-      <nav class="nav-links">
-        <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
-        <a routerLink="/owner/inventory" routerLinkActive="active">Inventory</a>
-        <a routerLink="/owner/consignors" routerLinkActive="active">Consignors</a>
-        <a routerLink="/owner/return-requests" routerLinkActive="active">Return Requests</a>
-      </nav>
     </div>
-  </div>
 
-  <div class="content">
+    <div class="content">
     <!-- Controls -->
     <div class="controls">
       <label for="statusFilter">Filter:</label>
@@ -131,5 +123,6 @@
         </p>
       </div>
     </div>
+    </div>
   </div>
-</div>
+</app-owner-layout>

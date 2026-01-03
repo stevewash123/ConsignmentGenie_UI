@@ -2,9 +2,154 @@
   <h2 class="section-title">Accounting</h2>
   <p class="section-description">Connect with QuickBooks, Xero, and other accounting systems</p>
 
-  <div class="placeholder">
-    <h3>📊 Accounting Integrations</h3>
-    <p>QuickBooks connection, Xero integration, automated export settings</p>
-    <p><em>Component placeholder - implementation pending</em></p>
-  </div>
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading integrations...</p>
+    </div>
+  }
+
+  <!-- QuickBooks Integration -->
+  <section class="integration-card">
+    <div class="integration-header">
+      <div class="integration-title">
+        <div class="integration-logo">QB</div>
+        <h3>QuickBooks Online</h3>
+      </div>
+      <div class="integration-status">
+        @if (quickBooksStatus().isConnected) {
+          <span class="status-badge connected">✓ Connected</span>
+        } @else {
+          <span class="status-badge not-connected">Not Connected</span>
+        }
+      </div>
+    </div>
+
+    @if (quickBooksStatus().isConnected) {
+      <div class="integration-content">
+        <p class="integration-description">
+          Sync your transactions, items, and payouts with QuickBooks.
+        </p>
+
+        <div class="company-info">
+          <h4>Connected Company</h4>
+          <p><strong>{{ quickBooksStatus().companyName || 'Unknown Company' }}</strong></p>
+          <p class="company-id">Company ID: {{ quickBooksStatus().companyId }}</p>
+        </div>
+
+        <div class="sync-settings">
+          <h4>Sync Settings</h4>
+          <div class="form-group">
+            <label for="syncFrequency">Sync Frequency</label>
+            <select
+              id="syncFrequency"
+              [(ngModel)]="quickBooksStatus().syncFrequency"
+              (ngModelChange)="updateSyncFrequency($event)"
+              class="form-select">
+              <option value="manual">Manual sync only</option>
+              <option value="daily">Daily automatic sync</option>
+              <option value="real-time">Real-time sync</option>
+            </select>
+          </div>
+
+          <div class="sync-status">
+            <label><strong>Last Sync:</strong> {{ formatDate(quickBooksStatus().lastSync) || 'Never' }}</label>
+            <button
+              type="button"
+              class="btn btn-secondary btn-small"
+              (click)="syncQuickBooksNow()"
+              [disabled]="isLoading()">
+              {{ isLoading() ? 'Syncing...' : 'Sync Now' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="account-mappings">
+          <h4>Account Mappings</h4>
+          <div class="mapping-list">
+            <div class="mapping-item">
+              <span class="mapping-label">Sales Revenue:</span>
+              <span class="mapping-value">{{ quickBooksStatus().accountMappings.salesAccount || 'Not mapped' }}</span>
+            </div>
+            <div class="mapping-item">
+              <span class="mapping-label">Consignor Payouts:</span>
+              <span class="mapping-value">{{ quickBooksStatus().accountMappings.payoutAccount || 'Not mapped' }}</span>
+            </div>
+            <div class="mapping-item">
+              <span class="mapping-label">Expenses:</span>
+              <span class="mapping-value">{{ quickBooksStatus().accountMappings.expenseAccount || 'Not mapped' }}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="configureAccountMapping()">
+            Configure Mapping
+          </button>
+        </div>
+
+        @if (quickBooksStatus().error) {
+          <div class="error-message">
+            <span class="error-icon">⚠️</span>
+            <span>{{ quickBooksStatus().error }}</span>
+          </div>
+        }
+
+        <div class="integration-actions">
+          <button
+            type="button"
+            class="btn btn-outline btn-danger"
+            (click)="disconnectQuickBooks()"
+            [disabled]="isLoading()">
+            Disconnect
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="integration-content">
+        <p class="integration-description">
+          Connect to automatically sync your financial data with QuickBooks Online.
+        </p>
+
+        @if (quickBooksStatus().error) {
+          <div class="error-message">
+            <span class="error-icon">⚠️</span>
+            <span>{{ quickBooksStatus().error }}</span>
+          </div>
+        }
+
+        <div class="integration-features">
+          <h4>What you'll get:</h4>
+          <ul>
+            <li>✓ Automatic transaction sync</li>
+            <li>✓ Consignor payout tracking</li>
+            <li>✓ Tax reporting integration</li>
+            <li>✓ Financial reconciliation</li>
+          </ul>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-primary connect-button"
+          (click)="connectQuickBooks()"
+          [disabled]="isLoading()">
+          {{ isLoading() ? 'Connecting...' : 'Connect to QuickBooks' }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- Save Actions -->
+  @if (quickBooksStatus().isConnected) {
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="saveIntegrationSettings()"
+        [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving...' : 'Save Settings' }}
+      </button>
+    </div>
+  }
 </div>

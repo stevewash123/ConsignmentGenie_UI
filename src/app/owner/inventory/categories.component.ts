@@ -1,12 +1,12 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CategoryService } from '../../../services/category.service';
-import { LoadingService } from '../../../shared/services/loading.service';
-import { LookupManagementComponent } from '../../../shared/components/lookup-management.component';
-import { LookupItem, ItemCategoryDto, CreateItemCategoryDto, UpdateItemCategoryDto } from '../../../models/inventory.model';
+import { CategoryService } from '../../services/category.service';
+import { LoadingService } from '../../shared/services/loading.service';
+import { LookupManagementComponent } from '../../shared/components/lookup-management.component';
+import { LookupItem, ItemCategoryDto, CreateItemCategoryDto, UpdateItemCategoryDto } from '../../models/inventory.model';
 
 @Component({
-  selector: 'app-categories',
+  selector: 'app-inventory-categories',
   standalone: true,
   imports: [CommonModule, LookupManagementComponent],
   template: `
@@ -169,7 +169,7 @@ import { LookupItem, ItemCategoryDto, CreateItemCategoryDto, UpdateItemCategoryD
     }
   `]
 })
-export class CategoriesComponent implements OnInit {
+export class InventoryCategoriesComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private loadingService = inject(LoadingService);
 

@@ -1,0 +1,108 @@
+<div class="section">
+  <h2 class="section-title">Inventory Management</h2>
+  <p class="section-description">Choose how you want to track and manage your inventory</p>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading integrations...</p>
+    </div>
+  }
+
+  <div class="choice-section">
+    <h3 class="choice-title">How would you like to track inventory?</h3>
+
+    <div class="choice-grid">
+      <!-- Option 1: Keep My Inventory in ConsignmentGenie -->
+      <div
+        class="choice-card"
+        [class.selected]="selectedChoice === 'consignment-genie'"
+        (click)="selectChoice('consignment-genie')">
+        <input type="radio" name="inventoryChoice" value="consignment-genie" [checked]="selectedChoice === 'consignment-genie'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-text-section">
+            <h4 class="choice-label">Keep my inventory in ConsignmentGenie</h4>
+            <div class="choice-benefits">
+              <div class="benefit-item">• Best for new users with no existing inventory</div>
+              <div class="benefit-item">• Can still use Square for payment processing</div>
+              <div class="benefit-item">• Full consignment workflow integration</div>
+            </div>
+          </div>
+          <div class="choice-icon">📦</div>
+        </div>
+      </div>
+
+      <!-- Option 2: My Inventory is in Square -->
+      <div
+        class="choice-card"
+        [class.selected]="selectedChoice === 'square'"
+        (click)="selectChoice('square')">
+        <input type="radio" name="inventoryChoice" value="square" [checked]="selectedChoice === 'square'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-text-section">
+            <h4 class="choice-label">Keep my inventory in Square</h4>
+            <div class="choice-benefits">
+              <div class="benefit-item">• Good starting point if you already have inventory in Square</div>
+              <div class="benefit-item">• Can migrate items to ConsignmentGenie at any time</div>
+              <div class="benefit-item">• Can link Square items to ConsignmentGenie consignors for payout tracking</div>
+            </div>
+          </div>
+          <div class="choice-icon">⬛</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Square Integration Section - Show when Square option is selected -->
+  @if (selectedChoice === 'square') {
+    <div class="choice-section">
+      <h3 class="choice-title">Square Integration</h3>
+
+      <div class="integration-card">
+        <div class="integration-header">
+          <div class="integration-icon">🔲</div>
+          <div class="integration-info">
+            @if (squareStatus().isConnected) {
+              <h4 class="integration-title">Square Connected</h4>
+              <p class="integration-description">
+                @if (squareStatus().merchantName) {
+                  Connected to {{ squareStatus().merchantName }}
+                } @else {
+                  Your Square account is connected
+                }
+              </p>
+              <div class="status-indicator connected">✓ CONNECTED</div>
+            } @else {
+              <h4 class="integration-title">Connect to Square</h4>
+              <p class="integration-description">Connect your Square account to sync inventory data</p>
+            }
+          </div>
+        </div>
+
+        @if (squareStatus().isConnected) {
+          <button
+            type="button"
+            class="disconnect-button"
+            (click)="disconnectFromSquare()">
+            Disconnect from Square
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="connect-button"
+            (click)="connectToSquare()"
+            [disabled]="isConnecting()">
+            @if (isConnecting()) {
+              <div class="spinner"></div>
+              Connecting...
+            } @else {
+              Connect to Square
+            }
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

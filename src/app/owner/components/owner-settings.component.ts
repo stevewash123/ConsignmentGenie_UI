@@ -12,6 +12,22 @@ interface OrganizationSettings {
   subscriptionStatus: string;
   quickBooksConnected: boolean;
   quickBooksLastSync?: string;
+  squareIntegration?: {
+    connected: boolean;
+    merchantId?: string;
+    businessName?: string;
+    locationId?: string;
+    locationName?: string;
+    connectedAt?: Date;
+    inventorySource: 'cg' | 'square' | 'hybrid';
+    posMode: 'cg' | 'square';
+    useSquarePayments: boolean;
+    salesImportMode: 'none' | 'manual' | 'scheduled' | 'realtime';
+    lastCatalogSync?: Date;
+    lastSalesImport?: Date;
+    lastSalesImportCount?: number;
+  };
+  // Legacy fields for backward compatibility
   squareConnected: boolean;
   squareLocationId?: string;
 }
@@ -365,6 +381,13 @@ export class OwnerSettingsComponent implements OnInit {
         subscriptionTier: 'Pro',
         subscriptionStatus: 'Active',
         quickBooksConnected: false,
+        squareIntegration: {
+          connected: false,
+          inventorySource: 'cg',
+          posMode: 'cg',
+          useSquarePayments: false,
+          salesImportMode: 'none'
+        },
         squareConnected: false
       });
     }
@@ -487,7 +510,7 @@ export class OwnerSettingsComponent implements OnInit {
   }
 
   async disconnectSquare() {
-    if (!confirm('Are you sure you want to disconnect Square? This will stop all syncing.')) {
+    if (!confirm('Are you sure you want to disconnect Square? This will stop all syncing and reset all integration settings.')) {
       return;
     }
 
@@ -502,6 +525,25 @@ export class OwnerSettingsComponent implements OnInit {
       }
     } catch (error) {
       this.showError('Failed to disconnect Square');
+    }
+  }
+
+  async updateSquareSettings(settings: any) {
+    this.saving.set(true);
+    try {
+      const response = await this.http.put<any>(
+        `${environment.apiUrl}/api/square/settings`,
+        settings
+      ).toPromise();
+
+      if (response?.success) {
+        await this.loadOrganizationSettings();
+        this.showSuccess('Square settings updated successfully');
+      }
+    } catch (error) {
+      this.showError('Failed to update Square settings');
+    } finally {
+      this.saving.set(false);
     }
   }
 
@@ -522,6 +564,20 @@ export class OwnerSettingsComponent implements OnInit {
     } finally {
       this.syncing.set(false);
     }
+  }
+
+  // Helper methods for accessing Square integration data
+  get isSquareConnected(): boolean {
+    return this.organization()?.squareIntegration?.connected ||
+           this.organization()?.squareConnected || false;
+  }
+
+  get squareBusinessName(): string {
+    return this.organization()?.squareIntegration?.businessName || 'Unknown Business';
+  }
+
+  get squareLocationName(): string {
+    return this.organization()?.squareIntegration?.locationName || 'Unknown Location';
   }
 
   private showSuccess(message: string) {

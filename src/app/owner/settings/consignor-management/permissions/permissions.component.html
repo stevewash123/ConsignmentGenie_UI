@@ -12,32 +12,6 @@
   </div>
 
   <div *ngIf="!isLoading()">
-    <!-- Permission Templates -->
-    <section class="form-section">
-      <h3>Permission Templates</h3>
-
-      <div class="template-selector">
-        <label>Quick Apply Template</label>
-        <div class="template-grid">
-          <div *ngFor="let template of permissionTemplates()"
-               class="template-card"
-               [class.selected]="selectedTemplate() === template.name"
-               (click)="applyTemplate(template)">
-            <div class="template-name">{{ template.name }}</div>
-            <div class="template-description">{{ template.description }}</div>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-size: 0.875rem; color: #6b7280;">
-            {{ getPermissionCount().enabled }} of {{ getPermissionCount().total }} permissions enabled
-          </div>
-          <button type="button" (click)="createCustomTemplate()" class="btn-secondary">
-            Create Custom Template
-          </button>
-        </div>
-      </div>
-    </section>
 
     <!-- Permissions Form -->
     <form [formGroup]="permissionsForm" (ngSubmit)="saveDefaultPermissions()">
@@ -78,164 +52,25 @@
               </div>
             </div>
 
-            <div class="permission-item">
-              <input type="checkbox" id="canMarkAsSold" formControlName="canMarkAsSold">
-              <div class="permission-content">
-                <div class="permission-label">Can mark items as sold</div>
-                <div class="permission-description">Allow consignors to record sales (typically restricted to shop staff)</div>
-              </div>
-            </div>
 
-            <div class="permission-item">
-              <input type="checkbox" id="canViewAllItems" formControlName="canViewAllItems">
-              <div class="permission-content">
-                <div class="permission-label">Can view all store items</div>
-                <div class="permission-description">Allow consignors to see inventory from other consignors</div>
-              </div>
-            </div>
 
-            <div class="permission-item">
-              <input type="checkbox" id="canManageCategories" formControlName="canManageCategories">
-              <div class="permission-content">
-                <div class="permission-label">Can manage categories</div>
-                <div class="permission-description">Allow consignors to create and modify product categories</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Analytics Permissions -->
-      <section class="form-section">
-        <div class="permission-group">
-          <h4>Analytics & Reporting</h4>
-          <div class="permission-list" formGroupName="analytics">
-            <div class="permission-item">
-              <input type="checkbox" id="canViewBasicAnalytics" formControlName="canViewBasicAnalytics">
-              <div class="permission-content">
-                <div class="permission-label">Can view basic analytics</div>
-                <div class="permission-description">Item views, basic sales summaries for their own items</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canViewDetailedAnalytics" formControlName="canViewDetailedAnalytics">
-              <div class="permission-content">
-                <div class="permission-label">Can view detailed analytics</div>
-                <div class="permission-description">Advanced metrics, trends, store-wide data (typically restricted)</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canViewSalesHistory" formControlName="canViewSalesHistory">
-              <div class="permission-content">
-                <div class="permission-label">Can view their sales history</div>
-                <div class="permission-description">History of sold items with dates and prices</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canViewPayoutHistory" formControlName="canViewPayoutHistory">
-              <div class="permission-content">
-                <div class="permission-label">Can view payout history</div>
-                <div class="permission-description">History of payments received from the shop</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canExportReports" formControlName="canExportReports">
-              <div class="permission-content">
-                <div class="permission-label">Can export reports</div>
-                <div class="permission-description">Allow downloading reports as CSV or PDF files</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canViewRevenue" formControlName="canViewRevenue">
-              <div class="permission-content">
-                <div class="permission-label">Can view revenue details</div>
-                <div class="permission-description">Access to detailed financial information and earnings</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Account Permissions -->
-      <section class="form-section">
-        <div class="permission-group">
-          <h4>Account Management</h4>
-          <div class="permission-list" formGroupName="account">
-            <div class="permission-item">
-              <input type="checkbox" id="canUpdateProfile" formControlName="canUpdateProfile">
-              <div class="permission-content">
-                <div class="permission-label">Can update profile information</div>
-                <div class="permission-description">Change name, contact info, bio, profile photo</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canChangePaymentPreferences" formControlName="canChangePaymentPreferences">
-              <div class="permission-content">
-                <div class="permission-label">Can change payment preferences</div>
-                <div class="permission-description">Update payment method, address for checks, etc.</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canCancelAccount" formControlName="canCancelAccount">
-              <div class="permission-content">
-                <div class="permission-label">Can cancel their account</div>
-                <div class="permission-description">Self-service account cancellation (consider requiring approval)</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canManageNotifications" formControlName="canManageNotifications">
-              <div class="permission-content">
-                <div class="permission-label">Can manage notification settings</div>
-                <div class="permission-description">Control email and SMS notification preferences</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canContactSupport" formControlName="canContactSupport">
-              <div class="permission-content">
-                <div class="permission-label">Can contact support</div>
-                <div class="permission-description">Access to customer support and help resources</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Form Actions -->
-      <section class="form-section">
-        <div class="form-actions">
-          <div>
-            <button type="button" (click)="resetToDefaults()" class="btn-secondary">
-              Reset to Defaults
-            </button>
           </div>
 
-          <div style="display: flex; gap: 1rem;">
-            <button type="submit"
-                    class="btn-primary"
-                    [disabled]="!permissionsForm.valid || isSaving()">
-              {{ isSaving() ? 'Saving...' : 'Save Default Permissions' }}
-            </button>
-          </div>
-        </div>
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <div>
+              <button type="button" (click)="resetToDefaults()" class="btn-secondary">
+                Reset to Defaults
+              </button>
+            </div>
 
-        <div class="warning-box">
-          <div class="warning-title">Important Notes</div>
-          <div class="warning-text">
-            <ul style="margin: 0; padding-left: 1rem;">
-              <li>These permissions apply to NEW consignors when they're approved</li>
-              <li>You can override permissions for individual consignors later</li>
-              <li>Changes here don't affect existing consignors' permissions</li>
-              <li>Consider your business model when setting default permissions</li>
-            </ul>
+            <div style="display: flex; gap: 1rem;">
+              <button type="submit"
+                      class="btn-primary"
+                      [disabled]="!permissionsForm.valid || isSaving()">
+                {{ isSaving() ? 'Saving...' : 'Save Default Permissions' }}
+              </button>
+            </div>
           </div>
         </div>
       </section>

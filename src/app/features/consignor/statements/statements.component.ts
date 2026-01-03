@@ -39,7 +39,10 @@ export class StatementsComponent implements OnInit, OnDestroy {
     this.consignorPortalService.getStatements()
       .pipe(
         takeUntil(this.destroy$),
-        map((statementList: StatementListDto[]) => this.transformToStatementMonths(statementList))
+        map((response: any) => {
+          const statementsData = response.success ? response.data : response;
+          return statementsData.statements || [];
+        })
       )
       .subscribe({
         next: (statements) => {
@@ -61,7 +64,7 @@ export class StatementsComponent implements OnInit, OnDestroy {
 
     statement.isDownloading = true;
 
-    this.consignorPortalService.downloadStatementPdfByPeriod(statement.year, statement.month)
+    this.consignorPortalService.downloadStatementPdf(statement.year, statement.month)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {

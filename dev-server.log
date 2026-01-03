@@ -1,0 +1,43 @@
+
+> temp-angular-project@0.0.1 start
+> ng serve
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names                                 |  Raw size
+main.js             | main                                  |  46.82 kB | 
+chunk-R2HZO43J.js   | -                                     |  12.77 kB | 
+styles.css          | styles                                |   6.10 kB | 
+chunk-5RGLZ3SL.js   | -                                     |   3.01 kB | 
+chunk-T73AR6O4.js   | -                                     |   2.23 kB | 
+chunk-EVSPGG2W.js   | -                                     |   1.64 kB | 
+chunk-LXHLCQ2Q.js   | -                                     | 490 bytes | 
+polyfills.js        | polyfills                             |  95 bytes | 
+
+                    | Initial total                         |  73.16 kB
+
+Lazy chunk files    | Names                                 |  Raw size
+chunk-4A3SAMWO.js   | consignor-balance-dashboard-component | 218.40 kB | 
+chunk-T7ME3N2U.js   | inventory-list-component              | 217.75 kB | 
+chunk-X3FSTZOL.js   | consignor-list-component              | 137.63 kB | 
+chunk-JT2FKFXJ.js   | item-list-component                   | 132.69 kB | 
+chunk-7RBW6ZC4.js   | price-request-list-component          | 130.79 kB | 
+chunk-WVWIAQYA.js   | consignor-item-detail-component       | 129.05 kB | 
+chunk-AHMC6RUX.js   | consignor-payouts-component           | 127.86 kB | 
+chunk-FSPEHY6U.js   | owner-approval-component              | 125.73 kB | 
+chunk-SDSSPY5Q.js   | owner-sales-component                 | 119.81 kB | 
+chunk-QC57V57Q.js   | storefront-settings-component         | 108.88 kB | 
+chunk-C7E7SBQU.js   | payout-history-component              |  92.55 kB | 
+chunk-WUOZM6QC.js   | record-sale-component                 |  86.27 kB | 
+chunk-5OV4WEES.js   | consignor-settings-component          |  84.66 kB | 
+chunk-XMQ76MUJ.js   | account-settings-component            |  79.58 kB | 
+chunk-553PV7QT.js   | store-layout-component                |  74.49 kB | 
+...and 111 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [51.295 seconds] - 2025-12-31T16:49:11.516Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+11:49:13 AM [vite] (ssr) Re-optimizing dependencies because vite config has changed
+11:49:13 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+  ➜  Local:   http://localhost:4200/

@@ -1,11 +1,10 @@
-<div class="price-requests-page">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-content">
+<app-owner-layout>
+  <div class="price-requests-page">
+    <!-- Page Header -->
+    <div class="page-header">
       <h1 class="page-title">Price Change Requests</h1>
       <p class="page-subtitle">Review and manage consignor price change requests</p>
     </div>
-  </div>
 
   <!-- Filters and Search -->
   <div class="filters-section">
@@ -212,4 +211,5 @@
     [show]="showReviewModal"
     (closed)="onReviewModalClosed($event)">
   </app-price-request-review-modal>
-</div>
+  </div>
+</app-owner-layout>

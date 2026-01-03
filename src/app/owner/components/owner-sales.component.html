@@ -122,32 +122,32 @@
                   </td>
                   <td class="item-cell">
                     <div class="item-info">
-                      <div class="item-name">{{ transaction.item.name }}</div>
-                      <div class="item-description">{{ transaction.item.description }}</div>
+                      <div class="item-name">{{ transaction.items?.[0]?.item?.title || 'N/A' }}</div>
+                      <div class="item-description">{{ transaction.items?.[0]?.item?.description || '' }}</div>
                     </div>
                   </td>
                   <td class="consignor-cell">
                     <div class="consignor-info">
-                      <div class="consignor-name">{{ transaction.consignor.name }}</div>
-                      <div class="commission-rate">{{ transaction.consignorsplitPercentage }}% commission</div>
+                      <div class="consignor-name">{{ transaction.items?.[0]?.consignor?.name || 'N/A' }}</div>
+                      <div class="commission-rate">{{ transaction.items?.[0]?.consignorSplitPercentage * 100 || 0 }}% commission</div>
                     </div>
                   </td>
                   <td class="price-cell">
-                    <div class="sale-price">${{ transaction.salePrice | number:'1.2-2' }}</div>
-                    <div class="tax-amount" *ngIf="transaction.salesTaxAmount">
-                      +${{ transaction.salesTaxAmount | number:'1.2-2' }} tax
+                    <div class="sale-price">${{ transaction.subtotal | number:'1.2-2' }}</div>
+                    <div class="tax-amount" *ngIf="transaction.taxAmount">
+                      +${{ transaction.taxAmount | number:'1.2-2' }} tax
                     </div>
                   </td>
                   <td class="payment-cell">
-                    <span class="payment-badge" [class]="'payment-' + transaction.paymentMethod.toLowerCase()">
-                      {{ transaction.paymentMethod }}
+                    <span class="payment-badge" [class]="'payment-' + transaction.paymentType.toLowerCase()">
+                      {{ transaction.paymentType }}
                     </span>
                   </td>
                   <td class="commission-cell">
-                    ${{ transaction.consignorAmount | number:'1.2-2' }}
+                    ${{ transaction.items?.[0]?.consignorAmount | number:'1.2-2' }}
                   </td>
                   <td class="shop-amount-cell">
-                    ${{ transaction.shopAmount | number:'1.2-2' }}
+                    ${{ transaction.items?.[0]?.storeAmount | number:'1.2-2' }}
                   </td>
                   <td class="actions-cell">
                     <div class="action-buttons">
@@ -223,17 +223,17 @@
                 <!-- Header with key transaction info -->
                 <div class="detail-header">
                   <div class="header-main">
-                    <h3>{{ transaction.item.name }}</h3>
+                    <h3>{{ transaction.items?.[0]?.item?.title || 'N/A' }}</h3>
                     <div class="header-meta">
-                      <span class="transaction-id">ID: {{ transaction.id }}</span>
+                      <span class="transaction-id">ID: {{ transaction.id.substring(0, 8).toUpperCase() }}</span>
                       <span class="sale-date">{{ transaction.saleDate | date:'MMM d, yyyy h:mm a' }}</span>
                     </div>
                   </div>
                   <div class="header-amount">
-                    <div class="sale-total">${{ transaction.salePrice | number:'1.2-2' }}</div>
+                    <div class="sale-total">${{ transaction.total | number:'1.2-2' }}</div>
                     <div class="payment-method">
-                      <span class="payment-badge" [class]="'payment-' + transaction.paymentMethod.toLowerCase()">
-                        {{ transaction.paymentMethod }}
+                      <span class="payment-badge" [class]="'payment-' + transaction.paymentType.toLowerCase()">
+                        {{ transaction.paymentType }}
                       </span>
                     </div>
                   </div>
@@ -247,17 +247,17 @@
                     <div class="detail-section">
                       <h4>Item Details</h4>
                       <div class="detail-grid compact">
-                        <div class="detail-row" *ngIf="transaction.item.description">
+                        <div class="detail-row" *ngIf="transaction.items?.[0]?.item?.description">
                           <label>Description:</label>
-                          <span>{{ transaction.item.description }}</span>
+                          <span>{{ transaction.items?.[0]?.item?.description }}</span>
                         </div>
                         <div class="detail-row">
                           <label>Original Price:</label>
-                          <span class="amount">${{ transaction.item.originalPrice | number:'1.2-2' }}</span>
+                          <span class="amount">${{ transaction.items?.[0]?.item?.price | number:'1.2-2' }}</span>
                         </div>
-                        <div class="detail-row" *ngIf="transaction.salesTaxAmount">
+                        <div class="detail-row" *ngIf="transaction.taxAmount">
                           <label>Sales Tax:</label>
-                          <span class="amount">${{ transaction.salesTaxAmount | number:'1.2-2' }}</span>
+                          <span class="amount">${{ transaction.taxAmount | number:'1.2-2' }}</span>
                         </div>
                       </div>
                     </div>
@@ -265,14 +265,14 @@
                     <!-- Commission Split -->
                     <div class="detail-section">
                       <h4>Commission Split</h4>
-                      <div class="commission-breakdown compact">
-                        <div class="breakdown-row">
-                          <span>consignor ({{ transaction.consignorsplitPercentage }}%)</span>
-                          <span class="amount consignor-amount">${{ transaction.consignorAmount | number:'1.2-2' }}</span>
+                      <div class="detail-grid compact">
+                        <div class="detail-row">
+                          <label>Consignor ({{ (transaction.items?.[0]?.consignorSplitPercentage || 0) * 100 }}%):</label>
+                          <span class="amount consignor-amount">${{ transaction.items?.[0]?.consignorAmount | number:'1.2-2' }}</span>
                         </div>
-                        <div class="breakdown-row">
-                          <span>Shop ({{ 100 - transaction.consignorsplitPercentage }}%)</span>
-                          <span class="amount shop-amount">${{ transaction.shopAmount | number:'1.2-2' }}</span>
+                        <div class="detail-row">
+                          <label>Shop ({{ 100 - ((transaction.items?.[0]?.consignorSplitPercentage || 0) * 100) }}%):</label>
+                          <span class="amount shop-amount">${{ transaction.items?.[0]?.storeAmount | number:'1.2-2' }}</span>
                         </div>
                       </div>
                     </div>
@@ -282,19 +282,19 @@
                   <div class="detail-column">
                     <!-- consignor Information -->
                     <div class="detail-section">
-                      <h4>consignor</h4>
+                      <h4>Consignor</h4>
                       <div class="detail-grid compact">
                         <div class="detail-row">
                           <label>Name:</label>
-                          <span>{{ transaction.consignor.name }}</span>
+                          <span>{{ transaction.items?.[0]?.consignor?.name || 'N/A' }}</span>
                         </div>
-                        <div class="detail-row" *ngIf="transaction.consignor.email">
+                        <div class="detail-row" *ngIf="transaction.items?.[0]?.consignor?.email">
                           <label>Email:</label>
-                          <span>{{ transaction.consignor.email }}</span>
+                          <span>{{ transaction.items?.[0]?.consignor?.email }}</span>
                         </div>
                         <div class="detail-row">
                           <label>Commission Rate:</label>
-                          <span>{{ transaction.consignorsplitPercentage }}%</span>
+                          <span>{{ (transaction.items?.[0]?.consignorSplitPercentage || 0) * 100 }}%</span>
                         </div>
                       </div>
                     </div>
@@ -353,8 +353,8 @@
                 <!-- Compact Transaction Summary -->
                 <div class="transaction-summary compact">
                   <div class="summary-row">
-                    <strong>{{ transaction.item.name }}</strong>
-                    <span class="consignor-info">{{ transaction.consignor.name }} ({{ transaction.consignorsplitPercentage }}%)</span>
+                    <strong>{{ transaction.items?.[0]?.item?.title || 'N/A' }}</strong>
+                    <span class="consignor-info">{{ transaction.items?.[0]?.consignor?.name || 'N/A' }} ({{ (transaction.items?.[0]?.consignorSplitPercentage || 0) * 100 }}%)</span>
                   </div>
                 </div>
 

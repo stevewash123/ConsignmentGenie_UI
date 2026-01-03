@@ -22,7 +22,9 @@ import {
   StatementDto,
   ItemRequest,
   CreateItemRequest,
-  ItemRequestQuery
+  ItemRequestQuery,
+  EarningsSummary,
+  StatementListResponse
 } from '../models/consignor.models';
 
 @Injectable({
@@ -36,6 +38,11 @@ export class ConsignorPortalService {
   // Dashboard
   getDashboard(): Observable<ProviderDashboard> {
     return this.http.get<ProviderDashboard>(`${this.apiUrl}/dashboard`);
+  }
+
+  // Earnings
+  getEarningsSummary(): Observable<EarningsSummary> {
+    return this.http.get<EarningsSummary>(`${this.apiUrl}/earnings-summary`);
   }
 
   // Items
@@ -71,12 +78,20 @@ export class ConsignorPortalService {
   }
 
   // Payouts
-  getMyPayouts(): Observable<PagedResult<ProviderPayout>> {
-    return this.http.get<PagedResult<ProviderPayout>>(`${this.apiUrl}/payouts`);
+  getMyPayouts(page: number = 1, pageSize: number = 20, year?: number): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (year) {
+      params = params.set('year', year.toString());
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/payouts`, { params });
   }
 
-  getMyPayout(id: string): Observable<ProviderPayoutDetail> {
-    return this.http.get<ProviderPayoutDetail>(`${this.apiUrl}/payouts/${id}`);
+  getMyPayout(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/payouts/${id}`);
   }
 
   // Profile
@@ -125,32 +140,14 @@ export class ConsignorPortalService {
   }
 
   // Statements
-  getStatements(): Observable<StatementListDto[]> {
-    return this.http.get<StatementListDto[]>(`${this.apiUrl}/statements`);
+  getStatements(): Observable<StatementListResponse> {
+    return this.http.get<StatementListResponse>(`${this.apiUrl}/statements`);
   }
 
-  getStatement(statementId: string): Observable<StatementDto> {
-    return this.http.get<StatementDto>(`${this.apiUrl}/statements/${statementId}`);
-  }
-
-  getStatementByPeriod(year: number, month: number): Observable<StatementDto> {
-    return this.http.get<StatementDto>(`${this.apiUrl}/statements/period/${year}/${month}`);
-  }
-
-  downloadStatementPdf(statementId: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/statements/${statementId}/pdf`, {
+  downloadStatementPdf(year: number, month: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/statements/${year}/${month}/pdf`, {
       responseType: 'blob'
     });
-  }
-
-  downloadStatementPdfByPeriod(year: number, month: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/statements/period/${year}/${month}/pdf`, {
-      responseType: 'blob'
-    });
-  }
-
-  regenerateStatement(statementId: string): Observable<StatementDto> {
-    return this.http.post<StatementDto>(`${this.apiUrl}/statements/${statementId}/regenerate`, {});
   }
 
   // Item Requests

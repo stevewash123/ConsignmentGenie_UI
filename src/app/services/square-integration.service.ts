@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { SquareStatus } from '../owner/settings/integrations/integrations-settings.component';
+import { SquareStatus } from '../owner/settings/integrations/inventory/inventory.component';
 
 export interface SquareConnectionResponse {
   success: boolean;
@@ -25,7 +25,7 @@ export interface SquareSyncResponse {
   providedIn: 'root'
 })
 export class SquareIntegrationService {
-  private readonly apiUrl = `${environment.apiUrl}/api/integrations/square`;
+  private readonly apiUrl = `${environment.apiUrl}/api/owner/integrations/square`;
   private http = inject(HttpClient);
 
   /**
@@ -35,22 +35,19 @@ export class SquareIntegrationService {
     try {
       const response = await this.http.get<any>(`${this.apiUrl}/status`).toPromise();
 
-      if (response.success) {
-        return {
-          isConnected: response.data.isConnected,
-          merchantId: response.data.merchantId,
-          merchantName: response.data.merchantName,
-          connectedAt: response.data.connectedAt ? new Date(response.data.connectedAt) : undefined,
-          lastSync: response.data.lastSync ? new Date(response.data.lastSync) : undefined,
-          itemCount: response.data.itemCount
-        };
-      } else {
-        throw new Error(response.message || 'Failed to get status');
-      }
+      return {
+        isConnected: response.connected || false,
+        merchantId: response.merchantId,
+        merchantName: response.merchantName,
+        connectedAt: response.connectedAt ? new Date(response.connectedAt) : undefined,
+        lastSync: response.lastSyncAt ? new Date(response.lastSyncAt) : undefined,
+        itemCount: 0 // This will be populated when sync is implemented
+      };
     } catch (error) {
       console.error('Square status error:', error);
-      // Return mock data for development
-      return this.getMockStatus();
+      return {
+        isConnected: false
+      };
     }
   }
 
@@ -59,17 +56,16 @@ export class SquareIntegrationService {
    */
   async initiateConnection(): Promise<string> {
     try {
-      const response = await this.http.post<SquareConnectionResponse>(`${this.apiUrl}/connect`, {}).toPromise();
+      const response = await this.http.get<any>(`${this.apiUrl}/auth-url`).toPromise();
 
-      if (response?.success && response.oauthUrl) {
-        return response.oauthUrl;
+      if (response?.authUrl) {
+        return response.authUrl;
       } else {
-        throw new Error(response?.error || 'Failed to get OAuth URL');
+        throw new Error('Failed to get OAuth URL');
       }
     } catch (error) {
       console.error('Square connection initiation error:', error);
-      // Return mock OAuth URL for development
-      return this.getMockOAuthUrl();
+      throw error;
     }
   }
 
@@ -78,18 +74,9 @@ export class SquareIntegrationService {
    */
   async disconnect(): Promise<void> {
     try {
-      const response = await this.http.post<SquareDisconnectResponse>(`${this.apiUrl}/disconnect`, {}).toPromise();
-
-      if (!response?.success) {
-        throw new Error(response?.message || 'Failed to disconnect');
-      }
+      await this.http.post<any>(`${this.apiUrl}/disconnect`, {}).toPromise();
     } catch (error) {
       console.error('Square disconnect error:', error);
-      // For development, just log the error but don't throw
-      if (!environment.production) {
-        console.log('Mock disconnect successful');
-        return;
-      }
       throw error;
     }
   }
@@ -98,21 +85,8 @@ export class SquareIntegrationService {
    * Manually trigger a sync
    */
   async syncNow(): Promise<void> {
-    try {
-      const response = await this.http.post<SquareSyncResponse>(`${this.apiUrl}/sync`, {}).toPromise();
-
-      if (!response?.success) {
-        throw new Error(response?.message || 'Sync failed');
-      }
-    } catch (error) {
-      console.error('Square sync error:', error);
-      // For development, just log the error but don't throw
-      if (!environment.production) {
-        console.log('Mock sync successful');
-        return;
-      }
-      throw error;
-    }
+    // TODO: Implement sync functionality in backend
+    throw new Error('Sync functionality not yet implemented');
   }
 
   /**
@@ -120,20 +94,19 @@ export class SquareIntegrationService {
    */
   async handleCallback(code: string, state: string): Promise<SquareStatus> {
     try {
-      const response = await this.http.get<any>(`${this.apiUrl}/callback?code=${code}&state=${state}`).toPromise();
+      const response = await this.http.post<any>(`${this.apiUrl}/callback`, {
+        code: code,
+        state: state
+      }).toPromise();
 
-      if (response.success) {
-        return {
-          isConnected: true,
-          merchantId: response.data.merchantId,
-          merchantName: response.data.merchantName,
-          connectedAt: new Date(),
-          lastSync: undefined,
-          itemCount: 0
-        };
-      } else {
-        throw new Error(response.message || 'OAuth callback failed');
-      }
+      return {
+        isConnected: response.connected || true,
+        merchantId: response.merchantId,
+        merchantName: response.merchantName,
+        connectedAt: new Date(),
+        lastSync: response.lastSyncAt ? new Date(response.lastSyncAt) : undefined,
+        itemCount: 0
+      };
     } catch (error) {
       console.error('Square callback error:', error);
       throw error;
@@ -141,41 +114,51 @@ export class SquareIntegrationService {
   }
 
   /**
-   * Mock status for development
+   * Update Square usage settings across the application
    */
-  private getMockStatus(): SquareStatus {
-    const isConnected = Math.random() > 0.5; // Random for testing
-
-    if (isConnected) {
-      return {
-        isConnected: true,
-        merchantId: 'MLR8XT6T0KH2N',
-        merchantName: "Jane's Vintage Shop",
-        connectedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-        lastSync: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-        itemCount: 47
-      };
-    } else {
-      return {
-        isConnected: false
-      };
-    }
+  updateSquareUsageSettings(settings: {
+    inventoryChoice?: 'consignment-genie' | 'square';
+    onlineChoice?: 'consignmentgenie-storefront' | 'square-online' | 'none';
+    posChoice?: 'consignmentgenie-pos' | 'square-pos' | 'manual';
+  }): void {
+    const currentSettings = this.getSquareUsageSettings();
+    const updatedSettings = { ...currentSettings, ...settings };
+    localStorage.setItem('squareUsageSettings', JSON.stringify(updatedSettings));
   }
 
   /**
-   * Mock OAuth URL for development
+   * Get current Square usage settings
    */
-  private getMockOAuthUrl(): string {
-    const clientId = environment.squareApplicationId || 'sandbox-sq0idb-XXXXXXXXXXXXXXXXXXXXXXXX';
-    const redirectUri = encodeURIComponent(`${window.location.origin}/owner/settings/integrations/square/callback`);
-    const state = 'mock-csrf-token-' + Date.now();
-    const scopes = 'ITEMS_READ+ORDERS_READ+MERCHANT_PROFILE_READ+INVENTORY_READ';
+  getSquareUsageSettings(): {
+    inventoryChoice: 'consignment-genie' | 'square';
+    onlineChoice: 'consignmentgenie-storefront' | 'square-online' | 'none';
+    posChoice: 'consignmentgenie-pos' | 'square-pos' | 'manual';
+  } {
+    const stored = localStorage.getItem('squareUsageSettings');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (error) {
+        console.error('Failed to parse stored Square usage settings:', error);
+      }
+    }
 
-    return `https://connect.squareupsandbox.com/oauth2/authorize?` +
-           `client_id=${clientId}&` +
-           `scope=${scopes}&` +
-           `redirect_uri=${redirectUri}&` +
-           `state=${state}&` +
-           `response_type=code`;
+    // Default settings
+    return {
+      inventoryChoice: 'consignment-genie',
+      onlineChoice: 'consignmentgenie-storefront',
+      posChoice: 'consignmentgenie-pos'
+    };
   }
+
+  /**
+   * Check if Square is being used in any integration point
+   */
+  isSquareInUse(): boolean {
+    const settings = this.getSquareUsageSettings();
+    return settings.inventoryChoice === 'square' ||
+           settings.onlineChoice === 'square-online' ||
+           settings.posChoice === 'square-pos';
+  }
+
 }

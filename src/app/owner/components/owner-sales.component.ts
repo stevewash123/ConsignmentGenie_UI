@@ -622,10 +622,10 @@ import { LoadingService } from '../../shared/services/loading.service';
     }
 
     .detail-section {
-      background: #f8fafc;
+      background: #f1f5f9;
+      border: 1px solid #d1d5db;
       border-radius: 8px;
       padding: 1.25rem;
-      border: 1px solid #e2e8f0;
     }
 
     .detail-section.full-width {
@@ -676,8 +676,8 @@ import { LoadingService } from '../../shared/services/loading.service';
 
     /* Commission breakdown */
     .commission-breakdown {
-      background: white;
-      border: 1px solid #e2e8f0;
+      background: #f1f5f9;
+      border: 1px solid #d1d5db;
       border-radius: 6px;
       padding: 1rem;
     }
@@ -1205,7 +1205,7 @@ export class OwnerSalesComponent implements OnInit {
     this.showConfirmDialog = true;
     this.confirmDialog = {
       title: 'Void Sale',
-      message: `Are you sure you want to void the sale of "${transaction.item.name}"? This will restore the item to inventory and cannot be undone.`,
+      message: `Are you sure you want to void the sale of "${transaction.items?.[0]?.item?.title || 'this item'}"? This will restore the item to inventory and cannot be undone.`,
       confirmText: 'Void Sale',
       cancelText: 'Cancel',
       isDestructive: true,

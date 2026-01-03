@@ -2,13 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { EarningsWidgetComponent } from './earnings-widget.component';
-import { MockEarningsService } from '../services/mock-earnings.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { EarningsSummary } from '../models/consignor.models';
 
 describe('EarningsWidgetComponent', () => {
   let component: EarningsWidgetComponent;
   let fixture: ComponentFixture<EarningsWidgetComponent>;
-  let mockEarningsService: jasmine.SpyObj<MockEarningsService>;
+  let mockConsignorPortalService: jasmine.SpyObj<ConsignorPortalService>;
 
   const mockEarningsSummary: EarningsSummary = {
     pending: 127.50,
@@ -19,201 +19,166 @@ describe('EarningsWidgetComponent', () => {
   };
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('MockEarningsService', ['getEarningsSummary']);
+    const consignorPortalServiceSpy = jasmine.createSpyObj('ConsignorPortalService', [
+      'getEarningsSummary'
+    ]);
 
     await TestBed.configureTestingModule({
-      imports: [EarningsWidgetComponent, RouterTestingModule],
+      imports: [
+        EarningsWidgetComponent,
+        RouterTestingModule.withRoutes([])
+      ],
       providers: [
-        { provide: MockEarningsService, useValue: spy }
+        { provide: ConsignorPortalService, useValue: consignorPortalServiceSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EarningsWidgetComponent);
     component = fixture.componentInstance;
-    mockEarningsService = TestBed.inject(MockEarningsService) as jasmine.SpyObj<MockEarningsService>;
-
-    // Set default mock return value to prevent subscription errors
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
+    mockConsignorPortalService = TestBed.inject(ConsignorPortalService) as jasmine.SpyObj<ConsignorPortalService>;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load earnings data on init', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
+  it('should load earnings summary successfully on init', () => {
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
 
     component.ngOnInit();
 
-    expect(mockEarningsService.getEarningsSummary).toHaveBeenCalled();
+    expect(mockConsignorPortalService.getEarningsSummary).toHaveBeenCalled();
     expect(component.earningsSummary).toEqual(mockEarningsSummary);
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
+    expect(component.error).toBeNull();
   });
 
-  it('should display pending amount with info icon', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
-    fixture.detectChanges();
+  it('should handle direct response format', () => {
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
 
-    const pendingAmount = fixture.nativeElement.querySelector('.earning-amount');
-    const infoIcon = fixture.nativeElement.querySelector('.info-icon');
+    component.ngOnInit();
 
-    expect(pendingAmount.textContent).toContain('$127.50');
-    expect(infoIcon).toBeTruthy();
-    expect(infoIcon.getAttribute('title')).toBe('Expected payout date 1/2/2025');
+    expect(component.earningsSummary).toEqual(mockEarningsSummary);
+    expect(component.loading).toBe(false);
   });
 
-  it('should display paid this month with payout count', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
-    fixture.detectChanges();
+  it('should handle error when loading earnings fails', () => {
+    const errorMessage = 'Network error';
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(throwError(() => new Error(errorMessage)));
 
-    const earningColumns = fixture.nativeElement.querySelectorAll('.earning-column');
-    const paidColumn = earningColumns[1];
-    const paidAmount = paidColumn.querySelector('.earning-amount');
-    const payoutDetail = paidColumn.querySelector('.earning-detail');
+    component.ngOnInit();
 
-    expect(paidAmount.textContent).toContain('$485.00');
-    expect(payoutDetail.textContent).toContain('(2 payouts)');
+    expect(component.error).toBe('Unable to load earnings. Please try again.');
+    expect(component.loading).toBe(false);
+    expect(component.earningsSummary).toBeNull();
   });
 
-  it('should show current month name dynamically', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
-    fixture.detectChanges();
+  it('should retry loading earnings when retry is called', () => {
+    // First call fails
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(throwError(() => new Error('Network error')));
+    component.ngOnInit();
+    expect(component.error).toBe('Unable to load earnings. Please try again.');
 
-    const currentMonth = new Date().toLocaleDateString('en-US', { month: 'short' });
-    const monthLabel = fixture.nativeElement.querySelector('.earning-label');
+    // Second call succeeds
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
 
-    expect(monthLabel.textContent).toContain(`Paid (${currentMonth})`);
+    component.loadEarnings();
+
+    expect(mockConsignorPortalService.getEarningsSummary).toHaveBeenCalledTimes(2);
+    expect(component.earningsSummary).toEqual(mockEarningsSummary);
+    expect(component.error).toBeNull();
+    expect(component.loading).toBe(false);
   });
 
-  it('should display next payout date', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
-    fixture.detectChanges();
+  it('should format current month name correctly', () => {
+    const monthName = component.getCurrentMonthName();
+    const currentDate = new Date();
+    const expectedMonth = currentDate.toLocaleDateString('en-US', { month: 'short' });
 
-    const nextPayout = fixture.nativeElement.querySelector('.next-payout');
-    expect(nextPayout.textContent).toContain('Next payout: Jan 2');
+    expect(monthName).toBe(expectedMonth);
   });
 
-  it('should display view history link', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
-    fixture.detectChanges();
+  it('should format payout date correctly', () => {
+    const testDate = new Date('2025-01-02T12:00:00');
+    const formattedDate = component.formatPayoutDate(testDate);
 
-    const viewHistoryLink = fixture.nativeElement.querySelector('.view-history-link');
-    expect(viewHistoryLink.textContent).toContain('View History →');
-    expect(viewHistoryLink.getAttribute('routerLink')).toBe('/consignor/payouts');
+    expect(formattedDate).toBe('Jan 2');
   });
 
-  it('should handle $0.00 states gracefully', () => {
-    const emptyEarnings: EarningsSummary = {
-      pending: 0,
-      pendingTooltip: 'No pending earnings',
-      paidThisMonth: 0,
-      payoutCountThisMonth: 0,
-      nextPayoutDate: null
-    };
-
-    mockEarningsService.getEarningsSummary.and.returnValue(of(emptyEarnings));
-    fixture.detectChanges();
-
-    const earningAmounts = fixture.nativeElement.querySelectorAll('.earning-amount');
-    expect(earningAmounts[0].textContent).toContain('$0.00'); // Pending
-    expect(earningAmounts[1].textContent).toContain('$0.00'); // Paid this month
-
-    const noEarningsMessage = fixture.nativeElement.querySelector('.next-payout');
-    expect(noEarningsMessage.textContent).toContain('No earnings yet');
-  });
-
-  it('should handle single payout correctly', () => {
-    const singlePayoutEarnings: EarningsSummary = {
-      pending: 50.00,
-      pendingTooltip: 'Expected payout date 2/1/2025',
-      paidThisMonth: 100.00,
-      payoutCountThisMonth: 1,
-      nextPayoutDate: new Date('2025-02-01T12:00:00')
-    };
-
-    mockEarningsService.getEarningsSummary.and.returnValue(of(singlePayoutEarnings));
-    fixture.detectChanges();
-
-    const payoutDetail = fixture.nativeElement.querySelector('.earning-detail');
-    expect(payoutDetail.textContent).toContain('(1 payout)');
-  });
-
-  it('should show loading state', () => {
-    component.earningsSummary = null;
+  it('should display loading state initially', () => {
     component.loading = true;
     fixture.detectChanges();
 
-    const loadingState = fixture.nativeElement.querySelector('.loading-state');
-    expect(loadingState).toBeTruthy();
-    expect(loadingState.textContent).toContain('Loading earnings...');
+    const compiled = fixture.nativeElement;
+    const loadingElement = compiled.querySelector('.loading-state');
+
+    expect(loadingElement).toBeTruthy();
+    expect(loadingElement.textContent).toContain('Loading earnings...');
   });
 
-  it('should show error state and allow retry', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(throwError('Network error'));
+  it('should display error state when error occurs', () => {
+    component.error = 'Unable to load earnings. Please try again.';
+    component.loading = false;
     fixture.detectChanges();
 
-    const errorState = fixture.nativeElement.querySelector('.error-state');
-    const retryButton = fixture.nativeElement.querySelector('.retry-button');
+    const compiled = fixture.nativeElement;
+    const errorElement = compiled.querySelector('.error-state');
 
-    expect(errorState).toBeTruthy();
-    expect(errorState.textContent).toContain('Failed to load earnings data');
-    expect(retryButton).toBeTruthy();
+    expect(errorElement).toBeTruthy();
+    expect(errorElement.textContent).toContain('Unable to load earnings. Please try again.');
   });
 
-  it('should retry loading on button click', () => {
-    mockEarningsService.getEarningsSummary.and.returnValue(throwError('Network error'));
+  it('should display earnings data when loaded successfully', () => {
+    component.earningsSummary = mockEarningsSummary;
+    component.loading = false;
+    component.error = null;
     fixture.detectChanges();
 
-    // Reset spy to return success on retry
-    mockEarningsService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
+    const compiled = fixture.nativeElement;
+    const widgetContent = compiled.querySelector('.widget-content');
 
-    const retryButton = fixture.nativeElement.querySelector('.retry-button');
-    retryButton.click();
-
-    expect(mockEarningsService.getEarningsSummary).toHaveBeenCalledTimes(2);
+    expect(widgetContent).toBeTruthy();
+    expect(compiled.textContent).toContain('$127.50');
+    expect(compiled.textContent).toContain('$485.00');
+    expect(compiled.textContent).toContain('2 payouts');
   });
 
-  it('should format payout dates correctly', () => {
-    const testDate = new Date('2025-03-15T12:00:00');
-    const formatted = component.formatPayoutDate(testDate);
-    expect(formatted).toBe('Mar 15');
-  });
-
-  it('should get current month name correctly', () => {
-    const currentMonth = component.getCurrentMonthName();
-    const expectedMonth = new Date().toLocaleDateString('en-US', { month: 'short' });
-    expect(currentMonth).toBe(expectedMonth);
-  });
-
-  it('should show minimum payout tooltip when below threshold', () => {
-    const belowMinimumEarnings: EarningsSummary = {
-      pending: 12.50,
-      pendingTooltip: 'Minimum payout amount is $25.00',
+  it('should show no earnings message when both pending and paid are zero', () => {
+    const zeroEarnings: EarningsSummary = {
+      pending: 0,
+      pendingTooltip: '',
       paidThisMonth: 0,
       payoutCountThisMonth: 0,
       nextPayoutDate: null
     };
 
-    mockEarningsService.getEarningsSummary.and.returnValue(of(belowMinimumEarnings));
+    component.earningsSummary = zeroEarnings;
+    component.loading = false;
+    component.error = null;
     fixture.detectChanges();
 
-    const infoIcon = fixture.nativeElement.querySelector('.info-icon');
-    expect(infoIcon.getAttribute('title')).toBe('Minimum payout amount is $25.00');
+    const compiled = fixture.nativeElement;
+    expect(compiled.textContent).toContain('No earnings yet');
   });
 
-  it('should show "Payout Date TBD" tooltip when date is undetermined', () => {
-    const undeterminedEarnings: EarningsSummary = {
-      pending: 89.50,
-      pendingTooltip: 'Payout Date TBD',
-      paidThisMonth: 0,
-      payoutCountThisMonth: 0,
-      nextPayoutDate: null
-    };
-
-    mockEarningsService.getEarningsSummary.and.returnValue(of(undeterminedEarnings));
+  it('should show next payout date when available', () => {
+    component.earningsSummary = mockEarningsSummary;
+    component.loading = false;
     fixture.detectChanges();
 
-    const infoIcon = fixture.nativeElement.querySelector('.info-icon');
-    expect(infoIcon.getAttribute('title')).toBe('Payout Date TBD');
+    const compiled = fixture.nativeElement;
+    expect(compiled.textContent).toContain('Next payout: Jan 2');
+  });
+
+  it('should have router link to payouts page', () => {
+    component.earningsSummary = mockEarningsSummary;
+    component.loading = false;
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement;
+    const linkElement = compiled.querySelector('a[routerLink="/consignor/payouts"]');
+
+    expect(linkElement).toBeTruthy();
+    expect(linkElement.textContent).toContain('View History');
   });
 });

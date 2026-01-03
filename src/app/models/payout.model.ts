@@ -53,12 +53,12 @@ export interface PayoutTransaction {
   itemName: string;
   saleDate: Date;
   salePrice: number;
-  providerAmount: number;
+  consignorAmount: number;
   shopAmount: number;
 }
 
 export interface CreatePayoutRequest {
-  providerId: string;
+  consignorId: string;
   payoutDate: Date;
   paymentMethod: string;
   paymentReference?: string;
@@ -77,7 +77,7 @@ export interface UpdatePayoutRequest {
 }
 
 export interface PayoutSearchRequest {
-  providerId?: string;
+  consignorId?: string;
   payoutDateFrom?: Date;
   payoutDateTo?: Date;
   status?: PayoutStatus;
@@ -90,15 +90,15 @@ export interface PayoutSearchRequest {
 }
 
 export interface PendingPayoutsRequest {
-  providerId?: string;
+  consignorId?: string;
   periodEndBefore?: Date;
   minimumAmount?: number;
 }
 
 export interface PendingPayoutData {
-  providerId: string;
-  providerName: string;
-  providerEmail?: string;
+  consignorId: string;
+  consignorName: string;
+  consignorEmail?: string;
   pendingAmount: number;
   transactionCount: number;
   earliestSale: Date;

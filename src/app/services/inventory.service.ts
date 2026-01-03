@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { SquareIntegrationService } from './square-integration.service';
 import {
   ItemListDto,
   ItemDetailDto,
@@ -21,10 +22,18 @@ import {
 })
 export class InventoryService {
   private http = inject(HttpClient);
+  private squareService = inject(SquareIntegrationService);
   private readonly apiUrl = `${environment.apiUrl}/api`;
 
   // Items API
   getItems(params?: ItemQueryParams): Observable<PagedResult<ItemListDto>> {
+    // Check if Square inventory mode is active
+    const settings = this.squareService.getSquareUsageSettings();
+    if (settings.inventoryChoice === 'square') {
+      return this.getSquareItems(params);
+    }
+
+    // Default to ConsignmentGenie native inventory
     let httpParams = new HttpParams();
 
     if (params) {
@@ -41,6 +50,21 @@ export class InventoryService {
     }
 
     return this.http.get<PagedResult<ItemListDto>>(`${this.apiUrl}/items`, { params: httpParams });
+  }
+
+  // Square inventory methods
+  private getSquareItems(params?: ItemQueryParams): Observable<PagedResult<ItemListDto>> {
+    let httpParams = new HttpParams();
+
+    if (params) {
+      // Map common parameters to Square API parameters
+      if (params.page) httpParams = httpParams.set('page', params.page.toString());
+      if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize.toString());
+      if (params.search) httpParams = httpParams.set('search', params.search);
+      // Note: Other filters like status, condition may not apply to Square items
+    }
+
+    return this.http.get<PagedResult<ItemListDto>>(`${this.apiUrl}/owner/integrations/square/inventory/items`, { params: httpParams });
   }
 
   getItem(id: string): Observable<ApiResponse<ItemDetailDto>> {

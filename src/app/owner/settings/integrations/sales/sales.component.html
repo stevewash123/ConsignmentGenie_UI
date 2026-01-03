@@ -1,0 +1,204 @@
+<div class="section">
+  <h2 class="section-title">Sales Management</h2>
+  <p class="section-description">Configure your point of sale and online storefront options</p>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading sales settings...</p>
+    </div>
+  }
+
+  <!-- Online Sales Section -->
+  <div class="choice-section">
+    <h3 class="choice-title">How would you like to sell online?</h3>
+
+    <div class="choice-grid">
+      <!-- Option 1: ConsignmentGenie Storefront -->
+      <div
+        class="choice-card"
+        [class.selected]="onlineChoice === 'consignmentgenie-storefront'"
+        (click)="selectOnlineChoice('consignmentgenie-storefront')">
+        <input type="radio" name="onlineChoice" value="consignmentgenie-storefront" [checked]="onlineChoice === 'consignmentgenie-storefront'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-header">
+            <div class="choice-text-section">
+              <h4 class="choice-label">Use ConsignmentGenie storefront</h4>
+            </div>
+            <div class="choice-icon">📱</div>
+          </div>
+          <div class="choice-benefits">
+            <div class="benefit-item">• Built-in consignment workflows and features</div>
+            <div class="benefit-item">• Automatic consignor payout calculations</div>
+            <div class="benefit-item">• Integrated with your inventory management</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 2: Square Online -->
+      <div
+        class="choice-card"
+        [class.selected]="onlineChoice === 'square-online'"
+        (click)="selectOnlineChoice('square-online')">
+        <input type="radio" name="onlineChoice" value="square-online" [checked]="onlineChoice === 'square-online'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-header">
+            <div class="choice-text-section">
+              <h4 class="choice-label">Use Square online</h4>
+            </div>
+            <div class="choice-icon">🔲</div>
+          </div>
+          <div class="choice-benefits">
+            <div class="benefit-item">• Keep using your existing Square website</div>
+            <div class="benefit-item">• Import sales data for payout tracking</div>
+            <div class="benefit-item">• Maintain your current domain and branding</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 3: No Online Sales -->
+      <div
+        class="choice-card"
+        [class.selected]="onlineChoice === 'none'"
+        (click)="selectOnlineChoice('none')">
+        <input type="radio" name="onlineChoice" value="none" [checked]="onlineChoice === 'none'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-header">
+            <div class="choice-text-section">
+              <h4 class="choice-label">No online sales</h4>
+            </div>
+            <div class="choice-icon">❌</div>
+          </div>
+          <div class="choice-benefits">
+            <div class="benefit-item">• Focus on in-store sales only</div>
+            <div class="benefit-item">• Simplify your operations</div>
+            <div class="benefit-item">• Can add online sales later</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-Store Sales Section -->
+  <div class="choice-section">
+    <h3 class="choice-title">How would you like to record in-store sales?</h3>
+
+    <div class="choice-grid">
+      <!-- Option 1: ConsignmentGenie POS -->
+      <div
+        class="choice-card"
+        [class.selected]="posChoice === 'consignmentgenie-pos'"
+        (click)="selectPosChoice('consignmentgenie-pos')">
+        <input type="radio" name="posChoice" value="consignmentgenie-pos" [checked]="posChoice === 'consignmentgenie-pos'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-header">
+            <div class="choice-text-section">
+              <h4 class="choice-label">Use ConsignmentGenie POS</h4>
+            </div>
+            <div class="choice-icon">🧾</div>
+          </div>
+          <div class="choice-benefits">
+            <div class="benefit-item">• Built-in consignment split calculations</div>
+            <div class="benefit-item">• Automatic inventory updates</div>
+            <div class="benefit-item">• Real-time payout tracking</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 2: Square POS -->
+      <div
+        class="choice-card"
+        [class.selected]="posChoice === 'square-pos'"
+        (click)="selectPosChoice('square-pos')">
+        <input type="radio" name="posChoice" value="square-pos" [checked]="posChoice === 'square-pos'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-header">
+            <div class="choice-text-section">
+              <h4 class="choice-label">Use Square POS/register</h4>
+            </div>
+            <div class="choice-icon">🔲</div>
+          </div>
+          <div class="choice-benefits">
+            <div class="benefit-item">• Keep using your existing Square hardware</div>
+            <div class="benefit-item">• Import sales data for consignor payouts</div>
+            <div class="benefit-item">• Maintain familiar workflows</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 3: Manual Entry -->
+      <div
+        class="choice-card"
+        [class.selected]="posChoice === 'manual'"
+        (click)="selectPosChoice('manual')">
+        <input type="radio" name="posChoice" value="manual" [checked]="posChoice === 'manual'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-header">
+            <div class="choice-text-section">
+              <h4 class="choice-label">Manual entry</h4>
+            </div>
+            <div class="choice-icon">✏️</div>
+          </div>
+          <div class="choice-benefits">
+            <div class="benefit-item">• Record sales after transactions</div>
+            <div class="benefit-item">• No additional hardware needed</div>
+            <div class="benefit-item">• Simple cash register or paper receipts</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Square Integration Section - Show when Square options are selected -->
+  @if (onlineChoice === 'square-online' || posChoice === 'square-pos') {
+    <div class="choice-section">
+      <h3 class="choice-title">Square Integration</h3>
+
+      <div class="integration-card">
+        <div class="integration-header">
+          <div class="integration-icon">🔲</div>
+          <div class="integration-info">
+            @if (squareStatus().isConnected) {
+              <h4 class="integration-title">Square Connected</h4>
+              <p class="integration-description">
+                @if (squareStatus().merchantName) {
+                  Connected to {{ squareStatus().merchantName }}
+                } @else {
+                  Your Square account is connected
+                }
+              </p>
+              <div class="status-indicator connected">✓ CONNECTED</div>
+            } @else {
+              <h4 class="integration-title">Connect to Square</h4>
+              <p class="integration-description">Connect your Square account to sync inventory and sales data</p>
+            }
+          </div>
+        </div>
+
+        @if (squareStatus().isConnected) {
+          <button
+            type="button"
+            class="disconnect-button"
+            (click)="disconnectFromSquare()">
+            Disconnect from Square
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="connect-button"
+            (click)="connectToSquare()"
+            [disabled]="isConnecting()">
+            @if (isConnecting()) {
+              <div class="spinner"></div>
+              Connecting...
+            } @else {
+              Connect to Square
+            }
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+</div>

@@ -47,6 +47,10 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/inventory-edit.component').then(m => m.InventoryEditComponent)
   },
   {
+    path: 'inventory/categories',
+    loadComponent: () => import('./inventory/categories.component').then(m => m.InventoryCategoriesComponent)
+  },
+  {
     path: 'record-sale',
     loadComponent: () => import('./components/record-sale.component').then(m => m.RecordSaleComponent)
   },
@@ -157,23 +161,37 @@ export const ownerRoutes: Routes = [
         ]
       },
       {
-        path: 'inventory-management/categories',
-        loadComponent: () => import('./settings/inventory/categories.component').then(m => m.CategoriesComponent)
-      },
-      {
         path: 'consignor-management',
         children: [
           {
-            path: 'store-codes',
-            loadComponent: () => import('./settings/consignor-management/store-codes/store-codes.component').then(m => m.StoreCodesComponent)
-          },
-          {
-            path: 'approval-workflow',
-            loadComponent: () => import('./settings/consignor-management/approval-workflow/approval-workflow.component').then(m => m.ApprovalWorkflowComponent)
-          },
-          {
             path: 'permissions',
             loadComponent: () => import('./settings/consignor-management/permissions/permissions.component').then(m => m.PermissionsComponent)
+          }
+        ]
+      },
+      {
+        path: 'payouts',
+        children: [
+          {
+            path: '',
+            redirectTo: 'schedule-thresholds',
+            pathMatch: 'full'
+          },
+          {
+            path: 'schedule-thresholds',
+            loadComponent: () => import('./settings/payouts/schedule-thresholds.component').then(m => m.ScheduleThresholdsComponent)
+          },
+          {
+            path: 'payment-methods',
+            loadComponent: () => import('./settings/payouts/payment-methods.component').then(m => m.PaymentMethodsComponent)
+          },
+          {
+            path: 'automation',
+            loadComponent: () => import('./settings/payouts/automation.component').then(m => m.AutomationComponent)
+          },
+          {
+            path: 'reports',
+            loadComponent: () => import('./settings/payouts/reports.component').then(m => m.ReportsComponent)
           }
         ]
       },
@@ -182,11 +200,16 @@ export const ownerRoutes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('./settings/integrations/integrations-settings.component').then(m => m.IntegrationsSettingsComponent)
+            redirectTo: 'inventory',
+            pathMatch: 'full'
           },
           {
-            path: 'inventory-sales',
-            loadComponent: () => import('./settings/integrations/inventory-sales/inventory-sales.component').then(m => m.InventorySalesComponent)
+            path: 'inventory',
+            loadComponent: () => import('./settings/integrations/inventory/inventory.component').then(m => m.InventoryComponent)
+          },
+          {
+            path: 'sales',
+            loadComponent: () => import('./settings/integrations/sales/sales.component').then(m => m.SalesComponent)
           },
           {
             path: 'accounting',
@@ -197,8 +220,8 @@ export const ownerRoutes: Routes = [
             loadComponent: () => import('./settings/integrations/payments/payments.component').then(m => m.PaymentsComponent)
           },
           {
-            path: 'banking',
-            loadComponent: () => import('./settings/integrations/banking/banking.component').then(m => m.BankingComponent)
+            path: 'payouts',
+            loadComponent: () => import('./settings/integrations/payouts/payouts.component').then(m => m.Payouts)
           }
         ]
       },

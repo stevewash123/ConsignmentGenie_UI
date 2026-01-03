@@ -10,27 +10,21 @@ describe('StatementsComponent', () => {
   let fixture: ComponentFixture<StatementsComponent>;
   let consignorPortalServiceSpy: jasmine.SpyObj<ConsignorPortalService>;
 
-  const mockStatementListDtos: StatementListDto[] = [
+  const mockStatementMonths: StatementMonth[] = [
     {
-      statementId: '1',
-      statementNumber: 'ST-2024-12-001',
-      periodStart: new Date('2024-12-01'),
-      periodEnd: new Date('2024-12-31'),
-      periodLabel: 'December 2024',
-      itemsSold: 12,
+      year: 2024,
+      month: 12,
+      monthName: 'December 2024',
+      salesCount: 12,
       totalEarnings: 485.00,
-      payoutCount: 2,
-      closingBalance: 485.00,
-      status: 'Final',
-      hasPdf: true,
-      generatedAt: new Date('2024-12-31')
+      payoutCount: 2
     }
   ];
 
   beforeEach(async () => {
     consignorPortalServiceSpy = jasmine.createSpyObj('ConsignorPortalService', [
       'getStatements',
-      'downloadStatementPdfByPeriod'
+      'downloadStatementPdf'
     ]);
 
     await TestBed.configureTestingModule({
@@ -47,7 +41,7 @@ describe('StatementsComponent', () => {
     component = fixture.componentInstance;
 
     // Set up default successful response
-    consignorPortalServiceSpy.getStatements.and.returnValue(of(mockStatementListDtos));
+    consignorPortalServiceSpy.getStatements.and.returnValue(of({ statements: mockStatementMonths }));
   });
 
   it('should create', () => {
@@ -87,7 +81,7 @@ describe('StatementsComponent', () => {
 
   it('should handle download successfully', () => {
     const mockBlob = new Blob(['test'], { type: 'application/pdf' });
-    consignorPortalServiceSpy.downloadStatementPdfByPeriod.and.returnValue(of(mockBlob));
+    consignorPortalServiceSpy.downloadStatementPdf.and.returnValue(of(mockBlob));
     spyOn(component as any, 'downloadFile');
 
     const statement: StatementMonth = {
@@ -102,7 +96,7 @@ describe('StatementsComponent', () => {
 
     component.downloadPdf(statement);
 
-    expect(consignorPortalServiceSpy.downloadStatementPdfByPeriod).toHaveBeenCalledWith(2024, 12);
+    expect(consignorPortalServiceSpy.downloadStatementPdf).toHaveBeenCalledWith(2024, 12);
     expect((component as any).downloadFile).toHaveBeenCalledWith(
       mockBlob,
       'statement-2024-12.pdf'
@@ -122,7 +116,7 @@ describe('StatementsComponent', () => {
 
     component.downloadPdf(statement);
 
-    expect(consignorPortalServiceSpy.downloadStatementPdfByPeriod).not.toHaveBeenCalled();
+    expect(consignorPortalServiceSpy.downloadStatementPdf).not.toHaveBeenCalled();
   });
 
   it('should track statements correctly', () => {

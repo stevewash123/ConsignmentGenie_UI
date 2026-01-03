@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MockEarningsService } from '../services/mock-earnings.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { EarningsSummary } from '../models/consignor.models';
 
 @Component({
@@ -241,7 +241,7 @@ export class EarningsWidgetComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  constructor(private earningsService: MockEarningsService) {}
+  constructor(private consignorService: ConsignorPortalService) {}
 
   ngOnInit() {
     this.loadEarnings();
@@ -251,13 +251,13 @@ export class EarningsWidgetComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.earningsService.getEarningsSummary().subscribe({
-      next: (data) => {
-        this.earningsSummary = data;
+    this.consignorService.getEarningsSummary().subscribe({
+      next: (response: any) => {
+        this.earningsSummary = response.success ? response.data : response;
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Failed to load earnings data. Please try again.';
+        this.error = 'Unable to load earnings. Please try again.';
         this.loading = false;
         console.error('Earnings error:', err);
       }

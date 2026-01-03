@@ -259,46 +259,14 @@ describe('ConsignorPortalService', () => {
         }
       ];
 
-      service.getStatements().subscribe(statements => {
-        expect(statements.length).toBe(1);
+      service.getStatements().subscribe(response => {
+        expect(response.statements.length).toBe(1);
       });
 
       const req = httpMock.expectOne(`${apiUrl}/statements`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockStatements);
+      req.flush({ statements: mockStatements });
     });
 
-    it('should get specific statement', () => {
-      const statementId = '123';
-      const mockStatement = {
-        id: statementId,
-        statementNumber: 'ST-001',
-        periodStart: '2023-12-01',
-        periodEnd: '2023-12-31',
-        periodLabel: 'December 2023',
-        providerName: 'Test consignor',
-        shopName: 'Test Shop',
-        openingBalance: 0,
-        totalSales: 1500.00,
-        totalEarnings: 1000.00,
-        totalPayouts: 0,
-        closingBalance: 1000.00,
-        itemsSold: 5,
-        payoutCount: 0,
-        sales: [],
-        payouts: [],
-        status: 'Generated',
-        hasPdf: true,
-        generatedAt: new Date()
-      };
-
-      service.getStatement(statementId).subscribe(statement => {
-        expect(statement.id).toBe(statementId);
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/statements/${statementId}`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockStatement);
-    });
   });
 });

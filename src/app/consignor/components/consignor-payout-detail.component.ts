@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { MockConsignorPayoutService } from '../services/mock-consignor-payout.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { ConsignorPayoutDetail } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
@@ -415,7 +415,7 @@ export class ConsignorPayoutDetailComponent implements OnInit {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private payoutService: MockConsignorPayoutService,
+    private consignorService: ConsignorPortalService,
     private route: ActivatedRoute,
     public loadingService: LoadingService
   ) {
@@ -432,9 +432,9 @@ export class ConsignorPayoutDetailComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.PAYOUT_DETAIL);
     this.error = null;
 
-    this.payoutService.getPayoutDetail(this.payoutId).subscribe({
-      next: (detail) => {
-        this.payoutDetail = detail;
+    this.consignorService.getMyPayout(this.payoutId).subscribe({
+      next: (response: any) => {
+        this.payoutDetail = response.success ? response.data : response;
       },
       error: (err) => {
         this.error = 'Failed to load payout details. Please try again.';
@@ -474,19 +474,8 @@ export class ConsignorPayoutDetailComponent implements OnInit {
   downloadReceipt() {
     if (!this.payoutDetail) return;
 
-    this.payoutService.downloadPayoutReceipt(this.payoutDetail.payoutId).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `payout_${this.payoutDetail!.payoutNumber}_receipt.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        console.error('Download error:', err);
-        // Could show a toast notification here
-      }
-    });
+    // For now, just print the receipt since we don't have a receipt download endpoint
+    // In the future, this could be implemented as a separate API endpoint
+    this.printPayout();
   }
 }

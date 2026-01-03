@@ -5,8 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 import { ConsignorBalance, ConsignorPayoutSummary, PayoutListQuery, PagedResult, PayoutRequestStatus, PayoutRequest } from '../models/consignor.models';
-import { MockConsignorBalanceService } from '../services/mock-consignor-balance.service';
-import { MockConsignorPayoutService } from '../services/mock-consignor-payout.service';
+import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { BalanceCardComponent } from './balance-card.component';
 import { RequestPayoutModalComponent } from './request-payout-modal.component';
 import { RequestSuccessModalComponent } from './request-success-modal.component';
@@ -647,8 +646,7 @@ export class ConsignorPayoutsComponent implements OnInit {
   readonly KEYS = LOADING_KEYS;
 
   constructor(
-    private balanceService: MockConsignorBalanceService,
-    private payoutService: MockConsignorPayoutService,
+    private consignorService: ConsignorPortalService,
     public loadingService: LoadingService,
     private router: Router
   ) {}
@@ -709,19 +707,25 @@ export class ConsignorPayoutsComponent implements OnInit {
     this.loadingService.start(LOADING_KEYS.PAYOUTS_LIST);
     this.error = null;
 
-    // For demo purposes, randomly choose between normal balance and empty balance
-    const useEmptyState = Math.random() < 0.2; // 20% chance of empty state
-
-    const balanceObservable = useEmptyState ?
-      this.balanceService.getEmptyBalance() :
-      this.balanceService.getConsignorBalance();
-
-    balanceObservable.subscribe({
-      next: (balance) => {
-        this.consignorBalance = balance;
+    // For now, get earnings summary which includes balance info
+    this.consignorService.getEarningsSummary().subscribe({
+      next: (response: any) => {
+        const summary = response.success ? response.data : response;
+        this.consignorBalance = {
+          pending: { amount: summary.pending || 0, itemCount: 0 },
+          available: { amount: summary.paidThisMonth || 0, itemCount: 0 },
+          inTransit: null,
+          lifetimeEarned: summary.pending + summary.paidThisMonth || 0,
+          lifetimeReceived: summary.paidThisMonth || 0,
+          nextPayoutDate: summary.nextPayoutDate || null,
+          payoutScheduleDescription: 'Monthly',
+          canRequestPayout: (summary.pending || 0) > 0,
+          minimumPayoutAmount: 25,
+          pendingRequest: null
+        };
       },
       error: (err) => {
-        this.error = 'Failed to load balance information. Please try again.';
+        this.error = 'Failed to load balance information.';
         console.error('Balance error:', err);
       },
       complete: () => {
@@ -732,21 +736,7 @@ export class ConsignorPayoutsComponent implements OnInit {
 
   refreshBalance() {
     // Silent refresh without showing loading spinner
-    const useEmptyState = Math.random() < 0.2;
-
-    const balanceObservable = useEmptyState ?
-      this.balanceService.getEmptyBalance() :
-      this.balanceService.getConsignorBalance();
-
-    balanceObservable.subscribe({
-      next: (balance) => {
-        this.consignorBalance = balance;
-      },
-      error: (err) => {
-        console.error('Silent balance refresh error:', err);
-        // Don't show error for silent refresh - user can manually refresh
-      }
-    });
+    this.loadBalance();
   }
 
   manualRefresh() {
@@ -762,17 +752,10 @@ export class ConsignorPayoutsComponent implements OnInit {
   }
 
   onConfirmReceived(payoutId: string) {
-    this.balanceService.confirmPayoutReceived(payoutId).subscribe({
-      next: () => {
-        // In a real app, you'd refresh the balance or update the UI
-        console.log('Payout confirmed as received');
-        this.loadBalance(); // Reload to get updated balance
-      },
-      error: (err) => {
-        console.error('Error confirming payout:', err);
-        // Show error message to user
-      }
-    });
+    // Placeholder functionality - in the real implementation,
+    // this would call an API to confirm receipt
+    console.log('Payout confirmed as received:', payoutId);
+    this.loadBalance(); // Reload to get updated balance
   }
 
   onRequestPayout() {
@@ -780,14 +763,8 @@ export class ConsignorPayoutsComponent implements OnInit {
   }
 
   loadRequestStatus() {
-    this.balanceService.getPayoutRequestStatus().subscribe({
-      next: (status) => {
-        this.requestStatus = status;
-      },
-      error: (err) => {
-        console.error('Error loading request status:', err);
-      }
-    });
+    // For now, set empty request status since we don't have this endpoint
+    this.requestStatus = null;
   }
 
   onRequestModalClose() {
@@ -832,10 +809,21 @@ export class ConsignorPayoutsComponent implements OnInit {
     this.payoutError = null;
 
     const query = this.buildPayoutQuery();
+    const year = this.getYearFromDateRange();
 
-    this.payoutService.getPayoutHistory(query).subscribe({
-      next: (result) => {
-        this.payoutHistory = result;
+    this.consignorService.getMyPayouts(this.currentPage, this.pageSize, year).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.payoutHistory = {
+            items: response.data.items || [],
+            totalCount: response.data.totalCount || 0,
+            page: response.data.page || 1,
+            pageSize: response.data.pageSize || this.pageSize,
+            totalPages: Math.ceil((response.data.totalCount || 0) / (response.data.pageSize || this.pageSize)),
+            hasNext: response.data.hasNext || false,
+            hasPrevious: response.data.hasPrevious || false
+          };
+        }
       },
       error: (err) => {
         this.payoutError = 'Failed to load payout history. Please try again.';
@@ -845,6 +833,22 @@ export class ConsignorPayoutsComponent implements OnInit {
         this.loadingService.stop(LOADING_KEYS.PAYOUTS_LIST);
       }
     });
+  }
+
+  private getYearFromDateRange(): number | undefined {
+    const now = new Date();
+
+    switch (this.dateRange) {
+      case 'thisYear':
+        return now.getFullYear();
+      case 'custom':
+        if (this.customDateFrom) {
+          return new Date(this.customDateFrom).getFullYear();
+        }
+        break;
+    }
+
+    return undefined;
   }
 
   buildPayoutQuery(): PayoutListQuery {
