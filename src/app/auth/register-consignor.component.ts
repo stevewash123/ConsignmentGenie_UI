@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './register-consignor.component.html',
-  styles: []
+  styleUrls: ['./register-consignor.component.scss']
 })
 export class RegisterConsignorComponent implements OnInit {
   storeCodeForm: FormGroup;

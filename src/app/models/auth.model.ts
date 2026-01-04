@@ -18,6 +18,7 @@ export interface AuthResponse {
   organizationId: string;
   organizationName: string;
   expiresAt: string;
+  approvalStatus?: number;
 }
 
 export interface WrappedAuthResponse {
@@ -27,7 +28,7 @@ export interface WrappedAuthResponse {
   errors?: string[] | null;
 }
 
-export type LoginResponse = AuthResponse | WrappedAuthResponse;
+export type LoginResponse = WrappedAuthResponse;
 
 export interface User {
   userId: string;

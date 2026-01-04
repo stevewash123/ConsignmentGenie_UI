@@ -1,17 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../shared/services/loading.service';
-import { environment } from '../../environments/environment';
+import { StorageService } from '../shared/services/storage.service';
+import { LoginRequest } from '../models/auth.model';
 
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
+// ============================================================================
+// Types
+// ============================================================================
 interface LoginData {
   token: string;
   userId: string;
@@ -23,296 +22,96 @@ interface LoginData {
   approvalStatus?: number;
 }
 
-interface LoginResponse {
-  success: boolean;
-  data: LoginData;
-  message: string;
-  errors: string[] | null;
+interface HttpError {
+  status?: number;
+  message?: string;
 }
 
+// ============================================================================
+// Constants
+// ============================================================================
+const LOADING_KEY = 'auth-login';
+const DEFAULT_TEST_PASSWORD = 'password123';
+const TOKEN_EXPIRY_HOURS = 24;
+const SYSTEM_ADMIN_EMAIL = 'admin@microsaasbuilders.com';
+
+const ROLE_MAP: Record<number, string> = {
+  0: 'Admin',
+  1: 'Owner',
+  2: 'Consignor',
+  3: 'Customer'
+};
+
+const ROUTES = {
+  ADMIN_DASHBOARD: '/admin/dashboard',
+  OWNER_DASHBOARD: '/owner/dashboard',
+  CUSTOMER_DASHBOARD: '/customer/dashboard'
+} as const;
+
+const APPROVAL_STATUS = {
+  PENDING: 0,
+  APPROVED: 1,
+  REJECTED: 2
+} as const;
+
+const ERROR_MESSAGES = {
+  INVALID_CREDENTIALS: 'Invalid email or password. Please try again.',
+  NETWORK_ERROR: 'Unable to connect to server. Please check your connection.',
+  GENERIC_ERROR: 'Login failed. Please try again later.',
+  PENDING_APPROVAL: 'Your account is pending admin approval. You will receive an email once approved.',
+  REJECTED: 'Your account has been rejected. Please contact support for more information.'
+} as const;
+
+// ============================================================================
+// Component
+// ============================================================================
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styles: [`
-    .login-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 2rem;
-    }
-
-    .login-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      padding: 3rem;
-      max-width: 480px;
-      width: 100%;
-    }
-
-    .login-header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
-
-    .login-header h1 {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #1f2937;
-      margin-bottom: 0.5rem;
-    }
-
-    .login-header p {
-      color: #6b7280;
-      font-size: 1.1rem;
-    }
-
-    .error-message {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .error-icon {
-      font-size: 1.2rem;
-    }
-
-    .login-form {
-      margin-bottom: 2rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 1rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .form-group input:disabled {
-      background: #f9fafb;
-      color: #6b7280;
-    }
-
-    .password-input {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .password-toggle {
-      position: absolute;
-      right: 1rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2rem;
-      padding: 0.25rem;
-    }
-
-    .field-error {
-      color: #dc2626;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-    }
-
-    .login-btn {
-      width: 100%;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      padding: 1rem 1.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .login-btn:hover:not(:disabled) {
-      background: #2563eb;
-    }
-
-    .login-btn:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .spinner {
-      width: 1rem;
-      height: 1rem;
-      border: 2px solid transparent;
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .test-accounts {
-      border-top: 1px solid #e5e7eb;
-      padding-top: 2rem;
-    }
-
-    .test-accounts h3 {
-      text-align: center;
-      color: #6b7280;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-
-    .test-account-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-
-    .test-account-btn {
-      padding: 1rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      background: white;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: left;
-    }
-
-    .test-account-btn:hover:not(:disabled) {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .test-account-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .test-account-btn.admin { border-left: 4px solid #dc2626; }
-    .test-account-btn.owner { border-left: 4px solid #059669; }
-    .test-account-btn.consignor { border-left: 4px solid #d97706; }
-    .test-account-btn.customer { border-left: 4px solid #7c3aed; }
-
-    .account-role {
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: #374151;
-      margin-bottom: 0.25rem;
-    }
-
-    .account-email {
-      font-size: 0.75rem;
-      color: #6b7280;
-      font-family: monospace;
-    }
-
-    .register-link {
-      text-align: center;
-      margin-top: 1.5rem;
-      padding-top: 1rem;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .register-link p {
-      color: #6b7280;
-      margin: 0;
-    }
-
-    .register-link a {
-      color: #3b82f6;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .register-link a:hover {
-      text-decoration: underline;
-    }
-
-    @media (max-width: 640px) {
-      .login-container {
-        padding: 1rem;
-      }
-
-      .login-card {
-        padding: 2rem;
-      }
-
-      .test-account-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  `]
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly loadingService = inject(LoadingService);
+  private readonly storageService = inject(StorageService);
+
+  // Form state
   credentials = {
     email: '',
     password: ''
   };
 
+  // UI state
   showPassword = signal(false);
   errorMessage = signal('');
 
-  constructor(
-    private router: Router,
-    private http: HttpClient,
-    private authService: AuthService,
-    private loadingService: LoadingService
-  ) {}
+  // ============================================================================
+  // Public Methods
+  // ============================================================================
 
   isAuthLoading(): boolean {
-    return this.loadingService.isLoading('auth-login');
+    return this.loadingService.isLoading(LOADING_KEY);
   }
 
-  togglePassword() {
+  togglePassword(): void {
     this.showPassword.update(show => !show);
   }
 
-  useTestAccount(email: string) {
+  useTestAccount(email: string): void {
     this.credentials.email = email;
-    this.credentials.password = 'password123';
+    this.credentials.password = DEFAULT_TEST_PASSWORD;
     this.errorMessage.set('');
   }
 
-  async onSubmit() {
-    if (!this.credentials.email || !this.credentials.password) {
+  async onSubmit(): Promise<void> {
+    if (!this.isValidCredentials()) {
       return;
     }
 
-    this.loadingService.start('auth-login');
+    this.loadingService.start(LOADING_KEY);
     this.errorMessage.set('');
 
     try {
@@ -321,122 +120,123 @@ export class LoginComponent {
         password: this.credentials.password
       };
 
-      const response = await this.http.post<LoginResponse>(`${environment.apiUrl}/api/auth/login`, loginRequest).toPromise();
+      const response = await firstValueFrom(this.authService.login(loginRequest));
 
-      if (response && response.data) {
-        console.log('Login response:', response);
-
-        // Extract actual login data from API wrapper
-        const loginData = response.data;
-
-        // Check approval status for owners/managers before proceeding
-        if (this.normalizeRole(loginData.role) === 'Owner' && loginData.approvalStatus !== undefined) {
-          const approvalStatus = loginData.approvalStatus;
-
-          // 0 = Pending, 1 = Approved, 2 = Rejected
-          if (approvalStatus === 0) {
-            this.errorMessage.set('Your account is pending admin approval. You will receive an email once approved.');
-            return;
-          } else if (approvalStatus === 2) {
-            this.errorMessage.set('Your account has been rejected. Please contact support for more information.');
-            return;
-          }
-        }
-
-        // Clear any old auth data first
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-
-        // Store authentication data using the correct keys the AuthService expects
-        const expiryTime = loginData.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // Default to 24 hours if not provided
-        localStorage.setItem('auth_token', loginData.token);
-        localStorage.setItem('tokenExpiry', expiryTime);
-        localStorage.setItem('user_data', JSON.stringify({
-          userId: loginData.userId,
-          email: loginData.email,
-          role: loginData.role,
-          organizationId: loginData.organizationId,
-          organizationName: loginData.organizationName,
-          businessName: loginData.organizationName
-        }));
-
-        // Update AuthService state
-        this.authService.loadStoredAuth();
-
-        // Role-based redirection
-        this.redirectBasedOnRole(loginData.role.toString(), loginData.email);
+      if (response?.data) {
+        this.handleSuccessfulLogin(response.data);
       }
-    } catch (error: any) {
-      console.error('Login error:', error);
-
-      if (error.status === 401) {
-        this.errorMessage.set('Invalid email or password. Please try again.');
-      } else if (error.status === 0) {
-        this.errorMessage.set('Unable to connect to server. Please check your connection.');
-      } else {
-        this.errorMessage.set('Login failed. Please try again later.');
-      }
+    } catch (error: unknown) {
+      this.handleLoginError(error as HttpError);
     } finally {
-      this.loadingService.stop('auth-login');
+      this.loadingService.stop(LOADING_KEY);
     }
   }
 
-  private redirectBasedOnRole(role: string, email: string) {
-    // Convert numeric role to string if needed
-    const roleStr = this.normalizeRole(role);
+  // ============================================================================
+  // Private Methods
+  // ============================================================================
 
-    // Special case: System admin gets admin dashboard
-    if (email === 'admin@microsaasbuilders.com') {
-      this.router.navigate(['/admin/dashboard']);
+  private isValidCredentials(): boolean {
+    return Boolean(this.credentials.email && this.credentials.password);
+  }
+
+  private handleSuccessfulLogin(loginData: LoginData): void {
+    // Check approval status for owners before proceeding
+    if (!this.isApproved(loginData)) {
       return;
     }
 
-    // Role-based routing for regular users
-    switch (roleStr) {
+    // Store authentication data
+    this.storeAuthData(loginData);
+
+    // Update AuthService state
+    this.authService.loadStoredAuth();
+
+    // Role-based redirection
+    this.redirectBasedOnRole(loginData.role.toString(), loginData.email);
+  }
+
+  private isApproved(loginData: LoginData): boolean {
+    const role = this.normalizeRole(loginData.role);
+    
+    // Only owners have approval workflow
+    if (role !== 'Owner' || loginData.approvalStatus === undefined) {
+      return true;
+    }
+
+    if (loginData.approvalStatus === APPROVAL_STATUS.PENDING) {
+      this.errorMessage.set(ERROR_MESSAGES.PENDING_APPROVAL);
+      return false;
+    }
+
+    if (loginData.approvalStatus === APPROVAL_STATUS.REJECTED) {
+      this.errorMessage.set(ERROR_MESSAGES.REJECTED);
+      return false;
+    }
+
+    return true;
+  }
+
+  private storeAuthData(loginData: LoginData): void {
+    // Clear any old auth data first
+    this.storageService.clearAuthData();
+
+    // Calculate expiry time
+    const expiryTime = loginData.expiresAt ||
+      new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000).toISOString();
+
+    // Store new auth data
+    this.storageService.setAuthToken(loginData.token);
+    this.storageService.setTokenExpiry(expiryTime);
+    this.storageService.setUserData({
+      userId: loginData.userId,
+      email: loginData.email,
+      role: loginData.role,
+      organizationId: loginData.organizationId,
+      organizationName: loginData.organizationName,
+      businessName: loginData.organizationName
+    });
+  }
+
+  private handleLoginError(error: HttpError): void {
+    if (error.status === 401) {
+      this.errorMessage.set(ERROR_MESSAGES.INVALID_CREDENTIALS);
+    } else if (error.status === 0) {
+      this.errorMessage.set(ERROR_MESSAGES.NETWORK_ERROR);
+    } else {
+      this.errorMessage.set(ERROR_MESSAGES.GENERIC_ERROR);
+    }
+  }
+
+  private redirectBasedOnRole(role: string, email: string): void {
+    const normalizedRole = this.normalizeRole(role);
+
+    // Special case: System admin email always gets admin dashboard
+    if (email === SYSTEM_ADMIN_EMAIL) {
+      this.router.navigate([ROUTES.ADMIN_DASHBOARD]);
+      return;
+    }
+
+    switch (normalizedRole) {
       case 'Admin':
-        this.router.navigate(['/admin/dashboard']);
+        this.router.navigate([ROUTES.ADMIN_DASHBOARD]);
         break;
-
       case 'Owner':
-        this.router.navigate(['/owner/dashboard']);
+        this.router.navigate([ROUTES.OWNER_DASHBOARD]);
         break;
-
-      // case 'Manager':
-      //   // Managers get owner dashboard access (planned feature)
-      //   this.router.navigate(['/owner/dashboard']);
-      //   break;
-
-      case 'consignor':
-        // For now, redirect to customer area - could be separate consignor portal later
-        this.router.navigate(['/customer/dashboard']);
-        break;
-
+      case 'Consignor':
       case 'Customer':
-        this.router.navigate(['/customer/dashboard']);
+        this.router.navigate([ROUTES.CUSTOMER_DASHBOARD]);
         break;
-
       default:
-        console.warn('Unknown role:', roleStr);
-        this.router.navigate(['/owner/dashboard']);
+        this.router.navigate([ROUTES.OWNER_DASHBOARD]);
     }
   }
 
   private normalizeRole(role: string | number): string {
-    // Handle numeric role values (enum numbers from API)
     if (typeof role === 'number' || !isNaN(Number(role))) {
-      const roleMap: { [key: number]: string } = {
-        0: 'Admin',
-        1: 'Owner',
-        // 2: 'Manager', // Planned feature - commented out for now
-        2: 'consignor',
-        3: 'Customer'
-      };
-      return roleMap[Number(role)] || 'Owner';
+      return ROLE_MAP[Number(role)] || 'Owner';
     }
-
-    // Return string role as-is
     return String(role);
   }
 }

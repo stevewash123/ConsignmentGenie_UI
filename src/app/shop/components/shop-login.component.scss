@@ -1,0 +1,188 @@
+  
+    .shop-login-container {
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      max-width: 400px;
+      width: 100%;
+      border-top: 4px solid var(--shop-accent, #047857);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-header h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .login-header p {
+      color: #6b7280;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+
+    .login-form {
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.875rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--shop-accent, #047857);
+      box-shadow: 0 0 0 3px rgba(var(--shop-accent-rgb, 4, 120, 87), 0.1);
+    }
+
+    .form-input:disabled {
+      background: #f9fafb;
+      color: #6b7280;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--shop-accent, #047857);
+      color: white;
+      border: none;
+      padding: 0.875rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .login-btn:hover:not(:disabled) {
+      background: var(--shop-accent-hover, #065f46);
+      transform: translateY(-1px);
+    }
+
+    .login-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-links {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 1.5rem;
+      text-align: center;
+    }
+
+    .signup-links,
+    .general-links {
+      margin-bottom: 1.5rem;
+    }
+
+    .signup-links p,
+    .general-links p {
+      color: #6b7280;
+      margin: 0 0 0.75rem 0;
+      font-size: 0.9rem;
+    }
+
+    .link {
+      color: var(--shop-accent, #047857);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    .divider {
+      color: #9ca3af;
+      margin: 0 0.5rem;
+    }
+
+    .back-link {
+      margin-bottom: 1rem;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      color: #6b7280;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .back-btn:hover {
+      color: var(--shop-accent, #047857);
+    }
+
+    .global-link {
+      padding-top: 1rem;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .global-link .link {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .global-link .link:hover {
+      color: #6b7280;
+    }
+
+    @media (max-width: 480px) {
+      .shop-login-container {
+        padding: 1rem 0.5rem;
+      }
+
+      .login-card {
+        padding: 1.5rem;
+      }
+
+      .login-header h2 {
+        font-size: 1.5rem;
+      }
+    }

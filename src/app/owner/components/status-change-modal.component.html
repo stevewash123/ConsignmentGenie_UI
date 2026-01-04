@@ -1,0 +1,37 @@
+    <div class="modal-overlay" *ngIf="isOpen" (click)="onOverlayClick($event)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ getModalTitle() }}</h3>
+          <button type="button" class="close-btn" (click)="close()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p>{{ getConfirmationMessage() }}</p>
+
+          <div *ngIf="statusAction?.requireReason" class="reason-field">
+            <label for="reason" class="form-label">Reason (optional):</label>
+            <textarea
+              id="reason"
+              [(ngModel)]="reason"
+              class="form-textarea"
+              placeholder="Enter reason for status change..."
+              rows="3">
+            </textarea>
+          </div>
+
+          <div class="error-message" *ngIf="error">
+            {{ error }}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isSubmitting">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="isSubmitting">
+            <div class="loading-spinner" *ngIf="isSubmitting"></div>
+            {{ isSubmitting ? 'Processing...' : 'Confirm' }}
+          </button>
+        </div>
+      </div>
+    </div>

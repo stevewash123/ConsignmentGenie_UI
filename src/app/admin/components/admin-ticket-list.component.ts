@@ -11,7 +11,7 @@ import { SupportTicket, TICKET_STATUSES, TICKET_PRIORITIES, TicketStatus } from 
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './admin-ticket-list.component.html',
-  styles: []
+  styleUrls: ['./admin-ticket-list.component.scss']
 })
 export class AdminTicketListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

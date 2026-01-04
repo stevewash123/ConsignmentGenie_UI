@@ -8,7 +8,7 @@ import { CreateTicketRequest, TICKET_CATEGORIES, TICKET_PRIORITIES, TicketCatego
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './support-ticket-form.component.html',
-  styles: []
+  styleUrls: ['./support-ticket-form.component.scss']
 })
 export class SupportTicketFormComponent {
   @Input() isLoading = false;

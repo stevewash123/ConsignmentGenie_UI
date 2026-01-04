@@ -1,0 +1,20 @@
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'isConnected' does not exist on type 'SpyObj<SquareIntegrationService>'. Did you mean 'disconnect'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/inventory-list.component.spec.ts:167:22:
+[37m      167 │     mockSquareService.[32misConnected[37m.and.returnValue(of(true));
+          ╵                       [32m~~~~~~~~~~~[0m
+
+  'disconnect' is declared here.
+
+    src/app/services/square-integration.service.ts:75:8:
+[37m      75 │   async [32mdisconnect[37m(): Promise<void> {
+         ╵         [32m~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'getSettings' does not exist on type 'SpyObj<SquareIntegrationService>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/inventory-list.component.spec.ts:168:22:
+[37m      168 │     mockSquareService.[32mgetSettings[37m.and.returnValue(of({ success: t...
+          ╵                       [32m~~~~~~~~~~~[0m
+
+

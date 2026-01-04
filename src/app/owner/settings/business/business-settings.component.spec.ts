@@ -1,27 +1,45 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 
 import { BusinessSettingsComponent } from './business-settings.component';
-import { BusinessSettings, ItemSubmissionMode } from '../../../shared/interfaces/business.interfaces';
+import { ItemSubmissionMode } from '../../../shared/interfaces/business.interfaces';
+import { OwnerService, BusinessSettings } from '../../../services/owner.service';
 
 describe('BusinessSettingsComponent', () => {
   let component: BusinessSettingsComponent;
   let fixture: ComponentFixture<BusinessSettingsComponent>;
-  let mockHttpClient: jasmine.SpyObj<HttpClient>;
+  let mockOwnerService: jasmine.SpyObj<OwnerService>;
 
   const mockBusinessSettings: BusinessSettings = {
     commission: {
       defaultSplit: '50/50',
+      categoryBasedSplits: false,
+      minimumCommission: 5,
       allowCustomSplitsPerConsignor: true,
       allowCustomSplitsPerItem: false
     },
     tax: {
+      enabled: true,
+      rate: 8.25,
+      label: 'Sales Tax',
       salesTaxRate: 8.25,
+      taxIncludedInPrice: false,
       taxIncludedInPrices: false,
       chargeTaxOnShipping: true,
       taxIdEin: '12-3456789'
+    },
+    policies: {
+      consignmentPeriod: 90,
+      returnPolicy: 'Store Credit Only',
+      itemSubmissionMode: 'approval_required',
+      autoApproveItems: false
+    },
+    schedule: {
+      businessHours: [
+        { day: 'Monday', open: '09:00', close: '17:00', closed: false }
+      ],
+      timezone: 'America/New_York'
     },
     payouts: {
       schedule: 'monthly',
@@ -37,6 +55,7 @@ describe('BusinessSettingsComponent', () => {
       markdownSchedule: {
         after30Days: 10,
         after60Days: 25,
+        after90Days: 50,
         after90DaysAction: 'donate'
       }
     },
@@ -46,16 +65,16 @@ describe('BusinessSettingsComponent', () => {
   };
 
   beforeEach(async () => {
-    mockHttpClient = jasmine.createSpyObj('HttpClient', ['get', 'put']);
+    mockOwnerService = jasmine.createSpyObj('OwnerService', ['getBusinessSettings', 'updateBusinessSettings']);
 
-    // Mock the HTTP calls
-    mockHttpClient.get.and.returnValue(of(mockBusinessSettings));
-    mockHttpClient.put.and.returnValue(of({ success: true }));
+    // Mock the service calls
+    mockOwnerService.getBusinessSettings.and.returnValue(of(mockBusinessSettings));
+    mockOwnerService.updateBusinessSettings.and.returnValue(of(mockBusinessSettings));
 
     await TestBed.configureTestingModule({
       imports: [BusinessSettingsComponent, FormsModule],
       providers: [
-        { provide: HttpClient, useValue: mockHttpClient }
+        { provide: OwnerService, useValue: mockOwnerService }
       ]
     }).compileComponents();
 
@@ -71,7 +90,7 @@ describe('BusinessSettingsComponent', () => {
     fixture.detectChanges();
     tick(); // Wait for async operation
 
-    expect(mockHttpClient.get).toHaveBeenCalled();
+    expect(mockOwnerService.getBusinessSettings).toHaveBeenCalled();
     expect(component.settings()).toEqual(mockBusinessSettings);
   }));
 
@@ -88,7 +107,7 @@ describe('BusinessSettingsComponent', () => {
   }));
 
   it('should handle settings load error', fakeAsync(() => {
-    mockHttpClient.get.and.returnValue(throwError(() => new Error('API Error')));
+    mockOwnerService.getBusinessSettings.and.returnValue(throwError(() => new Error('API Error')));
 
     fixture.detectChanges();
     tick(); // Wait for async operation
@@ -104,12 +123,12 @@ describe('BusinessSettingsComponent', () => {
     component.saveSettings();
     tick(); // Wait for save operation
 
-    expect(mockHttpClient.put).toHaveBeenCalled();
+    expect(mockOwnerService.updateBusinessSettings).toHaveBeenCalled();
     expect(component.successMessage()).toBe('Business settings saved successfully');
   }));
 
   it('should handle save error', fakeAsync(() => {
-    mockHttpClient.put.and.returnValue(throwError(() => new Error('Save Error')));
+    mockOwnerService.updateBusinessSettings.and.returnValue(throwError(() => new Error('Save Error')));
     fixture.detectChanges();
     tick(); // Wait for initial load
 

@@ -1,0 +1,58 @@
+    <div class="statements-container">
+      <!-- Header -->
+      <div class="statements-header">
+        <a routerLink="/consignor/dashboard" class="back-link">← Dashboard</a>
+        <h1>Monthly Statements</h1>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading statements...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="error-state">
+        <p>{{ error }}</p>
+        <button class="btn-retry" (click)="loadStatements()">Retry</button>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && !error && (!statements || statements.length === 0)" class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h2>No statements available yet</h2>
+        <p>Statements are generated for months with sales or payout activity.</p>
+      </div>
+
+      <!-- Statements Table -->
+      <div *ngIf="!loading && !error && statements && statements.length > 0" class="statements-content">
+        <div class="statements-table">
+          <div class="table-header">
+            <div class="col-month">MONTH</div>
+            <div class="col-sales">SALES</div>
+            <div class="col-earnings">EARNINGS</div>
+            <div class="col-payouts">PAYOUTS</div>
+            <div class="col-actions"></div>
+          </div>
+
+          <div *ngFor="let statement of statements" class="table-row">
+            <div class="col-month">{{ statement.monthName }}</div>
+            <div class="col-sales">{{ statement.salesCount }}</div>
+            <div class="col-earnings">${{ statement.totalEarnings.toFixed(2) }}</div>
+            <div class="col-payouts">{{ statement.payoutCount }}</div>
+            <div class="col-actions">
+              <button
+                class="btn-download"
+                (click)="downloadPdf(statement)"
+                [disabled]="downloading">
+                {{ downloading ? 'Loading...' : '[PDF]' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          Showing months with activity
+        </div>
+      </div>
+    </div>

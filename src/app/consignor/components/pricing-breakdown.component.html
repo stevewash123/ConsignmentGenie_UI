@@ -1,0 +1,67 @@
+    <div class="pricing-breakdown">
+      <h3>Pricing</h3>
+
+      <div class="pricing-grid">
+        <div class="pricing-row">
+          <span class="label">Your Suggested Price:</span>
+          <span class="value suggested">${{ item.suggestedPrice.toFixed(2) }}</span>
+        </div>
+
+        <div class="pricing-row">
+          <span class="label">Market Price:</span>
+          <span class="value market">${{ item.marketPrice.toFixed(2) }}</span>
+        </div>
+
+        <div class="pricing-row">
+          <span class="label">Listed Price:</span>
+          <span class="value listed">${{ item.listedPrice.toFixed(2) }}</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="pricing-row split-row">
+          <span class="label">Your Split:</span>
+          <span class="value split">{{ item.splitPercentage }}%</span>
+        </div>
+
+        <div class="pricing-row earnings-row" *ngIf="item.status !== 'sold'">
+          <span class="label">If Sold, You Earn:</span>
+          <span class="value earnings">${{ item.consignorEarnings.toFixed(2) }}</span>
+        </div>
+
+        <div class="pricing-row earnings-row" *ngIf="item.status === 'sold'">
+          <span class="label">You Earned:</span>
+          <span class="value earnings">${{ (item.earnedAmount || item.consignorEarnings).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <!-- Owner Note -->
+      <div class="owner-note" *ngIf="item.ownerNote">
+        <h4>Owner's Note:</h4>
+        <blockquote>
+          {{ item.ownerNote }}
+        </blockquote>
+      </div>
+
+      <!-- Pending Price Request Callout -->
+      <div class="price-request-callout" *ngIf="item.pendingPriceRequest">
+        <div class="callout-header">
+          <span class="callout-icon">⏳</span>
+          <h4>Pending Price Change Request</h4>
+        </div>
+        <div class="callout-content">
+          <p>
+            <strong>{{ item.pendingPriceRequest.requestedBy }}</strong> requested a price change
+            <strong>{{ formatDateAgo(item.pendingPriceRequest.requestDate) }}</strong>
+          </p>
+          <div class="price-change-details">
+            <span class="current-price">${{ item.pendingPriceRequest.currentPrice.toFixed(2) }}</span>
+            <span class="arrow">→</span>
+            <span class="requested-price">${{ item.pendingPriceRequest.requestedPrice.toFixed(2) }}</span>
+          </div>
+          <p class="reason" *ngIf="item.pendingPriceRequest.reason">
+            <em>Reason: {{ item.pendingPriceRequest.reason }}</em>
+          </p>
+        </div>
+      </div>
+    </div>

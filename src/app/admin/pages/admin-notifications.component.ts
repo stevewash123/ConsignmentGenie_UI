@@ -6,6 +6,6 @@ import { NotificationCenterComponent } from '../../shared/components/notificatio
   standalone: true,
   imports: [NotificationCenterComponent],
   templateUrl: './admin-notifications.component.html',
-  styles: []
+  styleUrls: ['./admin-notifications.component.scss']
 })
 export class AdminNotificationsComponent {}

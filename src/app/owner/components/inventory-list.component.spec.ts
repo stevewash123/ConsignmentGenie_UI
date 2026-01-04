@@ -6,6 +6,8 @@ import { of, throwError } from 'rxjs';
 import { InventoryListComponent } from './inventory-list.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
+import { SquareIntegrationService } from '../../services/square-integration.service';
+import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
 import {
   ItemListDto,
   PagedResult,
@@ -22,6 +24,8 @@ describe('InventoryListComponent', () => {
   let mockInventoryService: jasmine.SpyObj<InventoryService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
+  let mockSquareService: jasmine.SpyObj<SquareIntegrationService>;
+  let mockConfirmationService: jasmine.SpyObj<ConfirmationDialogService>;
 
   const mockCategories: ItemCategoryDto[] = [
     {
@@ -114,6 +118,16 @@ describe('InventoryListComponent', () => {
       'stop',
       'isLoading'
     ]);
+    const squareServiceSpy = jasmine.createSpyObj('SquareIntegrationService', [
+      'syncNow',
+      'getStatus',
+      'updateSettings',
+      'getSquareUsageSettings'
+    ]);
+    const confirmationServiceSpy = jasmine.createSpyObj('ConfirmationDialogService', [
+      'confirmDelete',
+      'confirmAction'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [InventoryListComponent, HttpClientTestingModule],
@@ -121,6 +135,8 @@ describe('InventoryListComponent', () => {
         { provide: InventoryService, useValue: inventoryServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: LoadingService, useValue: loadingServiceSpy },
+        { provide: SquareIntegrationService, useValue: squareServiceSpy },
+        { provide: ConfirmationDialogService, useValue: confirmationServiceSpy },
         {
           provide: ActivatedRoute,
           useValue: { queryParams: of({}), params: of({}) }
@@ -134,6 +150,8 @@ describe('InventoryListComponent', () => {
     mockInventoryService = TestBed.inject(InventoryService) as jasmine.SpyObj<InventoryService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
+    mockSquareService = TestBed.inject(SquareIntegrationService) as jasmine.SpyObj<SquareIntegrationService>;
+    mockConfirmationService = TestBed.inject(ConfirmationDialogService) as jasmine.SpyObj<ConfirmationDialogService>;
 
     // Setup default mock returns
     mockInventoryService.getItems.and.returnValue(of(mockPagedResult));
@@ -141,7 +159,21 @@ describe('InventoryListComponent', () => {
       success: true,
       data: mockCategories
     } as ApiResponse<ItemCategoryDto[]>));
+    mockInventoryService.updateItemStatus.and.returnValue(of({ success: true, data: null }));
+    mockInventoryService.deleteItem.and.returnValue(of({ success: true, data: null }));
+    mockLoadingService.start.and.stub();
+    mockLoadingService.stop.and.stub();
     mockLoadingService.isLoading.and.returnValue(false);
+    mockSquareService.syncNow.and.returnValue(Promise.resolve());
+    mockSquareService.getStatus.and.returnValue(Promise.resolve({ isConnected: true, lastSync: new Date() }));
+    mockSquareService.updateSettings.and.returnValue(Promise.resolve());
+    mockSquareService.getSquareUsageSettings.and.returnValue({
+      inventoryChoice: 'consignment-genie' as const,
+      onlineChoice: 'none' as const,
+      posChoice: 'manual' as const
+    });
+    mockConfirmationService.confirmDelete.and.returnValue(of({ confirmed: true }));
+    mockConfirmationService.confirmAction.and.returnValue(of({ confirmed: true }));
   });
 
   /**

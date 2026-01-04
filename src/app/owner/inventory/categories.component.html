@@ -1,0 +1,38 @@
+<div class="categories-page">
+  <div class="page-header">
+    <h1>Category Management</h1>
+    <p>Organize your inventory with custom categories. Categories help you group similar items and make it easier for customers to browse your store.</p>
+  </div>
+
+  <div *ngIf="errorMessage()" class="error-banner">
+    <div class="error-icon"> </div>
+    <span>{{ errorMessage() }}</span>
+    <button type="button" class="dismiss-btn" (click)="errorMessage.set('')"></button>
+  </div>
+
+  <div *ngIf="successMessage()" class="success-banner">
+    <div class="success-icon"></div>
+    <span>{{ successMessage() }}</span>
+    <button type="button" class="dismiss-btn" (click)="successMessage.set('')"></button>
+  </div>
+
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading categories...</p>
+  </div>
+
+  <div *ngIf="!isLoading()">
+    <app-lookup-management
+      title="Categories"
+      description="Categories help organize your inventory and make it easier for customers to find items."
+      [items]="lookupItems()"
+      itemLabel="items"
+      [allowReorder]="true"
+      [showCount]="true"
+      (add)="onAddCategory($event)"
+      (rename)="onRenameCategory($event)"
+      (delete)="onDeleteCategory($event)"
+      (reorder)="onReorderCategories($event)"
+    ></app-lookup-management>
+  </div>
+</div>

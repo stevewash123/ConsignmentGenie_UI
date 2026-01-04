@@ -1,0 +1,447 @@
+      <header class="section-header">
+        <h2>Basic Information</h2>
+        <p>Essential details about your store and how customers can reach you</p>
+      </header>
+
+      <form [formGroup]="basicInfoForm" (ngSubmit)="onSave()" class="basic-info-form">
+
+        <!-- Store Identity -->
+        <section class="form-section">
+          <h3>Store Identity</h3>
+
+          <div class="form-group">
+            <label for="storeName">Store Name *</label>
+            <input
+              id="storeName"
+              type="text"
+              formControlName="storeName"
+              class="form-input"
+              placeholder="Your Store Name"
+              maxlength="100">
+            <div class="char-count">{{ getCharacterCount('storeName') }}/100</div>
+            <div *ngIf="basicInfoForm.get('storeName')?.invalid && basicInfoForm.get('storeName')?.touched"
+                 class="field-error">
+              <div *ngIf="basicInfoForm.get('storeName')?.hasError('required')">Store name is required</div>
+              <div *ngIf="basicInfoForm.get('storeName')?.hasError('maxlength')">Store name cannot exceed 100 characters</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Store Description</label>
+            <textarea
+              id="description"
+              formControlName="description"
+              class="form-textarea"
+              placeholder="Brief description of your store and what you offer..."
+              rows="4"
+              maxlength="500"></textarea>
+            <div class="char-count">{{ getCharacterCount('description') }}/500</div>
+          </div>
+
+          <div class="form-group">
+            <label for="website">Website</label>
+            <input
+              id="website"
+              type="url"
+              formControlName="website"
+              class="form-input"
+              placeholder="https://www.yourstore.com">
+            <div *ngIf="basicInfoForm.get('website')?.invalid && basicInfoForm.get('website')?.touched"
+                 class="field-error">
+              <div *ngIf="basicInfoForm.get('website')?.hasError('pattern')">Please enter a valid website URL</div>
+            </div>
+            <div class="help-text">Include https:// for full website URLs</div>
+          </div>
+        </section>
+
+        <!-- Store Contact Information & Address -->
+        <section class="form-section" formGroupName="contact">
+          <h3>Store Contact Information & Address</h3>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="useOwnerContact"
+                (change)="onUseOwnerContactChange()"
+                [ngModelOptions]="{standalone: true}"
+                class="checkbox-input">
+              <span class="checkbox-text">Use Owner's Contact Information</span>
+            </label>
+            <div class="help-text" *ngIf="ownerContact">
+              Owner: {{ ownerContact.name }} ({{ ownerContact.email }})
+              <span *ngIf="ownerContact.phone"> • {{ ownerContact.phone }}</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone Number *</label>
+              <input
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                class="form-input"
+                placeholder="(555) 123-4567">
+              <div *ngIf="basicInfoForm.get('contact.phone')?.invalid && basicInfoForm.get('contact.phone')?.touched"
+                   class="field-error">
+                <div *ngIf="basicInfoForm.get('contact.phone')?.hasError('required')">Phone number is required</div>
+                <div *ngIf="basicInfoForm.get('contact.phone')?.hasError('pattern')">Please enter a valid phone number</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                class="form-input"
+                placeholder="info@yourstore.com">
+              <div *ngIf="basicInfoForm.get('contact.email')?.invalid && basicInfoForm.get('contact.email')?.touched"
+                   class="field-error">
+                <div *ngIf="basicInfoForm.get('contact.email')?.hasError('required')">Email address is required</div>
+                <div *ngIf="basicInfoForm.get('contact.email')?.hasError('email')">Please enter a valid email address</div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="form-section" formGroupName="address">
+          <div class="form-group">
+            <label for="street1">Street Address *</label>
+            <input
+              id="street1"
+              type="text"
+              formControlName="street1"
+              class="form-input"
+              placeholder="123 Main Street">
+            <div *ngIf="basicInfoForm.get('address.street1')?.invalid && basicInfoForm.get('address.street1')?.touched"
+                 class="field-error">
+              <div *ngIf="basicInfoForm.get('address.street1')?.hasError('required')">Street address is required</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="street2">Address Line 2</label>
+            <input
+              id="street2"
+              type="text"
+              formControlName="street2"
+              class="form-input"
+              placeholder="Suite 100">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input
+                id="city"
+                type="text"
+                formControlName="city"
+                class="form-input"
+                placeholder="City">
+              <div *ngIf="basicInfoForm.get('address.city')?.invalid && basicInfoForm.get('address.city')?.touched"
+                   class="field-error">
+                <div *ngIf="basicInfoForm.get('address.city')?.hasError('required')">City is required</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="state">State *</label>
+              <select
+                id="state"
+                formControlName="state"
+                class="form-select">
+                <option value="">Select State</option>
+                <option *ngFor="let state of states" [value]="state.code">{{ state.name }}</option>
+              </select>
+              <div *ngIf="basicInfoForm.get('address.state')?.invalid && basicInfoForm.get('address.state')?.touched"
+                   class="field-error">
+                <div *ngIf="basicInfoForm.get('address.state')?.hasError('required')">State is required</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="zipCode">ZIP Code *</label>
+              <input
+                id="zipCode"
+                type="text"
+                formControlName="zipCode"
+                class="form-input"
+                placeholder="12345">
+              <div *ngIf="basicInfoForm.get('address.zipCode')?.invalid && basicInfoForm.get('address.zipCode')?.touched"
+                   class="field-error">
+                <div *ngIf="basicInfoForm.get('address.zipCode')?.hasError('required')">ZIP code is required</div>
+                <div *ngIf="basicInfoForm.get('address.zipCode')?.hasError('pattern')">Please enter a valid ZIP code</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                formControlName="showPublicly"
+                class="checkbox-input">
+              <span class="checkbox-text">Show address to customers publicly</span>
+            </label>
+            <div class="help-text">Uncheck if you operate from home or prefer privacy</div>
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            (click)="onPreview()"
+            class="btn-secondary"
+            [disabled]="saving()">
+            Preview Customer View
+          </button>
+          <button
+            type="submit"
+            [disabled]="!basicInfoForm.valid || saving()"
+            class="btn-primary">
+            {{ saving() ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- Messages -->
+      <div class="messages" *ngIf="successMessage() || errorMessage()">
+        <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+        <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .basic-info-section {
+      padding: 2rem;
+      max-width: 800px;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-header p {
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    .basic-info-form {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .form-section {
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .form-section:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .form-section h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-row.three-col {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .checkbox-input {
+      margin: 0;
+    }
+
+    .char-count {
+      font-size: 0.75rem;
+      color: #6b7280;
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+
+    .help-text {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: #dc2626;
+      margin-top: 0.25rem;
+      font-weight: 500;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-input.ng-invalid.ng-touched, .form-textarea.ng-invalid.ng-touched, .form-select.ng-invalid.ng-touched {
+      border-color: #dc2626;
+    }
+
+    .form-input:disabled, .form-textarea:disabled, .form-select:disabled {
+      background-color: #f9fafb;
+      color: #6b7280;
+      border-color: #d1d5db;
+      cursor: not-allowed;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 2rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-primary, .btn-secondary {
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+
+    .btn-primary:disabled {
+      background: #9ca3af;
+      border-color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border-color: #d1d5db;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e5e7eb;
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .messages {
+      margin-top: 1rem;
+    }
+
+    .message {
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .message.success {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+
+    .message.error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .basic-info-section {
+        padding: 1rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+    }

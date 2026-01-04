@@ -1,41 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { OwnerService, TaxSettings } from '../../../services/owner.service';
 
-interface TaxSettings {
-  collection: {
-    enabled: boolean;
-    acknowledgmentDate?: Date;
-  };
-  rates: {
-    defaultRate: number;
-    isInclusive: boolean;
-    effectiveDate: Date;
-    categoryRates?: { [category: string]: number };
-  };
-  display: {
-    showBreakdownOnReceipt: boolean;
-    showTaxIdOnReceipt: boolean;
-    lineItemTax: boolean;
-  };
-  business: {
-    taxId?: string;
-    stateTaxId?: string;
-    taxIdVerified: boolean;
-  };
-  calculation: {
-    applyToCommission: 'before' | 'after';
-    exemptCategories: string[];
-  };
-  reporting: {
-    period: 'monthly' | 'quarterly';
-    autoGenerate: boolean;
-    exportFormat: 'csv' | 'pdf' | 'excel';
-  };
-  lastUpdated: Date;
-}
 
 @Component({
   selector: 'app-tax-settings',
@@ -52,7 +19,7 @@ export class TaxSettingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private ownerService: OwnerService
   ) {}
 
   ngOnInit() {
@@ -90,7 +57,7 @@ export class TaxSettingsComponent implements OnInit {
 
   async loadTaxSettings() {
     try {
-      const response = await this.http.get<TaxSettings>(`${environment.apiUrl}/api/organization/tax-settings`).toPromise();
+      const response = await this.ownerService.getTaxSettings().toPromise();
       if (response) {
         this.populateForm(response);
       }
@@ -163,6 +130,11 @@ export class TaxSettingsComponent implements OnInit {
       const formValue = this.taxForm.value;
 
       const taxSettings: TaxSettings = {
+        taxEnabled: formValue.taxEnabled || false,
+        defaultTaxRate: formValue.defaultTaxRate || 0,
+        taxLabel: formValue.taxLabel || 'Tax',
+        taxCalculationMethod: formValue.taxCalculationMethod || 'exclusive',
+        exemptCategories: formValue.exemptCategories || [],
         collection: {
           enabled: formValue.collectionEnabled,
           acknowledgmentDate: formValue.collectionEnabled ? new Date() : undefined
@@ -194,7 +166,7 @@ export class TaxSettingsComponent implements OnInit {
         lastUpdated: new Date()
       };
 
-      await this.http.put(`${environment.apiUrl}/api/organization/tax-settings`, taxSettings).toPromise();
+      await this.ownerService.updateTaxSettings(taxSettings).toPromise();
       this.showSuccess('Tax settings saved successfully');
     } catch (error) {
       this.showError('Failed to save tax settings. Please try again.');

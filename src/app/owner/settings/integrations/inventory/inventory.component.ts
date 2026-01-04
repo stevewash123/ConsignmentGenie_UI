@@ -3,9 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { SquareIntegrationService } from '../../../../services/square-integration.service';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 
 export interface SquareStatus {
   isConnected: boolean;
@@ -42,326 +41,10 @@ export interface SquareIntegrationSettings {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './inventory.component.html',
-  styles: [`
-    .section {
-      background: white;
-      border-radius: 8px;
-      padding: 2rem;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    }
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #111827;
-    }
-    .section-description {
-      color: #6b7280;
-      margin-bottom: 2rem;
-    }
-    .choice-section {
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-    }
-    .choice-title {
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #374151;
-      font-size: 1.125rem;
-    }
-
-    /* New card-based choice layout */
-    .choice-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    @media (max-width: 768px) {
-      .choice-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .choice-card {
-      position: relative;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 1.5rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      background: white;
-      min-height: 200px;
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .choice-card:hover {
-      border-color: #3b82f6;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-    }
-
-    .choice-card.selected {
-      border-color: #3b82f6;
-      background: #eff6ff;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-    }
-
-    .choice-radio {
-      width: 20px;
-      height: 20px;
-      margin: 0.25rem 0 0 0;
-      flex-shrink: 0;
-    }
-
-    .choice-main-content {
-      display: flex;
-      flex: 1;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .choice-text-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .choice-icon {
-      font-size: 4rem;
-      line-height: 1;
-      flex-shrink: 0;
-      margin-top: 0.5rem;
-    }
-
-    .choice-label {
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-      color: #111827;
-      line-height: 1.4;
-      text-align: center;
-    }
-
-    .choice-benefits {
-      margin-top: auto;
-    }
-
-    .benefit-item {
-      color: #374151;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-      line-height: 1.4;
-    }
-
-    /* Value proposition panel */
-    .value-panel {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .value-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .value-icon {
-      color: #10b981;
-      font-size: 1.25rem;
-    }
-
-    .value-title {
-      font-weight: 600;
-      color: #1e40af;
-      font-size: 1.125rem;
-    }
-
-    .value-description {
-      color: #1e40af;
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-    }
-
-    .value-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .value-list li {
-      color: #1e40af;
-      font-size: 0.875rem;
-      margin-bottom: 0.25rem;
-      line-height: 1.4;
-    }
-    .radio-group {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .radio-option {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 1rem 1.25rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex: 1;
-      min-width: 200px;
-    }
-    .radio-option:hover {
-      border-color: #3b82f6;
-      background: #eff6ff;
-    }
-    .radio-option.selected {
-      border-color: #3b82f6;
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
-    .square-options {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 1.5rem;
-      margin-top: 1rem;
-    }
-    .square-options.disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-    .placeholder {
-      background: #f9fafb;
-      border: 2px dashed #d1d5db;
-      border-radius: 6px;
-      padding: 2rem;
-      text-align: center;
-      color: #6b7280;
-      margin-top: 1rem;
-    }
-    .integration-option {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 1rem;
-    }
-    .integration-option:hover {
-      background: #f9fafb;
-    }
-    .tooltip-text {
-      margin-top: 0.25rem;
-    }
-
-    .integration-card {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .integration-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .integration-icon {
-      font-size: 2rem;
-    }
-
-    .integration-info h4 {
-      font-weight: 600;
-      color: #111827;
-      margin: 0 0 0.25rem 0;
-    }
-
-    .integration-info p {
-      color: #6b7280;
-      margin: 0;
-      font-size: 0.875rem;
-    }
-
-    .connect-button {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.75rem 1.5rem;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: background-color 0.2s;
-    }
-
-    .connect-button:hover:not(:disabled) {
-      background: #2563eb;
-    }
-
-    .connect-button:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-    }
-    .disconnect-button {
-      background: #ef4444;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.75rem 1.5rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .disconnect-button:hover {
-      background: #dc2626;
-    }
-    .status-indicator {
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      margin-top: 0.5rem;
-      display: inline-block;
-    }
-    .status-indicator.connected {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .spinner {
-      width: 1rem;
-      height: 1rem;
-      border: 2px solid #e5e7eb;
-      border-top: 2px solid #3b82f6;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `]
+  styleUrls: ['./inventory.component.scss']
 })
 export class InventoryComponent implements OnInit {
   private squareService = inject(SquareIntegrationService);
-  private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -573,7 +256,7 @@ export class InventoryComponent implements OnInit {
     this.isSaving.set(true);
     try {
       const settings = this.squareSettings();
-      await this.http.put(`${environment.apiUrl}/api/integrations/square/settings`, settings).toPromise();
+      await this.squareService.updateSettings(settings);
       await this.loadSquareStatus();
     } catch (error) {
       console.error('Failed to save Square settings:', error);
@@ -593,7 +276,7 @@ export class InventoryComponent implements OnInit {
   async refreshCatalog() {
     this.isLoading.set(true);
     try {
-      await this.http.post(`${environment.apiUrl}/api/integrations/square/catalog/refresh`, {}).toPromise();
+      await this.squareService.refreshCatalog();
       await this.loadSquareStatus();
     } catch (error) {
       console.error('Failed to refresh catalog:', error);
@@ -609,7 +292,7 @@ export class InventoryComponent implements OnInit {
   async importSalesNow() {
     this.isLoading.set(true);
     try {
-      const response = await this.http.post<any>(`${environment.apiUrl}/api/integrations/square/sales/import`, {}).toPromise();
+      const response = await this.squareService.importSales();
       this.squareStatus.update(status => ({
         ...status,
         lastSalesImport: new Date(),
@@ -738,7 +421,7 @@ export class InventoryComponent implements OnInit {
         ? `${environment.apiUrl}/api/owner/integrations/square/inventory/sync`
         : `${environment.apiUrl}/api/owner/integrations/square/inventory/sync-to-cg`;
 
-      await this.http.post(endpoint, {}).toPromise();
+      await this.squareService.triggerSalesImport(endpoint);
 
       console.log('🔧 [Inventory] performInventorySync - Sync completed successfully');
 

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 import { EarningsWidgetComponent } from './earnings-widget.component';
 import { ConsignorPortalService } from '../services/consignor-portal.service';
@@ -26,7 +27,8 @@ describe('EarningsWidgetComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         EarningsWidgetComponent,
-        RouterTestingModule.withRoutes([])
+        RouterTestingModule.withRoutes([]),
+        HttpClientTestingModule
       ],
       providers: [
         { provide: ConsignorPortalService, useValue: consignorPortalServiceSpy }
@@ -36,6 +38,9 @@ describe('EarningsWidgetComponent', () => {
     fixture = TestBed.createComponent(EarningsWidgetComponent);
     component = fixture.componentInstance;
     mockConsignorPortalService = TestBed.inject(ConsignorPortalService) as jasmine.SpyObj<ConsignorPortalService>;
+
+    // Set up default mock return value for getEarningsSummary
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(of(mockEarningsSummary));
   });
 
   it('should create', () => {

@@ -7,6 +7,6 @@ import { OwnerLayoutComponent } from '../components/owner-layout.component';
   standalone: true,
   imports: [NotificationCenterComponent, OwnerLayoutComponent],
   templateUrl: './owner-notifications.component.html',
-  styles: []
+  styleUrls: ['./owner-notifications.component.scss']
 })
 export class OwnerNotificationsComponent {}

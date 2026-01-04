@@ -125,6 +125,11 @@ export class InventoryService {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/items/metrics`);
   }
 
+  // Duplicate file check
+  checkDuplicateFile(request: { fileName: string; firstDataRow: string; rowCount: number }): Observable<{ isDuplicate: boolean; lastUploadDate?: string; lastFileName?: string }> {
+    return this.http.post<{ isDuplicate: boolean; lastUploadDate?: string; lastFileName?: string }>(`${this.apiUrl}/items/check-duplicate`, request);
+  }
+
   // Categories API (now using ItemCategories)
   getCategories(): Observable<ApiResponse<ItemCategoryDto[]>> {
     return this.http.get<ApiResponse<ItemCategoryDto[]>>(`${this.apiUrl}/itemcategories`);

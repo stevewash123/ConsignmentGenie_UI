@@ -1,8 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { OwnerService, NotificationSettings } from '../../../services/owner.service';
 
 interface NotificationType {
   key: string;
@@ -11,286 +10,13 @@ interface NotificationType {
   category: string;
 }
 
-interface NotificationSettings {
-  primaryEmail: string;
-  phoneNumber?: string;
-  emailPreferences: { [key: string]: boolean };
-  smsPreferences: { [key: string]: boolean };
-  thresholds: {
-    highValueSale?: number;
-    lowInventory?: number;
-  };
-}
 
 @Component({
   selector: 'app-account-notifications',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './notifications.component.html',
-  styles: [`
-    .notifications-section {
-      padding: 2rem;
-      max-width: 1200px;
-    }
-
-    .section-header {
-      margin-bottom: 2rem;
-    }
-
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 0.5rem;
-    }
-
-    .section-description {
-      color: #6b7280;
-    }
-
-    .form-section {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-section h3 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 1rem;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 1rem;
-      align-items: start;
-    }
-
-    .form-group {
-      flex: 1;
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 0.5rem;
-      font-size: 0.875rem;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      box-sizing: border-box;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .form-input.error {
-      border-color: #dc2626;
-    }
-
-    .error-message {
-      font-size: 0.75rem;
-      color: #dc2626;
-      margin-top: 0.25rem;
-    }
-
-    .notification-grid {
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .grid-header {
-      display: grid;
-      grid-template-columns: 3fr 1fr 1fr;
-      background: #f8fafc;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0.75rem 1rem;
-      font-weight: 600;
-      color: #374151;
-      font-size: 0.875rem;
-    }
-
-    .notification-type-header {
-      padding-left: 0;
-    }
-
-    .channel-header {
-      text-align: center;
-    }
-
-    .notification-category {
-      display: grid;
-      grid-template-columns: 3fr 1fr 1fr;
-      background: #f1f5f9;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0.5rem 1rem;
-    }
-
-    .category-title {
-      font-weight: 600;
-      color: #1e293b;
-      font-size: 0.875rem;
-    }
-
-    .notification-row {
-      display: grid;
-      grid-template-columns: 3fr 1fr 1fr;
-      border-bottom: 1px solid #f3f4f6;
-      padding: 0.5rem 1rem;
-      align-items: center;
-      transition: background-color 0.2s ease;
-    }
-
-    .notification-row:hover {
-      background: #f8fafc;
-    }
-
-    .notification-row:last-child {
-      border-bottom: none;
-    }
-
-    .notification-type {
-      padding-right: 1rem;
-    }
-
-    .notification-name {
-      font-weight: 500;
-      color: #111827;
-      cursor: help;
-    }
-
-    .notification-channel {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .notification-channel input[type="checkbox"] {
-      width: 1.125rem;
-      height: 1.125rem;
-      cursor: pointer;
-    }
-
-    .notification-channel input[type="checkbox"]:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .btn-primary, .btn-secondary {
-      padding: 0.75rem 1rem;
-      border-radius: 6px;
-      font-weight: 500;
-      font-size: 0.875rem;
-      cursor: pointer;
-      border: 1px solid;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    .btn-primary {
-      background: #3b82f6;
-      color: white;
-      border-color: #3b82f6;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: #2563eb;
-      border-color: #2563eb;
-    }
-
-    .btn-primary:disabled {
-      background: #9ca3af;
-      border-color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .btn-secondary {
-      background: #f3f4f6;
-      color: #374151;
-      border-color: #d1d5db;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: #e5e7eb;
-    }
-
-    .btn-secondary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .message {
-      padding: 0.75rem 1rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      font-weight: 500;
-    }
-
-    .message.success {
-      background: #ecfdf5;
-      color: #059669;
-      border: 1px solid #a7f3d0;
-    }
-
-    .message.error {
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fecaca;
-    }
-
-    @media (max-width: 768px) {
-      .notifications-section {
-        padding: 1rem;
-      }
-
-      .form-row {
-        flex-direction: column;
-      }
-
-      .grid-header, .notification-category, .notification-row {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-      }
-
-      .channel-header {
-        text-align: left;
-      }
-
-      .notification-channel {
-        justify-content: flex-start;
-      }
-    }
-  `]
+  styleUrls: ['./notifications.component.scss']
 })
 export class AccountNotificationsComponent implements OnInit {
   notificationsForm!: FormGroup;
@@ -330,7 +56,7 @@ export class AccountNotificationsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private ownerService: OwnerService
   ) {}
 
   ngOnInit(): void {
@@ -365,7 +91,7 @@ export class AccountNotificationsComponent implements OnInit {
   async loadNotificationSettings(): Promise<void> {
     try {
       this.isLoading.set(true);
-      const settings = await this.http.get<NotificationSettings>(`${environment.apiUrl}/api/user/notification-settings`).toPromise();
+      const settings = await this.ownerService.getNotificationSettings().toPromise();
       if (settings) {
         this.notificationSettings.set(settings);
 
@@ -428,10 +154,24 @@ export class AccountNotificationsComponent implements OnInit {
         thresholds: {
           highValueSale: formData.highValueSaleThreshold,
           lowInventory: formData.lowInventoryThreshold
+        },
+        emailNotifications: {
+          newSales: formData.emailNewSales || false,
+          newConsignors: formData.emailNewConsignors || false,
+          lowInventory: formData.emailLowInventory || false,
+          payoutReady: formData.emailPayoutReady || false,
+        },
+        smsNotifications: {
+          newSales: formData.smsNewSales || false,
+          emergencyAlerts: formData.smsEmergencyAlerts || false,
+        },
+        pushNotifications: {
+          newSales: formData.pushNewSales || false,
+          consignorActivity: formData.pushConsignorActivity || false,
         }
       };
 
-      await this.http.put(`${environment.apiUrl}/api/user/notification-settings`, settings).toPromise();
+      await this.ownerService.updateNotificationSettings(settings).toPromise();
       this.notificationSettings.set(settings);
       this.showSuccess('Notification settings saved successfully');
     } catch (error) {

@@ -6,6 +6,6 @@ import { NotificationPreferencesComponent } from '../../shared/components/notifi
   standalone: true,
   imports: [NotificationPreferencesComponent],
   templateUrl: './consignor-notification-preferences.component.html',
-  styles: []
+  styleUrls: ['./consignor-notification-preferences.component.scss']
 })
 export class ConsignorNotificationPreferencesComponent {}

@@ -1,312 +1,336 @@
+<div class="business-settings">
+  <div class="settings-header">
+    <h2>Business Settings</h2>
+    <p>Configure commission structure, tax settings, payout schedule, and item policies</p>
+  </div>
 
-    <div class="business-settings">
-      <div class="settings-header">
-        <h2>Business Settings</h2>
-        <p>Configure commission structure, tax settings, payout schedule, and item policies</p>
+  <form (ngSubmit)="saveSettings()" class="settings-form" *ngIf="settings()">
+    <!-- Commission Structure -->
+    <div class="form-section">
+      <h3>Commission Structure</h3>
+
+      <div class="form-group">
+        <label for="defaultSplit">Default Split (Shop/Consignor)</label>
+        <select
+          id="defaultSplit"
+          [(ngModel)]="settings()!.commission.defaultSplit"
+          name="defaultSplit"
+          class="form-select">
+          <option value="70/30">70 / 30 - Shop keeps 70%, Consignor gets 30%</option>
+          <option value="60/40">60 / 40 - Shop keeps 60%, Consignor gets 40%</option>
+          <option value="50/50">50 / 50 - Shop keeps 50%, Consignor gets 50%</option>
+          <option value="40/60">40 / 60 - Shop keeps 40%, Consignor gets 60%</option>
+        </select>
       </div>
 
-      <form (ngSubmit)="saveSettings()" class="settings-form" *ngIf="settings()">
-        <!-- Commission Structure -->
-        <div class="form-section">
-          <h3>Commission Structure</h3>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="settings()!.commission.allowCustomSplitsPerConsignor"
+            name="allowCustomConsignor">
+          <span class="checkmark"></span>
+          Allow custom splits per consignor
+        </label>
 
-          <div class="form-group">
-            <label for="defaultSplit">Default Split (Shop/Consignor)</label>
-            <select
-              id="defaultSplit"
-              [(ngModel)]="settings()!.commission.defaultSplit"
-              name="defaultSplit"
-              class="form-select">
-              <option value="70/30">70 / 30 - Shop keeps 70%, Consignor gets 30%</option>
-              <option value="60/40">60 / 40 - Shop keeps 60%, Consignor gets 40%</option>
-              <option value="50/50">50 / 50 - Shop keeps 50%, Consignor gets 50%</option>
-              <option value="40/60">40 / 60 - Shop keeps 40%, Consignor gets 60%</option>
-            </select>
-          </div>
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="settings()!.commission.allowCustomSplitsPerItem"
+            name="allowCustomItem">
+          <span class="checkmark"></span>
+          Allow custom splits per item
+        </label>
+      </div>
+    </div>
 
-          <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="settings()!.commission.allowCustomSplitsPerConsignor"
-                name="allowCustomConsignor">
-              <span class="checkmark"></span>
-              Allow custom splits per consignor
-            </label>
+    <!-- Consignor Permissions -->
+    <div class="form-section">
+      <h3>Consignor Permissions</h3>
 
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="settings()!.commission.allowCustomSplitsPerItem"
-                name="allowCustomItem">
-              <span class="checkmark"></span>
-              Allow custom splits per item
-            </label>
-          </div>
+      <div class="form-group">
+        <label>Inventory Submission Mode</label>
+        <div class="radio-group vertical">
+          <label
+            class="radio-label permission-option"
+            *ngFor="let option of submissionModeOptions"
+            [class.selected]="settings()?.consignorPermissions?.itemSubmissionMode === option.value">
+            <input
+              type="radio"
+              [value]="option.value"
+              [(ngModel)]="settings()!.consignorPermissions.itemSubmissionMode"
+              name="itemSubmissionMode">
+            <span class="radio-mark"></span>
+            <div class="option-content">
+              <div class="option-label">{{ option.label }}</div>
+              <div class="option-description">{{ option.description }}</div>
+            </div>
+          </label>
         </div>
+      </div>
+    </div>
 
-        <!-- Tax Settings -->
-        <div class="form-section">
-          <h3>Tax Settings</h3>
+    <!-- Tax Settings -->
+    <div class="form-section">
+      <h3>Tax Settings</h3>
 
-          <div class="form-group">
-            <label for="salesTaxRate">Sales Tax Rate (%)</label>
+      <div class="form-group">
+        <label for="salesTaxRate">Sales Tax Rate (%)</label>
+        <div class="input-with-suffix">
+          <input
+            type="number"
+            id="salesTaxRate"
+            [(ngModel)]="settings()!.tax.salesTaxRate"
+            name="salesTaxRate"
+            class="form-input"
+            placeholder="8.25"
+            min="0"
+            max="20"
+            step="0.01">
+          <span class="input-suffix">%</span>
+        </div>
+      </div>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="settings()!.tax.taxIncludedInPrices"
+            name="taxIncluded">
+          <span class="checkmark"></span>
+          Tax is included in listed prices
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="settings()!.tax.chargeTaxOnShipping"
+            name="taxOnShipping">
+          <span class="checkmark"></span>
+          Charge tax on shipping
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="taxIdEin">Tax ID / EIN (optional)</label>
+        <input
+          type="text"
+          id="taxIdEin"
+          [(ngModel)]="settings()!.tax.taxIdEin"
+          name="taxIdEin"
+          class="form-input"
+          placeholder="12-3456789">
+      </div>
+    </div>
+
+    <!-- Payout Settings -->
+    <div class="form-section">
+      <h3>Payout Settings</h3>
+
+      <div class="form-group">
+        <label for="holdPeriod">Payout Hold Period (Days)</label>
+        <input
+          type="number"
+          id="holdPeriod"
+          [(ngModel)]="settings()!.payouts.holdPeriodDays"
+          name="holdPeriod"
+          class="form-input"
+          placeholder="7"
+          min="0"
+          max="90">
+        <div class="form-hint">
+          Funds become available this many days after the sale.<br>
+          This is your refund window — once paid, no refunds allowed.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="minimumPayout">Minimum Payout Amount</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix">$</span>
+          <input
+            type="number"
+            id="minimumPayout"
+            [(ngModel)]="settings()!.payouts.minimumAmount"
+            name="minimumPayout"
+            class="form-input"
+            placeholder="25.00"
+            min="0"
+            max="10000"
+            step="0.01">
+        </div>
+        <div class="form-hint">
+          Consignors won't appear in "Ready to Pay" until they reach this threshold.
+        </div>
+      </div>
+
+      <div class="payout-divider"></div>
+
+      <h4>Refund Policy</h4>
+      <div class="form-group">
+        <label>When are refunds allowed?</label>
+        <div class="radio-group vertical">
+          <label class="radio-label">
+            <input
+              type="radio"
+              value="NoRefunds"
+              [(ngModel)]="settings()!.payouts.refundPolicy"
+              name="refundPolicy">
+            <span class="radio-mark"></span>
+            No refunds
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              value="WithinDays"
+              [(ngModel)]="settings()!.payouts.refundPolicy"
+              name="refundPolicy">
+            <span class="radio-mark"></span>
+            Within <input
+              type="number"
+              [(ngModel)]="settings()!.payouts.refundWindowDays"
+              name="refundWindowDays"
+              class="inline-input"
+              placeholder="7"
+              min="1"
+              max="90"
+              [disabled]="settings()!.payouts.refundPolicy !== 'WithinDays'"> days of sale
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              value="UntilPayout"
+              [(ngModel)]="settings()!.payouts.refundPolicy"
+              name="refundPolicy">
+            <span class="radio-mark"></span>
+            Until consignor is paid (recommended)
+          </label>
+        </div>
+        <div class="form-hint info-box">
+          ⓘ Once a consignor has been paid for an item, that item cannot be refunded.
+          The hold period above gives customers time to return items before consignors are paid.
+        </div>
+      </div>
+
+      <div class="payout-divider"></div>
+
+      <div class="form-group">
+        <label for="defaultPayoutMethod">Default Payout Method</label>
+        <select
+          id="defaultPayoutMethod"
+          [(ngModel)]="settings()!.payouts.defaultPayoutMethod"
+          name="defaultPayoutMethod"
+          class="form-select">
+          <option value="Check">Check</option>
+          <option value="Cash">Cash</option>
+          <option value="DirectDeposit">Direct Deposit</option>
+          <option value="PayPal">PayPal</option>
+          <option value="Venmo">Venmo</option>
+          <option value="StoreCredit">Store Credit</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Item Policies -->
+    <div class="form-section">
+      <h3>Item Policies</h3>
+
+      <div class="form-group">
+        <label for="consignmentPeriod">Default Consignment Period</label>
+        <select
+          id="consignmentPeriod"
+          [(ngModel)]="settings()!.items.defaultConsignmentPeriodDays"
+          name="consignmentPeriod"
+          class="form-select">
+          <option value="30">30 days</option>
+          <option value="60">60 days</option>
+          <option value="90">90 days</option>
+          <option value="120">120 days</option>
+          <option value="180">180 days</option>
+          <option value="365">1 year</option>
+        </select>
+      </div>
+
+      <div class="markdown-settings">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="settings()!.items.enableAutoMarkdowns"
+            name="enableMarkdowns">
+          <span class="checkmark"></span>
+          Enable automatic markdowns
+        </label>
+
+        <div class="markdown-schedule" *ngIf="settings()?.items.enableAutoMarkdowns">
+          <div class="markdown-item">
+            <span class="markdown-label">After 30 days:</span>
             <div class="input-with-suffix">
               <input
                 type="number"
-                id="salesTaxRate"
-                [(ngModel)]="settings()!.tax.salesTaxRate"
-                name="salesTaxRate"
-                class="form-input"
-                placeholder="8.25"
+                [(ngModel)]="settings()!.items.markdownSchedule.after30Days"
+                name="markdown30"
+                class="form-input markdown-input"
                 min="0"
-                max="20"
-                step="0.01">
-              <span class="input-suffix">%</span>
+                max="100"
+                step="5">
+              <span class="input-suffix">% off</span>
             </div>
           </div>
 
-          <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="settings()!.tax.taxIncludedInPrices"
-                name="taxIncluded">
-              <span class="checkmark"></span>
-              Tax is included in listed prices
-            </label>
-
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="settings()!.tax.chargeTaxOnShipping"
-                name="taxOnShipping">
-              <span class="checkmark"></span>
-              Charge tax on shipping
-            </label>
-          </div>
-
-          <div class="form-group">
-            <label for="taxIdEin">Tax ID / EIN (optional)</label>
-            <input
-              type="text"
-              id="taxIdEin"
-              [(ngModel)]="settings()!.tax.taxIdEin"
-              name="taxIdEin"
-              class="form-input"
-              placeholder="12-3456789">
-          </div>
-        </div>
-
-        <!-- Payout Settings -->
-        <div class="form-section">
-          <h3>Payout Settings</h3>
-
-          <div class="form-group">
-            <label for="holdPeriod">Payout Hold Period (Days)</label>
-            <input
-              type="number"
-              id="holdPeriod"
-              [(ngModel)]="settings()!.payouts.holdPeriodDays"
-              name="holdPeriod"
-              class="form-input"
-              placeholder="7"
-              min="0"
-              max="90">
-            <div class="form-hint">
-              Funds become available this many days after the sale.<br>
-              This is your refund window — once paid, no refunds allowed.
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="minimumPayout">Minimum Payout Amount</label>
-            <div class="input-with-prefix">
-              <span class="input-prefix">$</span>
+          <div class="markdown-item">
+            <span class="markdown-label">After 60 days:</span>
+            <div class="input-with-suffix">
               <input
                 type="number"
-                id="minimumPayout"
-                [(ngModel)]="settings()!.payouts.minimumAmount"
-                name="minimumPayout"
-                class="form-input"
-                placeholder="25.00"
+                [(ngModel)]="settings()!.items.markdownSchedule.after60Days"
+                name="markdown60"
+                class="form-input markdown-input"
                 min="0"
-                max="10000"
-                step="0.01">
-            </div>
-            <div class="form-hint">
-              Consignors won't appear in "Ready to Pay" until they reach this threshold.
+                max="100"
+                step="5">
+              <span class="input-suffix">% off</span>
             </div>
           </div>
 
-          <div class="payout-divider"></div>
-
-          <h4>Refund Policy</h4>
-          <div class="form-group">
-            <label>When are refunds allowed?</label>
-            <div class="radio-group vertical">
+          <div class="markdown-item">
+            <span class="markdown-label">After 90 days:</span>
+            <div class="radio-group">
               <label class="radio-label">
                 <input
                   type="radio"
-                  value="NoRefunds"
-                  [(ngModel)]="settings()!.payouts.refundPolicy"
-                  name="refundPolicy">
+                  value="donate"
+                  [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
+                  name="after90Action">
                 <span class="radio-mark"></span>
-                No refunds
+                Donate
               </label>
               <label class="radio-label">
                 <input
                   type="radio"
-                  value="WithinDays"
-                  [(ngModel)]="settings()!.payouts.refundPolicy"
-                  name="refundPolicy">
+                  value="return"
+                  [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
+                  name="after90Action">
                 <span class="radio-mark"></span>
-                Within <input
-                  type="number"
-                  [(ngModel)]="settings()!.payouts.refundWindowDays"
-                  name="refundWindowDays"
-                  class="inline-input"
-                  placeholder="7"
-                  min="1"
-                  max="90"
-                  [disabled]="settings()!.payouts.refundPolicy !== 'WithinDays'"> days of sale
-              </label>
-              <label class="radio-label">
-                <input
-                  type="radio"
-                  value="UntilPayout"
-                  [(ngModel)]="settings()!.payouts.refundPolicy"
-                  name="refundPolicy">
-                <span class="radio-mark"></span>
-                Until consignor is paid (recommended)
+                Return to consignor
               </label>
             </div>
-            <div class="form-hint info-box">
-              ⓘ Once a consignor has been paid for an item, that item cannot be refunded.
-              The hold period above gives customers time to return items before consignors are paid.
-            </div>
-          </div>
-
-          <div class="payout-divider"></div>
-
-          <div class="form-group">
-            <label for="defaultPayoutMethod">Default Payout Method</label>
-            <select
-              id="defaultPayoutMethod"
-              [(ngModel)]="settings()!.payouts.defaultPayoutMethod"
-              name="defaultPayoutMethod"
-              class="form-select">
-              <option value="Check">Check</option>
-              <option value="Cash">Cash</option>
-              <option value="DirectDeposit">Direct Deposit</option>
-              <option value="PayPal">PayPal</option>
-              <option value="Venmo">Venmo</option>
-              <option value="StoreCredit">Store Credit</option>
-            </select>
           </div>
         </div>
-
-        <!-- Item Policies -->
-        <div class="form-section">
-          <h3>Item Policies</h3>
-
-          <div class="form-group">
-            <label for="consignmentPeriod">Default Consignment Period</label>
-            <select
-              id="consignmentPeriod"
-              [(ngModel)]="settings()!.items.defaultConsignmentPeriodDays"
-              name="consignmentPeriod"
-              class="form-select">
-              <option value="30">30 days</option>
-              <option value="60">60 days</option>
-              <option value="90">90 days</option>
-              <option value="120">120 days</option>
-              <option value="180">180 days</option>
-              <option value="365">1 year</option>
-            </select>
-          </div>
-
-          <div class="markdown-settings">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="settings()!.items.enableAutoMarkdowns"
-                name="enableMarkdowns">
-              <span class="checkmark"></span>
-              Enable automatic markdowns
-            </label>
-
-            <div class="markdown-schedule" *ngIf="settings()?.items.enableAutoMarkdowns">
-              <div class="markdown-item">
-                <span class="markdown-label">After 30 days:</span>
-                <div class="input-with-suffix">
-                  <input
-                    type="number"
-                    [(ngModel)]="settings()!.items.markdownSchedule.after30Days"
-                    name="markdown30"
-                    class="form-input markdown-input"
-                    min="0"
-                    max="100"
-                    step="5">
-                  <span class="input-suffix">% off</span>
-                </div>
-              </div>
-
-              <div class="markdown-item">
-                <span class="markdown-label">After 60 days:</span>
-                <div class="input-with-suffix">
-                  <input
-                    type="number"
-                    [(ngModel)]="settings()!.items.markdownSchedule.after60Days"
-                    name="markdown60"
-                    class="form-input markdown-input"
-                    min="0"
-                    max="100"
-                    step="5">
-                  <span class="input-suffix">% off</span>
-                </div>
-              </div>
-
-              <div class="markdown-item">
-                <span class="markdown-label">After 90 days:</span>
-                <div class="radio-group">
-                  <label class="radio-label">
-                    <input
-                      type="radio"
-                      value="donate"
-                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
-                      name="after90Action">
-                    <span class="radio-mark"></span>
-                    Donate
-                  </label>
-                  <label class="radio-label">
-                    <input
-                      type="radio"
-                      value="return"
-                      [(ngModel)]="settings()!.items.markdownSchedule.after90DaysAction"
-                      name="after90Action">
-                    <span class="radio-mark"></span>
-                    Return to consignor
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="button" class="btn-secondary" (click)="loadSettings()">Cancel</button>
-          <button type="submit" class="btn-primary" [disabled]="isSaving()">
-            {{ isSaving() ? 'Saving...' : 'Save Changes' }}
-          </button>
-        </div>
-      </form>
-
-      <!-- Messages -->
-      <div class="messages" *ngIf="successMessage() || errorMessage()">
-        <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
-        <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
       </div>
     </div>
-  
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="loadSettings()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

@@ -64,6 +64,7 @@ describe('ItemDetailComponent', () => {
     activatedRoute = TestBed.inject(ActivatedRoute);
 
     loadingService.isLoading.and.returnValue(false);
+    inventoryService.getItem.and.returnValue(of({ success: true, data: mockItem }));
   });
 
   beforeEach(() => {

@@ -1,0 +1,5 @@
+    <span [class]="badgeClass" [class.requires-response]="requiresResponse">
+      <span class="status-icon">{{ statusIcon }}</span>
+      {{ displayText }}
+      <span *ngIf="requiresResponse" class="action-indicator">⚡</span>
+    </span>

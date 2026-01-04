@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ToastrService } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import { RecordSaleComponent } from './record-sale.component';
@@ -32,10 +33,10 @@ describe('RecordSaleComponent', () => {
 
   beforeEach(async () => {
     const recordSaleServiceSpy = jasmine.createSpyObj('RecordSaleService', ['getTaxRate', 'completeSale']);
-    const toastrServiceSpy = jasmine.createSpyObj('ToastrService', ['success', 'error']);
+    const toastrServiceSpy = jasmine.createSpyObj('ToastrService', ['success', 'error', 'warning']);
 
     await TestBed.configureTestingModule({
-      imports: [RecordSaleComponent, RouterTestingModule],
+      imports: [RecordSaleComponent, RouterTestingModule, HttpClientTestingModule],
       providers: [
         { provide: RecordSaleService, useValue: recordSaleServiceSpy },
         { provide: ToastrService, useValue: toastrServiceSpy }
@@ -46,6 +47,10 @@ describe('RecordSaleComponent', () => {
     component = fixture.componentInstance;
     mockRecordSaleService = TestBed.inject(RecordSaleService) as jasmine.SpyObj<RecordSaleService>;
     mockToastrService = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
+
+    // Setup default returns for component initialization
+    mockRecordSaleService.getTaxRate.and.returnValue(of(0.08));
+    mockRecordSaleService.completeSale.and.returnValue(of(mockSaleResult));
   });
 
   it('should create', () => {

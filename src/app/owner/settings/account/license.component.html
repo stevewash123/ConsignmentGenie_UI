@@ -1,0 +1,57 @@
+<div class="license-settings">
+  <div class="settings-header">
+    <h2>Billing & Subscription Management</h2>
+    <p>Manage your ConsignmentGenie subscription through Stripe's secure portal</p>
+  </div>
+
+  <div *ngIf="!isLoading()" class="subscription-content">
+    <!-- Current Subscription Info -->
+    <div class="subscription-card">
+      <div class="subscription-info">
+        <h3>Current Subscription</h3>
+        <div class="plan-details" *ngIf="subscriptionInfo()">
+          <div class="plan-name">{{ subscriptionInfo()!.planName }}</div>
+          <div class="plan-status" [class]="'status-' + subscriptionInfo()!.status">
+            {{ getStatusLabel(subscriptionInfo()!.status) }}
+          </div>
+          <div *ngIf="subscriptionInfo()!.nextBillingDate && !subscriptionInfo()!.cancelAtPeriodEnd" class="billing-info">
+            Next billing date: {{ subscriptionInfo()!.nextBillingDate | date:'mediumDate' }}
+          </div>
+          <div *ngIf="subscriptionInfo()!.cancelAtPeriodEnd" class="cancellation-notice">
+            Your subscription will end on {{ subscriptionInfo()!.nextBillingDate | date:'mediumDate' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="subscription-actions">
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="openStripePortal()"
+          [disabled]="isProcessing()">
+          {{ isProcessing() ? 'Opening...' : 'Manage Subscription' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Information Section -->
+    <div class="info-section">
+      <h3>What you can do in the Stripe portal:</h3>
+      <ul class="portal-features">
+        <li>✓ View and download invoices</li>
+        <li>✓ Update payment methods</li>
+        <li>✓ Change subscription plans</li>
+        <li>✓ Cancel your subscription</li>
+        <li>✓ Update billing address</li>
+      </ul>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading()" class="loading-state">
+    <p>Loading subscription information...</p>
+  </div>
+
+  <div *ngIf="errorMessage()" class="error-message">
+    {{ errorMessage() }}
+  </div>
+</div>

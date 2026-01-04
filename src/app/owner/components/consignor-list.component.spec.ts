@@ -51,7 +51,9 @@ describe('ConsignorListComponent', () => {
       'getPendingInvitations',
       'getPendingApprovals',
       'resendInvitation',
-      'cancelInvitation'
+      'cancelInvitation',
+      'processApproval',
+      'changeConsignorStatus'
     ]);
     const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
       'start',
@@ -82,6 +84,8 @@ describe('ConsignorListComponent', () => {
       { id: 1, name: 'Pending User', email: 'pending@example.com', registrationDate: new Date(), storeCode: 'TEST123' }
     ]));
     mockConsignorService.resendInvitation.and.returnValue(of({ success: true, message: 'Invitation resent' }));
+    mockConsignorService.processApproval.and.returnValue(of({ success: true, message: 'Approval processed' }));
+    mockConsignorService.changeConsignorStatus.and.returnValue(of({ success: true, message: 'Status changed' }));
     mockLoadingService.isLoading.and.returnValue(false);
   });
 

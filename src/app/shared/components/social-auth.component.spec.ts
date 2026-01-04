@@ -3,15 +3,49 @@ import { EventEmitter } from '@angular/core';
 import { SocialAuthComponent, SocialAuthResult } from './social-auth.component';
 import { By } from '@angular/platform-browser';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { AuthService } from '../../services/auth.service';
+import { of } from 'rxjs';
 
 describe('SocialAuthComponent', () => {
   let component: SocialAuthComponent;
   let fixture: ComponentFixture<SocialAuthComponent>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['mockFacebookAuth', 'mockGoogleAuth']);
+
     await TestBed.configureTestingModule({
-      imports: [SocialAuthComponent, HttpClientTestingModule]
+      imports: [SocialAuthComponent, HttpClientTestingModule],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy }
+      ]
     }).compileComponents();
+
+    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+
+    // Setup default returns for auth methods
+    mockAuthService.mockFacebookAuth.and.returnValue(of({
+      token: 'fb-token',
+      userId: '1',
+      email: 'test@facebook.com',
+      role: 2,
+      organizationId: 'org-1',
+      organizationName: 'Test Org',
+      expiresAt: '2024-12-31T23:59:59Z',
+      isNewUser: false,
+      needsProfileCompletion: false
+    }));
+    mockAuthService.mockGoogleAuth.and.returnValue(of({
+      token: 'google-token',
+      userId: '1',
+      email: 'test@google.com',
+      role: 2,
+      organizationId: 'org-1',
+      organizationName: 'Test Org',
+      expiresAt: '2024-12-31T23:59:59Z',
+      isNewUser: false,
+      needsProfileCompletion: false
+    }));
 
     fixture = TestBed.createComponent(SocialAuthComponent);
     component = fixture.componentInstance;

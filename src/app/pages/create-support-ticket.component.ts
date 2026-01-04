@@ -13,7 +13,7 @@ import { CreateTicketRequest } from '../models/support-ticket.model';
   standalone: true,
   imports: [CommonModule, SupportTicketFormComponent],
   templateUrl: './create-support-ticket.component.html',
-  styles: []
+  styleUrls: ['./create-support-ticket.component.scss']
 })
 export class CreateSupportTicketComponent implements OnDestroy {
   private destroy$ = new Subject<void>();

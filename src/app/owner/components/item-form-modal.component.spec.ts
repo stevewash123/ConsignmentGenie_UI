@@ -85,6 +85,48 @@ describe('ItemFormModalComponent', () => {
 
     // Setup default mock returns
     mockInventoryService.getCategories.and.returnValue(of({ success: true, data: mockCategories }));
+    mockInventoryService.createItem.and.returnValue(of({
+      success: true,
+      data: {
+        itemId: '1',
+        title: 'Test Item',
+        description: 'Test Description',
+        price: 29.99,
+        condition: ItemCondition.Good,
+        consignorId: '1',
+        consignorName: 'Test Consignor',
+        commissionRate: 60,
+        sku: 'TEST001',
+        shopAmount: 17.99,
+        consignorAmount: 11.99,
+        status: 'Available' as any,
+        receivedDate: new Date(),
+        images: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    }));
+    mockInventoryService.updateItem.and.returnValue(of({
+      success: true,
+      data: {
+        itemId: '1',
+        title: 'Updated Item',
+        description: 'Updated Description',
+        price: 39.99,
+        condition: ItemCondition.Good,
+        consignorId: '1',
+        consignorName: 'Test Consignor',
+        commissionRate: 60,
+        sku: 'TEST001',
+        shopAmount: 23.99,
+        consignorAmount: 15.99,
+        status: 'Available' as any,
+        receivedDate: new Date(),
+        images: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    }));
     mockConsignorService.getConsignors.and.returnValue(of(mockConsignors));
     mockConditionService.getAll.and.returnValue(of(mockConditions));
 
@@ -150,10 +192,24 @@ describe('ItemFormModalComponent', () => {
     };
 
     const mockResponse = {
+      success: true,
       data: {
         itemId: '1',
         title: 'Test Item',
-        condition: 'LikeNew'
+        description: 'Test description',
+        price: 25.99,
+        condition: ItemCondition.LikeNew,
+        consignorId: '1',
+        consignorName: 'Test Consignor',
+        commissionRate: 60,
+        sku: 'TEST-001',
+        shopAmount: 15.59,
+        consignorAmount: 10.40,
+        status: 'Available' as any,
+        receivedDate: new Date(),
+        images: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     } as any;
 

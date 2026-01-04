@@ -60,7 +60,7 @@ describe('AuthService', () => {
 
   it('should login successfully with direct response format', fakeAsync(() => {
     const loginRequest = { email: 'test@test.com', password: 'password' };
-    const mockResponse = {
+    const authData = {
       token: 'mock-token',
       userId: 'user-123',
       email: 'test@test.com',
@@ -68,6 +68,11 @@ describe('AuthService', () => {
       organizationId: 'org-123',
       organizationName: 'Test Organization',
       expiresAt: new Date(Date.now() + 3600000).toISOString()
+    };
+    const mockResponse = {
+      success: true,
+      data: authData,
+      message: 'Login successful'
     };
 
     mockHttpClient.post.and.returnValue(of(mockResponse));

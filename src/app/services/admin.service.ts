@@ -4,11 +4,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message: string;
-}
 
 export interface AdminMetrics {
   activeOrganizations: number;
@@ -37,6 +32,22 @@ export interface NewSignup {
   email: string;
   registeredAt: string;
   subdomain?: string;
+}
+
+export interface PendingOwner {
+  userId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  shopName: string;
+  requestedAt: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  errors?: string[];
 }
 
 @Injectable({
@@ -80,5 +91,18 @@ export class AdminService {
         registeredAt: signup.createdAt,
         subdomain: signup.subdomain
       }))));
+  }
+
+  // Pending Owner Approval
+  getPendingOwners(): Observable<ApiResponse<PendingOwner[]>> {
+    return this.http.get<ApiResponse<PendingOwner[]>>(`${this.apiUrl}/pending-owners`);
+  }
+
+  approveOwner(userId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${userId}/approve`, {});
+  }
+
+  rejectOwner(userId: string, reason?: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${userId}/reject`, { reason });
   }
 }

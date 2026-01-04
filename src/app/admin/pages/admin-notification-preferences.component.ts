@@ -6,6 +6,6 @@ import { NotificationPreferencesComponent } from '../../shared/components/notifi
   standalone: true,
   imports: [NotificationPreferencesComponent],
   templateUrl: './admin-notification-preferences.component.html',
-  styles: []
+  styleUrls: ['./admin-notification-preferences.component.scss']
 })
 export class AdminNotificationPreferencesComponent {}

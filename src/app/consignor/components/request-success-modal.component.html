@@ -1,0 +1,16 @@
+    <div class="modal-overlay" *ngIf="show && payoutRequest" (click)="onBackdropClick($event)">
+      <div class="modal-container">
+        <!-- Success Content -->
+        <div class="success-content">
+          <div class="success-icon">✓</div>
+          <h2 class="success-title">Request Submitted</h2>
+          <p class="success-message">
+            Your payout request for <strong>${{ payoutRequest.amount.toFixed(2) }}</strong> has been
+            sent to the shop. You'll be notified when it's processed.
+          </p>
+          <button class="done-button" (click)="onDone()">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>

@@ -7,11 +7,8 @@ import { ENTITY_LABELS } from '../constants/labels';
   selector: 'app-status-badge',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <span [ngClass]="badgeClass">
-      {{ label }}
-    </span>
-  `
+  templateUrl: './status-badge.component.html',
+  styleUrls: ['./status-badge.component.scss']
 })
 export class StatusBadgeComponent {
   @Input() status: ConsignorStatus = 'active';

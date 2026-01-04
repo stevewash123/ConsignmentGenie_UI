@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
-import { HttpClient } from '@angular/common/http';
+import { OwnerService } from '../../../services/owner.service';
 
 interface AccountNotificationSettings {
   email: {
@@ -73,7 +73,7 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
+    private ownerService: OwnerService,
     private authService: AuthService
   ) {
     this.initializeForm();

@@ -1,0 +1,75 @@
+    <div class="modal-overlay" *ngIf="isOpen" (click)="onBackdropClick($event)">
+      <div class="modal-container" role="dialog" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <h3 id="modal-title">Change Consignor Status</h3>
+          <button type="button" class="close-button" (click)="onCancel()" aria-label="Close">
+            ×
+          </button>
+        </div>
+
+        <div class="modal-content">
+          <div class="consignor-info">
+            <p><strong>{{ consignorName }}</strong></p>
+            <p class="current-status">Current status:
+              <span [class]="'status-' + currentStatus">{{ getStatusLabel(currentStatus) }}</span>
+            </p>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" #statusForm="ngForm">
+            <div class="form-group">
+              <label for="newStatus">New Status *</label>
+              <select
+                id="newStatus"
+                name="newStatus"
+                [(ngModel)]="selectedStatus"
+                required
+                class="form-control"
+                #statusField="ngModel"
+              >
+                <option value="">Select new status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+                <option value="closed">Closed</option>
+              </select>
+              <div class="error-message" *ngIf="statusField.invalid && statusField.touched">
+                Please select a status
+              </div>
+            </div>
+
+            <div class="status-description" *ngIf="selectedStatus">
+              <p class="description">{{ getStatusDescription(selectedStatus) }}</p>
+            </div>
+
+            <div class="form-group" *ngIf="requiresReason(selectedStatus)">
+              <label for="reason">Reason for {{ selectedStatus }} status</label>
+              <textarea
+                id="reason"
+                name="reason"
+                [(ngModel)]="changeReason"
+                class="form-control"
+                rows="3"
+                [placeholder]="getReasonPlaceholder(selectedStatus)"
+              ></textarea>
+              <small class="form-text">This reason will be logged internally</small>
+            </div>
+
+            <div class="warning-message" *ngIf="getWarningMessage(selectedStatus)">
+              <div class="warning-icon">⚠️</div>
+              <div class="warning-text">{{ getWarningMessage(selectedStatus) }}</div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="onCancel()">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="btn-primary"
+                [class.btn-danger]="selectedStatus === 'closed'"
+                [disabled]="statusForm.invalid || isSubmitting()"
+              >
+                {{ isSubmitting() ? 'Changing...' : getSubmitButtonText(selectedStatus) }}
+              </button>
+            </div>
+          </form>

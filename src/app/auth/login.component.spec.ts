@@ -1,352 +1,406 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../shared/services/loading.service';
+import { StorageService } from '../shared/services/storage.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let mockRouter: jasmine.SpyObj<Router>;
-  let mockHttpClient: jasmine.SpyObj<HttpClient>;
+  let router: Router;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
+  let mockStorageService: jasmine.SpyObj<StorageService>;
 
+  // ============================================================================
+  // Test Data Factories
+  // ============================================================================
+  const createLoginResponse = (overrides: Partial<{
+    token: string;
+    userId: string;
+    email: string;
+    role: number;
+    organizationId: string;
+    organizationName: string;
+    expiresAt: string;
+    approvalStatus: number;
+  }> = {}) => ({
+    success: true,
+    data: {
+      token: 'test-token-123',
+      userId: 'user-123',
+      email: 'test@example.com',
+      role: 1,
+      organizationId: 'org-123',
+      organizationName: 'Test Organization',
+      expiresAt: new Date(Date.now() + 86400000).toISOString(),
+      ...overrides
+    }
+  });
+
+  // ============================================================================
+  // Setup
+  // ============================================================================
   beforeEach(async () => {
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    const httpSpy = jasmine.createSpyObj('HttpClient', ['post']);
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['loadStoredAuth']);
-    const loadingServiceSpy = jasmine.createSpyObj('LoadingService', [
-      'start',
-      'stop',
-      'isLoading'
+    mockAuthService = jasmine.createSpyObj('AuthService', ['login', 'loadStoredAuth']);
+    mockLoadingService = jasmine.createSpyObj('LoadingService', ['start', 'stop', 'isLoading']);
+    mockStorageService = jasmine.createSpyObj('StorageService', [
+      'clearAuthData',
+      'setAuthToken',
+      'setTokenExpiry',
+      'setUserData'
     ]);
 
+    mockLoadingService.isLoading.and.returnValue(false);
+
     await TestBed.configureTestingModule({
-      imports: [LoginComponent],
+      imports: [LoginComponent, RouterTestingModule.withRoutes([])],
       providers: [
-        { provide: Router, useValue: routerSpy },
-        { provide: HttpClient, useValue: httpSpy },
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: LoadingService, useValue: loadingServiceSpy }
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: LoadingService, useValue: mockLoadingService },
+        { provide: StorageService, useValue: mockStorageService }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
-    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    mockHttpClient = TestBed.inject(HttpClient) as jasmine.SpyObj<HttpClient>;
-    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    mockLoadingService = TestBed.inject(LoadingService) as jasmine.SpyObj<LoadingService>;
-
-    mockLoadingService.isLoading.and.returnValue(false);
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should initialize with empty credentials', () => {
-    expect(component.credentials.email).toBe('');
-    expect(component.credentials.password).toBe('');
-  });
-
-  it('should initialize with loading false', () => {
-    expect(mockLoadingService.isLoading('auth-login')).toBeFalsy();
-  });
-
-  it('should initialize with password hidden', () => {
-    expect(component.showPassword()).toBeFalsy();
-  });
-
-  it('should initialize with no error message', () => {
-    expect(component.errorMessage()).toBe('');
-  });
-
-  describe('togglePassword', () => {
-    it('should toggle password visibility', () => {
-      expect(component.showPassword()).toBeFalsy();
-
-      component.togglePassword();
-      expect(component.showPassword()).toBeTruthy();
-
-      component.togglePassword();
-      expect(component.showPassword()).toBeFalsy();
+  // ============================================================================
+  // Initialization Tests
+  // ============================================================================
+  describe('initialization', () => {
+    it('should create', () => {
+      expect(component).toBeTruthy();
     });
-  });
 
-  describe('useTestAccount', () => {
-    it('should set credentials for test account', () => {
-      const testEmail = 'test@example.com';
+    it('should initialize with empty credentials', () => {
+      expect(component.credentials.email).toBe('');
+      expect(component.credentials.password).toBe('');
+    });
 
-      component.useTestAccount(testEmail);
+    it('should initialize with password hidden', () => {
+      expect(component.showPassword()).toBeFalse();
+    });
 
-      expect(component.credentials.email).toBe(testEmail);
-      expect(component.credentials.password).toBe('password123');
+    it('should initialize with no error message', () => {
       expect(component.errorMessage()).toBe('');
     });
   });
 
-  describe('onSubmit', () => {
-    it('should return early if email is missing', async () => {
-      component.credentials.email = '';
-      component.credentials.password = 'password';
+  // ============================================================================
+  // Happy Path Tests - Public Methods
+  // ============================================================================
+  describe('isAuthLoading', () => {
+    it('should return loading state from LoadingService', () => {
+      mockLoadingService.isLoading.and.returnValue(true);
+      expect(component.isAuthLoading()).toBeTrue();
 
-      await component.onSubmit();
-
-      expect(mockHttpClient.post).not.toHaveBeenCalled();
+      mockLoadingService.isLoading.and.returnValue(false);
+      expect(component.isAuthLoading()).toBeFalse();
     });
 
-    it('should return early if password is missing', async () => {
-      component.credentials.email = 'test@example.com';
-      component.credentials.password = '';
+    it('should check loading with correct key', () => {
+      component.isAuthLoading();
+      expect(mockLoadingService.isLoading).toHaveBeenCalledWith('auth-login');
+    });
+  });
 
-      await component.onSubmit();
-
-      expect(mockHttpClient.post).not.toHaveBeenCalled();
+  describe('togglePassword', () => {
+    it('should toggle password visibility from false to true', () => {
+      expect(component.showPassword()).toBeFalse();
+      component.togglePassword();
+      expect(component.showPassword()).toBeTrue();
     });
 
-    it('should handle successful login with owner role', async () => {
-      const mockResponse = {
-        data: {
-          token: 'test-token',
-          userId: '123',
-          email: 'owner@test.com',
-          role: 1,
-          organizationId: 'org123',
-          organizationName: 'Test Org',
-          expiresAt: new Date().toISOString(),
-          approvalStatus: 1
-        }
-      };
+    it('should toggle password visibility from true to false', () => {
+      component.togglePassword(); // false -> true
+      component.togglePassword(); // true -> false
+      expect(component.showPassword()).toBeFalse();
+    });
+  });
 
-      component.credentials.email = 'owner@test.com';
-      component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(of(mockResponse));
-
-      await component.onSubmit();
-
-      expect(mockAuthService.loadStoredAuth).toHaveBeenCalled();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+  describe('useTestAccount', () => {
+    it('should set email to provided value', () => {
+      component.useTestAccount('admin@test.com');
+      expect(component.credentials.email).toBe('admin@test.com');
     });
 
-    it('should handle successful login with customer role', async () => {
-      const mockResponse = {
-        data: {
-          token: 'test-token',
-          userId: '123',
-          email: 'customer@test.com',
-          role: 3,
-          organizationId: 'org123',
-          organizationName: 'Test Org',
-          expiresAt: new Date().toISOString()
-        }
-      };
-
-      component.credentials.email = 'customer@test.com';
-      component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(of(mockResponse));
-
-      await component.onSubmit();
-
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
+    it('should set password to default test password', () => {
+      component.useTestAccount('admin@test.com');
+      expect(component.credentials.password).toBe('password123');
     });
 
-    it('should handle admin login', async () => {
-      const mockResponse = {
-        data: {
-          token: 'test-token',
-          userId: '123',
-          email: 'admin@microsaasbuilders.com',
-          role: 0,
-          organizationId: 'org123',
-          organizationName: 'Test Org',
-          expiresAt: new Date().toISOString()
-        }
-      };
-
-      component.credentials.email = 'admin@microsaasbuilders.com';
-      component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(of(mockResponse));
-
-      await component.onSubmit();
-
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
+    it('should clear any existing error message', () => {
+      component.errorMessage.set('Previous error');
+      component.useTestAccount('admin@test.com');
+      expect(component.errorMessage()).toBe('');
     });
+  });
 
-    it('should handle pending approval status', async () => {
-      const mockResponse = {
-        data: {
-          token: 'test-token',
-          userId: '123',
-          email: 'pending@test.com',
-          role: 1,
-          organizationId: 'org123',
-          organizationName: 'Test Org',
-          expiresAt: new Date().toISOString(),
-          approvalStatus: 0
-        }
-      };
-
-      component.credentials.email = 'pending@test.com';
-      component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(of(mockResponse));
-
-      await component.onSubmit();
-
-      expect(component.errorMessage()).toContain('pending admin approval');
-      expect(mockRouter.navigate).not.toHaveBeenCalled();
-    });
-
-    it('should handle rejected approval status', async () => {
-      const mockResponse = {
-        data: {
-          token: 'test-token',
-          userId: '123',
-          email: 'rejected@test.com',
-          role: 1,
-          organizationId: 'org123',
-          organizationName: 'Test Org',
-          expiresAt: new Date().toISOString(),
-          approvalStatus: 2
-        }
-      };
-
-      component.credentials.email = 'rejected@test.com';
-      component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(of(mockResponse));
-
-      await component.onSubmit();
-
-      expect(component.errorMessage()).toContain('has been rejected');
-      expect(mockRouter.navigate).not.toHaveBeenCalled();
-    });
-
-    it('should handle 401 error', async () => {
-      const error = { status: 401 };
-
-      component.credentials.email = 'test@example.com';
-      component.credentials.password = 'wrongpassword';
-
-      mockHttpClient.post.and.returnValue(throwError(error));
-
-      await component.onSubmit();
-
-      expect(component.errorMessage()).toContain('Invalid email or password');
-    });
-
-    it('should handle network error (status 0)', async () => {
-      const error = { status: 0 };
-
+  describe('onSubmit - Happy Paths', () => {
+    beforeEach(() => {
       component.credentials.email = 'test@example.com';
       component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(throwError(error));
-
-      await component.onSubmit();
-
-      expect(component.errorMessage()).toContain('Unable to connect to server');
     });
 
-    it('should handle generic error', async () => {
-      const error = { status: 500 };
-
-      component.credentials.email = 'test@example.com';
-      component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(throwError(error));
-
-      await component.onSubmit();
-
-      expect(component.errorMessage()).toContain('Login failed');
-    });
-
-    it('should set loading state during login', async () => {
-      const mockResponse = {
-        data: {
-          token: 'test-token',
-          userId: '123',
-          email: 'test@example.com',
-          role: 1,
-          organizationId: 'org123',
-          organizationName: 'Test Org',
-          expiresAt: new Date().toISOString()
-        }
-      };
-
-      component.credentials.email = 'test@example.com';
-      component.credentials.password = 'password123';
-
-      mockHttpClient.post.and.returnValue(of(mockResponse));
+    it('should start and stop loading during submission', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse()));
 
       await component.onSubmit();
 
       expect(mockLoadingService.start).toHaveBeenCalledWith('auth-login');
       expect(mockLoadingService.stop).toHaveBeenCalledWith('auth-login');
     });
+
+    it('should clear error message before submission', async () => {
+      component.errorMessage.set('Previous error');
+      mockAuthService.login.and.returnValue(of(createLoginResponse()));
+
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toBe('');
+    });
+
+    it('should call AuthService login with credentials', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse()));
+
+      await component.onSubmit();
+
+      expect(mockAuthService.login).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123'
+      });
+    });
+
+    it('should store auth data on successful login', async () => {
+      const response = createLoginResponse();
+      mockAuthService.login.and.returnValue(of(response));
+
+      await component.onSubmit();
+
+      expect(mockStorageService.clearAuthData).toHaveBeenCalled();
+      expect(mockStorageService.setAuthToken).toHaveBeenCalledWith('test-token-123');
+      expect(mockStorageService.setTokenExpiry).toHaveBeenCalled();
+      expect(mockStorageService.setUserData).toHaveBeenCalled();
+    });
+
+    it('should call loadStoredAuth after storing data', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse()));
+
+      await component.onSubmit();
+
+      expect(mockAuthService.loadStoredAuth).toHaveBeenCalled();
+    });
+
+    // Role-based routing tests
+    it('should redirect Admin (role 0) to admin dashboard', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ role: 0 })));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
+    });
+
+    it('should redirect Owner (role 1) with approved status to owner dashboard', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ 
+        role: 1, 
+        approvalStatus: 1 
+      })));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+    });
+
+    it('should redirect Consignor (role 2) to customer dashboard', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ role: 2 })));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
+    });
+
+    it('should redirect Customer (role 3) to customer dashboard', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ role: 3 })));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
+    });
+
+    it('should redirect system admin email to admin dashboard regardless of role', async () => {
+      component.credentials.email = 'admin@microsaasbuilders.com';
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ 
+        email: 'admin@microsaasbuilders.com',
+        role: 1 // Even with Owner role
+      })));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
+    });
+
+    it('should handle string role values', async () => {
+      const response = {
+        success: true,
+        data: {
+          ...createLoginResponse().data,
+          role: 'Owner' as unknown as number
+        }
+      };
+      mockAuthService.login.and.returnValue(of(response));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+    });
+
+    it('should default unknown roles to owner dashboard', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ role: 99 })));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+    });
   });
 
-  describe('normalizeRole', () => {
-    it('should convert numeric role to string', () => {
-      expect(component['normalizeRole'](0)).toBe('Admin');
-      expect(component['normalizeRole'](1)).toBe('Owner');
-      expect(component['normalizeRole'](2)).toBe('consignor');
-      expect(component['normalizeRole'](3)).toBe('Customer');
+  // ============================================================================
+  // Edge Cases & Error Handling
+  // ============================================================================
+  describe('onSubmit - Validation', () => {
+    it('should not submit if email is empty', async () => {
+      component.credentials.email = '';
+      component.credentials.password = 'password123';
+
+      await component.onSubmit();
+
+      expect(mockAuthService.login).not.toHaveBeenCalled();
+      expect(mockLoadingService.start).not.toHaveBeenCalled();
     });
 
-    it('should return Owner for unknown numeric role', () => {
-      expect(component['normalizeRole'](999)).toBe('Owner');
-    });
+    it('should not submit if password is empty', async () => {
+      component.credentials.email = 'test@example.com';
+      component.credentials.password = '';
 
-    it('should return string role as-is', () => {
-      expect(component['normalizeRole']('CustomRole')).toBe('CustomRole');
-    });
+      await component.onSubmit();
 
-    it('should handle string numbers', () => {
-      expect(component['normalizeRole']('0')).toBe('Admin');
-      expect(component['normalizeRole']('1')).toBe('Owner');
-      expect(component['normalizeRole']('2')).toBe('consignor');
-      expect(component['normalizeRole']('3')).toBe('Customer');
+      expect(mockAuthService.login).not.toHaveBeenCalled();
+      expect(mockLoadingService.start).not.toHaveBeenCalled();
     });
   });
 
-  describe('redirectBasedOnRole', () => {
-    it('should redirect admin email to admin dashboard', () => {
-      component['redirectBasedOnRole']('0', 'admin@microsaasbuilders.com');
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
+  describe('onSubmit - Approval Status', () => {
+    beforeEach(() => {
+      component.credentials.email = 'owner@example.com';
+      component.credentials.password = 'password123';
     });
 
-    it('should redirect owner to owner dashboard', () => {
-      component['redirectBasedOnRole']('1', 'owner@example.com');
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+    it('should block login for pending owner approval (status 0)', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ 
+        role: 1, 
+        approvalStatus: 0 
+      })));
+
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toContain('pending admin approval');
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(mockStorageService.setAuthToken).not.toHaveBeenCalled();
     });
 
-    // it('should redirect manager to owner dashboard', () => {
-    //   component['redirectBasedOnRole']('2', 'manager@example.com');
-    //   expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
-    // });
+    it('should block login for rejected owner (status 2)', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ 
+        role: 1, 
+        approvalStatus: 2 
+      })));
 
-    it('should redirect consignor to customer dashboard', () => {
-      component['redirectBasedOnRole']('2', 'consignor@example.com');
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toContain('has been rejected');
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(mockStorageService.setAuthToken).not.toHaveBeenCalled();
     });
 
-    it('should redirect customer to customer dashboard', () => {
-      component['redirectBasedOnRole']('3', 'customer@example.com');
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
+    it('should allow non-owner roles without approval check', async () => {
+      mockAuthService.login.and.returnValue(of(createLoginResponse({ 
+        role: 3, // Customer
+        approvalStatus: 0 // Even with pending status
+      })));
+
+      await component.onSubmit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/customer/dashboard']);
+    });
+  });
+
+  describe('onSubmit - Error Handling', () => {
+    beforeEach(() => {
+      component.credentials.email = 'test@example.com';
+      component.credentials.password = 'password123';
     });
 
-    it('should default to owner dashboard for unknown role', () => {
-      component['redirectBasedOnRole']('999', 'unknown@example.com');
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/owner/dashboard']);
+    it('should handle 401 unauthorized error', async () => {
+      mockAuthService.login.and.returnValue(throwError(() => ({ status: 401 })));
+
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toContain('Invalid email or password');
+      expect(mockLoadingService.stop).toHaveBeenCalledWith('auth-login');
+    });
+
+    it('should handle network error (status 0)', async () => {
+      mockAuthService.login.and.returnValue(throwError(() => ({ status: 0 })));
+
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toContain('Unable to connect to server');
+    });
+
+    it('should handle generic server error (500)', async () => {
+      mockAuthService.login.and.returnValue(throwError(() => ({ status: 500 })));
+
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toContain('Login failed');
+    });
+
+    it('should always stop loading even on error', async () => {
+      mockAuthService.login.and.returnValue(throwError(() => ({ status: 500 })));
+
+      await component.onSubmit();
+
+      expect(mockLoadingService.stop).toHaveBeenCalledWith('auth-login');
+    });
+  });
+
+  describe('onSubmit - Null/Undefined Response', () => {
+    beforeEach(() => {
+      component.credentials.email = 'test@example.com';
+      component.credentials.password = 'password123';
+    });
+
+    it('should handle null response gracefully', async () => {
+      mockAuthService.login.and.returnValue(of(null as any));
+
+      await component.onSubmit();
+
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(mockStorageService.setAuthToken).not.toHaveBeenCalled();
+    });
+
+    it('should handle response with null data', async () => {
+      mockAuthService.login.and.returnValue(of({ data: null } as any));
+
+      await component.onSubmit();
+
+      expect(router.navigate).not.toHaveBeenCalled();
     });
   });
 });

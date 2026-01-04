@@ -1,0 +1,31 @@
+    <div class="image-gallery">
+      <!-- Main Image -->
+      <div class="main-image-container">
+        <img
+          [src]="selectedImage.url"
+          [alt]="itemName"
+          class="main-image"
+          loading="lazy">
+      </div>
+
+      <!-- Thumbnails -->
+      <div class="thumbnails" *ngIf="images.length > 1">
+        <button
+          *ngFor="let image of images"
+          type="button"
+          class="thumbnail-button"
+          [class.active]="image.id === selectedImage.id"
+          (click)="selectImage(image)">
+          <img
+            [src]="image.url"
+            [alt]="itemName + ' view ' + image.sortOrder"
+            class="thumbnail-image"
+            loading="lazy">
+        </button>
+      </div>
+
+      <!-- Image Counter -->
+      <div class="image-counter" *ngIf="images.length > 1">
+        {{ getSelectedImageIndex() + 1 }} of {{ images.length }}
+      </div>
+    </div>

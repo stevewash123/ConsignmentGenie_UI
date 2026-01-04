@@ -1,0 +1,58 @@
+<div class="reports-section">
+  <header class="settings-header">
+    <h2>Reports & Statements</h2>
+    <p>Configure statement generation, formatting, and delivery options</p>
+  </header>
+
+  <form [formGroup]="reportsForm" (ngSubmit)="onSave()">
+    <!-- Report Configuration -->
+    <section class="form-section" formGroupName="reports">
+      <h3>Report Configuration</h3>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="autoGenerateStatements">
+          <span class="checkmark"></span>
+          Automatically generate payout statements
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="includeItemDetails">
+          <span class="checkmark"></span>
+          Include item details in statements
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="includeBranding">
+          <span class="checkmark"></span>
+          Include shop branding and logo
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="pdfFormat">
+          <span class="checkmark"></span>
+          Generate statements in PDF format
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="emailStatements">
+          <span class="checkmark"></span>
+          Email statements automatically
+        </label>
+      </div>
+    </section>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="submit" [disabled]="!reportsForm.valid || saving()" class="btn-primary">
+        {{ saving() ? 'Saving...' : 'Save Report Settings' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

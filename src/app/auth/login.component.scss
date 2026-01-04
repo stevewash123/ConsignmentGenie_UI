@@ -1,0 +1,303 @@
+// ============================================================================
+// Login Component Styles
+// ============================================================================
+
+// Variables
+$color-primary: #3b82f6;
+$color-primary-hover: #2563eb;
+$color-text-primary: #1f2937;
+$color-text-secondary: #6b7280;
+$color-text-muted: #374151;
+$color-border: #e5e7eb;
+$color-border-input: #d1d5db;
+$color-background-disabled: #f9fafb;
+$color-danger: #dc2626;
+$color-danger-light: #fef2f2;
+$color-danger-border: #fecaca;
+
+$color-admin: #dc2626;
+$color-owner: #059669;
+$color-consignor: #d97706;
+$color-customer: #7c3aed;
+
+$border-radius-md: 8px;
+$border-radius-lg: 16px;
+
+$shadow-card: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// ============================================================================
+// Container & Card
+// ============================================================================
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.login-card {
+  background: white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-card;
+  padding: 3rem;
+  max-width: 480px;
+  width: 100%;
+}
+
+// ============================================================================
+// Header
+// ============================================================================
+.login-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: $color-text-primary;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: $color-text-secondary;
+    font-size: 1.1rem;
+  }
+}
+
+// ============================================================================
+// Error Message
+// ============================================================================
+.error-message {
+  background: $color-danger-light;
+  border: 1px solid $color-danger-border;
+  color: $color-danger;
+  padding: 1rem;
+  border-radius: $border-radius-md;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-icon {
+  font-size: 1.2rem;
+}
+
+// ============================================================================
+// Form
+// ============================================================================
+.login-form {
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    font-weight: 600;
+    color: $color-text-muted;
+    margin-bottom: 0.5rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid $color-border-input;
+    border-radius: $border-radius-md;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &:disabled {
+      background: $color-background-disabled;
+      color: $color-text-secondary;
+    }
+  }
+}
+
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem;
+}
+
+.field-error {
+  color: $color-danger;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+// ============================================================================
+// Login Button
+// ============================================================================
+.login-btn {
+  width: 100%;
+  background: $color-primary;
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: $border-radius-md;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hover;
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================================
+// Test Accounts
+// ============================================================================
+.test-accounts {
+  border-top: 1px solid $color-border;
+  padding-top: 2rem;
+
+  h3 {
+    text-align: center;
+    color: $color-text-secondary;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+}
+
+.test-account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.test-account-btn {
+  padding: 1rem;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-md;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+
+  &:hover:not(:disabled) {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.admin {
+    border-left: 4px solid $color-admin;
+  }
+
+  &.owner {
+    border-left: 4px solid $color-owner;
+  }
+
+  &.consignor {
+    border-left: 4px solid $color-consignor;
+  }
+
+  &.customer {
+    border-left: 4px solid $color-customer;
+  }
+}
+
+.account-role {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: $color-text-muted;
+  margin-bottom: 0.25rem;
+}
+
+.account-email {
+  font-size: 0.75rem;
+  color: $color-text-secondary;
+  font-family: monospace;
+}
+
+// ============================================================================
+// Register Link
+// ============================================================================
+.register-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid $color-border;
+
+  p {
+    color: $color-text-secondary;
+    margin: 0;
+  }
+
+  a {
+    color: $color-primary;
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ============================================================================
+// Responsive
+// ============================================================================
+@media (max-width: 640px) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .login-card {
+    padding: 2rem;
+  }
+
+  .test-account-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,514 @@
+❯ Building...
+✔ Building...
+Application bundle generation failed. [31.494 seconds] - 2026-01-04T18:38:44.435Z
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'categoryId' does not exist on type 'ItemDetailDto'. Did you mean 'category'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-form-modal.component.ts:103:37:
+[37m      103 │         categoryId: this.editingItem.[32mcategoryId[37m || '',
+          ╵                                      [32m~~~~~~~~~~[0m
+
+  'category' is declared here.
+
+    src/app/models/inventory.model.ts:30:2:
+[37m      30 │   [32mcategory[37m?: string;
+         ╵   [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'ngOnInit' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:68:14:
+[37m      68 │     component.[32mngOnInit[37m();
+         ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'allItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:72:21:
+[37m      72 │     expect(component.[32mallItems[37m()).toEqual(mockItems);
+         ╵                      [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'isLoading' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:73:21:
+[37m      73 │     expect(component.[32misLoading[37m()).toBe(false);
+         ╵                      [32m~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'ngOnInit' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:81:14:
+[37m      81 │     component.[32mngOnInit[37m();
+         ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'isLoading' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:84:21:
+[37m      84 │     expect(component.[32misLoading[37m()).toBe(false);
+         ╵                      [32m~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'allItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:89:14:
+[37m      89 │     component.[32mallItems[37m.set(mockItems);
+         ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'searchQuery' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:90:14:
+[37m      90 │     component.[32msearchQuery[37m = 'test';
+         ╵               [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'displayedItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:92:31:
+[37m      92 │     const filtered = component.[32mdisplayedItems[37m();
+         ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'allItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:100:14:
+[37m      100 │     component.[32mallItems[37m.set(mockItems);
+          ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'searchQuery' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:101:14:
+[37m      101 │     component.[32msearchQuery[37m = 'WIDGET';
+          ╵               [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'displayedItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:103:31:
+[37m      103 │     const filtered = component.[32mdisplayedItems[37m();
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'allItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:110:14:
+[37m      110 │     component.[32mallItems[37m.set(mockItems);
+          ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'searchQuery' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:111:14:
+[37m      111 │     component.[32msearchQuery[37m = 'Widget Maker';
+          ╵               [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'displayedItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:113:31:
+[37m      113 │     const filtered = component.[32mdisplayedItems[37m();
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'allItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:130:14:
+[37m      130 │     component.[32mallItems[37m.set(manyItems);
+          ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'searchQuery' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:131:14:
+[37m      131 │     component.[32msearchQuery[37m = '';
+          ╵               [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'displayedItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:133:31:
+[37m      133 │     const filtered = component.[32mdisplayedItems[37m();
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'ngOnInit' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:140:14:
+[37m      140 │     component.[32mngOnInit[37m();
+          ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'onSearchInput' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:152:14:
+[37m      152 │     component.[32monSearchInput[37m(inputEvent);
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'allItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:162:21:
+[37m      162 │     expect(component.[32mallItems[37m()).toEqual([mockItems[0]]);
+          ╵                      [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'ngOnInit' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:167:14:
+[37m      167 │     component.[32mngOnInit[37m();
+          ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'onSearchInput' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:180:14:
+[37m      180 │     component.[32monSearchInput[37m(inputEvent);
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'isLoading' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:184:21:
+[37m      184 │     expect(component.[32misLoading[37m()).toBe(false);
+          ╵                      [32m~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'itemSelected' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:189:20:
+[37m      189 │     spyOn(component.[32mitemSelected[37m, 'emit');
+          ╵                     [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'selectItem' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:191:14:
+[37m      191 │     component.[32mselectItem[37m(mockItems[0]);
+          ╵               [32m~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'itemSelected' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:193:21:
+[37m      193 │     expect(component.[32mitemSelected[37m.emit).toHaveBeenCalledWith(mock...
+          ╵                      [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'itemSelected' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:197:20:
+[37m      197 │     spyOn(component.[32mitemSelected[37m, 'emit');
+          ╵                     [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'selectItem' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:201:14:
+[37m      201 │     component.[32mselectItem[37m(mockItems[0]); // Item with id '1'
+          ╵               [32m~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'itemSelected' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:203:21:
+[37m      203 │     expect(component.[32mitemSelected[37m.emit).not.toHaveBeenCalled();
+          ╵                      [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'itemSelected' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:207:20:
+[37m      207 │     spyOn(component.[32mitemSelected[37m, 'emit');
+          ╵                     [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'selectItem' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:211:14:
+[37m      211 │     component.[32mselectItem[37m(mockItems[1]); // Item with id '2'
+          ╵               [32m~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'itemSelected' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:213:21:
+[37m      213 │     expect(component.[32mitemSelected[37m.emit).toHaveBeenCalledWith(mock...
+          ╵                      [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'ngOnInit' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:218:14:
+[37m      218 │     component.[32mngOnInit[37m();
+          ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'onSearchInput' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:228:14:
+[37m      228 │     component.[32monSearchInput[37m(inputEvent);
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'onSearchInput' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:240:14:
+[37m      240 │     component.[32monSearchInput[37m(inputEvent);
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'searchQuery' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:242:21:
+[37m      242 │     expect(component.[32msearchQuery[37m).toBe('new search term');
+          ╵                      [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'allItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:246:14:
+[37m      246 │     component.[32mallItems[37m.set(mockItems);
+          ╵               [32m~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'searchQuery' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:247:14:
+[37m      247 │     component.[32msearchQuery[37m = 'TEST'; // Uppercase
+          ╵               [32m~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'displayedItems' does not exist on type 'ItemSearchComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/components/item-search.component.spec.ts:249:31:
+[37m      249 │     const filtered = component.[32mdisplayedItems[37m();
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:44:27:
+[37m      44 │     const form = component.[32mbasicInfoForm[37m;
+         ╵                            [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:78:21:
+[37m      78 │     expect(component.[32mbasicInfoForm[37m.get('storeName')?.value).toBe('...
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:79:21:
+[37m      79 │     expect(component.[32mbasicInfoForm[37m.get('description')?.value).toBe...
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:80:21:
+[37m      80 │     expect(component.[32mbasicInfoForm[37m.get('contact.phone')?.value).to...
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:81:21:
+[37m      81 │     expect(component.[32mbasicInfoForm[37m.get('contact.email')?.value).to...
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:82:21:
+[37m      82 │     expect(component.[32mbasicInfoForm[37m.get('contact.website')?.value)....
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:83:21:
+[37m      83 │     expect(component.[32mbasicInfoForm[37m.get('address.street1')?.value)....
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:84:21:
+[37m      84 │     expect(component.[32mbasicInfoForm[37m.get('address.street2')?.value)....
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:85:21:
+[37m      85 │     expect(component.[32mbasicInfoForm[37m.get('address.city')?.value).toB...
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:86:21:
+[37m      86 │     expect(component.[32mbasicInfoForm[37m.get('address.state')?.value).to...
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:87:21:
+[37m      87 │     expect(component.[32mbasicInfoForm[37m.get('address.zipCode')?.value)....
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:94:35:
+[37m      94 │ ...const phoneControl = component.[32mbasicInfoForm[37m.get('contact.phone');
+         ╵                                   [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:119:35:
+[37m      119 │ ...onst emailControl = component.[32mbasicInfoForm[37m.get('contact.email');
+          ╵                                  [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:134:37:
+[37m      134 │ ... websiteControl = component.[32mbasicInfoForm[37m.get('contact.website');
+          ╵                                [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:151:33:
+[37m      151 │ ...onst zipControl = component.[32mbasicInfoForm[37m.get('address.zipCode');
+          ╵                                [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:171:14:
+[37m      171 │     component.[32mbasicInfoForm[37m.get('storeName')?.setValue('Test Stor...
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'getCharacterCount' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:172:21:
+[37m      172 │     expect(component.[32mgetCharacterCount[37m('storeName')).toBe(10);
+          ╵                      [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:174:14:
+[37m      174 │     component.[32mbasicInfoForm[37m.get('description')?.setValue('This is...
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'getCharacterCount' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:175:21:
+[37m      175 │     expect(component.[32mgetCharacterCount[37m('description')).toBe(26);
+          ╵                      [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:182:14:
+[37m      182 │     component.[32mbasicInfoForm[37m.get('storeName')?.setValue(longStoreN...
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:183:21:
+[37m      183 │     expect(component.[32mbasicInfoForm[37m.get('storeName')?.hasError('ma...
+          ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:186:14:
+[37m      186 │     component.[32mbasicInfoForm[37m.get('description')?.setValue(longDesc...
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:187:21:
+[37m      187 │     expect(component.[32mbasicInfoForm[37m.get('description')?.hasError('...
+          ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:196:14:
+[37m      196 │     component.[32mbasicInfoForm[37m.patchValue({
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'successMessage' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:237:21:
+[37m      237 │     expect(component.[32msuccessMessage[37m()).toBe('Basic information sa...
+          ╵                      [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:251:21:
+[37m      251 │     expect(component.[32mbasicInfoForm[37m.get('storeName')?.touched).toB...
+          ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'basicInfoForm' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:260:14:
+[37m      260 │     component.[32mbasicInfoForm[37m.patchValue({
+          ╵               [32m~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errorMessage' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:286:21:
+[37m      286 │     expect(component.[32merrorMessage[37m()).toBe('Failed to save basic i...
+          ╵                      [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'onPreview' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:292:14:
+[37m      292 │     component.[32monPreview[37m();
+          ╵               [32m~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'successMessage' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:293:21:
+[37m      293 │     expect(component.[32msuccessMessage[37m()).toBe('Preview functionalit...
+          ╵                      [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'successMessage' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:298:21:
+[37m      298 │     expect(component.[32msuccessMessage[37m()).toBe('Test message');
+          ╵                      [32m~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'successMessage' does not exist on type 'StoreProfileBasicInfoComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/owner/settings/profile/basic-info/store-profile-basic-info.component.spec.ts:301:21:
+[37m      301 │     expect(component.[32msuccessMessage[37m()).toBe('');
+          ╵                      [32m~~~~~~~~~~~~~~[0m
+
+

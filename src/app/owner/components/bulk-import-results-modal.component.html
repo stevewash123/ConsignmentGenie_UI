@@ -1,0 +1,73 @@
+    <div class="modal-overlay" (click)="onOverlayClick($event)">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <i [class]="getHeaderIcon()"></i>
+            {{ getHeaderTitle() }}
+          </h2>
+          <button type="button" class="close-btn" (click)="close()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+          <div class="results-summary">
+            <div class="summary-stats">
+              <div class="stat-item success" *ngIf="result.successfulImports > 0">
+                <i class="fas fa-check-circle"></i>
+                <span class="stat-number">{{ result.successfulImports }}</span>
+                <span class="stat-label">Successfully imported</span>
+              </div>
+              <div class="stat-item error" *ngIf="result.failedImports > 0">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span class="stat-number">{{ result.failedImports }}</span>
+                <span class="stat-label">Failed to import</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Details -->
+          <div class="error-section" *ngIf="result.errors && result.errors.length > 0">
+            <h3 class="error-title">
+              <i class="fas fa-list"></i>
+              Error Details
+            </h3>
+            <div class="error-list">
+              <div class="error-item" *ngFor="let error of getDisplayErrors(); let i = index">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ error }}</span>
+              </div>
+              <div class="more-errors" *ngIf="result.errors.length > maxDisplayErrors">
+                <i class="fas fa-ellipsis-h"></i>
+                <span>and {{ result.errors.length - maxDisplayErrors }} more errors</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <div class="success-section" *ngIf="result.success && result.errors.length === 0">
+            <i class="fas fa-check-circle"></i>
+            <p>All items were imported successfully!</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="sendToNotifications()"
+            *ngIf="result.errors && result.errors.length > 0"
+          >
+            <i class="fas fa-bell"></i>
+            Send to Notifications
+          </button>
+          <button type="button" class="btn btn-primary" (click)="close()">
+            <i class="fas fa-check"></i>
+            OK
+          </button>
+        </div>
+      </div>
+    </div>

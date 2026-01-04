@@ -1,0 +1,119 @@
+<div class="payment-methods-section">
+  <header class="settings-header">
+    <h2>Payment Methods & Processing Fees</h2>
+    <p>Configure available payment options and fee structure</p>
+  </header>
+
+  <form [formGroup]="paymentForm" (ngSubmit)="onSave()">
+    <!-- Payment Methods -->
+    <section class="form-section" formGroupName="paymentMethods">
+      <h3>Payment Methods</h3>
+
+      <div class="form-group">
+        <label for="defaultMethod">Default payment method</label>
+        <select id="defaultMethod" formControlName="defaultMethod" class="form-select">
+          <option value="check">Check (by mail)</option>
+          <option value="cash">Cash (pickup)</option>
+          <option value="store_credit">Store credit</option>
+          <option value="ach">Bank transfer (ACH)</option>
+        </select>
+        <span class="help-text">This will be pre-selected for new consignors</span>
+      </div>
+
+      <div class="form-group">
+        <label>Available payment methods for consignors</label>
+        <div class="payment-methods-grid">
+          <div *ngFor="let method of paymentMethodsArray.controls; let i = index"
+               class="payment-method-option">
+            <label class="checkbox-label">
+              <input type="checkbox"
+                     [checked]="method.get('enabled')?.value"
+                     (change)="onPaymentMethodToggle(i, $any($event.target).checked)">
+              <span class="checkmark"></span>
+              <div class="method-info">
+                <span class="method-name">{{ method.get('displayName')?.value }}</span>
+                <span class="method-description">{{ method.get('description')?.value }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fee Structure -->
+    <section class="form-section" formGroupName="fees">
+      <h3>Processing Fees</h3>
+
+      <div class="form-group">
+        <label>Who pays processing fees?</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" value="shop" formControlName="processingFeePaidBy">
+            <span class="radio-mark"></span>
+            Shop pays all fees
+          </label>
+          <label class="radio-label">
+            <input type="radio" value="consignor" formControlName="processingFeePaidBy">
+            <span class="radio-mark"></span>
+            Deduct fees from consignor payouts
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" formGroupName="feesByMethod">
+        <label>Fee structure by payment method</label>
+        <div class="fees-grid">
+          <div class="fee-item">
+            <label>Check processing fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="check" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="fee-item">
+            <label>ACH/Bank transfer fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="ach" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="fee-item">
+            <label>Cash processing fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="cash" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="fee-item">
+            <label>Store credit fee</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" formControlName="store_credit" class="form-input" min="0" step="0.01">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="feeDisclosureEnabled">
+          <span class="checkmark"></span>
+          Disclose fees to consignors in payout statements
+        </label>
+      </div>
+    </section>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="submit" [disabled]="!paymentForm.valid || saving()" class="btn-primary">
+        {{ saving() ? 'Saving...' : 'Save Payment Settings' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

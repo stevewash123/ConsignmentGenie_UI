@@ -6,6 +6,6 @@ import { NotificationCenterComponent } from '../../shared/components/notificatio
   standalone: true,
   imports: [NotificationCenterComponent],
   templateUrl: './consignor-notifications.component.html',
-  styles: []
+  styleUrls: ['./consignor-notifications.component.scss']
 })
 export class ConsignorNotificationsComponent {}

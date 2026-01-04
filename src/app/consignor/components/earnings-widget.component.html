@@ -1,0 +1,52 @@
+<div class="earnings-widget">
+  <div class="widget-header">
+    <h3 class="widget-title">My Earnings</h3>
+  </div>
+
+  <div class="widget-content" *ngIf="earningsSummary && !loading">
+    <!-- Earnings Amounts Row -->
+    <div class="earnings-row">
+      <!-- Pending Column -->
+      <div class="earning-column">
+        <div class="earning-label">
+          Pending
+          <span class="info-icon"
+                [title]="earningsSummary.pendingTooltip"
+                tabindex="0">ⓘ</span>
+        </div>
+        <div class="earning-amount">${{earningsSummary.pending.toFixed(2)}}</div>
+      </div>
+
+      <!-- Paid This Month Column -->
+      <div class="earning-column">
+        <div class="earning-label">Paid ({{getCurrentMonthName()}})</div>
+        <div class="earning-amount">${{earningsSummary.paidThisMonth.toFixed(2)}}</div>
+        <div class="earning-detail" *ngIf="earningsSummary.payoutCountThisMonth > 0">
+          ({{earningsSummary.payoutCountThisMonth}} payout{{earningsSummary.payoutCountThisMonth === 1 ? '' : 's'}})
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Payout and Link Row -->
+    <div class="footer-row">
+      <div class="next-payout" *ngIf="earningsSummary.nextPayoutDate">
+        Next payout: {{formatPayoutDate(earningsSummary.nextPayoutDate)}}
+      </div>
+      <div class="next-payout" *ngIf="!earningsSummary.nextPayoutDate && earningsSummary.pending === 0 && earningsSummary.paidThisMonth === 0">
+        No earnings yet
+      </div>
+      <a routerLink="/consignor/payouts" class="view-history-link">View History →</a>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <p>Loading earnings...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error">
+    <p>{{error}}</p>
+    <button (click)="loadEarnings()" class="retry-button">Retry</button>
+  </div>
+</div>

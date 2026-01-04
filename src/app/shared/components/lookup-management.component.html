@@ -1,0 +1,132 @@
+    <div class="lookup-management">
+      <div class="header">
+        <div class="title-section">
+          <h2>{{ title }}</h2>
+          <p *ngIf="description" class="description">{{ description }}</p>
+        </div>
+        <button
+          type="button"
+          class="add-button"
+          (click)="showAddForm = true"
+          [disabled]="showAddForm"
+        >
+          <span class="icon">+</span>
+          Add {{ title.slice(0, -1) }}
+        </button>
+      </div>
+
+      <!-- Add new item form -->
+      <div *ngIf="showAddForm" class="add-form-card">
+        <div class="form-group">
+          <label for="newItemName">{{ title.slice(0, -1) }} Name</label>
+          <input
+            #newItemInput
+            id="newItemName"
+            type="text"
+            class="form-input"
+            [(ngModel)]="newItemName"
+            placeholder="Enter name..."
+            maxlength="100"
+            (keyup.enter)="handleAdd()"
+            (keyup.escape)="cancelAdd()"
+          />
+        </div>
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelAdd()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="handleAdd()"
+            [disabled]="!newItemName?.trim()"
+          >
+            Add {{ title.slice(0, -1) }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Items list -->
+      <div class="items-container">
+        <div *ngIf="items.length === 0" class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h3>No {{ title.toLowerCase() }} yet</h3>
+          <p>Get started by adding your first {{ title.slice(0, -1).toLowerCase() }}.</p>
+        </div>
+
+        <div *ngIf="items.length > 0" class="items-list">
+          <div
+            *ngFor="let item of items; trackBy: trackByItemId"
+            class="item-row"
+            [class.editing]="editingItemId === item.id"
+          >
+            <div *ngIf="allowReorder" class="drag-handle">
+              ⋮⋮
+            </div>
+
+            <!-- Display mode -->
+            <div *ngIf="editingItemId !== item.id" class="item-display">
+              <div class="item-info">
+                <span class="item-name">{{ item.name }}</span>
+                <span *ngIf="showCount && item.count !== undefined" class="item-count">
+                  {{ item.count }} {{ itemLabel }}
+                </span>
+              </div>
+
+              <div class="item-actions">
+                <button
+                  type="button"
+                  class="action-btn edit-btn"
+                  (click)="startEdit(item)"
+                  title="Rename"
+                >
+                  ✏️
+                </button>
+                <button
+                  type="button"
+                  class="action-btn delete-btn"
+                  (click)="handleDelete(item)"
+                  title="Delete"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <!-- Edit mode -->
+            <div *ngIf="editingItemId === item.id" class="item-edit">
+              <input
+                #editInput
+                type="text"
+                class="edit-input"
+                [(ngModel)]="editingItemName"
+                maxlength="100"
+                (keyup.enter)="handleRename()"
+                (keyup.escape)="cancelEdit()"
+              />
+              <div class="edit-actions">
+                <button
+                  type="button"
+                  class="action-btn cancel-btn"
+                  (click)="cancelEdit()"
+                >
+                  ✕
+                </button>
+                <button
+                  type="button"
+                  class="action-btn save-btn"
+                  (click)="handleRename()"
+                  [disabled]="!editingItemName?.trim()"
+                >
+                  ✓
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,48 @@
+<div class="modal-overlay" (click)="onBackdropClick($event)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <i [class]="conflictTypeIcon" class="text-red-500"></i>
+      <h3>Item No Longer Available</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="item-details">
+        <div class="item-name">{{ conflictData().item.name }}</div>
+        <div class="item-sku">{{ conflictData().item.sku }}</div>
+      </div>
+
+      <div class="conflict-detail">
+        <i [class]="conflictTypeIcon"></i>
+        <p>{{ conflictTypeMessage }}</p>
+      </div>
+
+      <p class="text-gray-600">
+        {{ conflictData().errorMessage }}
+      </p>
+    </div>
+
+    <div class="modal-actions">
+      <button
+        class="btn btn-primary"
+        (click)="dismiss()">
+        <i class="fas fa-times"></i>
+        Remove from Cart
+      </button>
+
+      @if (conflictData().conflictType !== 'already_sold') {
+        <button
+          class="btn btn-secondary"
+          [disabled]="isRetrying()"
+          (click)="retry()">
+          @if (isRetrying()) {
+            <span class="spinner"></span>
+            Retrying...
+          } @else {
+            <i class="fas fa-redo"></i>
+            Try Again
+          }
+        </button>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+    <div class="item-card" [class.requires-action]="item.requiresResponse">
+      <div class="item-image">
+        <img
+          *ngIf="item.primaryImageUrl"
+          [src]="item.primaryImageUrl"
+          [alt]="item.name"
+          loading="lazy"
+        >
+        <div *ngIf="!item.primaryImageUrl" class="image-placeholder">📷</div>
+      </div>
+
+      <div class="item-details">
+        <div class="item-header">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <div *ngIf="item.requiresResponse" class="action-banner">
+            ⚡ ACTION REQUIRED
+          </div>
+        </div>
+
+        <div class="pricing-info" *ngIf="item.status !== 'sold'; else soldInfo">
+          <span class="price-label">Listed:</span>
+          <span class="price">${{ item.listedPrice.toFixed(2) }}</span>
+          <span class="separator">•</span>
+          <span class="earnings-label">Your Earnings:</span>
+          <span class="earnings">${{ item.consignorEarnings.toFixed(2) }}</span>
+          <span class="percentage">({{ item.splitPercentage }}%)</span>
+        </div>
+
+        <ng-template #soldInfo>
+          <div class="pricing-info">
+            <span class="price-label">Sold:</span>
+            <span class="price">${{ item.listedPrice.toFixed(2) }}</span>
+            <span class="separator">•</span>
+            <span class="earnings-label">You Earned:</span>
+            <span class="earnings">${{ item.consignorEarnings.toFixed(2) }}</span>
+            <span class="percentage">({{ item.splitPercentage }}%)</span>
+          </div>
+        </ng-template>
+
+        <div class="status-line">
+          <span class="status-info">
+            <span class="status-label">Status:</span>
+            <app-status-badge
+              [status]="item.status"
+              [requiresResponse]="item.requiresResponse">
+            </app-status-badge>
+          </span>
+
+          <span *ngIf="item.status === 'sold' && item.soldDate" class="sold-date">
+            on {{ item.soldDate | date:'MMM d, y' }}
+          </span>
+
+          <span *ngIf="item.status === 'available'" class="days-listed">
+            • {{ item.daysListed }} days listed
+          </span>
+
+          <span *ngIf="item.hasPendingPriceRequest && item.status === 'pending_consignor_approval'" class="price-change-info">
+            Owner proposes: ${{ item.listedPrice }} → ${{ (item.consignorEarnings / (item.splitPercentage / 100)).toFixed(2) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="item-actions">
+        <a
+          [routerLink]="['/consignor/items', item.id]"
+          class="view-details-btn"
+          [class.respond-btn]="item.requiresResponse">
+          {{ item.requiresResponse ? 'Respond Now →' : 'View Details →' }}
+        </a>
+      </div>
+    </div>

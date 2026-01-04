@@ -1,0 +1,18 @@
+<div class="toast-container" [class.visible]="isVisible()">
+  <div class="toast warning">
+    <div class="toast-content">
+      <i class="fas fa-clock text-orange-500"></i>
+      <div class="toast-text">
+        <h4>Reservation Expiring Soon</h4>
+        <p>
+          <strong>{{ warningData().item.name }}</strong>
+          will be available online again in
+          <span class="time-highlight">{{ formatTime(currentTimeRemaining()) }}</span>
+        </p>
+      </div>
+    </div>
+    <button (click)="dismiss()" class="toast-close" aria-label="Dismiss warning">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</div>

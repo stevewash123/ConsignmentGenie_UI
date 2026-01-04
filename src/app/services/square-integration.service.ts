@@ -85,8 +85,35 @@ export class SquareIntegrationService {
    * Manually trigger a sync
    */
   async syncNow(): Promise<void> {
-    // TODO: Implement sync functionality in backend
-    throw new Error('Sync functionality not yet implemented');
+    await this.http.post(`${this.apiUrl}/inventory/sync`, {}).toPromise();
+  }
+
+  /**
+   * Update Square integration settings
+   */
+  async updateSettings(settings: any): Promise<void> {
+    await this.http.put(`${environment.apiUrl}/api/integrations/square/settings`, settings).toPromise();
+  }
+
+  /**
+   * Refresh catalog from Square
+   */
+  async refreshCatalog(): Promise<void> {
+    await this.http.post(`${environment.apiUrl}/api/integrations/square/catalog/refresh`, {}).toPromise();
+  }
+
+  /**
+   * Import sales from Square
+   */
+  async importSales(): Promise<any> {
+    return await this.http.post<any>(`${environment.apiUrl}/api/integrations/square/sales/import`, {}).toPromise();
+  }
+
+  /**
+   * Trigger sales import
+   */
+  async triggerSalesImport(endpoint: string): Promise<void> {
+    await this.http.post(endpoint, {}).toPromise();
   }
 
   /**

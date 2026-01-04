@@ -1,90 +1,49 @@
 <div class="section">
-  <h2 class="section-title">Payouts</h2>
-  <p class="section-description">Manage consignor payouts and banking integrations</p>
+  <h2 class="section-title">Bank Account Setup</h2>
+  <p class="section-description">Connect bank accounts for automated consignor payouts</p>
 
-  <!-- Payout Methods Section -->
-  <section class="integration-card">
-    <div class="integration-header">
-      <div class="integration-title">
-        <div class="integration-logo">💳</div>
-        <h3>Payout Methods</h3>
-      </div>
-    </div>
-    <div class="integration-content">
-      <p class="integration-description">
-        Choose how you want to pay your consignors their share of sales.
-      </p>
-
-      <div class="banking-options">
-        <div class="banking-option">
-          <div class="banking-provider">
-            <strong>Manual Payouts</strong>
-            <span class="provider-description">Export payout reports and handle payments yourself</span>
-          </div>
-          <span class="status-indicator">✓ Always Available</span>
-        </div>
-
-        <div class="banking-option disabled">
-          <div class="banking-provider">
-            <strong>Direct Bank Transfers</strong>
-            <span class="provider-description">Automated ACH payments to consignor bank accounts</span>
-          </div>
-          <span class="status-indicator">Coming Soon</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Banking Integrations Section -->
-  <section class="integration-card coming-soon">
+  <!-- Banking Setup Card -->
+  <div class="integration-card">
     <div class="integration-header">
       <div class="integration-title">
         <div class="integration-logo">🏦</div>
-        <h3>Banking Integrations</h3>
-      </div>
-      <div class="integration-status">
-        <span class="status-badge coming-soon">Coming Soon</span>
+        <h3>Bank Account Verification</h3>
       </div>
     </div>
     <div class="integration-content">
       <p class="integration-description">
-        Connect banking services to automate consignor payouts with direct transfers.
+        Connect your shop's bank account securely using Plaid to enable automated ACH transfers to consignors.
+        This replaces manual check writing and cash payments.
       </p>
 
-      <div class="banking-options">
-        <div class="banking-option disabled">
-          <div class="banking-provider">
-            <strong>Plaid</strong>
-            <span class="provider-description">Bank account verification and connection</span>
+      <div class="setup-actions">
+        <button class="setup-btn primary" (click)="connectBankAccount()" [disabled]="connecting()">
+          <span class="btn-icon">🔗</span>
+          {{ connecting() ? 'Connecting...' : 'Connect Bank Account' }}
+        </button>
+        <p class="help-text">Opens secure Plaid modal to verify your bank account</p>
+      </div>
+
+      <div class="connection-status" *ngIf="bankConnected()">
+        <div class="status-success">
+          <span class="status-icon">✅</span>
+          <div class="status-details">
+            <strong>{{connectedBankName()}}</strong>
+            <span class="account-mask">Account ending in {{accountLast4()}}</span>
           </div>
-          <span class="status-indicator">Coming Soon</span>
-        </div>
-        <div class="banking-option disabled">
-          <div class="banking-provider">
-            <strong>Dwolla</strong>
-            <span class="provider-description">ACH payment processing for direct transfers</span>
-          </div>
-          <span class="status-indicator">Coming Soon</span>
-        </div>
-        <div class="banking-option disabled">
-          <div class="banking-provider">
-            <strong>Stripe Connect</strong>
-            <span class="provider-description">Marketplace payments for instant payouts</span>
-          </div>
-          <span class="status-indicator">Coming Soon</span>
         </div>
       </div>
 
-      <div class="integration-description" style="margin-top: 1.5rem;">
-        <h4 style="color: #374151; font-weight: 600; margin-bottom: 0.75rem;">What you'll get when available:</h4>
-        <ul style="list-style: none; padding: 0; margin: 0;">
-          <li style="padding: 0.25rem 0; color: #6b7280;">• Automatic bank account verification for consignors</li>
-          <li style="padding: 0.25rem 0; color: #6b7280;">• Scheduled payout runs (weekly, monthly)</li>
-          <li style="padding: 0.25rem 0; color: #6b7280;">• Instant payout options for consignors</li>
-          <li style="padding: 0.25rem 0; color: #6b7280;">• Automated tax reporting and 1099 generation</li>
-          <li style="padding: 0.25rem 0; color: #6b7280;">• Fraud protection and compliance handling</li>
+      <div class="info-box">
+        <h4>What you'll get with bank account verification:</h4>
+        <ul>
+          <li>Secure bank account connection via Plaid</li>
+          <li>Automated ACH transfers to verified accounts</li>
+          <li>Lower processing fees than checks or cash</li>
+          <li>Faster payments to consignors</li>
+          <li>Built-in fraud protection and compliance</li>
         </ul>
       </div>
     </div>
-  </section>
+  </div>
 </div>
