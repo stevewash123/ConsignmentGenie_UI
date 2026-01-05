@@ -1,68 +1,68 @@
-    .store-layout {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+.store-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-    .store-content {
-      flex: 1;
-      padding: 1rem 0;
-    }
+.store-content {
+  flex: 1;
+  padding: 1rem 0;
+}
 
-    .store-footer {
-      background-color: #f8f9fa;
-      border-top: 1px solid #dee2e6;
-      padding: 2rem 0 1rem;
-      margin-top: 2rem;
-    }
+.store-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 2rem 0 1rem;
+  margin-top: 2rem;
+}
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
 
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
 
-    .store-details h4 {
-      margin: 0 0 1rem 0;
-      color: #343a40;
-    }
+.store-details h4 {
+  margin: 0 0 1rem 0;
+  color: #343a40;
+}
 
-    .store-details p {
-      margin: 0.5rem 0;
-      color: #6c757d;
-    }
+.store-details p {
+  margin: 0.5rem 0;
+  color: #6c757d;
+}
 
-    .store-hours h5 {
-      margin: 0 0 1rem 0;
-      color: #343a40;
-    }
+.store-hours h5 {
+  margin: 0 0 1rem 0;
+  color: #343a40;
+}
 
-    .footer-bottom {
-      border-top: 1px solid #dee2e6;
-      padding-top: 1rem;
-      text-align: center;
-      color: #6c757d;
-      font-size: 0.875rem;
-    }
+.footer-bottom {
+  border-top: 1px solid #dee2e6;
+  padding-top: 1rem;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
 
-    .footer-bottom p {
-      margin: 0.25rem 0;
-    }
+.footer-bottom p {
+  margin: 0.25rem 0;
+}
 
-    .powered-by {
-      color: #adb5bd !important;
-    }
+.powered-by {
+  color: #adb5bd !important;
+}
 
-    @media (max-width: 768px) {
-      .footer-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-    }
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}

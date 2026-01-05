@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal, output, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { RecordSaleService } from '../../services/record-sale.service';
 
 export interface Item {
   id: string;
@@ -16,25 +19,92 @@ export interface Item {
   selector: 'app-item-search',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div>
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        placeholder="Search items..."
-        (input)="onSearch()"
-      >
-      <div *ngFor="let item of items">
-        {{item.name}} - {{item.sku}}
-      </div>
-    </div>
-  `
+  templateUrl: './item-search.component.html',
+  styleUrls: ['./item-search.component.scss']
 })
-export class ItemSearchComponent {
-  searchTerm = '';
-  items: Item[] = [];
+export class ItemSearchComponent implements OnInit {
+  private recordSaleService = inject(RecordSaleService);
 
-  onSearch() {
-    // Search implementation would go here
+  // Inputs and outputs
+  itemSelected = output<Item>();
+  disabledItems = input<string[]>([]);
+
+  // State signals
+  allItems = signal<Item[]>([]);
+  isLoading = signal<boolean>(false);
+  searchQuery = '';
+
+  // Search subject for debouncing
+  private searchSubject = new Subject<string>();
+
+  // Computed filtered items
+  displayedItems = computed(() => {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) {
+      return this.allItems().slice(0, 20); // Show first 20 items when no search
+    }
+
+    return this.allItems().filter(item =>
+      item.name.toLowerCase().includes(query) ||
+      item.sku.toLowerCase().includes(query) ||
+      item.consignorName.toLowerCase().includes(query)
+    );
+  });
+
+  ngOnInit() {
+    this.setupSearch();
+    this.loadInitialItems();
+  }
+
+  private setupSearch() {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(searchTerm => {
+        if (!searchTerm.trim()) {
+          return of([]); // Return empty for no search, loadInitialItems will handle initial load
+        }
+        this.isLoading.set(true);
+        return this.recordSaleService.getAvailableItems(searchTerm);
+      })
+    ).subscribe({
+      next: (items) => {
+        if (this.searchQuery.trim()) {
+          this.allItems.set(items);
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Search failed:', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private loadInitialItems() {
+    this.isLoading.set(true);
+    this.recordSaleService.getAvailableItems().subscribe({
+      next: (items) => {
+        this.allItems.set(items);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load items:', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onSearchInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.searchQuery = target.value;
+    this.searchSubject.next(this.searchQuery);
+  }
+
+  selectItem(item: Item) {
+    if (this.disabledItems().includes(item.id)) {
+      return;
+    }
+    this.itemSelected.emit(item);
   }
 }

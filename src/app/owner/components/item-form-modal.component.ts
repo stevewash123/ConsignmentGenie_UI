@@ -12,26 +12,7 @@ import { Consignor } from '../../models/consignor.model';
   selector: 'app-item-form-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="modal" *ngIf="isOpen">
-      <div class="modal-content">
-        <h2>{{editingItem ? 'Edit Item' : 'Add New Item'}}</h2>
-        <form (ngSubmit)="onSubmit()">
-          <input [(ngModel)]="formData.title" name="title" placeholder="Title" required>
-          <input [(ngModel)]="formData.sku" name="sku" placeholder="SKU" required>
-          <input [(ngModel)]="formData.price" name="price" type="number" placeholder="Price" required>
-          <select [(ngModel)]="formData.condition" name="condition" required>
-            <option value="" disabled>Select Condition</option>
-            <option *ngFor="let condition of conditionOptions()" [value]="condition.value">
-              {{condition.label}}
-            </option>
-          </select>
-          <button type="submit">{{editingItem ? 'Update' : 'Create'}}</button>
-          <button type="button" (click)="close()">Cancel</button>
-        </form>
-      </div>
-    </div>
-  `,
+  templateUrl: './item-form-modal-simple.component.html',
   styleUrls: ['./item-form-modal.component.scss']
 })
 export class ItemFormModalComponent implements OnInit {
