@@ -34,6 +34,7 @@ interface ProviderDetails {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './consignor-registration-step2.component.html',
+  styleUrls: ['./consignor-registration-step2.component.scss']
 })
 export class ConsignorRegistrationStep2Component implements OnInit {
   registrationData = signal<RegistrationData | null>(null);

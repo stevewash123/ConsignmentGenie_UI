@@ -17,6 +17,7 @@ export interface SuggestionFormData {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './suggestion-box-modal.component.html',
+  styleUrls: ['./suggestion-box-modal.component.scss']
 })
 export class SuggestionBoxModalComponent {
   @Input() isVisible = false;

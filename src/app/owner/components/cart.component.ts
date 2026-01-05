@@ -153,7 +153,11 @@ export class CartComponent implements OnInit {
     });
 
     expiredCartItems.forEach(item => {
-      this.handleExpiredReservation(item);
+      // Fire and forget - don't await to avoid blocking timer
+      // But we need to catch any promise rejections to avoid uncaught promise errors
+      this.handleExpiredReservation(item).catch(() => {
+        // Silent catch - errors are already handled within handleExpiredReservation
+      });
     });
   }
 
@@ -192,7 +196,7 @@ export class CartComponent implements OnInit {
     }
 
     // Remove from cart
-    this.removeItem(item.item.id);
+    await this.removeItem(item.item.id);
   }
 
   // -------------------------------------------------------------------------

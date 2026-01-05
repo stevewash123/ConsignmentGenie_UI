@@ -13,6 +13,7 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
   standalone: true,
   imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemSearchComponent, CartComponent],
   templateUrl: './record-sale.component.html',
+  styleUrls: ['./record-sale.component.scss']
 })
 export class RecordSaleComponent implements OnInit {
   private recordSaleService = inject(RecordSaleService);

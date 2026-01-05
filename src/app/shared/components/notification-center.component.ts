@@ -18,6 +18,7 @@ import { LoadingService } from '../services/loading.service';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './notification-center.component.html',
+  styleUrls: ['./notification-center.component.scss']
 })
 export class NotificationCenterComponent implements OnInit, OnDestroy {
   @Input() role: UserRole = 'consignor';

@@ -16,6 +16,7 @@ interface BulkInviteResult {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './bulk-invite-consignor-modal.component.html',
+  styleUrls: ['./bulk-invite-consignor-modal.component.scss']
 })
 export class BulkInviteConsignorModalComponent {
   @Output() closed = new EventEmitter<void>();

@@ -18,6 +18,7 @@ export interface CredentialsEvent {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './auth-method-selector.component.html',
+  styleUrls: ['./auth-method-selector.component.scss']
 })
 export class AuthMethodSelectorComponent {
   @Input() enabledProviders: string[] = ['google', 'facebook'];

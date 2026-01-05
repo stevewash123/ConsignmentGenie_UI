@@ -85,6 +85,10 @@ describe('ConsignorPayoutDetailComponent', () => {
 
     // Setup default mocks
     mockLoadingService.isLoading.and.returnValue(false);
+    mockConsignorService.getMyPayout.and.returnValue(of({
+      success: true,
+      data: mockPayoutDetail
+    }));
   });
 
   it('should create', () => {
@@ -216,10 +220,13 @@ describe('ConsignorPayoutDetailComponent', () => {
   });
 
   it('should display error state', () => {
+    component.payoutDetail = null;
     component.error = 'Failed to load payout details. Please try again.';
+    mockLoadingService.isLoading.and.returnValue(false);
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
+    console.log('HTML content:', compiled.innerHTML); // Debug what's actually rendered
     const errorElement = compiled.querySelector('.error');
 
     expect(errorElement).toBeTruthy();

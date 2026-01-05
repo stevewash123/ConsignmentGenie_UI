@@ -9,6 +9,7 @@ import { ItemRequest } from '../models/consignor.models';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './item-request-detail.component.html',
+  styleUrls: ['./item-request-detail.component.scss']
 })
 export class ItemRequestDetailComponent implements OnInit {
   request: ItemRequest | null = null;

@@ -88,7 +88,7 @@ describe('CartComponent', () => {
 
     fixture = TestBed.createComponent(CartComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call fixture.detectChanges() here - let individual tests control when ngOnInit runs
   });
 
   // ============================================================================
@@ -96,30 +96,37 @@ describe('CartComponent', () => {
   // ============================================================================
   describe('initialization', () => {
     it('should create', () => {
+      fixture.detectChanges();
       expect(component).toBeTruthy();
     });
 
     it('should initialize with empty cart', () => {
+      fixture.detectChanges();
       expect(component.cartItems()).toEqual([]);
     });
 
     it('should initialize with default payment type', () => {
+      fixture.detectChanges();
       expect(component.selectedPaymentType()).toBe('Cash');
     });
 
     it('should initialize with empty customer email', () => {
+      fixture.detectChanges();
       expect(component.customerEmail()).toBe('');
     });
 
     it('should initialize with empty expired items', () => {
+      fixture.detectChanges();
       expect(component.expiredItems()).toEqual([]);
     });
 
     it('should initialize with empty item timers', () => {
+      fixture.detectChanges();
       expect(component.itemTimers().size).toBe(0);
     });
 
     it('should expose warning threshold constant', () => {
+      fixture.detectChanges();
       expect(component.warningThresholdMs).toBe(2 * 60 * 1000);
     });
   });
@@ -130,6 +137,7 @@ describe('CartComponent', () => {
   describe('computed values', () => {
     describe('subtotal', () => {
       it('should return 0 for empty cart', () => {
+        fixture.detectChanges();
         expect(component.subtotal()).toBe(0);
       });
 
@@ -259,9 +267,11 @@ describe('CartComponent', () => {
   // ============================================================================
   describe('reservation timer', () => {
     it('should update timers periodically', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
+
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
 
       tick(1000); // Advance 1 second
       fixture.detectChanges();
@@ -270,9 +280,11 @@ describe('CartComponent', () => {
     }));
 
     it('should check for expirations on each tick', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
+
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
 
       // Set timer to expired
       mockReservationService.calculateRemainingTime.and.returnValue(0);
@@ -284,9 +296,11 @@ describe('CartComponent', () => {
     }));
 
     it('should emit warning when timer approaches threshold', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
+
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
 
       const warningSpy = spyOn(component.showExpirationWarning, 'emit');
 
@@ -301,9 +315,11 @@ describe('CartComponent', () => {
     }));
 
     it('should not emit multiple warnings for same item', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
+
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
 
       const warningSpy = spyOn(component.showExpirationWarning, 'emit');
       mockReservationService.calculateRemainingTime.and.returnValue(90000);
@@ -484,9 +500,11 @@ describe('CartComponent', () => {
   // ============================================================================
   describe('expired reservation handling', () => {
     it('should add item to expired list', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
+
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
 
       mockReservationService.calculateRemainingTime.and.returnValue(0);
 
@@ -497,9 +515,11 @@ describe('CartComponent', () => {
     }));
 
     it('should release reservation on expiration', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
+
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
 
       mockReservationService.calculateRemainingTime.and.returnValue(0);
 
@@ -510,13 +530,19 @@ describe('CartComponent', () => {
     }));
 
     it('should remove item from cart on expiration', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
 
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
+
+      // Set up spy after component is initialized
       const removeSpy = spyOn(component.itemRemoved, 'emit');
+
+      // Set timer to expired
       mockReservationService.calculateRemainingTime.and.returnValue(0);
 
+      // Advance time to trigger timer
       tick(1000);
       fixture.detectChanges();
 
@@ -524,9 +550,11 @@ describe('CartComponent', () => {
     }));
 
     it('should handle release failure gracefully', fakeAsync(() => {
-      const itemWithReservation = createCartItemWithReservation();
-      fixture.componentRef.setInput('cartItems', [itemWithReservation]);
-      fixture.detectChanges();
+      // Set up cart items before initializing component
+      fixture.componentRef.setInput('cartItems', [createCartItemWithReservation()]);
+
+      // Initialize component and start timers
+      fixture.detectChanges(); // This calls ngOnInit and starts the timer
 
       mockReservationService.releaseReservation.and.returnValue(Promise.reject('Error'));
       mockReservationService.calculateRemainingTime.and.returnValue(0);

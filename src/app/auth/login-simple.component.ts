@@ -10,6 +10,7 @@ import { LoadingService } from '../shared/services/loading.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './login-simple.component.html',
+  styleUrls: ['./login-simple.component.scss']
 })
 export class LoginSimpleComponent implements OnInit {
   email = '';

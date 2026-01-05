@@ -16,6 +16,7 @@ import { LoadingService } from '../../shared/services/loading.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './owner-invitations-list.component.html',
+  styleUrls: ['./owner-invitations-list.component.scss']
 })
 export class OwnerInvitationsListComponent implements OnInit {
   invitations = signal<OwnerInvitationListDto[]>([]);

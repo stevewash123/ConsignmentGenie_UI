@@ -15,6 +15,7 @@ import { LoadingService } from '../services/loading.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './notification-bell.component.html',
+  styleUrls: ['./notification-bell.component.scss']
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
   @Input() role: UserRole = 'consignor';

@@ -7,6 +7,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './register-success.component.html',
+  styleUrls: ['./register-success.component.scss']
 })
 export class RegisterSuccessComponent implements OnInit {
   registrationType = signal<string>('');

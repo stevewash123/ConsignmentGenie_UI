@@ -18,6 +18,7 @@ export interface ProviderRegistrationData {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './consignor-registration.component.html',
+  styleUrls: ['./consignor-registration.component.scss']
 })
 export class ConsignorRegistrationComponent implements OnInit {
   registration: ProviderRegistrationData = {

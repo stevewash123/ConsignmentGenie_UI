@@ -8,6 +8,7 @@ import { ConsignorService } from '../../services/consignor.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './consignor-invitation-modal.component.html',
+  styleUrls: ['./consignor-invitation-modal.component.scss']
 })
 export class ConsignorInvitationModalComponent {
   @Input() isVisible!: () => boolean;

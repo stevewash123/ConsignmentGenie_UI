@@ -14,6 +14,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './confirmation-dialog.component.html',
+  styleUrls: ['./confirmation-dialog.component.scss'],
   animations: []
 })
 export class ConfirmationDialogComponent implements OnInit, OnDestroy {

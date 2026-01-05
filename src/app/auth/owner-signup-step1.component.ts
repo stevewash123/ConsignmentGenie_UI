@@ -9,6 +9,7 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './owner-signup-step1.component.html',
+  styleUrls: ['./owner-signup-step1.component.scss']
 })
 export class OwnerSignupStep1Component {
   authForm: FormGroup;

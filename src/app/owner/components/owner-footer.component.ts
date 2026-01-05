@@ -15,6 +15,7 @@ interface UserData {
   standalone: true,
   imports: [CommonModule, SuggestionBoxModalComponent],
   templateUrl: './owner-footer.component.html',
+  styleUrls: ['./owner-footer.component.scss']
 })
 export class OwnerFooterComponent implements OnInit {
   currentYear = new Date().getFullYear();

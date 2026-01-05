@@ -16,6 +16,7 @@ import { LoadingService } from '../services/loading.service';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   templateUrl: './notification-preferences.component.html',
+  styleUrls: ['./notification-preferences.component.scss']
 })
 export class NotificationPreferencesComponent implements OnInit, OnDestroy {
   @Input() role: UserRole = 'consignor';

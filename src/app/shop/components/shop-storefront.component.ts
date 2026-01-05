@@ -19,6 +19,7 @@ interface ShopItem {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './shop-storefront.component.html',
+  styleUrls: ['./shop-storefront.component.scss']
 })
 export class ShopStorefrontComponent implements OnInit {
   items = signal<ShopItem[]>([]);

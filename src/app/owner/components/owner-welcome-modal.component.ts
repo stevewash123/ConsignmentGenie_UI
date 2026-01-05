@@ -11,6 +11,7 @@ import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shar
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './owner-welcome-modal.component.html',
+  styleUrls: ['./owner-welcome-modal.component.scss']
 })
 export class OwnerWelcomeModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isVisible: boolean = false;

@@ -120,11 +120,6 @@ describe('PoliciesComponent', () => {
       expect(form?.get('consignorPolicies.notifyOnRegistration')?.value).toBe(false);
     });
 
-    it('should initialize form with default customer service settings', () => {
-      const form = component.policiesForm();
-      expect(form?.get('customerService.responseTimeHours')?.value).toBe(24);
-      expect(form?.get('customerService.preferredContact')?.value).toBe('either');
-    });
 
     it('should initialize schedule with weekdays open and Sunday closed', () => {
       const form = component.policiesForm();
@@ -212,7 +207,6 @@ describe('PoliciesComponent', () => {
         returns: jasmine.any(Object),
         payments: jasmine.any(Object),
         consignorPolicies: jasmine.any(Object),
-        customerService: jasmine.any(Object),
         lastUpdated: jasmine.any(Date)
       }));
       req.flush({});

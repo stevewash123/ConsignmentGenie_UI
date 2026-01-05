@@ -9,6 +9,7 @@ import { MockConsignorBalanceService } from '../services/mock-consignor-balance.
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './request-payout-modal.component.html',
+  styleUrls: ['./request-payout-modal.component.scss']
 })
 export class RequestPayoutModalComponent implements OnInit {
   @Input() balance: ConsignorBalance | null = null;

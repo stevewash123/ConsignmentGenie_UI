@@ -15,6 +15,7 @@ interface UserData {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './app-header.component.html',
+  styleUrls: ['./app-header.component.scss']
 })
 export class AppHeaderComponent implements OnInit {
   currentUser = signal<UserData | null>(null);

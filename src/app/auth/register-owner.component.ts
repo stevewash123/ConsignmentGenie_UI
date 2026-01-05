@@ -10,6 +10,7 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './register-owner.component.html',
+  styleUrls: ['./register-owner.component.scss']
 })
 export class RegisterOwnerComponent implements OnInit {
   signupForm: FormGroup;

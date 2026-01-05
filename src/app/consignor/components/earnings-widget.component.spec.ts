@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { of, throwError, NEVER } from 'rxjs';
 import { EarningsWidgetComponent } from './earnings-widget.component';
 import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { EarningsSummary } from '../models/consignor.models';
@@ -111,7 +111,9 @@ describe('EarningsWidgetComponent', () => {
   });
 
   it('should display loading state initially', () => {
-    component.loading = true;
+    // Override the service method to never complete, keeping loading = true
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(NEVER); // Never emits
+    component.ngOnInit(); // Trigger the loading state manually
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
@@ -122,8 +124,9 @@ describe('EarningsWidgetComponent', () => {
   });
 
   it('should display error state when error occurs', () => {
-    component.error = 'Unable to load earnings. Please try again.';
-    component.loading = false;
+    // Override the service method to throw error
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(throwError(() => new Error('Network error')));
+    component.ngOnInit(); // Trigger the error state
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;
@@ -157,9 +160,9 @@ describe('EarningsWidgetComponent', () => {
       nextPayoutDate: null
     };
 
-    component.earningsSummary = zeroEarnings;
-    component.loading = false;
-    component.error = null;
+    // Override the service to return zero earnings
+    mockConsignorPortalService.getEarningsSummary.and.returnValue(of(zeroEarnings));
+    component.ngOnInit();
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement;

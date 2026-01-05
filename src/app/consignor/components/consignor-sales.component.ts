@@ -12,6 +12,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './consignor-sales.component.html',
+  styleUrls: ['./consignor-sales.component.scss']
 })
 export class ConsignorSalesComponent implements OnInit {
   salesResult: PagedResult<consignorsale> | null = null;

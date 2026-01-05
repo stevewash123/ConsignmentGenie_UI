@@ -11,6 +11,7 @@ import { ENTITY_LABELS } from '../constants/labels';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './invite-consignor-modal.component.html',
+  styleUrls: ['./invite-consignor-modal.component.scss']
 })
 export class InviteConsignorModalComponent {
   @Output() closed = new EventEmitter<void>();

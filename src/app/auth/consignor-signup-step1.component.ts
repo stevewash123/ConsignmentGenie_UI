@@ -10,6 +10,7 @@ import { ConsignorService } from '../services/consignor.service';
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './consignor-signup-step1.component.html',
+  styleUrls: ['./consignor-signup-step1.component.scss']
 })
 export class ConsignorSignupStep1Component implements OnInit {
   authForm: FormGroup;

@@ -17,6 +17,7 @@ interface SettingsCard {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './settings-hub.component.html',
+  styleUrls: ['./settings-hub.component.scss']
 })
 export class SettingsHubComponent implements OnInit {
   stats = signal<{

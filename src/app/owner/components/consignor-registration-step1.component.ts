@@ -18,6 +18,7 @@ interface InvitationDetails {
   standalone: true,
   imports: [CommonModule, AuthMethodSelectorComponent],
   templateUrl: './consignor-registration-step1.component.html',
+  styleUrls: ['./consignor-registration-step1.component.scss']
 })
 export class ConsignorRegistrationStep1Component implements OnInit {
   invitationDetails = signal<InvitationDetails | null>(null);

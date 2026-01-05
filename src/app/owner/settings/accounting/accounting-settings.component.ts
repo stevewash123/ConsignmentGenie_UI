@@ -29,6 +29,7 @@ interface AccountingSettings {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './accounting-settings.component.html',
+  styleUrls: ['./accounting-settings.component.scss']
 })
 export class AccountingSettingsComponent implements OnInit {
   settings = signal<AccountingSettings | null>(null);

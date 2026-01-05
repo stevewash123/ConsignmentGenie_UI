@@ -18,6 +18,7 @@ interface UserData {
   standalone: true,
   imports: [CommonModule, RouterModule, NotificationBellComponent],
   templateUrl: './owner-header.component.html',
+  styleUrls: ['./owner-header.component.scss']
 })
 export class OwnerHeaderComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

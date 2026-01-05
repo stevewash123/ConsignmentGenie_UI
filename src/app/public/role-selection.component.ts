@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './role-selection.component.html',
+  styleUrls: ['./role-selection.component.scss']
 })
 export class RoleSelectionComponent {
 }

@@ -40,6 +40,7 @@ export interface ItemReturnRequestDto {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './return-request-modal.component.html',
+  styleUrls: ['./return-request-modal.component.scss']
 })
 export class ReturnRequestModalComponent implements OnInit {
   @Input() item: ConsignorItemDetailDto | null = null;

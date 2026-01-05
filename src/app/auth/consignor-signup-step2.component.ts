@@ -9,6 +9,7 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './consignor-signup-step2.component.html',
+  styleUrls: ['./consignor-signup-step2.component.scss']
 })
 export class ConsignorSignupStep2Component implements OnInit {
   signupForm: FormGroup;

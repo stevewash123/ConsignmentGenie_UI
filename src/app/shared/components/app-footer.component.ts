@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './app-footer.component.html',
+  styleUrls: ['./app-footer.component.scss']
 })
 export class AppFooterComponent {
   currentYear = new Date().getFullYear();

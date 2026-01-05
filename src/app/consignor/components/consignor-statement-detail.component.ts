@@ -12,6 +12,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './consignor-statement-detail.component.html',
+  styleUrls: ['./consignor-statement-detail.component.scss']
 })
 export class ConsignorStatementDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

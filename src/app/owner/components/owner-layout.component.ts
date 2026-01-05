@@ -8,6 +8,7 @@ import { OwnerFooterComponent } from './owner-footer.component';
   standalone: true,
   imports: [CommonModule, OwnerHeaderComponent, OwnerFooterComponent],
   templateUrl: './owner-layout.component.html',
+  styleUrls: ['./owner-layout.component.scss']
 })
 export class OwnerLayoutComponent {
 }
