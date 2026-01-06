@@ -153,11 +153,8 @@ export class CartComponent implements OnInit {
     });
 
     expiredCartItems.forEach(item => {
-      // Fire and forget - don't await to avoid blocking timer
-      // But we need to catch any promise rejections to avoid uncaught promise errors
-      this.handleExpiredReservation(item).catch(() => {
-        // Silent catch - errors are already handled within handleExpiredReservation
-      });
+      // Fire and forget - errors are already handled within handleExpiredReservation
+      this.handleExpiredReservation(item);
     });
   }
 
@@ -184,19 +181,21 @@ export class CartComponent implements OnInit {
     }
   }
 
-  private async handleExpiredReservation(item: CartItem): Promise<void> {
+  private handleExpiredReservation(item: CartItem): void {
     // Add to expired list to prevent multiple notifications
     this.expiredItems.update(list => [...list, item.item.id]);
 
-    try {
-      // Release reservation (cleanup)
-      await this.reservationService.releaseReservation(item.item.id);
-    } catch {
-      // Silently handle - still remove from cart
-    }
-
-    // Remove from cart
-    await this.removeItem(item.item.id);
+    // Release reservation (cleanup)
+    this.reservationService.releaseReservation(item.item.id).subscribe({
+      next: () => {
+        // Remove from cart after successful release
+        this.removeItem(item.item.id);
+      },
+      error: () => {
+        // Silently handle - still remove from cart
+        this.removeItem(item.item.id);
+      }
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -227,19 +226,23 @@ export class CartComponent implements OnInit {
   /**
    * Remove item from cart and release reservation if active
    */
-  async removeItem(itemId: string): Promise<void> {
+  removeItem(itemId: string): void {
     const item = this.cartItems().find(i => i.item.id === itemId);
 
     // Release reservation if active
     if (item?.reservation?.isActive) {
-      try {
-        await this.reservationService.releaseReservation(itemId);
-      } catch {
-        // Silently handle - still emit removal
-      }
+      this.reservationService.releaseReservation(itemId).subscribe({
+        next: () => {
+          this.itemRemoved.emit(itemId);
+        },
+        error: () => {
+          // Silently handle - still emit removal
+          this.itemRemoved.emit(itemId);
+        }
+      });
+    } else {
+      this.itemRemoved.emit(itemId);
     }
-
-    this.itemRemoved.emit(itemId);
   }
 
   /**

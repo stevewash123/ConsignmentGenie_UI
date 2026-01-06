@@ -92,12 +92,15 @@ export class PayoutHistoryComponent implements OnInit {
     }
   }
 
-  async loadConsignors() {
-    try {
-      this.consignors = await this.payoutService.getConsignorsList();
-    } catch (error) {
-      console.error('Error loading consignors:', error);
-    }
+  loadConsignors() {
+    this.payoutService.getConsignorsList().subscribe({
+      next: (consignors) => {
+        this.consignors = consignors;
+      },
+      error: (error) => {
+        console.error('Error loading consignors:', error);
+      }
+    });
   }
 
   onSearch() {
@@ -164,26 +167,27 @@ export class PayoutHistoryComponent implements OnInit {
     this.closeDetailModal();
   }
 
-  async exportToCSV() {
-    try {
-      const csv = await this.payoutService.exportPayoutHistoryCSV({
-        ...this.filters,
-        searchTerm: this.searchTerm || undefined
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `payout-history-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error exporting CSV:', error);
-      alert('Failed to export CSV. Please try again.');
-    }
+  exportToCSV() {
+    this.payoutService.exportPayoutHistoryCSV({
+      ...this.filters,
+      searchTerm: this.searchTerm || undefined
+    }).subscribe({
+      next: (csv) => {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `payout-history-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error exporting CSV:', error);
+        alert('Failed to export CSV. Please try again.');
+      }
+    });
   }
 
   formatCurrency(amount: number): string {

@@ -112,36 +112,40 @@ export class BrandingComponent implements OnInit {
     });
   }
 
-  private async loadBrandingSettings() {
-    try {
-      const branding = await this.brandingService.getBranding();
-      if (branding) {
-        this.brandingForm.patchValue(branding);
-        if (branding.logo.url) {
-          this.currentLogo.set(branding.logo.url);
+  private loadBrandingSettings() {
+    this.brandingService.getBranding().subscribe({
+      next: (branding) => {
+        if (branding) {
+          this.brandingForm.patchValue(branding);
+          if (branding.logo.url) {
+            this.currentLogo.set(branding.logo.url);
+          }
         }
+      },
+      error: (error) => {
+        this.showError('Failed to load branding settings');
       }
-    } catch (error) {
-      this.showError('Failed to load branding settings');
-    }
+    });
   }
 
-  async onSave() {
+  onSave() {
     if (this.brandingForm.valid) {
       this.saving.set(true);
-      try {
-        const brandingData: StoreBranding = {
-          ...this.brandingForm.value,
-          lastUpdated: new Date()
-        };
+      const brandingData: StoreBranding = {
+        ...this.brandingForm.value,
+        lastUpdated: new Date()
+      };
 
-        await this.brandingService.saveBranding(brandingData);
-        this.showSuccess('Branding settings saved successfully');
-      } catch (error) {
-        this.showError('Failed to save branding settings');
-      } finally {
-        this.saving.set(false);
-      }
+      this.brandingService.saveBranding(brandingData).subscribe({
+        next: (result) => {
+          this.showSuccess('Branding settings saved successfully');
+          this.saving.set(false);
+        },
+        error: (error) => {
+          this.showError('Failed to save branding settings');
+          this.saving.set(false);
+        }
+      });
     }
   }
 
@@ -164,49 +168,51 @@ export class BrandingComponent implements OnInit {
     }
   }
 
-  private async uploadLogo(file: File) {
-    try {
-      this.saving.set(true);
-      const uploadResult = await this.brandingService.uploadLogo(file);
-
-      // Update form with new logo data
-      this.brandingForm.get('logo')?.patchValue({
-        url: uploadResult.url,
-        fileName: file.name,
-        uploadedAt: new Date(),
-        dimensions: uploadResult.dimensions
-      });
-
-      this.currentLogo.set(uploadResult.url);
-      this.showSuccess('Logo uploaded successfully');
-    } catch (error) {
-      this.showError('Failed to upload logo');
-    } finally {
-      this.saving.set(false);
-    }
-  }
-
-  async removeLogo() {
-    if (confirm('Are you sure you want to remove the logo?')) {
-      try {
-        this.saving.set(true);
-        await this.brandingService.removeLogo();
-
-        // Clear logo data in form
+  private uploadLogo(file: File) {
+    this.saving.set(true);
+    this.brandingService.uploadLogo(file).subscribe({
+      next: (uploadResult) => {
+        // Update form with new logo data
         this.brandingForm.get('logo')?.patchValue({
-          url: '',
-          fileName: '',
-          uploadedAt: null,
-          dimensions: { width: 0, height: 0 }
+          url: uploadResult.url,
+          fileName: file.name,
+          uploadedAt: new Date(),
+          dimensions: uploadResult.dimensions
         });
 
-        this.currentLogo.set('');
-        this.showSuccess('Logo removed successfully');
-      } catch (error) {
-        this.showError('Failed to remove logo');
-      } finally {
+        this.currentLogo.set(uploadResult.url);
+        this.showSuccess('Logo uploaded successfully');
+        this.saving.set(false);
+      },
+      error: (error) => {
+        this.showError('Failed to upload logo');
         this.saving.set(false);
       }
+    });
+  }
+
+  removeLogo() {
+    if (confirm('Are you sure you want to remove the logo?')) {
+      this.saving.set(true);
+      this.brandingService.removeLogo().subscribe({
+        next: () => {
+          // Clear logo data in form
+          this.brandingForm.get('logo')?.patchValue({
+            url: '',
+            fileName: '',
+            uploadedAt: null,
+            dimensions: { width: 0, height: 0 }
+          });
+
+          this.currentLogo.set('');
+          this.showSuccess('Logo removed successfully');
+          this.saving.set(false);
+        },
+        error: (error) => {
+          this.showError('Failed to remove logo');
+          this.saving.set(false);
+        }
+      });
     }
   }
 

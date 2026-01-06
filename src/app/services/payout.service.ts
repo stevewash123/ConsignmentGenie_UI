@@ -264,20 +264,21 @@ export class PayoutService {
     };
   }
 
-  async getConsignorsList(): Promise<{ id: string, name: string }[]> {
-    const response = await this.http.get<{
+  getConsignorsList(): Observable<{ id: string, name: string }[]> {
+    return this.http.get<{
       success: boolean;
       data: { id: string, name: string }[]
-    }>(`${environment.apiUrl}/api/consignors/list`).toPromise();
-
-    if (!response?.success) {
-      throw new Error('Failed to get consignors list');
-    }
-
-    return response.data;
+    }>(`${environment.apiUrl}/api/consignors/list`).pipe(
+      map(response => {
+        if (!response?.success) {
+          throw new Error('Failed to get consignors list');
+        }
+        return response.data;
+      })
+    );
   }
 
-  async getPayoutDetail(payoutId: string): Promise<{
+  getPayoutDetail(payoutId: string): Observable<{
     id: string;
     payoutNumber: string;
     date: Date;
@@ -306,7 +307,7 @@ export class PayoutService {
       transactionId: string;
     }[];
   }> {
-    const response = await this.http.get<{
+    return this.http.get<{
       success: boolean;
       data: {
         id: string;
@@ -337,65 +338,71 @@ export class PayoutService {
           transactionId: string;
         }[];
       }
-    }>(`${this.apiUrl}/${payoutId}/detail`).toPromise();
+    }>(`${this.apiUrl}/${payoutId}/detail`).pipe(
+      map(response => {
+        if (!response?.success) {
+          throw new Error('Failed to get payout detail');
+        }
 
-    if (!response?.success) {
-      throw new Error('Failed to get payout detail');
-    }
-
-    // Convert date strings to Date objects
-    const data = response.data;
-    return {
-      ...data,
-      date: new Date(data.date),
-      processedDate: new Date(data.processedDate),
-      voidedDate: data.voidedDate ? new Date(data.voidedDate) : undefined,
-      items: data.items.map(item => ({
-        ...item,
-        saleDate: new Date(item.saleDate)
-      }))
-    };
+        // Convert date strings to Date objects
+        const data = response.data;
+        return {
+          ...data,
+          date: new Date(data.date),
+          processedDate: new Date(data.processedDate),
+          voidedDate: data.voidedDate ? new Date(data.voidedDate) : undefined,
+          items: data.items.map(item => ({
+            ...item,
+            saleDate: new Date(item.saleDate)
+          }))
+        };
+      })
+    );
   }
 
-  async updatePayout(payoutId: string, updateData: {
+  updatePayout(payoutId: string, updateData: {
     method: string;
     notes: string;
-  }): Promise<void> {
-    const response = await this.http.put<{
+  }): Observable<void> {
+    return this.http.put<{
       success: boolean;
       message: string;
-    }>(`${this.apiUrl}/${payoutId}/update`, updateData).toPromise();
-
-    if (!response?.success) {
-      throw new Error('Failed to update payout');
-    }
+    }>(`${this.apiUrl}/${payoutId}/update`, updateData).pipe(
+      map(response => {
+        if (!response?.success) {
+          throw new Error('Failed to update payout');
+        }
+      })
+    );
   }
 
-  async voidPayout(payoutId: string, reason: string): Promise<void> {
-    const response = await this.http.post<{
+  voidPayout(payoutId: string, reason: string): Observable<void> {
+    return this.http.post<{
       success: boolean;
       message: string;
-    }>(`${this.apiUrl}/${payoutId}/void`, { reason }).toPromise();
-
-    if (!response?.success) {
-      throw new Error('Failed to void payout');
-    }
+    }>(`${this.apiUrl}/${payoutId}/void`, { reason }).pipe(
+      map(response => {
+        if (!response?.success) {
+          throw new Error('Failed to void payout');
+        }
+      })
+    );
   }
 
-  async downloadPayoutReceipt(payoutId: string): Promise<Blob> {
+  downloadPayoutReceipt(payoutId: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${payoutId}/receipt`, {
       responseType: 'blob'
-    }).toPromise() as Promise<Blob>;
+    });
   }
 
-  async exportPayoutHistoryCSV(filters: {
+  exportPayoutHistoryCSV(filters: {
     consignorId?: string;
     method?: string;
     status?: string;
     fromDate?: string;
     toDate?: string;
     searchTerm?: string;
-  }): Promise<string> {
+  }): Observable<string> {
     let params = new HttpParams();
 
     Object.entries(filters).forEach(([key, value]) => {
@@ -404,11 +411,9 @@ export class PayoutService {
       }
     });
 
-    const response = await this.http.get(`${this.apiUrl}/history/export`, {
+    return this.http.get(`${this.apiUrl}/history/export`, {
       params,
       responseType: 'text'
-    }).toPromise();
-
-    return response as string;
+    });
   }
 }

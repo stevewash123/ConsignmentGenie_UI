@@ -61,27 +61,28 @@ export class ReservationConflictModalComponent {
     this.dismissed.emit();
   }
 
-  async retry(): Promise<void> {
+  retry(): void {
     this.isRetrying.set(true);
 
-    try {
-      const result = await this.reservationService.reserveItem(this.conflictData().item.id);
-
-      if (result.success) {
-        // Success - emit retry with success
-        this.retryRequested.emit(this.conflictData().item.id);
-        this.dismissed.emit();
-      } else {
-        // Still conflicts - this will trigger a new modal
-        // For now, just dismiss this one
-        this.dismissed.emit();
+    this.reservationService.reserveItem(this.conflictData().item.id).subscribe({
+      next: (result) => {
+        if (result.success) {
+          // Success - emit retry with success
+          this.retryRequested.emit(this.conflictData().item.id);
+          this.dismissed.emit();
+        } else {
+          // Still conflicts - this will trigger a new modal
+          // For now, just dismiss this one
+          this.dismissed.emit();
+        }
+        this.isRetrying.set(false);
+      },
+      error: (error) => {
+        console.error('Retry reservation failed:', error);
+        // Keep modal open on error
+        this.isRetrying.set(false);
       }
-    } catch (error) {
-      console.error('Retry reservation failed:', error);
-      // Keep modal open on error
-    } finally {
-      this.isRetrying.set(false);
-    }
+    });
   }
 
   // Handle backdrop click

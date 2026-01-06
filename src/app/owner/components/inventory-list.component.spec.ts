@@ -164,9 +164,9 @@ describe('InventoryListComponent', () => {
     mockLoadingService.start.and.stub();
     mockLoadingService.stop.and.stub();
     mockLoadingService.isLoading.and.returnValue(false);
-    mockSquareService.syncNow.and.returnValue(Promise.resolve());
-    mockSquareService.getStatus.and.returnValue(Promise.resolve({ isConnected: true, lastSync: new Date() }));
-    mockSquareService.updateSettings.and.returnValue(Promise.resolve());
+    mockSquareService.syncNow.and.returnValue(of(void 0));
+    mockSquareService.getStatus.and.returnValue(of({ isConnected: true, lastSync: new Date() }));
+    mockSquareService.updateSettings.and.returnValue(of(void 0));
     mockSquareService.getSquareUsageSettings.and.returnValue({
       inventoryChoice: 'consignment-genie' as const,
       onlineChoice: 'none' as const,

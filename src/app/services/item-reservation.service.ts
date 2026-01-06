@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface ReservationResult {
@@ -37,51 +38,43 @@ export class ItemReservationService {
   /**
    * Reserve an item for POS transaction
    */
-  async reserveItem(itemId: string, reservedBy: string = 'POS-Terminal'): Promise<ReservationResult> {
-    try {
-      const response = await firstValueFrom(
-        this.http.post<ReservationResult>(`${this.apiUrl}/${itemId}/reserve`, { reservedBy })
-      );
-      return response;
-    } catch (error) {
-      console.error('Failed to reserve item:', error);
-      return {
-        success: false,
-        errorMessage: 'Network error occurred while reserving item',
-        conflictType: 'api_error'
-      };
-    }
+  reserveItem(itemId: string, reservedBy: string = 'POS-Terminal'): Observable<ReservationResult> {
+    return this.http.post<ReservationResult>(`${this.apiUrl}/${itemId}/reserve`, { reservedBy }).pipe(
+      catchError(error => {
+        console.error('Failed to reserve item:', error);
+        return of({
+          success: false,
+          errorMessage: 'Network error occurred while reserving item',
+          conflictType: 'api_error' as const
+        });
+      })
+    );
   }
 
   /**
    * Release an item reservation
    */
-  async releaseReservation(itemId: string): Promise<void> {
-    try {
-      await firstValueFrom(
-        this.http.delete(`${this.apiUrl}/${itemId}/reserve`)
-      );
-    } catch (error) {
-      console.error('Failed to release reservation:', error);
-      throw error;
-    }
+  releaseReservation(itemId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${itemId}/reserve`).pipe(
+      catchError(error => {
+        console.error('Failed to release reservation:', error);
+        throw error;
+      })
+    );
   }
 
   /**
    * Get current reservation status for an item
    */
-  async getReservationStatus(itemId: string): Promise<ReservationStatus> {
-    try {
-      const response = await firstValueFrom(
-        this.http.get<ReservationStatus>(`${this.apiUrl}/${itemId}/reservation-status`)
-      );
-      return response;
-    } catch (error) {
-      console.error('Failed to get reservation status:', error);
-      return {
-        isReserved: false
-      };
-    }
+  getReservationStatus(itemId: string): Observable<ReservationStatus> {
+    return this.http.get<ReservationStatus>(`${this.apiUrl}/${itemId}/reservation-status`).pipe(
+      catchError(error => {
+        console.error('Failed to get reservation status:', error);
+        return of({
+          isReserved: false
+        });
+      })
+    );
   }
 
   /**
@@ -114,22 +107,19 @@ export class ItemReservationService {
   /**
    * Create a reservation for an item
    */
-  async createReservation(itemId: string, durationMinutes: number = 5): Promise<ReservationResult> {
-    try {
-      const response = await firstValueFrom(
-        this.http.post<ReservationResult>(`${this.apiUrl}/${itemId}/reserve`, {
-          durationMinutes,
-          reservedBy: 'cart-system'
-        })
-      );
-      return response;
-    } catch (error) {
-      console.error('Failed to create reservation:', error);
-      return {
-        success: false,
-        errorMessage: 'Failed to create reservation',
-        conflictType: 'api_error'
-      };
-    }
+  createReservation(itemId: string, durationMinutes: number = 5): Observable<ReservationResult> {
+    return this.http.post<ReservationResult>(`${this.apiUrl}/${itemId}/reserve`, {
+      durationMinutes,
+      reservedBy: 'cart-system'
+    }).pipe(
+      catchError(error => {
+        console.error('Failed to create reservation:', error);
+        return of({
+          success: false,
+          errorMessage: 'Failed to create reservation',
+          conflictType: 'api_error' as const
+        });
+      })
+    );
   }
 }

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { BrowserTestingModule } from '@angular/platform-browser/testing';
+import { of, throwError } from 'rxjs';
 
 import { BrandingComponent } from './branding.component';
 import { BrandingService } from '../../../../services/branding.service';
@@ -67,12 +68,12 @@ describe('BrandingComponent', () => {
    */
   function initializeComponent(brandingData: StoreBranding | null = null) {
     if (brandingData) {
-      mockBrandingService.getBranding.and.returnValue(Promise.resolve(brandingData));
+      mockBrandingService.getBranding.and.returnValue(of(brandingData));
     } else {
-      mockBrandingService.getBranding.and.returnValue(Promise.resolve(null));
+      mockBrandingService.getBranding.and.returnValue(of(null));
     }
     fixture.detectChanges();
-    tick(); // Allow the promise to resolve
+    tick(); // Allow the observable to emit
     fixture.detectChanges();
   }
 
@@ -98,7 +99,7 @@ describe('BrandingComponent', () => {
   }));
 
   it('should handle loading error', fakeAsync(() => {
-    mockBrandingService.getBranding.and.returnValue(Promise.reject('Error loading'));
+    mockBrandingService.getBranding.and.returnValue(throwError('Error loading'));
     spyOn<any>(component, 'showError');
 
     fixture.detectChanges();
@@ -110,7 +111,7 @@ describe('BrandingComponent', () => {
   it('should save branding settings successfully', fakeAsync(() => {
     initializeComponent(null);
 
-    mockBrandingService.saveBranding.and.returnValue(Promise.resolve(mockStoreBranding));
+    mockBrandingService.saveBranding.and.returnValue(of(mockStoreBranding));
     component.brandingForm.patchValue(mockStoreBranding);
     spyOn<any>(component, 'showSuccess');
 
@@ -125,7 +126,7 @@ describe('BrandingComponent', () => {
   it('should handle save error', fakeAsync(() => {
     initializeComponent(null);
 
-    mockBrandingService.saveBranding.and.returnValue(Promise.reject('Save error'));
+    mockBrandingService.saveBranding.and.returnValue(throwError('Save error'));
     spyOn<any>(component, 'showError');
 
     component.onSave();
@@ -177,7 +178,7 @@ describe('BrandingComponent', () => {
     Object.defineProperty(mockFile, 'size', { value: 1024 });
 
     const uploadResult = { url: 'https://example.com/new-logo.png', dimensions: { width: 200, height: 50 } };
-    mockBrandingService.uploadLogo.and.returnValue(Promise.resolve(uploadResult));
+    mockBrandingService.uploadLogo.and.returnValue(of(uploadResult));
     spyOn<any>(component, 'showSuccess');
 
     component['uploadLogo'](mockFile);
@@ -192,7 +193,7 @@ describe('BrandingComponent', () => {
     initializeComponent(null);
 
     spyOn(window, 'confirm').and.returnValue(true);
-    mockBrandingService.removeLogo.and.returnValue(Promise.resolve());
+    mockBrandingService.removeLogo.and.returnValue(of(void 0));
     spyOn<any>(component, 'showSuccess');
     component.currentLogo.set('https://example.com/logo.png');
 
