@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { SquareStatus } from '../owner/settings/integrations/inventory/inventory.component';
 
@@ -31,113 +33,100 @@ export class SquareIntegrationService {
   /**
    * Get current Square integration status
    */
-  async getStatus(): Promise<SquareStatus> {
-    try {
-      const response = await this.http.get<any>(`${this.apiUrl}/status`).toPromise();
-
-      return {
-        isConnected: response.connected || false,
-        merchantId: response.merchantId,
-        merchantName: response.merchantName,
-        connectedAt: response.connectedAt ? new Date(response.connectedAt) : undefined,
-        lastSync: response.lastSyncAt ? new Date(response.lastSyncAt) : undefined,
-        itemCount: 0 // This will be populated when sync is implemented
-      };
-    } catch (error) {
-      console.error('Square status error:', error);
-      return {
-        isConnected: false
-      };
-    }
+  getStatus(): Observable<SquareStatus> {
+    return this.http.get<any>(`${this.apiUrl}/status`).pipe(
+      map(response => {
+        return {
+          isConnected: response.connected || response.isConnected || false,
+          merchantId: response.merchantId,
+          merchantName: response.merchantName,
+          connectedAt: response.connectedAt ? new Date(response.connectedAt) : undefined,
+          lastSync: response.lastSyncAt ? new Date(response.lastSyncAt) : (response.lastSync ? new Date(response.lastSync) : undefined),
+          itemCount: response.itemCount || 0
+        };
+      })
+    );
   }
 
   /**
    * Initiate Square OAuth connection
    */
-  async initiateConnection(): Promise<string> {
-    try {
-      const response = await this.http.get<any>(`${this.apiUrl}/auth-url`).toPromise();
-
-      if (response?.authUrl) {
-        return response.authUrl;
-      } else {
-        throw new Error('Failed to get OAuth URL');
-      }
-    } catch (error) {
-      console.error('Square connection initiation error:', error);
-      throw error;
-    }
+  initiateConnection(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/auth-url`);
   }
 
   /**
    * Disconnect from Square
    */
-  async disconnect(): Promise<void> {
-    try {
-      await this.http.post<any>(`${this.apiUrl}/disconnect`, {}).toPromise();
-    } catch (error) {
-      console.error('Square disconnect error:', error);
-      throw error;
-    }
+  disconnect(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/disconnect`, {});
   }
 
   /**
-   * Manually trigger a sync
+   * Sync Square inventory to ConsignmentGenie (import from Square)
    */
-  async syncNow(): Promise<void> {
-    await this.http.post(`${this.apiUrl}/inventory/sync`, {}).toPromise();
+  syncFromSquare(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/inventory/sync`, {});
+  }
+
+  /**
+   * Full sync - this is the main sync operation
+   */
+  performFullSync(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/sync`, {});
+  }
+
+  /**
+   * @deprecated Use syncFromSquare() or performFullSync() instead
+   */
+  syncNow(): Observable<any> {
+    return this.syncFromSquare();
   }
 
   /**
    * Update Square integration settings
    */
-  async updateSettings(settings: any): Promise<void> {
-    await this.http.put(`${environment.apiUrl}/api/integrations/square/settings`, settings).toPromise();
+  updateSettings(settings: any): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/api/integrations/square/settings`, settings);
   }
 
   /**
    * Refresh catalog from Square
    */
-  async refreshCatalog(): Promise<void> {
-    await this.http.post(`${environment.apiUrl}/api/integrations/square/catalog/refresh`, {}).toPromise();
+  refreshCatalog(): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/integrations/square/catalog/refresh`, {});
   }
 
   /**
    * Import sales from Square
    */
-  async importSales(): Promise<any> {
-    return await this.http.post<any>(`${environment.apiUrl}/api/integrations/square/sales/import`, {}).toPromise();
-  }
-
-  /**
-   * Trigger sales import
-   */
-  async triggerSalesImport(endpoint: string): Promise<void> {
-    await this.http.post(endpoint, {}).toPromise();
+  importSales(): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/integrations/square/sales/import`, {});
   }
 
   /**
    * Handle OAuth callback (called by backend)
    */
-  async handleCallback(code: string, state: string): Promise<SquareStatus> {
-    try {
-      const response = await this.http.post<any>(`${this.apiUrl}/callback`, {
-        code: code,
-        state: state
-      }).toPromise();
-
-      return {
-        isConnected: response.connected || true,
-        merchantId: response.merchantId,
-        merchantName: response.merchantName,
-        connectedAt: new Date(),
-        lastSync: response.lastSyncAt ? new Date(response.lastSyncAt) : undefined,
-        itemCount: 0
-      };
-    } catch (error) {
-      console.error('Square callback error:', error);
-      throw error;
-    }
+  handleCallback(code: string, state: string): Observable<SquareStatus> {
+    return this.http.post<any>(`${this.apiUrl}/callback`, {
+      code: code,
+      state: state
+    }).pipe(
+      map(response => {
+        return {
+          isConnected: response.connected || true,
+          merchantId: response.merchantId,
+          merchantName: response.merchantName,
+          connectedAt: new Date(),
+          lastSync: response.lastSyncAt ? new Date(response.lastSyncAt) : undefined,
+          itemCount: 0
+        };
+      }),
+      catchError(error => {
+        console.error('Square callback error:', error);
+        throw error;
+      })
+    );
   }
 
   /**
@@ -186,6 +175,15 @@ export class SquareIntegrationService {
     return settings.inventoryChoice === 'square' ||
            settings.onlineChoice === 'square-online' ||
            settings.posChoice === 'square-pos';
+  }
+
+  /**
+   * Clear all Square-related localStorage settings
+   */
+  clearSquareLocalStorage(): void {
+    localStorage.removeItem('squareUsageSettings');
+    localStorage.removeItem('pendingSalesShopChoice');
+    console.log('🔧 [SquareService] Cleared Square localStorage settings');
   }
 
 }

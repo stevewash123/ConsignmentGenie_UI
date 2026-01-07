@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { SquareIntegrationService } from '../../../../services/square-integration.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
+import { ConfirmationDialogService } from '../../../../shared/services/confirmation-dialog.service';
 
 export interface SquareStatus {
   isConnected: boolean;
@@ -26,8 +28,7 @@ export interface SquareStatus {
 }
 
 export interface SalesSettings {
-  onlineChoice: 'consignmentgenie-storefront' | 'square-online' | 'none';
-  posChoice: 'consignmentgenie-pos' | 'square-pos' | 'manual';
+  shopChoice: 'square' | 'consignmentgenie';
 }
 
 @Component({
@@ -41,6 +42,7 @@ export class SalesComponent implements OnInit {
   private squareService = inject(SquareIntegrationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private confirmationService = inject(ConfirmationDialogService);
 
   configForm: FormGroup;
 
@@ -49,114 +51,141 @@ export class SalesComponent implements OnInit {
   });
 
   salesSettings = signal<SalesSettings>({
-    onlineChoice: 'consignmentgenie-storefront',
-    posChoice: 'consignmentgenie-pos'
+    shopChoice: 'consignmentgenie'
   });
 
   isLoading = signal(false);
   isSaving = signal(false);
   isConnecting = signal(false);
 
-  onlineChoice: 'consignmentgenie-storefront' | 'square-online' | 'none' = 'consignmentgenie-storefront';
-  posChoice: 'consignmentgenie-pos' | 'square-pos' | 'manual' = 'consignmentgenie-pos';
+  shopChoice: 'square' | 'consignmentgenie' = 'consignmentgenie';
 
   constructor(private fb: FormBuilder) {
     this.configForm = this.fb.group({
-      onlineChoice: ['consignmentgenie-storefront'],
-      posChoice: ['consignmentgenie-pos']
+      shopChoice: ['consignmentgenie']
     });
   }
 
   ngOnInit() {
-    console.log('🔧 [Sales] ngOnInit - Loading page');
+    console.log('🔧 [Sales] ngOnInit - Loading Sales component page');
+    console.log('🔧 [Sales] ngOnInit - Component initialized with shopChoice:', this.shopChoice);
+
     this.loadSquareStatus();
     this.loadSalesSettings();
     this.handleSquareCallback();
 
-    // Load current choices from shared settings
+    // Load current choice from shared settings
     const savedSettings = this.squareService.getSquareUsageSettings();
-    this.onlineChoice = savedSettings.onlineChoice;
-    this.posChoice = savedSettings.posChoice;
+    console.log('🔧 [Sales] ngOnInit - Retrieved Square usage settings:', savedSettings);
+
+    // Determine shop choice based on existing settings
+    if (savedSettings.inventoryChoice === 'square' || savedSettings.onlineChoice === 'square-online' || savedSettings.posChoice === 'square-pos') {
+      this.shopChoice = 'square';
+      console.log('🔧 [Sales] ngOnInit - Set shopChoice to "square" based on saved settings');
+    } else {
+      this.shopChoice = 'consignmentgenie';
+      console.log('🔧 [Sales] ngOnInit - Set shopChoice to "consignmentgenie" based on saved settings');
+    }
     this.updateSalesSettings();
 
     // Restore pending choice if user navigated back without completing OAuth
-    const pendingOnlineChoice = localStorage.getItem('pendingSalesOnlineChoice');
-    const pendingPosChoice = localStorage.getItem('pendingSalesPosChoice');
+    const pendingShopChoice = localStorage.getItem('pendingSalesShopChoice');
     const hasOAuthCode = this.route.snapshot.queryParams['code'];
-    console.log('🔧 [Sales] ngOnInit - pendingOnlineChoice:', pendingOnlineChoice, 'pendingPosChoice:', pendingPosChoice, 'hasOAuthCode:', !!hasOAuthCode);
+    console.log('🔧 [Sales] ngOnInit - pendingShopChoice:', pendingShopChoice, 'hasOAuthCode:', !!hasOAuthCode);
 
-    if ((pendingOnlineChoice || pendingPosChoice) && !hasOAuthCode) {
-      console.log('🔧 [Sales] ngOnInit - Restoring choices from localStorage');
-      if (pendingOnlineChoice) {
-        this.onlineChoice = pendingOnlineChoice as 'consignmentgenie-storefront' | 'square-online' | 'none';
-      }
-      if (pendingPosChoice) {
-        this.posChoice = pendingPosChoice as 'consignmentgenie-pos' | 'square-pos' | 'manual';
-      }
+    if (pendingShopChoice && !hasOAuthCode) {
+      console.log('🔧 [Sales] ngOnInit - Restoring choice from localStorage:', pendingShopChoice);
+      this.shopChoice = pendingShopChoice as 'square' | 'consignmentgenie';
       this.updateSalesSettings();
     }
+
+    console.log('🔧 [Sales] ngOnInit - Final shopChoice after initialization:', this.shopChoice);
   }
 
-  selectOnlineChoice(choice: 'consignmentgenie-storefront' | 'square-online' | 'none'): void {
-    console.log('🔧 [Sales] selectOnlineChoice - User selected:', choice);
-    this.onlineChoice = choice;
-    this.configForm.patchValue({ onlineChoice: choice });
+  selectShopChoice(choice: 'square' | 'consignmentgenie'): void {
+    console.log('🔧 [Sales] selectShopChoice - User selected:', choice);
+    console.log('🔧 [Sales] selectShopChoice - Current Square status:', this.squareStatus());
+    console.log('🔧 [Sales] selectShopChoice - Current shopChoice:', this.shopChoice);
+
+    // If user selects Square and isn't connected, just set the choice (don't auto-trigger OAuth)
+    if (choice === 'square' && !this.squareStatus().isConnected) {
+      console.log('🔧 [Sales] selectShopChoice - Square option selected but not connected, showing Connect button');
+      // Note: Don't auto-trigger OAuth - user must click Connect button manually
+    }
+
+    // If user selects "I don't use Square" and Square is connected, trigger disconnect
+    if (choice === 'consignmentgenie' && this.squareStatus().isConnected) {
+      console.log('🔧 [Sales] selectShopChoice - User selected "I don\'t use Square" while connected, triggering disconnect');
+      this.initiateDisconnectFlow();
+      return;
+    }
+
+    this.shopChoice = choice;
+    this.configForm.patchValue({ shopChoice: choice });
     this.updateSalesSettings();
 
-    // Update shared Square usage settings
-    this.squareService.updateSquareUsageSettings({
-      onlineChoice: choice
-    });
+    // Update shared Square usage settings based on choice
+    if (choice === 'square') {
+      console.log('🔧 [Sales] selectShopChoice - Setting Square usage settings');
+      this.squareService.updateSquareUsageSettings({
+        inventoryChoice: 'square',
+        onlineChoice: 'square-online',
+        posChoice: 'square-pos'
+      });
+    } else {
+      console.log('🔧 [Sales] selectShopChoice - Setting ConsignmentGenie usage settings');
+      this.squareService.updateSquareUsageSettings({
+        inventoryChoice: 'consignment-genie',
+        onlineChoice: 'consignmentgenie-storefront',
+        posChoice: 'consignmentgenie-pos'
+      });
+    }
+
+    // Save settings to API immediately
+    this.saveSalesSettings();
 
     // Clear any pending choice since user made a new selection
-    localStorage.removeItem('pendingSalesOnlineChoice');
-    console.log('🔧 [Sales] selectOnlineChoice - Cleared pendingSalesOnlineChoice from localStorage');
-
-    // Check if we need to disconnect when no Square options are selected
-    this.checkForDisconnect();
-  }
-
-  selectPosChoice(choice: 'consignmentgenie-pos' | 'square-pos' | 'manual'): void {
-    console.log('🔧 [Sales] selectPosChoice - User selected:', choice);
-    this.posChoice = choice;
-    this.configForm.patchValue({ posChoice: choice });
-    this.updateSalesSettings();
-
-    // Update shared Square usage settings
-    this.squareService.updateSquareUsageSettings({
-      posChoice: choice
-    });
-
-    // Clear any pending choice since user made a new selection
-    localStorage.removeItem('pendingSalesPosChoice');
-    console.log('🔧 [Sales] selectPosChoice - Cleared pendingSalesPosChoice from localStorage');
-
-    // Check if we need to disconnect when no Square options are selected
-    this.checkForDisconnect();
+    localStorage.removeItem('pendingSalesShopChoice');
+    console.log('🔧 [Sales] selectShopChoice - Cleared pendingSalesShopChoice from localStorage');
   }
 
   private updateSalesSettings(): void {
     this.salesSettings.set({
-      onlineChoice: this.onlineChoice,
-      posChoice: this.posChoice
+      shopChoice: this.shopChoice
     });
   }
 
   private async loadSalesSettings() {
     this.isLoading.set(true);
     try {
-      // In the future, load saved settings from the API
-      // For now, use defaults
-      const settings: SalesSettings = {
-        onlineChoice: 'consignmentgenie-storefront',
-        posChoice: 'consignmentgenie-pos'
-      };
+      const response = await fetch(`${environment.apiUrl}/api/sales/settings`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-      this.onlineChoice = settings.onlineChoice;
-      this.posChoice = settings.posChoice;
-      this.salesSettings.set(settings);
+      if (response.ok) {
+        const settings = await response.json();
+        this.shopChoice = settings.shopChoice || 'consignmentgenie';
+        this.salesSettings.set({
+          shopChoice: this.shopChoice
+        });
+      } else {
+        // Use defaults if API call fails
+        this.shopChoice = 'consignmentgenie';
+        this.salesSettings.set({
+          shopChoice: this.shopChoice
+        });
+      }
     } catch (error) {
       console.error('Failed to load sales settings:', error);
+      // Use defaults on error
+      this.shopChoice = 'consignmentgenie';
+      this.salesSettings.set({
+        shopChoice: this.shopChoice
+      });
     } finally {
       this.isLoading.set(false);
     }
@@ -166,9 +195,36 @@ export class SalesComponent implements OnInit {
     this.isSaving.set(true);
     try {
       const settings = this.salesSettings();
-      // In the future, save to API
       console.log('Sales settings to save:', settings);
-      // await this.http.put(`${environment.apiUrl}/api/sales/settings`, settings).toPromise();
+
+      const response = await fetch(`${environment.apiUrl}/api/sales/settings`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save settings: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Sales settings saved successfully:', result);
+
+      // Trigger Square sync if user selected Square and is connected
+      if (settings.shopChoice === 'square' && this.squareStatus().isConnected) {
+        console.log('🔧 [Sales] saveSalesSettings - Triggering Square full sync after settings save');
+        this.squareService.performFullSync().subscribe({
+          next: (syncResult) => {
+            console.log('🔧 [Sales] Square sync completed:', syncResult);
+          },
+          error: (syncError) => {
+            console.error('🔧 [Sales] Square sync failed:', syncError);
+          }
+        });
+      }
     } catch (error) {
       console.error('Failed to save sales settings:', error);
     } finally {
@@ -177,13 +233,12 @@ export class SalesComponent implements OnInit {
   }
 
   async connectToSquare() {
-    console.log('🔧 [Sales] connectToSquare - Starting connection, current choices: online=', this.onlineChoice, 'pos=', this.posChoice);
+    console.log('🔧 [Sales] connectToSquare - Starting connection, current choice:', this.shopChoice);
     this.isConnecting.set(true);
 
-    // Save current selections before OAuth redirect
-    localStorage.setItem('pendingSalesOnlineChoice', this.onlineChoice);
-    localStorage.setItem('pendingSalesPosChoice', this.posChoice);
-    console.log('🔧 [Sales] connectToSquare - Saved to localStorage:', this.onlineChoice, this.posChoice);
+    // Save Square choice before OAuth redirect (user wants to use Square)
+    localStorage.setItem('pendingSalesShopChoice', 'square');
+    console.log('🔧 [Sales] connectToSquare - Saved "square" to localStorage for OAuth return');
 
     // Set a timeout to prevent indefinite loading state
     const timeout = setTimeout(() => {
@@ -191,48 +246,105 @@ export class SalesComponent implements OnInit {
       console.error('Connection timeout - resetting button state');
     }, 10000); // 10 second timeout
 
-    try {
-      const authUrl = await this.squareService.initiateConnection();
-      console.log('🔧 [Sales] connectToSquare - Got auth URL, redirecting to Square...');
-      clearTimeout(timeout);
-      // Note: We don't set isConnecting to false here because we're navigating away
-      window.location.href = authUrl;
-    } catch (error) {
-      clearTimeout(timeout);
-      console.error('Failed to initiate Square connection:', error);
-      this.isConnecting.set(false);
-      // TODO: Show user-friendly error message
-    }
+    this.squareService.initiateConnection().subscribe({
+      next: (response) => {
+        console.log('🔧 [Sales] connectToSquare - Got auth URL, redirecting to Square...');
+        clearTimeout(timeout);
+        // Note: We don't set isConnecting to false here because we're navigating away
+        if (response?.authUrl) {
+          window.location.href = response.authUrl;
+        } else {
+          throw new Error('Failed to get OAuth URL');
+        }
+      },
+      error: (error) => {
+        clearTimeout(timeout);
+        console.error('Failed to initiate Square connection:', error);
+        this.isConnecting.set(false);
+        // TODO: Show user-friendly error message
+      }
+    });
   }
 
   async disconnectFromSquare() {
-    const confirmed = confirm('Are you sure you want to disconnect from Square? This will stop syncing your Square sales data.');
-    if (!confirmed) return;
-
-    try {
-      await this.squareService.disconnect();
-      await this.loadSquareStatus();
-      console.log('🔧 [Sales] Successfully disconnected from Square');
-    } catch (error) {
-      console.error('Failed to disconnect from Square:', error);
-      // TODO: Show user-friendly error message
-    }
+    console.log('🔧 [Sales] disconnectFromSquare - Manual disconnect button clicked');
+    this.initiateDisconnectFlow();
   }
 
-  private async loadSquareStatus() {
+  private async initiateDisconnectFlow() {
+    console.log('🔧 [Sales] initiateDisconnectFlow - Starting disconnect flow');
+    this.confirmationService.confirmAction(
+      'Disconnect from Square?',
+      'Are you sure you want to disconnect from Square? This will stop syncing your Square sales data.',
+      'Disconnect'
+    ).subscribe(async (result) => {
+      if (!result.confirmed) {
+        console.log('🔧 [Sales] initiateDisconnectFlow - User cancelled disconnect');
+        return;
+      }
+
+      try {
+        console.log('🔧 [Sales] initiateDisconnectFlow - User confirmed disconnect, executing...');
+        console.log('🔧 [Sales] initiateDisconnectFlow - Calling squareService.disconnect()...');
+
+        const disconnectResult = await new Promise((resolve, reject) => {
+          this.squareService.disconnect().subscribe({
+            next: (result) => {
+              console.log('🔧 [Sales] initiateDisconnectFlow - Disconnect API result:', result);
+              resolve(result);
+            },
+            error: (error) => {
+              console.error('🔧 [Sales] initiateDisconnectFlow - Disconnect API error:', error);
+              reject(error);
+            }
+          });
+        });
+
+        // Clear all Square-related localStorage settings
+        this.squareService.clearSquareLocalStorage();
+
+        // Set choice to "I don't use Square" after successful disconnect
+        this.shopChoice = 'consignmentgenie';
+        this.configForm.patchValue({ shopChoice: 'consignmentgenie' });
+        this.updateSalesSettings();
+
+        // Update shared Square usage settings to ConsignmentGenie
+        this.squareService.updateSquareUsageSettings({
+          inventoryChoice: 'consignment-genie',
+          onlineChoice: 'consignmentgenie-storefront',
+          posChoice: 'consignmentgenie-pos'
+        });
+
+        // Save settings to API
+        await this.saveSalesSettings();
+
+        await this.loadSquareStatus();
+        console.log('🔧 [Sales] initiateDisconnectFlow - Successfully disconnected from Square and set choice to "I don\'t use Square"');
+      } catch (error) {
+        console.error('🔧 [Sales] initiateDisconnectFlow - Failed to disconnect from Square:', error);
+        // TODO: Show user-friendly error message
+      }
+    });
+  }
+
+  private loadSquareStatus() {
+    console.log('🔧 [Sales] loadSquareStatus - Starting to load Square status');
     this.isLoading.set(true);
-    try {
-      const status = await this.squareService.getStatus();
-      this.squareStatus.set(status);
-    } catch (error) {
-      console.error('Failed to load Square status:', error);
-      this.squareStatus.set({
-        isConnected: false,
-        error: 'Failed to load status'
-      });
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.squareService.getStatus().subscribe({
+      next: (status) => {
+        console.log('🔧 [Sales] loadSquareStatus - Square status loaded:', status);
+        this.squareStatus.set(status);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('🔧 [Sales] loadSquareStatus - Failed to load Square status:', error);
+        this.squareStatus.set({
+          isConnected: false,
+          error: 'Failed to load status'
+        });
+        this.isLoading.set(false);
+      }
+    });
   }
 
   private async handleSquareCallback() {
@@ -246,7 +358,23 @@ export class SalesComponent implements OnInit {
       console.log('🔧 [Sales] handleSquareCallback - Processing OAuth callback...');
       try {
         this.isLoading.set(true);
-        await this.squareService.handleCallback(code, state);
+        console.log('🔧 [Sales] handleSquareCallback - Calling backend handleCallback API...');
+
+        // Call the backend API to process the OAuth callback
+        const callbackResult = await new Promise((resolve, reject) => {
+          this.squareService.handleCallback(code, state).subscribe({
+            next: (result) => {
+              console.log('🔧 [Sales] handleSquareCallback - Backend callback result:', result);
+              resolve(result);
+            },
+            error: (error) => {
+              console.error('🔧 [Sales] handleSquareCallback - Backend callback error:', error);
+              reject(error);
+            }
+          });
+        });
+
+        console.log('🔧 [Sales] handleSquareCallback - Backend callback completed, reloading Square status...');
         await this.loadSquareStatus();
       } catch (error) {
         console.error('Failed to handle Square OAuth callback:', error);
@@ -254,62 +382,51 @@ export class SalesComponent implements OnInit {
         this.isLoading.set(false);
       }
 
-      // Restore the user's choices from before OAuth redirect
-      const pendingOnlineChoice = localStorage.getItem('pendingSalesOnlineChoice');
-      const pendingPosChoice = localStorage.getItem('pendingSalesPosChoice');
-      console.log('🔧 [Sales] handleSquareCallback - pendingOnlineChoice:', pendingOnlineChoice, 'pendingPosChoice:', pendingPosChoice);
+      // Restore the user's choice from before OAuth redirect
+      const pendingShopChoice = localStorage.getItem('pendingSalesShopChoice');
+      console.log('🔧 [Sales] handleSquareCallback - pendingShopChoice:', pendingShopChoice);
 
-      if (pendingOnlineChoice) {
-        console.log('🔧 [Sales] handleSquareCallback - Restoring online choice:', pendingOnlineChoice);
-        this.onlineChoice = pendingOnlineChoice as 'consignmentgenie-storefront' | 'square-online' | 'none';
-        localStorage.removeItem('pendingSalesOnlineChoice');
+      if (pendingShopChoice) {
+        console.log('🔧 [Sales] handleSquareCallback - Restoring shop choice:', pendingShopChoice);
+        this.shopChoice = pendingShopChoice as 'square' | 'consignmentgenie';
+        localStorage.removeItem('pendingSalesShopChoice');
+      } else {
+        // If no pending choice, user successfully connected to Square, so set to Square
+        console.log('🔧 [Sales] handleSquareCallback - No pending choice, setting to square after successful connection');
+        this.shopChoice = 'square';
       }
-      if (pendingPosChoice) {
-        console.log('🔧 [Sales] handleSquareCallback - Restoring pos choice:', pendingPosChoice);
-        this.posChoice = pendingPosChoice as 'consignmentgenie-pos' | 'square-pos' | 'manual';
-        localStorage.removeItem('pendingSalesPosChoice');
-      }
+      this.configForm.patchValue({ shopChoice: this.shopChoice });
       this.updateSalesSettings();
-      console.log('🔧 [Sales] handleSquareCallback - Choices restored and localStorage cleared');
+
+      // Update Square usage settings to match choice
+      if (this.shopChoice === 'square') {
+        this.squareService.updateSquareUsageSettings({
+          inventoryChoice: 'square',
+          onlineChoice: 'square-online',
+          posChoice: 'square-pos'
+        });
+      }
+
+      console.log('🔧 [Sales] handleSquareCallback - Choice restored and localStorage cleared, final choice:', this.shopChoice);
 
       // Navigate back to the sales page without the callback params
       this.router.navigate(['/owner/settings/integrations/sales'], { replaceUrl: true });
     } else {
       console.log('🔧 [Sales] handleSquareCallback - No valid OAuth callback detected');
 
-      // If we have query params but they're not OAuth, still try to restore the choices
-      const pendingOnlineChoice = localStorage.getItem('pendingSalesOnlineChoice');
-      const pendingPosChoice = localStorage.getItem('pendingSalesPosChoice');
-      if (pendingOnlineChoice || pendingPosChoice) {
-        console.log('🔧 [Sales] handleSquareCallback - Restoring choices from localStorage anyway');
-        if (pendingOnlineChoice) {
-          this.onlineChoice = pendingOnlineChoice as 'consignmentgenie-storefront' | 'square-online' | 'none';
-          localStorage.removeItem('pendingSalesOnlineChoice');
-        }
-        if (pendingPosChoice) {
-          this.posChoice = pendingPosChoice as 'consignmentgenie-pos' | 'square-pos' | 'manual';
-          localStorage.removeItem('pendingSalesPosChoice');
-        }
+      // If we have query params but they're not OAuth, still try to restore the choice
+      const pendingShopChoice = localStorage.getItem('pendingSalesShopChoice');
+      if (pendingShopChoice) {
+        console.log('🔧 [Sales] handleSquareCallback - Restoring choice from localStorage anyway');
+        this.shopChoice = pendingShopChoice as 'square' | 'consignmentgenie';
+        localStorage.removeItem('pendingSalesShopChoice');
         this.updateSalesSettings();
       }
     }
   }
 
-  private async checkForDisconnect() {
-    // If Square is connected but no longer being used anywhere, offer to disconnect
-    if (this.squareStatus().isConnected && !this.squareService.isSquareInUse()) {
-      const shouldDisconnect = confirm(
-        'You\'ve deselected all Square options (inventory, online sales, and POS). Would you like to disconnect from Square entirely? ' +
-        '(You can always reconnect later if needed)'
-      );
-
-      if (shouldDisconnect) {
-        await this.disconnectFromSquare();
-      }
-    }
-  }
 
   get hasSquareOptions(): boolean {
-    return this.onlineChoice === 'square-online' || this.posChoice === 'square-pos';
+    return this.shopChoice === 'square';
   }
 }

@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { SquareIntegrationService } from '../../../../services/square-integration.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { ActivatedRoute, Router } from '@angular/router';
 
 export interface SquareStatus {
   isConnected: boolean;
@@ -102,7 +103,7 @@ export class InventoryComponent implements OnInit {
     return this.selectedChoice === 'square';
   }
 
-  async selectChoice(choice: 'consignment-genie' | 'square'): Promise<void> {
+  selectChoice(choice: 'consignment-genie' | 'square'): void {
     console.log('🔧 [Inventory] selectChoice - User selected:', choice);
     const previousChoice = this.selectedChoice;
     this.selectedChoice = choice;
@@ -125,7 +126,7 @@ export class InventoryComponent implements OnInit {
 
     if (previousChoice !== choice && this.squareStatus().isConnected) {
       console.log('🔧 [Inventory] selectChoice - Triggering automatic sync');
-      await this.performInventorySync(choice);
+      this.performInventorySync(choice);
     } else {
       console.log('🔧 [Inventory] selectChoice - Skipping sync - choice unchanged or Square not connected');
     }
@@ -138,42 +139,66 @@ export class InventoryComponent implements OnInit {
     this.configForm.patchValue({ provider });
   }
 
-  private async loadSquareStatus() {
+  private loadSquareStatus() {
+    console.log('🔧 [Inventory] loadSquareStatus - Starting to load status...');
     this.isLoading.set(true);
-    try {
-      const status = await this.squareService.getStatus();
-      this.squareStatus.set(status);
-    } catch (error) {
-      console.error('Failed to load Square status:', error);
-      this.squareStatus.set({
-        isConnected: false,
-        error: 'Failed to load status'
-      });
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.squareService.getStatus().subscribe({
+      next: (status) => {
+        console.log('🔧 [Inventory] loadSquareStatus - Raw API response:', status);
+        console.log('🔧 [Inventory] loadSquareStatus - isConnected value:', status.isConnected);
+        console.log('🔧 [Inventory] loadSquareStatus - Processed isConnected:', status.isConnected || false);
+
+        const processedStatus = {
+          isConnected: status.isConnected || false,
+          merchantId: status.merchantId,
+          merchantName: status.merchantName,
+          connectedAt: status.connectedAt,
+          lastSync: status.lastSync,
+          itemCount: status.itemCount || 0
+        };
+
+        console.log('🔧 [Inventory] loadSquareStatus - Final status object:', processedStatus);
+        this.squareStatus.set(processedStatus);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('🔧 [Inventory] loadSquareStatus - ERROR loading status:', error);
+        console.error('🔧 [Inventory] loadSquareStatus - Error details:', error.error);
+        this.squareStatus.set({
+          isConnected: false,
+          error: 'Failed to load status'
+        });
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  async connectSquare() {
+  connectSquare() {
     if (this.squareStatus().isConnected) {
       return;
     }
 
     this.isLoading.set(true);
-    try {
-      const oauthUrl = await this.squareService.initiateConnection();
-      window.location.href = oauthUrl;
-    } catch (error) {
-      console.error('Failed to initiate Square connection:', error);
-      this.squareStatus.update(status => ({
-        ...status,
-        error: 'Failed to start connection'
-      }));
-      this.isLoading.set(false);
-    }
+    this.squareService.initiateConnection().subscribe({
+      next: (response) => {
+        if (response?.authUrl) {
+          window.location.href = response.authUrl;
+        } else {
+          throw new Error('Failed to get OAuth URL');
+        }
+      },
+      error: (error) => {
+        console.error('Failed to initiate Square connection:', error);
+        this.squareStatus.update(status => ({
+          ...status,
+          error: 'Failed to start connection'
+        }));
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  async disconnectSquare() {
+  disconnectSquare() {
     if (!this.squareStatus().isConnected) {
       return;
     }
@@ -183,20 +208,22 @@ export class InventoryComponent implements OnInit {
     }
 
     this.isLoading.set(true);
-    try {
-      await this.squareService.disconnect();
-      this.squareStatus.set({
-        isConnected: false
-      });
-    } catch (error) {
-      console.error('Failed to disconnect from Square:', error);
-      this.squareStatus.update(status => ({
-        ...status,
-        error: 'Failed to disconnect'
-      }));
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.squareService.disconnect().subscribe({
+      next: () => {
+        this.squareStatus.set({
+          isConnected: false
+        });
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to disconnect from Square:', error);
+        this.squareStatus.update(status => ({
+          ...status,
+          error: 'Failed to disconnect'
+        }));
+        this.isLoading.set(false);
+      }
+    });
   }
 
   async syncNow() {
@@ -273,61 +300,71 @@ export class InventoryComponent implements OnInit {
     alert('Catalog linking interface will be implemented in the next phase');
   }
 
-  async refreshCatalog() {
+  refreshCatalog() {
     this.isLoading.set(true);
-    try {
-      await this.squareService.refreshCatalog();
-      await this.loadSquareStatus();
-    } catch (error) {
-      console.error('Failed to refresh catalog:', error);
-      this.squareStatus.update(status => ({
-        ...status,
-        error: 'Failed to refresh catalog'
-      }));
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.squareService.refreshCatalog().subscribe({
+      next: () => {
+        this.loadSquareStatus();
+      },
+      error: (error) => {
+        console.error('Failed to refresh catalog:', error);
+        this.squareStatus.update(status => ({
+          ...status,
+          error: 'Failed to refresh catalog'
+        }));
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  async importSalesNow() {
+  importSalesNow() {
     this.isLoading.set(true);
-    try {
-      const response = await this.squareService.importSales();
-      this.squareStatus.update(status => ({
-        ...status,
-        lastSalesImport: new Date(),
-        lastSalesImportCount: response.data?.itemsImported || 0
-      }));
-      await this.loadSquareStatus();
-    } catch (error) {
-      console.error('Failed to import sales:', error);
-      this.squareStatus.update(status => ({
-        ...status,
-        error: 'Failed to import sales'
-      }));
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.squareService.importSales().subscribe({
+      next: (response) => {
+        this.squareStatus.update(status => ({
+          ...status,
+          lastSalesImport: new Date(),
+          lastSalesImportCount: response.data?.itemsImported || 0
+        }));
+        this.loadSquareStatus();
+      },
+      error: (error) => {
+        console.error('Failed to import sales:', error);
+        this.squareStatus.update(status => ({
+          ...status,
+          error: 'Failed to import sales'
+        }));
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  private async handleSquareCallback() {
+  private handleSquareCallback() {
     const code = this.route.snapshot.queryParams['code'];
     const state = this.route.snapshot.queryParams['state'];
+    const fromSquare = this.route.snapshot.queryParams['fromSquare'];
+    const allParams = this.route.snapshot.queryParams;
 
-    console.log('🔧 [Inventory] handleSquareCallback - code:', !!code, 'state:', !!state);
+    console.log('🔧 [Inventory] handleSquareCallback - ALL query params:', allParams);
+    console.log('🔧 [Inventory] handleSquareCallback - code:', !!code, 'state:', !!state, 'fromSquare:', fromSquare);
     console.log('🔧 [Inventory] handleSquareCallback - Raw code:', code, 'Raw state:', state);
 
     if (code && state) {
       console.log('🔧 [Inventory] handleSquareCallback - Processing OAuth callback...');
-      try {
-        this.isLoading.set(true);
-        await this.squareService.handleCallback(code, state);
-        await this.loadSquareStatus();
-      } catch (error) {
-        console.error('Failed to handle Square OAuth callback:', error);
-      } finally {
-        this.isLoading.set(false);
-      }
+      this.isLoading.set(true);
+
+      this.squareService.handleCallback(code, state).subscribe({
+        next: (response) => {
+          console.log('🔧 [Inventory] handleSquareCallback - SUCCESS! Callback response:', response);
+          console.log('🔧 [Inventory] handleSquareCallback - About to reload status...');
+          this.loadSquareStatus();
+        },
+        error: (error) => {
+          console.error('🔧 [Inventory] handleSquareCallback - ERROR handling OAuth callback:', error);
+          console.error('🔧 [Inventory] handleSquareCallback - Error details:', error.error);
+          this.isLoading.set(false);
+        }
+      });
 
       // Restore the user's inventory choice from before OAuth redirect
       // This happens whether the API call succeeded or failed
@@ -342,6 +379,7 @@ export class InventoryComponent implements OnInit {
       }
 
       // Navigate back to the inventory page without the callback params
+      console.log('🔧 [Inventory] handleSquareCallback - Navigating to clean URL...');
       this.router.navigate(['/owner/settings/integrations/inventory'], { replaceUrl: true });
     } else {
       console.log('🔧 [Inventory] handleSquareCallback - No valid OAuth callback detected');
@@ -356,7 +394,7 @@ export class InventoryComponent implements OnInit {
     }
   }
 
-  async connectToSquare() {
+  connectToSquare() {
     console.log('🔧 [Inventory] connectToSquare - Starting connection, current choice:', this.selectedChoice);
     this.isConnecting.set(true);
 
@@ -370,18 +408,24 @@ export class InventoryComponent implements OnInit {
       console.error('Connection timeout - resetting button state');
     }, 10000); // 10 second timeout
 
-    try {
-      const authUrl = await this.squareService.initiateConnection();
-      console.log('🔧 [Inventory] connectToSquare - Got auth URL, redirecting to Square...');
-      clearTimeout(timeout);
-      // Note: We don't set isConnecting to false here because we're navigating away
-      window.location.href = authUrl;
-    } catch (error) {
-      clearTimeout(timeout);
-      console.error('Failed to initiate Square connection:', error);
-      this.isConnecting.set(false);
-      // TODO: Show user-friendly error message
-    }
+    this.squareService.initiateConnection().subscribe({
+      next: (response) => {
+        console.log('🔧 [Inventory] connectToSquare - Got auth URL, redirecting to Square...');
+        clearTimeout(timeout);
+        // Note: We don't set isConnecting to false here because we're navigating away
+        if (response?.authUrl) {
+          window.location.href = response.authUrl;
+        } else {
+          throw new Error('Failed to get OAuth URL');
+        }
+      },
+      error: (error) => {
+        clearTimeout(timeout);
+        console.error('Failed to initiate Square connection:', error);
+        this.isConnecting.set(false);
+        // TODO: Show user-friendly error message
+      }
+    });
   }
 
   async disconnectFromSquare() {
@@ -412,30 +456,26 @@ export class InventoryComponent implements OnInit {
     }
   }
 
-  private async performInventorySync(choice: 'consignment-genie' | 'square'): Promise<void> {
+  private performInventorySync(choice: 'consignment-genie' | 'square'): void {
     console.log('🔧 [Inventory] performInventorySync - Starting sync for choice:', choice);
     this.isLoading.set(true);
 
-    try {
-      const endpoint = choice === 'square'
-        ? `${environment.apiUrl}/api/owner/integrations/square/inventory/sync`
-        : `${environment.apiUrl}/api/owner/integrations/square/inventory/sync-to-cg`;
-
-      await this.squareService.triggerSalesImport(endpoint);
-
-      console.log('🔧 [Inventory] performInventorySync - Sync completed successfully');
-
-      // Update status to reflect the sync
-      await this.loadSquareStatus();
-
-    } catch (error) {
-      console.error('Failed to sync inventory:', error);
-      this.squareStatus.update(status => ({
-        ...status,
-        error: `Failed to sync inventory to ${choice === 'square' ? 'Square' : 'ConsignmentGenie'}`
-      }));
-    } finally {
-      this.isLoading.set(false);
-    }
+    // Both choices sync FROM Square to ensure data is current
+    // The choice affects which system is the source of truth for display/editing
+    this.squareService.syncFromSquare().subscribe({
+      next: () => {
+        console.log('🔧 [Inventory] performInventorySync - Sync completed successfully');
+        // Update status to reflect the sync
+        this.loadSquareStatus();
+      },
+      error: (error) => {
+        console.error('Failed to sync inventory:', error);
+        this.squareStatus.update(status => ({
+          ...status,
+          error: `Failed to sync inventory for ${choice === 'square' ? 'Square' : 'ConsignmentGenie'} choice`
+        }));
+        this.isLoading.set(false);
+      }
+    });
   }
 }

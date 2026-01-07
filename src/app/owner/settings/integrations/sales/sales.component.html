@@ -10,148 +10,59 @@
     </div>
   }
 
-  <!-- Online Sales Section -->
+  <!-- Shop Management Section -->
   <div class="choice-section">
-    <h3 class="choice-title">How would you like to sell online?</h3>
+    <h3 class="choice-title">How do you want to run your shop?</h3>
 
     <div class="choice-grid">
-      <!-- Option 1: ConsignmentGenie Storefront -->
+      <!-- Option 1: Use Square -->
       <div
         class="choice-card"
-        [class.selected]="onlineChoice === 'consignmentgenie-storefront'"
-        (click)="selectOnlineChoice('consignmentgenie-storefront')">
-        <input type="radio" name="onlineChoice" value="consignmentgenie-storefront" [checked]="onlineChoice === 'consignmentgenie-storefront'" class="choice-radio">
+        [class.selected]="shopChoice === 'square'"
+        (click)="selectShopChoice('square')">
+        <input type="radio" name="shopChoice" value="square" [checked]="shopChoice === 'square'" class="choice-radio">
         <div class="choice-main-content">
           <div class="choice-header">
             <div class="choice-text-section">
-              <h4 class="choice-label">Use ConsignmentGenie storefront</h4>
+              <h4 class="choice-label">I use Square</h4>
+            </div>
+            <div class="choice-icon">🔲</div>
+          </div>
+          <div class="choice-benefits">
+            <div class="benefit-item">• Connect Square, sync inventory from Square</div>
+            <div class="benefit-item">• Import all sales automatically</div>
+            <div class="benefit-item">• Use your existing Square setup</div>
+            <div class="benefit-item">• Keep your current workflows and hardware</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 2: Use ConsignmentGenie -->
+      <div
+        class="choice-card"
+        [class.selected]="shopChoice === 'consignmentgenie'"
+        (click)="selectShopChoice('consignmentgenie')">
+        <input type="radio" name="shopChoice" value="consignmentgenie" [checked]="shopChoice === 'consignmentgenie'" class="choice-radio">
+        <div class="choice-main-content">
+          <div class="choice-header">
+            <div class="choice-text-section">
+              <h4 class="choice-label">I don't use Square</h4>
             </div>
             <div class="choice-icon">📱</div>
           </div>
           <div class="choice-benefits">
-            <div class="benefit-item">• Built-in consignment workflows and features</div>
-            <div class="benefit-item">• Automatic consignor payout calculations</div>
-            <div class="benefit-item">• Integrated with your inventory management</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Option 2: Square Online -->
-      <div
-        class="choice-card"
-        [class.selected]="onlineChoice === 'square-online'"
-        (click)="selectOnlineChoice('square-online')">
-        <input type="radio" name="onlineChoice" value="square-online" [checked]="onlineChoice === 'square-online'" class="choice-radio">
-        <div class="choice-main-content">
-          <div class="choice-header">
-            <div class="choice-text-section">
-              <h4 class="choice-label">Use Square online</h4>
-            </div>
-            <div class="choice-icon">🔲</div>
-          </div>
-          <div class="choice-benefits">
-            <div class="benefit-item">• Keep using your existing Square website</div>
-            <div class="benefit-item">• Import sales data for payout tracking</div>
-            <div class="benefit-item">• Maintain your current domain and branding</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Option 3: No Online Sales -->
-      <div
-        class="choice-card"
-        [class.selected]="onlineChoice === 'none'"
-        (click)="selectOnlineChoice('none')">
-        <input type="radio" name="onlineChoice" value="none" [checked]="onlineChoice === 'none'" class="choice-radio">
-        <div class="choice-main-content">
-          <div class="choice-header">
-            <div class="choice-text-section">
-              <h4 class="choice-label">No online sales</h4>
-            </div>
-            <div class="choice-icon">❌</div>
-          </div>
-          <div class="choice-benefits">
-            <div class="benefit-item">• Focus on in-store sales only</div>
-            <div class="benefit-item">• Simplify your operations</div>
-            <div class="benefit-item">• Can add online sales later</div>
+            <div class="benefit-item">• Manage inventory in ConsignmentGenie</div>
+            <div class="benefit-item">• Use ConsignmentGenie POS system</div>
+            <div class="benefit-item">• Built-in consignment workflows</div>
+            <div class="benefit-item">• Optional online storefront later</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- In-Store Sales Section -->
-  <div class="choice-section">
-    <h3 class="choice-title">How would you like to record in-store sales?</h3>
-
-    <div class="choice-grid">
-      <!-- Option 1: ConsignmentGenie POS -->
-      <div
-        class="choice-card"
-        [class.selected]="posChoice === 'consignmentgenie-pos'"
-        (click)="selectPosChoice('consignmentgenie-pos')">
-        <input type="radio" name="posChoice" value="consignmentgenie-pos" [checked]="posChoice === 'consignmentgenie-pos'" class="choice-radio">
-        <div class="choice-main-content">
-          <div class="choice-header">
-            <div class="choice-text-section">
-              <h4 class="choice-label">Use ConsignmentGenie POS</h4>
-            </div>
-            <div class="choice-icon">🧾</div>
-          </div>
-          <div class="choice-benefits">
-            <div class="benefit-item">• Built-in consignment split calculations</div>
-            <div class="benefit-item">• Automatic inventory updates</div>
-            <div class="benefit-item">• Real-time payout tracking</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Option 2: Square POS -->
-      <div
-        class="choice-card"
-        [class.selected]="posChoice === 'square-pos'"
-        (click)="selectPosChoice('square-pos')">
-        <input type="radio" name="posChoice" value="square-pos" [checked]="posChoice === 'square-pos'" class="choice-radio">
-        <div class="choice-main-content">
-          <div class="choice-header">
-            <div class="choice-text-section">
-              <h4 class="choice-label">Use Square POS/register</h4>
-            </div>
-            <div class="choice-icon">🔲</div>
-          </div>
-          <div class="choice-benefits">
-            <div class="benefit-item">• Keep using your existing Square hardware</div>
-            <div class="benefit-item">• Import sales data for consignor payouts</div>
-            <div class="benefit-item">• Maintain familiar workflows</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Option 3: Manual Entry -->
-      <div
-        class="choice-card"
-        [class.selected]="posChoice === 'manual'"
-        (click)="selectPosChoice('manual')">
-        <input type="radio" name="posChoice" value="manual" [checked]="posChoice === 'manual'" class="choice-radio">
-        <div class="choice-main-content">
-          <div class="choice-header">
-            <div class="choice-text-section">
-              <h4 class="choice-label">Manual entry</h4>
-            </div>
-            <div class="choice-icon">✏️</div>
-          </div>
-          <div class="choice-benefits">
-            <div class="benefit-item">• Record sales after transactions</div>
-            <div class="benefit-item">• No additional hardware needed</div>
-            <div class="benefit-item">• Simple cash register or paper receipts</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Square Integration Section - Show when Square options are selected -->
-  @if (onlineChoice === 'square-online' || posChoice === 'square-pos') {
+  <!-- Square Integration Section - Show when Square is selected -->
+  @if (shopChoice === 'square') {
     <div class="choice-section">
       <h3 class="choice-title">Square Integration</h3>
 
