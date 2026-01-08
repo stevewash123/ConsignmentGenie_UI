@@ -36,6 +36,58 @@ export interface UpdateConsignorRequest extends CreateConsignorRequest {
   status?: ConsignorStatus;
 }
 
+export interface ConsignorDetailDto {
+  consignorId: string;
+  userId?: string;
+  consignorNumber: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  fullAddress?: string;
+  commissionRate: number;
+  contractStartDate?: string;
+  contractEndDate?: string;
+  isContractExpired: boolean;
+  preferredPaymentMethod?: string;
+  paymentDetails?: string;
+  notes?: string;
+  status: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  approvalDate?: string;
+  approvedByUserId?: string;
+  approvedByUserName?: string;
+  totalItems: number;
+  activeItems: number;
+  soldItems: number;
+  pendingBalance: number;
+  totalEarnings: number;
+  totalPaid: number;
+  earningsThisMonth: number;
+  earningsLastMonth: number;
+  salesThisMonth: number;
+  salesLastMonth: number;
+  lastSaleDate?: string;
+  lastPayoutDate?: string;
+  lastPayoutAmount: number;
+  averageItemPrice: number;
+  averageDaysToSell: number;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+}
+
 export interface ConsignorListDto {
   consignorId: number;
   consignorNumber: string;

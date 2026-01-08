@@ -3,11 +3,11 @@
       <div class="header-container">
         <div class="header-left">
           <div class="logo">
-            <h2>{{ currentUser()?.organizationName || 'ConsignmentGenie' }}</h2>
+            <h2>{{ getCurrentUser()?.organizationName || 'ConsignmentGenie' }}</h2>
             <span class="owner-badge">Shop Management</span>
           </div>
 
-          <nav class="main-nav" *ngIf="currentUser()">
+          <nav class="main-nav" *ngIf="getCurrentUser()">
             <div class="nav-links">
               <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
               <a routerLink="/owner/consignors" routerLinkActive="active">consignors</a>
@@ -32,14 +32,14 @@
           </nav>
         </div>
 
-        <div class="header-right" *ngIf="currentUser()">
+        <div class="header-right" *ngIf="getCurrentUser()">
           <!-- Notification Bell -->
           <app-notification-bell role="owner"></app-notification-bell>
 
           <div class="user-info">
             <div class="user-details">
-              <div class="user-email">{{ currentUser()?.email }}</div>
-              <div class="org-name">{{ currentUser()?.organizationName }}</div>
+              <div class="user-email">{{ getCurrentUser()?.email }}</div>
+              <div class="org-name">{{ getCurrentUser()?.organizationName }}</div>
             </div>
           </div>
 

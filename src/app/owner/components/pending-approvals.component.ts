@@ -40,9 +40,21 @@ export class PendingApprovalsComponent implements OnInit {
 
   loadPendingApprovals(): void {
     this.loadingService.start('pending-approvals');
-    this.consignorService.getPendingApprovals().subscribe({
-      next: (approvals) => {
-        this.pendingApprovals.set(approvals || []);
+    this.consignorService.getConsignors().subscribe({
+      next: (consignors) => {
+        // Filter for pending consignors and transform to PendingConsignorApproval interface
+        const pendingApprovals = consignors
+          .filter(c => c.status === 'pending')
+          .map(c => ({
+            id: parseInt(c.id), // Convert string to number to match PendingConsignorApproval interface
+            name: c.name,
+            email: c.email,
+            phone: c.phone,
+            registrationDate: c.createdAt,
+            storeCode: 'SHOP2024', // TODO: Get from organization/shop settings
+            registrationInfo: c.notes || ''
+          }));
+        this.pendingApprovals.set(pendingApprovals);
       },
       error: (error) => {
         console.error('Error loading pending approvals:', error);

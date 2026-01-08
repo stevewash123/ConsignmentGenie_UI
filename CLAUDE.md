@@ -43,6 +43,10 @@ src/
 **Essential Development Notes:**
 1. **Use Chrome MCP to debug as needed** - Available for web debugging and testing
 2. **Find a similar component before adding a new one** - Check services, code styles, and existing patterns
+3. **Follow UI Pattern Standards** - See [UI_PATTERNS.md](../docs/UI_PATTERNS.md) for:
+   - Modal vs Page decision framework
+   - Entity-specific interaction patterns
+   - **NEVER use browser dialogs** (`alert`, `confirm`, `prompt`) - Use shared modal components instead
 
 ## Build & Test Commands
 

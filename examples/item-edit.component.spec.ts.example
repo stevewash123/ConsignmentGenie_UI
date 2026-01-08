@@ -1,0 +1,207 @@
+/**
+ * EXAMPLE: Edit/Form Component Smoke Test
+ * 
+ * This shows smoke tests for a form component with save/cancel actions.
+ */
+
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { of, throwError } from 'rxjs';
+import { ItemEditComponent } from './item-edit.component';
+import { ConsoleErrorTracker } from '@testing/console-error-tracker';
+import { ItemService } from '../../services/item.service';
+import { Router } from '@angular/router';
+
+describe('ItemEditComponent', () => {
+  let tracker: ConsoleErrorTracker;
+  let mockItemService: jasmine.SpyObj<ItemService>;
+  let mockRouter: jasmine.SpyObj<Router>;
+
+  const mockItem = {
+    id: '1',
+    name: 'Vintage Lamp',
+    description: 'Beautiful mid-century lamp',
+    price: 45.00,
+    category: 'lighting',
+    providerId: 'provider-1'
+  };
+
+  beforeEach(() => {
+    tracker = new ConsoleErrorTracker();
+    
+    mockItemService = jasmine.createSpyObj('ItemService', [
+      'getItem',
+      'saveItem',
+      'createItem'
+    ]);
+    mockItemService.getItem.and.returnValue(of(mockItem));
+    mockItemService.saveItem.and.returnValue(of(mockItem));
+    mockItemService.createItem.and.returnValue(of(mockItem));
+    
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+  });
+
+  afterEach(() => {
+    tracker.stop();
+  });
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ItemEditComponent, ReactiveFormsModule],
+      providers: [
+        { provide: ItemService, useValue: mockItemService },
+        { provide: Router, useValue: mockRouter },
+      ],
+    }).compileComponents();
+  });
+
+  describe('SMOKE', () => {
+    it('should render edit form with data without console errors', fakeAsync(() => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemEditComponent);
+      const component = fixture.componentInstance;
+      
+      // Simulate route parameter for editing existing item
+      component.itemId = '1';
+      
+      fixture.detectChanges();
+      tick(); // Wait for async load
+      fixture.detectChanges();
+
+      // Verify form populated
+      expect(component.form.get('name')?.value).toBe('Vintage Lamp');
+      expect(component.form.get('price')?.value).toBe(45.00);
+      
+      // Verify form controls rendered
+      const nameInput = fixture.nativeElement.querySelector('input[formControlName="name"]');
+      expect(nameInput).toBeTruthy();
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    }));
+
+    it('should render create form without console errors', () => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemEditComponent);
+      const component = fixture.componentInstance;
+      
+      // No itemId = create mode
+      component.itemId = null;
+      
+      fixture.detectChanges();
+
+      // Verify empty form
+      expect(component.form.get('name')?.value).toBeFalsy();
+      expect(component.isEditMode).toBe(false);
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    });
+
+    it('should handle save action without console errors', fakeAsync(() => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemEditComponent);
+      const component = fixture.componentInstance;
+      component.itemId = '1';
+      
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      // Modify form
+      component.form.patchValue({ name: 'Updated Lamp' });
+      fixture.detectChanges();
+
+      // Trigger save
+      component.onSave();
+      tick();
+      fixture.detectChanges();
+
+      // Verify save called
+      expect(mockItemService.saveItem).toHaveBeenCalled();
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    }));
+
+    it('should handle cancel action without console errors', fakeAsync(() => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemEditComponent);
+      const component = fixture.componentInstance;
+      component.itemId = '1';
+      
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      // Trigger cancel
+      component.onCancel();
+      tick();
+      fixture.detectChanges();
+
+      // Verify navigation
+      expect(mockRouter.navigate).toHaveBeenCalled();
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    }));
+
+    it('should handle validation errors without console errors', () => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemEditComponent);
+      const component = fixture.componentInstance;
+      component.itemId = null;
+      
+      fixture.detectChanges();
+
+      // Submit invalid form
+      component.form.patchValue({ name: '' }); // Invalid - name required
+      component.onSave();
+      fixture.detectChanges();
+
+      // Verify validation error displayed
+      const errorMsg = fixture.nativeElement.querySelector('.error-message');
+      expect(errorMsg).toBeTruthy();
+      
+      // Service should NOT have been called
+      expect(mockItemService.createItem).not.toHaveBeenCalled();
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    });
+
+    it('should handle server error without console errors', fakeAsync(() => {
+      tracker.start();
+      
+      // Set up error response
+      mockItemService.saveItem.and.returnValue(
+        throwError(() => new Error('Server error'))
+      );
+      
+      const fixture = TestBed.createComponent(ItemEditComponent);
+      const component = fixture.componentInstance;
+      component.itemId = '1';
+      
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      // Trigger save (will fail)
+      component.form.patchValue({ name: 'Test' });
+      component.onSave();
+      tick();
+      fixture.detectChanges();
+
+      // Verify error state handled gracefully
+      expect(component.errorMessage).toBeTruthy();
+      
+      // THE KEY ASSERTION - component should handle error without console.error
+      tracker.expectNoErrors();
+    }));
+  });
+});

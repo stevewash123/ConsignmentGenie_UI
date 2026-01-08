@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Consignor, ConsignorListDto, CreateConsignorRequest, UpdateConsignorRequest, ConsignorStatusChangeRequest, ConsignorStatusChangeResponse, PendingConsignorApproval, ConsignorApprovalRequest, ConsignorApprovalResponse } from '../models/consignor.model';
+import { Consignor, ConsignorListDto, ConsignorDetailDto, ApiResponse, CreateConsignorRequest, UpdateConsignorRequest, ConsignorStatusChangeRequest, ConsignorStatusChangeResponse, PendingConsignorApproval, ConsignorApprovalRequest, ConsignorApprovalResponse, ConsignorStatus } from '../models/consignor.model';
 import { BalanceAdjustment, CreateBalanceAdjustmentRequest, BalanceAdjustmentResponse, ConsignorBalance } from '../models/balance-adjustment.model';
 import { PagedResult } from '../models/inventory.model';
 import { environment } from '../../environments/environment';
@@ -112,7 +112,45 @@ export class ConsignorService {
   }
 
   getConsignor(id: string): Observable<Consignor> {
-    return this.http.get<Consignor>(`${this.apiUrl}/${id}`);
+    return this.http.get<ApiResponse<ConsignorDetailDto>>(`${this.apiUrl}/${id}`).pipe(
+      map(response => this.transformDetailToConsignor(response.data))
+    );
+  }
+
+  private transformDetailToConsignor(dto: ConsignorDetailDto): Consignor {
+    return {
+      id: dto.consignorId,
+      name: dto.fullName,
+      email: dto.email || '',
+      phone: dto.phone,
+      address: dto.fullAddress,
+      commissionRate: dto.commissionRate,
+      preferredPaymentMethod: dto.preferredPaymentMethod,
+      paymentDetails: dto.paymentDetails,
+      notes: dto.notes,
+      isActive: dto.isActive,
+      status: this.mapApiStatusToConsignorStatus(dto.status),
+      organizationId: 1, // Will be handled by backend
+      consignorNumber: dto.consignorNumber,
+      createdAt: new Date(dto.createdAt),
+      updatedAt: new Date(dto.updatedAt),
+      activatedAt: dto.approvalDate ? new Date(dto.approvalDate) : undefined
+    };
+  }
+
+  getConsignorStats(id: string): Observable<any> {
+    return this.http.get<ApiResponse<ConsignorDetailDto>>(`${this.apiUrl}/${id}`).pipe(
+      map(response => {
+        const dto = response.data;
+        return {
+          totalItems: dto.totalItems,
+          activeItems: dto.activeItems,
+          soldItems: dto.soldItems,
+          totalEarnings: dto.totalEarnings,
+          pendingPayout: dto.pendingBalance
+        };
+      })
+    );
   }
 
   createConsignor(request: CreateConsignorRequest): Observable<Consignor> {
@@ -180,12 +218,21 @@ export class ConsignorService {
     return this.http.patch<ConsignorStatusChangeResponse>(`${this.apiUrl}/${consignorId}/status`, request);
   }
 
-  // Approval workflow methods
-  getPendingApprovals(): Observable<PendingConsignorApproval[]> {
-    return this.http.get<PendingConsignorApproval[]>(`${this.apiUrl}/pending-approvals`);
-  }
+  // Approval workflow methods - Use getConsignors() and filter for status === 'pending'
 
   processApproval(approvalId: number, request: ConsignorApprovalRequest): Observable<ConsignorApprovalResponse> {
     return this.http.post<ConsignorApprovalResponse>(`${this.apiUrl}/approvals/${approvalId}`, request);
+  }
+
+  private mapApiStatusToConsignorStatus(apiStatus: string): ConsignorStatus {
+    switch (apiStatus?.toLowerCase()) {
+      case 'active': return 'active';
+      case 'invited': return 'invited';
+      case 'inactive': return 'inactive';
+      case 'suspended': return 'suspended';
+      case 'closed': return 'closed';
+      case 'pending': return 'pending';
+      default: return 'inactive';
+    }
   }
 }
