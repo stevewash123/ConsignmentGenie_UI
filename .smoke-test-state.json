@@ -1,0 +1,146 @@
+{
+  "features": {
+    "admin": {
+      "name": "admin",
+      "description": "Admin dashboard and management",
+      "totalFiles": 11,
+      "withSpecs": 11,
+      "missingSpecs": 0,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "complete"
+    },
+    "inventory": {
+      "name": "inventory",
+      "description": "Inventory Management - add/edit/list/detail inventory items",
+      "totalFiles": 6,
+      "withSpecs": 4,
+      "missingSpecs": 2,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "in-progress"
+    },
+    "consignor": {
+      "name": "consignor",
+      "description": "Consignor Management - invite/add/edit/list consignors, registration",
+      "totalFiles": 39,
+      "withSpecs": 10,
+      "missingSpecs": 29,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "in-progress"
+    },
+    "settings-account": {
+      "name": "settings-account",
+      "description": "Settings: Account & Profile - basic info, branding, contact",
+      "totalFiles": 6,
+      "withSpecs": 1,
+      "missingSpecs": 5,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "in-progress"
+    },
+    "settings-policies": {
+      "name": "settings-policies",
+      "description": "Settings: Business Policies - rules, receipt settings",
+      "totalFiles": 4,
+      "withSpecs": 4,
+      "missingSpecs": 0,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "complete"
+    },
+    "settings-integrations": {
+      "name": "settings-integrations",
+      "description": "Settings: Integrations - accounting, payments, payouts, sales, inventory",
+      "totalFiles": 6,
+      "withSpecs": 0,
+      "missingSpecs": 6,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "not-started"
+    },
+    "settings-consignor": {
+      "name": "settings-consignor",
+      "description": "Settings: Consignor Management - permissions, agreements",
+      "totalFiles": 0,
+      "withSpecs": 0,
+      "missingSpecs": 0,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "not-started"
+    },
+    "settings-notifications": {
+      "name": "settings-notifications",
+      "description": "Settings: Notifications - notification preferences",
+      "totalFiles": 1,
+      "withSpecs": 0,
+      "missingSpecs": 1,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "not-started"
+    },
+    "settings-storefront": {
+      "name": "settings-storefront",
+      "description": "Settings: Storefront - storefront configuration",
+      "totalFiles": 1,
+      "withSpecs": 0,
+      "missingSpecs": 1,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "not-started"
+    },
+    "price-management": {
+      "name": "price-management",
+      "description": "Price Management - price change requests and modals",
+      "totalFiles": 0,
+      "withSpecs": 0,
+      "missingSpecs": 0,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "not-started"
+    },
+    "bulk-operations": {
+      "name": "bulk-operations",
+      "description": "Bulk Operations - bulk import functionality",
+      "totalFiles": 0,
+      "withSpecs": 0,
+      "missingSpecs": 0,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "not-started"
+    },
+    "shared": {
+      "name": "shared",
+      "description": "Shared components, pipes, directives",
+      "totalFiles": 31,
+      "withSpecs": 11,
+      "missingSpecs": 20,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "in-progress"
+    },
+    "auth": {
+      "name": "auth",
+      "description": "Authentication and authorization",
+      "totalFiles": 22,
+      "withSpecs": 11,
+      "missingSpecs": 11,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "in-progress"
+    },
+    "layout": {
+      "name": "layout",
+      "description": "Layout components - header, sidebar, footer",
+      "totalFiles": 2,
+      "withSpecs": 0,
+      "missingSpecs": 2,
+      "passingTests": 0,
+      "failingTests": 0,
+      "status": "not-started"
+    }
+  },
+  "lastUpdated": "2026-01-08T16:55:30.625Z",
+  "currentFeature": null
+}
