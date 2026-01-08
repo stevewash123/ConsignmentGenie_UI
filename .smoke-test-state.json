@@ -24,8 +24,8 @@
       "name": "consignor",
       "description": "Consignor Management - invite/add/edit/list consignors, registration",
       "totalFiles": 40,
-      "withSpecs": 9,
-      "missingSpecs": 31,
+      "withSpecs": 10,
+      "missingSpecs": 30,
       "passingTests": 0,
       "failingTests": 0,
       "status": "in-progress"
@@ -114,8 +114,8 @@
       "name": "shared",
       "description": "Shared components, pipes, directives",
       "totalFiles": 31,
-      "withSpecs": 11,
-      "missingSpecs": 20,
+      "withSpecs": 13,
+      "missingSpecs": 18,
       "passingTests": 0,
       "failingTests": 0,
       "status": "in-progress"
@@ -124,8 +124,8 @@
       "name": "auth",
       "description": "Authentication and authorization",
       "totalFiles": 22,
-      "withSpecs": 11,
-      "missingSpecs": 11,
+      "withSpecs": 18,
+      "missingSpecs": 4,
       "passingTests": 0,
       "failingTests": 0,
       "status": "in-progress"
@@ -134,13 +134,13 @@
       "name": "layout",
       "description": "Layout components - header, sidebar, footer",
       "totalFiles": 2,
-      "withSpecs": 0,
-      "missingSpecs": 2,
+      "withSpecs": 2,
+      "missingSpecs": 0,
       "passingTests": 0,
       "failingTests": 0,
-      "status": "not-started"
+      "status": "complete"
     }
   },
-  "lastUpdated": "2026-01-08T17:30:47.929Z",
+  "lastUpdated": "2026-01-08T17:34:09.612Z",
   "currentFeature": null
 }
