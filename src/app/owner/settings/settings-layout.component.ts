@@ -101,6 +101,12 @@ export class SettingsLayoutComponent implements OnInit {
           route: 'consignors',
           description: 'Commission rates, time periods'
         },
+        {
+          id: 'agreement',
+          label: 'Consignment Agreement',
+          route: 'consignors/agreement',
+          description: 'Upload and manage your consignment agreement template'
+        }
       ]
     },
     {
@@ -142,12 +148,6 @@ export class SettingsLayoutComponent implements OnInit {
       description: 'External services and connections',
       children: [
         {
-          id: 'inventory',
-          label: 'Inventory',
-          route: 'integrations/inventory',
-          description: 'Item management and tracking setup'
-        },
-        {
           id: 'sales',
           label: 'Sales',
           route: 'integrations/sales',
@@ -158,12 +158,6 @@ export class SettingsLayoutComponent implements OnInit {
           label: 'Accounting',
           route: 'integrations/accounting',
           description: 'QuickBooks, Xero integrations'
-        },
-        {
-          id: 'payments',
-          label: 'Payment Processing',
-          route: 'integrations/payments',
-          description: 'Stripe, Square payment setup'
         },
         {
           id: 'payouts',

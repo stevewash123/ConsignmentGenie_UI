@@ -10,6 +10,8 @@ import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SquareIntegrationService } from '../../services/square-integration.service';
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
+import { ConsignorService } from '../../services/consignor.service';
+import { Consignor } from '../../models/consignor.model';
 import {
   ItemListDto,
   ItemQueryParams,
@@ -17,7 +19,8 @@ import {
   ItemCondition,
   ItemStatus,
   ItemCategoryDto,
-  UpdateItemStatusRequest
+  UpdateItemStatusRequest,
+  PendingSquareImportDto
 } from '../../models/inventory.model';
 
 // Define interface for imported CSV data structure
@@ -48,11 +51,14 @@ export class InventoryListComponent implements OnInit {
   private loadingService = inject(LoadingService);
   private squareService = inject(SquareIntegrationService);
   private confirmationService = inject(ConfirmationDialogService);
+  private consignorService = inject(ConsignorService);
   private destroyRef = inject(DestroyRef);
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
+  pendingImportsResult = signal<PagedResult<PendingSquareImportDto> | null>(null);
   categories = signal<ItemCategoryDto[]>([]);
+  consignors = signal<Consignor[]>([]);
   error = signal<string | null>(null);
   isBulkImportModalOpen = signal(false);
   isColorGuideModalOpen = signal(false);
@@ -62,12 +68,27 @@ export class InventoryListComponent implements OnInit {
     return this.loadingService.isLoading('inventory-list');
   }
 
+  // View mode state
+  viewMode = signal<'regular' | 'pending'>('regular');
+
+  // Selection state for pending imports
+  selectedPendingImports = signal<Set<string>>(new Set());
+  allPendingSelected = signal(false);
+
+  // Bulk assign state
+  selectedConsignorId = signal<string>('');
+
+  // Individual assign state
+  assignmentDropdownOpen = signal<string | null>(null);
+  individualConsignorSelections = signal<Map<string, string>>(new Map());
+
   // Filter state
   searchQuery = '';
   selectedStatus = '';
   selectedCondition = '';
   selectedCategory = '';
   selectedExpiration = '';
+  selectedConsignor = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
   sortBy = 'sku';
@@ -78,7 +99,7 @@ export class InventoryListComponent implements OnInit {
 
   // Computed values
   visiblePages = computed(() => {
-    const result = this.itemsResult();
+    const result = this.viewMode() === 'pending' ? this.pendingImportsResult() : this.itemsResult();
     if (!result) return [];
 
     const current = this.currentPage();
@@ -103,6 +124,7 @@ export class InventoryListComponent implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
+    this.loadConsignors();
     this.loadItems();
   }
 
@@ -116,6 +138,17 @@ export class InventoryListComponent implements OnInit {
           }
         },
         error: (err) => console.error('Failed to load categories:', err)
+      });
+  }
+
+  private loadConsignors() {
+    this.consignorService.getConsignors()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (consignors) => {
+          this.consignors.set(consignors);
+        },
+        error: (err) => console.error('Failed to load consignors:', err)
       });
   }
 
@@ -135,28 +168,50 @@ export class InventoryListComponent implements OnInit {
     if (this.selectedCondition) params.condition = this.selectedCondition;
     if (this.selectedCategory) params.category = this.selectedCategory;
     if (this.selectedExpiration) params.expiration = this.selectedExpiration;
+    if (this.selectedConsignor) params.consignorId = this.selectedConsignor;
     if (this.priceMin !== null) params.priceMin = this.priceMin;
     if (this.priceMax !== null) params.priceMax = this.priceMax;
 
-    // The InventoryService will automatically detect whether to use Square or CG native inventory
-    this.inventoryService.getItems(params)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (result) => {
-          this.itemsResult.set(result);
-        },
-        error: (err) => {
-          if (this.isSquareInventoryMode()) {
-            this.error.set('Failed to load Square inventory items. Please ensure you are connected to Square and try again.');
-          } else {
-            this.error.set('Failed to load inventory items. Please try again.');
+    if (this.viewMode() === 'pending') {
+      // Load pending Square imports
+      this.inventoryService.getPendingSquareImports(params)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (result) => {
+            console.log('Pending imports result:', result);
+            console.log('First pending item:', result.items[0]);
+            if (result.items[0]) {
+              console.log('First pendingImportId:', result.items[0].pendingImportId);
+            }
+            this.pendingImportsResult.set(result);
+            this.itemsResult.set(null); // Clear regular items
+          },
+          error: (err) => {
+            this.error.set('Failed to load Square pending imports. Please ensure you are connected to Square and try again.');
+            console.error('Error loading Square pending imports:', err);
+          },
+          complete: () => {
+            this.loadingService.stop('inventory-list');
           }
-          console.error('Error loading items:', err);
-        },
-        complete: () => {
-          this.loadingService.stop('inventory-list');
-        }
-      });
+        });
+    } else {
+      // Load regular ConsignmentGenie inventory
+      this.inventoryService.getItems(params)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (result) => {
+            this.itemsResult.set(result);
+            this.pendingImportsResult.set(null); // Clear pending imports
+          },
+          error: (err) => {
+            this.error.set('Failed to load inventory items. Please try again.');
+            console.error('Error loading items:', err);
+          },
+          complete: () => {
+            this.loadingService.stop('inventory-list');
+          }
+        });
+    }
   }
 
   applyFilters() {
@@ -170,6 +225,7 @@ export class InventoryListComponent implements OnInit {
     this.selectedCondition = '';
     this.selectedCategory = '';
     this.selectedExpiration = '';
+    this.selectedConsignor = '';
     this.priceMin = null;
     this.priceMax = null;
     this.sortBy = 'sku';
@@ -198,7 +254,170 @@ export class InventoryListComponent implements OnInit {
   }
 
   pagedResult() {
-    return this.itemsResult();
+    return this.viewMode() === 'pending' ? this.pendingImportsResult() : this.itemsResult();
+  }
+
+  switchViewMode(mode: 'regular' | 'pending') {
+    this.viewMode.set(mode);
+    this.currentPage.set(1); // Reset to page 1 when switching views
+    this.clearSelection(); // Clear selection when switching views
+    this.loadItems();
+  }
+
+  // Selection methods for pending imports
+  clearSelection() {
+    this.selectedPendingImports.set(new Set());
+    this.allPendingSelected.set(false);
+  }
+
+  toggleSelectAll() {
+    const pendingResult = this.pendingImportsResult();
+    if (!pendingResult) return;
+
+    if (this.allPendingSelected()) {
+      this.selectedPendingImports.set(new Set());
+      this.allPendingSelected.set(false);
+    } else {
+      const allIds = new Set(pendingResult.items.map(item => item.pendingImportId));
+      this.selectedPendingImports.set(allIds);
+      this.allPendingSelected.set(true);
+    }
+  }
+
+  toggleSelectItem(pendingImportId: string) {
+    const selected = new Set(this.selectedPendingImports());
+    if (selected.has(pendingImportId)) {
+      selected.delete(pendingImportId);
+    } else {
+      selected.add(pendingImportId);
+    }
+    this.selectedPendingImports.set(selected);
+
+    // Update select all state
+    const pendingResult = this.pendingImportsResult();
+    if (pendingResult) {
+      const allSelected = pendingResult.items.every(item => selected.has(item.pendingImportId));
+      this.allPendingSelected.set(allSelected);
+    }
+  }
+
+  isSelected(pendingImportId: string): boolean {
+    return this.selectedPendingImports().has(pendingImportId);
+  }
+
+  async bulkAssignConsignor() {
+    const selectedIds = Array.from(this.selectedPendingImports());
+    const consignorId = this.selectedConsignorId();
+
+    if (selectedIds.length === 0) {
+      this.error.set('Please select at least one item to assign.');
+      return;
+    }
+
+    if (!consignorId) {
+      this.error.set('Please select a consignor to assign items to.');
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      const request = { pendingImportIds: selectedIds, consignorId };
+      await firstValueFrom(this.inventoryService.bulkAssignConsignorToPendingImports(request));
+
+      // Clear selection and reload data
+      this.clearSelection();
+      this.selectedConsignorId.set('');
+      this.loadItems();
+
+      // Show success message (you can add a toast service here)
+      console.log(`Successfully assigned ${selectedIds.length} items to consignor`);
+    } catch (error) {
+      console.error('Failed to bulk assign consignor:', error);
+      this.error.set('Failed to assign items to consignor. Please try again.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async assignIndividualConsignor(pendingImportId: string, consignorId: string) {
+    if (!consignorId) {
+      this.error.set('Please select a consignor to assign this item to.');
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      await firstValueFrom(this.inventoryService.assignConsignorToPendingImport(pendingImportId, consignorId));
+
+      // Close dropdown and clear selection for this row
+      this.assignmentDropdownOpen.set(null);
+      const selections = new Map(this.individualConsignorSelections());
+      selections.delete(pendingImportId);
+      this.individualConsignorSelections.set(selections);
+
+      // Reload data to show updated status
+      this.loadItems();
+
+      console.log('Successfully assigned item to consignor');
+    } catch (error) {
+      console.error('Failed to assign consignor to item:', error);
+      this.error.set('Failed to assign item to consignor. Please try again.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  toggleAssignmentDropdown(pendingImportId: string) {
+    console.log('toggleAssignmentDropdown called with pendingImportId:', pendingImportId);
+    console.log('Current assignmentDropdownOpen:', this.assignmentDropdownOpen());
+
+    if (this.assignmentDropdownOpen() === pendingImportId) {
+      // Close dropdown and clear selection for this row
+      console.log('Closing dropdown for pendingImportId:', pendingImportId);
+      this.assignmentDropdownOpen.set(null);
+      const selections = new Map(this.individualConsignorSelections());
+      selections.delete(pendingImportId);
+      this.individualConsignorSelections.set(selections);
+    } else {
+      // Open dropdown for this row
+      console.log('Opening dropdown for pendingImportId:', pendingImportId);
+      this.assignmentDropdownOpen.set(pendingImportId);
+    }
+
+    console.log('New assignmentDropdownOpen:', this.assignmentDropdownOpen());
+  }
+
+  cancelIndividualAssignment(pendingImportId: string) {
+    this.assignmentDropdownOpen.set(null);
+    const selections = new Map(this.individualConsignorSelections());
+    selections.delete(pendingImportId);
+    this.individualConsignorSelections.set(selections);
+  }
+
+  confirmIndividualAssignment(pendingImportId: string) {
+    const consignorId = this.individualConsignorSelections().get(pendingImportId);
+    if (consignorId) {
+      this.assignIndividualConsignor(pendingImportId, consignorId);
+    }
+  }
+
+  updateIndividualConsignorSelection(pendingImportId: string, consignorId: string) {
+    const selections = new Map(this.individualConsignorSelections());
+    if (consignorId) {
+      selections.set(pendingImportId, consignorId);
+    } else {
+      selections.delete(pendingImportId);
+    }
+    this.individualConsignorSelections.set(selections);
+  }
+
+  getIndividualConsignorSelection(pendingImportId: string): string {
+    return this.individualConsignorSelections().get(pendingImportId) || '';
+  }
+
+  onConsignorSelectionChange(pendingImportId: string, event: Event) {
+    const target = event.target as HTMLSelectElement;
+    this.updateIndividualConsignorSelection(pendingImportId, target.value);
   }
 
   createNewItem() {
@@ -374,20 +593,25 @@ export class InventoryListComponent implements OnInit {
     this.router.navigate(['/owner/settings/integrations/inventory']);
   }
 
-  async refreshInventory() {
+  refreshInventory() {
     if (this.isSquareInventoryMode()) {
       // Refresh Square inventory via service
       this.isLoading.set(true);
-      try {
-        await this.squareService.syncNow();
-        // Reload the inventory list after sync
-        this.loadItems();
-      } catch (error) {
-        console.error('Failed to refresh Square inventory:', error);
-        this.error.set('Failed to refresh Square inventory. Please try again.');
-      } finally {
-        this.isLoading.set(false);
-      }
+      this.squareService.performFullSync()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            // Reload the inventory list after sync
+            this.loadItems();
+          },
+          error: (error) => {
+            console.error('Failed to refresh Square inventory:', error);
+            this.error.set('Failed to refresh Square inventory. Please try again.');
+          },
+          complete: () => {
+            this.isLoading.set(false);
+          }
+        });
     } else {
       // Just reload CG native inventory
       this.loadItems();

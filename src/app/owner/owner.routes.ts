@@ -155,6 +155,10 @@ export const ownerRoutes: Routes = [
             loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
           },
           {
+            path: 'agreement',
+            loadComponent: () => import('./settings/consignors/agreement/agreements.component').then(m => m.AgreementsComponent)
+          },
+          {
             path: 'payout-settings',
             loadComponent: () => import('./settings/consignors/consignor-payout-settings.component').then(m => m.ConsignorPayoutSettingsComponent)
           }
@@ -200,12 +204,8 @@ export const ownerRoutes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'inventory',
+            redirectTo: 'sales',
             pathMatch: 'full'
-          },
-          {
-            path: 'inventory',
-            loadComponent: () => import('./settings/integrations/inventory/inventory.component').then(m => m.InventoryComponent)
           },
           {
             path: 'sales',
@@ -214,10 +214,6 @@ export const ownerRoutes: Routes = [
           {
             path: 'accounting',
             loadComponent: () => import('./settings/integrations/accounting/accounting.component').then(m => m.AccountingComponent)
-          },
-          {
-            path: 'payments',
-            loadComponent: () => import('./settings/integrations/payments/payments.component').then(m => m.PaymentsComponent)
           },
           {
             path: 'payouts',

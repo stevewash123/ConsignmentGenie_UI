@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NotificationBellComponent } from '../../shared/components/notification-bell.component';
 import { MockConsignorItemService } from '../../consignor/services/mock-consignor-item.service';
+import { AuthService } from '../../services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 
 interface UserData {
@@ -29,7 +30,8 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private mockService: MockConsignorItemService
+    private mockService: MockConsignorItemService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -44,10 +46,15 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
   }
 
   private loadUserData() {
-    const userData = localStorage.getItem('user_data');
+    // Use AuthService instead of localStorage directly
+    const userData = this.authService.getCurrentUser();
     if (userData) {
-      this.currentUser.set(JSON.parse(userData));
+      this.currentUser.set(userData);
     }
+  }
+
+  getCurrentUser() {
+    return this.authService.getCurrentUser();
   }
 
   getInitials(email?: string): string {
@@ -86,8 +93,7 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }

@@ -49,74 +49,20 @@ export class ConsignorListComponent implements OnInit {
   loadData(): void {
     this.isLoading.set(true);
 
-    // Load regular consignors and pending approvals in parallel
+    // Load all consignors (including pending ones)
     const consignors$ = this.ConsignorService.getConsignors();
-    const pendingApprovals$ = this.ConsignorService.getPendingApprovals();
 
-    // Combine both API calls
+    // Load consignors - they already include pending status
     consignors$.subscribe({
       next: (consignors) => {
-        // Load pending approvals and convert to consignor format
-        pendingApprovals$.subscribe({
-          next: (approvals) => {
-            const pendingConsignors: Consignor[] = approvals.map(approval => ({
-              id: approval.id.toString(),
-              name: approval.name,
-              email: approval.email,
-              phone: approval.phone,
-              commissionRate: 50, // Default commission rate
-              status: 'pending' as const,
-              isActive: false,
-              organizationId: 1,
-              consignorNumber: `PEN${approval.id.toString().padStart(3, '0')}`,
-              createdAt: approval.registrationDate,
-              updatedAt: approval.registrationDate
-            }));
+        // Filter out Shop-Owned Inventory and any other system entries
+        let allConsignors = (consignors || []).filter(c =>
+          !c.name.toLowerCase().includes('shop-owned') &&
+          !c.name.toLowerCase().includes('shop owned')
+        );
 
-            // Add mock pending consignors as fallback when API has no pending approvals
-            if (pendingConsignors.length === 0) {
-              const mockPendingConsignors: Consignor[] = [
-                {
-                  id: '1001',
-                  name: 'Sarah Johnson',
-                  email: 'sarah.johnson@example.com',
-                  phone: '(555) 123-4567',
-                  commissionRate: 50,
-                  status: 'pending',
-                  isActive: false,
-                  organizationId: 1,
-                  consignorNumber: 'PEN001',
-                  createdAt: new Date('2024-12-29'),
-                  updatedAt: new Date('2024-12-29')
-                },
-                {
-                  id: '1002',
-                  name: 'Mike Chen',
-                  email: 'mike.chen@email.com',
-                  phone: '(555) 987-6543',
-                  commissionRate: 50,
-                  status: 'pending',
-                  isActive: false,
-                  organizationId: 1,
-                  consignorNumber: 'PEN002',
-                  createdAt: new Date('2024-12-28'),
-                  updatedAt: new Date('2024-12-28')
-                }
-              ];
-              pendingConsignors.push(...mockPendingConsignors);
-            }
-
-            const allConsignors = [...pendingConsignors, ...(consignors || [])];
-            this.consignors.set(allConsignors);
-            this.applyFilters();
-          },
-          error: (error) => {
-            console.error('Error loading pending approvals:', error);
-            // Just load regular consignors if pending approvals fail
-            this.consignors.set(consignors || []);
-            this.applyFilters();
-          }
-        });
+        this.consignors.set(allConsignors);
+        this.applyFilters();
       },
       error: (error) => {
         console.error('Error loading consignors:', error);

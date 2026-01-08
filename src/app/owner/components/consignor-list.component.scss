@@ -1,8 +1,50 @@
+// ============================================================================
+// Theme Colors - Five-Tier Green System (matching app-wide standards)
+// ============================================================================
+
+// Green Theme Hierarchy (5 levels)
+$color-shell-background: #f0fdf4;        // Level 1: Main shell/body background (very light green)
+$color-section-background: hsl(130, 25%, 92%);  // Level 2: Cards/sections background (light green)
+$color-primary: #059669;                  // Level 3: Headers, borders, primary actions (primary green)
+$color-primary-dark: #047857;            // Level 4: Badges, accents, hover states (dark green)
+$color-primary-darker: #065f46;          // Level 5: Deep accents, pressed states (darker green)
+
+// Legacy aliases for backwards compatibility
+$color-primary-hover: $color-primary-dark;
+$color-card-background: $color-section-background;
+$color-background-subtle: $color-shell-background;
+
+// Other Theme Colors
+$color-text-primary: #1f2937;
+$color-text-secondary: #6b7280;
+$color-text-muted: #374151;
+$color-border: #e5e7eb;
+$color-border-light: #d1d5db;
+$color-background-light: #f3f4f6;
+$color-background-hover: #e5e7eb;
+
+$color-blue-primary: #3b82f6;
+$color-blue-dark: #2563eb;
+$color-blue-darker: #1d4ed8;
+$color-blue-light: #dbeafe;
+
+$color-danger: #dc2626;
+$color-danger-light: #fee2e2;
+$color-warning: #ea580c;
+
+$border-radius-sm: 4px;
+$border-radius-md: 6px;
+$border-radius-lg: 8px;
+$border-radius-xl: 12px;
+
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
 .consignor-list-container {
-  padding: 2rem 4rem;
-  margin: 1rem auto;
+  padding: 2rem;
   max-width: 1400px;
-  min-height: calc(100vh - 200px);
+  margin: 0 auto;
+  // Background provided by app-owner-layout (Level 1: shell background)
 }
 
 /* Header Styling */
@@ -11,8 +53,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid rgba(148, 163, 184, 0.1);
+  padding-bottom: 1rem;
+  border-bottom: 2px solid $color-primary;  // Dark green separator line
 }
 
 .page-title {
@@ -175,8 +217,16 @@
 
 /* Pending approval row styling */
 .pending-approval {
-  background-color: rgba(255, 193, 7, 0.1);
-  border-left: 4px solid #ffc107;
+  background-color: #fffbeb !important;  // Light yellow background
+  border-left: 4px solid $color-primary !important;  // Dark green accent border
+
+  &:hover {
+    background-color: #fef3c7 !important;  // Slightly darker yellow on hover
+  }
+
+  &.even {
+    background-color: #fef08a !important;  // Alternating yellow for even rows
+  }
 }
 
 .pending-badge {
@@ -194,22 +244,22 @@
 .content-sections {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 .section {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
+  background: white;
+  border: 2px solid $color-primary;  // Dark green border
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
 }
 
 .section-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid rgba(148, 163, 184, 0.1);
+  padding: 1.5rem 2rem;  // Reduced vertical padding
+  background: $color-section-background;  // Level 2: Section background
+  margin: 0;
+  // Removed border-bottom to eliminate inner border line
 }
 
 .section-header h3 {
@@ -224,16 +274,16 @@
 .consignor-table, .invitations-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  margin: 0;
 }
 
 .consignor-table th,
 .consignor-table td,
 .invitations-table th,
 .invitations-table td {
-  padding: 1rem 0.75rem;
+  padding: 0.75rem;  // Reduced padding to make rows shorter
   text-align: left;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid $color-primary;  // Fine dark green border between rows
 }
 
 .consignor-table th:nth-child(1),
@@ -277,12 +327,11 @@
 
 .consignor-table th,
 .invitations-table th {
-  background-color: rgba(249, 250, 251, 0.8);
-  font-weight: 700;
-  color: #374151;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  background: $color-section-background;  // Level 2: Section background
+  font-weight: 500;
+  color: $color-text-muted;
+  font-size: 1rem;
+  border-bottom: 1px solid $color-primary;  // Dark green header border
 }
 
 .action-buttons {

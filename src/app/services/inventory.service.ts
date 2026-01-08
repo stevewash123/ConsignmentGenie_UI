@@ -14,7 +14,10 @@ import {
   CreateItemCategoryDto,
   UpdateItemCategoryDto,
   ItemCategoryDto,
-  ApiResponse
+  ApiResponse,
+  PendingSquareImportDto,
+  BulkAssignConsignorRequest,
+  BulkAssignResult
 } from '../models/inventory.model';
 
 @Injectable({
@@ -25,15 +28,11 @@ export class InventoryService {
   private squareService = inject(SquareIntegrationService);
   private readonly apiUrl = `${environment.apiUrl}/api`;
 
-  // Items API
+  // Items API - Always returns ConsignmentGenie native inventory
+  // Use getPendingSquareImports() for Square pending imports
   getItems(params?: ItemQueryParams): Observable<PagedResult<ItemListDto>> {
-    // Check if Square inventory mode is active
-    const settings = this.squareService.getSquareUsageSettings();
-    if (settings.inventoryChoice === 'square') {
-      return this.getSquareItems(params);
-    }
-
-    // Default to ConsignmentGenie native inventory
+    // Always return ConsignmentGenie native inventory
+    // UI should explicitly call getPendingSquareImports() for Square data
     let httpParams = new HttpParams();
 
     if (params) {
@@ -52,8 +51,8 @@ export class InventoryService {
     return this.http.get<PagedResult<ItemListDto>>(`${this.apiUrl}/items`, { params: httpParams });
   }
 
-  // Square inventory methods
-  private getSquareItems(params?: ItemQueryParams): Observable<PagedResult<ItemListDto>> {
+  // Square inventory methods - these return pending Square imports that need consignor assignment
+  private getSquareItems(params?: ItemQueryParams): Observable<PagedResult<PendingSquareImportDto>> {
     let httpParams = new HttpParams();
 
     if (params) {
@@ -61,10 +60,25 @@ export class InventoryService {
       if (params.page) httpParams = httpParams.set('page', params.page.toString());
       if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize.toString());
       if (params.search) httpParams = httpParams.set('search', params.search);
-      // Note: Other filters like status, condition may not apply to Square items
+      // Note: Other filters like status, condition may not apply to pending imports
     }
 
-    return this.http.get<PagedResult<ItemListDto>>(`${this.apiUrl}/owner/integrations/square/inventory/items`, { params: httpParams });
+    return this.http.get<PagedResult<PendingSquareImportDto>>(`${this.apiUrl}/owner/integrations/square/inventory/items`, { params: httpParams });
+  }
+
+  // Public method to get pending Square imports
+  getPendingSquareImports(params?: ItemQueryParams): Observable<PagedResult<PendingSquareImportDto>> {
+    return this.getSquareItems(params);
+  }
+
+  // Method to assign consignor to pending Square imports
+  assignConsignorToPendingImport(pendingImportId: string, consignorId: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/inventory/pending-imports/${pendingImportId}/assign`, { consignorId });
+  }
+
+  // Method to bulk assign consignor to multiple pending imports
+  bulkAssignConsignorToPendingImports(request: BulkAssignConsignorRequest): Observable<ApiResponse<BulkAssignResult>> {
+    return this.http.post<ApiResponse<BulkAssignResult>>(`${this.apiUrl}/inventory/pending-imports/bulk-assign`, request);
   }
 
   getItem(id: string): Observable<ApiResponse<ItemDetailDto>> {

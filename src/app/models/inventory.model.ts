@@ -274,3 +274,33 @@ export interface ConsignorBreakdownDto {
   count: number;
   value: number;
 }
+
+// Pending Square Import interfaces
+export interface PendingSquareImportDto {
+  pendingImportId: string;
+  squareCatalogId: string;
+  squareVariationId?: string;
+  name: string;
+  description?: string;
+  price: number;
+  sku?: string;
+  category?: string;
+  squareUpdatedAt?: Date;
+  importedAt: Date;
+  status?: string;
+}
+
+export interface BulkAssignConsignorRequest {
+  pendingImportIds: string[];
+  consignorId: string;
+}
+
+export interface BulkAssignResult {
+  assigned: number;
+  failed: FailedAssignment[];
+}
+
+export interface FailedAssignment {
+  pendingImportId: string;
+  reason: string;
+}

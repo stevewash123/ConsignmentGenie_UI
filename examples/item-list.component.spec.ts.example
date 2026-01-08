@@ -1,0 +1,153 @@
+/**
+ * EXAMPLE: Completed Smoke Test
+ * 
+ * This shows what a generated spec file looks like AFTER
+ * you've filled in the TODO sections with real code.
+ */
+
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { ItemListComponent } from './item-list.component';
+import { ConsoleErrorTracker } from '@testing/console-error-tracker';
+import { ItemService } from '../../services/item.service';
+
+describe('ItemListComponent', () => {
+  let tracker: ConsoleErrorTracker;
+  let mockItemService: jasmine.SpyObj<ItemService>;
+
+  // Sample mock data
+  const mockItems = [
+    { id: '1', name: 'Vintage Lamp', price: 45.00, status: 'available' },
+    { id: '2', name: 'Antique Chair', price: 120.00, status: 'available' },
+    { id: '3', name: 'Retro Radio', price: 85.00, status: 'sold' },
+  ];
+
+  beforeEach(() => {
+    tracker = new ConsoleErrorTracker();
+    
+    // Create mock service
+    mockItemService = jasmine.createSpyObj('ItemService', [
+      'getItems',
+      'deleteItem',
+      'searchItems'
+    ]);
+    mockItemService.getItems.and.returnValue(of(mockItems));
+    mockItemService.searchItems.and.returnValue(of(mockItems));
+    mockItemService.deleteItem.and.returnValue(of(void 0));
+  });
+
+  afterEach(() => {
+    tracker.stop();
+  });
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ItemListComponent],
+      providers: [
+        { provide: ItemService, useValue: mockItemService },
+      ],
+    }).compileComponents();
+  });
+
+  describe('SMOKE', () => {
+    it('should render with data without console errors', () => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemListComponent);
+      fixture.detectChanges();
+
+      // Verify component created
+      expect(fixture.componentInstance).toBeTruthy();
+      
+      // Verify data rendered
+      const rows = fixture.nativeElement.querySelectorAll('.item-row');
+      expect(rows.length).toBe(3);
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    });
+
+    it('should handle filter action without console errors', fakeAsync(() => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemListComponent);
+      fixture.detectChanges();
+
+      // Trigger filter action
+      const component = fixture.componentInstance;
+      component.filterText = 'Vintage';
+      component.onFilter();
+      
+      tick(300); // Debounce time
+      fixture.detectChanges();
+
+      // Verify filter was called
+      expect(mockItemService.searchItems).toHaveBeenCalledWith('Vintage');
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    }));
+
+    it('should handle sort action without console errors', fakeAsync(() => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemListComponent);
+      fixture.detectChanges();
+
+      // Trigger sort action
+      const component = fixture.componentInstance;
+      component.sortBy('price');
+      
+      tick();
+      fixture.detectChanges();
+
+      // Verify sort state
+      expect(component.currentSort).toBe('price');
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    }));
+
+    it('should handle empty state without console errors', () => {
+      tracker.start();
+      
+      // Override mock to return empty
+      mockItemService.getItems.and.returnValue(of([]));
+      
+      const fixture = TestBed.createComponent(ItemListComponent);
+      fixture.detectChanges();
+
+      // Verify empty state rendered
+      const emptyState = fixture.nativeElement.querySelector('.empty-state');
+      expect(emptyState).toBeTruthy();
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    });
+
+    it('should handle delete action without console errors', fakeAsync(() => {
+      tracker.start();
+      
+      const fixture = TestBed.createComponent(ItemListComponent);
+      fixture.detectChanges();
+
+      // Trigger delete
+      const component = fixture.componentInstance;
+      component.deleteItem('1');
+      
+      tick();
+      fixture.detectChanges();
+
+      // Verify delete was called
+      expect(mockItemService.deleteItem).toHaveBeenCalledWith('1');
+      
+      // THE KEY ASSERTION
+      tracker.expectNoErrors();
+    }));
+  });
+
+  // Additional non-smoke tests would go here
+  describe('detailed behavior', () => {
+    // More comprehensive tests...
+  });
+});
