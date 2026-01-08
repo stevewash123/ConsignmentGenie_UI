@@ -4,33 +4,7 @@
     <p>Manage how new consignors join your shop and configure approval settings</p>
   </div>
 
-  <div class="settings-form" *ngIf="settings()">
-    <!-- Store Code -->
-    <div class="form-section">
-      <h3>Store Code</h3>
-      <p class="section-description">
-        Share this code with consignors to let them join your shop.
-      </p>
-
-      <div class="store-code-display">
-        <div class="code-box">
-          <span class="store-code">{{ settings()?.storeCode }}</span>
-        </div>
-        <div class="code-actions">
-          <button class="btn-secondary" (click)="copyStoreCode()">Copy Code</button>
-          <button class="btn-secondary" (click)="regenerateStoreCode()">Regenerate</button>
-        </div>
-      </div>
-
-      <div class="signup-link">
-        <label>Direct signup link:</label>
-        <div class="link-display">
-          <span class="signup-url">{{ settings()?.signupUrl }}</span>
-          <button class="btn-link" (click)="copySignupLink()">Copy Link</button>
-        </div>
-      </div>
-    </div>
-
+  <div class="settings-form" *ngIf="settings()">    
     <!-- Consignor Approval -->
     <div class="form-section">
       <h3>Consignor Approval</h3>
@@ -127,53 +101,6 @@
       </div>
     </div>
 
-    <!-- Agreement Settings -->
-    <div class="form-section">
-      <h3>Consignment Agreements</h3>
-      <p class="section-description">
-        Configure how consignment agreements are handled with new consignors.
-      </p>
-
-      <!-- Template Status Warning -->
-      <div class="agreement-status" *ngIf="!settings()?.agreements?.templateCustomized">
-        <div class="warning-banner">
-          <div class="warning-icon">⚠️</div>
-          <div class="warning-content">
-            <strong>Agreement template not customized.</strong>
-            <a href="/settings/integrations" class="warning-link">Edit Template</a> before enabling auto-send.
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="permission-toggle">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings()!.agreements.autoSendOnRegistration"
-            name="autoSendOnRegistration"
-            [disabled]="!settings()?.agreements?.templateCustomized">
-          <div class="toggle-switch"></div>
-          <div class="permission-content">
-            <span class="permission-title">Auto-send agreement when consignor registers</span>
-            <span class="permission-description">Automatically email agreement to new consignors</span>
-          </div>
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label class="permission-toggle">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings()!.agreements.requireBeforeItems"
-            name="requireBeforeItems">
-          <div class="toggle-switch"></div>
-          <div class="permission-content">
-            <span class="permission-title">Require signed agreement before item submission</span>
-            <span class="permission-description">Block item submission until agreement is on file</span>
-          </div>
-        </label>
-      </div>
-    </div>
 
     <!-- Notification Preferences -->
     <div class="form-section">

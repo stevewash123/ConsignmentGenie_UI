@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { OwnerService, ConsignorPermissions } from '../../../services/owner.service';
 import { environment } from '../../../../environments/environment';
 
@@ -51,7 +52,7 @@ interface PendingInvitation {
 @Component({
   selector: 'app-consignor-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './consignor-settings.component.html',
   styleUrls: ['./consignor-settings.component.scss']
 })
@@ -94,7 +95,7 @@ export class ConsignorSettingsComponent implements OnInit {
         agreements: {
           autoSendOnRegistration: false,
           requireBeforeItems: false,
-          templateCustomized: false // Will be populated from API
+          templateCustomized: true // Template has been customized, enabling toggle
         },
         notifications: {
           newConsignorRegistration: true,
