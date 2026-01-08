@@ -14,8 +14,8 @@
       "name": "inventory",
       "description": "Inventory Management - add/edit/list/detail inventory items",
       "totalFiles": 6,
-      "withSpecs": 4,
-      "missingSpecs": 2,
+      "withSpecs": 5,
+      "missingSpecs": 1,
       "passingTests": 0,
       "failingTests": 0,
       "status": "in-progress"
@@ -23,9 +23,9 @@
     "consignor": {
       "name": "consignor",
       "description": "Consignor Management - invite/add/edit/list consignors, registration",
-      "totalFiles": 39,
-      "withSpecs": 10,
-      "missingSpecs": 29,
+      "totalFiles": 40,
+      "withSpecs": 9,
+      "missingSpecs": 31,
       "passingTests": 0,
       "failingTests": 0,
       "status": "in-progress"
@@ -34,8 +34,8 @@
       "name": "settings-account",
       "description": "Settings: Account & Profile - basic info, branding, contact",
       "totalFiles": 6,
-      "withSpecs": 1,
-      "missingSpecs": 5,
+      "withSpecs": 4,
+      "missingSpecs": 2,
       "passingTests": 0,
       "failingTests": 0,
       "status": "in-progress"
@@ -44,21 +44,21 @@
       "name": "settings-policies",
       "description": "Settings: Business Policies - rules, receipt settings",
       "totalFiles": 4,
-      "withSpecs": 4,
-      "missingSpecs": 0,
+      "withSpecs": 0,
+      "missingSpecs": 4,
       "passingTests": 0,
       "failingTests": 0,
-      "status": "complete"
+      "status": "not-started"
     },
     "settings-integrations": {
       "name": "settings-integrations",
       "description": "Settings: Integrations - accounting, payments, payouts, sales, inventory",
       "totalFiles": 6,
-      "withSpecs": 0,
-      "missingSpecs": 6,
+      "withSpecs": 6,
+      "missingSpecs": 0,
       "passingTests": 0,
       "failingTests": 0,
-      "status": "not-started"
+      "status": "complete"
     },
     "settings-consignor": {
       "name": "settings-consignor",
@@ -141,6 +141,6 @@
       "status": "not-started"
     }
   },
-  "lastUpdated": "2026-01-08T16:55:30.625Z",
+  "lastUpdated": "2026-01-08T17:15:41.943Z",
   "currentFeature": null
 }
