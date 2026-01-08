@@ -4,11 +4,12 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ConsignorService } from '../../services/consignor.service';
 import { Consignor } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
+import { OwnerLayoutComponent } from './owner-layout.component';
 
 @Component({
   selector: 'app-consignor-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, OwnerLayoutComponent],
   templateUrl: './consignor-detail.component.html',
   styleUrls: ['./consignor-detail.component.scss']
 })
@@ -66,14 +67,21 @@ export class ConsignorDetailComponent implements OnInit {
   }
 
   loadStats(): void {
-    // This would call an API to get consignor statistics
-    // For now, using mock data
-    this.stats.set({
-      totalItems: 25,
-      activeItems: 18,
-      soldItems: 7,
-      totalEarnings: 1250.75,
-      pendingPayout: 450.50
+    this.ConsignorService.getConsignorStats(this.providerId()).subscribe({
+      next: (stats) => {
+        this.stats.set(stats);
+      },
+      error: (error) => {
+        console.error('Error loading consignor stats:', error);
+        // Fall back to zeros if API fails
+        this.stats.set({
+          totalItems: 0,
+          activeItems: 0,
+          soldItems: 0,
+          totalEarnings: 0,
+          pendingPayout: 0
+        });
+      }
     });
   }
 

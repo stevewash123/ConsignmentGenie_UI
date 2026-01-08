@@ -1,7 +1,56 @@
+// ============================================================================
+// Theme Colors - Four-Tier Green System (matching app-wide standards)
+// ============================================================================
+
+// Green Theme Hierarchy (5 levels)
+$color-shell-background: #f0fdf4;        // Level 1: Main shell/body background (very light green)
+$color-section-background: hsl(130, 25%, 92%);  // Level 2: Cards/sections background (light green)
+$color-primary: #059669;                  // Level 3: Headers, borders, primary actions (primary green)
+$color-primary-dark: #047857;            // Level 4: Badges, accents, hover states (dark green)
+$color-primary-darker: #065f46;          // Level 5: Deep accents, pressed states (darker green)
+
+// Legacy alias for backwards compatibility
+$color-primary-hover: $color-primary-dark;
+
+// Other Theme Colors
+$color-text-primary: #1f2937;
+$color-text-secondary: #6b7280;
+$color-text-muted: #374151;
+$color-border: #e5e7eb;
+$color-border-light: #d1d5db;
+$color-background-light: #f3f4f6;
+$color-background-hover: #e5e7eb;
+
+$color-blue-primary: #3b82f6;
+$color-blue-dark: #2563eb;
+$color-blue-darker: #1d4ed8;
+$color-blue-light: #dbeafe;
+
+$color-danger: #dc2626;
+$color-danger-light: #fee2e2;
+$color-warning: #ea580c;
+
+// Legacy alias for backwards compatibility
+$color-background-subtle: $color-shell-background;
+$color-card-background: $color-section-background;
+
+$border-radius-sm: 4px;
+$border-radius-md: 6px;
+$border-radius-lg: 8px;
+$border-radius-xl: 12px;
+
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// ============================================================================
+// Component Styles
+// ============================================================================
+
 .consignor-detail-container {
-  padding: 1.5rem;
-  max-width: 1200px;
+  padding: 2rem;
+  max-width: 1400px;
   margin: 0 auto;
+  // Background provided by app-owner-layout (Level 1: shell background)
 }
 
 .detail-header {
@@ -9,11 +58,13 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid $color-border;
 }
 
-.breadcrumb a {
-  color: #007bff;
-  text-decoration: none;
+.back-button {
+  margin: 0;
+  padding: 0.5rem 1rem;
 }
 
 .header-actions {
@@ -23,9 +74,10 @@
 
 .consignor-detail-card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
   overflow: hidden;
+  border: 2px solid $color-primary;
 }
 
 .consignor-header {
@@ -33,24 +85,24 @@
   justify-content: space-between;
   align-items: center;
   padding: 2rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: $color-section-background;  // Level 2: Section background
+  border-bottom: 1px solid $color-primary;
 }
 
 .status {
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: $border-radius-sm;
   font-weight: 500;
 }
 
 .status.active {
-  background: #d4edda;
-  color: #155724;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .status.inactive {
-  background: #f8d7da;
-  color: #721c24;
+  background: $color-danger-light;
+  color: $color-danger;
 }
 
 .consignor-info {
@@ -63,7 +115,8 @@
 
 .info-section h3 {
   margin-bottom: 1rem;
-  color: #212529;
+  color: $color-text-primary;
+  font-weight: 600;
 }
 
 .info-grid {
@@ -79,19 +132,19 @@
 
 .info-item label {
   font-weight: 500;
-  color: #6c757d;
+  color: $color-text-secondary;
   margin-bottom: 0.25rem;
 }
 
 .info-item span {
-  color: #212529;
+  color: $color-text-primary;
 }
 
 .notes {
-  background: #f8f9fa;
+  background: $color-shell-background;  // Level 1: Very light background for contrast
   padding: 1rem;
-  border-radius: 4px;
-  border-left: 4px solid #007bff;
+  border-radius: $border-radius-sm;
+  border-left: 4px solid $color-primary;
   margin: 0;
 }
 
@@ -100,38 +153,41 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   padding: 2rem;
-  background: #f8f9fa;
-  border-top: 1px solid #e9ecef;
+  background: $color-section-background;  // Level 2: Section background
+  border-top: 1px solid $color-primary;
 }
 
 .stat-card {
   text-align: center;
   background: white;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  border: 1px solid $color-border-light;
 }
 
 .stat-number {
   font-size: 2rem;
   font-weight: 600;
-  color: #007bff;
+  color: $color-primary;
   margin-bottom: 0.5rem;
 }
 
 .stat-label {
-  color: #6c757d;
+  color: $color-text-secondary;
   font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .recent-activity {
   padding: 2rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid $color-primary;
 }
 
 .recent-activity h3 {
   margin-bottom: 1rem;
-  color: #212529;
+  color: $color-text-primary;
+  font-weight: 600;
 }
 
 .activity-list {
@@ -143,15 +199,16 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 4px;
+  background: $color-background-subtle;
+  border-radius: $border-radius-md;
   margin-bottom: 0.5rem;
+  border: 1px solid $color-border-light;
 }
 
 .activity-icon {
   width: 40px;
   height: 40px;
-  background: #007bff;
+  background: $color-primary;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -167,58 +224,76 @@
 .activity-description {
   font-weight: 500;
   margin-bottom: 0.25rem;
+  color: $color-text-primary;
 }
 
 .activity-date {
-  color: #6c757d;
+  color: $color-text-secondary;
   font-size: 0.875rem;
 }
 
 .activity-amount {
   font-weight: 500;
-  color: #28a745;
+  color: #166534;
 }
 
 .no-activity {
   text-align: center;
-  color: #6c757d;
+  color: $color-text-secondary;
   padding: 2rem;
 }
 
 .btn-primary, .btn-secondary, .btn-danger, .btn-success {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: $border-radius-lg;
   cursor: pointer;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   text-align: center;
   font-size: 0.875rem;
-  transition: all 0.15s ease-in-out;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .btn-primary {
-  background: #007bff;
+  background: $color-primary;
   color: white;
+
+  &:hover {
+    background: $color-primary-hover;
+  }
 }
 
 .btn-secondary {
-  background: #6c757d;
-  color: white;
+  background: $color-blue-light;
+  color: $color-blue-darker;
+  border: 1px solid $color-blue-primary;
+
+  &:hover {
+    background: #bfdbfe;
+    border-color: $color-blue-dark;
+  }
 }
 
 .btn-danger {
-  background: #dc3545;
+  background: $color-danger;
   color: white;
+
+  &:hover {
+    background: #b91c1c;
+  }
 }
 
 .btn-success {
-  background: #28a745;
+  background: #059669;
   color: white;
-}
 
-.btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .btn-success:hover {
-  opacity: 0.85;
+  &:hover {
+    background: #047857;
+  }
 }
 
 .btn-primary:disabled, .btn-secondary:disabled, .btn-danger:disabled, .btn-success:disabled {
@@ -229,9 +304,131 @@
 .loading, .error-message {
   text-align: center;
   padding: 2rem;
-  color: #6c757d;
+  color: $color-text-secondary;
 }
 
 .error-message {
-  color: #dc3545;
+  color: $color-danger;
+  background: $color-danger-light;
+  border: 1px solid $color-danger;
+  border-radius: $border-radius-md;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+// UI Patterns Guide styles for entity header
+.entity-header {
+  margin-bottom: 2rem;
+  padding: 1.5rem 0;
+  border-bottom: 2px solid $color-primary;
+}
+
+.entity-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.entity-name {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.entity-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-inactive {
+  background: $color-danger-light;
+  color: $color-danger;
+}
+
+.secondary-info {
+  color: $color-text-secondary;
+  font-size: 0.875rem;
+}
+
+// Dropdown styles following UI patterns guide
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background: $color-primary;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: $border-radius-lg;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $color-primary-hover;
+  }
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  min-width: 180px;
+  box-shadow: $shadow-lg;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-lg;
+  z-index: 1000;
+  margin-top: 0.25rem;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: $color-text-primary;
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $color-background-light;
+    color: $color-text-primary;
+  }
+}
+
+.dropdown-divider {
+  height: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-top: 1px solid $color-border;
 }
