@@ -14,11 +14,11 @@
       "name": "inventory",
       "description": "Inventory Management - add/edit/list/detail inventory items",
       "totalFiles": 6,
-      "withSpecs": 5,
-      "missingSpecs": 1,
+      "withSpecs": 6,
+      "missingSpecs": 0,
       "passingTests": 0,
       "failingTests": 0,
-      "status": "in-progress"
+      "status": "complete"
     },
     "consignor": {
       "name": "consignor",
@@ -114,11 +114,11 @@
       "name": "shared",
       "description": "Shared components, pipes, directives",
       "totalFiles": 31,
-      "withSpecs": 13,
-      "missingSpecs": 18,
+      "withSpecs": 31,
+      "missingSpecs": 0,
       "passingTests": 0,
       "failingTests": 0,
-      "status": "in-progress"
+      "status": "complete"
     },
     "auth": {
       "name": "auth",
@@ -141,6 +141,6 @@
       "status": "complete"
     }
   },
-  "lastUpdated": "2026-01-08T17:34:09.612Z",
+  "lastUpdated": "2026-01-08T17:58:19.615Z",
   "currentFeature": null
 }
