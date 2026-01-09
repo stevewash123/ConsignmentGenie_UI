@@ -145,8 +145,8 @@ export class LoginSimpleComponent implements OnInit {
         break;
       case 'consignor':
       case 'Consignor':
-        console.log('Navigating to /consignor/dashboard');
-        this.router.navigate(['/consignor/dashboard']).then(
+        console.log('Navigating to /consignor/agreement (agreement gate)');
+        this.router.navigate(['/consignor/agreement']).then(
           success => console.log('Consignor navigation success:', success),
           error => console.error('Consignor navigation failed:', error)
         );

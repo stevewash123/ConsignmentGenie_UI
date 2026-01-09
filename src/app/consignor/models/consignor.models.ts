@@ -58,8 +58,8 @@ export interface ProviderPayoutDetail extends ProviderPayout {
   items: consignorsale[];
 }
 
-export interface ProviderProfile {
-  providerId: string;
+export interface ConsignorProfile {
+  consignorId: string;
   fullName: string;
   email: string;
   phone?: string;
@@ -71,7 +71,7 @@ export interface ProviderProfile {
   organizationName: string;
 }
 
-export interface UpdateProviderProfile {
+export interface UpdateConsignorProfile {
   fullName: string;
   phone?: string;
   preferredPaymentMethod?: string;

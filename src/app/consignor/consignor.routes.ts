@@ -15,6 +15,10 @@ export const consignorRoutes: Routes = [
         loadComponent: () => import('./components/consignor-dashboard.component').then(m => m.ConsignorDashboardComponent)
       },
       {
+        path: 'agreement',
+        loadComponent: () => import('./components/agreement-gate.component').then(m => m.AgreementGateComponent)
+      },
+      {
         path: 'items',
         loadComponent: () => import('../features/consignor/items/item-list/item-list.component').then(m => m.ItemListComponent)
       },

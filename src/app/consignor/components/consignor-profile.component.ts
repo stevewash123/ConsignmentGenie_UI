@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ProviderProfile, UpdateProviderProfile } from '../models/consignor.models';
+import { ConsignorProfile, UpdateConsignorProfile } from '../models/consignor.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 
@@ -15,7 +15,7 @@ import { LOADING_KEYS } from '../constants/loading-keys';
   styleUrls: ['./consignor-profile.component.scss']
 })
 export class ConsignorProfileComponent implements OnInit {
-  profile: ProviderProfile | null = null;
+  profile: ConsignorProfile | null = null;
   saving = false;
   error: string | null = null;
   successMessage: string | null = null;
@@ -23,7 +23,7 @@ export class ConsignorProfileComponent implements OnInit {
   // Expose for template
   readonly KEYS = LOADING_KEYS;
 
-  formData: UpdateProviderProfile = {
+  formData: UpdateConsignorProfile = {
     fullName: '',
     phone: '',
     preferredPaymentMethod: '',
@@ -61,7 +61,7 @@ export class ConsignorProfileComponent implements OnInit {
     });
   }
 
-  populateForm(profile: ProviderProfile) {
+  populateForm(profile: ConsignorProfile) {
     this.formData = {
       fullName: profile.fullName,
       phone: profile.phone || '',

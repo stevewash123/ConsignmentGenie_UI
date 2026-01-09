@@ -9,8 +9,8 @@ import {
   consignorsale,
   ProviderPayout,
   ProviderPayoutDetail,
-  ProviderProfile,
-  UpdateProviderProfile,
+  ConsignorProfile,
+  UpdateConsignorProfile,
   PagedResult,
   ProviderItemQuery,
   consignorsaleQuery,
@@ -95,12 +95,12 @@ export class ConsignorPortalService {
   }
 
   // Profile
-  getProfile(): Observable<ProviderProfile> {
-    return this.http.get<ProviderProfile>(`${this.apiUrl}/profile`);
+  getProfile(): Observable<ConsignorProfile> {
+    return this.http.get<ConsignorProfile>(`${this.apiUrl}/profile`);
   }
 
-  updateProfile(profile: UpdateProviderProfile): Observable<ProviderProfile> {
-    return this.http.put<ProviderProfile>(`${this.apiUrl}/profile`, profile);
+  updateProfile(profile: UpdateConsignorProfile): Observable<ConsignorProfile> {
+    return this.http.put<ConsignorProfile>(`${this.apiUrl}/profile`, profile);
   }
 
   // Notifications
