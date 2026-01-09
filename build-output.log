@@ -1,44 +1,5 @@
-❯ Building...
-✔ Building...
-Initial chunk files   | Names                               |  Raw size | Estimated transfer size
-chunk-ANSA2PME.js     | -                                   | 199.70 kB |                57.80 kB
-chunk-WEOBWZ7V.js     | -                                   |  92.56 kB |                23.36 kB
-main-CMTA5RYZ.js      | main                                |  78.00 kB |                20.45 kB
-chunk-3ALIYE4C.js     | -                                   |  52.32 kB |                10.16 kB
-polyfills-5CFQRCPP.js | polyfills                           |  34.59 kB |                11.33 kB
-chunk-AFOJXWWM.js     | -                                   |  23.53 kB |                 5.12 kB
-chunk-OGZY43I2.js     | -                                   |  18.14 kB |                 5.34 kB
-chunk-RXQBR24F.js     | -                                   |   7.33 kB |                 1.74 kB
-styles-BBURD7AU.css   | styles                              |   5.38 kB |                 1.78 kB
-chunk-4YDH7NGL.js     | -                                   |   1.37 kB |               523 bytes
-chunk-4CLCTAJ7.js     | -                                   | 830 bytes |               830 bytes
-chunk-IOK7ZFEF.js     | -                                   | 716 bytes |               716 bytes
-chunk-MUTJNURO.js     | -                                   | 386 bytes |               386 bytes
-
-                      | Initial total                       | 514.83 kB |               139.55 kB
-
-Lazy chunk files      | Names                               |  Raw size | Estimated transfer size
-chunk-2GQVVZGE.js     | inventory-list-component            |  82.05 kB |                16.66 kB
-chunk-DCM47CDM.js     | owner-payouts-component             |  55.95 kB |                11.34 kB
-chunk-WRMYNCXO.js     | price-request-list-component        |  51.61 kB |                 8.38 kB
-chunk-CN4AQC4S.js     | item-list-component                 |  51.30 kB |                10.38 kB
-chunk-2NDNGDSQ.js     | consignor-list-component            |  46.94 kB |                10.01 kB
-chunk-JRETPJYR.js     | consignor-item-detail-component     |  46.02 kB |                 8.81 kB
-chunk-IPIYBLLW.js     | consignor-payouts-component         |  44.47 kB |                 9.18 kB
-chunk-UI264FRU.js     | owner-approval-component            |  40.44 kB |                 8.53 kB
-chunk-KYFNON6J.js     | storefront-settings-component       |  38.22 kB |                 7.66 kB
-chunk-XSPHLDIQ.js     | record-sale-component               |  34.77 kB |                 8.37 kB
-chunk-SNVUCE3V.js     | consignor-settings-component        |  30.80 kB |                 6.81 kB
-chunk-S2CA46MI.js     | payout-history-component            |  29.23 kB |                 6.36 kB
-chunk-VLUY67FJ.js     | store-layout-component              |  28.26 kB |                 5.07 kB
-chunk-FEZ4OJGW.js     | account-settings-component          |  28.08 kB |                 5.78 kB
-chunk-6Z7QLX2L.js     | consignor-payout-settings-component |  27.15 kB |                 6.52 kB
-...and 115 more lazy chunks files. Use "--verbose" to show all the files.
-
-Application bundle generation complete. [60.952 seconds] - 2026-01-06T01:28:06.709Z
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 500.00 kB was not met by 14.83 kB with a total of 514.83 kB.[0m
-
-
-Output location: /mnt/c/Projects/ConsignmentGenie/ConsignmentGenie_UI/dist/production
-
+npm error Missing script: "build"
+npm error
+npm error To see a list of scripts, run:
+npm error   npm run
+npm error A complete log of this run can be found in: /home/swash/.npm/_logs/2026-01-08T17_43_22_165Z-debug-0.log
