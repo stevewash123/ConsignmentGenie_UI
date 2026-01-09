@@ -20,6 +20,9 @@ export class ConsignorGuard implements CanActivate {
     try {
       const userData = JSON.parse(userDataStr);
 
+      // Normalize role to handle both string and numeric values
+      const normalizedRole = this.normalizeRole(userData.role);
+
       // Allow consignor role access to consignor area
       // Note: Owners can also access consignor areas for their shop's consignors
       const allowedRoles = [
@@ -27,12 +30,12 @@ export class ConsignorGuard implements CanActivate {
         UserRole.Owner  // Owners can see consignor pages for their shop
       ];
 
-      if (allowedRoles.includes(userData.role)) {
+      if (allowedRoles.includes(normalizedRole)) {
         return true;
       }
 
       // Redirect non-consignor users to their appropriate dashboard
-      this.redirectToUserDashboard(userData.role);
+      this.redirectToUserDashboard(normalizedRole);
       return false;
     } catch (error) {
       console.error('Invalid user data in localStorage');
@@ -52,5 +55,26 @@ export class ConsignorGuard implements CanActivate {
       default:
         this.router.navigate(['/login']);
     }
+  }
+
+  private normalizeRole(role: string | number): number {
+    // Handle string role values from API
+    if (typeof role === 'string') {
+      switch (role.toLowerCase()) {
+        case 'admin': return UserRole.Admin;
+        case 'owner': return UserRole.Owner;
+        case 'consignor': return UserRole.consignor;
+        case 'customer': return UserRole.Customer;
+        default: return UserRole.Customer; // Default fallback
+      }
+    }
+
+    // Handle numeric role values
+    if (typeof role === 'number') {
+      return role;
+    }
+
+    // Fallback for unexpected types
+    return UserRole.Customer;
   }
 }
