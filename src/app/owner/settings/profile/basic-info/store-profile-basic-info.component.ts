@@ -1,8 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { SettingsService, ShopProfile } from '../../../../services/settings.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 
 interface StoreBasicInfo {
   storeName: string;
@@ -30,7 +33,7 @@ interface OwnerContact {
 }
 
 // Legacy API interface for compatibility
-interface ShopProfile {
+interface LegacyShopProfile {
   ShopName: string;
   ShopDescription?: string;
   ShopPhone?: string;
@@ -52,13 +55,22 @@ interface ShopProfile {
   templateUrl: './store-profile-basic-info-template.component.html',
   styleUrls: ['./store-profile-basic-info.component.scss']
 })
-export class StoreProfileBasicInfoComponent implements OnInit {
+export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
   basicInfoForm!: FormGroup;
-  saving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
   ownerContact: OwnerContact | null = null;
   useOwnerContact = true;
+  private subscriptions = new Subscription();
+
+  // Profile signal - initialized in ngOnInit
+  profile = signal<ShopProfile | null>(null);
+
+  // Auto-save status computed from form state
+  autoSaveStatus = computed(() => {
+    const profile = this.profile();
+    return profile ? 'Saved automatically' : 'Loading...';
+  });
 
   states = [
     { code: 'AL', name: 'Alabama' },
@@ -115,13 +127,32 @@ export class StoreProfileBasicInfoComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit() {
     this.initializeForm();
+    this.setupProfileSubscription();
     this.loadProfile();
     this.loadOwnerContact();
+    this.setupFormChangeListeners();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
+  private setupProfileSubscription() {
+    // Subscribe to profile changes from settings service
+    this.subscriptions.add(
+      this.settingsService.profile.subscribe(profile => {
+        this.profile.set(profile);
+        if (profile) {
+          this.updateFormFromProfile(profile);
+        }
+      })
+    );
   }
 
   private initializeForm() {
@@ -177,71 +208,122 @@ export class StoreProfileBasicInfoComponent implements OnInit {
     return value.length;
   }
 
-  async loadProfile() {
-    try {
-      const response = await this.http.get<ShopProfile>(`${environment.apiUrl}/api/organization/profile`).toPromise();
-      if (response) {
-        this.populateForm(response);
-      }
-    } catch (error) {
-      console.error('Error loading shop profile:', error);
-      this.showError('Failed to load shop profile');
-    }
+  private setupFormChangeListeners() {
+    // Listen to form changes and update settings service
+    this.subscriptions.add(
+      this.basicInfoForm.get('storeName')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopName) {
+          this.settingsService.updateProfileSetting('shopName', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('description')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopDescription) {
+          this.settingsService.updateProfileSetting('shopDescription', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('website')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopWebsite) {
+          this.settingsService.updateProfileSetting('shopWebsite', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('contact.phone')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopPhone) {
+          this.settingsService.updateProfileSetting('shopPhone', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('contact.email')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopEmail) {
+          this.settingsService.updateProfileSetting('shopEmail', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('address.street1')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopAddress1) {
+          this.settingsService.updateProfileSetting('shopAddress1', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('address.street2')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopAddress2) {
+          this.settingsService.updateProfileSetting('shopAddress2', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('address.city')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopCity) {
+          this.settingsService.updateProfileSetting('shopCity', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('address.state')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopState) {
+          this.settingsService.updateProfileSetting('shopState', value);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.basicInfoForm.get('address.zipCode')?.valueChanges.subscribe(value => {
+        if (value !== this.profile()?.shopZip) {
+          this.settingsService.updateProfileSetting('shopZip', value);
+        }
+      })
+    );
+
+    // Profile changes are handled in setupProfileSubscription
   }
 
-  private populateForm(profile: ShopProfile) {
+  private updateFormFromProfile(profile: ShopProfile) {
+    // Update form without triggering change events
     this.basicInfoForm.patchValue({
-      storeName: profile.ShopName || '',
-      description: profile.ShopDescription || '',
-      website: profile.ShopWebsite || '',
+      storeName: profile.shopName,
+      description: profile.shopDescription,
+      website: profile.shopWebsite,
       contact: {
-        phone: profile.ShopPhone || '',
-        email: profile.ShopEmail || ''
+        phone: profile.shopPhone,
+        email: profile.shopEmail
       },
       address: {
-        street1: profile.ShopAddress1 || '',
-        street2: profile.ShopAddress2 || '',
-        city: profile.ShopCity || '',
-        state: profile.ShopState || '',
-        zipCode: profile.ShopZip || '',
-        showPublicly: true // Default to true as this field doesn't exist in legacy API
+        street1: profile.shopAddress1,
+        street2: profile.shopAddress2,
+        city: profile.shopCity,
+        state: profile.shopState,
+        zipCode: profile.shopZip,
+        showPublicly: true // Default since not in API
       }
-    });
+    }, { emitEvent: false }); // Don't emit events to prevent loops
   }
 
-  async onSave() {
-    if (!this.basicInfoForm.valid) {
-      this.basicInfoForm.markAllAsTouched();
-      return;
-    }
-
-    this.saving.set(true);
+  async loadProfile() {
     try {
-      const formValue = this.basicInfoForm.value;
-
-      // Convert to legacy API format
-      const profileData: Partial<ShopProfile> = {
-        ShopName: formValue.storeName,
-        ShopDescription: formValue.description,
-        ShopWebsite: formValue.website,
-        ShopPhone: formValue.contact.phone,
-        ShopEmail: formValue.contact.email,
-        ShopAddress1: formValue.address.street1,
-        ShopAddress2: formValue.address.street2,
-        ShopCity: formValue.address.city,
-        ShopState: formValue.address.state,
-        ShopZip: formValue.address.zipCode
-      };
-
-      await this.http.put(`${environment.apiUrl}/api/organization/profile`, profileData).toPromise();
-      this.showSuccess('Basic information saved successfully');
+      // Load profile through settings service
+      await this.settingsService.loadProfile();
     } catch (error) {
-      console.error('Error saving basic info:', error);
-      this.showError('Failed to save basic information');
-    } finally {
-      this.saving.set(false);
+      console.error('Error loading profile:', error);
+      this.showError('Failed to load profile information');
     }
   }
+
 
   async loadOwnerContact() {
     try {

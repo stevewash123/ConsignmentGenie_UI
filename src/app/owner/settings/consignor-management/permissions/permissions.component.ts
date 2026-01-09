@@ -1,23 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
-
-interface InventoryPermissions {
-  canAddItems: boolean;
-  canEditOwnItems: boolean;
-  canRemoveOwnItems: boolean;
-  canEditPrices: boolean;
-}
-
-
-
-interface ConsignorPermissions {
-  inventory: InventoryPermissions;
-  isActive: boolean;
-  lastUpdated: Date;
-}
+import { SettingsService, ConsignorPermissions } from '../../../../services/settings.service';
+import { Subscription } from 'rxjs';
 
 interface PermissionTemplate {
   name: string;
@@ -32,78 +17,81 @@ interface PermissionTemplate {
   templateUrl: './permissions.component.html',
   styleUrls: ['./permissions.component.scss']
 })
-export class PermissionsComponent implements OnInit {
-  permissionsForm!: FormGroup;
-  defaultPermissions = signal<ConsignorPermissions | null>(null);
-  isLoading = signal(false);
-  isSaving = signal(false);
+export class PermissionsComponent implements OnInit, OnDestroy {
+  permissions = signal<ConsignorPermissions | null>(null);
   successMessage = signal('');
   errorMessage = signal('');
+  private subscriptions = new Subscription();
+
+  // Auto-save status computed from permissions state
+  autoSaveStatus = computed(() => {
+    const permissions = this.permissions();
+    return permissions ? 'Saved automatically' : 'Loading...';
+  });
 
   constructor(
-    private fb: FormBuilder,
-    private http: HttpClient
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
-    this.initializeForm();
-    this.loadDefaultPermissions();
+    this.setupSubscriptions();
+    this.loadPermissions();
   }
 
-  private initializeForm(): void {
-    this.permissionsForm = this.fb.group({
-      inventory: this.fb.group({
-        canAddItems: [true],
-        canEditOwnItems: [true],
-        canRemoveOwnItems: [false],
-        canEditPrices: [true]
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  private setupSubscriptions(): void {
+    // Subscribe to permissions changes from the service
+    this.subscriptions.add(
+      this.settingsService.consignorPermissions.subscribe(permissions => {
+        this.permissions.set(permissions);
       })
-    });
+    );
   }
 
-
-
-  private async loadDefaultPermissions(): Promise<void> {
+  async loadPermissions(): Promise<void> {
     try {
-      this.isLoading.set(true);
-      const permissions = await this.http.get<ConsignorPermissions>(`${environment.apiUrl}/api/organization/default-consignor-permissions`).toPromise();
-      if (permissions) {
-        this.defaultPermissions.set(permissions);
-        this.permissionsForm.patchValue(permissions);
-      }
+      await this.settingsService.loadConsignorPermissions();
     } catch (error) {
-      this.showError('Failed to load default permissions');
-    } finally {
-      this.isLoading.set(false);
+      console.error('Error loading consignor permissions:', error);
+      this.showError('Failed to load permissions');
     }
   }
 
-  async saveDefaultPermissions(): Promise<void> {
-    if (!this.permissionsForm.valid) {
-      return;
-    }
-
-    this.isSaving.set(true);
-    try {
-      const formData = {
-        ...this.permissionsForm.value,
-        isActive: true,
-        lastUpdated: new Date()
-      };
-
-      await this.http.put(`${environment.apiUrl}/api/organization/default-consignor-permissions`, formData).toPromise();
-      this.defaultPermissions.set(formData);
-      this.showSuccess('Default permissions saved successfully');
-    } catch (error) {
-      this.showError('Failed to save default permissions');
-    } finally {
-      this.isSaving.set(false);
-    }
+  // Individual permission update methods - these trigger debounced saves
+  onCanAddItemsChange(value: boolean): void {
+    this.settingsService.updateConsignorPermission('canAddItems', value);
   }
 
+  onCanEditOwnItemsChange(value: boolean): void {
+    this.settingsService.updateConsignorPermission('canEditOwnItems', value);
+  }
+
+  onCanRemoveOwnItemsChange(value: boolean): void {
+    this.settingsService.updateConsignorPermission('canRemoveOwnItems', value);
+  }
+
+  onCanEditPricesChange(value: boolean): void {
+    this.settingsService.updateConsignorPermission('canEditPrices', value);
+  }
+
+  onIsActiveChange(value: boolean): void {
+    this.settingsService.updateConsignorPermission('isActive', value);
+  }
 
   resetToDefaults(): void {
-    this.initializeForm();
+    // Reset to default values with auto-save
+    const defaultPermissions = {
+      canAddItems: true,
+      canEditOwnItems: true,
+      canRemoveOwnItems: false,
+      canEditPrices: true,
+      isActive: true
+    };
+
+    this.settingsService.updateConsignorPermissions(defaultPermissions);
   }
 
 

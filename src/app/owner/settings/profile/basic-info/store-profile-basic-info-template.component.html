@@ -4,7 +4,7 @@
     <p>Essential details about your store and how customers can reach you</p>
   </header>
 
-  <form [formGroup]="basicInfoForm" (ngSubmit)="onSave()" class="basic-info-form">
+  <form [formGroup]="basicInfoForm" class="basic-info-form">
 
     <!-- Store Identity -->
     <section class="form-section">
@@ -192,20 +192,13 @@
       </div>
     </section>
 
-    <div class="form-actions">
-      <button
-        type="button"
-        (click)="onPreview()"
-        class="btn-secondary"
-        [disabled]="saving()">
-        Preview Customer View
-      </button>
-      <button
-        type="submit"
-        [disabled]="!basicInfoForm.valid || saving()"
-        class="btn-primary">
-        {{ saving() ? 'Saving...' : 'Save Changes' }}
-      </button>
+    <!-- Auto-save Status -->
+    <div class="auto-save-status">
+      <div class="save-indicator">
+        <span class="status-icon">✓</span>
+        <span>{{ autoSaveStatus() }}</span>
+      </div>
+      <small class="save-note">Changes are saved automatically as you type</small>
     </div>
   </form>
 

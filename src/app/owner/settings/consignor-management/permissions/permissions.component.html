@@ -7,73 +7,77 @@
   <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
   <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
 
-  <div *ngIf="isLoading()" class="loading">
-    <p>Loading permission settings...</p>
-  </div>
-
-  <div *ngIf="!isLoading()">
-
+  <div *ngIf="permissions()">
     <!-- Permissions Form -->
-    <form [formGroup]="permissionsForm" (ngSubmit)="saveDefaultPermissions()">
-      <!-- Inventory Permissions -->
-      <section class="form-section">
-        <div class="permission-group">
-          <h4>Inventory Management</h4>
-          <div class="permission-list" formGroupName="inventory">
-            <div class="permission-item">
-              <input type="checkbox" id="canAddItems" formControlName="canAddItems">
-              <div class="permission-content">
-                <div class="permission-label">Can add new items</div>
-                <div class="permission-description">Allow consignors to add new items to the inventory</div>
-              </div>
+    <section class="form-section">
+      <div class="permission-group">
+        <h4>Inventory Management</h4>
+        <div class="permission-list">
+          <div class="permission-item">
+            <input
+              type="checkbox"
+              id="canAddItems"
+              [checked]="permissions()?.inventory?.canAddItems || false"
+              (change)="onCanAddItemsChange($event.target.checked)">
+            <div class="permission-content">
+              <div class="permission-label">Can add new items</div>
+              <div class="permission-description">Allow consignors to add new items to the inventory</div>
             </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canEditOwnItems" formControlName="canEditOwnItems">
-              <div class="permission-content">
-                <div class="permission-label">Can edit their own items</div>
-                <div class="permission-description">Allow consignors to modify descriptions, photos, etc. of their items</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canRemoveOwnItems" formControlName="canRemoveOwnItems">
-              <div class="permission-content">
-                <div class="permission-label">Can remove/withdraw their own items</div>
-                <div class="permission-description">Allow consignors to remove items from sale</div>
-              </div>
-            </div>
-
-            <div class="permission-item">
-              <input type="checkbox" id="canEditPrices" formControlName="canEditPrices">
-              <div class="permission-content">
-                <div class="permission-label">Can edit item prices</div>
-                <div class="permission-description">Allow consignors to change prices on their items</div>
-              </div>
-            </div>
-
-
-
           </div>
 
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <div>
-              <button type="button" (click)="resetToDefaults()" class="btn-secondary">
-                Reset to Defaults
-              </button>
+          <div class="permission-item">
+            <input
+              type="checkbox"
+              id="canEditOwnItems"
+              [checked]="permissions()?.inventory?.canEditOwnItems || false"
+              (change)="onCanEditOwnItemsChange($event.target.checked)">
+            <div class="permission-content">
+              <div class="permission-label">Can edit their own items</div>
+              <div class="permission-description">Allow consignors to modify descriptions, photos, etc. of their items</div>
             </div>
+          </div>
 
-            <div style="display: flex; gap: 1rem;">
-              <button type="submit"
-                      class="btn-primary"
-                      [disabled]="!permissionsForm.valid || isSaving()">
-                {{ isSaving() ? 'Saving...' : 'Save Default Permissions' }}
-              </button>
+          <div class="permission-item">
+            <input
+              type="checkbox"
+              id="canRemoveOwnItems"
+              [checked]="permissions()?.inventory?.canRemoveOwnItems || false"
+              (change)="onCanRemoveOwnItemsChange($event.target.checked)">
+            <div class="permission-content">
+              <div class="permission-label">Can remove/withdraw their own items</div>
+              <div class="permission-description">Allow consignors to remove items from sale</div>
+            </div>
+          </div>
+
+          <div class="permission-item">
+            <input
+              type="checkbox"
+              id="canEditPrices"
+              [checked]="permissions()?.inventory?.canEditPrices || false"
+              (change)="onCanEditPricesChange($event.target.checked)">
+            <div class="permission-content">
+              <div class="permission-label">Can edit item prices</div>
+              <div class="permission-description">Allow consignors to change prices on their items</div>
             </div>
           </div>
         </div>
-      </section>
-    </form>
+
+        <!-- Auto-save Status -->
+        <div class="auto-save-status">
+          <div class="save-indicator">
+            <span class="status-icon">✓</span>
+            <span>{{ autoSaveStatus() }}</span>
+          </div>
+          <small class="save-note">Changes are saved automatically as you type</small>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" (click)="resetToDefaults()" class="btn-secondary">
+            Reset to Defaults
+          </button>
+        </div>
+      </div>
+    </section>
   </div>
 </div>

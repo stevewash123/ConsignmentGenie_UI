@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OwnerService, BusinessSettings } from '../../../services/owner.service';
+import { SettingsService, BusinessSettings } from '../../../services/settings.service';
 import { ItemSubmissionMode } from '../../../shared/interfaces/business.interfaces';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -12,11 +13,17 @@ import { ItemSubmissionMode } from '../../../shared/interfaces/business.interfac
   templateUrl: './business-settings.component.html',
   styleUrls: ['./business-settings.component.scss']
 })
-export class BusinessSettingsComponent implements OnInit {
+export class BusinessSettingsComponent implements OnInit, OnDestroy {
   settings = signal<BusinessSettings | null>(null);
-  isSaving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  private subscriptions = new Subscription();
+
+  // Auto-save status computed from settings state
+  autoSaveStatus = computed(() => {
+    const settings = this.settings();
+    return settings ? 'Saved automatically' : 'Loading...';
+  });
 
   ItemSubmissionMode = ItemSubmissionMode;
 
@@ -38,67 +45,180 @@ export class BusinessSettingsComponent implements OnInit {
     }
   ];
 
-  constructor(private ownerService: OwnerService) {}
+  constructor(private settingsService: SettingsService) {}
 
   ngOnInit() {
+    this.setupSubscriptions();
     this.loadSettings();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
+  private setupSubscriptions() {
+    // Subscribe to settings changes from the service
+    this.subscriptions.add(
+      this.settingsService.businessSettings.subscribe(settings => {
+        this.settings.set(settings);
+      })
+    );
   }
 
   async loadSettings() {
     try {
-      const response = await this.ownerService.getBusinessSettings().toPromise();
-      if (response) {
-        // Ensure ConsignorPermissions section exists with default value for backwards compatibility
-        if (!response.consignorPermissions) {
-          response.consignorPermissions = {
-            itemSubmissionMode: ItemSubmissionMode.ApprovalRequired
-          };
-        }
-        this.settings.set(response);
-      }
+      await this.settingsService.loadBusinessSettings();
     } catch (error) {
+      console.error('Error loading business settings:', error);
       this.showError('Failed to load business settings');
     }
   }
 
-  async saveSettings() {
-    if (!this.settings()) return;
-
-    // Validate payout settings per story requirements
-    const settings = this.settings()!;
-    const errors: string[] = [];
-
-    // Validation: HoldPeriodDays: ≥ 0, ≤ 90
-    if (settings.payouts.holdPeriodDays < 0 || settings.payouts.holdPeriodDays > 90) {
-      errors.push('Hold period must be between 0 and 90 days');
+  // Individual field update methods - these trigger debounced saves
+  onDefaultSplitChange(value: string) {
+    if (this.isValidSplit(value)) {
+      this.settingsService.updateBusinessSetting('defaultSplit', value);
     }
+  }
 
-    // Validation: MinimumAmount: ≥ 0, ≤ 10000
-    if (settings.payouts.minimumAmount < 0 || settings.payouts.minimumAmount > 10000) {
-      errors.push('Minimum payout amount must be between $0 and $10,000');
-    }
+  onAllowCustomSplitsPerConsignorChange(value: boolean) {
+    this.settingsService.updateBusinessSetting('allowCustomSplitsPerConsignor', value);
+  }
 
-    // Validation: RefundWindowDays: ≥ 1, ≤ 90 (only if RefundPolicy = WithinDays)
-    if (settings.payouts.refundPolicy === 'WithinDays') {
-      if (!settings.payouts.refundWindowDays || settings.payouts.refundWindowDays < 1 || settings.payouts.refundWindowDays > 90) {
-        errors.push('Refund window must be between 1 and 90 days when using "Within Days" policy');
-      }
-    }
+  onAllowCustomSplitsPerItemChange(value: boolean) {
+    this.settingsService.updateBusinessSetting('allowCustomSplitsPerItem', value);
+  }
 
-    if (errors.length > 0) {
-      this.showError(errors.join('. '));
-      return;
+  onSalesTaxRateChange(value: string) {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && this.isValidTaxRate(numValue)) {
+      this.settingsService.updateBusinessSetting('salesTaxRate', numValue);
     }
+  }
 
-    this.isSaving.set(true);
-    try {
-      const response = await this.ownerService.updateBusinessSettings(this.settings()!).toPromise();
-      this.showSuccess('Business settings saved successfully');
-    } catch (error) {
-      this.showError('Failed to save business settings');
-    } finally {
-      this.isSaving.set(false);
+  onTaxIncludedInPricesChange(value: boolean) {
+    this.settingsService.updateBusinessSetting('taxIncludedInPrices', value);
+  }
+
+  onChargeTaxOnShippingChange(value: boolean) {
+    this.settingsService.updateBusinessSetting('chargeTaxOnShipping', value);
+  }
+
+  onTaxIdEinChange(value: string) {
+    this.settingsService.updateBusinessSetting('taxIdEin', value || null);
+  }
+
+  onHoldPeriodDaysChange(value: string) {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && this.isValidHoldPeriod(numValue)) {
+      this.settingsService.updateBusinessSetting('holdPeriodDays', numValue);
     }
+  }
+
+  onMinimumAmountChange(value: string) {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && this.isValidMinimumAmount(numValue)) {
+      this.settingsService.updateBusinessSetting('minimumAmount', numValue);
+    }
+  }
+
+  onPayoutScheduleChange(value: string) {
+    this.settingsService.updateBusinessSetting('payoutSchedule', value);
+  }
+
+  onPayoutMethodChange(value: string) {
+    this.settingsService.updateBusinessSetting('payoutMethod', value);
+  }
+
+  onAutoProcessingChange(value: boolean) {
+    this.settingsService.updateBusinessSetting('autoProcessing', value);
+  }
+
+  onRefundPolicyChange(value: string) {
+    this.settingsService.updateBusinessSetting('refundPolicy', value);
+  }
+
+  onRefundWindowDaysChange(value: string) {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && this.isValidRefundWindow(numValue)) {
+      this.settingsService.updateBusinessSetting('refundWindowDays', numValue);
+    }
+  }
+
+  onDefaultConsignmentPeriodDaysChange(value: string) {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue)) {
+      this.settingsService.updateBusinessSetting('defaultConsignmentPeriodDays', numValue);
+    }
+  }
+
+  onEnableAutoMarkdownsChange(value: boolean) {
+    this.settingsService.updateBusinessSetting('enableAutoMarkdowns', value);
+  }
+
+  onItemSubmissionModeChange(value: string) {
+    this.settingsService.updateBusinessSetting('itemSubmissionMode', value);
+  }
+
+  onAutoApproveItemsChange(value: boolean) {
+    this.settingsService.updateBusinessSetting('autoApproveItems', value);
+  }
+
+  // Special handler for markdown schedule (nested structure)
+  updateMarkdownSchedule(field: string, value: any) {
+    const currentSettings = this.settings();
+    if (!currentSettings) return;
+
+    // Create updated markdown schedule
+    const updatedSchedule = {
+      ...currentSettings.items.markdownSchedule,
+      [field]: field.includes('Days') ? Number(value) : value
+    };
+
+    // Update the items section with new markdown schedule
+    const updatedItems = {
+      ...currentSettings.items,
+      markdownSchedule: updatedSchedule
+    };
+
+    // Update settings optimistically
+    this.settings.set({
+      ...currentSettings,
+      items: updatedItems
+    });
+
+    // For nested structures, we'll use a direct update approach
+    // Since markdown is part of items settings, we update them together
+    const itemsUpdates = {
+      [`items.markdownSchedule.${field}`]: field.includes('Days') ? Number(value) : value
+    };
+
+    this.settingsService.updateBusinessSettings(itemsUpdates);
+  }
+
+  // Validation methods
+  private isValidSplit(split: string): boolean {
+    const parts = split.split('/');
+    if (parts.length !== 2) return false;
+    const consignor = parseInt(parts[0]);
+    const shop = parseInt(parts[1]);
+    return !isNaN(consignor) && !isNaN(shop) && consignor + shop === 100 && consignor >= 0 && shop >= 0;
+  }
+
+  private isValidTaxRate(rate: number): boolean {
+    return rate >= 0 && rate <= 100;
+  }
+
+  private isValidHoldPeriod(days: number): boolean {
+    return days >= 0 && days <= 90;
+  }
+
+  private isValidMinimumAmount(amount: number): boolean {
+    return amount >= 0 && amount <= 10000;
+  }
+
+  private isValidRefundWindow(days: number): boolean {
+    return days >= 1 && days <= 90;
   }
 
   private showSuccess(message: string) {
