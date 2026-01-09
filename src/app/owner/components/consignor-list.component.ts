@@ -185,8 +185,37 @@ export class ConsignorListComponent implements OnInit {
     console.log('Email agreement for:', consignor.name);
   }
 
-  getRelativeTime(date: Date | string): string {
-    return new Date(date).toLocaleDateString();
+  getRelativeTime(date: Date | string | null | undefined): string {
+    if (!date) {
+      return 'Unknown';
+    }
+
+    const parsedDate = new Date(date);
+
+    // Check if the date is valid
+    if (isNaN(parsedDate.getTime())) {
+      return 'Invalid date';
+    }
+
+    const now = new Date();
+    const diffInMs = now.getTime() - parsedDate.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    // Return relative time
+    if (diffInMinutes < 1) {
+      return 'Just now';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes}m ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}d ago`;
+    } else {
+      // For dates older than a week, show the actual date
+      return parsedDate.toLocaleDateString();
+    }
   }
 
   resendInvitation(invitationId: string): void {

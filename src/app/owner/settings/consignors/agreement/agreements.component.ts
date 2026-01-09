@@ -1,10 +1,10 @@
-import { Component, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, computed, effect, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SettingsService, OrganizationSettings } from '../../../../services/settings.service';
+import { SettingsService, OrganizationSettings, AgreementTemplate } from '../../../../services/settings.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-interface AgreementTemplate {
+interface LocalAgreementTemplate {
   id: string;
   content: string;
   isCustomized: boolean;
@@ -21,7 +21,7 @@ interface AgreementTemplate {
   styleUrls: ['./agreements.component.scss']
 })
 export class AgreementsComponent implements OnInit {
-  template = signal<AgreementTemplate | null>(null);
+  template = signal<LocalAgreementTemplate | null>(null);
   templateContent = signal('');
   isEditing = signal(false);
   isSaving = signal(false);
@@ -31,8 +31,8 @@ export class AgreementsComponent implements OnInit {
   viewMode = signal<'sample' | 'agreement'>('sample');
   hasCustomTemplate = signal(false);
 
-  // Use the settings service
-  settings = toSignal(this.settingsService.settings);
+  // Use the settings service - initialized in constructor
+  settings!: Signal<OrganizationSettings | null>;
 
   metaTagsHelp = [
     { tag: '{{SHOP_NAME}}', description: 'Your shop\'s business name' },
@@ -71,7 +71,9 @@ Shop Representative: _________________________ Date: _________
 DISCLAIMER: This is sample content only and does not constitute legal advice.
 Consult with an attorney to ensure your agreement meets local legal requirements.`;
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(private settingsService: SettingsService) {
+    this.settings = toSignal(this.settingsService.settings);
+  }
 
   ngOnInit() {
     this.loadTemplate();
@@ -84,21 +86,25 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   async loadTemplate() {
     try {
-      // TODO: Replace with actual API call
-      const mockTemplate: AgreementTemplate = {
-        id: '1',
+      // Check if there's an uploaded template from settings
+      const settings = this.settings();
+      const hasUploadedTemplate = settings?.agreementTemplateId != null;
+
+      // Create local template based on whether there's an uploaded file
+      const localTemplate: LocalAgreementTemplate = {
+        id: hasUploadedTemplate ? settings!.agreementTemplateId! : '1',
         content: this.sampleTemplate,
-        isCustomized: false,
+        isCustomized: hasUploadedTemplate,
         lastModified: new Date(),
         metaTags: this.metaTagsHelp.map(tag => tag.tag)
       };
 
-      this.template.set(mockTemplate);
-      this.templateContent.set(mockTemplate.content);
-      this.hasCustomTemplate.set(mockTemplate.isCustomized);
+      this.template.set(localTemplate);
+      this.templateContent.set(localTemplate.content);
+      this.hasCustomTemplate.set(localTemplate.isCustomized);
 
       // Set view mode based on whether custom template exists
-      if (mockTemplate.isCustomized) {
+      if (localTemplate.isCustomized) {
         this.viewMode.set('agreement');
       } else {
         this.viewMode.set('sample');
@@ -181,55 +187,59 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     this.showSuccess('Agreement downloaded');
   }
 
-  onFileSelected(event: Event) {
+  async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
     const file = input.files[0];
-    if (file.type !== 'text/plain' && !file.name.endsWith('.txt')) {
-      this.showError('Please select a text file (.txt)');
+
+    // Validate file type (PDF, TXT, RTF, HTML)
+    const allowedTypes = [
+      'application/pdf',
+      'text/plain',
+      'text/rtf',
+      'application/rtf',
+      'text/html',
+      'text/htm'
+    ];
+
+    if (!allowedTypes.includes(file.type) && !this.isValidFileExtension(file.name)) {
+      this.showError('Please select a PDF, TXT, RTF, or HTML file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      this.showError('File size cannot exceed 5MB');
       return;
     }
 
     this.isUploading.set(true);
-    const reader = new FileReader();
 
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        if (content) {
-          this.templateContent.set(content);
+    try {
+      // Upload the file using the settings service
+      const uploadedTemplate = await this.settingsService.uploadAgreementTemplate(file);
 
-          // Update template object
-          const updatedTemplate = {
-            ...this.template()!,
-            content: content,
-            isCustomized: true,
-            lastModified: new Date()
-          };
-          this.template.set(updatedTemplate);
+      // Update the settings to reference the new template
+      this.settingsService.updateSetting('agreementTemplateId', uploadedTemplate.id);
 
-          // Enable agreement view and switch to it
-          this.hasCustomTemplate.set(true);
-          this.viewMode.set('agreement');
+      // Update local state
+      this.hasCustomTemplate.set(true);
+      this.viewMode.set('agreement');
 
-          this.showSuccess('Agreement file loaded successfully');
-        }
-      } catch (error) {
-        this.showError('Failed to read agreement file');
-      } finally {
-        this.isUploading.set(false);
-        input.value = ''; // Clear the input
-      }
-    };
+      // Reload the template to update the display
+      await this.loadTemplate();
 
-    reader.onerror = () => {
-      this.showError('Failed to read agreement file');
+      this.showSuccess(`Agreement template "${uploadedTemplate.fileName}" uploaded successfully`);
+
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      this.showError(error?.error || 'Failed to upload agreement template');
+    } finally {
       this.isUploading.set(false);
-      input.value = '';
-    };
-
-    reader.readAsText(file);
+      input.value = ''; // Clear the input
+    }
   }
 
   insertMetaTag(tag: string) {
@@ -254,15 +264,116 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     if (this.viewMode() === 'sample') {
       return this.sampleTemplate;
     } else {
+      // If we have an uploaded PDF template, show a message instead of content
+      const settings = this.settings();
+      if (settings?.agreementTemplateId) {
+        return `PDF Agreement Template Uploaded
+
+Your custom consignment agreement PDF template has been uploaded successfully.
+
+Template ID: ${settings.agreementTemplateId}
+
+To view or edit the agreement template, download the PDF file using the download button above.
+
+This PDF template will be used when generating agreements for new consignors.`;
+      }
       return this.template()?.content || '';
     }
   }
 
-  downloadCurrentView() {
+  async downloadCurrentView() {
     if (this.viewMode() === 'sample') {
       this.downloadSample();
     } else {
-      this.downloadTemplate();
+      // Check if we have an uploaded PDF template
+      const settings = this.settings();
+      if (settings?.agreementTemplateId) {
+        await this.downloadPdfTemplate(settings.agreementTemplateId);
+      } else {
+        this.downloadTemplate();
+      }
+    }
+  }
+
+  async downloadPdfTemplate(templateId: string) {
+    try {
+      const blob = await this.settingsService.downloadAgreementTemplate(templateId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `agreement-template-${templateId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      this.showSuccess('Agreement template downloaded');
+    } catch (error) {
+      this.showError('Failed to download agreement template');
+    }
+  }
+
+  async generatePdfFromTemplate() {
+    if (!this.templateContent().trim()) {
+      this.showError('Template content cannot be empty');
+      return;
+    }
+
+    this.isSaving.set(true);
+    try {
+      // Generate PDF from text content on the server
+      const pdfBlob = await this.settingsService.generatePdfFromText(this.templateContent());
+
+      // Create a File object from the blob to upload
+      const pdfFile = new File([pdfBlob], 'agreement-template.pdf', { type: 'application/pdf' });
+
+      // Upload the generated PDF
+      const uploadedTemplate = await this.settingsService.uploadAgreementTemplate(pdfFile);
+
+      // Update the settings to reference the new template
+      this.settingsService.updateSetting('agreementTemplateId', uploadedTemplate.id);
+
+      // Update local state
+      this.hasCustomTemplate.set(true);
+      this.viewMode.set('agreement');
+      this.isEditing.set(false);
+
+      // Reload the template to update the display
+      await this.loadTemplate();
+
+      this.showSuccess('Agreement PDF generated and uploaded successfully');
+
+    } catch (error: any) {
+      console.error('PDF generation error:', error);
+      this.showError(error?.error || 'Failed to generate PDF from template');
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  async sendSampleAgreement() {
+    this.isSaving.set(true);
+    try {
+      // Get the current template content (either from editor or current template)
+      const contentToSend = this.isEditing()
+        ? this.templateContent()
+        : this.template()?.content || this.sampleTemplate;
+
+      if (!contentToSend.trim()) {
+        this.showError('No agreement content to send');
+        return;
+      }
+
+      // Send sample agreement notification
+      await this.settingsService.sendSampleAgreement(contentToSend);
+
+      this.showSuccess('Sample agreement sent to your notifications! Check your notifications panel to view it.');
+
+    } catch (error: any) {
+      console.error('Sample agreement error:', error);
+      this.showError(error?.error || 'Failed to send sample agreement');
+    } finally {
+      this.isSaving.set(false);
     }
   }
 
@@ -301,13 +412,30 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     };
   }
 
+  // Check if agreement is uploaded
+  hasAgreementUploaded(): boolean {
+    const settings = this.settings();
+    return settings?.agreementTemplateId != null;
+  }
+
   // Settings change handlers
   onAutoSendChange(checked: boolean): void {
+    // Only allow enabling if agreement is uploaded
+    if (checked && !this.hasAgreementUploaded()) {
+      this.showError('Please upload an agreement template (PDF, TXT, RTF, or HTML) before enabling auto-send');
+      return;
+    }
     this.settingsService.updateSetting('autoSendAgreementOnRegister', checked);
   }
 
   onRequireSignedChange(checked: boolean): void {
     this.settingsService.updateSetting('requireSignedAgreement', checked);
+  }
+
+  private isValidFileExtension(fileName: string): boolean {
+    const allowedExtensions = ['.pdf', '.txt', '.rtf', '.html', '.htm'];
+    const fileExtension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+    return allowedExtensions.includes(fileExtension);
   }
 
   private showSuccess(message: string) {

@@ -144,6 +144,7 @@ export class LoginSimpleComponent implements OnInit {
         );
         break;
       case 'consignor':
+      case 'Consignor':
         console.log('Navigating to /consignor/dashboard');
         this.router.navigate(['/consignor/dashboard']).then(
           success => console.log('Consignor navigation success:', success),
@@ -239,7 +240,7 @@ export class LoginSimpleComponent implements OnInit {
         0: 'Admin',
         1: 'Owner',
         // 2: 'Manager', // Planned feature - commented out for now
-        2: 'consignor',
+        2: 'Consignor',
         3: 'Customer'
       };
       return roleMap[Number(role)] || 'Owner';

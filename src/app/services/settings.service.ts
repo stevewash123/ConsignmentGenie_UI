@@ -39,9 +39,8 @@ export class SettingsService {
    */
   async loadSettings(): Promise<void> {
     try {
-      const orgId = this.getOrgId();
       const settings = await firstValueFrom(
-        this.http.get<OrganizationSettings>(`${environment.apiUrl}/api/organizations/${orgId}/settings`)
+        this.http.get<OrganizationSettings>(`${environment.apiUrl}/api/organizations/settings`)
       );
       this.settings$.next(settings);
     } catch (error) {
@@ -114,10 +113,9 @@ export class SettingsService {
     this.pendingChanges = {};
 
     try {
-      const orgId = this.getOrgId();
       const updatedSettings = await firstValueFrom(
         this.http.patch<OrganizationSettings>(
-          `${environment.apiUrl}/api/organizations/${orgId}/settings`,
+          `${environment.apiUrl}/api/organizations/settings`,
           changesToSave
         )
       );
@@ -148,11 +146,6 @@ export class SettingsService {
     this.loadSettings();
   }
 
-  private getOrgId(): string {
-    // Get from auth service
-    const user = this.authService.getCurrentUser();
-    return user?.organizationId?.toString() || '1'; // Fallback to 1 for now
-  }
 
   private showError(message: string): void {
     // TODO: Integrate with toast service when available
@@ -176,4 +169,74 @@ export class SettingsService {
   getCurrentSettings(): OrganizationSettings | null {
     return this.settings$.value;
   }
+
+  /**
+   * Upload agreement template file
+   */
+  async uploadAgreementTemplate(file: File): Promise<AgreementTemplate> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await firstValueFrom(
+      this.http.post<AgreementTemplate>(`${environment.apiUrl}/api/organizations/agreement-templates`, formData)
+    );
+
+    return response;
+  }
+
+  /**
+   * Download agreement template file
+   */
+  async downloadAgreementTemplate(templateId: string): Promise<Blob> {
+    const response = await firstValueFrom(
+      this.http.get(`${environment.apiUrl}/api/organizations/agreement-templates/${templateId}`,
+        { responseType: 'blob' })
+    );
+
+    return response;
+  }
+
+  /**
+   * Generate PDF from text content
+   */
+  async generatePdfFromText(textContent: string): Promise<Blob> {
+    const response = await firstValueFrom(
+      this.http.post(`${environment.apiUrl}/api/organizations/generate-pdf`,
+        { content: textContent, contentType: 'text' },
+        { responseType: 'blob' })
+    );
+
+    return response;
+  }
+
+  /**
+   * Generate PDF from HTML content
+   */
+  async generatePdfFromHtml(htmlContent: string): Promise<Blob> {
+    const response = await firstValueFrom(
+      this.http.post(`${environment.apiUrl}/api/organizations/generate-pdf`,
+        { content: htmlContent, contentType: 'html' },
+        { responseType: 'blob' })
+    );
+
+    return response;
+  }
+
+  /**
+   * Send sample agreement as notification to owner
+   */
+  async sendSampleAgreement(templateContent: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${environment.apiUrl}/api/organizations/send-sample-agreement`,
+        { templateContent })
+    );
+  }
+}
+
+export interface AgreementTemplate {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  uploadedAt: string;
+  contentType: string;
 }
