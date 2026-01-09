@@ -1,58 +1,43 @@
 {
-  "name": "temp-angular-project",
-  "version": "0.0.0",
+  "name": "smoke-test-utilities",
+  "version": "1.0.0",
+  "description": "Smoke test generator and utilities with console error tracking for Angular projects",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build --configuration production",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "test:coverage": "ng test --code-coverage --watch=false",
-    "test:coverage:open": "ng test --code-coverage --watch=false && open coverage/temp-angular-project/index.html",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
-    "e2e": "cypress run",
-    "e2e:open": "cypress open"
-  },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
-  },
-  "private": true,
-  "dependencies": {
-    "@angular/animations": "^20.3.0",
-    "@angular/common": "^20.3.0",
-    "@angular/compiler": "^20.3.0",
-    "@angular/core": "^20.3.0",
-    "@angular/forms": "^20.3.0",
-    "@angular/platform-browser": "^20.3.0",
-    "@angular/router": "^20.3.0",
-    "ngx-toastr": "^19.1.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "generate": "ts-node scripts/generate-smoke-tests.ts",
+    "generate:dry-run": "ts-node scripts/generate-smoke-tests.ts --dry-run",
+    "generate:verbose": "ts-node scripts/generate-smoke-tests.ts --dry-run --verbose",
+    "generate:components": "ts-node scripts/generate-smoke-tests.ts --type=component",
+    "generate:services": "ts-node scripts/generate-smoke-tests.ts --type=service",
+    
+    "nightly": "ts-node scripts/nightly-smoke-runner.ts",
+    "nightly:dry": "ts-node scripts/nightly-smoke-runner.ts --skip-fixes",
+    "nightly:verbose": "ts-node scripts/nightly-smoke-runner.ts --verbose",
+    "nightly:max6": "ts-node scripts/nightly-smoke-runner.ts --max-components=6",
+    
+    "workflow": "ts-node scripts/feature-workflow.ts",
+    "workflow:status": "ts-node scripts/feature-workflow.ts status",
+    "workflow:list": "ts-node scripts/feature-workflow.ts list",
+    "workflow:next": "ts-node scripts/feature-workflow.ts next",
+    
+    "feature:admin": "ts-node scripts/feature-workflow.ts process admin",
+    "feature:inventory": "ts-node scripts/feature-workflow.ts process inventory",
+    "feature:consignor": "ts-node scripts/feature-workflow.ts process consignor",
+    "feature:settings-account": "ts-node scripts/feature-workflow.ts process settings-account",
+    "feature:settings-policies": "ts-node scripts/feature-workflow.ts process settings-policies",
+    "feature:settings-integrations": "ts-node scripts/feature-workflow.ts process settings-integrations",
+    "feature:settings-consignor": "ts-node scripts/feature-workflow.ts process settings-consignor",
+    "feature:settings-notifications": "ts-node scripts/feature-workflow.ts process settings-notifications",
+    "feature:settings-storefront": "ts-node scripts/feature-workflow.ts process settings-storefront",
+    "feature:price-management": "ts-node scripts/feature-workflow.ts process price-management",
+    "feature:bulk-operations": "ts-node scripts/feature-workflow.ts process bulk-operations"
   },
   "devDependencies": {
-    "@angular/build": "^20.3.10",
-    "@angular/cli": "^20.3.10",
-    "@angular/compiler-cli": "^20.3.0",
-    "@types/jasmine": "~5.1.0",
-    "cypress": "^15.7.0",
-    "cypress-real-events": "^1.15.0",
-    "jasmine-core": "~5.9.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.4.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=17.0.0",
+    "@angular/common": ">=17.0.0"
   }
 }
