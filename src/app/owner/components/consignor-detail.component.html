@@ -99,6 +99,109 @@
             <h3>Notes</h3>
             <p class="notes">{{ consignor()!.notes }}</p>
           </div>
+
+          <!-- Agreement Section -->
+          <div class="info-section agreement-section" *ngIf="showAgreementSection()">
+            <h3>Agreement</h3>
+            <div class="agreement-card" [ngClass]="'status-' + agreementStatus()?.status">
+
+              <!-- Pending State -->
+              <div *ngIf="agreementStatus()?.status === 'pending'" class="agreement-pending">
+                <div class="status-header">
+                  <span class="status-icon">⚠️</span>
+                  <span class="status-text">Agreement Status: Pending</span>
+                </div>
+                <p class="status-message">Consignor has not completed the agreement requirement</p>
+                <div class="agreement-actions">
+                  <button class="btn-secondary" (click)="openMarkOnFileModal()">
+                    Mark Agreement on File
+                  </button>
+                  <button class="btn-secondary" (click)="openUploadModal()">
+                    Upload Signed Copy
+                  </button>
+                </div>
+              </div>
+
+              <!-- On File State (owner marked, no document) -->
+              <div *ngIf="agreementStatus()?.status === 'on_file'" class="agreement-on-file">
+                <div class="status-header">
+                  <span class="status-icon">✅</span>
+                  <span class="status-text">Agreement Status: On file</span>
+                </div>
+                <div class="status-details">
+                  <span>Marked by {{ agreementStatus()?.markedBy?.name }} · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
+                </div>
+                <div class="notes" *ngIf="agreementNotes()">
+                  Note: "{{ agreementNotes() }}"
+                </div>
+                <div class="agreement-actions">
+                  <button class="btn-secondary" (click)="openUploadModal()">
+                    Upload Document
+                  </button>
+                  <button class="btn-danger-outline" (click)="confirmRemoveAgreement()">
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              <!-- Uploaded State (document stored) -->
+              <div *ngIf="agreementStatus()?.status === 'uploaded'" class="agreement-uploaded">
+                <div class="status-header">
+                  <span class="status-icon">✅</span>
+                  <span class="status-text">Agreement Status: On file</span>
+                </div>
+                <div class="status-details">
+                  <span>Uploaded by {{ agreementStatus()?.markedBy?.name }} · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
+                </div>
+                <div class="document-info">
+                  <span class="document-icon">📄</span>
+                  <span class="document-name">{{ getDocumentName() }}</span>
+                </div>
+                <div class="notes" *ngIf="agreementNotes()">
+                  Note: "{{ agreementNotes() }}"
+                </div>
+                <div class="agreement-actions">
+                  <button class="btn-secondary" (click)="viewDocument()">
+                    View Document
+                  </button>
+                  <button class="btn-secondary" (click)="openUploadModal()">
+                    Replace
+                  </button>
+                  <button class="btn-danger-outline" (click)="confirmRemoveAgreement()">
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              <!-- Completed by Consignor State -->
+              <div *ngIf="isConsignorCompleted()" class="agreement-completed">
+                <div class="status-header">
+                  <span class="status-icon">✅</span>
+                  <span class="status-text">Agreement Status: Completed</span>
+                </div>
+                <div class="status-details" *ngIf="agreementStatus()?.method === 'consignor_acknowledge'">
+                  <span>Acknowledged by consignor · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
+                </div>
+                <div class="status-details" *ngIf="agreementStatus()?.method === 'consignor_upload'">
+                  <span>Uploaded by consignor · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
+                  <div class="document-info">
+                    <span class="document-icon">📄</span>
+                    <span class="document-name">{{ getDocumentName() }}</span>
+                  </div>
+                </div>
+                <div class="agreement-actions">
+                  <button class="btn-secondary" *ngIf="agreementStatus()?.method === 'consignor_acknowledge'" (click)="viewAcknowledgedTerms()">
+                    View Terms Acknowledged
+                  </button>
+                  <button class="btn-secondary" *ngIf="agreementStatus()?.method === 'consignor_upload'" (click)="viewDocument()">
+                    View Document
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
 
         <div class="consignor-stats">
@@ -152,5 +255,101 @@
     <ng-template #loading>
       <div class="loading">Loading consignor details...</div>
     </ng-template>
+
+    <!-- Mark Agreement on File Modal -->
+    <div class="modal-overlay" *ngIf="showMarkOnFileModal()" (click)="closeMarkOnFileModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Mark Agreement as Received</h3>
+          <button type="button" class="modal-close" (click)="closeMarkOnFileModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Mark this consignor's agreement as received and on file.</p>
+          <div class="form-group">
+            <label for="onFileNotes">Notes (optional)</label>
+            <textarea
+              id="onFileNotes"
+              [(ngModel)]="onFileNotes"
+              class="form-textarea"
+              placeholder="e.g., Signed in store on 1/8/2025"
+              rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeMarkOnFileModal()">Cancel</button>
+          <button type="button" class="btn-primary" (click)="markAgreementOnFile()" [disabled]="isProcessingAgreement()">
+            {{ isProcessingAgreement() ? 'Marking...' : 'Mark as Received' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Agreement Modal -->
+    <div class="modal-overlay" *ngIf="showUploadModal()" (click)="closeUploadModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ agreementStatus()?.status === 'uploaded' ? 'Replace Agreement Document' : 'Upload Agreement Document' }}</h3>
+          <button type="button" class="modal-close" (click)="closeUploadModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="agreementFile">Agreement Document</label>
+            <input
+              type="file"
+              id="agreementFile"
+              (change)="onFileSelected($event)"
+              accept=".pdf,.png,.jpg,.jpeg"
+              class="form-file">
+            <div class="field-hint">PDF, PNG, or JPG files only. Maximum 10MB.</div>
+          </div>
+          <div class="form-group">
+            <label for="uploadNotes">Notes (optional)</label>
+            <textarea
+              id="uploadNotes"
+              [(ngModel)]="uploadNotes"
+              class="form-textarea"
+              placeholder="e.g., Scanned from physical copy"
+              rows="3"></textarea>
+          </div>
+          <div class="upload-progress" *ngIf="uploadProgress() > 0">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+            </div>
+            <span>{{ uploadProgress() }}%</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeUploadModal()">Cancel</button>
+          <button type="button" class="btn-primary" (click)="uploadAgreement()" [disabled]="!selectedFile() || isProcessingAgreement()">
+            {{ isProcessingAgreement() ? 'Uploading...' : 'Upload' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remove Agreement Confirmation Modal -->
+    <div class="modal-overlay" *ngIf="showRemoveConfirmModal()" (click)="closeRemoveConfirmModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Remove Agreement</h3>
+          <button type="button" class="modal-close" (click)="closeRemoveConfirmModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Remove this agreement? The consignor may need to resubmit their agreement.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeRemoveConfirmModal()">Cancel</button>
+          <button type="button" class="btn-danger" (click)="removeAgreement()" [disabled]="isProcessingAgreement()">
+            {{ isProcessingAgreement() ? 'Removing...' : 'Remove Agreement' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast success-toast" *ngIf="showSuccessToast()">
+      {{ successMessage() }}
+    </div>
+
     </app-owner-layout>
   
