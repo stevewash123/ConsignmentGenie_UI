@@ -2,6 +2,15 @@
   <div class="page-header">
     <h2>Consignment Agreement</h2>
     <p>Customize your consignment agreement with placeholders that will be automatically filled when generating agreements for consignors.</p>
+
+    <!-- Warning when template editing is disabled -->
+    <div class="warning-panel" *ngIf="!isTemplateEditingEnabled()">
+      <div class="warning-icon">⚠️</div>
+      <div class="warning-content">
+        Template editing is disabled because the agreement requirement is set to "No action required" in Consignor Onboarding settings.
+        <a routerLink="/owner/settings/consignors/onboarding">Change onboarding settings</a> to enable template editing.
+      </div>
+    </div>
   </div>
 
   <!-- Agreement Settings -->
@@ -15,51 +24,13 @@
       <label class="permission-toggle">
         <input
           type="checkbox"
-          [checked]="settings()?.autoSendAgreementOnRegister || false"
-          (change)="onAutoSendChange($any($event.target).checked)"
-          name="autoSendOnRegistration">
-        <div class="toggle-switch"></div>
-        <div class="permission-content">
-          <span class="permission-title">Auto-send agreement when consignor registers</span>
-          <span class="permission-description">Automatically email agreement to new consignors</span>
-        </div>
-      </label>
-
-      <!-- Error message when auto-send is enabled but no agreement template uploaded -->
-      <div class="upload-required-error auto-send-error" *ngIf="settings()?.autoSendAgreementOnRegister && !hasAgreementUploaded()">
-        <div class="error-icon">⚠️</div>
-        <div class="error-content">
-          <strong>Agreement Required:</strong> You must upload an agreement template (PDF, TXT, RTF, or HTML) before auto-send will work.
-          <div class="upload-section-inline">
-            <label for="auto-send-upload" class="btn-secondary">
-              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-              </svg>
-              {{ isUploading() ? 'Uploading...' : 'Upload Agreement' }}
-            </label>
-            <input
-              id="auto-send-upload"
-              type="file"
-              accept="application/pdf,.pdf,.txt,.rtf,.html,.htm,text/plain,text/rtf,text/html"
-              (change)="onFileSelected($event)"
-              [disabled]="isUploading()"
-              style="display: none;">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="permission-toggle">
-        <input
-          type="checkbox"
           [checked]="settings()?.requireSignedAgreement || false"
           (change)="onRequireSignedChange($any($event.target).checked)"
           name="requireBeforeItems">
         <div class="toggle-switch"></div>
         <div class="permission-content">
-          <span class="permission-title">Require signed agreement before item submission</span>
-          <span class="permission-description">Block item submission until agreement is on file</span>
+          <span class="permission-title">Require signed agreement before activating account</span>
+          <span class="permission-description">Block account activation until agreement is on file</span>
         </div>
       </label>
     </div>
@@ -93,7 +64,12 @@
           </label>
         </div>
         <div class="preview-actions">
-          <button type="button" class="btn-icon-small" (click)="startEditing()" title="Edit Agreement Template">
+          <button
+            type="button"
+            class="btn-icon-small"
+            (click)="startEditing()"
+            [disabled]="!isTemplateEditingEnabled()"
+            title="Edit Agreement Template">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
@@ -108,7 +84,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
             </svg>
           </button>
-          <label for="template-upload-preview" class="btn-icon-small" title="Upload Agreement">
+          <label
+            for="template-upload-preview"
+            class="btn-icon-small"
+            [class.disabled]="!isTemplateEditingEnabled()"
+            title="Upload Agreement">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
             </svg>
@@ -118,7 +98,7 @@
             type="file"
             accept="application/pdf,.pdf,.txt,.rtf,.html,.htm,text/plain,text/rtf,text/html"
             (change)="onFileSelected($event)"
-            [disabled]="isUploading()"
+            [disabled]="isUploading() || !isTemplateEditingEnabled()"
             style="display: none;">
         </div>
       </div>

@@ -1,7 +1,8 @@
 import { Component, OnInit, signal, computed, effect, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SettingsService, OrganizationSettings, AgreementTemplate } from '../../../../services/settings.service';
+import { RouterModule } from '@angular/router';
+import { SettingsService, OrganizationSettings, AgreementTemplate, ConsignorOnboardingSettings } from '../../../../services/settings.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 interface LocalAgreementTemplate {
@@ -16,7 +17,7 @@ interface LocalAgreementTemplate {
 @Component({
   selector: 'app-agreements',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './agreements.component.html',
   styleUrls: ['./agreements.component.scss']
 })
@@ -30,6 +31,11 @@ export class AgreementsComponent implements OnInit {
   errorMessage = signal('');
   viewMode = signal<'sample' | 'agreement'>('sample');
   hasCustomTemplate = signal(false);
+  onboardingSettings = signal<ConsignorOnboardingSettings | null>(null);
+  isTemplateEditingEnabled = computed(() => {
+    const settings = this.onboardingSettings();
+    return settings?.agreementRequirement !== 'none';
+  });
 
   // Use the settings service - initialized in constructor
   settings!: Signal<OrganizationSettings | null>;
@@ -78,10 +84,20 @@ Consult with an attorney to ensure your agreement meets local legal requirements
   ngOnInit() {
     this.loadTemplate();
     this.loadSettings();
+    this.loadOnboardingSettings();
   }
 
   async loadSettings() {
     await this.settingsService.loadSettings();
+  }
+
+  async loadOnboardingSettings() {
+    try {
+      const settings = await this.settingsService.getConsignorOnboardingSettings();
+      this.onboardingSettings.set(settings);
+    } catch (error) {
+      console.error('Failed to load onboarding settings:', error);
+    }
   }
 
   async loadTemplate() {
@@ -419,15 +435,6 @@ This PDF template will be used when generating agreements for new consignors.`;
   }
 
   // Settings change handlers
-  onAutoSendChange(checked: boolean): void {
-    // Only allow enabling if agreement is uploaded
-    if (checked && !this.hasAgreementUploaded()) {
-      this.showError('Please upload an agreement template (PDF, TXT, RTF, or HTML) before enabling auto-send');
-      return;
-    }
-    this.settingsService.updateSetting('autoSendAgreementOnRegister', checked);
-  }
-
   onRequireSignedChange(checked: boolean): void {
     this.settingsService.updateSetting('requireSignedAgreement', checked);
   }

@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { SettingsService, ConsignorOnboardingSettings } from '../../../../services/settings.service';
 
 @Component({
   selector: 'app-consignor-onboarding',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './consignor-onboarding.component.html',
   styleUrls: ['./consignor-onboarding.component.scss']
 })
@@ -33,10 +34,10 @@ export class ConsignorOnboardingComponent implements OnInit {
       const response = await this.settingsService.getConsignorOnboardingSettings();
 
       this.settings.set(response || {
-        agreementRequirement: 'none',
+        agreementRequirement: 'upload',
         agreementTemplateId: null,
         acknowledgeTermsText: null,
-        approvalMode: 'manual'
+        approvalMode: 'auto'
       });
 
     } catch (error: any) {
@@ -132,43 +133,4 @@ export class ConsignorOnboardingComponent implements OnInit {
     this.closeConfigureTermsModal();
   }
 
-  onTemplateUpload(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.includes('pdf')) {
-      this.errorMessage.set('Please upload a PDF file');
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      this.errorMessage.set('File size must be less than 10MB');
-      return;
-    }
-
-    // TODO: Implement file upload to server and get template ID
-    console.log('Template file selected:', file);
-    this.errorMessage.set('Template upload functionality coming soon');
-  }
-
-  downloadCurrentTemplate(): void {
-    const current = this.settings();
-    if (!current?.agreementTemplateId) {
-      this.errorMessage.set('No template available to download');
-      return;
-    }
-
-    // TODO: Implement template download
-    console.log('Download template:', current.agreementTemplateId);
-    this.errorMessage.set('Template download functionality coming soon');
-  }
-
-  hasTemplate(): boolean {
-    const current = this.settings();
-    return !!current?.agreementTemplateId;
-  }
 }

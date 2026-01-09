@@ -119,6 +119,10 @@ export const routes: Routes = [
     path: 'register/success',
     loadComponent: () => import('./auth/register-success.component').then(m => m.RegisterSuccessComponent)
   },
+  {
+    path: 'consignor/agreement',
+    loadComponent: () => import('./auth/consignor-agreement-onboarding.component').then(m => m.ConsignorAgreementOnboardingComponent)
+  },
 
   // Support ticket routes (authenticated users)
   {

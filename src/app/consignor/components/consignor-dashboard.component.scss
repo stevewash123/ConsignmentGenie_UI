@@ -22,6 +22,73 @@
   margin: 0;
 }
 
+.agreement-banner {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #f59e0b 100%);
+  border: 1px solid #f59e0b;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.agreement-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.agreement-banner-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #f59e0b;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agreement-banner-text {
+  flex-grow: 1;
+}
+
+.agreement-banner-text h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0 0 0.5rem 0;
+}
+
+.agreement-banner-text p {
+  font-size: 0.875rem;
+  color: #92400e;
+  margin: 0;
+}
+
+.agreement-banner-actions {
+  flex-shrink: 0;
+}
+
+.agreement-action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: #92400e;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.agreement-action-btn:hover {
+  background: #78350f;
+  color: white;
+  text-decoration: none;
+}
+
 .dashboard-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -155,6 +222,25 @@
 
   .welcome-message h2 {
     font-size: 1.5rem;
+  }
+
+  .agreement-banner {
+    margin: 0 1rem 2rem;
+    padding: 1rem;
+  }
+
+  .agreement-banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .agreement-banner-text h3 {
+    font-size: 1rem;
+  }
+
+  .agreement-banner-text p {
+    font-size: 0.8rem;
   }
 
   .dashboard-content {

@@ -96,9 +96,15 @@ export class SettingsLayoutComponent implements OnInit {
           description: 'Agreement requirements and approval settings'
         },
         {
+          id: 'agreement',
+          label: 'Consignor Agreement',
+          route: 'consignors/agreement',
+          description: 'Edit agreement template with meta tags'
+        },
+        {
           id: 'defaults',
           label: 'Default Terms',
-          route: 'consignors',
+          route: 'consignors/defaults',
           description: 'Commission rates, time periods'
         },
         {

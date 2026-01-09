@@ -152,6 +152,11 @@ export const ownerRoutes: Routes = [
         children: [
           {
             path: '',
+            redirectTo: 'defaults',
+            pathMatch: 'full'
+          },
+          {
+            path: 'defaults',
             loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
           },
           {

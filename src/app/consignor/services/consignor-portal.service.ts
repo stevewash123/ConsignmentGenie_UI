@@ -181,4 +181,26 @@ export class ConsignorPortalService {
   deleteItemRequest(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/item-requests/${id}`);
   }
+
+  // Agreement
+  getAgreementStatus(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/agreement/status`);
+  }
+
+  acknowledgeAgreement(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/agreement/acknowledge`, { acknowledged: true });
+  }
+
+  uploadAgreement(file: File, notes?: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (notes) {
+      formData.append('notes', notes);
+    }
+    return this.http.post<any>(`${this.apiUrl}/agreement/upload`, formData);
+  }
+
+  downloadAgreementTemplate(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/agreement/template`, { responseType: 'blob' });
+  }
 }
