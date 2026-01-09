@@ -90,10 +90,10 @@ export class SettingsLayoutComponent implements OnInit {
       description: 'Default permissions and terms for consignors',
       children: [
         {
-          id: 'permissions',
-          label: 'Default Permissions',
-          route: 'consignor-management/permissions',
-          description: 'Default inventory and analytics permissions for all consignors'
+          id: 'onboarding',
+          label: 'Consignor Onboarding',
+          route: 'consignors/onboarding',
+          description: 'Agreement requirements and approval settings'
         },
         {
           id: 'defaults',
@@ -102,10 +102,10 @@ export class SettingsLayoutComponent implements OnInit {
           description: 'Commission rates, time periods'
         },
         {
-          id: 'agreement',
-          label: 'Consignment Agreement',
-          route: 'consignors/agreement',
-          description: 'Upload and manage your consignment agreement template'
+          id: 'permissions',
+          label: 'Default Permissions',
+          route: 'consignor-management/permissions',
+          description: 'Default inventory and analytics permissions for all consignors'
         }
       ]
     },

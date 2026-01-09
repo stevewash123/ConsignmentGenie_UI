@@ -1,0 +1,200 @@
+<div class="consignor-onboarding">
+  <header class="settings-header">
+    <h2>Consignor Onboarding</h2>
+    <p>Configure how new consignors join your shop</p>
+  </header>
+
+  <div class="settings-content" *ngIf="!loading(); else loadingTemplate">
+    <form class="settings-form" *ngIf="settings()">
+
+      <!-- Agreement Requirement Section -->
+      <section class="form-section">
+        <h3>Consignment Agreement</h3>
+        <p class="section-subheader">What is required from consignors?</p>
+
+        <div class="radio-group">
+          <label class="radio-option" [class.selected]="settings()?.agreementRequirement === 'none'">
+            <input
+              type="radio"
+              name="agreementRequirement"
+              value="none"
+              [checked]="settings()?.agreementRequirement === 'none'"
+              (change)="onAgreementRequirementChange('none')">
+            <div class="radio-content">
+              <span class="radio-title">No action required</span>
+              <span class="radio-description">Consignors proceed without agreeing to terms in the app</span>
+            </div>
+          </label>
+
+          <label class="radio-option" [class.selected]="settings()?.agreementRequirement === 'acknowledge'">
+            <input
+              type="radio"
+              name="agreementRequirement"
+              value="acknowledge"
+              [checked]="settings()?.agreementRequirement === 'acknowledge'"
+              (change)="onAgreementRequirementChange('acknowledge')">
+            <div class="radio-content">
+              <span class="radio-title">Acknowledge terms</span>
+              <span class="radio-description">Consignors must click to accept your terms</span>
+            </div>
+          </label>
+
+          <div class="radio-action" *ngIf="settings()?.agreementRequirement === 'acknowledge'">
+            <button type="button" class="btn-secondary btn-small" (click)="openConfigureTermsModal()">
+              Configure Terms
+            </button>
+          </div>
+
+          <label class="radio-option" [class.selected]="settings()?.agreementRequirement === 'upload'">
+            <input
+              type="radio"
+              name="agreementRequirement"
+              value="upload"
+              [checked]="settings()?.agreementRequirement === 'upload'"
+              (change)="onAgreementRequirementChange('upload')">
+            <div class="radio-content">
+              <span class="radio-title">Upload signed agreement</span>
+              <span class="radio-description">Consignors must upload a signed copy of your agreement</span>
+            </div>
+          </label>
+
+          <div class="radio-action" *ngIf="settings()?.agreementRequirement === 'upload'">
+            <div class="template-actions">
+              <label class="btn-secondary btn-small file-upload-btn">
+                Upload Template
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onTemplateUpload($event)"
+                  hidden>
+              </label>
+              <button
+                type="button"
+                class="btn-secondary btn-small"
+                [disabled]="!hasTemplate()"
+                (click)="downloadCurrentTemplate()">
+                Download Current
+              </button>
+            </div>
+            <div class="template-status" *ngIf="hasTemplate()">
+              ✓ Template uploaded
+            </div>
+            <div class="template-status no-template" *ngIf="!hasTemplate()">
+              No template uploaded
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-icon">ℹ️</div>
+          <div class="info-content">
+            For physical/in-person agreements, you can upload scanned copies directly from the consignor management list for any consignor missing an agreement.
+          </div>
+        </div>
+      </section>
+
+      <!-- Approval Mode Section -->
+      <section class="form-section">
+        <h3>Consignor Approval</h3>
+
+        <!-- Warning Panel -->
+        <div class="warning-panel" *ngIf="showWarningPanel()">
+          <div class="warning-icon">⚠️</div>
+          <div class="warning-content">
+            Auto-approval requires an in-app agreement step. Select "Acknowledge terms" or "Upload signed agreement" above to enable auto-approval.
+          </div>
+        </div>
+
+        <div class="radio-group">
+          <label class="radio-option"
+                 [class.selected]="settings()?.approvalMode === 'auto'"
+                 [class.disabled]="isAutoApprovalDisabled()">
+            <input
+              type="radio"
+              name="approvalMode"
+              value="auto"
+              [checked]="settings()?.approvalMode === 'auto'"
+              [disabled]="isAutoApprovalDisabled()"
+              (change)="onApprovalModeChange('auto')">
+            <div class="radio-content">
+              <span class="radio-title">Auto-approve new consignors</span>
+              <span class="radio-description">Can add items once agreement requirements are met</span>
+            </div>
+          </label>
+
+          <label class="radio-option" [class.selected]="settings()?.approvalMode === 'manual'">
+            <input
+              type="radio"
+              name="approvalMode"
+              value="manual"
+              [checked]="settings()?.approvalMode === 'manual'"
+              (change)="onApprovalModeChange('manual')">
+            <div class="radio-content">
+              <span class="radio-title">Require manual approval</span>
+              <span class="radio-description">Review each consignor before they can add items</span>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="saving()">
+          {{ saving() ? 'Saving...' : 'Save Settings' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading Template -->
+  <ng-template #loadingTemplate>
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading settings...</p>
+    </div>
+  </ng-template>
+
+  <!-- Configure Terms Modal -->
+  <div class="modal-overlay" *ngIf="showConfigureTermsModal()" (click)="closeConfigureTermsModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Configure Terms</h3>
+        <button type="button" class="modal-close" (click)="closeConfigureTermsModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="acknowledgeTermsText">Terms text for consignors to acknowledge</label>
+          <textarea
+            id="acknowledgeTermsText"
+            [(ngModel)]="tempAcknowledgeText"
+            class="form-textarea"
+            rows="6"
+            placeholder="Enter the terms that consignors must acknowledge before joining your shop..."></textarea>
+        </div>
+
+        <div class="preview-section">
+          <h4>Preview</h4>
+          <div class="terms-preview">
+            <div class="preview-text">{{ tempAcknowledgeText() || 'Terms will appear here...' }}</div>
+            <label class="preview-checkbox">
+              <input type="checkbox" disabled>
+              I acknowledge and agree to these terms
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeConfigureTermsModal()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="saveConfigureTerms()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

@@ -1,8 +1,12 @@
 {
-  "name": "smoke-test-utilities",
+  "name": "consignment-genie-ui",
   "version": "1.0.0",
-  "description": "Smoke test generator and utilities with console error tracking for Angular projects",
+  "description": "Angular UI for ConsignmentGenie",
   "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
     "generate": "ts-node scripts/generate-smoke-tests.ts",
     "generate:dry-run": "ts-node scripts/generate-smoke-tests.ts --dry-run",
     "generate:verbose": "ts-node scripts/generate-smoke-tests.ts --dry-run --verbose",

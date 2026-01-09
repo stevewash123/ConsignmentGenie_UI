@@ -155,6 +155,10 @@ export const ownerRoutes: Routes = [
             loadComponent: () => import('./settings/consignors/consignor-settings.component').then(m => m.ConsignorSettingsComponent)
           },
           {
+            path: 'onboarding',
+            loadComponent: () => import('./settings/consignors/onboarding/consignor-onboarding.component').then(m => m.ConsignorOnboardingComponent)
+          },
+          {
             path: 'agreement',
             loadComponent: () => import('./settings/consignors/agreement/agreements.component').then(m => m.AgreementsComponent)
           },

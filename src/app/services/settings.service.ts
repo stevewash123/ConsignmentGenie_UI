@@ -17,6 +17,13 @@ export interface OrganizationSettings {
   // Add other settings as needed...
 }
 
+export interface ConsignorOnboardingSettings {
+  agreementRequirement: 'none' | 'acknowledge' | 'upload';
+  agreementTemplateId: string | null;
+  acknowledgeTermsText: string | null;
+  approvalMode: 'auto' | 'manual';
+}
+
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
   private settings$ = new BehaviorSubject<OrganizationSettings | null>(null);
@@ -229,6 +236,27 @@ export class SettingsService {
     await firstValueFrom(
       this.http.post(`${environment.apiUrl}/api/organizations/send-sample-agreement`,
         { templateContent })
+    );
+  }
+
+  /**
+   * Get consignor onboarding settings
+   */
+  async getConsignorOnboardingSettings(): Promise<ConsignorOnboardingSettings> {
+    return await firstValueFrom(
+      this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/owner/settings/consignor-onboarding`)
+    );
+  }
+
+  /**
+   * Update consignor onboarding settings
+   */
+  async updateConsignorOnboardingSettings(settings: ConsignorOnboardingSettings): Promise<ConsignorOnboardingSettings> {
+    return await firstValueFrom(
+      this.http.put<ConsignorOnboardingSettings>(
+        `${environment.apiUrl}/api/owner/settings/consignor-onboarding`,
+        settings
+      )
     );
   }
 }
