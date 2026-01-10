@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { OwnerService, NotificationSettings } from '../../../services/owner.service';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SettingsService, NotificationSettings } from '../../../services/settings.service';
+import { Subscription } from 'rxjs';
 
 interface NotificationType {
   key: string;
@@ -18,13 +19,17 @@ interface NotificationType {
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss']
 })
-export class AccountNotificationsComponent implements OnInit {
-  notificationsForm!: FormGroup;
+export class AccountNotificationsComponent implements OnInit, OnDestroy {
   notificationSettings = signal<NotificationSettings | null>(null);
-  isLoading = signal(false);
-  isSaving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  private subscriptions = new Subscription();
+
+  // Auto-save status computed from settings state
+  autoSaveStatus = computed(() => {
+    const settings = this.notificationSettings();
+    return settings ? 'Saved automatically' : 'Loading...';
+  });
 
   // Notification types organized by category
   businessNotifications: NotificationType[] = [
@@ -55,147 +60,75 @@ export class AccountNotificationsComponent implements OnInit {
   ];
 
   constructor(
-    private fb: FormBuilder,
-    private ownerService: OwnerService
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
-    this.initializeForm();
+    this.setupSubscriptions();
     this.loadNotificationSettings();
   }
 
-  private initializeForm(): void {
-    const formControls: any = {
-      primaryEmail: ['', [Validators.required, Validators.email]],
-      phoneNumber: [''],
-      highValueSaleThreshold: [500, [Validators.min(0)]],
-      lowInventoryThreshold: [10, [Validators.min(0)]]
-    };
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
 
-    // Add form controls for each notification type
-    const allNotifications = [
-      ...this.businessNotifications,
-      ...this.consignorNotifications,
-      ...this.salesNotifications,
-      ...this.systemNotifications
-    ];
-
-    allNotifications.forEach(notification => {
-      formControls[`email_${notification.key}`] = [false];
-      formControls[`sms_${notification.key}`] = [false];
-    });
-
-    this.notificationsForm = this.fb.group(formControls);
+  private setupSubscriptions(): void {
+    // Subscribe to notification settings changes from the service
+    this.subscriptions.add(
+      this.settingsService.notificationSettings.subscribe(settings => {
+        this.notificationSettings.set(settings);
+      })
+    );
   }
 
   async loadNotificationSettings(): Promise<void> {
     try {
-      this.isLoading.set(true);
-      const settings = await this.ownerService.getNotificationSettings().toPromise();
-      if (settings) {
-        this.notificationSettings.set(settings);
-
-        // Patch form with settings
-        const formValue: any = {
-          primaryEmail: settings.primaryEmail,
-          phoneNumber: settings.phoneNumber || '',
-          highValueSaleThreshold: settings.thresholds?.highValueSale || 500,
-          lowInventoryThreshold: settings.thresholds?.lowInventory || 10
-        };
-
-        // Set email preferences
-        Object.keys(settings.emailPreferences).forEach(key => {
-          formValue[`email_${key}`] = settings.emailPreferences[key];
-        });
-
-        // Set SMS preferences
-        Object.keys(settings.smsPreferences).forEach(key => {
-          formValue[`sms_${key}`] = settings.smsPreferences[key];
-        });
-
-        this.notificationsForm.patchValue(formValue);
-      }
+      await this.settingsService.loadNotificationSettings();
     } catch (error) {
+      console.error('Error loading notification settings:', error);
       this.showError('Failed to load notification settings');
-    } finally {
-      this.isLoading.set(false);
     }
   }
 
-  async saveNotificationSettings(): Promise<void> {
-    if (!this.notificationsForm.valid) {
-      this.markFormGroupTouched();
-      return;
-    }
+  // Individual change handlers for debounced auto-save
+  onPrimaryEmailChange(value: string): void {
+    this.settingsService.updateNotificationSetting('primaryEmail', value);
+  }
 
-    this.isSaving.set(true);
-    try {
-      const formData = this.notificationsForm.value;
+  onPhoneNumberChange(value: string): void {
+    this.settingsService.updateNotificationSetting('phoneNumber', value || undefined);
+  }
 
-      // Extract email and SMS preferences
-      const emailPreferences: { [key: string]: boolean } = {};
-      const smsPreferences: { [key: string]: boolean } = {};
+  onHighValueThresholdChange(value: number): void {
+    this.settingsService.updateNotificationThreshold('highValueSale', value);
+  }
 
-      Object.keys(formData).forEach(key => {
-        if (key.startsWith('email_')) {
-          const notificationKey = key.replace('email_', '');
-          emailPreferences[notificationKey] = formData[key];
-        } else if (key.startsWith('sms_')) {
-          const notificationKey = key.replace('sms_', '');
-          smsPreferences[notificationKey] = formData[key];
-        }
-      });
+  onLowInventoryThresholdChange(value: number): void {
+    this.settingsService.updateNotificationThreshold('lowInventory', value);
+  }
 
-      const settings: NotificationSettings = {
-        primaryEmail: formData.primaryEmail,
-        phoneNumber: formData.phoneNumber || undefined,
-        emailPreferences,
-        smsPreferences,
-        thresholds: {
-          highValueSale: formData.highValueSaleThreshold,
-          lowInventory: formData.lowInventoryThreshold
-        },
-        emailNotifications: {
-          newSales: formData.emailNewSales || false,
-          newConsignors: formData.emailNewConsignors || false,
-          lowInventory: formData.emailLowInventory || false,
-          payoutReady: formData.emailPayoutReady || false,
-        },
-        smsNotifications: {
-          newSales: formData.smsNewSales || false,
-          emergencyAlerts: formData.smsEmergencyAlerts || false,
-        },
-        pushNotifications: {
-          newSales: formData.pushNewSales || false,
-          consignorActivity: formData.pushConsignorActivity || false,
-        }
-      };
+  onEmailPreferenceChange(notificationType: string, enabled: boolean): void {
+    this.settingsService.updateEmailPreference(notificationType, enabled);
+  }
 
-      await this.ownerService.updateNotificationSettings(settings).toPromise();
-      this.notificationSettings.set(settings);
-      this.showSuccess('Notification settings saved successfully');
-    } catch (error) {
-      this.showError('Failed to save notification settings');
-    } finally {
-      this.isSaving.set(false);
-    }
+  onSmsPreferenceChange(notificationType: string, enabled: boolean): void {
+    this.settingsService.updateSmsPreference(notificationType, enabled);
+  }
+
+  // Helper methods for template
+  isEmailEnabled(notificationType: string): boolean {
+    const settings = this.notificationSettings();
+    return settings?.emailPreferences[notificationType] || false;
+  }
+
+  isSmsEnabled(notificationType: string): boolean {
+    const settings = this.notificationSettings();
+    return settings?.smsPreferences[notificationType] || false;
   }
 
 
   trackByNotificationKey(index: number, notification: NotificationType): string {
     return notification.key;
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.notificationsForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
-  }
-
-  private markFormGroupTouched(): void {
-    Object.keys(this.notificationsForm.controls).forEach(key => {
-      const control = this.notificationsForm.get(key);
-      control?.markAsTouched();
-    });
   }
 
   private showSuccess(message: string): void {

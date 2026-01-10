@@ -24,6 +24,19 @@ export interface ConsignorOnboardingSettings {
   approvalMode: 'auto' | 'manual';
 }
 
+export interface NotificationThresholds {
+  highValueSale: number;
+  lowInventory: number;
+}
+
+export interface NotificationSettings {
+  primaryEmail: string;
+  phoneNumber?: string;
+  emailPreferences: Record<string, boolean>;
+  smsPreferences: Record<string, boolean>;
+  thresholds: NotificationThresholds;
+}
+
 export interface ShopProfile {
   shopName: string;
   shopDescription: string | null;
@@ -118,6 +131,12 @@ export class SettingsService {
   private onboardingSaveTimeout: ReturnType<typeof setTimeout> | null = null;
   private isOnboardingSaving = false;
 
+  // Notification settings state
+  private notificationSettings$ = new BehaviorSubject<NotificationSettings | null>(null);
+  private pendingNotificationChanges: Record<string, any> = {};
+  private notificationSaveTimeout: ReturnType<typeof setTimeout> | null = null;
+  private isNotificationSaving = false;
+
   readonly DEBOUNCE_MS = 800;
 
   // Observable for components to subscribe to
@@ -126,6 +145,7 @@ export class SettingsService {
   readonly businessSettings = this.businessSettings$.asObservable();
   readonly consignorPermissions = this.consignorPermissions$.asObservable();
   readonly consignorOnboarding = this.consignorOnboarding$.asObservable();
+  readonly notificationSettings = this.notificationSettings$.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -867,6 +887,163 @@ export class SettingsService {
    */
   getCurrentConsignorOnboarding(): ConsignorOnboardingSettings | null {
     return this.consignorOnboarding$.value;
+  }
+
+  // ===== NOTIFICATION SETTINGS METHODS =====
+
+  /**
+   * Load notification settings from API
+   */
+  async loadNotificationSettings(): Promise<void> {
+    try {
+      const settings = await firstValueFrom(
+        this.http.get<NotificationSettings>(`${environment.apiUrl}/api/organizations/notification-settings`)
+      );
+      this.notificationSettings$.next(settings);
+    } catch (error) {
+      console.error('Failed to load notification settings:', error);
+      this.notificationSettings$.next(null);
+    }
+  }
+
+  /**
+   * Update a notification setting with automatic debounced save
+   */
+  updateNotificationSetting<K extends keyof NotificationSettings>(key: K, value: NotificationSettings[K]): void {
+    const current = this.notificationSettings$.value;
+    if (!current) return;
+
+    // Optimistic update
+    const updated = { ...current, [key]: value };
+    this.notificationSettings$.next(updated);
+
+    // Queue for save
+    this.pendingNotificationChanges[key] = value;
+    this.scheduleNotificationSave();
+  }
+
+  /**
+   * Update email preference for a specific notification type
+   */
+  updateEmailPreference(notificationType: string, enabled: boolean): void {
+    const current = this.notificationSettings$.value;
+    if (!current) return;
+
+    // Optimistic update
+    const updated = {
+      ...current,
+      emailPreferences: { ...current.emailPreferences, [notificationType]: enabled }
+    };
+    this.notificationSettings$.next(updated);
+
+    // Queue for save with flat key structure
+    this.pendingNotificationChanges[`Email_${notificationType}`] = enabled;
+    this.scheduleNotificationSave();
+  }
+
+  /**
+   * Update SMS preference for a specific notification type
+   */
+  updateSmsPreference(notificationType: string, enabled: boolean): void {
+    const current = this.notificationSettings$.value;
+    if (!current) return;
+
+    // Optimistic update
+    const updated = {
+      ...current,
+      smsPreferences: { ...current.smsPreferences, [notificationType]: enabled }
+    };
+    this.notificationSettings$.next(updated);
+
+    // Queue for save with flat key structure
+    this.pendingNotificationChanges[`Sms_${notificationType}`] = enabled;
+    this.scheduleNotificationSave();
+  }
+
+  /**
+   * Update notification threshold
+   */
+  updateNotificationThreshold(thresholdType: keyof NotificationThresholds, value: number): void {
+    const current = this.notificationSettings$.value;
+    if (!current) return;
+
+    // Optimistic update
+    const updated = {
+      ...current,
+      thresholds: { ...current.thresholds, [thresholdType]: value }
+    };
+    this.notificationSettings$.next(updated);
+
+    // Queue for save
+    this.pendingNotificationChanges[`${thresholdType}Threshold`] = value;
+    this.scheduleNotificationSave();
+  }
+
+  private scheduleNotificationSave(): void {
+    if (this.notificationSaveTimeout) {
+      clearTimeout(this.notificationSaveTimeout);
+    }
+
+    this.notificationSaveTimeout = setTimeout(() => {
+      this.saveNotificationSettings();
+    }, this.DEBOUNCE_MS);
+  }
+
+  private async saveNotificationSettings(): Promise<void> {
+    if (this.isNotificationSaving || Object.keys(this.pendingNotificationChanges).length === 0) {
+      return;
+    }
+
+    this.isNotificationSaving = true;
+    const changesToSave = { ...this.pendingNotificationChanges };
+    this.pendingNotificationChanges = {};
+
+    try {
+      const updatedSettings = await firstValueFrom(
+        this.http.patch<NotificationSettings>(`${environment.apiUrl}/api/organizations/notification-settings`, changesToSave)
+      );
+
+      // Update with server response (authoritative)
+      this.notificationSettings$.next(updatedSettings);
+
+    } catch (error) {
+      console.error('Failed to save notification settings:', error);
+
+      // Revert optimistic changes
+      this.revertNotificationChanges(changesToSave);
+      this.showError('Failed to save notification settings. Please try again.');
+
+    } finally {
+      this.isNotificationSaving = false;
+
+      // If more changes came in while saving, save again
+      if (Object.keys(this.pendingNotificationChanges).length > 0) {
+        this.scheduleNotificationSave();
+      }
+    }
+  }
+
+  private revertNotificationChanges(changes: Record<string, any>): void {
+    // Re-fetch from server to get correct state
+    this.loadNotificationSettings();
+  }
+
+  /**
+   * Force immediate notification settings save
+   */
+  async flushNotificationSettings(): Promise<void> {
+    if (this.notificationSaveTimeout) {
+      clearTimeout(this.notificationSaveTimeout);
+      this.notificationSaveTimeout = null;
+    }
+    await this.saveNotificationSettings();
+  }
+
+  /**
+   * Get current notification settings synchronously
+   */
+  getCurrentNotificationSettings(): NotificationSettings | null {
+    return this.notificationSettings$.value;
   }
 }
 
