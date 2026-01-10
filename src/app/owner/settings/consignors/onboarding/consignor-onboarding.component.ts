@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SettingsService, ConsignorOnboardingSettings } from '../../../../services/settings.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-consignor-onboarding',
@@ -11,93 +12,62 @@ import { SettingsService, ConsignorOnboardingSettings } from '../../../../servic
   templateUrl: './consignor-onboarding.component.html',
   styleUrls: ['./consignor-onboarding.component.scss']
 })
-export class ConsignorOnboardingComponent implements OnInit {
+export class ConsignorOnboardingComponent implements OnInit, OnDestroy {
   settings = signal<ConsignorOnboardingSettings | null>(null);
-  loading = signal(false);
-  saving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
   showConfigureTermsModal = signal(false);
   tempAcknowledgeText = signal('');
+  private subscriptions = new Subscription();
+
+  // Auto-save status computed from settings state
+  autoSaveStatus = computed(() => {
+    const settings = this.settings();
+    return settings ? 'Saved automatically' : 'Loading...';
+  });
 
   constructor(private settingsService: SettingsService) {}
 
   ngOnInit(): void {
+    this.setupSubscriptions();
     this.loadSettings();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  private setupSubscriptions(): void {
+    // Subscribe to onboarding settings changes from the service
+    this.subscriptions.add(
+      this.settingsService.consignorOnboarding.subscribe(settings => {
+        this.settings.set(settings);
+      })
+    );
   }
 
   async loadSettings(): Promise<void> {
     try {
-      this.loading.set(true);
-      this.errorMessage.set('');
-
-      const response = await this.settingsService.getConsignorOnboardingSettings();
-
-      this.settings.set(response || {
-        agreementRequirement: 'upload',
-        agreementTemplateId: null,
-        acknowledgeTermsText: null,
-        approvalMode: 'auto'
-      });
-
-    } catch (error: any) {
+      await this.settingsService.loadConsignorOnboarding();
+    } catch (error) {
       console.error('Error loading consignor onboarding settings:', error);
-      this.errorMessage.set('Failed to load settings. Please try again.');
-    } finally {
-      this.loading.set(false);
+      this.showError('Failed to load settings');
     }
   }
 
-  async saveSettings(): Promise<void> {
-    const currentSettings = this.settings();
-    if (!currentSettings) return;
-
-    try {
-      this.saving.set(true);
-      this.errorMessage.set('');
-      this.successMessage.set('');
-
-      const response = await this.settingsService.updateConsignorOnboardingSettings(currentSettings);
-
-      this.settings.set(response);
-      this.successMessage.set('Settings saved successfully');
-
-      // Clear success message after 3 seconds
-      setTimeout(() => this.successMessage.set(''), 3000);
-
-    } catch (error: any) {
-      console.error('Error saving consignor onboarding settings:', error);
-
-      if (error.error?.error) {
-        this.errorMessage.set(error.error.error);
-      } else {
-        this.errorMessage.set('Failed to save settings. Please try again.');
-      }
-    } finally {
-      this.saving.set(false);
-    }
-  }
 
   onAgreementRequirementChange(value: 'none' | 'acknowledge' | 'upload'): void {
-    const current = this.settings();
-    if (!current) return;
-
-    // Update the agreement requirement
-    const updated = { ...current, agreementRequirement: value };
+    // Update the agreement requirement with debounced save
+    this.settingsService.updateConsignorOnboardingSetting('agreementRequirement', value);
 
     // Validation Rule 1: If "none", approval mode must be "manual"
     if (value === 'none') {
-      updated.approvalMode = 'manual';
+      this.settingsService.updateConsignorOnboardingSetting('approvalMode', 'manual');
     }
-
-    this.settings.set(updated);
   }
 
   onApprovalModeChange(value: 'auto' | 'manual'): void {
-    const current = this.settings();
-    if (!current) return;
-
-    this.settings.set({ ...current, approvalMode: value });
+    this.settingsService.updateConsignorOnboardingSetting('approvalMode', value);
   }
 
   isAutoApprovalDisabled(): boolean {
@@ -122,15 +92,20 @@ export class ConsignorOnboardingComponent implements OnInit {
   }
 
   saveConfigureTerms(): void {
-    const current = this.settings();
-    if (!current) return;
-
-    this.settings.set({
-      ...current,
-      acknowledgeTermsText: this.tempAcknowledgeText()
-    });
-
+    this.settingsService.updateConsignorOnboardingSetting('acknowledgeTermsText', this.tempAcknowledgeText());
     this.closeConfigureTermsModal();
+  }
+
+  private showSuccess(message: string): void {
+    this.successMessage.set(message);
+    this.errorMessage.set('');
+    setTimeout(() => this.successMessage.set(''), 5000);
+  }
+
+  private showError(message: string): void {
+    this.errorMessage.set(message);
+    this.successMessage.set('');
+    setTimeout(() => this.errorMessage.set(''), 5000);
   }
 
 }

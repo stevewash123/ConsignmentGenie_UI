@@ -4,8 +4,8 @@
     <p>Configure how new consignors join your shop</p>
   </header>
 
-  <div class="settings-content" *ngIf="!loading(); else loadingTemplate">
-    <form class="settings-form" *ngIf="settings()">
+  <div class="settings-content" *ngIf="settings()">
+    <div class="settings-form">
 
       <!-- Agreement Requirement Section -->
       <section class="form-section">
@@ -117,22 +117,16 @@
         </div>
       </section>
 
-      <!-- Actions -->
-      <div class="form-actions">
-        <button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="saving()">
-          {{ saving() ? 'Saving...' : 'Save Settings' }}
-        </button>
+      <!-- Auto-save Status -->
+      <div class="auto-save-status">
+        <div class="save-indicator">
+          <span class="status-icon">✓</span>
+          <span>{{ autoSaveStatus() }}</span>
+        </div>
+        <small class="save-note">Changes are saved automatically</small>
       </div>
-    </form>
-  </div>
-
-  <!-- Loading Template -->
-  <ng-template #loadingTemplate>
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p>Loading settings...</p>
     </div>
-  </ng-template>
+  </div>
 
   <!-- Configure Terms Modal -->
   <div class="modal-overlay" *ngIf="showConfigureTermsModal()" (click)="closeConfigureTermsModal()">

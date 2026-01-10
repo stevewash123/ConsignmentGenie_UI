@@ -7,73 +7,69 @@
   <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
   <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
 
-  <div *ngIf="isLoading()" class="loading">
-    <p>Loading contact information...</p>
-  </div>
-
-  <form *ngIf="!isLoading()" [formGroup]="contactForm" (ngSubmit)="saveContactInfo()">
-
+  <div *ngIf="profile()">
     <!-- Business Information -->
     <section class="form-section">
       <h3>Business Information</h3>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="businessName">Business Name</label>
+          <label for="shopName">Business Name</label>
           <input
-            id="businessName"
+            id="shopName"
             type="text"
-            formControlName="businessName"
             class="form-input"
-            [class.error]="isFieldInvalid('businessName')"
+            [value]="profile()?.shopName || ''"
+            (input)="onShopNameChange($any($event.target).value)"
             placeholder="Your business name">
-          <div *ngIf="getFieldError('businessName')" class="form-error">
-            {{ getFieldError('businessName') }}
-          </div>
         </div>
 
         <div class="form-group">
-          <label for="ownerName">Owner Name</label>
+          <label for="shopEmail">Email Address</label>
           <input
-            id="ownerName"
-            type="text"
-            formControlName="ownerName"
+            id="shopEmail"
+            type="email"
             class="form-input"
-            [class.error]="isFieldInvalid('ownerName')"
-            placeholder="Your full name">
-          <div *ngIf="getFieldError('ownerName')" class="form-error">
-            {{ getFieldError('ownerName') }}
-          </div>
+            [value]="profile()?.shopEmail || ''"
+            (input)="onShopEmailChange($any($event.target).value)"
+            placeholder="your@email.com">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="email">Email Address</label>
+          <label for="shopPhone">Phone Number</label>
           <input
-            id="email"
-            type="email"
-            formControlName="email"
+            id="shopPhone"
+            type="tel"
             class="form-input"
-            [class.error]="isFieldInvalid('email')"
-            placeholder="your@email.com">
-          <div *ngIf="getFieldError('email')" class="form-error">
-            {{ getFieldError('email') }}
-          </div>
+            [value]="profile()?.shopPhone || ''"
+            (input)="onShopPhoneChange($any($event.target).value)"
+            placeholder="(555) 123-4567">
         </div>
 
         <div class="form-group">
-          <label for="phoneNumber">Phone Number</label>
+          <label for="shopWebsite">Website</label>
           <input
-            id="phoneNumber"
-            type="tel"
-            formControlName="phoneNumber"
+            id="shopWebsite"
+            type="url"
             class="form-input"
-            [class.error]="isFieldInvalid('phoneNumber')"
-            placeholder="(555) 123-4567">
-          <div *ngIf="getFieldError('phoneNumber')" class="form-error">
-            {{ getFieldError('phoneNumber') }}
-          </div>
+            [value]="profile()?.shopWebsite || ''"
+            (input)="onShopWebsiteChange($any($event.target).value)"
+            placeholder="https://yourstore.com">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="shopDescription">Business Description</label>
+          <textarea
+            id="shopDescription"
+            class="form-input"
+            rows="3"
+            [value]="profile()?.shopDescription || ''"
+            (input)="onShopDescriptionChange($any($event.target).value)"
+            placeholder="Tell customers about your business..."></textarea>
         </div>
       </div>
     </section>
@@ -84,79 +80,104 @@
 
       <div class="form-row">
         <div class="form-group full-width">
-          <label for="street">Street Address</label>
+          <label for="shopAddress1">Street Address</label>
           <input
-            id="street"
+            id="shopAddress1"
             type="text"
-            formControlName="street"
             class="form-input"
-            [class.error]="isFieldInvalid('street')"
+            [value]="profile()?.shopAddress1 || ''"
+            (input)="onShopAddress1Change($any($event.target).value)"
             placeholder="123 Main Street">
-          <div *ngIf="getFieldError('street')" class="form-error">
-            {{ getFieldError('street') }}
-          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="shopAddress2">Address Line 2 (Optional)</label>
+          <input
+            id="shopAddress2"
+            type="text"
+            class="form-input"
+            [value]="profile()?.shopAddress2 || ''"
+            (input)="onShopAddress2Change($any($event.target).value)"
+            placeholder="Suite, unit, building, floor, etc.">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="city">City</label>
+          <label for="shopCity">City</label>
           <input
-            id="city"
+            id="shopCity"
             type="text"
-            formControlName="city"
             class="form-input"
-            [class.error]="isFieldInvalid('city')"
+            [value]="profile()?.shopCity || ''"
+            (input)="onShopCityChange($any($event.target).value)"
             placeholder="Portland">
-          <div *ngIf="getFieldError('city')" class="form-error">
-            {{ getFieldError('city') }}
-          </div>
         </div>
 
         <div class="form-group">
-          <label for="state">State</label>
+          <label for="shopState">State</label>
           <input
-            id="state"
+            id="shopState"
             type="text"
-            formControlName="state"
             class="form-input"
-            [class.error]="isFieldInvalid('state')"
+            [value]="profile()?.shopState || ''"
+            (input)="onShopStateChange($any($event.target).value)"
             placeholder="OR"
             maxlength="2">
-          <div *ngIf="getFieldError('state')" class="form-error">
-            {{ getFieldError('state') }}
-          </div>
         </div>
-      </div>
 
-      <div class="form-row">
         <div class="form-group">
-          <label for="zipCode">ZIP Code</label>
+          <label for="shopZip">ZIP Code</label>
           <input
-            id="zipCode"
+            id="shopZip"
             type="text"
-            formControlName="zipCode"
             class="form-input"
-            [class.error]="isFieldInvalid('zipCode')"
+            [value]="profile()?.shopZip || ''"
+            (input)="onShopZipChange($any($event.target).value)"
             placeholder="97201">
-          <div *ngIf="getFieldError('zipCode')" class="form-error">
-            {{ getFieldError('zipCode') }}
-          </div>
         </div>
       </div>
     </section>
 
-    <!-- Save Actions -->
+    <!-- Timezone -->
+    <section class="form-section">
+      <h3>Store Settings</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="shopTimezone">Timezone</label>
+          <select
+            id="shopTimezone"
+            class="form-input"
+            [value]="profile()?.shopTimezone || 'America/New_York'"
+            (change)="onShopTimezoneChange($any($event.target).value)">
+            <option value="America/New_York">Eastern Time</option>
+            <option value="America/Chicago">Central Time</option>
+            <option value="America/Denver">Mountain Time</option>
+            <option value="America/Los_Angeles">Pacific Time</option>
+            <option value="America/Anchorage">Alaska Time</option>
+            <option value="Pacific/Honolulu">Hawaii Time</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Auto-save Status -->
+    <div class="auto-save-status">
+      <div class="save-indicator">
+        <span class="status-icon">✓</span>
+        <span>{{ autoSaveStatus() }}</span>
+      </div>
+      <small class="save-note">Changes are saved automatically as you type</small>
+    </div>
+
+    <!-- Form Actions -->
     <div class="form-actions">
-      <button type="button" (click)="resetForm()" class="btn-secondary">
-        Reset Changes
-      </button>
-      <button
-        type="submit"
-        class="btn-primary"
-        [disabled]="!contactForm.valid || isSaving()">
-        {{ isSaving() ? 'Saving...' : 'Save Contact Information' }}
+      <button type="button" (click)="resetToDefaults()" class="btn-secondary">
+        Reset to Server Values
       </button>
     </div>
-  </form>
+  </div>
 </div>
