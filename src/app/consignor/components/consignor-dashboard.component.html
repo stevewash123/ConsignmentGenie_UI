@@ -6,26 +6,6 @@
         <h2>Welcome back, {{dashboard?.providerName || 'Consignor'}}!</h2>
       </div>
 
-      <!-- Agreement Banner -->
-      <div class="agreement-banner" *ngIf="showAgreementBanner()">
-        <div class="agreement-banner-content">
-          <div class="agreement-banner-icon">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="agreement-banner-text">
-            <h3>Agreement Required</h3>
-            <p *ngIf="agreementStatus()?.type === 'acknowledge'">Please review and acknowledge the consignment agreement to continue.</p>
-            <p *ngIf="agreementStatus()?.type === 'upload'">Please download, sign, and upload your consignment agreement to continue.</p>
-          </div>
-          <div class="agreement-banner-actions">
-            <a routerLink="/consignor/agreement" class="agreement-action-btn">
-              Complete Agreement
-            </a>
-          </div>
-        </div>
-      </div>
 
       <div class="dashboard-content" *ngIf="dashboard">
         <!-- Earnings Widget -->
@@ -48,7 +28,7 @@
           <div class="metric-card">
             <div class="metric-title">ALL-TIME</div>
             <div class="metric-title">EARNINGS</div>
-            <div class="metric-value">\${{dashboard.totalEarningsAllTime.toFixed(2)}}</div>
+            <div class="metric-value">${{dashboard.totalEarningsAllTime.toFixed(2)}}</div>
           </div>
         </div>
 
@@ -68,8 +48,8 @@
             <div class="table-row" *ngFor="let sale of dashboard.recentSales">
               <div class="col">{{formatDate(sale.saleDate)}}</div>
               <div class="col">{{sale.itemTitle}}</div>
-              <div class="col">\${{sale.salePrice.toFixed(2)}}</div>
-              <div class="col">\${{sale.myEarnings.toFixed(2)}}</div>
+              <div class="col">${{sale.salePrice.toFixed(2)}}</div>
+              <div class="col">${{sale.myEarnings.toFixed(2)}}</div>
             </div>
             <div class="no-data" *ngIf="dashboard.recentSales.length === 0">
               No recent sales
@@ -86,7 +66,7 @@
           <div class="payout-info" *ngIf="dashboard.lastPayout">
             <div class="payout-row">
               <div class="col">{{formatDate(dashboard.lastPayout.payoutDate)}}</div>
-              <div class="col">\${{dashboard.lastPayout.amount.toFixed(2)}}</div>
+              <div class="col">${{dashboard.lastPayout.amount.toFixed(2)}}</div>
               <div class="col">{{dashboard.lastPayout.itemCount}} items</div>
               <div class="col">Via {{dashboard.lastPayout.paymentMethod}}</div>
             </div>

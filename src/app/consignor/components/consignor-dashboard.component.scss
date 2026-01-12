@@ -1,6 +1,52 @@
+// ============================================================================
+// Consignor Dashboard Component Styles
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Theme Colors - Five-Tier Purple System (matching app-wide consignor standards)
+// ----------------------------------------------------------------------------
+
+// Purple Theme Hierarchy (5 levels) - Muted version
+$color-shell-background: #f7f3ff;        // Level 1: Main shell/body background (very light muted purple)
+$color-section-background: hsl(270, 18%, 90%);  // Level 2: Cards/sections background (light muted purple)
+$color-primary: #6b46c1;                 // Level 3: Headers, borders, primary actions (muted purple)
+$color-primary-dark: #553c9a;            // Level 4: Badges, accents, hover states (darker muted purple)
+$color-primary-darker: #4c1d95;          // Level 5: Deep accents, pressed states (darkest muted purple)
+
+// Legacy alias for backwards compatibility
+$color-primary-hover: $color-primary-dark;
+
+// Other Theme Colors
+$color-text-primary: #1f2937;
+$color-text-secondary: #6b7280;
+$color-text-muted: #374151;
+$color-border: #e5e7eb;
+$color-border-light: #d1d5db;
+$color-background-light: #f3f4f6;
+$color-background-hover: #e5e7eb;
+
+$color-success: #059669;
+$color-success-light: #d1fae5;
+$color-danger: #dc2626;
+$color-danger-light: #fee2e2;
+$color-warning: #ea580c;
+
+$border-radius-sm: 4px;
+$border-radius-md: 6px;
+$border-radius-lg: 8px;
+$border-radius-xl: 12px;
+
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+// ----------------------------------------------------------------------------
+// Main Dashboard Layout
+// ----------------------------------------------------------------------------
 .consignor-dashboard {
   padding: 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: $color-shell-background;
+  min-height: 100vh;
 }
 
 .welcome-section {
@@ -11,14 +57,14 @@
 .welcome-section h1 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #111827;
+  color: $color-primary-dark;
   margin: 0 0 0.5rem;
 }
 
 .welcome-section h2 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #111827;
+  color: $color-primary-darker;
   margin: 0;
 }
 
@@ -103,17 +149,24 @@
 }
 
 .metric-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  background: $color-section-background;
+  border: 2px solid $color-primary;
+  border-radius: $border-radius-xl;
   padding: 1.5rem;
   text-align: center;
+  box-shadow: $shadow-lg;
+  transition: all 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .metric-title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
+  color: $color-text-secondary;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -121,16 +174,17 @@
 .metric-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #111827;
+  color: $color-primary-darker;
   margin-top: 0.5rem;
 }
 
 .section {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  background: $color-section-background;
+  border: 2px solid $color-primary;
+  border-radius: $border-radius-xl;
   margin-bottom: 2rem;
   overflow: hidden;
+  box-shadow: $shadow-lg;
 }
 
 .section-header {
@@ -138,24 +192,26 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid $color-primary;
 }
 
 .section-header h3 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: $color-primary-darker;
   margin: 0;
 }
 
 .view-all-link {
-  color: #3b82f6;
+  color: $color-primary;
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s;
 }
 
 .view-all-link:hover {
-  color: #2563eb;
+  color: $color-primary-dark;
+  text-decoration: underline;
 }
 
 .sales-table, .payout-info {
@@ -166,13 +222,13 @@
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid $color-primary;
 }
 
 .table-header {
-  background: #f9fafb;
+  background: $color-section-background;
   font-weight: 600;
-  color: #374151;
+  color: $color-text-muted;
   font-size: 0.875rem;
 }
 
