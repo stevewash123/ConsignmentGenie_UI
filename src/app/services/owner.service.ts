@@ -353,4 +353,22 @@ export class OwnerService {
   regenerateStoreCode(): Observable<{newStoreCode: string, generatedAt: string}> {
     return this.http.post<{newStoreCode: string, generatedAt: string}>(`${this.apiUrl}/organization/store-code/regenerate`, {});
   }
+
+  // === Dropoff Request Management ===
+  getDropoffRequests(status?: string): Observable<any[]> {
+    let params = status ? `?status=${status}` : '';
+    return this.http.get<any[]>(`${this.apiUrl}/owner/dropoff-requests${params}`);
+  }
+
+  getDropoffRequestDetail(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/owner/dropoff-requests/${id}`);
+  }
+
+  markDropoffAsReceived(id: string, data: { status: string; ownerNotes?: string }): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/owner/dropoff-requests/${id}/receive`, data);
+  }
+
+  importDropoffToInventory(id: string, data: { ownerNotes?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/owner/dropoff-requests/${id}/import`, data);
+  }
 }

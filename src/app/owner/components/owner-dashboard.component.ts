@@ -113,7 +113,7 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
         }
 
         const activeConsignorCount = Array.isArray(consignorsArray) ?
-          consignorsArray.filter((p: any) => p?.isActive).length : 0;
+          consignorsArray.filter((p: any) => p?.status === 'active').length : 0;
         this.activeConsignorCount.set(activeConsignorCount);
 
         // Calculate real pending payout totals from new API

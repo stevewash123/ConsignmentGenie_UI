@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 // ============================================================================
 // Theme Colors - Four-Tier Green System (matching app-wide standards)
 // ============================================================================
@@ -623,7 +625,7 @@ $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
           &:focus {
             outline: none;
             border-color: $color-primary;
-            box-shadow: 0 0 0 2px transparentize($color-primary, 0.8);
+            box-shadow: 0 0 0 2px color.adjust($color-primary, $alpha: -0.8);
           }
         }
 
@@ -678,7 +680,7 @@ $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
         color: white;
 
         &:hover {
-          background: darken($color-danger, 10%);
+          background: color.adjust($color-danger, $lightness: -10%);
         }
       }
     }

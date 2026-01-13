@@ -85,6 +85,14 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getRoute: (n, role) => n.providerId ? `/${role}/consignors/${n.providerId}` : `/${role}/consignors`,
     allowedRoles: ['owner']
   },
+  dropoff_manifest: {
+    icon: '📦',
+    color: 'blue',
+    getTitle: () => 'New Drop-off Manifest',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => n.referenceId ? `/${role}/dropoff-requests/${n.referenceId}` : null,
+    allowedRoles: ['owner']
+  },
   daily_sales_summary: {
     icon: '📊',
     color: 'blue',

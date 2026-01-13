@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { ConsignorPortalService } from '../consignor/services/consignor-portal.service';
 
 interface AgreementStatus {
@@ -31,12 +32,17 @@ export class ConsignorAgreementOnboardingComponent implements OnInit {
   // For file upload mode
   selectedFile = signal<File | null>(null);
   uploadProgress = signal(0);
-  uploadNotes = '';
+  isAgreementUploaded = signal(false);
+  isDragOver = signal(false);
+  isDownloading = signal(false);
+
+  private hasRedirected = false;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private consignorService: ConsignorPortalService
+    private consignorService: ConsignorPortalService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -57,51 +63,62 @@ export class ConsignorAgreementOnboardingComponent implements OnInit {
 
       this.agreementStatus.set(status || { required: false, type: 'none', status: 'completed' });
 
+      // Check if we should redirect back to dashboard
+      // Only redirect if agreement is not required OR already completed
+      // AND we came from the dashboard (indicated by returnTo query param)
+      const returnTo = this.route.snapshot.queryParams['returnTo'];
+
+      if ((!status?.required || status?.status === 'completed') && returnTo === 'dashboard' && !this.hasRedirected) {
+        // No agreement required OR agreement already completed, proceed to dashboard
+        this.hasRedirected = true;
+        this.proceedToDashboard();
+        return;
+      }
+
+      // If agreement is not required and we didn't come from dashboard,
+      // they probably navigated here directly - just stay on this page
       if (!status?.required) {
-        // No agreement required, proceed to dashboard
-        this.proceedToDashboard();
-        return;
-      }
-
-      if (status.status === 'completed') {
-        // Agreement already completed, proceed to dashboard
-        this.proceedToDashboard();
-        return;
-      }
-
-      if (status.type === 'acknowledge') {
+        // Show message that no agreement is required
+        this.errorMessage.set('No agreement is currently required for your account.');
+        // Still load terms text so the user can see what the agreement would be
         await this.loadTermsText();
+        return;
       }
+
+      // Always load terms text regardless of agreement type
+      await this.loadTermsText();
     } catch (error: any) {
       console.error('Error loading agreement status:', error);
       this.errorMessage.set('Failed to load agreement requirements');
+      // Still try to load terms text even if status call fails
+      await this.loadTermsText();
     } finally {
       this.isLoading.set(false);
     }
   }
 
   private async loadTermsText(): Promise<void> {
+    console.log('Loading terms text...');
     try {
-      // Get organization settings to fetch acknowledge terms text
-      // This would need to be implemented - for now using placeholder
-      const termsText = `By joining our consignment program, you agree to the following terms:
+      const response = await this.consignorService.getAgreementText().toPromise();
+      console.log('Terms text response:', response);
 
-1. Commission Rate: Items will be sold at the agreed commission rate
-2. Consignment Period: Items will remain on sale for the agreed period
-3. Retrieval Policy: Unsold items must be retrieved within the specified timeframe
-4. Item Condition: All items must meet our quality standards
-5. Payment Terms: Payments will be processed according to our payout schedule
-
-Please review these terms carefully and click to acknowledge your agreement.`;
-
-      this.acknowledgeTermsText.set(termsText);
+      if (response?.text) {
+        console.log('Setting agreement text from API');
+        this.acknowledgeTermsText.set(response.text);
+      } else {
+        console.log('No agreement text from API');
+        this.toastr.error('No agreement text configured for this organization', 'Agreement Not Available');
+        this.acknowledgeTermsText.set('Agreement text not available. Please contact support.');
+      }
     } catch (error) {
       console.error('Error loading terms text:', error);
-      this.acknowledgeTermsText.set('Error loading terms. Please try again.');
+      this.toastr.error('Failed to load agreement text. Please try refreshing the page.', 'Connection Error');
+      this.acknowledgeTermsText.set('Failed to load agreement text. Please refresh the page or contact support.');
     }
   }
 
-  async submitAgreement(): Promise<void> {
+  async continueToApp(): Promise<void> {
     if (!this.isTermsAccepted()) {
       this.errorMessage.set('Please accept the terms to continue');
       return;
@@ -112,7 +129,11 @@ Please review these terms carefully and click to acknowledge your agreement.`;
     if (agreementType === 'acknowledge') {
       await this.acknowledgeTerms();
     } else if (agreementType === 'upload') {
-      await this.uploadAgreement();
+      if (!this.isAgreementUploaded()) {
+        this.errorMessage.set('Please upload your signed agreement first');
+        return;
+      }
+      this.proceedToDashboard();
     }
   }
 
@@ -142,25 +163,52 @@ Please review these terms carefully and click to acknowledge your agreement.`;
     const file = input.files?.[0];
 
     if (file) {
-      // Validate file type
-      const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg'];
-      if (!allowedTypes.includes(file.type)) {
-        this.errorMessage.set('Please select a PDF, PNG, or JPG file');
-        return;
-      }
-
-      // Validate file size (10MB max)
-      if (file.size > 10 * 1024 * 1024) {
-        this.errorMessage.set('File size must be less than 10MB');
-        return;
-      }
-
-      this.selectedFile.set(file);
-      this.errorMessage.set('');
+      this.processFile(file);
     }
   }
 
-  private async uploadAgreement(): Promise<void> {
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(true);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processFile(files[0]);
+    }
+  }
+
+  private processFile(file: File): void {
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+    if (!allowedTypes.includes(file.type)) {
+      this.errorMessage.set('Please select a PDF, PNG, or JPG file');
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      this.errorMessage.set('File size must be less than 10MB');
+      return;
+    }
+
+    this.selectedFile.set(file);
+    this.errorMessage.set('');
+  }
+
+  async uploadAgreement(): Promise<void> {
     const file = this.selectedFile();
     if (!file) {
       this.errorMessage.set('Please select a file to upload');
@@ -172,26 +220,30 @@ Please review these terms carefully and click to acknowledge your agreement.`;
     this.uploadProgress.set(0);
 
     try {
-      await this.consignorService.uploadAgreement(file, this.uploadNotes).toPromise();
+      await this.consignorService.uploadAgreement(file).toPromise();
 
       this.uploadProgress.set(100);
-      this.successMessage.set('Agreement uploaded successfully');
+      this.isAgreementUploaded.set(true);
+      this.successMessage.set('Agreement uploaded successfully! Redirecting to dashboard...');
 
-      // Wait a moment to show success message, then proceed
+      // Clear processing state and redirect to dashboard
       setTimeout(() => {
+        this.isProcessing.set(false);
+        this.uploadProgress.set(0);
         this.proceedToDashboard();
       }, 1500);
     } catch (error: any) {
       console.error('Error uploading agreement:', error);
       this.errorMessage.set(error.error?.message || 'Failed to upload agreement. Please try again.');
-    } finally {
       this.isProcessing.set(false);
       this.uploadProgress.set(0);
     }
   }
 
   async downloadTemplate(): Promise<void> {
+    this.isDownloading.set(true);
     try {
+      // First try to download the PDF template from the API
       const response = await this.consignorService.downloadAgreementTemplate().toPromise();
 
       if (response) {
@@ -206,14 +258,32 @@ Please review these terms carefully and click to acknowledge your agreement.`;
       }
     } catch (error: any) {
       console.error('Error downloading template:', error);
-      this.errorMessage.set('Template download not available');
+
+      // Fallback: Generate a simple text document with the agreement text
+      try {
+        const agreementText = this.acknowledgeTermsText();
+        if (agreementText) {
+          const blob = new Blob([agreementText], { type: 'text/plain' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'consignment-agreement.txt';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        } else {
+          this.errorMessage.set('Agreement template not available');
+        }
+      } catch (fallbackError) {
+        console.error('Error creating fallback download:', fallbackError);
+        this.errorMessage.set('Template download not available');
+      }
+    } finally {
+      this.isDownloading.set(false);
     }
   }
 
-  skipForNow(): void {
-    // Mark as skipped and proceed to dashboard with pending state
-    this.proceedToDashboard();
-  }
 
   private proceedToDashboard(): void {
     this.router.navigate(['/consignor/dashboard']);

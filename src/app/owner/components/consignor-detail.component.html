@@ -20,7 +20,7 @@
               <div class="dropdown-divider"></div>
               <button
                 class="dropdown-item"
-                *ngIf="consignor()?.isActive"
+                *ngIf="consignor()?.status === 'active'"
                 (click)="deactivateProvider()"
                 [disabled]="isSubmitting()"
               >
@@ -28,7 +28,7 @@
               </button>
               <button
                 class="dropdown-item"
-                *ngIf="!consignor()?.isActive"
+                *ngIf="consignor()?.status !== 'active'"
                 (click)="activateProvider()"
                 [disabled]="isSubmitting()"
               >
@@ -44,8 +44,8 @@
         <div class="entity-title-section">
           <h1 class="entity-name">{{ consignor()!.name }}</h1>
           <div class="entity-meta">
-            <span class="status-badge" [class.status-active]="consignor()!.isActive" [class.status-inactive]="!consignor()!.isActive">
-              {{ consignor()!.isActive ? 'Active' : 'Inactive' }}
+            <span class="status-badge" [class.status-active]="consignor()!.status === 'active'" [class.status-inactive]="consignor()!.status !== 'active'">
+              {{ consignor()!.status === 'active' ? 'Active' : 'Inactive' }}
             </span>
             <span class="secondary-info">Consignor #{{ consignor()!.consignorNumber }}</span>
           </div>

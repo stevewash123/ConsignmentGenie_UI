@@ -84,11 +84,11 @@ export class PermissionsComponent implements OnInit, OnDestroy {
   resetToDefaults(): void {
     // Reset to default values with auto-save
     const defaultPermissions = {
-      canAddItems: true,
-      canEditOwnItems: true,
-      canRemoveOwnItems: false,
-      canEditPrices: true,
-      isActive: true
+      'canAddItems': true,
+      'canEditOwnItems': true,
+      'canRemoveOwnItems': false,
+      'canEditPrices': true,
+      'isActive': true
     };
 
     this.settingsService.updateConsignorPermissions(defaultPermissions);

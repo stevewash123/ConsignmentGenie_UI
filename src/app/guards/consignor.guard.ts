@@ -23,11 +23,10 @@ export class ConsignorGuard implements CanActivate {
       // Normalize role to handle both string and numeric values
       const normalizedRole = this.normalizeRole(userData.role);
 
-      // Allow consignor role access to consignor area
-      // Note: Owners can also access consignor areas for their shop's consignors
+      // Allow ONLY consignor role access to consignor area
+      // Owners should manage consignors through the owner dashboard, not consignor interface
       const allowedRoles = [
-        UserRole.consignor,
-        UserRole.Owner  // Owners can see consignor pages for their shop
+        UserRole.consignor
       ];
 
       if (allowedRoles.includes(normalizedRole)) {
@@ -48,6 +47,9 @@ export class ConsignorGuard implements CanActivate {
     switch (userRole) {
       case UserRole.Admin:
         this.router.navigate(['/admin/dashboard']);
+        break;
+      case UserRole.Owner:
+        this.router.navigate(['/owner/dashboard']);
         break;
       case UserRole.Customer:
         this.router.navigate(['/customer/dashboard']);

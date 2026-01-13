@@ -33,7 +33,7 @@ export class OwnerInvitationsListComponent implements OnInit {
   // Filters
   searchTerm = '';
   statusFilter = '';
-  private searchTimeout?: number;
+  private searchTimeout?: any;
 
   constructor(private ownerInvitationService: OwnerInvitationService, private loadingService: LoadingService) {}
 

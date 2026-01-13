@@ -24,7 +24,11 @@ import {
   CreateItemRequest,
   ItemRequestQuery,
   EarningsSummary,
-  StatementListResponse
+  StatementListResponse,
+  CreateDropoffRequest,
+  DropoffRequestList,
+  DropoffRequestDetail,
+  DropoffRequestQuery
 } from '../models/consignor.models';
 
 @Injectable({
@@ -202,5 +206,37 @@ export class ConsignorPortalService {
 
   downloadAgreementTemplate(): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/agreement/template`, { responseType: 'blob' });
+  }
+
+  getAgreementText(): Observable<{ text: string }> {
+    return this.http.get<{ text: string }>(`${this.apiUrl}/agreement/text`);
+  }
+
+  // Dropoff Requests
+  getMyDropoffRequests(query?: DropoffRequestQuery): Observable<DropoffRequestList[]> {
+    let params = new HttpParams();
+
+    if (query?.status) params = params.set('status', query.status);
+    if (query?.page) params = params.set('page', query.page.toString());
+    if (query?.pageSize) params = params.set('pageSize', query.pageSize.toString());
+
+    return this.http.get<DropoffRequestList[]>(`${this.apiUrl}/dropoff-requests`, { params });
+  }
+
+  getDropoffRequest(id: string): Observable<DropoffRequestDetail> {
+    return this.http.get<DropoffRequestDetail>(`${this.apiUrl}/dropoff-requests/${id}`);
+  }
+
+  createDropoffRequest(request: CreateDropoffRequest): Observable<DropoffRequestDetail> {
+    return this.http.post<DropoffRequestDetail>(`${this.apiUrl}/dropoff-requests`, request);
+  }
+
+  cancelDropoffRequest(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/dropoff-requests/${id}`);
+  }
+
+  // Categories
+  getCategories(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/categories`);
   }
 }

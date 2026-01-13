@@ -18,7 +18,7 @@
               type="checkbox"
               id="canAddItems"
               [checked]="permissions()?.inventory?.canAddItems || false"
-              (change)="onCanAddItemsChange($event.target.checked)">
+              (change)="onCanAddItemsChange($any($event.target).checked)">
             <div class="permission-content">
               <div class="permission-label">Can add new items</div>
               <div class="permission-description">Allow consignors to add new items to the inventory</div>
@@ -30,7 +30,7 @@
               type="checkbox"
               id="canEditOwnItems"
               [checked]="permissions()?.inventory?.canEditOwnItems || false"
-              (change)="onCanEditOwnItemsChange($event.target.checked)">
+              (change)="onCanEditOwnItemsChange($any($event.target).checked)">
             <div class="permission-content">
               <div class="permission-label">Can edit their own items</div>
               <div class="permission-description">Allow consignors to modify descriptions, photos, etc. of their items</div>
@@ -42,7 +42,7 @@
               type="checkbox"
               id="canRemoveOwnItems"
               [checked]="permissions()?.inventory?.canRemoveOwnItems || false"
-              (change)="onCanRemoveOwnItemsChange($event.target.checked)">
+              (change)="onCanRemoveOwnItemsChange($any($event.target).checked)">
             <div class="permission-content">
               <div class="permission-label">Can remove/withdraw their own items</div>
               <div class="permission-description">Allow consignors to remove items from sale</div>
@@ -54,7 +54,7 @@
               type="checkbox"
               id="canEditPrices"
               [checked]="permissions()?.inventory?.canEditPrices || false"
-              (change)="onCanEditPricesChange($event.target.checked)">
+              (change)="onCanEditPricesChange($any($event.target).checked)">
             <div class="permission-content">
               <div class="permission-label">Can edit item prices</div>
               <div class="permission-description">Allow consignors to change prices on their items</div>
@@ -62,14 +62,6 @@
           </div>
         </div>
 
-        <!-- Auto-save Status -->
-        <div class="auto-save-status">
-          <div class="save-indicator">
-            <span class="status-icon">✓</span>
-            <span>{{ autoSaveStatus() }}</span>
-          </div>
-          <small class="save-note">Changes are saved automatically as you type</small>
-        </div>
 
         <!-- Form Actions -->
         <div class="form-actions">

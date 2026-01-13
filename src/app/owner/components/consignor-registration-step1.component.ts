@@ -7,7 +7,8 @@ import { AuthMethodSelectorComponent, ProviderAuthEvent, CredentialsEvent } from
 
 interface InvitationDetails {
   isValid: boolean;
-  invitedName?: string;
+  invitedFirstName?: string;
+  invitedLastName?: string;
   invitedEmail?: string;
   shopName?: string;
   message?: string;

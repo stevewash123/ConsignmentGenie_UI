@@ -37,6 +37,11 @@ export class AgreementsComponent implements OnInit {
     return settings?.agreementRequirement !== 'none';
   });
 
+  showAgreementRequiredError = computed(() => {
+    const settings = this.settings();
+    return settings?.requireSignedAgreement === true && !this.hasAgreementUploaded();
+  });
+
   // Use the settings service - initialized in constructor
   settings!: Signal<OrganizationSettings | null>;
 
@@ -89,6 +94,8 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   async loadSettings() {
     await this.settingsService.loadSettings();
+    // Reload template after settings are loaded to update hasCustomTemplate state
+    await this.loadTemplate();
   }
 
   async loadOnboardingSettings() {
@@ -400,6 +407,7 @@ This PDF template will be used when generating agreements for new consignors.`;
       return 'Download Agreement';
     }
   }
+
 
   private validateTemplate(content: string): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];

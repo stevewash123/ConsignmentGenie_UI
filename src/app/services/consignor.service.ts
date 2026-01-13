@@ -50,7 +50,7 @@ export interface PendingInvitation {
   id: string;
   email: string;
   name?: string;
-  sentAt: string;
+  createdAt: string;
   expiresAt: string;
   status: 'pending' | 'expired' | 'cancelled';
 }
@@ -100,7 +100,6 @@ export class ConsignorService {
       preferredPaymentMethod: undefined, // Not provided in DTO
       paymentDetails: undefined, // Not provided in DTO
       notes: undefined, // Not provided in DTO
-      isActive: dto.status === 'active',
       status: dto.status as 'active' | 'invited' | 'inactive',
       organizationId: 0, // Not provided in DTO
       consignorNumber: dto.consignorNumber,
@@ -128,7 +127,6 @@ export class ConsignorService {
       preferredPaymentMethod: dto.preferredPaymentMethod,
       paymentDetails: dto.paymentDetails,
       notes: dto.notes,
-      isActive: dto.isActive,
       status: this.mapApiStatusToConsignorStatus(dto.status),
       organizationId: 1, // Will be handled by backend
       consignorNumber: dto.consignorNumber,

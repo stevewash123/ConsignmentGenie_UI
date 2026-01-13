@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, interval } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
@@ -40,13 +40,15 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     { value: 'payout_pending', label: 'Payout Pending' },
     { value: 'statement_ready', label: 'Statement Ready' },
     { value: 'new_provider_request', label: 'consignor Request' },
+    { value: 'dropoff_manifest', label: 'Drop-off Manifests' },
     { value: 'subscription_reminder', label: 'Subscription' },
     { value: 'system_announcement', label: 'Announcements' }
   ];
 
   constructor(
     private notificationService: NotificationService,
-    public loadingService: LoadingService
+    public loadingService: LoadingService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -200,5 +202,24 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
 
   getNotificationIconClass(type: string): string {
     return getNotificationIconClass(type as any);
+  }
+
+  openBulkImportWithManifest(notification: NotificationDto, event: Event) {
+    event.stopPropagation();
+
+    // Mark notification as read if not already
+    if (!notification.isRead) {
+      this.markAsRead(notification, event);
+    }
+
+    // Navigate to inventory list with manifest ID parameter to trigger bulk import modal
+    if (notification.referenceId) {
+      this.router.navigate(['/owner/inventory'], {
+        queryParams: {
+          manifestId: notification.referenceId,
+          openBulkImport: 'true'
+        }
+      });
+    }
   }
 }

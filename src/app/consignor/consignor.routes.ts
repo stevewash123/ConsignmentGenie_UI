@@ -15,10 +15,6 @@ export const consignorRoutes: Routes = [
         loadComponent: () => import('./components/consignor-dashboard.component').then(m => m.ConsignorDashboardComponent)
       },
       {
-        path: 'agreement',
-        loadComponent: () => import('./components/agreement-gate.component').then(m => m.AgreementGateComponent)
-      },
-      {
         path: 'items',
         loadComponent: () => import('../features/consignor/items/item-list/item-list.component').then(m => m.ItemListComponent)
       },
@@ -69,6 +65,18 @@ export const consignorRoutes: Routes = [
       {
         path: 'item-requests/:id',
         loadComponent: () => import('./components/item-request-detail.component').then(m => m.ItemRequestDetailComponent)
+      },
+      {
+        path: 'dropoff-requests',
+        loadComponent: () => import('./components/dropoff-requests.component').then(m => m.DropoffRequestsComponent)
+      },
+      {
+        path: 'dropoff-requests/create',
+        loadComponent: () => import('./components/create-dropoff-request.component').then(m => m.CreateDropoffRequestComponent)
+      },
+      {
+        path: 'dropoff-requests/:id',
+        loadComponent: () => import('./components/dropoff-request-detail.component').then(m => m.DropoffRequestDetailComponent)
       }
     ]
   }

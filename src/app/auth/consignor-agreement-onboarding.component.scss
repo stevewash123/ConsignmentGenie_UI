@@ -1,21 +1,50 @@
+// ============================================================================
+// Purple Theme Colors - Five-Tier Purple System (parallel to green owner theme)
+// ============================================================================
+
+// Purple Theme Hierarchy (5 levels) - Muted version
+$color-shell-background: #f7f3ff;        // Level 1: Main shell/body background (very light muted purple)
+$color-section-background: hsl(270, 18%, 90%);  // Level 2: Cards/sections background (light muted purple)
+$color-primary: #6b46c1;                 // Level 3: Headers, borders, primary actions (muted purple)
+$color-primary-dark: #553c9a;            // Level 4: Badges, accents, hover states (darker muted purple)
+$color-primary-darker: #4c1d95;          // Level 5: Deep accents, pressed states (darkest muted purple)
+
+// Legacy alias for backwards compatibility
+$color-primary-hover: $color-primary-dark;
+
+// Other Theme Colors
+$color-text-primary: #1f2937;
+$color-text-secondary: #6b7280;
+$color-text-muted: #374151;
+$color-border: #e5e7eb;
+$color-border-light: #d1d5db;
+$color-background-light: #f3f4f6;
+$color-background-hover: #e5e7eb;
+
+$color-success: #059669;
+$color-success-light: #d1fae5;
+$color-danger: #dc2626;
+$color-danger-light: #fee2e2;
+$color-warning: #ea580c;
+
 .agreement-onboarding-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-darker 100%);
   padding: 2rem;
 }
 
 .loading-container {
   text-align: center;
-  color: white;
+  color: $color-text-primary;
 
   .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid white;
+    border: 4px solid $color-border-light;
+    border-top: 4px solid $color-primary;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem;
@@ -27,13 +56,25 @@
   100% { transform: rotate(360deg); }
 }
 
+.loading-spinner-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid $color-border-light;
+  border-top: 2px solid $color-primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
 .agreement-card {
-  background: white;
+  background: $color-section-background;
   border-radius: 12px;
   padding: 3rem;
-  max-width: 600px;
+  max-width: 700px;
   width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid $color-border-light;
 }
 
 .agreement-header {
@@ -42,32 +83,35 @@
 
   h1 {
     font-size: 2rem;
-    color: #2d3748;
+    color: $color-primary-dark;
     margin-bottom: 0.5rem;
     font-weight: 600;
   }
 
   p {
-    color: #718096;
+    color: $color-text-secondary;
     line-height: 1.6;
     margin: 0;
   }
 }
 
 .terms-content {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 
   .terms-text {
-    background: #f7fafc;
-    border: 2px solid #e2e8f0;
+    background: white;
+    border: 2px solid $color-primary;
     border-radius: 8px;
-    padding: 1.5rem;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #2d3748;
-    max-height: 300px;
+    padding: 2rem;
+    font-size: 15px;
+    line-height: 1.7;
+    color: $color-text-primary;
+    height: 150px !important;
+    max-height: none !important;
+    min-height: 150px;
     overflow-y: auto;
     white-space: pre-line;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -86,14 +130,21 @@
       appearance: none;
       width: 20px;
       height: 20px;
-      border: 2px solid #cbd5e0;
+      border: 2px solid $color-primary;
       border-radius: 4px;
       position: relative;
       cursor: pointer;
+      background-color: white;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        border-color: $color-primary-dark;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+      }
 
       &:checked {
-        background-color: #667eea;
-        border-color: #667eea;
+        background-color: $color-primary;
+        border-color: $color-primary;
 
         &::after {
           content: '✓';
@@ -109,17 +160,42 @@
       &:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+        background-color: #f9fafb;
       }
     }
   }
 }
 
 .download-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   text-align: center;
 
-  .btn-icon {
-    margin-right: 0.5rem;
+  .btn {
+    background: $color-primary;
+    color: white;
+    padding: 0.875rem 2rem;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background: $color-primary-dark;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    .btn-icon {
+      margin-right: 0.5rem;
+      font-size: 18px;
+    }
   }
 }
 
@@ -150,9 +226,13 @@
     position: relative;
     border: 2px dashed #cbd5e0;
     border-radius: 8px;
-    padding: 2rem;
+    padding: 1rem;
     text-align: center;
     transition: border-color 0.2s;
+    max-width: 400px;
+    margin: 0 auto;
+    min-height: 80px;
+    background: $color-shell-background;
 
     &:hover {
       border-color: #667eea;
@@ -162,6 +242,12 @@
       border-style: solid;
       border-color: #48bb78;
       background-color: #f0fff4;
+    }
+
+    &.drag-over {
+      border-color: $color-primary;
+      background-color: #f0f4ff;
+      transform: scale(1.02);
     }
 
     .file-upload-content {
@@ -322,6 +408,34 @@
       &.btn-small {
         padding: 0.5rem 1rem;
         font-size: 14px;
+      }
+
+      // Upload button should match download button purple theme and size
+      &.upload-button {
+        background: $color-primary;
+        color: white;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        // Override btn-small padding to match download button
+        padding: 0.875rem 2rem !important;
+        font-size: 16px !important;
+        font-weight: 600;
+        border-radius: 8px;
+
+        &:hover:not(:disabled) {
+          background: $color-primary-dark;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+
+        .btn-icon {
+          margin-right: 0.5rem;
+          font-size: 18px;
+        }
       }
     }
 

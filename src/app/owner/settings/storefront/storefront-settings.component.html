@@ -1,424 +1,212 @@
+<div class="storefront-settings">
+  <header class="section-header">
+    <h2 class="section-title">Storefront Settings</h2>
+    <p class="section-description">Configure your online store and sales channels</p>
+  </header>
 
-    <div class="storefront-settings">
-      <div class="settings-header">
-        <h2>Storefront & Sales Channels</h2>
-        <p>Configure how you sell to customers and manage your online presence</p>
+  <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+  <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+
+  <div *ngIf="storefrontSettings()">
+    <!-- Basic Storefront Settings -->
+    <section class="form-section">
+      <h3>Store Information</h3>
+
+      <div class="form-group">
+        <label for="storeSlug">Store Slug</label>
+        <input
+          id="storeSlug"
+          type="text"
+          class="form-input"
+          [value]="getStoreSlug()"
+          (input)="onStoreSlugChange($any($event.target).value)"
+          placeholder="my-store">
+        <div class="field-help">Your store URL: consignmentgenie.com/shop/{{ getStoreSlug() || 'your-slug' }}</div>
       </div>
 
-      <div class="settings-form" *ngIf="settings()">
-        <!-- Channel Selection -->
-        <div class="form-section">
-          <h3>How would you like to sell to customers?</h3>
-
-          <div class="channel-options">
-            <label
-              *ngFor="let option of channelOptions"
-              class="channel-option"
-              [class.selected]="settings()?.selectedChannel === option.id">
-              <input
-                type="radio"
-                [value]="option.id"
-                [(ngModel)]="settings()!.selectedChannel"
-                name="salesChannel"
-                (change)="onChannelChange()">
-              <div class="option-content">
-                <div class="option-header">
-                  <span class="option-title">{{ option.title }}</span>
-                </div>
-                <div class="option-description">{{ option.description }}</div>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <!-- Square Settings -->
-        <div class="form-section" *ngIf="settings()?.selectedChannel === 'square'">
-          <h3>Square Integration</h3>
-
-          <div *ngIf="!settings()?.square?.connected" class="integration-setup">
-            <div class="setup-info">
-              <h4>Connect to Square</h4>
-              <p>Integrate with your Square POS system for unified inventory and payment processing.</p>
-              <button class="btn-primary" (click)="connectSquare()">Connect to Square</button>
-            </div>
-          </div>
-
-          <div *ngIf="settings()?.square?.connected" class="integration-connected">
-            <div class="connection-status">
-              <h4>✅ Connected</h4>
-              <div class="connection-details">
-                <div><strong>Business:</strong> {{ settings()?.square?.businessName }}</div>
-                <div><strong>Location:</strong> {{ settings()?.square?.locationName }}</div>
-                <div><strong>Connected:</strong> {{ settings()?.square?.connectedAt | date:'mediumDate' }}</div>
-              </div>
-              <button class="btn-danger-outline" (click)="disconnectSquare()">Disconnect Square</button>
-            </div>
-
-            <div class="sync-settings">
-              <h4>Sync Settings</h4>
-              <div class="checkbox-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="settings()!.square!.syncInventory" name="squareSyncInventory">
-                  <span class="checkmark"></span>
-                  Sync inventory to Square
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="settings()!.square!.importSales" name="squareImportSales">
-                  <span class="checkmark"></span>
-                  Import sales from Square automatically
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="settings()!.square!.syncCustomers" name="squareSyncCustomers">
-                  <span class="checkmark"></span>
-                  Sync customer data
-                </label>
-              </div>
-
-              <div class="form-group">
-                <label for="squareSyncFreq">Sync Frequency</label>
-                <select id="squareSyncFreq" [(ngModel)]="settings()!.square!.syncFrequency" class="form-select">
-                  <option value="5min">Every 5 minutes</option>
-                  <option value="15min">Every 15 minutes</option>
-                  <option value="30min">Every 30 minutes</option>
-                  <option value="1hour">Every hour</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="sync-log">
-              <h4>Recent Sync Activity</h4>
-              <div class="activity-log">
-                <div class="log-entry">Today 2:45 PM - ✓ 12 items synced</div>
-                <div class="log-entry">Today 2:30 PM - ✓ 3 sales imported</div>
-                <div class="log-entry">Today 2:15 PM - ✓ 8 items synced</div>
-                <div class="log-entry">Today 2:00 PM - ⚠ 1 item failed (no image)</div>
-              </div>
-              <div class="sync-actions">
-                <button class="btn-secondary" (click)="viewSyncLog()">View Full Sync Log</button>
-                <button class="btn-primary" (click)="syncNow()">Sync Now</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Shopify Settings -->
-        <div class="form-section" *ngIf="settings()?.selectedChannel === 'shopify'">
-          <h3>Shopify Integration</h3>
-
-          <div *ngIf="!settings()?.shopify?.connected" class="integration-setup">
-            <div class="setup-info">
-              <h4>Connect to Shopify</h4>
-              <p>Sync your inventory with your Shopify store for seamless online sales.</p>
-              <button class="btn-primary" (click)="connectShopify()">Connect to Shopify</button>
-            </div>
-          </div>
-
-          <div *ngIf="settings()?.shopify?.connected" class="integration-connected">
-            <div class="connection-status">
-              <h4>✅ Connected</h4>
-              <div class="connection-details">
-                <div><strong>Store:</strong> {{ settings()?.shopify?.storeName }}</div>
-                <div><strong>Connected:</strong> {{ settings()?.shopify?.connectedAt | date:'mediumDate' }}</div>
-              </div>
-              <div class="connection-actions">
-                <button class="btn-secondary" (click)="openShopifyStore()">View Shopify Store ↗</button>
-                <button class="btn-danger-outline" (click)="disconnectShopify()">Disconnect</button>
-              </div>
-            </div>
-
-            <div class="sync-settings">
-              <h4>Sync Settings</h4>
-              <div class="checkbox-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="settings()!.shopify!.pushInventory" name="shopifyPushInventory">
-                  <span class="checkmark"></span>
-                  Push inventory to Shopify
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="settings()!.shopify!.importOrders" name="shopifyImportOrders">
-                  <span class="checkmark"></span>
-                  Import orders from Shopify automatically
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="settings()!.shopify!.syncImages" name="shopifySyncImages">
-                  <span class="checkmark"></span>
-                  Sync product images
-                </label>
-              </div>
-
-              <div class="radio-group">
-                <span class="radio-label-header">When item sells in Shopify:</span>
-                <label class="radio-label">
-                  <input type="radio" [value]="true" [(ngModel)]="settings()!.shopify!.autoMarkSold" name="shopifyAutoMark">
-                  <span class="radio-mark"></span>
-                  Automatically mark sold in ConsignmentGenie
-                </label>
-                <label class="radio-label">
-                  <input type="radio" [value]="false" [(ngModel)]="settings()!.shopify!.autoMarkSold" name="shopifyAutoMark">
-                  <span class="radio-mark"></span>
-                  Create pending sale for review
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CG Storefront Settings -->
-        <div class="form-section" *ngIf="settings()?.selectedChannel === 'cg_storefront'">
-          <h3>ConsignmentGenie Storefront</h3>
-
-          <div class="form-group">
-            <label>Store URL Configuration</label>
-            <div class="url-options">
-              <!-- ConsignmentGenie Subdomain Option -->
-              <div class="url-option" [class.selected]="settings()?.cgStorefront?.useCustomDomain !== 'true'">
-                <label class="radio-label">
-                  <input
-                    type="radio"
-                    value="false"
-                    [(ngModel)]="settings()!.cgStorefront!.useCustomDomain"
-                    name="domainType">
-                  <span class="radio-mark"></span>
-                  <div class="option-content">
-                    <div class="option-title">Use ConsignmentGenie subdomain (Recommended)</div>
-                    <div class="option-description">Free, instant setup with SSL included</div>
-                  </div>
-                </label>
-                <div class="url-input" *ngIf="settings()?.cgStorefront?.useCustomDomain !== 'true'">
-                  <span class="url-prefix">consignmentgenie.com/shop/</span>
-                  <input
-                    type="text"
-                    [(ngModel)]="settings()!.cgStorefront!.storeSlug"
-                    name="storeSlug"
-                    class="form-input url-slug"
-                    placeholder="your-store-name">
-                  <span class="url-status">✓ Available</span>
-                </div>
-              </div>
-
-              <!-- Custom Domain Option -->
-              <div class="url-option" [class.selected]="settings()?.cgStorefront?.useCustomDomain === 'true'">
-                <label class="radio-label">
-                  <input
-                    type="radio"
-                    value="true"
-                    [(ngModel)]="settings()!.cgStorefront!.useCustomDomain"
-                    name="domainType">
-                  <span class="radio-mark"></span>
-                  <div class="option-content">
-                    <div class="option-title">Use your own domain</div>
-                    <div class="option-description">Professional branding with your domain name</div>
-                  </div>
-                </label>
-                <div class="custom-domain-setup" *ngIf="settings()?.cgStorefront?.useCustomDomain === 'true'">
-                  <input
-                    type="url"
-                    [(ngModel)]="settings()!.cgStorefront!.customDomain"
-                    name="customDomain"
-                    class="form-input"
-                    placeholder="shop.yourstore.com">
-
-                  <div class="domain-status" [class.verified]="settings()?.cgStorefront?.dnsVerified">
-                    <div class="status-indicator">
-                      {{ settings()?.cgStorefront?.dnsVerified ? '✅ DNS verified' : '⚠️ DNS not verified' }}
-                    </div>
-                    <button *ngIf="!settings()?.cgStorefront?.dnsVerified" class="btn-link" (click)="verifyDns()">
-                      Verify DNS
-                    </button>
-                  </div>
-
-                  <!-- DNS Setup Instructions -->
-                  <div class="dns-instructions" *ngIf="settings()?.cgStorefront?.customDomain && !settings()?.cgStorefront?.dnsVerified">
-                    <div class="instruction-header">
-                      <strong>DNS Setup Instructions</strong>
-                    </div>
-                    <div class="instruction-content">
-                      <p>To use your custom domain, add these DNS records with your domain registrar:</p>
-                      <div class="dns-records">
-                        <div class="dns-record">
-                          <div class="record-type">Type: <strong>CNAME</strong></div>
-                          <div class="record-name">Name: <strong>shop</strong> (or your subdomain)</div>
-                          <div class="record-value">Value: <strong>storefront.consignmentgenie.com</strong></div>
-                        </div>
-                      </div>
-                      <div class="instruction-note">
-                        <strong>Note:</strong> DNS changes can take up to 24 hours to propagate.
-                        Click "Verify DNS" above once you've added the record.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="stripe-section">
-            <h4>Payment Processing (Stripe)</h4>
-            <div *ngIf="!settings()?.cgStorefront?.stripeConnected" class="stripe-setup">
-              <div class="setup-warning">
-                <span class="warning-icon">⚠️</span>
-                <div>
-                  <strong>Stripe Required</strong>
-                  <p>To accept payments on your CG storefront, you need to connect a Stripe account.</p>
-                </div>
-              </div>
-              <button class="btn-primary" (click)="connectStripe()">Connect Stripe</button>
-            </div>
-
-            <div *ngIf="settings()?.cgStorefront?.stripeConnected" class="stripe-connected">
-              <div class="stripe-status">
-                <span class="status-icon">✅</span>
-                <div>
-                  <strong>Stripe Connected</strong>
-                  <div>Account: {{ settings()?.cgStorefront?.stripeAccountName }}</div>
-                  <div>Accepting: Visa, MC, Amex, Apple Pay</div>
-                </div>
-              </div>
-              <div class="stripe-actions">
-                <button class="btn-secondary" (click)="openStripeDashboard()">View Stripe Dashboard ↗</button>
-                <button class="btn-danger-outline" (click)="disconnectStripe()">Disconnect</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="branding-section">
-            <h4>Store Branding</h4>
-            <div class="form-group">
-              <label for="bannerImage">Banner Image</label>
-              <div class="image-upload">
-                <div class="image-preview" *ngIf="settings()?.cgStorefront?.bannerImageUrl; else noBanner">
-                  <img [src]="settings()?.cgStorefront?.bannerImageUrl" alt="Banner">
-                </div>
-                <ng-template #noBanner>
-                  <div class="image-placeholder">No banner image</div>
-                </ng-template>
-                <input type="file" #bannerInput (change)="onBannerSelect($event)" accept="image/*" style="display: none;">
-                <button type="button" class="btn-secondary" (click)="bannerInput.click()">Upload Banner</button>
-                <div class="upload-hint">Recommended: 1200x300px</div>
-              </div>
-            </div>
-
-            <div class="color-settings">
-              <div class="form-group">
-                <label for="primaryColor">Primary Color</label>
-                <input
-                  type="color"
-                  id="primaryColor"
-                  [(ngModel)]="settings()!.cgStorefront!.primaryColor"
-                  name="primaryColor"
-                  class="color-input">
-              </div>
-              <div class="form-group">
-                <label for="accentColor">Accent Color</label>
-                <input
-                  type="color"
-                  id="accentColor"
-                  [(ngModel)]="settings()!.cgStorefront!.accentColor"
-                  name="accentColor"
-                  class="color-input">
-              </div>
-            </div>
-
-            <div class="seo-settings">
-              <h4>SEO Settings</h4>
-              <div class="form-group">
-                <label for="metaTitle">Meta Title</label>
-                <input
-                  type="text"
-                  id="metaTitle"
-                  [(ngModel)]="settings()!.cgStorefront!.metaTitle"
-                  name="metaTitle"
-                  class="form-input"
-                  placeholder="Your Store - Best Consignment in Town">
-              </div>
-              <div class="form-group">
-                <label for="metaDescription">Meta Description</label>
-                <textarea
-                  id="metaDescription"
-                  [(ngModel)]="settings()!.cgStorefront!.metaDescription"
-                  name="metaDescription"
-                  class="form-textarea"
-                  placeholder="Shop curated vintage and antique items..."
-                  rows="3"></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- In-Store Only Settings -->
-        <div class="form-section" *ngIf="settings()?.selectedChannel === 'in_store_only'">
-          <h3>In-Store Only</h3>
-
-          <div class="info-box">
-            <span class="info-icon">ℹ️</span>
-            <div>
-              <strong>No online storefront</strong>
-              <p>You've chosen to manage sales manually. Record transactions in the POS section.</p>
-              <p>Want to sell online? Choose Square or ConsignmentGenie Storefront above.</p>
-            </div>
-          </div>
-
-          <div class="manual-settings">
-            <h4>Manual Transaction Entry</h4>
-
-            <div class="form-group">
-              <label for="defaultPayment">Default payment method for manual sales:</label>
-              <select id="defaultPayment" [(ngModel)]="settings()!.inStoreOnly!.defaultPaymentMethod" class="form-select">
-                <option value="cash">Cash</option>
-                <option value="check">Check</option>
-                <option value="credit_card">Credit Card</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div class="checkbox-group">
-              <label class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="settings()!.inStoreOnly!.requireReceiptNumber" name="requireReceipt">
-                <span class="checkmark"></span>
-                Require receipt number for manual entries
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="settings()!.inStoreOnly!.autoGenerateReceipts" name="autoReceipts">
-                <span class="checkmark"></span>
-                Auto-generate receipt numbers
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="button" class="btn-secondary" (click)="loadSettings()">Cancel</button>
-          <button
-            type="button"
-            class="btn-primary"
-            (click)="saveSettings()"
-            [disabled]="isSaving() || !hasConfigurableSettings()">
-            {{ isSaving() ? 'Saving...' : 'Save Changes' }}
-          </button>
-        </div>
-
-        <!-- Channel-specific info for non-configurable channels -->
-        <div class="channel-info" *ngIf="!hasConfigurableSettings()">
-          <div class="info-box">
-            <span class="info-icon">ℹ️</span>
-            <div>
-              <strong>Settings managed externally</strong>
-              <p *ngIf="settings()?.selectedChannel === 'square'">
-                Square integration settings are configured through the Square dashboard and sync automatically.
-              </p>
-              <p *ngIf="settings()?.selectedChannel === 'in_store_only'">
-                In-store only mode requires manual transaction entry through the POS system.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div class="form-group">
+        <label for="bannerImage">Banner Image URL</label>
+        <input
+          id="bannerImage"
+          type="url"
+          class="form-input"
+          [value]="getBannerImageUrl()"
+          (input)="onBannerImageUrlChange($any($event.target).value)"
+          placeholder="https://example.com/banner.jpg">
       </div>
 
-      <!-- Messages -->
-      <div class="messages" *ngIf="successMessage() || errorMessage()">
-        <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
-        <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="getStripeConnected()"
+            (change)="onStripeConnectedChange($any($event.target).checked)">
+          <span class="checkmark"></span>
+          Stripe Connected
+        </label>
       </div>
-    </div>
-  
+    </section>
+
+    <!-- Payment Settings -->
+    <section class="form-section">
+      <h3>Payment Settings</h3>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="getEnableCreditCards()"
+            (change)="onEnableCreditCardsChange($any($event.target).checked)">
+          <span class="checkmark"></span>
+          Enable Credit Cards
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="getEnableBuyNow()"
+            (change)="onEnableBuyNowChange($any($event.target).checked)">
+          <span class="checkmark"></span>
+          Enable Buy Now
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="getEnableLayaway()"
+            (change)="onEnableLayawayChange($any($event.target).checked)">
+          <span class="checkmark"></span>
+          Enable Layaway
+        </label>
+      </div>
+
+      <div class="form-row" *ngIf="getEnableLayaway()">
+        <div class="form-group">
+          <label for="layawayDeposit">Layaway Deposit Percentage</label>
+          <input
+            id="layawayDeposit"
+            type="number"
+            min="0"
+            max="100"
+            class="form-input"
+            [value]="getLayawayDepositPercentage()"
+            (input)="onLayawayDepositPercentageChange(+$any($event.target).value)">
+        </div>
+
+        <div class="form-group">
+          <label for="layawayTerms">Layaway Terms (Days)</label>
+          <input
+            id="layawayTerms"
+            type="number"
+            min="1"
+            class="form-input"
+            [value]="getLayawayTermsInDays()"
+            (input)="onLayawayTermsInDaysChange(+$any($event.target).value)">
+        </div>
+      </div>
+    </section>
+
+    <!-- Shipping Settings -->
+    <section class="form-section">
+      <h3>Shipping Settings</h3>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="getEnableShipping()"
+            (change)="onEnableShippingChange($any($event.target).checked)">
+          <span class="checkmark"></span>
+          Enable Shipping
+        </label>
+      </div>
+
+      <div class="form-row" *ngIf="getEnableShipping()">
+        <div class="form-group">
+          <label for="flatRate">Flat Shipping Rate ($)</label>
+          <input
+            id="flatRate"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-input"
+            [value]="getFlatRate()"
+            (input)="onFlatRateChange(+$any($event.target).value)">
+        </div>
+
+        <div class="form-group">
+          <label for="freeShippingThreshold">Free Shipping Threshold ($)</label>
+          <input
+            id="freeShippingThreshold"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-input"
+            [value]="getFreeShippingThreshold()"
+            (input)="onFreeShippingThresholdChange(+$any($event.target).value)">
+        </div>
+
+        <div class="form-group">
+          <label for="shipsFromZip">Ships From ZIP Code</label>
+          <input
+            id="shipsFromZip"
+            type="text"
+            class="form-input"
+            [value]="getShipsFromZipCode()"
+            (input)="onShipsFromZipCodeChange($any($event.target).value)"
+            placeholder="12345">
+        </div>
+      </div>
+    </section>
+
+    <!-- Sales Settings -->
+    <section class="form-section">
+      <h3>Sales Settings</h3>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="getEnableBestOffer()"
+            (change)="onEnableBestOfferChange($any($event.target).checked)">
+          <span class="checkmark"></span>
+          Enable Best Offer
+        </label>
+      </div>
+
+      <div class="form-row" *ngIf="getEnableBestOffer()">
+        <div class="form-group">
+          <label for="autoAccept">Auto Accept Percentage (%)</label>
+          <input
+            id="autoAccept"
+            type="number"
+            min="0"
+            max="100"
+            class="form-input"
+            [value]="getAutoAcceptPercentage()"
+            (input)="onAutoAcceptPercentageChange(+$any($event.target).value)">
+          <div class="field-help">Automatically accept offers above this percentage of asking price</div>
+        </div>
+
+        <div class="form-group">
+          <label for="minimumOffer">Minimum Offer Percentage (%)</label>
+          <input
+            id="minimumOffer"
+            type="number"
+            min="0"
+            max="100"
+            class="form-input"
+            [value]="getMinimumOfferPercentage()"
+            (input)="onMinimumOfferPercentageChange(+$any($event.target).value)">
+          <div class="field-help">Lowest offer percentage customers can submit</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="!storefrontSettings()" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading storefront settings...</p>
+  </div>
+</div>

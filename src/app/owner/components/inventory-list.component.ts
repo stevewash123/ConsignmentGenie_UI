@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { OwnerLayoutComponent } from './owner-layout.component';
@@ -11,6 +11,7 @@ import { LoadingService } from '../../shared/services/loading.service';
 import { SquareIntegrationService } from '../../services/square-integration.service';
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
 import { ConsignorService } from '../../services/consignor.service';
+import { OwnerService } from '../../services/owner.service';
 import { Consignor } from '../../models/consignor.model';
 import {
   ItemListDto,
@@ -48,10 +49,12 @@ export interface ImportedItem {
 export class InventoryListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private loadingService = inject(LoadingService);
   private squareService = inject(SquareIntegrationService);
   private confirmationService = inject(ConfirmationDialogService);
   private consignorService = inject(ConsignorService);
+  private ownerService = inject(OwnerService);
   private destroyRef = inject(DestroyRef);
 
   // State signals
@@ -126,6 +129,13 @@ export class InventoryListComponent implements OnInit {
     this.loadCategories();
     this.loadConsignors();
     this.loadItems();
+
+    // Check for manifest query parameters to auto-open bulk import modal
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      if (params['openBulkImport'] === 'true' && params['manifestId']) {
+        this.openBulkImportWithManifest(params['manifestId']);
+      }
+    });
   }
 
   private loadCategories() {
@@ -430,6 +440,45 @@ export class InventoryListComponent implements OnInit {
 
   openBulkImport() {
     this.isBulkImportModalOpen.set(true);
+  }
+
+  openBulkImportWithManifest(manifestId: string) {
+    // Fetch manifest data from API and pre-populate bulk import modal
+    this.ownerService.getDropoffRequestDetail(manifestId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (manifest) => {
+        // Convert manifest items to ImportedItem format for bulk import modal
+        const importedItems: ImportedItem[] = manifest.items?.map((item: any) => ({
+          name: item.name,
+          description: item.notes || '',
+          sku: '', // SKU will be generated during import
+          price: item.suggestedPrice?.toString() || '0',
+          consignorNumber: manifest.consignorNumber || '',
+          category: item.category || '',
+          condition: 'Good', // Default condition
+          receivedDate: manifest.plannedDate || new Date().toISOString().split('T')[0],
+          location: '',
+          notes: item.notes || ''
+        })) || [];
+
+        // TODO: Pass the importedItems to the bulk import modal
+        // For now, just open the modal - the modal can be enhanced to accept pre-populated data
+        this.isBulkImportModalOpen.set(true);
+
+        console.log('Manifest data loaded for bulk import:', {
+          manifestId,
+          consignorNumber: manifest.consignorNumber,
+          itemCount: importedItems.length,
+          items: importedItems
+        });
+      },
+      error: (error) => {
+        console.error('Error loading manifest for bulk import:', error);
+        // Still open the modal even if manifest loading fails
+        this.isBulkImportModalOpen.set(true);
+      }
+    });
   }
 
   closeBulkImportModal() {

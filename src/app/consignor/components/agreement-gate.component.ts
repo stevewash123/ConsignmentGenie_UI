@@ -20,7 +20,7 @@ export class AgreementGateComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  agreementStatus: AgreementStatusDto | null = null;
+  agreementStatus: any = null;
   consignorProfile: ConsignorProfile | null = null;
   selectedFile: File | null = null;
   isUploading = false;
@@ -35,22 +35,21 @@ export class AgreementGateComponent implements OnInit {
 
   private async loadAgreementStatus() {
     try {
-      // First get the consignor profile to get the consignor ID
-      this.consignorProfile = await this.consignorService.getProfile().toPromise();
+      // Get the agreement status using the consignor portal service
+      const agreementStatus = await this.consignorService.getAgreementStatus().toPromise();
 
-      if (this.consignorProfile?.consignorId) {
-        // Then get the agreement status
-        this.agreementStatus = await this.agreementService.getAgreementStatus(this.consignorProfile.consignorId).toPromise();
-
-        // If agreement is approved or not required, redirect to dashboard
-        if (this.agreementStatus?.status === 'approved' || this.agreementStatus?.status === 'not_required') {
-          console.log('Agreement already approved or not required, redirecting to dashboard');
-          this.router.navigate(['/consignor/dashboard']);
-          return;
-        }
-      } else {
-        this.error = 'Unable to load consignor information';
+      // If agreement is not required or already completed, redirect to dashboard
+      if (!agreementStatus?.required || agreementStatus?.status === 'completed') {
+        console.log('Agreement not required or already completed, redirecting to dashboard');
+        this.router.navigate(['/consignor/dashboard']);
+        return;
       }
+
+      // Store the status (even though it's a different type than AgreementStatusDto)
+      this.agreementStatus = agreementStatus;
+
+      // Also get consignor profile for display purposes
+      this.consignorProfile = await this.consignorService.getProfile().toPromise();
     } catch (err: any) {
       this.error = 'Failed to load agreement status';
       console.error('Agreement status error:', err);

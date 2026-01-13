@@ -113,7 +113,7 @@
                 <tbody>
                   <tr *ngFor="let invitation of pendingInvitations()">
                     <td class="email-cell">{{ invitation.email }}</td>
-                    <td class="sent-cell">{{ getRelativeTime(invitation.sentAt) }}</td>
+                    <td class="sent-cell">{{ getRelativeTime(invitation.createdAt) }}</td>
                     <td class="actions-cell">
                       <div class="action-buttons">
                         <button class="btn-resend" (click)="resendInvitation(invitation.id)">

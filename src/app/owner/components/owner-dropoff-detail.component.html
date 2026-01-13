@@ -1,0 +1,200 @@
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="flex items-center gap-4 mb-6">
+    <button (click)="back()" class="btn btn-ghost btn-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to Manifests
+    </button>
+    <h1 class="text-3xl font-bold text-gray-900">Drop-off Manifest Detail</h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="alert alert-error mb-6">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Request Detail -->
+  <div *ngIf="!isLoading && !error && request" class="space-y-6">
+
+    <!-- Status and Overview -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">
+            {{ request.consignor.firstName }} {{ request.consignor.lastName }}
+          </h2>
+          <div [class]="getStatusBadgeClass(request.status)" class="mb-3">
+            {{ request.status | titlecase }}
+          </div>
+        </div>
+        <div class="text-right text-sm text-gray-600">
+          <div><span class="font-medium">Submitted:</span> {{ formatDateTime(request.createdAt) }}</div>
+          <div *ngIf="request.receivedAt">
+            <span class="font-medium">Received:</span> {{ formatDateTime(request.receivedAt) }}
+          </div>
+          <div *ngIf="request.importedAt">
+            <span class="font-medium">Imported:</span> {{ formatDateTime(request.importedAt) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div class="bg-gray-50 p-3 rounded">
+          <div class="font-medium text-gray-700">Total Items</div>
+          <div class="text-lg font-semibold text-gray-900">{{ request.itemCount }}</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded">
+          <div class="font-medium text-gray-700">Suggested Total</div>
+          <div class="text-lg font-semibold text-gray-900">{{ request.suggestedTotal | currency }}</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded" *ngIf="request.plannedDate">
+          <div class="font-medium text-gray-700">Planned Drop-off</div>
+          <div class="text-lg font-semibold text-gray-900">
+            {{ formatDate(request.plannedDate) }}
+            <div *ngIf="request.plannedTimeSlot" class="text-sm text-gray-600">
+              {{ request.plannedTimeSlot }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consignor Information -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Consignor Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <span class="font-medium text-gray-700">Name:</span>
+          <span class="ml-2">{{ request.consignor.firstName }} {{ request.consignor.lastName }}</span>
+        </div>
+        <div *ngIf="request.consignor.email">
+          <span class="font-medium text-gray-700">Email:</span>
+          <span class="ml-2">{{ request.consignor.email }}</span>
+        </div>
+        <div *ngIf="request.consignor.phone">
+          <span class="font-medium text-gray-700">Phone:</span>
+          <span class="ml-2">{{ request.consignor.phone }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shop Information -->
+    <div class="bg-white rounded-lg shadow-sm border p-6" *ngIf="request.shop">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Shop Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <span class="font-medium text-gray-700">Shop Name:</span>
+          <span class="ml-2">{{ request.shop.name }}</span>
+        </div>
+        <div *ngIf="request.shop.address">
+          <span class="font-medium text-gray-700">Address:</span>
+          <span class="ml-2">{{ request.shop.address }}</span>
+        </div>
+        <div *ngIf="request.shop.phone">
+          <span class="font-medium text-gray-700">Phone:</span>
+          <span class="ml-2">{{ request.shop.phone }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Items ({{ request.items.length }})</h3>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Category</th>
+              <th>Brand</th>
+              <th>Suggested Price</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of request.items">
+              <td class="font-medium">{{ item.name }}</td>
+              <td>{{ item.category || '-' }}</td>
+              <td>{{ item.brand || '-' }}</td>
+              <td>{{ item.suggestedPrice | currency }}</td>
+              <td class="max-w-xs truncate" [title]="item.notes">{{ item.notes || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="bg-white rounded-lg shadow-sm border p-6" *ngIf="request.message || request.ownerNotes">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Messages</h3>
+
+      <div *ngIf="request.message" class="mb-4">
+        <h4 class="font-medium text-gray-700 mb-2">Consignor Message:</h4>
+        <div class="bg-blue-50 p-3 rounded text-sm">{{ request.message }}</div>
+      </div>
+
+      <div *ngIf="request.ownerNotes" class="mb-4">
+        <h4 class="font-medium text-gray-700 mb-2">Owner Notes:</h4>
+        <div class="bg-gray-50 p-3 rounded text-sm whitespace-pre-wrap">{{ request.ownerNotes }}</div>
+      </div>
+    </div>
+
+    <!-- Owner Actions -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Owner Actions</h3>
+
+      <!-- Owner Notes -->
+      <div class="mb-4">
+        <label for="ownerNotes" class="block text-sm font-medium text-gray-700 mb-2">
+          Owner Notes
+        </label>
+        <textarea
+          id="ownerNotes"
+          [(ngModel)]="ownerNotes"
+          rows="3"
+          class="textarea textarea-bordered w-full"
+          placeholder="Add notes about this dropoff request..."
+          [disabled]="isUpdating"></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3">
+        <button
+          *ngIf="canMarkAsReceived()"
+          (click)="markAsReceived()"
+          [disabled]="isUpdating"
+          class="btn btn-primary">
+          <span *ngIf="isUpdating" class="loading loading-spinner loading-sm"></span>
+          Mark as Received
+        </button>
+
+        <button
+          *ngIf="canImportToInventory()"
+          (click)="importToInventory()"
+          [disabled]="isUpdating"
+          class="btn btn-success">
+          <span *ngIf="isUpdating" class="loading loading-spinner loading-sm"></span>
+          Import to Inventory
+        </button>
+
+        <div *ngIf="!canMarkAsReceived() && !canImportToInventory()" class="text-sm text-gray-500 flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          No actions available for {{ request.status }} requests
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -11,6 +11,7 @@
         <a routerLink="/owner/settings/consignors/onboarding">Change onboarding settings</a> to enable template editing.
       </div>
     </div>
+
   </div>
 
   <!-- Agreement Settings -->
@@ -33,6 +34,31 @@
           <span class="permission-description">Block account activation until agreement is on file</span>
         </div>
       </label>
+    </div>
+
+    <!-- Error when require agreement is checked but no agreement uploaded -->
+    <div class="error-panel" *ngIf="showAgreementRequiredError()">
+      <div class="error-icon">❌</div>
+      <div class="error-content">
+        <strong>Agreement Required</strong><br>
+        You have enabled "Require signed agreement" but no agreement template has been uploaded.
+
+        <div class="error-actions">
+          <label for="error-upload-input" class="btn-primary btn-small">
+            <span>📤</span>
+            Upload Agreement Template
+          </label>
+          <input
+            id="error-upload-input"
+            type="file"
+            accept="application/pdf,.pdf,.txt,.rtf,.html,.htm,text/plain,text/rtf,text/html"
+            (change)="onFileSelected($event)"
+            [disabled]="isUploading()"
+            style="display: none;">
+
+          <span class="error-help-text">or uncheck the requirement above</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -105,7 +131,28 @@
     </div>
 
     <div class="preview-content" *ngIf="!isEditing()">
-      <pre class="template-preview-text">{{ getDisplayedContent() }}</pre>
+      <!-- Show PDF download prompt for uploaded agreements -->
+      <div *ngIf="viewMode() === 'agreement' && settings()?.agreementTemplateId; else textContent" class="pdf-download-prompt">
+        <div class="pdf-info">
+          <div class="pdf-icon">📄</div>
+          <h4>PDF Agreement Template</h4>
+          <p>Your custom agreement template is saved as a PDF file.</p>
+          <p><strong>Template ID:</strong> {{ settings()?.agreementTemplateId }}</p>
+        </div>
+
+        <div class="pdf-actions">
+          <button type="button" class="btn-primary" (click)="downloadCurrentView()">
+            <span>📥</span>
+            Download & View Agreement PDF
+          </button>
+          <p class="help-text">The PDF will download to your computer where you can view and print it.</p>
+        </div>
+      </div>
+
+      <!-- Show text content for sample template or text-based agreements -->
+      <ng-template #textContent>
+        <pre class="template-preview-text">{{ getDisplayedContent() }}</pre>
+      </ng-template>
     </div>
 
     <!-- Template Editor -->

@@ -5,7 +5,7 @@ export type NotificationType =
   | 'item_sold' | 'payout_processed' | 'item_price_changed' | 'item_returned'
   | 'item_expired' | 'statement_ready' | 'welcome'
   // Owner types
-  | 'new_provider_request' | 'provider_approved' | 'daily_sales_summary'
+  | 'new_provider_request' | 'provider_approved' | 'dropoff_manifest' | 'daily_sales_summary'
   | 'payout_due_reminder' | 'low_inventory_alert' | 'subscription_reminder'
   | 'subscription_failed' | 'square_sync_error' | 'qb_sync_error' | 'system_announcement'
   // Admin types

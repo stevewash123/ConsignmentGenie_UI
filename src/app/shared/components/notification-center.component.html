@@ -81,6 +81,16 @@
                 Payout: {{ notification.metadata['payoutAmount'] | currency }}
               </span>
             </div>
+
+            <!-- Action Button for Dropoff Manifests -->
+            <div *ngIf="notification.type === 'dropoff_manifest'" class="notification-action-button">
+              <button
+                class="btn btn-primary btn-sm"
+                (click)="openBulkImportWithManifest(notification, $event)"
+                title="Import items from this manifest">
+                📦 Import Items
+              </button>
+            </div>
           </div>
 
           <!-- Actions -->

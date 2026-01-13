@@ -25,8 +25,6 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   currentUser = signal<UserData | null>(null);
   showUserMenu = signal(false);
-  pendingRequestsCount = signal(0);
-  pendingReturnRequestsCount = signal(0);
 
   constructor(
     private router: Router,
@@ -36,8 +34,6 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadUserData();
-    this.loadPendingRequestsCount();
-    this.loadPendingReturnRequestsCount();
   }
 
   ngOnDestroy() {
@@ -64,32 +60,6 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
 
   toggleUserMenu() {
     this.showUserMenu.update(show => !show);
-  }
-
-  loadPendingRequestsCount() {
-    this.mockService.getPendingRequestsCount()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (count) => {
-          this.pendingRequestsCount.set(count);
-        },
-        error: (err) => {
-          console.error('Failed to load pending requests count:', err);
-        }
-      });
-  }
-
-  loadPendingReturnRequestsCount() {
-    this.mockService.getPendingReturnRequestsCount()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (count) => {
-          this.pendingReturnRequestsCount.set(count);
-        },
-        error: (err) => {
-          console.error('Failed to load pending return requests count:', err);
-        }
-      });
   }
 
   logout() {

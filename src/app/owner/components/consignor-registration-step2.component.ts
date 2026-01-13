@@ -13,7 +13,8 @@ interface RegistrationData {
     passwordConfirm: string;
   };
   invitationDetails: {
-    invitedName?: string;
+    invitedFirstName?: string;
+    invitedLastName?: string;
     invitedEmail?: string;
     shopName?: string;
   };
@@ -74,11 +75,12 @@ export class ConsignorRegistrationStep2Component implements OnInit {
       this.registrationData.set(parsedData);
       this.shopName.set(parsedData.invitationDetails.shopName || '');
 
-      // Pre-fill name if available from invitation
-      if (parsedData.invitationDetails.invitedName) {
-        const nameParts = parsedData.invitationDetails.invitedName.trim().split(' ');
-        this.details.firstName = nameParts[0] || '';
-        this.details.lastName = nameParts.slice(1).join(' ') || '';
+      // Pre-fill names if available from invitation
+      if (parsedData.invitationDetails.invitedFirstName) {
+        this.details.firstName = parsedData.invitationDetails.invitedFirstName;
+      }
+      if (parsedData.invitationDetails.invitedLastName) {
+        this.details.lastName = parsedData.invitationDetails.invitedLastName;
       }
     } catch (error) {
       console.error('Error parsing registration data:', error);

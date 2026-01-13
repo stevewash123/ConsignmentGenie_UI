@@ -100,6 +100,41 @@ export interface ConsignorPermissions {
   lastUpdated: Date;
 }
 
+export interface PaymentSettings {
+  enableCreditCards: boolean;
+  enableBuyNow: boolean;
+  enableLayaway: boolean;
+  layawayDepositPercentage: number;
+  layawayTermsInDays: number;
+}
+
+export interface ShippingSettings {
+  enableShipping: boolean;
+  flatRate: number;
+  freeShippingThreshold: number;
+  shipsFromZipCode: string;
+}
+
+export interface SalesSettings {
+  enableBestOffer: boolean;
+  autoAcceptPercentage: number;
+  minimumOfferPercentage: number;
+}
+
+export interface CgStorefrontSettings {
+  storeSlug: string;
+  bannerImageUrl: string;
+  stripeConnected: boolean;
+  paymentSettings: PaymentSettings;
+  shippingSettings: ShippingSettings;
+  salesSettings: SalesSettings;
+}
+
+export interface StorefrontSettings {
+  selectedChannel: string;
+  cgStorefront: CgStorefrontSettings;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
   private settings$ = new BehaviorSubject<OrganizationSettings | null>(null);
@@ -137,6 +172,12 @@ export class SettingsService {
   private notificationSaveTimeout: ReturnType<typeof setTimeout> | null = null;
   private isNotificationSaving = false;
 
+  // Storefront settings state
+  private storefrontSettings$ = new BehaviorSubject<StorefrontSettings | null>(null);
+  private pendingStorefrontChanges: Record<string, any> = {};
+  private storefrontSaveTimeout: ReturnType<typeof setTimeout> | null = null;
+  private isStorefrontSaving = false;
+
   readonly DEBOUNCE_MS = 800;
 
   // Observable for components to subscribe to
@@ -146,6 +187,7 @@ export class SettingsService {
   readonly consignorPermissions = this.consignorPermissions$.asObservable();
   readonly consignorOnboarding = this.consignorOnboarding$.asObservable();
   readonly notificationSettings = this.notificationSettings$.asObservable();
+  readonly storefrontSettings = this.storefrontSettings$.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -485,9 +527,12 @@ export class SettingsService {
     const current = this.businessSettings$.value;
     if (!current) return;
 
+    // Convert flat keys to nested object paths for optimistic updates
+    const nestedPath = this.getBusinessSettingPath(key);
+
     // Apply optimistic update to the nested structure
     const updated = JSON.parse(JSON.stringify(current));
-    this.setNestedProperty(updated, key, value);
+    this.setNestedProperty(updated, nestedPath, value);
     this.businessSettings$.next(updated);
 
     // Queue flat key-value for PATCH API
@@ -495,27 +540,7 @@ export class SettingsService {
     this.scheduleBusinessSave();
   }
 
-  /**
-   * Update multiple business settings at once
-   */
-  updateBusinessSettings(changes: Record<string, any>): void {
-    const current = this.businessSettings$.value;
-    if (!current) return;
-
-    // Apply optimistic updates
-    const updated = JSON.parse(JSON.stringify(current));
-    Object.entries(changes).forEach(([key, value]) => {
-      this.setNestedProperty(updated, key, value);
-    });
-    this.businessSettings$.next(updated);
-
-    // Queue changes for save
-    Object.assign(this.pendingBusinessChanges, changes);
-    this.scheduleBusinessSave();
-  }
-
-  private setNestedProperty(obj: any, path: string, value: any): void {
-    // Convert flat keys to nested object paths
+  private getBusinessSettingPath(key: string): string {
     const keyMappings: Record<string, string> = {
       // Commission settings
       'defaultSplit': 'commission.defaultSplit',
@@ -544,18 +569,28 @@ export class SettingsService {
       'autoApproveItems': 'items.autoApproveItems'
     };
 
-    const nestedPath = keyMappings[path] || path;
-    const keys = nestedPath.split('.');
-
-    let current = obj;
-    for (let i = 0; i < keys.length - 1; i++) {
-      if (!(keys[i] in current) || typeof current[keys[i]] !== 'object') {
-        current[keys[i]] = {};
-      }
-      current = current[keys[i]];
-    }
-    current[keys[keys.length - 1]] = value;
+    return keyMappings[key] || key;
   }
+
+  /**
+   * Update multiple business settings at once
+   */
+  updateBusinessSettings(changes: Record<string, any>): void {
+    const current = this.businessSettings$.value;
+    if (!current) return;
+
+    // Apply optimistic updates
+    const updated = JSON.parse(JSON.stringify(current));
+    Object.entries(changes).forEach(([key, value]) => {
+      this.setNestedProperty(updated, key, value);
+    });
+    this.businessSettings$.next(updated);
+
+    // Queue changes for save
+    Object.assign(this.pendingBusinessChanges, changes);
+    this.scheduleBusinessSave();
+  }
+
 
   private scheduleBusinessSave(): void {
     if (this.businessSaveTimeout) {
@@ -1044,6 +1079,145 @@ export class SettingsService {
    */
   getCurrentNotificationSettings(): NotificationSettings | null {
     return this.notificationSettings$.value;
+  }
+
+  // ============================================================================
+  // STOREFRONT SETTINGS METHODS
+  // ============================================================================
+
+  async loadStorefrontSettings(): Promise<void> {
+    try {
+      const settings = await firstValueFrom(
+        this.http.get<StorefrontSettings>(`${environment.apiUrl}/api/organizations/storefront-settings`)
+      );
+      this.storefrontSettings$.next(settings);
+    } catch (error) {
+      console.error('Failed to load storefront settings:', error);
+      // Set default settings on error
+      this.storefrontSettings$.next({
+        selectedChannel: 'cg-storefront',
+        cgStorefront: {
+          storeSlug: '',
+          bannerImageUrl: '',
+          stripeConnected: false,
+          paymentSettings: {
+            enableCreditCards: true,
+            enableBuyNow: true,
+            enableLayaway: false,
+            layawayDepositPercentage: 25,
+            layawayTermsInDays: 30
+          },
+          shippingSettings: {
+            enableShipping: false,
+            flatRate: 0,
+            freeShippingThreshold: 0,
+            shipsFromZipCode: ''
+          },
+          salesSettings: {
+            enableBestOffer: false,
+            autoAcceptPercentage: 0,
+            minimumOfferPercentage: 0
+          }
+        }
+      });
+    }
+  }
+
+  updateStorefrontSetting(key: string, value: any): void {
+    const current = this.storefrontSettings$.value;
+    if (!current) return;
+
+    // Optimistic update
+    const updated = JSON.parse(JSON.stringify(current));
+    this.setNestedProperty(updated, key, value);
+    this.storefrontSettings$.next(updated);
+
+    // Queue for save
+    this.pendingStorefrontChanges[key] = value;
+    this.scheduleStorefrontSave();
+  }
+
+  private scheduleStorefrontSave(): void {
+    if (this.storefrontSaveTimeout) {
+      clearTimeout(this.storefrontSaveTimeout);
+    }
+
+    this.storefrontSaveTimeout = setTimeout(() => {
+      this.saveStorefrontSettings();
+    }, this.DEBOUNCE_MS);
+  }
+
+  private async saveStorefrontSettings(): Promise<void> {
+    if (this.isStorefrontSaving || Object.keys(this.pendingStorefrontChanges).length === 0) {
+      return;
+    }
+
+    this.isStorefrontSaving = true;
+    const changesToSave = { ...this.pendingStorefrontChanges };
+    this.pendingStorefrontChanges = {};
+
+    try {
+      const updatedSettings = await firstValueFrom(
+        this.http.patch<StorefrontSettings>(`${environment.apiUrl}/api/organizations/storefront-settings`, changesToSave)
+      );
+
+      // Update with server response
+      this.storefrontSettings$.next(updatedSettings);
+      console.log('Storefront settings saved successfully');
+    } catch (error) {
+      console.error('Failed to save storefront settings:', error);
+      // Revert optimistic updates
+      this.revertStorefrontChanges(changesToSave);
+
+      // Retry once
+      if (Object.keys(changesToSave).length > 0) {
+        Object.assign(this.pendingStorefrontChanges, changesToSave);
+        this.scheduleStorefrontSave();
+      }
+    } finally {
+      this.isStorefrontSaving = false;
+    }
+  }
+
+  private revertStorefrontChanges(changes: Record<string, any>): void {
+    // Re-fetch from server to get correct state
+    this.loadStorefrontSettings();
+  }
+
+  /**
+   * Force immediate storefront settings save
+   */
+  async flushStorefrontSettings(): Promise<void> {
+    if (this.storefrontSaveTimeout) {
+      clearTimeout(this.storefrontSaveTimeout);
+      this.storefrontSaveTimeout = null;
+    }
+    await this.saveStorefrontSettings();
+  }
+
+  /**
+   * Get current storefront settings synchronously
+   */
+  getCurrentStorefrontSettings(): StorefrontSettings | null {
+    return this.storefrontSettings$.value;
+  }
+
+  /**
+   * Utility method to set nested properties (used by all complex settings)
+   */
+  private setNestedProperty(obj: any, path: string, value: any): void {
+    const keys = path.split('.');
+    let current = obj;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!(key in current)) {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+
+    current[keys[keys.length - 1]] = value;
   }
 }
 

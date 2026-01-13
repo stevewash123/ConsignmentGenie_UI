@@ -27,9 +27,14 @@
 
     <!-- Agreement Download (Always available) -->
     <div class="download-section">
-      <button type="button" class="btn btn-secondary btn-small" (click)="downloadTemplate()">
-        <span class="btn-icon">📄</span>
-        Download Agreement PDF
+      <button
+        type="button"
+        class="btn btn-secondary btn-small"
+        (click)="downloadTemplate()"
+        [disabled]="isDownloading()">
+        <span *ngIf="!isDownloading()" class="btn-icon">📄</span>
+        <span *ngIf="isDownloading()" class="loading-spinner-small"></span>
+        {{ isDownloading() ? 'Generating PDF...' : 'Download Agreement PDF' }}
       </button>
     </div>
 
@@ -41,12 +46,15 @@
       </p>
 
       <div class="upload-area">
-        <div class="file-upload-container" [class.has-file]="selectedFile()">
+        <div class="file-upload-container"
+             [class.has-file]="selectedFile()"
+             [class.drag-over]="isDragOver()"
+             (dragover)="onDragOver($event)"
+             (dragleave)="onDragLeave($event)"
+             (drop)="onDrop($event)">
           <div class="file-upload-content" *ngIf="!selectedFile()">
             <div class="upload-icon">📄</div>
             <p>Drag and drop your signed agreement here</p>
-            <p class="upload-subtext">or click to browse</p>
-            <p class="file-requirements">PDF, PNG, JPG up to 10MB</p>
           </div>
 
           <div class="selected-file-info" *ngIf="selectedFile()">
@@ -70,16 +78,6 @@
           <label for="agreementFile" class="file-upload-overlay" *ngIf="!selectedFile()"></label>
         </div>
 
-        <!-- Optional notes -->
-        <div class="form-group" *ngIf="selectedFile()">
-          <label for="uploadNotes">Notes (optional)</label>
-          <textarea
-            id="uploadNotes"
-            [(ngModel)]="uploadNotes"
-            class="form-textarea"
-            placeholder="Any additional notes about this agreement"
-            rows="2"></textarea>
-        </div>
 
         <!-- Upload progress -->
         <div class="upload-progress" *ngIf="uploadProgress() > 0">
@@ -90,12 +88,6 @@
         </div>
       </div>
 
-      <div class="alternative-option">
-        <div class="divider">
-          <span>or</span>
-        </div>
-        <p>Signing in person? Let the shop know and they can mark your agreement as received.</p>
-      </div>
     </div>
 
     <!-- Terms Acceptance (Always required) -->
@@ -112,29 +104,18 @@
 
     <!-- Action Buttons -->
     <div class="agreement-actions">
-      <!-- Skip button only for upload mode -->
+      <!-- Upload button (only for upload mode) -->
       <button
         *ngIf="agreementStatus()?.type === 'upload'"
         type="button"
-        class="btn btn-secondary"
-        (click)="skipForNow()"
-        [disabled]="isProcessing()">
-        Skip for Now
+        class="btn btn-secondary btn-small upload-button"
+        (click)="uploadAgreement()"
+        [disabled]="!selectedFile() || !isTermsAccepted() || isProcessing()">
+        <span *ngIf="!(isProcessing() && uploadProgress() > 0)" class="btn-icon">📤</span>
+        <span *ngIf="isProcessing() && uploadProgress() > 0" class="loading-spinner-small"></span>
+        {{ isProcessing() && uploadProgress() > 0 ? 'Uploading...' : 'Upload Agreement' }}
       </button>
 
-      <!-- Continue/Upload button -->
-      <button
-        type="button"
-        class="btn btn-primary"
-        (click)="submitAgreement()"
-        [disabled]="!isTermsAccepted() || (agreementStatus()?.type === 'upload' && !selectedFile()) || isProcessing()">
-        <ng-container *ngIf="agreementStatus()?.type === 'acknowledge'">
-          {{ isProcessing() ? 'Processing...' : 'Continue' }}
-        </ng-container>
-        <ng-container *ngIf="agreementStatus()?.type === 'upload'">
-          {{ isProcessing() ? 'Uploading...' : 'Upload & Continue' }}
-        </ng-container>
-      </button>
     </div>
 
     <!-- Success Message -->

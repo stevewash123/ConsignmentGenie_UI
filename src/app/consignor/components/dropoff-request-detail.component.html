@@ -1,0 +1,194 @@
+<div class="dropoff-request-detail">
+  <div class="content">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-actions">
+        <div class="header-left">
+          <button (click)="back()" class="back-btn">
+            ← Back to Manifests
+          </button>
+          <h2>Item Manifest Details</h2>
+        </div>
+
+        <div *ngIf="request" class="header-right">
+          <button *ngIf="canCancel()"
+                  (click)="cancelRequest()"
+                  [disabled]="isCanceling"
+                  class="cancel-request-btn">
+            <span *ngIf="isCanceling" class="loading">⏳</span>
+            {{ isCanceling ? 'Canceling...' : 'Cancel Request' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading">
+      <p>Loading manifest details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="error">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Request Details -->
+    <div *ngIf="request && !isLoading" class="detail-sections">
+      <!-- Status and Overview -->
+      <div class="detail-section">
+        <div class="overview-header">
+          <div class="overview-left">
+            <h3>Request Overview</h3>
+            <div [class]="getStatusBadgeClass(request.status)">
+              {{ request.status | titlecase }}
+            </div>
+          </div>
+          <div class="overview-right">
+            <div class="total-info">
+              <div class="total-label">Total Value</div>
+              <div class="total-amount">{{ request.suggestedTotal | currency }}</div>
+              <div class="total-items">{{ request.itemCount }} {{ request.itemCount === 1 ? 'item' : 'items' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="overview-details">
+          <div class="detail-item">
+            <div class="detail-label">Submitted</div>
+            <div class="detail-value">{{ formatDateTime(request.createdAt.toString()) }}</div>
+          </div>
+          <div *ngIf="request.importedAt" class="detail-item">
+            <div class="detail-label">Imported to Inventory</div>
+            <div class="detail-value success">{{ formatDateTime(request.importedAt.toString()) }}</div>
+          </div>
+          <div *ngIf="request.plannedDate" class="detail-item">
+            <div class="detail-label">Planned Drop-off</div>
+            <div class="detail-value">
+              {{ formatDate(request.plannedDate) }}
+              <span *ngIf="request.plannedTimeSlot" class="time-slot">
+                ({{ request.plannedTimeSlot }})
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="request.message" class="message-section">
+          <div class="message-label">Your Message</div>
+          <div class="message-content">
+            {{ request.message }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Shop Information -->
+      <div class="detail-section">
+        <h3>Shop Details</h3>
+        <div class="shop-details">
+          <div class="detail-item">
+            <div class="detail-label">Shop Name</div>
+            <div class="detail-value">{{ request.shop.name }}</div>
+          </div>
+          <div *ngIf="request.shop.address" class="detail-item">
+            <div class="detail-label">Address</div>
+            <div class="detail-value">{{ request.shop.address }}</div>
+          </div>
+          <div *ngIf="request.shop.phone" class="detail-item">
+            <div class="detail-label">Phone</div>
+            <div class="detail-value">{{ request.shop.phone }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items List -->
+      <div class="detail-section">
+        <h3>Items in This Manifest</h3>
+
+        <div class="items-table-container">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Brand</th>
+                <th class="text-right">Suggested Price</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of request.items">
+                <td class="item-name">{{ item.name }}</td>
+                <td class="item-category">
+                  <span *ngIf="item.category; else noCategoryTemplate">{{ item.category }}</span>
+                  <ng-template #noCategoryTemplate>
+                    <span class="empty-value">-</span>
+                  </ng-template>
+                </td>
+                <td class="item-brand">
+                  <span *ngIf="item.brand; else noBrandTemplate">{{ item.brand }}</span>
+                  <ng-template #noBrandTemplate>
+                    <span class="empty-value">-</span>
+                  </ng-template>
+                </td>
+                <td class="item-price">{{ item.suggestedPrice | currency }}</td>
+                <td class="item-notes">
+                  <span *ngIf="item.notes; else noNotesTemplate">{{ item.notes }}</span>
+                  <ng-template #noNotesTemplate>
+                    <span class="empty-value">-</span>
+                  </ng-template>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="3">Total</td>
+                <td class="total-price">{{ request.suggestedTotal | currency }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Status-specific Information -->
+      <div *ngIf="request.status === 'pending'" class="status-info pending">
+        <div class="status-content">
+          <div class="status-icon">ℹ️</div>
+          <div class="status-text">
+            <h4>Pending Review</h4>
+            <p>Your manifest is pending review by the shop owner. They will contact you to arrange the drop-off.</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="request.status === 'received'" class="status-info received">
+        <div class="status-content">
+          <div class="status-icon">📦</div>
+          <div class="status-text">
+            <h4>Items Received</h4>
+            <p>Your items have been received by the shop and are being processed for inventory.</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="request.status === 'imported'" class="status-info imported">
+        <div class="status-content">
+          <div class="status-icon">✅</div>
+          <div class="status-text">
+            <h4>Successfully Imported</h4>
+            <p>Your items have been successfully imported into the shop's inventory and are now available for sale.</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="request.status === 'cancelled'" class="status-info cancelled">
+        <div class="status-content">
+          <div class="status-icon">❌</div>
+          <div class="status-text">
+            <h4>Request Cancelled</h4>
+            <p>This drop-off request has been cancelled.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

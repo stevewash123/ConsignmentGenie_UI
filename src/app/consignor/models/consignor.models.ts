@@ -408,3 +408,48 @@ export interface ItemRequestQuery {
   pageSize?: number;
   search?: string;
 }
+
+// Dropoff Request Models
+export interface DropoffItem {
+  name: string;
+  category: string;
+  brand?: string;
+  suggestedPrice: number;
+  notes?: string;
+}
+
+export interface CreateDropoffRequest {
+  items: DropoffItem[];
+  plannedDate?: string; // DateOnly as ISO string (YYYY-MM-DD)
+  plannedTimeSlot?: string;
+  message?: string;
+}
+
+export interface DropoffRequestList {
+  id: string;
+  itemCount: number;
+  suggestedTotal: number;
+  plannedDate?: string; // DateOnly as ISO string
+  plannedTimeSlot?: string;
+  status: string;
+  createdAt: Date;
+  importedAt?: Date;
+}
+
+export interface DropoffRequestDetail extends DropoffRequestList {
+  items: DropoffItem[];
+  message?: string;
+  shop: ShopSummary;
+}
+
+export interface ShopSummary {
+  name: string;
+  address?: string;
+  phone?: string;
+}
+
+export interface DropoffRequestQuery {
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}

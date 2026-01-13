@@ -79,6 +79,14 @@ export const ownerRoutes: Routes = [
     loadComponent: () => import('./components/return-requests-list.component').then(m => m.ReturnRequestsListComponent)
   },
   {
+    path: 'dropoff-requests',
+    loadComponent: () => import('./components/owner-dropoff-requests.component').then(m => m.OwnerDropoffRequestsComponent)
+  },
+  {
+    path: 'dropoff-requests/:id',
+    loadComponent: () => import('./components/owner-dropoff-detail.component').then(m => m.OwnerDropoffDetailComponent)
+  },
+  {
     path: 'notifications',
     loadComponent: () => import('./pages/owner-notifications.component').then(m => m.OwnerNotificationsComponent)
   },

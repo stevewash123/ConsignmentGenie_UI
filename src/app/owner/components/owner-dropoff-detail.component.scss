@@ -1,0 +1,22 @@
+// Styling for owner dropoff detail component
+.transition-shadow {
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.badge {
+  &.badge-warning {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+  }
+  &.badge-info {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+  &.badge-success {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+  &.badge-error {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+  &.badge-neutral {
+    @apply bg-gray-100 text-gray-800 border-gray-200;
+  }
+}

@@ -10,7 +10,6 @@ export interface Consignor {
   preferredPaymentMethod?: string;
   paymentDetails?: string;
   notes?: string;
-  isActive: boolean;
   status: ConsignorStatus;
   organizationId: number;
   consignorNumber?: string;
@@ -32,8 +31,7 @@ export interface CreateConsignorRequest {
 }
 
 export interface UpdateConsignorRequest extends CreateConsignorRequest {
-  isActive: boolean;
-  status?: ConsignorStatus;
+  status: ConsignorStatus;
 }
 
 export interface ConsignorDetailDto {
@@ -59,7 +57,6 @@ export interface ConsignorDetailDto {
   paymentDetails?: string;
   notes?: string;
   status: string;
-  isActive: boolean;
   createdAt: string;
   updatedAt: string;
   approvalDate?: string;

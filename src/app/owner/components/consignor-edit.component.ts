@@ -32,7 +32,6 @@ export class ConsignorEditComponent implements OnInit {
     preferredPaymentMethod: '',
     paymentDetails: '',
     notes: '',
-    isActive: true,
     status: 'active' as ConsignorStatus
   };
 
@@ -90,7 +89,6 @@ export class ConsignorEditComponent implements OnInit {
       preferredPaymentMethod: consignor.preferredPaymentMethod || '',
       paymentDetails: consignor.paymentDetails || '',
       notes: consignor.notes || '',
-      isActive: consignor.isActive,
       status: consignor.status
     };
 
@@ -114,7 +112,6 @@ export class ConsignorEditComponent implements OnInit {
       preferredPaymentMethod: this.editData.preferredPaymentMethod || undefined,
       paymentDetails: this.editData.paymentDetails || undefined,
       notes: this.editData.notes || undefined,
-      isActive: this.editData.isActive,
       status: this.editData.status
     };
 

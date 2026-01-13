@@ -1,0 +1,338 @@
+<div class="create-dropoff-request">
+  <div class="content">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-actions">
+        <div class="header-left">
+          <button (click)="cancel()" class="back-btn">
+            ← Back
+          </button>
+          <h2>Create Item Manifest</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form #dropoffForm="ngForm" (ngSubmit)="onSubmit(dropoffForm)" class="form-container">
+      <!-- Items Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3>Items to Submit</h3>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="error-message">
+          <span>{{ error }}</span>
+        </div>
+
+        <!-- Dynamic Form - Add New Item or Edit Existing -->
+        <div class="item-form-area">
+          <!-- Add New Item Mode -->
+          <div *ngIf="editingIndex === null" class="add-item-form">
+            <h4>Add New Item</h4>
+            <form #addItemForm="ngForm" class="form-grid">
+              <div class="form-field">
+                <label class="field-label">Item Name *</label>
+                <input type="text"
+                       class="form-input"
+                       [(ngModel)]="newItem.name"
+                       name="newItemName"
+                       #newItemName="ngModel"
+                       #itemNameInput
+                       required
+                       (keypress)="onAddItemKeyPress($event)"
+                       placeholder="e.g., Blue Designer Dress">
+                <div *ngIf="newItemName.invalid && newItemName.touched" class="field-error">
+                  Item name is required
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Category *</label>
+                <div class="searchable-dropdown">
+                  <input type="text"
+                         class="form-input"
+                         [(ngModel)]="newItem.category"
+                         name="newItemCategory"
+                         #newItemCategory="ngModel"
+                         required
+                         (input)="onCategoryInput(newItem.category, true)"
+                         (keypress)="onAddItemKeyPress($event)"
+                         placeholder="Type to search or select category..."
+                         autocomplete="off">
+                  <div *ngIf="newItemCategory.invalid && newItemCategory.touched" class="field-error">
+                    Category is required
+                  </div>
+                  <div *ngIf="filteredCategories.length > 0 && newItem.category" class="dropdown-options">
+                    <div *ngFor="let category of filteredCategories"
+                         class="dropdown-option"
+                         (click)="selectCategory(category, true)">
+                      {{ category }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Brand</label>
+                <input type="text"
+                       class="form-input"
+                       [(ngModel)]="newItem.brand"
+                       name="newItemBrand"
+                       (keypress)="onAddItemKeyPress($event)"
+                       placeholder="e.g., Designer Brand">
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Suggested Price *</label>
+                <div class="price-input-wrapper">
+                  <span class="price-symbol">$</span>
+                  <input type="number"
+                         class="form-input price-input"
+                         [(ngModel)]="newItem.suggestedPrice"
+                         name="newItemPrice"
+                         #newItemPrice="ngModel"
+                         required
+                         min="0.01"
+                         step="0.01"
+                         (keypress)="onAddItemKeyPress($event)"
+                         placeholder="0.00">
+                </div>
+                <div *ngIf="newItemPrice.invalid && newItemPrice.touched" class="field-error">
+                  Suggested price is required and must be greater than $0
+                </div>
+              </div>
+
+              <div class="form-field full-width">
+                <label class="field-label">Notes</label>
+                <textarea class="form-textarea"
+                          [(ngModel)]="newItem.notes"
+                          name="newItemNotes"
+                          (keypress)="onAddItemKeyPress($event)"
+                          placeholder="Any additional details about this item..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="button"
+                        (click)="addItem()"
+                        [disabled]="!isNewItemValid()"
+                        class="add-save-btn">
+                  ✓ Add Item
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Edit Existing Item Mode -->
+          <div *ngIf="editingIndex !== null" class="edit-item-form">
+            <h4>Edit Item #{{ editingIndex + 1 }}</h4>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="field-label">Item Name *</label>
+                <input type="text"
+                       class="form-input"
+                       [(ngModel)]="dropoffRequest.items[editingIndex].name"
+                       [name]="'editItemName' + editingIndex"
+                       #editItemName="ngModel"
+                       required
+                       placeholder="e.g., Blue Designer Dress">
+                <div *ngIf="editItemName.invalid && editItemName.touched" class="field-error">
+                  Item name is required
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Category *</label>
+                <div class="searchable-dropdown">
+                  <input type="text"
+                         class="form-input"
+                         [(ngModel)]="dropoffRequest.items[editingIndex].category"
+                         [name]="'editItemCategory' + editingIndex"
+                         #editItemCategory="ngModel"
+                         required
+                         (input)="onCategoryInput(dropoffRequest.items[editingIndex].category, false)"
+                         placeholder="Type to search or select category..."
+                         autocomplete="off">
+                  <div *ngIf="editItemCategory.invalid && editItemCategory.touched" class="field-error">
+                    Category is required
+                  </div>
+                  <div *ngIf="filteredCategories.length > 0 && dropoffRequest.items[editingIndex].category" class="dropdown-options">
+                    <div *ngFor="let category of filteredCategories"
+                         class="dropdown-option"
+                         (click)="selectCategory(category, false)">
+                      {{ category }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Brand</label>
+                <input type="text"
+                       class="form-input"
+                       [(ngModel)]="dropoffRequest.items[editingIndex].brand"
+                       [name]="'editItemBrand' + editingIndex"
+                       placeholder="e.g., Designer Brand">
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Suggested Price *</label>
+                <div class="price-input-wrapper">
+                  <span class="price-symbol">$</span>
+                  <input type="number"
+                         class="form-input price-input"
+                         [(ngModel)]="dropoffRequest.items[editingIndex].suggestedPrice"
+                         [name]="'editItemPrice' + editingIndex"
+                         #editItemPrice="ngModel"
+                         required
+                         min="0.01"
+                         step="0.01"
+                         placeholder="0.00">
+                </div>
+                <div *ngIf="editItemPrice.invalid && editItemPrice.touched" class="field-error">
+                  Suggested price is required and must be greater than $0
+                </div>
+              </div>
+
+              <div class="form-field full-width">
+                <label class="field-label">Notes</label>
+                <textarea class="form-textarea"
+                          [(ngModel)]="dropoffRequest.items[editingIndex].notes"
+                          [name]="'editItemNotes' + editingIndex"
+                          placeholder="Any additional details about this item..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="button"
+                        (click)="saveItem(editingIndex!)"
+                        class="save-btn">
+                  ✓ Save Changes
+                </button>
+                <button type="button"
+                        (click)="cancelEdit()"
+                        class="cancel-edit-btn">
+                  ✗ Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-table-container" *ngIf="dropoffRequest.items.length > 0">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th class="item-name-col">Item Name</th>
+                <th class="category-col">Category</th>
+                <th class="brand-col">Brand</th>
+                <th class="price-col">Suggested Price</th>
+                <th class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of dropoffRequest.items; let i = index"
+                  class="item-row"
+                  [class.being-edited]="editingIndex === i">
+                <td class="item-name">
+                  {{ item.name || 'Untitled Item' }}
+                </td>
+                <td class="item-category">
+                  {{ item.category || '-' }}
+                </td>
+                <td class="item-brand">
+                  {{ item.brand || '-' }}
+                </td>
+                <td class="item-price">
+                  {{ item.suggestedPrice | currency }}
+                </td>
+                <td class="actions">
+                  <button type="button"
+                          (click)="startEditing(i)"
+                          class="edit-btn"
+                          [disabled]="editingIndex === i">
+                    ✏️ {{ editingIndex === i ? 'Editing...' : 'Edit' }}
+                  </button>
+                  <button type="button"
+                          (click)="removeItem(i)"
+                          class="delete-btn">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+
+            <!-- Total Row -->
+            <tfoot *ngIf="dropoffRequest.items.length > 0">
+              <tr class="total-row">
+                <td colspan="3" class="total-label">Total Suggested Value:</td>
+                <td class="total-amount">{{ getTotalSuggestedPrice() | currency }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Submission Details Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3>Submission Details (Optional)</h3>
+        </div>
+
+        <div class="details-form">
+          <!-- Planned Date -->
+          <div class="form-field">
+            <label class="field-label">
+              Planned Drop-off Date
+            </label>
+            <input type="date"
+                   class="form-input"
+                   [(ngModel)]="dropoffRequest.plannedDate"
+                   name="plannedDate">
+          </div>
+
+          <!-- Time Slot -->
+          <div class="form-field">
+            <label class="field-label">
+              Preferred Time
+            </label>
+            <select class="form-select"
+                    [(ngModel)]="dropoffRequest.plannedTimeSlot"
+                    name="plannedTimeSlot">
+              <option *ngFor="let option of timeSlotOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Message -->
+          <div class="form-field full-width">
+            <label class="field-label">
+              Message to Shop Owner
+            </label>
+            <textarea class="form-textarea large"
+                      [(ngModel)]="dropoffRequest.message"
+                      name="message"
+                      placeholder="Any special instructions or notes for the shop owner..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="button"
+                (click)="cancel()"
+                class="cancel-btn">
+          Cancel
+        </button>
+        <button type="submit"
+                [disabled]="isSubmitting || !canSubmit()"
+                class="submit-btn">
+          <span *ngIf="isSubmitting" class="loading">⏳</span>
+          {{ isSubmitting ? 'Creating...' : 'Send Manifest to ' + shopName }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

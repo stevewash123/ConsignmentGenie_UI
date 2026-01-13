@@ -55,11 +55,13 @@ export class ConsignorListComponent implements OnInit {
     // Load consignors - they already include pending status
     consignors$.subscribe({
       next: (consignors) => {
-        // Filter out Shop-Owned Inventory and any other system entries
+        // DEBUG: Show ALL consignors temporarily to debug missing provider1
+        console.log('DEBUG: Raw consignors from API:', consignors);
         let allConsignors = (consignors || []).filter(c =>
           !c.name.toLowerCase().includes('shop-owned') &&
           !c.name.toLowerCase().includes('shop owned')
         );
+        console.log('DEBUG: Filtered consignors (after removing shop-owned):', allConsignors);
 
         this.consignors.set(allConsignors);
         this.applyFilters();
@@ -346,7 +348,7 @@ export class ConsignorListComponent implements OnInit {
 
   private updateConsignorStatus(consignor: Consignor, newStatus: ConsignorStatus): void {
     this.consignors.update(list =>
-      list.map(c => c.id === consignor.id ? {...c, status: newStatus, isActive: newStatus === 'active'} : c)
+      list.map(c => c.id === consignor.id ? {...c, status: newStatus} : c)
     );
     this.applyFilters();
   }

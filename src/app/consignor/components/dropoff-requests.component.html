@@ -1,0 +1,116 @@
+<div class="dropoff-requests">
+  <div class="content">
+    <div class="page-header">
+      <div class="header-actions">
+        <h2>Item Manifests</h2>
+        <a routerLink="/consignor/dropoff-requests/create" class="create-btn">
+          📦 Create New Manifest
+        </a>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+      <div class="filter-container">
+        <label for="statusFilter" class="filter-label">
+          Filter by Status
+        </label>
+        <select id="statusFilter"
+                class="status-select"
+                [(ngModel)]="query.status"
+                (ngModelChange)="onStatusChange()">
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading">
+      <p>Loading manifests...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="error">
+      <p>{{ error }}</p>
+      <button (click)="loadRequests()" class="retry-btn">Try Again</button>
+    </div>
+
+    <!-- Requests List -->
+    <div *ngIf="!isLoading && !error">
+      <!-- Empty State -->
+      <div *ngIf="requests.length === 0" class="empty-state">
+        <div class="empty-content">
+          <div class="empty-icon">📦</div>
+          <h3>No Item Manifests Yet</h3>
+          <p>Submit your first manifest to get your items into the shop inventory.</p>
+          <a routerLink="/consignor/dropoff-requests/create" class="create-btn">
+            Create Your First Manifest
+          </a>
+        </div>
+      </div>
+
+      <!-- Request Cards -->
+      <div class="manifests-list">
+        <div *ngFor="let request of requests" class="manifest-card">
+          <div class="card-header">
+            <div class="manifest-info">
+              <h3 class="manifest-title">
+                {{ request.itemCount }} {{ request.itemCount === 1 ? 'Item' : 'Items' }}
+              </h3>
+              <div [class]="getStatusBadgeClass(request.status)">
+                {{ request.status | titlecase }}
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="actions-btn"
+                      (click)="toggleActionMenu(request.id)"
+                      type="button">
+                ⋮
+              </button>
+              <!-- Action Menu -->
+              <div *ngIf="openActionMenu === request.id" class="action-menu">
+                <a [routerLink]="'/consignor/dropoff-requests/' + request.id" class="menu-item">
+                  👁️ View Details
+                </a>
+                <button *ngIf="canCancel(request.status)"
+                        (click)="cancelRequest(request)"
+                        class="menu-item cancel-item">
+                  🗑️ Cancel Request
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-details">
+            <div class="detail-item">
+              <span class="detail-label">Suggested Total:</span>
+              <span class="detail-value">{{ request.suggestedTotal | currency }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Submitted:</span>
+              <span class="detail-value">{{ formatDate(request.createdAt.toString()) }}</span>
+            </div>
+            <div *ngIf="request.plannedDate" class="detail-item">
+              <span class="detail-label">Planned Drop-off:</span>
+              <span class="detail-value">
+                {{ formatDate(request.plannedDate) }}
+                <span *ngIf="request.plannedTimeSlot" class="time-slot">({{ request.plannedTimeSlot }})</span>
+              </span>
+            </div>
+            <div *ngIf="request.importedAt" class="detail-item success">
+              <span class="detail-label">Status:</span>
+              <span class="detail-value">✅ Imported to inventory on {{ formatDate(request.importedAt.toString()) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Click outside to close menu -->
+<div *ngIf="openActionMenu"
+     class="menu-overlay"
+     (click)="toggleActionMenu('')"></div>
