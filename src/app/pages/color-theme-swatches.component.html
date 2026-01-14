@@ -1,0 +1,486 @@
+<div class="container mx-auto px-6 py-8 max-w-4xl">
+  <div class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Color Comparison</h1>
+    <p class="text-gray-600">Click any color to copy its hex code</p>
+  </div>
+
+  <!-- Simple 2x6 Color Table -->
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <table class="w-full">
+      <!-- Owner Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #ecfdf5"
+            (click)="copyToClipboard('#ecfdf5', 'Owner Light')"
+            title="Owner Light: #ecfdf5">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: hsl(130, 32%, 85%)"
+            (click)="copyToClipboard('hsl(130, 32%, 85%)', 'Owner Light-Medium')"
+            title="Owner Light-Medium: hsl(130, 32%, 85%)">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #86efac"
+            (click)="copyToClipboard('#86efac', 'Owner Med-Light')"
+            title="Owner Med-Light: #86efac">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #16a34a"
+            (click)="copyToClipboard('#16a34a', 'Owner Medium')"
+            title="Owner Medium: #16a34a">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #047857"
+            (click)="copyToClipboard('#047857', 'Owner Medium-Dark')"
+            title="Owner Medium-Dark: #047857">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #065f46"
+            (click)="copyToClipboard('#065f46', 'Owner Dark')"
+            title="Owner Dark: #065f46">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+      <!-- Consignor Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #f3e8ff"
+            (click)="copyToClipboard('#f3e8ff', 'Consignor Light')"
+            title="Consignor Light: #f3e8ff">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #e9d5ff"
+            (click)="copyToClipboard('#e9d5ff', 'Consignor Light-Medium')"
+            title="Consignor Light-Medium: #e9d5ff">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #c4b5fd"
+            (click)="copyToClipboard('#c4b5fd', 'Consignor Med-Light')"
+            title="Consignor Med-Light: #c4b5fd">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #8b5cf6"
+            (click)="copyToClipboard('#8b5cf6', 'Consignor Medium')"
+            title="Consignor Medium: #8b5cf6">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #553c9a"
+            (click)="copyToClipboard('#553c9a', 'Consignor Medium-Dark')"
+            title="Consignor Medium-Dark: #553c9a">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #4c1d95"
+            (click)="copyToClipboard('#4c1d95', 'Consignor Dark')"
+            title="Consignor Dark: #4c1d95">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Rose Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fef2f2"
+            (click)="copyToClipboard('#fef2f2', 'Rose Light')"
+            title="Rose Light: #fef2f2">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fce7f3"
+            (click)="copyToClipboard('#fce7f3', 'Rose Light-Medium')"
+            title="Rose Light-Medium: #fce7f3">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #f9a8d4"
+            (click)="copyToClipboard('#f9a8d4', 'Rose Med-Light')"
+            title="Rose Med-Light: #f9a8d4">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #ec4899"
+            (click)="copyToClipboard('#ec4899', 'Rose Medium')"
+            title="Rose Medium: #ec4899">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #be185d"
+            (click)="copyToClipboard('#be185d', 'Rose Medium-Dark')"
+            title="Rose Medium-Dark: #be185d">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #881337"
+            (click)="copyToClipboard('#881337', 'Rose Dark')"
+            title="Rose Dark: #881337">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Blue Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #eff6ff"
+            (click)="copyToClipboard('#eff6ff', 'Blue Light')"
+            title="Blue Light: #eff6ff">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #dbeafe"
+            (click)="copyToClipboard('#dbeafe', 'Blue Light-Medium')"
+            title="Blue Light-Medium: #dbeafe">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #93c5fd"
+            (click)="copyToClipboard('#93c5fd', 'Blue Med-Light')"
+            title="Blue Med-Light: #93c5fd">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #3b82f6"
+            (click)="copyToClipboard('#3b82f6', 'Blue Medium')"
+            title="Blue Medium: #3b82f6">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #1d4ed8"
+            (click)="copyToClipboard('#1d4ed8', 'Blue Medium-Dark')"
+            title="Blue Medium-Dark: #1d4ed8">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #1e3a8a"
+            (click)="copyToClipboard('#1e3a8a', 'Blue Dark')"
+            title="Blue Dark: #1e3a8a">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Amber (Brownish Yellow) Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fffbeb"
+            (click)="copyToClipboard('#fffbeb', 'Amber Light')"
+            title="Amber Light: #fffbeb">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fef3c7"
+            (click)="copyToClipboard('#fef3c7', 'Amber Light-Medium')"
+            title="Amber Light-Medium: #fef3c7">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fcd34d"
+            (click)="copyToClipboard('#fcd34d', 'Amber Med-Light')"
+            title="Amber Med-Light: #fcd34d">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #f59e0b"
+            (click)="copyToClipboard('#f59e0b', 'Amber Medium')"
+            title="Amber Medium: #f59e0b">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #d97706"
+            (click)="copyToClipboard('#d97706', 'Amber Medium-Dark')"
+            title="Amber Medium-Dark: #d97706">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #92400e"
+            (click)="copyToClipboard('#92400e', 'Amber Dark')"
+            title="Amber Dark: #92400e">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Teal Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #f0fdfa"
+            (click)="copyToClipboard('#f0fdfa', 'Teal Light')"
+            title="Teal Light: #f0fdfa">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #ccfbf1"
+            (click)="copyToClipboard('#ccfbf1', 'Teal Light-Medium')"
+            title="Teal Light-Medium: #ccfbf1">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #5eead4"
+            (click)="copyToClipboard('#5eead4', 'Teal Med-Light')"
+            title="Teal Med-Light: #5eead4">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #14b8a6"
+            (click)="copyToClipboard('#14b8a6', 'Teal Medium')"
+            title="Teal Medium: #14b8a6">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #0f766e"
+            (click)="copyToClipboard('#0f766e', 'Teal Medium-Dark')"
+            title="Teal Medium-Dark: #0f766e">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #134e4a"
+            (click)="copyToClipboard('#134e4a', 'Teal Dark')"
+            title="Teal Dark: #134e4a">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Orange Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fff7ed"
+            (click)="copyToClipboard('#fff7ed', 'Orange Light')"
+            title="Orange Light: #fff7ed">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fed7aa"
+            (click)="copyToClipboard('#fed7aa', 'Orange Light-Medium')"
+            title="Orange Light-Medium: #fed7aa">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #fb923c"
+            (click)="copyToClipboard('#fb923c', 'Orange Med-Light')"
+            title="Orange Med-Light: #fb923c">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #ea580c"
+            (click)="copyToClipboard('#ea580c', 'Orange Medium')"
+            title="Orange Medium: #ea580c">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #c2410c"
+            (click)="copyToClipboard('#c2410c', 'Orange Medium-Dark')"
+            title="Orange Medium-Dark: #c2410c">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #9a3412"
+            (click)="copyToClipboard('#9a3412', 'Orange Dark')"
+            title="Orange Dark: #9a3412">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Indigo Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #eef2ff"
+            (click)="copyToClipboard('#eef2ff', 'Indigo Light')"
+            title="Indigo Light: #eef2ff">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #c7d2fe"
+            (click)="copyToClipboard('#c7d2fe', 'Indigo Light-Medium')"
+            title="Indigo Light-Medium: #c7d2fe">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #818cf8"
+            (click)="copyToClipboard('#818cf8', 'Indigo Med-Light')"
+            title="Indigo Med-Light: #818cf8">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #4f46e5"
+            (click)="copyToClipboard('#4f46e5', 'Indigo Medium')"
+            title="Indigo Medium: #4f46e5">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #3730a3"
+            (click)="copyToClipboard('#3730a3', 'Indigo Medium-Dark')"
+            title="Indigo Medium-Dark: #3730a3">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #312e81"
+            (click)="copyToClipboard('#312e81', 'Indigo Dark')"
+            title="Indigo Dark: #312e81">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Slate (Cool Gray) Row -->
+      <tr>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #f8fafc"
+            (click)="copyToClipboard('#f8fafc', 'Slate Light')"
+            title="Slate Light: #f8fafc">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #e2e8f0"
+            (click)="copyToClipboard('#e2e8f0', 'Slate Light-Medium')"
+            title="Slate Light-Medium: #e2e8f0">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Light-Med</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #94a3b8"
+            (click)="copyToClipboard('#94a3b8', 'Slate Med-Light')"
+            title="Slate Med-Light: #94a3b8">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-gray-800 text-sm font-medium">Med-Light</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #475569"
+            (click)="copyToClipboard('#475569', 'Slate Medium')"
+            title="Slate Medium: #475569">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Medium</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #334155"
+            (click)="copyToClipboard('#334155', 'Slate Medium-Dark')"
+            title="Slate Medium-Dark: #334155">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Med-Dark</span>
+          </div>
+        </td>
+        <td class="w-1/6 h-32 cursor-pointer transition-transform hover:scale-105"
+            style="background-color: #1e293b"
+            (click)="copyToClipboard('#1e293b', 'Slate Dark')"
+            title="Slate Dark: #1e293b">
+          <div class="flex items-center justify-center h-full">
+            <span class="text-white text-sm font-medium">Dark</span>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Labels -->
+    <div class="p-4 bg-gray-50 border-t">
+      <div class="flex justify-between text-sm text-gray-600">
+        <span><strong>Current Themes:</strong> Owner (Green), Consignor (Purple)</span>
+        <span><strong>Options:</strong> Rose, Blue, Amber, Teal, Orange, Indigo, Slate</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ProviderItem, PagedResult, ProviderItemQuery } from '../models/consignor.models';
+import { ProviderItem, ProviderItemQuery } from '../models/consignor.models';
+import { PagedResult } from '../../shared/models/api.models';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
 

@@ -68,6 +68,7 @@ export class BulkImportModalComponent implements OnInit {
   // Manifest-specific properties
   isManifestImport = signal(false);
   manifestConsignorNumber = signal<string>('');
+  manifestId = signal<string>('');
 
   // In-grid editing state
   editingRowId = signal<number | null>(null);
@@ -105,6 +106,7 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     // Reset manifest-specific properties
     this.isManifestImport.set(false);
     this.manifestConsignorNumber.set('');
+    this.manifestId.set('');
 
     // Reset duplicate detection
     this.isDuplicateFile.set(false);

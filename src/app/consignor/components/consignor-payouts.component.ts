@@ -4,7 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LoadingService } from '../../shared/services/loading.service';
 import { LOADING_KEYS } from '../constants/loading-keys';
-import { ConsignorBalance, ConsignorPayoutSummary, PayoutListQuery, PagedResult, PayoutRequestStatus, PayoutRequest } from '../models/consignor.models';
+import { ConsignorBalance, ConsignorPayoutSummary, PayoutListQuery, PayoutRequestStatus, PayoutRequest } from '../models/consignor.models';
+import { PagedResult } from '../../shared/models/api.models';
 import { ConsignorPortalService } from '../services/consignor-portal.service';
 import { BalanceCardComponent } from './balance-card.component';
 import { RequestPayoutModalComponent } from './request-payout-modal.component';
@@ -222,8 +223,9 @@ export class ConsignorPayoutsComponent implements OnInit {
             page: response.data.page || 1,
             pageSize: response.data.pageSize || this.pageSize,
             totalPages: Math.ceil((response.data.totalCount || 0) / (response.data.pageSize || this.pageSize)),
-            hasNext: response.data.hasNext || false,
-            hasPrevious: response.data.hasPrevious || false
+            hasNextPage: response.data.hasNextPage || false,
+            hasPreviousPage: response.data.hasPreviousPage || false,
+            organizationId: response.data.organizationId || ''
           };
         }
       },

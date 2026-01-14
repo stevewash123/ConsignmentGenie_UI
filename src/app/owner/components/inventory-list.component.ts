@@ -5,7 +5,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { OwnerLayoutComponent } from './owner-layout.component';
-import { BulkImportModalComponent } from './bulk-import-modal.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SquareIntegrationService } from '../../services/square-integration.service';
@@ -16,15 +15,15 @@ import { Consignor } from '../../models/consignor.model';
 import {
   ItemListDto,
   ItemQueryParams,
-  PagedResult,
   ItemCondition,
   ItemStatus,
   ItemCategoryDto,
   UpdateItemStatusRequest,
   PendingSquareImportDto
 } from '../../models/inventory.model';
+import { PagedResult } from '../../shared/models/api.models';
 
-// Define interface for imported CSV data structure
+// Define interface for imported CSV data structure (used by bulk import modal)
 // Note: CSV headers are PascalCase (Name, Price, ConsignorNumber) but converted to camelCase internally
 export interface ImportedItem {
   name: string;              // from CSV "Name"
@@ -42,7 +41,7 @@ export interface ImportedItem {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, BulkImportModalComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.scss']
 })
@@ -63,8 +62,6 @@ export class InventoryListComponent implements OnInit {
   categories = signal<ItemCategoryDto[]>([]);
   consignors = signal<Consignor[]>([]);
   error = signal<string | null>(null);
-  isBulkImportModalOpen = signal(false);
-  preloadedItems = signal<ImportedItem[] | null>(null); // For manifest data
   isColorGuideModalOpen = signal(false);
   isLoading = signal(false);
 
@@ -74,10 +71,16 @@ export class InventoryListComponent implements OnInit {
 
   // View mode state
   viewMode = signal<'regular' | 'pending'>('regular');
+  manifestIdToLoad = signal<string | null>(null);
+  manifestConsignorData = signal<any>(null); // Store manifest consignor data for auto-selection
 
-  // Selection state for pending imports
+  // Selection state for pending imports (used for bulk assign)
   selectedPendingImports = signal<Set<string>>(new Set());
   allPendingSelected = signal(false);
+
+  // Verification state for pending imports (for item verification checkboxes)
+  verifiedPendingImports = signal<Set<string>>(new Set());
+  allPendingVerified = signal(false);
 
   // Bulk assign state
   selectedConsignorId = signal<string>('');
@@ -85,6 +88,9 @@ export class InventoryListComponent implements OnInit {
   // Individual assign state
   assignmentDropdownOpen = signal<string | null>(null);
   individualConsignorSelections = signal<Map<string, string>>(new Map());
+
+  // Track consignor assignments for each pending import item
+  assignedConsignors = signal<Map<string, string>>(new Map()); // Maps pendingImportId to consignorId
 
   // Filter state
   searchQuery = '';
@@ -129,13 +135,17 @@ export class InventoryListComponent implements OnInit {
   ngOnInit() {
     this.loadCategories();
     this.loadConsignors();
-    this.loadItems();
 
-    // Check for manifest query parameters to auto-open bulk import modal
+    // Check for manifest query parameters FIRST, then load items
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       if (params['openBulkImport'] === 'true' && params['manifestId']) {
-        console.log('🧭 Opening bulk import from notification with manifestId:', params['manifestId']);
-        this.openBulkImportWithManifest(params['manifestId']);
+        console.log('🧭 Switching to pending imports view for manifestId:', params['manifestId']);
+        this.viewMode.set('pending');
+        this.manifestIdToLoad.set(params['manifestId']);
+        this.loadItems(); // This will load the manifest items in pending view
+      } else {
+        // Only load regular items if we're not handling manifest parameters
+        this.loadItems();
       }
     });
   }
@@ -159,6 +169,8 @@ export class InventoryListComponent implements OnInit {
       .subscribe({
         next: (consignors) => {
           this.consignors.set(consignors);
+          // After consignors load, try to auto-select from manifest data if we have it
+          this.tryAutoSelectConsignorFromManifest();
         },
         error: (err) => console.error('Failed to load consignors:', err)
       });
@@ -185,27 +197,35 @@ export class InventoryListComponent implements OnInit {
     if (this.priceMax !== null) params.priceMax = this.priceMax;
 
     if (this.viewMode() === 'pending') {
-      // Load pending Square imports
-      this.inventoryService.getPendingSquareImports(params)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (result) => {
-            console.log('Pending imports result:', result);
-            console.log('First pending item:', result.items[0]);
-            if (result.items[0]) {
-              console.log('First pendingImportId:', result.items[0].pendingImportId);
+      const manifestId = this.manifestIdToLoad();
+
+      if (manifestId) {
+        // Load manifest items for pending import
+        console.log('🧭 Loading manifest items for pending import:', manifestId);
+        this.loadManifestAsPendingImports(manifestId);
+      } else {
+        // Load pending Square imports
+        this.inventoryService.getPendingSquareImports(params)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (result) => {
+              console.log('Pending imports result:', result);
+              console.log('First pending item:', result.items[0]);
+              if (result.items[0]) {
+                console.log('First pendingImportId:', result.items[0].pendingImportId);
+              }
+              this.pendingImportsResult.set(result);
+              this.itemsResult.set(null); // Clear regular items
+            },
+            error: (err) => {
+              this.error.set('Failed to load Square pending imports. Please ensure you are connected to Square and try again.');
+              console.error('Error loading Square pending imports:', err);
+            },
+            complete: () => {
+              this.loadingService.stop('inventory-list');
             }
-            this.pendingImportsResult.set(result);
-            this.itemsResult.set(null); // Clear regular items
-          },
-          error: (err) => {
-            this.error.set('Failed to load Square pending imports. Please ensure you are connected to Square and try again.');
-            console.error('Error loading Square pending imports:', err);
-          },
-          complete: () => {
-            this.loadingService.stop('inventory-list');
-          }
-        });
+          });
+      }
     } else {
       // Load regular ConsignmentGenie inventory
       this.inventoryService.getItems(params)
@@ -223,6 +243,36 @@ export class InventoryListComponent implements OnInit {
             this.loadingService.stop('inventory-list');
           }
         });
+    }
+  }
+
+  private tryAutoSelectConsignorFromManifest() {
+    const manifestConsignor = this.manifestConsignorData();
+    if (!manifestConsignor || this.consignors().length === 0) {
+      return; // No manifest data or consignors not loaded yet
+    }
+
+    // Try to match by consignor ID first (most reliable)
+    const consignorId = manifestConsignor.id;
+    if (consignorId) {
+      const matchingConsignor = this.consignors().find(c => c.id === consignorId);
+      if (matchingConsignor) {
+        this.selectedConsignorId.set(matchingConsignor.id);
+        console.log('🎯 Auto-selected consignor for bulk assignment by ID (deferred):', matchingConsignor.name);
+        return;
+      }
+    }
+
+    // Fallback to matching by name if no ID match
+    const consignorName = `${manifestConsignor.firstName || ''} ${manifestConsignor.lastName || ''}`.trim();
+    if (consignorName) {
+      const matchingConsignor = this.consignors().find(c =>
+        c.name.toLowerCase() === consignorName.toLowerCase()
+      );
+      if (matchingConsignor) {
+        this.selectedConsignorId.set(matchingConsignor.id);
+        console.log('🎯 Auto-selected consignor for bulk assignment by name (deferred):', matchingConsignor.name);
+      }
     }
   }
 
@@ -273,13 +323,18 @@ export class InventoryListComponent implements OnInit {
     this.viewMode.set(mode);
     this.currentPage.set(1); // Reset to page 1 when switching views
     this.clearSelection(); // Clear selection when switching views
+    this.manifestIdToLoad.set(null); // Clear any manifest ID when switching views
+    this.manifestConsignorData.set(null); // Clear manifest consignor data when switching views
     this.loadItems();
   }
 
-  // Selection methods for pending imports
+  // Selection methods for pending imports (used for bulk assign and verification)
   clearSelection() {
     this.selectedPendingImports.set(new Set());
     this.allPendingSelected.set(false);
+    this.verifiedPendingImports.set(new Set());
+    this.allPendingVerified.set(false);
+    this.assignedConsignors.set(new Map());
   }
 
   toggleSelectAll() {
@@ -290,7 +345,7 @@ export class InventoryListComponent implements OnInit {
       this.selectedPendingImports.set(new Set());
       this.allPendingSelected.set(false);
     } else {
-      const allIds = new Set(pendingResult.items.map(item => item.pendingImportId));
+      const allIds = new Set(pendingResult.items.map((item: any) => item.pendingImportId as string));
       this.selectedPendingImports.set(allIds);
       this.allPendingSelected.set(true);
     }
@@ -315,6 +370,25 @@ export class InventoryListComponent implements OnInit {
 
   isSelected(pendingImportId: string): boolean {
     return this.selectedPendingImports().has(pendingImportId);
+  }
+
+  // New verification methods for the updated UI
+  isVerified(itemId: string): boolean {
+    return this.verifiedPendingImports().has(itemId);
+  }
+
+  toggleItemVerification(itemId: string, event: any) {
+    const verified = new Set(this.verifiedPendingImports());
+    if (event.target.checked) {
+      verified.add(itemId);
+    } else {
+      verified.delete(itemId);
+    }
+    this.verifiedPendingImports.set(verified);
+
+    // Update all verified state
+    const allItems = this.pendingImportsResult()?.items || [];
+    this.allPendingVerified.set(allItems.every(item => verified.has(item.pendingImportId)));
   }
 
   async bulkAssignConsignor() {
@@ -346,6 +420,50 @@ export class InventoryListComponent implements OnInit {
     } catch (error) {
       console.error('Failed to bulk assign consignor:', error);
       this.error.set('Failed to assign items to consignor. Please try again.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async submitVerifiedItems() {
+    const verifiedIds = Array.from(this.verifiedPendingImports());
+
+    if (verifiedIds.length === 0) {
+      this.error.set('Please verify at least one item before submitting.');
+      return;
+    }
+
+    // Check that all verified items have consignors assigned
+    const pendingResult = this.pendingImportsResult();
+    if (!pendingResult) return;
+
+    const itemsWithoutConsignors = verifiedIds.filter(id => {
+      const item = pendingResult.items.find(i => i.pendingImportId === id);
+      return !item?.consignorNumber && !item?.consignorId;
+    });
+
+    if (itemsWithoutConsignors.length > 0) {
+      this.error.set('All verified items must have consignors assigned before submitting. Please assign consignors to all verified items.');
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      // Submit only the verified items for import
+      const request = { pendingImportIds: verifiedIds };
+      await firstValueFrom(this.inventoryService.importPendingItems(request));
+
+      // Clear selections and reload data
+      this.clearSelection();
+      this.verifiedPendingImports.set(new Set());
+      this.loadItems();
+
+      // Show success message
+      console.log(`Successfully imported ${verifiedIds.length} verified items`);
+      // TODO: Add toast notification here
+    } catch (error) {
+      console.error('Failed to submit verified items:', error);
+      this.error.set('Failed to import verified items. Please try again.');
     } finally {
       this.isLoading.set(false);
     }
@@ -427,6 +545,14 @@ export class InventoryListComponent implements OnInit {
     return this.individualConsignorSelections().get(pendingImportId) || '';
   }
 
+  getAssignedConsignorName(pendingImportId: string): string {
+    const consignorId = this.assignedConsignors().get(pendingImportId);
+    if (!consignorId) return '';
+
+    const consignor = this.consignors().find(c => c.id === consignorId);
+    return consignor ? consignor.name : '';
+  }
+
   onConsignorSelectionChange(pendingImportId: string, event: Event) {
     const target = event.target as HTMLSelectElement;
     this.updateIndividualConsignorSelection(pendingImportId, target.value);
@@ -440,58 +566,98 @@ export class InventoryListComponent implements OnInit {
     this.router.navigate(['/owner/inventory/categories']);
   }
 
-  openBulkImport() {
-    this.isBulkImportModalOpen.set(true);
-  }
-
-  openBulkImportWithManifest(manifestId: string) {
-    // Fetch manifest data from API and pre-populate bulk import modal
+  loadManifestAsPendingImports(manifestId: string) {
+    // Fetch manifest data from API and convert to pending imports format
+    this.loadingService.start('inventory-list');
     this.ownerService.getDropoffRequestDetail(manifestId).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (manifest) => {
-        console.log('🔍 Manifest data received:', manifest);
+        console.log('🔍 Raw manifest data received:', manifest);
+        console.log('🔍 Manifest consignor:', manifest.consignor);
 
-        // Convert manifest items to ImportedItem format for bulk import modal
-        const importedItems: ImportedItem[] = manifest.items?.map((item: any) => ({
-          name: item.name,
+        // Store manifest consignor data for auto-selection
+        if (manifest.consignor) {
+          this.manifestConsignorData.set(manifest.consignor);
+        }
+
+        // Extract consignor info from manifest structure
+        const consignorNumber = manifest.consignor?.consignorNumber || '';
+        const consignorName = manifest.consignor ?
+          `${manifest.consignor.firstName} ${manifest.consignor.lastName}`.trim() : '';
+
+        // Convert manifest items to PendingSquareImportDto format for pending imports table
+        const pendingItems = manifest.items?.map((item: any, index: number) => ({
+          pendingImportId: `manifest-${manifestId}-${index}`,
+          name: item.name, // Use 'name' to match template expectation
           description: item.notes || '',
+          price: item.suggestedPrice || 0,
           sku: '', // SKU will be generated during import
-          price: item.suggestedPrice?.toString() || '0',
-          consignorNumber: manifest.consignorNumber || '',
+          consignorNumber: consignorNumber,
+          consignorName: consignorName,
           category: item.category || '',
           condition: 'Good', // Default condition
-          receivedDate: manifest.plannedDate || new Date().toISOString().split('T')[0],
+          importedAt: manifest.plannedDate || new Date().toISOString(),
           location: '',
-          notes: item.notes || ''
+          notes: item.notes || '',
+          // Add manifest-specific fields
+          isManifestItem: true,
+          manifestId: manifestId
         })) || [];
 
-        console.log('📦 Auto-selecting consignor from manifest:', {
-          manifestConsignorNumber: manifest.consignorNumber,
-          manifestConsignorName: manifest.consignorName
-        });
+        // Create a PagedResult structure for the pending imports
+        const pagedResult: PagedResult<PendingSquareImportDto> = {
+          items: pendingItems,
+          totalCount: pendingItems.length,
+          page: 1,
+          pageSize: pendingItems.length,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+          organizationId: '' // Will be set by the API if needed
+        };
 
-        // Store the imported items and open the modal
-        this.preloadedItems.set(importedItems);
-        this.isBulkImportModalOpen.set(true);
+        this.pendingImportsResult.set(pagedResult);
+        this.itemsResult.set(null); // Clear regular items
 
-        console.log('Manifest data loaded for bulk import:', {
+        // Try to auto-select consignor (this handles both immediate and deferred selection)
+        this.tryAutoSelectConsignorFromManifest();
+
+        // Auto-assign the manifest consignor to all manifest items
+        if (manifest.consignor?.id) {
+          const assignments = new Map(this.assignedConsignors());
+          pendingItems.forEach(item => {
+            assignments.set(item.pendingImportId, manifest.consignor.id);
+          });
+          this.assignedConsignors.set(assignments);
+          console.log('📋 Auto-assigned consignor to', pendingItems.length, 'manifest items');
+        }
+
+        console.log('📦 Manifest loaded as pending imports:', {
           manifestId,
-          consignorNumber: manifest.consignorNumber,
-          itemCount: importedItems.length,
-          items: importedItems
+          consignorNumber: consignorNumber,
+          consignorName: consignorName,
+          itemCount: pendingItems.length,
+          sampleItem: pendingItems[0] // Show first item structure for debugging
         });
+
       },
       error: (error) => {
-        console.error('Error loading manifest for bulk import:', error);
-        // Still open the modal even if manifest loading fails
-        this.isBulkImportModalOpen.set(true);
+        console.error('Error loading manifest for pending imports:', error);
+        this.error.set('Failed to load manifest data. Please try again.');
+        this.pendingImportsResult.set(null);
+      },
+      complete: () => {
+        this.loadingService.stop('inventory-list');
       }
     });
   }
 
-  closeBulkImportModal() {
-    this.isBulkImportModalOpen.set(false);
+  openBulkImportWithManifest(manifestId: string) {
+    // Legacy method - now redirects to pending imports view
+    this.viewMode.set('pending');
+    this.manifestIdToLoad.set(manifestId);
+    this.loadItems();
   }
 
   openColorGuideModal() {
@@ -500,13 +666,6 @@ export class InventoryListComponent implements OnInit {
 
   closeColorGuideModal() {
     this.isColorGuideModalOpen.set(false);
-  }
-
-  onItemsImported(items: ImportedItem[]) {
-    if (items && items.length > 0) {
-      this.loadItems(); // Refresh inventory list
-    }
-    this.closeBulkImportModal();
   }
 
   viewItem(id: string) {

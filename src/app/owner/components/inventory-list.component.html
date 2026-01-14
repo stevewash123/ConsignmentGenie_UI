@@ -62,11 +62,11 @@
           <div class="bulk-assign-subsection" *ngIf="viewMode() === 'pending'">
             <div class="bulk-assign-header">
               <h3 *ngIf="selectedPendingImports().size > 0">Bulk Assign {{ selectedPendingImports().size }} Selected Item(s)</h3>
-              <h3 *ngIf="selectedPendingImports().size === 0">Select items to bulk assign to consignors</h3>
+              <h3 *ngIf="selectedPendingImports().size === 0">Select items to bulk assign to a consignor</h3>
             </div>
             <div class="bulk-assign-controls">
               <div class="consignor-select-group">
-                <label for="bulkConsignorSelect">Assign to Consignor:</label>
+                <label for="bulkConsignorSelect">Consignor:</label>
                 <select
                   id="bulkConsignorSelect"
                   [(ngModel)]="selectedConsignorId"
@@ -79,11 +79,18 @@
               </div>
               <div class="bulk-assign-actions">
                 <button
-                  class="btn-primary"
+                  class="btn-secondary"
                   [disabled]="!selectedConsignorId() || selectedPendingImports().size === 0 || isLoading()"
                   (click)="bulkAssignConsignor()">
                   <span *ngIf="isLoading()" class="loading-spinner"></span>
-                  {{ isLoading() ? 'Assigning...' : 'Assign Items' }}
+                  {{ isLoading() ? 'Assigning...' : 'Assign Consignor' }}
+                </button>
+                <button
+                  class="btn-primary"
+                  [disabled]="verifiedPendingImports().size === 0 || isLoading()"
+                  (click)="submitVerifiedItems()">
+                  <span *ngIf="isLoading()" class="loading-spinner"></span>
+                  {{ isLoading() ? 'Importing...' : 'Submit Verified Items (' + verifiedPendingImports().size + ')' }}
                 </button>
                 <button
                   class="btn-secondary"
@@ -129,14 +136,17 @@
             <table class="inventory-table compact-design" [class.pending-mode]="viewMode() === 'pending'">
               <thead>
                 <tr>
-                  <!-- Checkbox column for pending imports -->
+                  <!-- Checkbox column for pending imports verification -->
                   <th class="checkbox-cell" *ngIf="viewMode() === 'pending'">
-                    <input
-                      type="checkbox"
-                      [checked]="allPendingSelected()"
-                      (change)="toggleSelectAll()"
-                      title="Select All"
-                    />
+                    <div style="text-align: center; font-size: 0.8rem;">
+                      Item Verified
+                    </div>
+                  </th>
+                  <!-- Checkbox column for consignor assignment -->
+                  <th class="checkbox-cell" *ngIf="viewMode() === 'pending'">
+                    <div style="text-align: center; font-size: 0.8rem;">
+                      Assign Consignor
+                    </div>
                   </th>
                   <th>Image</th>
                   <th (click)="setSorting('title')" class="sortable">
@@ -313,13 +323,22 @@
                   <ng-container *ngFor="let pendingItem of pendingImportsResult()!.items; let i = index">
                     <!-- Main pending import row -->
                     <tr class="item-row pending-import-row" [class.even]="i % 2 === 0">
-                      <!-- Checkbox -->
+                      <!-- Verification Checkbox -->
+                      <td class="checkbox-cell">
+                        <input
+                          type="checkbox"
+                          [checked]="isVerified(pendingItem.pendingImportId)"
+                          (change)="toggleItemVerification(pendingItem.pendingImportId, $event)"
+                          title="Mark item as verified"
+                        />
+                      </td>
+                      <!-- Assign Consignor Checkbox -->
                       <td class="checkbox-cell">
                         <input
                           type="checkbox"
                           [checked]="isSelected(pendingItem.pendingImportId)"
                           (change)="toggleSelectItem(pendingItem.pendingImportId)"
-                          title="Select Item"
+                          title="Select for consignor assignment"
                         />
                       </td>
                       <!-- Image -->
@@ -339,7 +358,14 @@
                       <td class="category-status-cell" colspan="2" style="text-align: center;">
                         <div class="category">{{ pendingItem.category || '—' }}</div>
                         <div class="status">
-                          <span class="status-badge status-pending">PENDING_ASSIGNMENT</span>
+                          <span class="status-badge status-pending">
+                            <ng-container *ngIf="pendingItem.isManifestItem; else squareImport">
+                              MANIFEST_IMPORT
+                            </ng-container>
+                            <ng-template #squareImport>
+                              PENDING_ASSIGNMENT
+                            </ng-template>
+                          </span>
                         </div>
                       </td>
 
@@ -353,8 +379,13 @@
 
                       <!-- Consignor -->
                       <td class="consignor-cell">
-                        <div class="consignor-name unassigned">
-                          Needs Assignment
+                        <div class="consignor-name" [class.assigned]="getAssignedConsignorName(pendingItem.pendingImportId)" [class.unassigned]="!getAssignedConsignorName(pendingItem.pendingImportId)">
+                          <ng-container *ngIf="getAssignedConsignorName(pendingItem.pendingImportId); else noConsignor">
+                            {{ getAssignedConsignorName(pendingItem.pendingImportId) }}
+                          </ng-container>
+                          <ng-template #noConsignor>
+                            Needs Assignment
+                          </ng-template>
                         </div>
                       </td>
 
@@ -456,14 +487,6 @@
 
       </div>
     </app-owner-layout>
-
-    <!-- Bulk Import Modal -->
-    <app-bulk-import-modal
-      [isOpen]="isBulkImportModalOpen()"
-      [preloadedItems]="preloadedItems()"
-      (closeModal)="closeBulkImportModal()"
-      (itemsImported)="onItemsImported($event)">
-    </app-bulk-import-modal>
 
     <!-- Color Guide Modal -->
     <div class="modal-overlay" *ngIf="isColorGuideModalOpen()" (click)="closeColorGuideModal()">

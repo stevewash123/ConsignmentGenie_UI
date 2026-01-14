@@ -131,16 +131,6 @@ export interface ItemQueryParams {
   sortDirection?: string;
 }
 
-export interface PagedResult<T> {
-  items: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  organizationId: string;
-}
 
 export enum ItemCondition {
   New = 'New',
@@ -278,16 +268,26 @@ export interface ConsignorBreakdownDto {
 // Pending Square Import interfaces
 export interface PendingSquareImportDto {
   pendingImportId: string;
-  squareCatalogId: string;
+  squareCatalogId?: string; // Optional for manifest imports
   squareVariationId?: string;
   name: string;
   description?: string;
   price: number;
   sku?: string;
   category?: string;
+  condition?: string;
   squareUpdatedAt?: Date;
   importedAt: Date;
   status?: string;
+  // Consignor assignment fields (for both Square and manifest imports)
+  consignorId?: string;
+  consignorNumber?: string;
+  consignorName?: string;
+  // Manifest-specific fields
+  isManifestItem?: boolean;
+  manifestId?: string;
+  location?: string;
+  notes?: string;
 }
 
 export interface BulkAssignConsignorRequest {

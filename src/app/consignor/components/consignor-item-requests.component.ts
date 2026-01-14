@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ConsignorPortalService } from '../services/consignor-portal.service';
-import { ItemRequest, ItemRequestQuery, PagedResult } from '../models/consignor.models';
+import { ItemRequest, ItemRequestQuery } from '../models/consignor.models';
+import { PagedResult } from '../../shared/models/api.models';
 
 @Component({
   selector: 'app-consignor-item-requests',
@@ -19,8 +20,9 @@ export class ConsignorItemRequestsComponent implements OnInit {
     page: 1,
     pageSize: 10,
     totalPages: 0,
-    hasNext: false,
-    hasPrevious: false
+    hasNextPage: false,
+    hasPreviousPage: false,
+    organizationId: ''
   };
 
   query: ItemRequestQuery = {

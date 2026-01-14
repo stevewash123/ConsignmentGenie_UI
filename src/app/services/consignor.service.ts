@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Consignor, ConsignorListDto, ConsignorDetailDto, ApiResponse, CreateConsignorRequest, UpdateConsignorRequest, ConsignorStatusChangeRequest, ConsignorStatusChangeResponse, PendingConsignorApproval, ConsignorApprovalRequest, ConsignorApprovalResponse, ConsignorStatus } from '../models/consignor.model';
 import { BalanceAdjustment, CreateBalanceAdjustmentRequest, BalanceAdjustmentResponse, ConsignorBalance } from '../models/balance-adjustment.model';
-import { PagedResult } from '../models/inventory.model';
+import { PagedResult } from '../shared/models/api.models';
 import { environment } from '../../environments/environment';
 
 export interface ConsignorInvitationRequest {

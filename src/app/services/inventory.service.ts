@@ -10,7 +10,6 @@ import {
   UpdateItemRequest,
   UpdateItemStatusRequest,
   ItemQueryParams,
-  PagedResult,
   CreateItemCategoryDto,
   UpdateItemCategoryDto,
   ItemCategoryDto,
@@ -19,6 +18,7 @@ import {
   BulkAssignConsignorRequest,
   BulkAssignResult
 } from '../models/inventory.model';
+import { PagedResult } from '../shared/models/api.models';
 
 @Injectable({
   providedIn: 'root'
@@ -81,6 +81,10 @@ export class InventoryService {
     return this.http.post<ApiResponse<BulkAssignResult>>(`${this.apiUrl}/inventory/pending-imports/bulk-assign`, request);
   }
 
+  importPendingItems(request: { pendingImportIds: string[] }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/inventory/pending-imports/import`, request);
+  }
+
   getItem(id: string): Observable<ApiResponse<ItemDetailDto>> {
     return this.http.get<ApiResponse<ItemDetailDto>>(`${this.apiUrl}/items/${id}`);
   }
@@ -125,11 +129,13 @@ export class InventoryService {
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/items/bulk-status`, { itemIds, status, reason });
   }
 
-  bulkCreateItems(items: CreateItemRequest[], fileName?: string, firstDataRow?: string): Observable<ApiResponse<any>> {
+  bulkCreateItems(items: CreateItemRequest[], fileName?: string, firstDataRow?: string, sourceType?: string, sourceReferenceId?: string): Observable<ApiResponse<any>> {
     const request = {
       items,
       fileName,
-      firstDataRow
+      firstDataRow,
+      sourceType,
+      sourceReferenceId
     };
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/items/bulk-import`, request);
   }

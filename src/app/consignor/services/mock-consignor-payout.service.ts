@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
-import { ConsignorPayoutSummary, ConsignorPayoutDetail, PayoutListQuery, PagedResult } from '../models/consignor.models';
+import { ConsignorPayoutSummary, ConsignorPayoutDetail, PayoutListQuery } from '../models/consignor.models';
+import { PagedResult } from '../../shared/models/api.models';
 
 @Injectable({
   providedIn: 'root'
@@ -145,8 +146,9 @@ export class MockConsignorPayoutService {
       page,
       pageSize,
       totalPages: Math.ceil(filteredPayouts.length / pageSize),
-      hasNext: endIndex < filteredPayouts.length,
-      hasPrevious: page > 1
+      hasNextPage: endIndex < filteredPayouts.length,
+      hasPreviousPage: page > 1,
+      organizationId: ''
     };
 
     // Add a small delay to simulate network request
@@ -160,8 +162,9 @@ export class MockConsignorPayoutService {
       page: 1,
       pageSize: 10,
       totalPages: 0,
-      hasNext: false,
-      hasPrevious: false
+      hasNextPage: false,
+      hasPreviousPage: false,
+      organizationId: ''
     };
 
     return of(result).pipe(delay(300));

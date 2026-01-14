@@ -58,6 +58,10 @@ export const routes: Routes = [
     loadComponent: () => import('./public/landing.component').then(m => m.LandingComponent)
   },
   {
+    path: 'color-themes',
+    loadComponent: () => import('./pages/color-theme-swatches.component').then(m => m.ColorThemeSwatchesComponent)
+  },
+  {
     path: 'signup',
     loadComponent: () => import('./public/role-selection.component').then(m => m.RoleSelectionComponent)
   },

@@ -79,15 +79,6 @@ export interface UpdateConsignorProfile {
   emailNotifications: boolean;
 }
 
-export interface PagedResult<T> {
-  items: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
 
 export interface ProviderItemQuery {
   status?: string;

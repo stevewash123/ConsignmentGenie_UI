@@ -12,7 +12,6 @@ import {
   ProviderPayoutDetail,
   ConsignorProfile,
   UpdateConsignorProfile,
-  PagedResult,
   ProviderItemQuery,
   consignorsaleQuery,
   NotificationDto,
@@ -31,6 +30,7 @@ import {
   DropoffRequestDetail,
   DropoffRequestQuery
 } from '../models/consignor.models';
+import { PagedResult } from '../../shared/models/api.models';
 import { ItemCategoryDto } from '../../models/inventory.model';
 
 @Injectable({
