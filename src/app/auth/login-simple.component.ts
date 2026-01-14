@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../shared/services/loading.service';
+import { ConsignorPortalService } from '../consignor/services/consignor-portal.service';
 
 @Component({
   selector: 'app-login-simple',
@@ -22,7 +23,8 @@ export class LoginSimpleComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private consignorService: ConsignorPortalService
   ) {}
 
   ngOnInit() {
@@ -145,11 +147,8 @@ export class LoginSimpleComponent implements OnInit {
         break;
       case 'consignor':
       case 'Consignor':
-        console.log('Navigating to /consignor/agreement (agreement gate)');
-        this.router.navigate(['/consignor/agreement']).then(
-          success => console.log('Consignor navigation success:', success),
-          error => console.error('Consignor navigation failed:', error)
-        );
+        console.log('Checking consignor agreement status before redirect...');
+        this.redirectConsignorBasedOnAgreement();
         break;
       case 'Customer':
         console.log('Navigating to /customer/dashboard');
@@ -248,5 +247,48 @@ export class LoginSimpleComponent implements OnInit {
 
     // Return string role as-is
     return String(role);
+  }
+
+  private redirectConsignorBasedOnAgreement(): void {
+    console.log('=== LOGIN AGREEMENT CHECK ===');
+
+    this.consignorService.getAgreementStatus().subscribe({
+      next: (agreementStatus) => {
+        console.log('Agreement status for redirect decision:', agreementStatus);
+
+        const isRequired = agreementStatus?.requiresAgreement;
+        const status = agreementStatus?.agreementStatus;
+        const hasCompleted = ['uploaded', 'approved', 'completed'].includes(status);
+
+        console.log('Redirect decision factors:', {
+          isRequired,
+          status,
+          hasCompleted,
+          shouldGoToDashboard: !isRequired || hasCompleted
+        });
+
+        if (!isRequired || hasCompleted) {
+          console.log('🚀 Consignor redirect: Going to DASHBOARD (agreement not required or completed)');
+          this.router.navigate(['/consignor/dashboard']).then(
+            success => console.log('Consignor dashboard navigation success:', success),
+            error => console.error('Consignor dashboard navigation failed:', error)
+          );
+        } else {
+          console.log('📝 Consignor redirect: Going to AGREEMENT PAGE (agreement required and not completed)');
+          this.router.navigate(['/consignor/agreement']).then(
+            success => console.log('Consignor agreement navigation success:', success),
+            error => console.error('Consignor agreement navigation failed:', error)
+          );
+        }
+      },
+      error: (error) => {
+        console.error('Error checking agreement status, defaulting to agreement page:', error);
+        // On error, default to agreement page (safer)
+        this.router.navigate(['/consignor/agreement']).then(
+          success => console.log('Consignor agreement navigation (error fallback) success:', success),
+          error => console.error('Consignor agreement navigation (error fallback) failed:', error)
+        );
+      }
+    });
   }
 }

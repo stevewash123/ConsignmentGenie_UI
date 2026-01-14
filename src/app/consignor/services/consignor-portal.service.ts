@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   ProviderDashboard,
@@ -30,6 +31,7 @@ import {
   DropoffRequestDetail,
   DropoffRequestQuery
 } from '../models/consignor.models';
+import { ItemCategoryDto } from '../../models/inventory.model';
 
 @Injectable({
   providedIn: 'root'
@@ -237,6 +239,13 @@ export class ConsignorPortalService {
 
   // Categories
   getCategories(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/categories`);
+    return this.http.get<ItemCategoryDto[]>(`${this.apiUrl}/categories`).pipe(
+      map(categories => categories.map(category => category.name))
+    );
+  }
+
+  // Conditions
+  getConditions(): Observable<{ value: string; label: string; sortOrder: number }[]> {
+    return this.http.get<{ value: string; label: string; sortOrder: number }[]>(`${environment.apiUrl}/api/conditions`);
   }
 }

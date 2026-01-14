@@ -35,26 +35,62 @@ export class AgreementGateComponent implements OnInit {
 
   private async loadAgreementStatus() {
     try {
+      console.log('=== AGREEMENT GATE DEBUG ===');
+      console.log('Loading agreement status...');
+
       // Get the agreement status using the consignor portal service
       const agreementStatus = await this.consignorService.getAgreementStatus().toPromise();
 
+      console.log('Raw API response:', agreementStatus);
+      console.log('Agreement properties check:');
+      console.log('- requiresAgreement:', agreementStatus?.requiresAgreement);
+      console.log('- agreementStatus:', agreementStatus?.agreementStatus);
+      console.log('- hasAgreement:', agreementStatus?.hasAgreement);
+      console.log('- agreementMethod:', agreementStatus?.agreementMethod);
+
+      // Fix property name mapping - our API returns different property names
+      const isRequired = agreementStatus?.requiresAgreement;
+      const status = agreementStatus?.agreementStatus;
+      const hasAgreement = agreementStatus?.hasAgreement;
+
+      console.log('Processed values:');
+      console.log('- isRequired:', isRequired);
+      console.log('- status:', status);
+      console.log('- hasAgreement:', hasAgreement);
+
+      // Check for completed agreement status
+      const completedStatuses = ['uploaded', 'approved', 'completed'];
+      const isCompleted = completedStatuses.includes(status);
+
+      console.log('Completion check:');
+      console.log('- completedStatuses:', completedStatuses);
+      console.log('- isCompleted:', isCompleted);
+      console.log('- shouldRedirect:', !isRequired || isCompleted);
+
       // If agreement is not required or already completed, redirect to dashboard
-      if (!agreementStatus?.required || agreementStatus?.status === 'completed') {
-        console.log('Agreement not required or already completed, redirecting to dashboard');
+      if (!isRequired || isCompleted) {
+        console.log('🚀 REDIRECTING TO DASHBOARD');
+        console.log('Reason: Agreement not required or already completed');
+        console.log('- Not required:', !isRequired);
+        console.log('- Is completed:', isCompleted);
         this.router.navigate(['/consignor/dashboard']);
         return;
       }
+
+      console.log('✋ STAYING ON AGREEMENT PAGE - Agreement required and not completed');
 
       // Store the status (even though it's a different type than AgreementStatusDto)
       this.agreementStatus = agreementStatus;
 
       // Also get consignor profile for display purposes
       this.consignorProfile = await this.consignorService.getProfile().toPromise();
+      console.log('Consignor profile loaded:', this.consignorProfile);
     } catch (err: any) {
       this.error = 'Failed to load agreement status';
       console.error('Agreement status error:', err);
     } finally {
       this.isLoading = false;
+      console.log('=== AGREEMENT GATE DEBUG END ===');
     }
   }
 

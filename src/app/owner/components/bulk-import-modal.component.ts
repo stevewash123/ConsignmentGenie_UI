@@ -33,6 +33,7 @@ export interface ImportSummary {
 })
 export class BulkImportModalComponent implements OnInit {
   @Input() isOpen = false;
+  @Input() preloadedItems: ImportedItem[] | null = null; // For manifest data
   @Output() closeModal = new EventEmitter<void>();
   @Output() itemsImported = new EventEmitter<ImportedItem[]>();
 
@@ -63,6 +64,10 @@ export class BulkImportModalComponent implements OnInit {
   defaultConsignorId = signal<string | null>(null);
   useDefaultConsignor = signal(false);
   defaultConsignorMode = signal<'missing' | 'missing-and-errors' | 'all'>('missing');
+
+  // Manifest-specific properties
+  isManifestImport = signal(false);
+  manifestConsignorNumber = signal<string>('');
 
   // In-grid editing state
   editingRowId = signal<number | null>(null);
@@ -96,6 +101,10 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
     // Reset default consignor settings
     this.defaultConsignorId.set(null);
     this.useDefaultConsignor.set(false);
+
+    // Reset manifest-specific properties
+    this.isManifestImport.set(false);
+    this.manifestConsignorNumber.set('');
 
     // Reset duplicate detection
     this.isDuplicateFile.set(false);
@@ -131,8 +140,30 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
   }
 
   ngOnInit() {
-    console.log('🔧 BulkImportModal: Initializing, loading consignors...');
+    console.log('🔧 BulkImportModal: Initializing, loading consignors...', {
+      hasPreloadedItems: !!(this.preloadedItems && this.preloadedItems.length > 0),
+      preloadedItems: this.preloadedItems
+    });
     this.loadConsignors();
+
+    // If we have preloaded items (from manifest), process them directly
+    if (this.preloadedItems && this.preloadedItems.length > 0) {
+      console.log('📦 BulkImportModal: Processing preloaded manifest items', this.preloadedItems);
+      this.processPreloadedItems();
+    } else {
+      console.log('📝 BulkImportModal: No preloaded items, showing file upload');
+    }
+  }
+
+  ngOnChanges(changes: any) {
+    console.log('🔄 BulkImportModal: Input changes detected:', changes);
+
+    // Handle preloadedItems changes
+    if (changes['preloadedItems'] && changes['preloadedItems'].currentValue) {
+      const preloadedItems = changes['preloadedItems'].currentValue;
+      console.log('📦 BulkImportModal: Preloaded items changed, processing:', preloadedItems);
+      this.processPreloadedItems();
+    }
   }
 
   private loadConsignors() {
@@ -141,11 +172,99 @@ Leather Messenger Bag,Brown leather with brass buckles,,125.00,472HK3,Accessorie
       next: (consignors) => {
         console.log(`✅ BulkImportModal: Loaded ${consignors.length} consignors:`, consignors.map(c => ({ id: c.id, name: c.name, consignorNumber: c.consignorNumber })));
         this.consignors.set(consignors);
+
+        // If we have preloaded items and consignors are now loaded, process them
+        if (this.preloadedItems && this.preloadedItems.length > 0) {
+          this.processPreloadedItems();
+        }
       },
       error: (error) => {
         console.error('❌ BulkImportModal: Error loading consignors:', error);
       }
     });
+  }
+
+  private autoSelectConsignorFromManifest(consignorNumber: string) {
+    const matchingConsignor = this.consignors().find(c =>
+      c.consignorNumber?.toUpperCase() === consignorNumber.toUpperCase()
+    );
+
+    if (matchingConsignor) {
+      console.log('✅ Auto-selecting consignor for manifest:', {
+        consignorId: matchingConsignor.id,
+        consignorNumber: matchingConsignor.consignorNumber,
+        consignorName: matchingConsignor.name
+      });
+
+      this.defaultConsignorId.set(matchingConsignor.id.toString());
+      this.useDefaultConsignor.set(true);
+      this.defaultConsignorMode.set('all'); // Apply to all items in manifest
+    } else {
+      console.warn('⚠️ No matching consignor found for manifest consignor number:', consignorNumber);
+    }
+  }
+
+  private processPreloadedItems() {
+    if (!this.preloadedItems || this.preloadedItems.length === 0) return;
+
+    console.log('📦 Processing manifest items directly to preview:', this.preloadedItems);
+
+    // Mark as manifest import
+    this.isManifestImport.set(true);
+
+    // Extract consignor number from first item (all should be the same)
+    const firstItem = this.preloadedItems[0];
+    if (firstItem?.consignorNumber) {
+      this.manifestConsignorNumber.set(firstItem.consignorNumber);
+      console.log('🎅 Extracted consignor number from manifest:', firstItem.consignorNumber);
+
+      // Auto-select the matching consignor if found
+      this.autoSelectConsignorFromManifest(firstItem.consignorNumber);
+    }
+
+    // Convert ImportedItem[] to ImportRow[] format (same as CSV processing does)
+    const importRows: ImportRow[] = this.preloadedItems.map((item, index) => {
+      const rowData = {
+        name: item.name,
+        description: item.description || '',
+        sku: item.sku || '',
+        price: item.price,
+        consignorNumber: item.consignorNumber || '',
+        category: item.category || '',
+        condition: item.condition || 'Good',
+        receivedDate: item.receivedDate || new Date().toISOString().split('T')[0],
+        location: item.location || '',
+        notes: item.notes || ''
+      };
+
+      // Validate the row (reuse existing validation logic)
+      const errors: string[] = [];
+      if (!rowData.name?.trim()) errors.push('Name is required');
+      if (!rowData.price || parseFloat(rowData.price) <= 0) errors.push('Valid price is required');
+
+      return {
+        rowNumber: index + 1,
+        data: rowData,
+        isValid: errors.length === 0,
+        errors,
+        originalCsv: `${rowData.name},${rowData.description},${rowData.sku},${rowData.price},${rowData.consignorNumber},${rowData.category},${rowData.condition},${rowData.receivedDate},${rowData.location},${rowData.notes}`
+      };
+    });
+
+    // Set the import data and summary (same as CSV processing would do)
+    this.importData.set(importRows);
+
+    const validRows = importRows.filter(row => row.isValid).length;
+    const errorRows = importRows.length - validRows;
+
+    this.summary.set({
+      totalRows: importRows.length,
+      validRows,
+      errorRows,
+      errors: errorRows > 0 ? [`${errorRows} rows have validation errors`] : []
+    });
+
+    console.log(`📊 Manifest processing complete: ${validRows} valid, ${errorRows} invalid out of ${importRows.length} total items`);
   }
 
   onFileSelected(event: Event) {

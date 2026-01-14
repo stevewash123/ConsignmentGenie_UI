@@ -27,36 +27,28 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getRoute: (n, role) => n.payoutId ? `/${role}/payouts/${n.payoutId}` : `/${role}/payouts`,
     allowedRoles: ['consignor']
   },
-  item_price_changed: {
-    icon: '💲',
+  payout_ready: {
+    icon: '💰',
     color: 'blue',
-    getTitle: () => 'Price Updated',
+    getTitle: () => 'Payout Ready',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => n.itemId ? `/${role}/items/${n.itemId}` : null,
+    getRoute: (n, role) => n.payoutId ? `/${role}/payouts/${n.payoutId}` : `/${role}/payouts`,
     allowedRoles: ['consignor']
   },
-  item_returned: {
-    icon: '🔄',
-    color: 'yellow',
-    getTitle: () => 'Item Returned',
+  consignor_approved: {
+    icon: '✅',
+    color: 'green',
+    getTitle: () => 'Consignor Approved',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => n.itemId ? `/${role}/items/${n.itemId}` : null,
+    getRoute: (n, role) => `/${role}/dashboard`,
     allowedRoles: ['consignor']
   },
-  item_expired: {
-    icon: '⏰',
-    color: 'yellow',
-    getTitle: () => 'Item Expired',
+  consignor_rejected: {
+    icon: '❌',
+    color: 'red',
+    getTitle: () => 'Consignor Rejected',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => n.itemId ? `/${role}/items/${n.itemId}` : null,
-    allowedRoles: ['consignor']
-  },
-  statement_ready: {
-    icon: '📄',
-    color: 'blue',
-    getTitle: () => 'Statement Ready',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/statements`,
+    getRoute: (n, role) => `/${role}/dashboard`,
     allowedRoles: ['consignor']
   },
   welcome: {
@@ -77,12 +69,28 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getRoute: (n, role) => n.providerId ? `/${role}/consignors/${n.providerId}` : `/${role}/consignors`,
     allowedRoles: ['owner']
   },
-  provider_approved: {
-    icon: '✅',
-    color: 'green',
-    getTitle: () => 'consignor Approved',
+  low_inventory_alert: {
+    icon: '📦',
+    color: 'yellow',
+    getTitle: () => 'Low Inventory Alert',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => n.providerId ? `/${role}/consignors/${n.providerId}` : `/${role}/consignors`,
+    getRoute: (n, role) => `/${role}/inventory`,
+    allowedRoles: ['owner']
+  },
+  suggestion_submitted: {
+    icon: '💡',
+    color: 'blue',
+    getTitle: () => 'Suggestion Submitted',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/suggestions`,
+    allowedRoles: ['owner']
+  },
+  owner_invitation_sent: {
+    icon: '📧',
+    color: 'blue',
+    getTitle: () => 'Owner Invitation Sent',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/settings`,
     allowedRoles: ['owner']
   },
   dropoff_manifest: {
@@ -101,55 +109,157 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     getRoute: (n, role) => `/${role}/sales`,
     allowedRoles: ['owner']
   },
-  payout_due_reminder: {
-    icon: '⚠️',
-    color: 'yellow',
-    getTitle: () => 'Payout Due',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/payouts`,
-    allowedRoles: ['owner']
-  },
-  low_inventory_alert: {
-    icon: '📦',
-    color: 'yellow',
-    getTitle: () => 'Low Inventory Alert',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/inventory`,
-    allowedRoles: ['owner']
-  },
-  subscription_reminder: {
-    icon: '💳',
+
+  // System notifications
+  password_reset: {
+    icon: '🔒',
     color: 'blue',
-    getTitle: () => 'Subscription Reminder',
+    getTitle: () => 'Password Reset',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner', 'admin']
+  },
+  account_activated: {
+    icon: '✅',
+    color: 'green',
+    getTitle: () => 'Account Activated',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/dashboard`,
+    allowedRoles: ['consignor', 'owner']
+  },
+  account_deactivated: {
+    icon: '❌',
+    color: 'red',
+    getTitle: () => 'Account Deactivated',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner']
+  },
+
+  // Payment notifications
+  payment_received: {
+    icon: '💰',
+    color: 'green',
+    getTitle: () => 'Payment Received',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/payments`,
+    allowedRoles: ['owner']
+  },
+  payment_failed: {
+    icon: '❌',
+    color: 'red',
+    getTitle: () => 'Payment Failed',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/payments`,
+    allowedRoles: ['owner']
+  },
+  subscription_expiring: {
+    icon: '⏰',
+    color: 'yellow',
+    getTitle: () => 'Subscription Expiring',
     getMessage: (n) => n.message,
     getRoute: (n, role) => `/${role}/settings/billing`,
     allowedRoles: ['owner']
   },
-  subscription_failed: {
-    icon: '🚨',
+
+  // Integration notifications
+  sync_error: {
+    icon: '❌',
     color: 'red',
-    getTitle: () => 'Subscription Payment Failed',
+    getTitle: () => 'Sync Error',
     getMessage: (n) => n.message,
-    getRoute: (n, role) => role === 'admin' ?
-      (n.referenceId ? `/${role}/subscriptions/${n.referenceId}` : `/${role}/subscriptions`) :
-      `/${role}/settings/billing`,
+    getRoute: (n, role) => `/${role}/settings/integrations`,
+    allowedRoles: ['owner']
+  },
+  sync_completed: {
+    icon: '✅',
+    color: 'green',
+    getTitle: () => 'Sync Completed',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/settings/integrations`,
+    allowedRoles: ['owner']
+  },
+
+  // Legacy types
+  info: {
+    icon: 'ℹ️',
+    color: 'blue',
+    getTitle: () => 'Information',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner', 'admin', 'customer']
+  },
+  success: {
+    icon: '✅',
+    color: 'green',
+    getTitle: () => 'Success',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner', 'admin', 'customer']
+  },
+  warning: {
+    icon: '⚠️',
+    color: 'yellow',
+    getTitle: () => 'Warning',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner', 'admin', 'customer']
+  },
+  error: {
+    icon: '❌',
+    color: 'red',
+    getTitle: () => 'Error',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner', 'admin', 'customer']
+  },
+  promotion: {
+    icon: '🎉',
+    color: 'purple',
+    getTitle: () => 'Promotion',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner', 'customer']
+  },
+  reminder: {
+    icon: '🔔',
+    color: 'blue',
+    getTitle: () => 'Reminder',
+    getMessage: (n) => n.message,
+    getRoute: () => null,
+    allowedRoles: ['consignor', 'owner', 'admin', 'customer']
+  },
+  payment: {
+    icon: '💳',
+    color: 'blue',
+    getTitle: () => 'Payment',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/payments`,
+    allowedRoles: ['consignor', 'owner']
+  },
+  inventory: {
+    icon: '📦',
+    color: 'blue',
+    getTitle: () => 'Inventory',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/inventory`,
+    allowedRoles: ['owner']
+  },
+  consignor: {
+    icon: '👤',
+    color: 'blue',
+    getTitle: () => 'Consignor',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/consignors`,
+    allowedRoles: ['owner']
+  },
+  report: {
+    icon: '📊',
+    color: 'blue',
+    getTitle: () => 'Report',
+    getMessage: (n) => n.message,
+    getRoute: (n, role) => `/${role}/reports`,
     allowedRoles: ['owner', 'admin']
-  },
-  square_sync_error: {
-    icon: '❌',
-    color: 'red',
-    getTitle: () => 'Square Sync Error',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/settings/integrations`,
-    allowedRoles: ['owner']
-  },
-  qb_sync_error: {
-    icon: '❌',
-    color: 'red',
-    getTitle: () => 'QuickBooks Sync Error',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/settings/integrations`,
-    allowedRoles: ['owner']
   },
   system_announcement: {
     icon: '📢',
@@ -160,113 +270,6 @@ export const notificationConfig: Record<NotificationType, NotificationTypeConfig
     allowedRoles: ['owner', 'consignor']
   },
 
-  // Admin types
-  new_owner_request: {
-    icon: '🏪',
-    color: 'blue',
-    getTitle: () => 'New Shop Registration',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
-    allowedRoles: ['admin']
-  },
-  owner_approved: {
-    icon: '✅',
-    color: 'green',
-    getTitle: () => 'Shop Approved',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
-    allowedRoles: ['admin']
-  },
-  subscription_created: {
-    icon: '💳',
-    color: 'green',
-    getTitle: () => 'New Subscription',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.referenceId ? `/${role}/subscriptions/${n.referenceId}` : `/${role}/subscriptions`,
-    allowedRoles: ['admin']
-  },
-  subscription_cancelled: {
-    icon: '💔',
-    color: 'gray',
-    getTitle: () => 'Subscription Cancelled',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
-    allowedRoles: ['admin']
-  },
-  system_error: {
-    icon: '🚨',
-    color: 'red',
-    getTitle: () => 'System Error',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/system/errors`,
-    allowedRoles: ['admin']
-  },
-  daily_platform_summary: {
-    icon: '📈',
-    color: 'blue',
-    getTitle: () => 'Daily Platform Summary',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => `/${role}/analytics`,
-    allowedRoles: ['admin']
-  },
-  new_owner_signup: {
-    icon: '🏪',
-    color: 'blue',
-    getTitle: () => 'New Shop Signup',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
-    allowedRoles: ['admin']
-  },
-  support_ticket_opened: {
-    icon: '🎫',
-    color: 'yellow',
-    getTitle: () => 'Support Ticket Opened',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.referenceId ? `/${role}/support/${n.referenceId}` : `/${role}/support`,
-    allowedRoles: ['admin']
-  },
-  support_ticket_assigned: {
-    icon: '🎫',
-    color: 'yellow',
-    getTitle: () => 'Support Ticket Assigned',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.referenceId ? `/${role}/support/${n.referenceId}` : `/${role}/support`,
-    allowedRoles: ['admin']
-  },
-  trial_expiring: {
-    icon: '⏰',
-    color: 'orange',
-    getTitle: () => 'Trial Expiring',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.organizationId ? `/${role}/owners/${n.organizationId}` : `/${role}/owners`,
-    allowedRoles: ['admin']
-  },
-
-  // Customer types
-  order_confirmed: {
-    icon: '✅',
-    color: 'green',
-    getTitle: () => 'Order Confirmed',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.referenceId ? `/${role}/orders/${n.referenceId}` : `/${role}/orders`,
-    allowedRoles: ['customer']
-  },
-  order_ready_pickup: {
-    icon: '📦',
-    color: 'blue',
-    getTitle: () => 'Ready for Pickup',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.referenceId ? `/${role}/orders/${n.referenceId}` : `/${role}/orders`,
-    allowedRoles: ['customer']
-  },
-  order_shipped: {
-    icon: '🚚',
-    color: 'blue',
-    getTitle: () => 'Order Shipped',
-    getMessage: (n) => n.message,
-    getRoute: (n, role) => n.referenceId ? `/${role}/orders/${n.referenceId}` : `/${role}/orders`,
-    allowedRoles: ['customer']
-  }
 };
 
 export function getNotificationConfig(type: NotificationType): NotificationTypeConfig | undefined {

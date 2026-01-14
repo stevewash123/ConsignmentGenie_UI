@@ -64,6 +64,7 @@ export class InventoryListComponent implements OnInit {
   consignors = signal<Consignor[]>([]);
   error = signal<string | null>(null);
   isBulkImportModalOpen = signal(false);
+  preloadedItems = signal<ImportedItem[] | null>(null); // For manifest data
   isColorGuideModalOpen = signal(false);
   isLoading = signal(false);
 
@@ -133,6 +134,7 @@ export class InventoryListComponent implements OnInit {
     // Check for manifest query parameters to auto-open bulk import modal
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       if (params['openBulkImport'] === 'true' && params['manifestId']) {
+        console.log('🧭 Opening bulk import from notification with manifestId:', params['manifestId']);
         this.openBulkImportWithManifest(params['manifestId']);
       }
     });
@@ -448,6 +450,8 @@ export class InventoryListComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (manifest) => {
+        console.log('🔍 Manifest data received:', manifest);
+
         // Convert manifest items to ImportedItem format for bulk import modal
         const importedItems: ImportedItem[] = manifest.items?.map((item: any) => ({
           name: item.name,
@@ -462,8 +466,13 @@ export class InventoryListComponent implements OnInit {
           notes: item.notes || ''
         })) || [];
 
-        // TODO: Pass the importedItems to the bulk import modal
-        // For now, just open the modal - the modal can be enhanced to accept pre-populated data
+        console.log('📦 Auto-selecting consignor from manifest:', {
+          manifestConsignorNumber: manifest.consignorNumber,
+          manifestConsignorName: manifest.consignorName
+        });
+
+        // Store the imported items and open the modal
+        this.preloadedItems.set(importedItems);
         this.isBulkImportModalOpen.set(true);
 
         console.log('Manifest data loaded for bulk import:', {

@@ -414,6 +414,7 @@ export interface DropoffItem {
   name: string;
   category: string;
   brand?: string;
+  condition: string;
   suggestedPrice: number;
   notes?: string;
 }

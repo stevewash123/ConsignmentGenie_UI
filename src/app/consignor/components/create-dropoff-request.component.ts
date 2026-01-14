@@ -37,6 +37,7 @@ export class CreateDropoffRequestComponent implements OnInit {
   shopName: string = 'Shop';
   categories: string[] = [];
   filteredCategories: string[] = [];
+  conditions: { value: string; label: string }[] = [];
 
   @ViewChild('itemNameInput') itemNameInput!: ElementRef<HTMLInputElement>;
   @ViewChild('addItemForm') addItemForm!: NgForm;
@@ -70,6 +71,9 @@ export class CreateDropoffRequestComponent implements OnInit {
         this.filteredCategories = this.categories;
       }
     });
+
+    // Load conditions
+    this.loadConditions();
   }
 
   createEmptyItem(): DropoffItem {
@@ -77,9 +81,30 @@ export class CreateDropoffRequestComponent implements OnInit {
       name: '',
       category: '',
       brand: '',
+      condition: '',
       suggestedPrice: 0,
       notes: ''
     };
+  }
+
+  loadConditions() {
+    // Call the conditions endpoint to get available condition options
+    this.consignorService.getConditions().subscribe({
+      next: (conditions) => {
+        this.conditions = conditions.map(c => ({ value: c.value, label: c.label }));
+      },
+      error: (error) => {
+        console.error('Error loading conditions:', error);
+        // Fallback conditions if API fails
+        this.conditions = [
+          { value: 'New', label: 'New' },
+          { value: 'LikeNew', label: 'Like New' },
+          { value: 'Good', label: 'Good' },
+          { value: 'Fair', label: 'Fair' },
+          { value: 'Poor', label: 'Poor' }
+        ];
+      }
+    });
   }
 
   addItem() {
@@ -113,6 +138,7 @@ export class CreateDropoffRequestComponent implements OnInit {
   isNewItemValid(): boolean {
     return !!(this.newItem.name && this.newItem.name.trim() !== '' &&
               this.newItem.category && this.newItem.category.trim() !== '' &&
+              this.newItem.condition && this.newItem.condition.trim() !== '' &&
               this.newItem.suggestedPrice > 0);
   }
 
@@ -226,7 +252,9 @@ export class CreateDropoffRequestComponent implements OnInit {
   }
 
   isItemValid(item: DropoffItem): boolean {
-    return !!(item.name && item.name.trim() !== '' && item.suggestedPrice > 0);
+    return !!(item.name && item.name.trim() !== '' &&
+              item.condition && item.condition.trim() !== '' &&
+              item.suggestedPrice > 0);
   }
 
   onAddItemKeyPress(event: KeyboardEvent) {
@@ -234,5 +262,10 @@ export class CreateDropoffRequestComponent implements OnInit {
       event.preventDefault();
       this.addItem();
     }
+  }
+
+  getConditionLabel(conditionValue: string): string {
+    const condition = this.conditions.find(c => c.value === conditionValue);
+    return condition ? condition.label : conditionValue;
   }
 }

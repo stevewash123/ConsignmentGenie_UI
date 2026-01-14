@@ -58,33 +58,58 @@ export class ConsignorAgreementOnboardingComponent implements OnInit {
 
   private async loadAgreementStatus(): Promise<void> {
     this.isLoading.set(true);
+    console.log('=== CONSIGNOR AGREEMENT ONBOARDING DEBUG ===');
+
     try {
       const status = await this.consignorService.getAgreementStatus().toPromise();
+      console.log('Raw agreement status API response:', status);
 
-      this.agreementStatus.set(status || { required: false, type: 'none', status: 'completed' });
+      // Map our API response format to the expected interface format
+      const apiStatus = status?.agreementStatus?.toLowerCase();
+      const mappedStatusValue: 'pending' | 'completed' = (['uploaded', 'approved'].includes(apiStatus) ? 'completed' :
+                                apiStatus === 'not_required' ? 'completed' : 'pending');
+
+      const mappedStatus: AgreementStatus = {
+        required: status?.requiresAgreement || false,
+        type: (status?.agreementMethod as 'none' | 'acknowledge' | 'upload') || 'none',
+        status: mappedStatusValue,
+        completedAt: status?.completedAt
+      };
+
+      console.log('Mapped status object:', mappedStatus);
+      this.agreementStatus.set(mappedStatus);
 
       // Check if we should redirect back to dashboard
       // Only redirect if agreement is not required OR already completed
-      // AND we came from the dashboard (indicated by returnTo query param)
       const returnTo = this.route.snapshot.queryParams['returnTo'];
+      console.log('Return to query param:', returnTo);
 
-      if ((!status?.required || status?.status === 'completed') && returnTo === 'dashboard' && !this.hasRedirected) {
-        // No agreement required OR agreement already completed, proceed to dashboard
+      const shouldRedirect = !mappedStatus.required || mappedStatus.status === 'completed';
+      console.log('Should redirect check:', {
+        notRequired: !mappedStatus.required,
+        isCompleted: mappedStatus.status === 'completed',
+        shouldRedirect,
+        hasRedirected: this.hasRedirected
+      });
+
+      // Remove the returnTo requirement - always redirect if agreement is complete or not required
+      if (shouldRedirect && !this.hasRedirected) {
+        console.log('🚀 REDIRECTING TO DASHBOARD');
+        console.log('Reason: Agreement not required or completed');
         this.hasRedirected = true;
         this.proceedToDashboard();
         return;
       }
 
-      // If agreement is not required and we didn't come from dashboard,
-      // they probably navigated here directly - just stay on this page
-      if (!status?.required) {
-        // Show message that no agreement is required
+      // If agreement is not required, show appropriate message
+      if (!mappedStatus.required) {
+        console.log('⚠️ Agreement not required - staying on page');
         this.errorMessage.set('No agreement is currently required for your account.');
-        // Still load terms text so the user can see what the agreement would be
         await this.loadTermsText();
         return;
       }
 
+      console.log('✋ Agreement required and not completed - loading terms');
       // Always load terms text regardless of agreement type
       await this.loadTermsText();
     } catch (error: any) {

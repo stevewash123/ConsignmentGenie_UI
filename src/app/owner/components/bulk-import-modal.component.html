@@ -2,7 +2,7 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
     <!-- Header -->
     <div class="modal-header">
-      <h2 class="modal-title">📦 Import Items</h2>
+      <h2 class="modal-title">📦 {{ isManifestImport() ? 'Import Dropoff Items' : 'Import Items' }}</h2>
       <button class="close-button" (click)="close()" type="button">×</button>
     </div>
 
@@ -15,7 +15,7 @@
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
-        *ngIf="!selectedFile()">
+        *ngIf="!selectedFile() && !isManifestImport()">
 
         <div class="upload-icon">📄</div>
         <div class="upload-title">Import Items from CSV</div>
@@ -49,13 +49,21 @@
       </div>
 
       <!-- Preview Section -->
-      <div class="preview-section" *ngIf="selectedFile() && !isProcessing() && summary()">
+      <div class="preview-section" *ngIf="(selectedFile() || isManifestImport()) && !isProcessing() && summary()">
         <!-- File Info -->
-        <div style="margin-bottom: 0.5rem;">
+        <div style="margin-bottom: 0.5rem;" *ngIf="!isManifestImport()">
           <strong>File:</strong> {{ selectedFile()!.name }}
           <button class="btn btn-secondary" style="margin-left: 1rem; font-size: 0.75rem; padding: 0.25rem 0.5rem;" (click)="reset(); selectedFile.set(null)">
             Choose Different File
           </button>
+        </div>
+
+        <!-- Manifest Info -->
+        <div style="margin-bottom: 0.5rem;" *ngIf="isManifestImport()">
+          <strong>Source:</strong> Dropoff Request Manifest
+          <span *ngIf="manifestConsignorNumber()" style="margin-left: 1rem;">
+            <strong>Consignor:</strong> {{ manifestConsignorNumber() }}
+          </span>
         </div>
 
         <!-- Duplicate File Warning -->
@@ -75,7 +83,7 @@
 
 
         <!-- Default Consignor Selection -->
-        <div class="default-consignor-section" *ngIf="summary()!.errorRows > 0">
+        <div class="default-consignor-section" *ngIf="summary()!.errorRows > 0 || isManifestImport()">
           <div class="default-consignor-controls">
             <div class="consignor-selector">
               <label for="defaultConsignor" class="select-label">Default Consignor:</label>
@@ -291,7 +299,7 @@
     </div>
 
     <!-- Footer -->
-    <div class="modal-footer" *ngIf="selectedFile() && !isProcessing() && summary()">
+    <div class="modal-footer" *ngIf="(selectedFile() || isManifestImport()) && !isProcessing() && summary()">
       <div class="footer-left">
         <button
           class="btn btn-secondary"

@@ -12,6 +12,7 @@ import {
 } from '../models/notification.models';
 import { getNotificationIcon, getNotificationIconClass } from '../config/notification.config';
 import { LoadingService } from '../services/loading.service';
+import { NOTIFICATION_TYPES, getNotificationTypeLabel } from '../constants/notification-types';
 
 @Component({
   selector: 'app-notification-center',
@@ -35,14 +36,13 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   loadingKey = 'notifications';
 
   availableTypes: { value: string; label: string }[] = [
-    { value: 'item_sold', label: 'Item Sold' },
-    { value: 'payout_processed', label: 'Payout Processed' },
-    { value: 'payout_pending', label: 'Payout Pending' },
-    { value: 'statement_ready', label: 'Statement Ready' },
-    { value: 'new_provider_request', label: 'consignor Request' },
-    { value: 'dropoff_manifest', label: 'Drop-off Manifests' },
-    { value: 'subscription_reminder', label: 'Subscription' },
-    { value: 'system_announcement', label: 'Announcements' }
+    { value: NOTIFICATION_TYPES.ITEM_SOLD, label: getNotificationTypeLabel(NOTIFICATION_TYPES.ITEM_SOLD) },
+    { value: NOTIFICATION_TYPES.PAYOUT_PROCESSED, label: getNotificationTypeLabel(NOTIFICATION_TYPES.PAYOUT_PROCESSED) },
+    { value: NOTIFICATION_TYPES.PAYOUT_READY, label: getNotificationTypeLabel(NOTIFICATION_TYPES.PAYOUT_READY) },
+    { value: NOTIFICATION_TYPES.NEW_PROVIDER_REQUEST, label: getNotificationTypeLabel(NOTIFICATION_TYPES.NEW_PROVIDER_REQUEST) },
+    { value: NOTIFICATION_TYPES.DROPOFF_MANIFEST, label: getNotificationTypeLabel(NOTIFICATION_TYPES.DROPOFF_MANIFEST) },
+    { value: NOTIFICATION_TYPES.SUBSCRIPTION_EXPIRING, label: getNotificationTypeLabel(NOTIFICATION_TYPES.SUBSCRIPTION_EXPIRING) },
+    { value: NOTIFICATION_TYPES.SYSTEM_ANNOUNCEMENT, label: getNotificationTypeLabel(NOTIFICATION_TYPES.SYSTEM_ANNOUNCEMENT) }
   ];
 
   constructor(
@@ -173,7 +173,23 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleNotificationClick(notification: NotificationDto) {
+  handleNotificationClick(notification: NotificationDto, event?: Event) {
+    // Don't handle clicks on buttons or other interactive elements
+    if (event && event.target) {
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'BUTTON' || target.closest('button')) {
+        console.log('🚫 Ignoring notification click - target is button');
+        return;
+      }
+    }
+
+    console.log('🔔 NotificationCenter: handleNotificationClick called!', {
+      notification,
+      actionUrl: notification.actionUrl,
+      type: notification.type,
+      target: event?.target
+    });
+
     if (!notification.isRead) {
       this.markAsRead(notification, new Event('click'));
     }
@@ -181,7 +197,8 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     // Navigate to related entity if actionUrl exists
     if (notification.actionUrl) {
       // Navigation handled by Router in the template via routerLink
-      console.log('Navigate to:', notification.actionUrl);
+      console.log('🧭 Navigate to actionUrl:', notification.actionUrl);
+      this.router.navigate([notification.actionUrl]);
     }
   }
 
@@ -204,21 +221,52 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     return getNotificationIconClass(type as any);
   }
 
+  testButtonClick() {
+    console.log('🧪 TEST: Button click handler works!');
+  }
+
   openBulkImportWithManifest(notification: NotificationDto, event: Event) {
+    console.log('🚀 NotificationCenter: openBulkImportWithManifest called!', {
+      notification,
+      referenceId: notification.referenceId,
+      relatedEntityId: notification.relatedEntityId, // Check legacy too
+      type: notification.type,
+      event,
+      eventType: event.type,
+      target: event.target
+    });
+
     event.stopPropagation();
+    event.preventDefault(); // Also prevent default behavior
 
     // Mark notification as read if not already
     if (!notification.isRead) {
       this.markAsRead(notification, event);
     }
 
+    // Check both modern and legacy properties
+    const manifestId = notification.referenceId || notification.relatedEntityId;
+
     // Navigate to inventory list with manifest ID parameter to trigger bulk import modal
-    if (notification.referenceId) {
+    if (manifestId) {
+      console.log('🧭 NotificationCenter: Navigating to inventory with params:', {
+        manifestId: manifestId,
+        openBulkImport: 'true'
+      });
+
       this.router.navigate(['/owner/inventory'], {
         queryParams: {
-          manifestId: notification.referenceId,
+          manifestId: manifestId,
           openBulkImport: 'true'
         }
+      }).then(
+        success => console.log('✅ Navigation successful:', success),
+        error => console.error('❌ Navigation failed:', error)
+      );
+    } else {
+      console.warn('⚠️ NotificationCenter: No manifestId found in notification', {
+        referenceId: notification.referenceId,
+        relatedEntityId: notification.relatedEntityId
       });
     }
   }

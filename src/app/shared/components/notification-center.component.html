@@ -51,7 +51,7 @@
           *ngFor="let notification of notifications; trackBy: trackByNotificationId"
           class="notification-item"
           [class.unread]="!notification.isRead"
-          (click)="handleNotificationClick(notification)">
+          (click)="handleNotificationClick(notification, $event)">
 
           <!-- Notification Icon -->
           <div class="notification-icon" [ngClass]="getNotificationIconClass(notification.type)">
@@ -90,6 +90,11 @@
                 title="Import items from this manifest">
                 📦 Import Items
               </button>
+            </div>
+
+            <!-- Debug info for notification types -->
+            <div class="debug-info" style="font-size: 10px; color: #666; margin-top: 4px;">
+              Type: "{{ notification.type }}" | RefId: {{ notification.referenceId || 'none' }}
             </div>
           </div>
 

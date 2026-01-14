@@ -53,7 +53,7 @@
               />
               <span class="radio-label">
                 <span class="radio-icon">🔲</span>
-                Pending Square Imports
+                Pending Imports
               </span>
             </label>
           </div>
@@ -308,7 +308,7 @@
                   </ng-container>
                 </ng-container>
 
-                <!-- Square pending imports -->
+                <!-- Pending imports -->
                 <ng-container *ngIf="viewMode() === 'pending' && pendingImportsResult()">
                   <ng-container *ngFor="let pendingItem of pendingImportsResult()!.items; let i = index">
                     <!-- Main pending import row -->
@@ -460,6 +460,7 @@
     <!-- Bulk Import Modal -->
     <app-bulk-import-modal
       [isOpen]="isBulkImportModalOpen()"
+      [preloadedItems]="preloadedItems()"
       (closeModal)="closeBulkImportModal()"
       (itemsImported)="onItemsImported($event)">
     </app-bulk-import-modal>

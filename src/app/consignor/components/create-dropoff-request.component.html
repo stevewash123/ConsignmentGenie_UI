@@ -67,7 +67,7 @@
                     <div *ngFor="let category of filteredCategories"
                          class="dropdown-option"
                          (click)="selectCategory(category, true)">
-                      {{ category }}
+                      {{ category.name }}
                     </div>
                   </div>
                 </div>
@@ -81,6 +81,23 @@
                        name="newItemBrand"
                        (keypress)="onAddItemKeyPress($event)"
                        placeholder="e.g., Designer Brand">
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Condition *</label>
+                <select class="form-input"
+                        [(ngModel)]="newItem.condition"
+                        name="newItemCondition"
+                        #newItemCondition="ngModel"
+                        required>
+                  <option value="">Select condition...</option>
+                  <option *ngFor="let condition of conditions" [value]="condition.value">
+                    {{ condition.label }}
+                  </option>
+                </select>
+                <div *ngIf="newItemCondition.invalid && newItemCondition.touched" class="field-error">
+                  Condition is required
+                </div>
               </div>
 
               <div class="form-field">
@@ -160,7 +177,7 @@
                     <div *ngFor="let category of filteredCategories"
                          class="dropdown-option"
                          (click)="selectCategory(category, false)">
-                      {{ category }}
+                      {{ category.name }}
                     </div>
                   </div>
                 </div>
@@ -173,6 +190,23 @@
                        [(ngModel)]="dropoffRequest.items[editingIndex].brand"
                        [name]="'editItemBrand' + editingIndex"
                        placeholder="e.g., Designer Brand">
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Condition *</label>
+                <select class="form-input"
+                        [(ngModel)]="dropoffRequest.items[editingIndex].condition"
+                        [name]="'editItemCondition' + editingIndex"
+                        #editItemCondition="ngModel"
+                        required>
+                  <option value="">Select condition...</option>
+                  <option *ngFor="let condition of conditions" [value]="condition.value">
+                    {{ condition.label }}
+                  </option>
+                </select>
+                <div *ngIf="editItemCondition.invalid && editItemCondition.touched" class="field-error">
+                  Condition is required
+                </div>
               </div>
 
               <div class="form-field">
@@ -226,6 +260,7 @@
                 <th class="item-name-col">Item Name</th>
                 <th class="category-col">Category</th>
                 <th class="brand-col">Brand</th>
+                <th class="condition-col">Condition</th>
                 <th class="price-col">Suggested Price</th>
                 <th class="actions-col">Actions</th>
               </tr>
@@ -242,6 +277,9 @@
                 </td>
                 <td class="item-brand">
                   {{ item.brand || '-' }}
+                </td>
+                <td class="item-condition">
+                  {{ getConditionLabel(item.condition) || '-' }}
                 </td>
                 <td class="item-price">
                   {{ item.suggestedPrice | currency }}
@@ -265,7 +303,7 @@
             <!-- Total Row -->
             <tfoot *ngIf="dropoffRequest.items.length > 0">
               <tr class="total-row">
-                <td colspan="3" class="total-label">Total Suggested Value:</td>
+                <td colspan="4" class="total-label">Total Suggested Value:</td>
                 <td class="total-amount">{{ getTotalSuggestedPrice() | currency }}</td>
                 <td></td>
               </tr>

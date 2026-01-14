@@ -1,20 +1,9 @@
+import { NotificationType } from '../constants/notification-types';
+
 export type UserRole = 'consignor' | 'owner' | 'admin' | 'customer';
 
-export type NotificationType =
-  // consignor types
-  | 'item_sold' | 'payout_processed' | 'item_price_changed' | 'item_returned'
-  | 'item_expired' | 'statement_ready' | 'welcome'
-  // Owner types
-  | 'new_provider_request' | 'provider_approved' | 'dropoff_manifest' | 'daily_sales_summary'
-  | 'payout_due_reminder' | 'low_inventory_alert' | 'subscription_reminder'
-  | 'subscription_failed' | 'square_sync_error' | 'qb_sync_error' | 'system_announcement'
-  // Admin types
-  | 'new_owner_request' | 'owner_approved' | 'subscription_created'
-  | 'subscription_cancelled' | 'system_error' | 'daily_platform_summary'
-  | 'new_owner_signup' | 'support_ticket_opened' | 'support_ticket_assigned'
-  | 'subscription_failed' | 'trial_expiring'
-  // Customer types
-  | 'order_confirmed' | 'order_ready_pickup' | 'order_shipped';
+// Use the imported NotificationType from constants
+export { NotificationType };
 
 export interface NotificationDto {
   notificationId: string;
@@ -32,8 +21,14 @@ export interface NotificationDto {
   payoutId?: string;
   providerId?: string;
   organizationId?: string;
+
+  // Modern reference properties
   referenceType?: string;
   referenceId?: string;
+
+  // Legacy properties (deprecated - for backward compatibility only)
+  relatedEntityType?: string;
+  relatedEntityId?: string;
 
   // Computed properties
   timeAgo: string;
