@@ -5,66 +5,64 @@ import { CommonModule } from '@angular/common';
   selector: 'app-status-badge',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './status-badge.component.html',
-  styleUrls: ['./status-badge.component.scss']
+  template: `
+    <span [class]="badgeClasses">
+      {{ status }}
+    </span>
+  `,
+  styles: [`
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .status-available {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .status-sold {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .status-withdrawn {
+      background-color: #f59e0b;
+      color: white;
+    }
+
+    .status-damaged {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .status-lost {
+      background-color: #6b7280;
+      color: white;
+    }
+
+    .requires-response {
+      animation: pulse 2s infinite;
+      border: 2px solid #f59e0b;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  `]
 })
 export class StatusBadgeComponent {
-  @Input() status!: string;
+  @Input() status: string = '';
   @Input() requiresResponse: boolean = false;
 
-  get badgeClass(): string {
-    switch (this.status) {
-      case 'available':
-        return 'status-available';
-      case 'sold':
-        return 'status-sold';
-      case 'pending_review':
-      case 'pending_consignor_approval':
-        return 'status-pending';
-      case 'expired':
-        return 'status-expired';
-      case 'ready_for_pickup':
-        return 'status-pickup';
-      default:
-        return 'status-available';
-    }
-  }
-
-  get statusIcon(): string {
-    switch (this.status) {
-      case 'available':
-        return '🟢';
-      case 'sold':
-        return '✅';
-      case 'pending_review':
-        return '🟡';
-      case 'pending_consignor_approval':
-        return '🟡';
-      case 'expired':
-        return '🟠';
-      case 'ready_for_pickup':
-        return '🔵';
-      default:
-        return '🟢';
-    }
-  }
-
-  get displayText(): string {
-    switch (this.status) {
-      case 'available':
-        return 'Available';
-      case 'sold':
-        return 'Sold';
-      case 'pending_review':
-        return 'Pending Review';
-      case 'pending_consignor_approval':
-        return 'Price Change - Your Response Needed';
-      case 'expired':
-        return 'Expired';
-      case 'ready_for_pickup':
-        return 'Ready for Pickup';
-      default:
-        return 'Unknown';
-    }
+  get badgeClasses(): string {
+    const baseClasses = 'status-badge';
+    const statusClass = `status-${this.status.toLowerCase()}`;
+    const responseClass = this.requiresResponse ? 'requires-response' : '';
+    return `${baseClasses} ${statusClass} ${responseClass}`.trim();
   }
 }
