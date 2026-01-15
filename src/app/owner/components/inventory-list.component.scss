@@ -1,22 +1,17 @@
 // ============================================================================
-// Inventory List Component Styles
+// Inventory List Component Styles - Redesigned with Tabs
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Theme Colors - Five-Tier Green System (matching app-wide standards)
+// Theme Colors - Five-Tier Green System
 // ----------------------------------------------------------------------------
 
 // Green Theme Hierarchy (5 levels)
-$color-shell-background: #f0fdf4;        // Level 1: Main shell/body background (very light green)
-$color-section-background: hsl(130, 25%, 92%);  // Level 2: Cards/sections background (light green)
-$color-primary: #059669;                  // Level 3: Headers, borders, primary actions (primary green)
-$color-primary-dark: #047857;            // Level 4: Badges, accents, hover states (dark green)
-$color-primary-darker: #065f46;          // Level 5: Deep accents, pressed states (darker green)
-
-// Legacy aliases for backwards compatibility
-$color-primary-hover: $color-primary-dark;
-$color-card-background: $color-section-background;
-$color-background-subtle: $color-shell-background;
+$color-shell-background: #f0fdf4;        // Level 1: Main shell/body background
+$color-section-background: hsl(130, 25%, 92%);  // Level 2: Cards/sections background
+$color-primary: #059669;                  // Level 3: Headers, borders, primary actions
+$color-primary-dark: #047857;            // Level 4: Badges, accents, hover states
+$color-primary-darker: #065f46;          // Level 5: Deep accents, pressed states
 
 // Other Theme Colors
 $color-text-primary: #1f2937;
@@ -35,6 +30,8 @@ $color-blue-light: #dbeafe;
 $color-danger: #dc2626;
 $color-danger-light: #fee2e2;
 $color-warning: #ea580c;
+$color-success: #059669;
+$color-success-light: #d1fae5;
 
 $border-radius-sm: 4px;
 $border-radius-md: 6px;
@@ -42,15 +39,18 @@ $border-radius-lg: 8px;
 $border-radius-xl: 12px;
 
 $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
 // ----------------------------------------------------------------------------
 // Page Layout
 // ----------------------------------------------------------------------------
 .inventory-page {
-  padding: 2rem;
+  padding: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
+  min-height: 100vh;
+  background-color: $color-shell-background;
 }
 
 // ----------------------------------------------------------------------------
@@ -62,642 +62,602 @@ $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid $color-primary;  // Dark green separator line
+  border-bottom: 2px solid $color-primary;
 
-  h1 {
-    color: $color-text-primary;
-    margin-bottom: 0.5rem;
-    font-size: 2rem;
-    font-weight: 600;
+  .header-content {
+    h1 {
+      color: $color-text-primary;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    p {
+      color: $color-text-secondary;
+      margin: 0;
+    }
   }
 
-  p {
-    color: $color-text-secondary;
-    margin: 0;
+  .header-actions {
+    display: flex;
+    gap: 1rem;
   }
 }
 
-.header-actions {
-  display: flex;
-  gap: 1rem;
-}
-
 // ----------------------------------------------------------------------------
-// Square Integration Styles
+// Tab Navigation
 // ----------------------------------------------------------------------------
-.square-mode-indicator {
-  margin-top: 0.5rem;
+.tab-navigation {
+  margin-bottom: 1.5rem;
 
-  p {
-    color: $color-blue-darker;
+  .tab-list {
+    display: flex;
+    border-bottom: 2px solid $color-border-light;
+    background: white;
+    border-radius: $border-radius-lg $border-radius-lg 0 0;
+    box-shadow: $shadow-sm;
+    overflow: hidden;
+  }
+
+  .tab-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
     font-weight: 500;
-    margin-bottom: 0.5rem;
-  }
-}
+    color: $color-text-secondary;
+    position: relative;
 
-.square-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: $color-blue-light;
-  border: 1px solid #93c5fd;
-  color: #1e40af;
-  padding: 0.375rem 0.75rem;
-  border-radius: $border-radius-md;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
+    &:hover {
+      background: $color-background-light;
+      color: $color-primary;
+    }
 
-.badge-icon {
-  font-size: 1rem;
-}
+    &.active {
+      color: $color-primary;
+      background: $color-shell-background;
+      border-bottom-color: $color-primary;
+      font-weight: 600;
 
-.square-mode-actions {
-  display: flex;
-  align-items: center;
-  margin-left: 1rem;
-}
+      .tab-icon {
+        transform: scale(1.1);
+      }
+    }
 
-.square-note {
-  color: $color-text-secondary;
-  font-size: 0.875rem;
-  margin: 0;
-}
+    .tab-icon {
+      font-size: 1.1rem;
+      transition: transform 0.2s ease;
+    }
 
-.square-link {
-  color: $color-blue-primary;
-  text-decoration: none;
-  font-weight: 500;
-
-  &:hover {
-    color: $color-blue-dark;
-    text-decoration: underline;
+    .tab-count {
+      background: $color-primary;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: $border-radius-sm;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.3rem;
+    }
   }
 }
 
 // ----------------------------------------------------------------------------
-// Buttons
+// Tab Content
 // ----------------------------------------------------------------------------
-.btn-primary,
-.btn-secondary {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: $border-radius-lg;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-}
+.tab-panel {
+  display: none;
+  background: white;
+  border-radius: 0 0 $border-radius-lg $border-radius-lg;
+  box-shadow: $shadow-md;
+  min-height: 500px;
 
-.btn-primary {
-  background: $color-primary;
-  color: white;
-
-  &:hover {
-    background: $color-primary-hover;
-  }
-}
-
-.btn-secondary {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #0ea5e9;
-
-  &:hover {
-    background: #bfdbfe;
-    border-color: #2563eb;
-  }
-}
-
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: $color-background-light;
-  border-radius: $border-radius-md;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-
-  &:hover {
-    background: $color-background-hover;
-  }
-
-  &.danger:hover {
-    background: $color-danger-light;
-    color: $color-danger;
+  &.active {
+    display: block;
   }
 }
 
 // ----------------------------------------------------------------------------
-// View Mode Toggle
+// Controls Section
 // ----------------------------------------------------------------------------
-.view-mode-section {
-  margin: 1.5rem 0;
-  padding: 1rem;
-  background-color: $color-card-background;
-  border-radius: $border-radius-lg;
-  border: 2px solid $color-primary;
-}
-
-.view-mode-toggle {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-}
-
-.radio-option {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-
-  input[type="radio"] {
-    margin-right: 0.75rem;
-    transform: scale(1.2);
-  }
-}
-
-.radio-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-  color: $color-text-primary;
-
-  .radio-icon {
-    font-size: 1.1em;
-  }
-}
-
-
-
-// ----------------------------------------------------------------------------
-// Inventory Header (outside section)
-// ----------------------------------------------------------------------------
-.inventory-header {
+.tab-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
+  background: $color-background-light;
+  border-bottom: 1px solid $color-border;
 
-  h2 {
-    color: $color-text-primary;
-    font-size: 1.25rem;
-    margin: 0;
-  }
-}
+  .search-section {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
 
-// ----------------------------------------------------------------------------
-// Results Section
-// ----------------------------------------------------------------------------
-.results-section {
-  overflow: hidden;
-  border: 2px solid $color-primary;
-  border-radius: $border-radius-lg;
-}
-
-// Table filters in header row
-.filter-row {
-  background-color: $color-card-background;
-
-  th {
-    padding: 0.25rem 0.5rem !important; // Reduced vertical padding
-    border-bottom: 1px solid $color-primary !important; // Fine dark green border
-    background-color: $color-card-background !important; // Force consistent background
-
-    // Remove right border between category and status filters
-    &.category-filter {
-      border-right: none !important;
-    }
-
-    &.status-filter {
-      border-left: none !important;
-    }
-
-    .filter-input,
-    .filter-select {
-      width: 100%;
-      padding: 0.375rem 0.5rem;
-      border: 1px solid $color-border-light;
-      border-radius: $border-radius-sm;
-      font-size: 0.875rem;
-      background: white;
+    .search-input {
+      padding: 0.5rem 1rem;
+      border: 1px solid $color-border;
+      border-radius: $border-radius-md;
+      font-size: 0.9rem;
+      width: 300px;
 
       &:focus {
         outline: none;
         border-color: $color-primary;
-        box-shadow: 0 0 0 2px rgba($color-primary, 0.1);
-      }
-
-      // Narrow dropdown styles
-      &.narrow {
-        width: 120px;
-        font-size: 0.8rem;
+        box-shadow: 0 0 0 2px rgba($color-primary, 0.2);
       }
     }
+  }
 
-    .filter-select {
-      margin-bottom: 0.25rem;
+  .controls-section {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 
-      &:last-child {
-        margin-bottom: 0;
-      }
+    .page-size-select {
+      padding: 0.5rem;
+      border: 1px solid $color-border;
+      border-radius: $border-radius-md;
+      background: white;
     }
   }
 }
 
-.clear-filters-btn {
-  padding: 0.375rem 0.75rem !important;
-  font-size: 0.75rem !important;
-  white-space: nowrap;
-}
-
-.header-controls {
+// ----------------------------------------------------------------------------
+// Filters Section (Regular Inventory)
+// ----------------------------------------------------------------------------
+.filters-section {
   display: flex;
-  align-items: center;
   gap: 1rem;
-}
-
-// Header search input
-.header-search-input {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid $color-border-light;
-  border-radius: $border-radius-md;
-  font-size: 0.875rem;
-  width: 250px;
+  padding: 1rem 1.5rem;
   background: white;
+  border-bottom: 1px solid $color-border;
+  flex-wrap: wrap;
 
-  &:focus {
-    outline: none;
-    border-color: $color-primary;
-    box-shadow: 0 0 0 2px rgba($color-primary, 0.1);
-  }
+  .filter-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-md;
+    background: white;
+    font-size: 0.9rem;
+    min-width: 120px;
 
-  &::placeholder {
-    color: $color-text-secondary;
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
   }
 }
 
-.page-size-select {
-  padding: 0.5rem;
-  border: 1px solid $color-border-light;
-  border-radius: $border-radius-md;
-  font-size: 0.875rem;
+// ----------------------------------------------------------------------------
+// Bulk Actions Section (Pending Imports)
+// ----------------------------------------------------------------------------
+.bulk-actions-section {
+  padding: 1rem 1.5rem;
+  background: $color-success-light;
+  border-bottom: 1px solid $color-border;
+
+  .bulk-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h3 {
+      color: $color-primary-darker;
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .selected-count {
+      color: $color-primary;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+  }
+
+  .bulk-actions-controls {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .consignor-assignment,
+    .verification-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .consignor-select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid $color-border;
+      border-radius: $border-radius-md;
+      background: white;
+      min-width: 200px;
+    }
+
+    label {
+      font-weight: 500;
+      color: $color-text-primary;
+    }
+  }
 }
 
 // ----------------------------------------------------------------------------
-// Legend Toggle
+// Table Container with Scrolling
 // ----------------------------------------------------------------------------
-.legend-toggle {
+.table-container {
+  .table-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 600px;
+    border: 1px solid $color-border;
+    border-radius: 0;
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: $color-background-light;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $color-border;
+      border-radius: 4px;
+
+      &:hover {
+        background: $color-text-secondary;
+      }
+    }
+  }
+
+  .inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 0.9rem;
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: white;
+
+      th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: $color-text-primary;
+        border-bottom: 2px solid $color-border;
+        background: $color-background-light;
+        white-space: nowrap;
+
+        &.sortable {
+          cursor: pointer;
+          user-select: none;
+
+          &:hover {
+            background: $color-background-hover;
+          }
+
+          .sort-indicator {
+            margin-left: 0.5rem;
+            opacity: 0.5;
+
+            &.active {
+              opacity: 1;
+              color: $color-primary;
+            }
+          }
+        }
+
+        &.checkbox-cell {
+          width: 60px;
+          text-align: center;
+          padding: 0.5rem;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid $color-border-light;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background: $color-shell-background;
+        }
+
+        &.even {
+          background: rgba($color-background-light, 0.3);
+
+          &:hover {
+            background: $color-shell-background;
+          }
+        }
+      }
+
+      td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid $color-border-light;
+
+        &.checkbox-cell {
+          text-align: center;
+          padding: 0.5rem;
+        }
+
+        &.image-cell {
+          width: 80px;
+          padding: 0.5rem;
+        }
+
+        &.title-cell,
+        &.item-cell {
+          max-width: 200px;
+        }
+
+        &.price-cell {
+          font-weight: 600;
+          color: $color-primary-dark;
+        }
+
+        &.actions-cell {
+          width: 120px;
+          text-align: center;
+        }
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Checkbox Styling
+// ----------------------------------------------------------------------------
+.checkbox-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #1e40af;
-  border: 1px solid #1d4ed8;
-  border-radius: $border-radius-md;
   cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-  color: white;
-  font-weight: 500;
+  user-select: none;
 
-  &:hover {
-    background: #1d4ed8;
-    border-color: #1e3a8a;
-  }
-}
+  .checkbox-input {
+    position: absolute;
+    opacity: 0;
 
-.legend-icon {
-  font-size: 1rem;
-}
+    &:checked + .checkbox-custom {
+      background: $color-primary;
+      border-color: $color-primary;
 
-// ----------------------------------------------------------------------------
-// Inventory Table
-// ----------------------------------------------------------------------------
-.table-container {
-  overflow-x: auto;
-}
-
-.inventory-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid $color-primary;
-
-  th {
-    background: $color-card-background; // Use section background color
-    padding: 0.75rem 1rem; // Reduced vertical padding
-    text-align: left;
-    font-weight: 500;
-    color: $color-text-muted;
-    font-size: 1rem;
-    border-bottom: 1px solid $color-primary; // Dark green, finer pen
-
-    &.sortable {
-      cursor: pointer;
-      user-select: none;
-
-      &:hover {
-        background: $color-background-light;
+      &::after {
+        opacity: 1;
+        transform: scale(1);
       }
     }
   }
 
-  // Compact design variant
-  &.compact-design {
-    font-size: 0.875rem;
+  .checkbox-custom {
+    width: 16px;
+    height: 16px;
+    border: 2px solid $color-border;
+    border-radius: $border-radius-sm;
+    background: white;
+    position: relative;
+    transition: all 0.2s ease;
 
-    th {
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 0.5rem;
-    }
-
-    td {
-      padding: 0.375rem 0.5rem;
-      vertical-align: top;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-direction: row;
-      gap: 0.25rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn-icon {
-      padding: 0.25rem;
-      font-size: 0.8rem;
+    &::after {
+      content: "✓";
+      position: absolute;
+      top: -2px;
+      left: 2px;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.2s ease;
     }
   }
-}
 
-.sort-indicator {
-  opacity: 0.3;
-  margin-left: 0.5rem;
-
-  &.active {
-    opacity: 1;
-    color: $color-primary;
+  .checkbox-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $color-text-primary;
   }
 }
 
 // ----------------------------------------------------------------------------
-// Table Rows
+// Table Cell Content Styling
 // ----------------------------------------------------------------------------
-.item-row {
-  &:hover {
-    background: #f0f9ff;
-  }
-
-  &.even {
-    background-color: #f8fafc;
-  }
-
-  td {
-    padding: 1rem;
-    vertical-align: top;
-    border-bottom: 1px solid $color-primary; // Fine dark green border between rows
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Table Cells
-// ----------------------------------------------------------------------------
-.image-cell {
-  width: 60px;
-  text-align: center;
-}
-
 .item-thumbnail {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
-  border-radius: $border-radius-md;
+  border-radius: $border-radius-sm;
+  border: 1px solid $color-border;
 }
 
 .no-image {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
+  background: $color-background-light;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-sm;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $color-background-light;
-  border-radius: $border-radius-md;
-  color: $color-text-secondary;
+  color: $color-text-muted;
   font-size: 1.2rem;
 }
 
-.sku-cell {
-  font-family: 'Courier New', monospace;
-  font-weight: 600;
-  color: $color-text-muted;
-  font-size: 0.875rem;
-}
-
-.title-sku-cell {
-  width: 22%;
-}
-
-.item-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.item-title {
-  font-weight: 600;
+.item-title,
+.item-name {
+  font-weight: 500;
   color: $color-text-primary;
-  margin-bottom: 0.125rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.item-sku,
+.item-description {
+  color: $color-text-secondary;
+  font-size: 0.8rem;
   line-height: 1.2;
 }
 
-.item-description {
-  color: $color-text-secondary;
-  font-size: 0.875rem;
-}
-
-.item-sku {
-  font-family: 'Courier New', monospace;
-  font-size: 0.75rem;
-  color: #4b5563;
-  font-weight: 600;
-}
-
-.category-status-cell {
-  width: 18%;
-}
-
-.category {
-  margin-bottom: 0.125rem;
-  color: $color-text-primary;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.price-condition-cell {
-  width: 15%;
-}
-
-.item-price {
-  font-weight: 600;
-  color: $color-primary;
-  margin-bottom: 0.125rem;
-  font-size: 1rem;
-}
-
-.condition {
-  font-size: 0.75rem;
-}
-
-.consignor-cell {
-  width: 15%;
-}
-
-.consignor-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.consignor-name {
-  font-weight: 600;
-  color: $color-text-primary;
-  margin-bottom: 0.25rem;
-
-  &.clickable {
-    color: $color-blue-dark;
-    cursor: pointer;
-    text-decoration: underline;
-    transition: color 0.2s;
-
-    &:hover {
-      color: $color-blue-darker;
-    }
+.item-info {
+  .item-description {
+    margin-top: 0.25rem;
+    font-style: italic;
   }
 }
 
-.dates-cell {
-  width: 18%;
-}
-
-.received-date {
-  margin-bottom: 0.125rem;
-  color: #4b5563;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.expires-date {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.date-cell {
-  color: $color-text-secondary;
-  font-size: 0.875rem;
-}
-
-.expiration-cell {
-  color: $color-text-secondary;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.actions-cell {
-  width: 12%;
-  text-align: center;
-
-  th {
-    text-align: center;
-  }
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
 // ----------------------------------------------------------------------------
-// Badges
+// Badge Styling
 // ----------------------------------------------------------------------------
+.status-badge,
 .condition-badge,
-.status-badge {
-  display: inline-block;
+.source-badge {
   padding: 0.25rem 0.5rem;
   border-radius: $border-radius-sm;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-// Pending assignment status
-.status-pending {
-  background-color: #fbbf24;
-  color: #92400e;
+// Status badges
+.status-badge {
+  &.status-available {
+    background: $color-success-light;
+    color: $color-success;
+  }
+
+  &.status-sold {
+    background: $color-blue-light;
+    color: $color-blue-dark;
+  }
+
+  &.status-removed {
+    background: $color-danger-light;
+    color: $color-danger;
+  }
+
+  &.status-pending {
+    background: #fef3c7;
+    color: #d97706;
+  }
 }
 
-// Condition badges: Quality-based (green=best to red=worst)
-.condition-new {
-  background: #dcfce7;
-  color: #166534;
+// Condition badges
+.condition-badge {
+  &.condition-new {
+    background: $color-success-light;
+    color: $color-success;
+  }
+
+  &.condition-like-new {
+    background: $color-blue-light;
+    color: $color-blue-dark;
+  }
+
+  &.condition-good {
+    background: #e0e7ff;
+    color: #5b21b6;
+  }
+
+  &.condition-fair {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  &.condition-poor {
+    background: $color-danger-light;
+    color: $color-danger;
+  }
 }
 
-.condition-like-new {
-  background: #d1fae5;
-  color: #065f46;
-}
+// Source badges
+.source-badge {
+  &.source-manifest {
+    background: #e0f2fe;
+    color: #0277bd;
+  }
 
-.condition-good {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.condition-fair {
-  background: #fed7aa;
-  color: #9a3412;
-}
-
-.condition-poor {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-// Status badges: Business logic (blue=active, green=success, gray=inactive)
-.status-available {
-  background: $color-blue-light;
-  color: $color-blue-darker;
-}
-
-.status-sold {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status-removed {
-  background: $color-background-light;
-  color: $color-text-secondary;
+  &.source-square {
+    background: #f3e5f5;
+    color: #7b1fa2;
+  }
 }
 
 // ----------------------------------------------------------------------------
-// Expiration Status
+// Consignor Assignment Styling
 // ----------------------------------------------------------------------------
-.expiration-expired {
-  color: $color-danger !important;
-  font-weight: 600;
+.consignor-name,
+.consignor-assignment {
+  font-weight: 500;
+
+  &.clickable {
+    color: $color-primary;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.assigned .assigned-consignor {
+    color: $color-success;
+  }
+
+  &.unassigned .needs-assignment {
+    color: $color-warning;
+    font-style: italic;
+  }
 }
 
-.expiration-warning {
-  color: $color-warning !important;
-  font-weight: 600;
+.assignment-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+
+  .consignor-select-small {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+  }
+
+  .assignment-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+  }
 }
 
-.expiration-normal {
-  color: $color-text-secondary;
+// ----------------------------------------------------------------------------
+// Action Buttons
+// ----------------------------------------------------------------------------
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
 }
 
 // ----------------------------------------------------------------------------
@@ -707,465 +667,353 @@ $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid $color-primary;  // Dark green separator line
-}
-
-.page-numbers {
-  display: flex;
   gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid $color-border;
+  background: $color-background-light;
+
+  .page-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid $color-border;
+    background: white;
+    border-radius: $border-radius-sm;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+
+    &:hover:not(:disabled) {
+      background: $color-primary;
+      color: white;
+      border-color: $color-primary;
+    }
+
+    &.active {
+      background: $color-primary;
+      color: white;
+      border-color: $color-primary;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
 }
 
-.page-btn {
+// ----------------------------------------------------------------------------
+// Loading and Empty States
+// ----------------------------------------------------------------------------
+.loading-state,
+.empty-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+
+  .empty-icon,
+  .error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    color: $color-text-primary;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: $color-text-secondary;
+    margin-bottom: 1rem;
+  }
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid $color-border;
+  border-top: 2px solid $color-primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// ----------------------------------------------------------------------------
+// Button Styles (including existing styles)
+// ----------------------------------------------------------------------------
+.btn-primary,
+.btn-secondary,
+.btn-primary-small,
+.btn-secondary-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
-  border: 1px solid $color-border-light;
-  background: white;
   border-radius: $border-radius-md;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
   cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.2s;
+  border: 1px solid transparent;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: $color-primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-dark;
+  }
+}
+
+.btn-secondary {
+  background: white;
+  color: $color-primary;
+  border-color: $color-primary;
+
+  &:hover:not(:disabled) {
+    background: $color-primary;
+    color: white;
+  }
+}
+
+.btn-primary-small,
+.btn-secondary-small {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.btn-primary-small {
+  background: $color-primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-dark;
+  }
+}
+
+.btn-secondary-small {
+  background: white;
+  color: $color-text-secondary;
+  border-color: $color-border;
 
   &:hover:not(:disabled) {
     background: $color-background-light;
-  }
-
-  &.active {
-    background: $color-primary;
-    color: white;
     border-color: $color-primary;
+    color: $color-primary;
+  }
+}
+
+.btn-icon {
+  font-size: 1rem;
+  background: transparent;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: $border-radius-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.1);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-}
 
-// ----------------------------------------------------------------------------
-// Loading & Empty States
-// ----------------------------------------------------------------------------
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-  color: $color-text-secondary;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid $color-border;
-  border-top: 3px solid $color-primary;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-  color: $color-text-secondary;
-
-  p {
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
+  &.btn-danger {
+    &:hover:not(:disabled) {
+      background: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+    }
   }
 }
 
 // ----------------------------------------------------------------------------
-// Color Guide Modal
+// Color Guide Modal (preserved from original)
 // ----------------------------------------------------------------------------
-.modal-overlay {
+.color-guide-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1000;
-}
 
-.modal-content {
-  background: white;
-  border-radius: $border-radius-xl;
-  padding: 1.5rem;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: $shadow-lg;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid $color-primary;  // Dark green separator line
-}
-
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: $color-text-primary;
-  margin: 0;
-}
-
-.modal-close-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: $color-background-light;
-  border-radius: $border-radius-md;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  color: $color-text-secondary;
-  transition: all 0.2s;
-
-  &:hover {
-    background: $color-background-hover;
-    color: $color-text-muted;
-  }
-}
-
-.modal-legend-section {
-  margin-bottom: 1.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
+  .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
   }
 
-  h4 {
-    margin: 0 0 1rem 0;
-    color: $color-text-muted;
-    font-size: 1rem;
-    font-weight: 600;
+  .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid $color-border;
+
+      h3 {
+        margin: 0;
+        color: $color-text-primary;
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: $color-text-secondary;
+
+        &:hover {
+          color: $color-text-primary;
+        }
+      }
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+
+      .guide-section {
+        margin-bottom: 2rem;
+
+        h4 {
+          margin-bottom: 1rem;
+          color: $color-text-primary;
+        }
+
+        .color-examples {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+
+          .color-example {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            span:last-child {
+              color: $color-text-secondary;
+            }
+          }
+        }
+      }
+    }
   }
-}
-
-.modal-legend-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-}
-
-.modal-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.modal-legend-text {
-  font-size: 0.875rem;
-  color: $color-text-secondary;
 }
 
 // ----------------------------------------------------------------------------
-// Responsive Styles
+// Responsive Design
 // ----------------------------------------------------------------------------
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .inventory-page {
     padding: 1rem;
   }
 
+  .table-wrapper {
+    max-height: 500px;
+  }
+
+  .filters-section {
+    flex-direction: column;
+    align-items: stretch;
+
+    .filter-select {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
   .page-header {
     flex-direction: column;
-    gap: 1rem;
     align-items: stretch;
+    gap: 1rem;
+
+    .header-actions {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
   }
 
-  .filter-row {
-    grid-template-columns: 1fr;
-  }
-
-  .section-header {
+  .tab-controls {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
+
+    .search-section {
+      justify-content: center;
+
+      .search-input {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+
+    .controls-section {
+      justify-content: center;
+    }
   }
 
-  .header-controls {
+  .bulk-actions-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
+
+    .consignor-assignment,
+    .verification-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .consignor-select {
+      min-width: unset;
+    }
   }
 
-  .legend-items {
-    grid-template-columns: 1fr;
+  .table-wrapper {
+    max-height: 400px;
   }
 
   .inventory-table {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
 
     th,
     td {
-      padding: 0.75rem 0.5rem;
-    }
-  }
-
-  .action-buttons {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .btn-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-  }
-
-  .pagination {
-    flex-direction: column;
-    gap: 1rem;
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Pending Import Specific Styles
-// ----------------------------------------------------------------------------
-.pending-import-row {
-  background-color: #fffbeb !important; // Light yellow background
-  border: 2px solid $color-primary !important; // Dark green border for attention
-
-  &:hover {
-    background-color: #fef3c7 !important; // Slightly darker yellow on hover
-  }
-
-  &.even {
-    background-color: #fef08a !important; // Slightly darker yellow for even rows (alternating)
-  }
-
-  td {
-    background-color: transparent !important; // Ensure cells don't override row background
-  }
-}
-
-.pending-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: #f59e0b;
-}
-
-.consignor-name.unassigned {
-  color: #dc2626;
-  font-style: italic;
-  font-weight: 500;
-}
-
-.btn-primary-small {
-  background-color: $color-primary;
-  color: white;
-  border: none;
-  padding: 0.375rem 0.75rem;
-  border-radius: $border-radius-sm;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background-color: $color-primary-hover;
-  }
-
-  &:disabled {
-    background-color: #9ca3af;
-    color: #e5e7eb;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Bulk Assign UI (now integrated within view-mode-section)
-// ----------------------------------------------------------------------------
-.bulk-assign-subsection {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid $color-primary;
-}
-
-.bulk-assign-header h3 {
-  color: #0c4a6e;
-  margin: 0 0 1rem 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.bulk-assign-controls {
-  display: flex;
-  align-items: end;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.consignor-select-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 250px;
-  flex: 1;
-
-  label {
-    font-weight: 500;
-    color: $color-text-primary;
-    font-size: 0.875rem;
-  }
-}
-
-.consignor-select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid $color-border;
-  border-radius: $border-radius-md;
-  font-size: 0.875rem;
-  background-color: white;
-
-  &:focus {
-    outline: none;
-    border-color: $color-blue-primary;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-  }
-}
-
-.bulk-assign-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-// Checkbox cell styles
-.checkbox-cell {
-  width: 40px;
-  text-align: center;
-  padding: 0.5rem !important;
-
-  input[type="checkbox"] {
-    cursor: pointer;
-    transform: scale(1.1);
-  }
-}
-
-// Individual assignment dropdown styles
-.individual-assign-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 200px;
-}
-
-.assignment-dropdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: white;
-  border: 1px solid $color-border;
-  border-radius: $border-radius-md;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-width: 180px;
-}
-
-.consignor-select-small {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid $color-border;
-  border-radius: $border-radius-sm;
-  font-size: 0.75rem;
-  background-color: white;
-
-  &:focus {
-    outline: none;
-    border-color: $color-blue-primary;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-  }
-}
-
-.assignment-actions {
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
-}
-
-.btn-secondary-small {
-  background-color: $color-background-light;
-  color: $color-text-muted;
-  border: 1px solid $color-border;
-  padding: 0.375rem 0.75rem;
-  border-radius: $border-radius-sm;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background-color: $color-background-hover;
-  }
-
-  &:disabled {
-    background-color: #9ca3af;
-    color: #e5e7eb;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-// Enhanced table styling for pending imports
-.inventory-table {
-
-  // Add subtle borders to all table cells in pending mode
-  td, th {
-    border: 1px solid transparent;
-  }
-
-  // Light borders for pending import tables
-  &.pending-mode {
-
-    // Only apply borders to data cells (tbody), not header cells
-    tbody td {
-      border-left: 1px solid #e0f2fe;
-      border-bottom: 1px solid #e0f2fe;
-      // Don't set border-right on all cells, handle last cell separately
-    }
-
-    // Add right border to all cells except the last one
-    tbody td:not(:last-child) {
-      border-right: 1px solid #e0f2fe;
-    }
-
-    // Main header row should maintain its normal styling
-    thead tr:first-child th {
-      background-color: $color-card-background !important;
-      border: none !important;
-      border-bottom: none !important; // Remove border between header rows
-    }
-
-    // Filter row should maintain its normal styling and add the bottom border
-    thead .filter-row th {
-      background-color: $color-card-background !important;
-      border-left: none !important;
-      border-right: none !important;
-      border-top: none !important;
-      border-bottom: 1px solid $color-primary !important; // Fine dark green border
+      padding: 0.5rem 0.75rem;
     }
   }
 }

@@ -85,6 +85,10 @@ export class InventoryService {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/inventory/pending-imports/import`, request);
   }
 
+  deletePendingImport(pendingImportId: string): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/pending-imports/${pendingImportId}`);
+  }
+
   getItem(id: string): Observable<ApiResponse<ItemDetailDto>> {
     return this.http.get<ApiResponse<ItemDetailDto>>(`${this.apiUrl}/items/${id}`);
   }

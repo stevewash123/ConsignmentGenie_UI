@@ -342,16 +342,27 @@ export class InventoryListComponent implements OnInit {
     if (!pendingResult) return;
 
     if (this.allPendingSelected()) {
+      // Deselect all
       this.selectedPendingImports.set(new Set());
       this.allPendingSelected.set(false);
     } else {
-      const allIds = new Set(pendingResult.items.map((item: any) => item.pendingImportId as string));
-      this.selectedPendingImports.set(allIds);
-      this.allPendingSelected.set(true);
+      // Select all items that don't have consignors assigned
+      const selectableIds = new Set(
+        pendingResult.items
+          .filter((item: any) => !this.getAssignedConsignorName(item.pendingImportId))
+          .map((item: any) => item.pendingImportId as string)
+      );
+      this.selectedPendingImports.set(selectableIds);
+      this.allPendingSelected.set(selectableIds.size > 0);
     }
   }
 
   toggleSelectItem(pendingImportId: string) {
+    // Don't allow selection if item already has a consignor assigned
+    if (this.getAssignedConsignorName(pendingImportId)) {
+      return;
+    }
+
     const selected = new Set(this.selectedPendingImports());
     if (selected.has(pendingImportId)) {
       selected.delete(pendingImportId);
@@ -363,8 +374,9 @@ export class InventoryListComponent implements OnInit {
     // Update select all state
     const pendingResult = this.pendingImportsResult();
     if (pendingResult) {
-      const allSelected = pendingResult.items.every(item => selected.has(item.pendingImportId));
-      this.allPendingSelected.set(allSelected);
+      const selectableItems = pendingResult.items.filter((item: any) => !this.getAssignedConsignorName(item.pendingImportId));
+      const allSelectableSelected = selectableItems.length > 0 && selectableItems.every(item => selected.has(item.pendingImportId));
+      this.allPendingSelected.set(allSelectableSelected);
     }
   }
 
@@ -375,6 +387,26 @@ export class InventoryListComponent implements OnInit {
   // New verification methods for the updated UI
   isVerified(itemId: string): boolean {
     return this.verifiedPendingImports().has(itemId);
+  }
+
+  toggleAllVerification(event: any) {
+    const pendingResult = this.pendingImportsResult();
+    if (!pendingResult) return;
+
+    const verified = new Set(this.verifiedPendingImports());
+
+    if (event.target.checked) {
+      // Check all items
+      pendingResult.items.forEach((item: any) => {
+        verified.add(item.pendingImportId);
+      });
+    } else {
+      // Uncheck all items
+      verified.clear();
+    }
+
+    this.verifiedPendingImports.set(verified);
+    this.allPendingVerified.set(event.target.checked);
   }
 
   toggleItemVerification(itemId: string, event: any) {
@@ -497,66 +529,6 @@ export class InventoryListComponent implements OnInit {
     }
   }
 
-  toggleAssignmentDropdown(pendingImportId: string) {
-    console.log('toggleAssignmentDropdown called with pendingImportId:', pendingImportId);
-    console.log('Current assignmentDropdownOpen:', this.assignmentDropdownOpen());
-
-    if (this.assignmentDropdownOpen() === pendingImportId) {
-      // Close dropdown and clear selection for this row
-      console.log('Closing dropdown for pendingImportId:', pendingImportId);
-      this.assignmentDropdownOpen.set(null);
-      const selections = new Map(this.individualConsignorSelections());
-      selections.delete(pendingImportId);
-      this.individualConsignorSelections.set(selections);
-    } else {
-      // Open dropdown for this row
-      console.log('Opening dropdown for pendingImportId:', pendingImportId);
-      this.assignmentDropdownOpen.set(pendingImportId);
-    }
-
-    console.log('New assignmentDropdownOpen:', this.assignmentDropdownOpen());
-  }
-
-  cancelIndividualAssignment(pendingImportId: string) {
-    this.assignmentDropdownOpen.set(null);
-    const selections = new Map(this.individualConsignorSelections());
-    selections.delete(pendingImportId);
-    this.individualConsignorSelections.set(selections);
-  }
-
-  confirmIndividualAssignment(pendingImportId: string) {
-    const consignorId = this.individualConsignorSelections().get(pendingImportId);
-    if (consignorId) {
-      this.assignIndividualConsignor(pendingImportId, consignorId);
-    }
-  }
-
-  updateIndividualConsignorSelection(pendingImportId: string, consignorId: string) {
-    const selections = new Map(this.individualConsignorSelections());
-    if (consignorId) {
-      selections.set(pendingImportId, consignorId);
-    } else {
-      selections.delete(pendingImportId);
-    }
-    this.individualConsignorSelections.set(selections);
-  }
-
-  getIndividualConsignorSelection(pendingImportId: string): string {
-    return this.individualConsignorSelections().get(pendingImportId) || '';
-  }
-
-  getAssignedConsignorName(pendingImportId: string): string {
-    const consignorId = this.assignedConsignors().get(pendingImportId);
-    if (!consignorId) return '';
-
-    const consignor = this.consignors().find(c => c.id === consignorId);
-    return consignor ? consignor.name : '';
-  }
-
-  onConsignorSelectionChange(pendingImportId: string, event: Event) {
-    const target = event.target as HTMLSelectElement;
-    this.updateIndividualConsignorSelection(pendingImportId, target.value);
-  }
 
   createNewItem() {
     this.router.navigate(['/owner/inventory/new']);
@@ -832,6 +804,156 @@ export class InventoryListComponent implements OnInit {
     } else {
       // Just reload CG native inventory
       this.loadItems();
+    }
+  }
+
+  // Individual assignment methods for pending imports
+  toggleAssignmentDropdown(pendingImportId: string) {
+    if (this.assignmentDropdownOpen() === pendingImportId) {
+      this.assignmentDropdownOpen.set(null);
+    } else {
+      this.assignmentDropdownOpen.set(pendingImportId);
+      // Clear any previous selection for this item
+      this.individualConsignorSelections.update(map => {
+        const newMap = new Map(map);
+        newMap.delete(pendingImportId);
+        return newMap;
+      });
+    }
+  }
+
+  onConsignorSelectionChange(pendingImportId: string, event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const consignorId = target.value;
+
+    this.individualConsignorSelections.update(map => {
+      const newMap = new Map(map);
+      if (consignorId) {
+        newMap.set(pendingImportId, consignorId);
+      } else {
+        newMap.delete(pendingImportId);
+      }
+      return newMap;
+    });
+  }
+
+  getIndividualConsignorSelection(pendingImportId: string): string {
+    return this.individualConsignorSelections().get(pendingImportId) || '';
+  }
+
+  async confirmIndividualAssignment(pendingImportId: string) {
+    const consignorId = this.getIndividualConsignorSelection(pendingImportId);
+    if (!consignorId) {
+      this.error.set('Please select a consignor before confirming assignment.');
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      const request = { pendingImportIds: [pendingImportId], consignorId };
+      await firstValueFrom(this.inventoryService.bulkAssignConsignorToPendingImports(request));
+
+      // Update the local state to show the assignment
+      this.assignedConsignors.update(map => {
+        const newMap = new Map(map);
+        newMap.set(pendingImportId, consignorId);
+        return newMap;
+      });
+
+      // Close the dropdown
+      this.assignmentDropdownOpen.set(null);
+
+      // Clear the individual selection
+      this.individualConsignorSelections.update(map => {
+        const newMap = new Map(map);
+        newMap.delete(pendingImportId);
+        return newMap;
+      });
+
+      // Reload data to get updated consignor names
+      this.loadItems();
+
+      console.log(`Successfully assigned item to consignor`);
+    } catch (error) {
+      console.error('Failed to assign item to consignor:', error);
+      this.error.set('Failed to assign item to consignor. Please try again.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  cancelIndividualAssignment(pendingImportId: string) {
+    this.assignmentDropdownOpen.set(null);
+    this.individualConsignorSelections.update(map => {
+      const newMap = new Map(map);
+      newMap.delete(pendingImportId);
+      return newMap;
+    });
+  }
+
+  getAssignedConsignorName(pendingImportId: string): string | null {
+    // First check if we have a local assignment
+    const localConsignorId = this.assignedConsignors().get(pendingImportId);
+    if (localConsignorId) {
+      const consignor = this.consignors().find(c => c.id === localConsignorId);
+      if (consignor) return `${consignor.name} (${consignor.consignorNumber})`;
+    }
+
+    // Check the pending imports result for existing assignments
+    const pendingResult = this.pendingImportsResult();
+    if (pendingResult) {
+      const item = pendingResult.items.find(i => i.pendingImportId === pendingImportId);
+      if (item && item.consignorName) {
+        return `${item.consignorName} (${item.consignorNumber || 'N/A'})`;
+      }
+    }
+
+    return null;
+  }
+
+  async deletePendingItem(pendingImportId: string) {
+    const confirmed = await firstValueFrom(this.confirmationService.confirm({
+      title: 'Delete Pending Import',
+      message: 'Are you sure you want to delete this pending import item? This action cannot be undone.',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      isDestructive: true
+    }));
+
+    if (!confirmed.confirmed) return;
+
+    this.isLoading.set(true);
+    try {
+      await firstValueFrom(this.inventoryService.deletePendingImport(pendingImportId));
+
+      // Remove from local state
+      this.selectedPendingImports.update(set => {
+        const newSet = new Set(set);
+        newSet.delete(pendingImportId);
+        return newSet;
+      });
+
+      this.verifiedPendingImports.update(set => {
+        const newSet = new Set(set);
+        newSet.delete(pendingImportId);
+        return newSet;
+      });
+
+      this.assignedConsignors.update(map => {
+        const newMap = new Map(map);
+        newMap.delete(pendingImportId);
+        return newMap;
+      });
+
+      // Reload the items to reflect the deletion
+      this.loadItems();
+
+      console.log('Successfully deleted pending import item');
+    } catch (error) {
+      console.error('Failed to delete pending import item:', error);
+      this.error.set('Failed to delete item. Please try again.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 }
