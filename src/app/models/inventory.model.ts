@@ -129,6 +129,7 @@ export interface ItemQueryParams {
   createdBefore?: Date;
   sortBy?: string;
   sortDirection?: string;
+  sourceReference?: string;
 }
 
 
@@ -288,6 +289,43 @@ export interface PendingSquareImportDto {
   manifestId?: string;
   location?: string;
   notes?: string;
+}
+
+// Unified Pending Import interfaces (replaces Square-specific imports)
+export interface PendingImportItemDto {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  sku?: string;
+  category?: string;
+  condition?: string;
+  source: ImportSource;
+  sourceReference?: string;
+  consignorId?: string;
+  consignorName?: string;
+  consignorNumber?: string;
+  status: ImportStatus;
+  importedAt?: Date;
+  importedItemId?: string;
+  createdAt: Date;
+  notes?: string;
+}
+
+export enum ImportSource {
+  Manual = 0,
+  CSV = 1,
+  Square = 2,
+  Manifest = 3
+}
+
+export enum ImportStatus {
+  Pending = 0,
+  Assigned = 1,
+  Verified = 2,
+  Imported = 3,
+  Rejected = 4,
+  Deleted = 5
 }
 
 export interface BulkAssignConsignorRequest {

@@ -19,7 +19,7 @@ import {
   ItemStatus,
   ItemCategoryDto,
   UpdateItemStatusRequest,
-  PendingSquareImportDto
+  PendingImportItemDto
 } from '../../models/inventory.model';
 import { PagedResult } from '../../shared/models/api.models';
 
@@ -58,11 +58,12 @@ export class InventoryListComponent implements OnInit {
 
   // State signals
   itemsResult = signal<PagedResult<ItemListDto> | null>(null);
-  pendingImportsResult = signal<PagedResult<PendingSquareImportDto> | null>(null);
+  pendingImportsResult = signal<PagedResult<PendingImportItemDto> | null>(null);
   categories = signal<ItemCategoryDto[]>([]);
   consignors = signal<Consignor[]>([]);
   error = signal<string | null>(null);
   isColorGuideModalOpen = signal(false);
+  isBulkImportModalOpen = signal(false);
   isLoading = signal(false);
 
   isInventoryLoading(): boolean {
@@ -84,13 +85,23 @@ export class InventoryListComponent implements OnInit {
 
   // Bulk assign state
   selectedConsignorId = signal<string>('');
+  selectedManifestId = signal<string>('');  // Filter by manifest for pending imports
+
+  // Computed property to show active filters
+  activeFilters = computed(() => {
+    const filters = [];
+    if (this.selectedManifestId()) {
+      filters.push({ type: 'manifest', label: `Manifest: ${this.selectedManifestId().substring(0, 8)}...`, value: this.selectedManifestId() });
+    }
+    return filters;
+  });
 
   // Individual assign state
   assignmentDropdownOpen = signal<string | null>(null);
   individualConsignorSelections = signal<Map<string, string>>(new Map());
 
   // Track consignor assignments for each pending import item
-  assignedConsignors = signal<Map<string, string>>(new Map()); // Maps pendingImportId to consignorId
+  assignedConsignors = signal<Map<string, string>>(new Map()); // Maps id to consignorId
 
   // Filter state
   searchQuery = '';
@@ -138,11 +149,13 @@ export class InventoryListComponent implements OnInit {
 
     // Check for manifest query parameters FIRST, then load items
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
-      if (params['openBulkImport'] === 'true' && params['manifestId']) {
+      if (params['view'] === 'pending' && params['manifestId']) {
         console.log('🧭 Switching to pending imports view for manifestId:', params['manifestId']);
+        console.log('✅ Pending imports should already exist (created by notification center)');
         this.viewMode.set('pending');
         this.manifestIdToLoad.set(params['manifestId']);
-        this.loadItems(); // This will load the manifest items in pending view
+        this.selectedManifestId.set(params['manifestId']); // Apply the manifest filter
+        this.loadItems(); // Load the already-created pending imports
       } else {
         // Only load regular items if we're not handling manifest parameters
         this.loadItems();
@@ -177,6 +190,58 @@ export class InventoryListComponent implements OnInit {
   }
 
   loadItems() {
+    // Dispatcher method - loads appropriate data based on current view mode
+    if (this.viewMode() === 'pending') {
+      this.loadPendingImports();
+    } else {
+      this.loadInventoryItems();
+    }
+  }
+
+  loadPendingImports() {
+    this.loadingService.start('inventory-list');
+    this.error.set(null);
+
+    const params: ItemQueryParams = {
+      page: this.currentPage(),
+      pageSize: this.pageSize,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection
+    };
+
+    if (this.searchQuery) params.search = this.searchQuery;
+    if (this.selectedStatus) params.status = this.selectedStatus;
+    if (this.selectedCondition) params.condition = this.selectedCondition;
+    if (this.selectedCategory) params.category = this.selectedCategory;
+    if (this.selectedExpiration) params.expiration = this.selectedExpiration;
+    if (this.selectedConsignor) params.consignorId = this.selectedConsignor;
+    if (this.selectedManifestId()) params.sourceReference = this.selectedManifestId(); // Filter by manifest
+    if (this.priceMin !== null) params.priceMin = this.priceMin;
+    if (this.priceMax !== null) params.priceMax = this.priceMax;
+
+    // Load pending imports (including any manifest filter from selectedManifestId signal)
+    this.inventoryService.getPendingSquareImports(params)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          console.log('📦 Pending imports result:', result);
+          if (this.selectedManifestId()) {
+            console.log('📋 Loaded with manifest filter:', this.selectedManifestId());
+          }
+          this.pendingImportsResult.set(result);
+          this.itemsResult.set(null); // Clear regular items
+        },
+        error: (err) => {
+          this.error.set('Failed to load pending imports. Please try again.');
+          console.error('Error loading pending imports:', err);
+        },
+        complete: () => {
+          this.loadingService.stop('inventory-list');
+        }
+      });
+  }
+
+  loadInventoryItems() {
     this.loadingService.start('inventory-list');
     this.error.set(null);
 
@@ -196,54 +261,22 @@ export class InventoryListComponent implements OnInit {
     if (this.priceMin !== null) params.priceMin = this.priceMin;
     if (this.priceMax !== null) params.priceMax = this.priceMax;
 
-    if (this.viewMode() === 'pending') {
-      const manifestId = this.manifestIdToLoad();
-
-      if (manifestId) {
-        // Load manifest items for pending import
-        console.log('🧭 Loading manifest items for pending import:', manifestId);
-        this.loadManifestAsPendingImports(manifestId);
-      } else {
-        // Load pending Square imports
-        this.inventoryService.getPendingSquareImports(params)
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: (result) => {
-              console.log('Pending imports result:', result);
-              console.log('First pending item:', result.items[0]);
-              if (result.items[0]) {
-                console.log('First pendingImportId:', result.items[0].pendingImportId);
-              }
-              this.pendingImportsResult.set(result);
-              this.itemsResult.set(null); // Clear regular items
-            },
-            error: (err) => {
-              this.error.set('Failed to load Square pending imports. Please ensure you are connected to Square and try again.');
-              console.error('Error loading Square pending imports:', err);
-            },
-            complete: () => {
-              this.loadingService.stop('inventory-list');
-            }
-          });
-      }
-    } else {
-      // Load regular ConsignmentGenie inventory
-      this.inventoryService.getItems(params)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (result) => {
-            this.itemsResult.set(result);
-            this.pendingImportsResult.set(null); // Clear pending imports
-          },
-          error: (err) => {
-            this.error.set('Failed to load inventory items. Please try again.');
-            console.error('Error loading items:', err);
-          },
-          complete: () => {
-            this.loadingService.stop('inventory-list');
-          }
-        });
-    }
+    // Load regular ConsignmentGenie inventory
+    this.inventoryService.getItems(params)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.itemsResult.set(result);
+          this.pendingImportsResult.set(null); // Clear pending imports
+        },
+        error: (err) => {
+          this.error.set('Failed to load inventory items. Please try again.');
+          console.error('Error loading items:', err);
+        },
+        complete: () => {
+          this.loadingService.stop('inventory-list');
+        }
+      });
   }
 
   private tryAutoSelectConsignorFromManifest() {
@@ -349,39 +382,39 @@ export class InventoryListComponent implements OnInit {
       // Select all items that don't have consignors assigned
       const selectableIds = new Set(
         pendingResult.items
-          .filter((item: any) => !this.getAssignedConsignorName(item.pendingImportId))
-          .map((item: any) => item.pendingImportId as string)
+          .filter((item: any) => !this.getAssignedConsignorName(item.id))
+          .map((item: any) => item.id as string)
       );
       this.selectedPendingImports.set(selectableIds);
       this.allPendingSelected.set(selectableIds.size > 0);
     }
   }
 
-  toggleSelectItem(pendingImportId: string) {
+  toggleSelectItem(itemId: string) {
     // Don't allow selection if item already has a consignor assigned
-    if (this.getAssignedConsignorName(pendingImportId)) {
+    if (this.getAssignedConsignorName(itemId)) {
       return;
     }
 
     const selected = new Set(this.selectedPendingImports());
-    if (selected.has(pendingImportId)) {
-      selected.delete(pendingImportId);
+    if (selected.has(itemId)) {
+      selected.delete(itemId);
     } else {
-      selected.add(pendingImportId);
+      selected.add(itemId);
     }
     this.selectedPendingImports.set(selected);
 
     // Update select all state
     const pendingResult = this.pendingImportsResult();
     if (pendingResult) {
-      const selectableItems = pendingResult.items.filter((item: any) => !this.getAssignedConsignorName(item.pendingImportId));
-      const allSelectableSelected = selectableItems.length > 0 && selectableItems.every(item => selected.has(item.pendingImportId));
+      const selectableItems = pendingResult.items.filter((item: any) => !this.getAssignedConsignorName(item.id));
+      const allSelectableSelected = selectableItems.length > 0 && selectableItems.every(item => selected.has(item.id));
       this.allPendingSelected.set(allSelectableSelected);
     }
   }
 
-  isSelected(pendingImportId: string): boolean {
-    return this.selectedPendingImports().has(pendingImportId);
+  isSelected(itemId: string): boolean {
+    return this.selectedPendingImports().has(itemId);
   }
 
   // New verification methods for the updated UI
@@ -398,7 +431,7 @@ export class InventoryListComponent implements OnInit {
     if (event.target.checked) {
       // Check all items
       pendingResult.items.forEach((item: any) => {
-        verified.add(item.pendingImportId);
+        verified.add(item.id);
       });
     } else {
       // Uncheck all items
@@ -420,7 +453,7 @@ export class InventoryListComponent implements OnInit {
 
     // Update all verified state
     const allItems = this.pendingImportsResult()?.items || [];
-    this.allPendingVerified.set(allItems.every(item => verified.has(item.pendingImportId)));
+    this.allPendingVerified.set(allItems.every(item => verified.has(item.id)));
   }
 
   async bulkAssignConsignor() {
@@ -470,8 +503,8 @@ export class InventoryListComponent implements OnInit {
     if (!pendingResult) return;
 
     const itemsWithoutConsignors = verifiedIds.filter(id => {
-      const item = pendingResult.items.find(i => i.pendingImportId === id);
-      return !item?.consignorNumber && !item?.consignorId;
+      const item = pendingResult.items.find(i => i.id === id);
+      return !item?.consignorId;
     });
 
     if (itemsWithoutConsignors.length > 0) {
@@ -501,7 +534,7 @@ export class InventoryListComponent implements OnInit {
     }
   }
 
-  async assignIndividualConsignor(pendingImportId: string, consignorId: string) {
+  async assignIndividualConsignor(itemId: string, consignorId: string) {
     if (!consignorId) {
       this.error.set('Please select a consignor to assign this item to.');
       return;
@@ -509,12 +542,12 @@ export class InventoryListComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
-      await firstValueFrom(this.inventoryService.assignConsignorToPendingImport(pendingImportId, consignorId));
+      await firstValueFrom(this.inventoryService.assignConsignorToPendingImport(itemId, consignorId));
 
       // Close dropdown and clear selection for this row
       this.assignmentDropdownOpen.set(null);
       const selections = new Map(this.individualConsignorSelections());
-      selections.delete(pendingImportId);
+      selections.delete(itemId);
       this.individualConsignorSelections.set(selections);
 
       // Reload data to show updated status
@@ -539,97 +572,57 @@ export class InventoryListComponent implements OnInit {
   }
 
   loadManifestAsPendingImports(manifestId: string) {
-    // Fetch manifest data from API and convert to pending imports format
-    this.loadingService.start('inventory-list');
-    this.ownerService.getDropoffRequestDetail(manifestId).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (manifest) => {
-        console.log('🔍 Raw manifest data received:', manifest);
-        console.log('🔍 Manifest consignor:', manifest.consignor);
+    // Set the manifest filter and switch to pending imports view
+    this.selectedManifestId.set(manifestId);
+    this.viewMode.set('pending');
 
-        // Store manifest consignor data for auto-selection
-        if (manifest.consignor) {
-          this.manifestConsignorData.set(manifest.consignor);
-        }
+    // Load pending imports with the manifest filter applied
+    this.loadItems();
+  }
 
-        // Extract consignor info from manifest structure
-        const consignorNumber = manifest.consignor?.consignorNumber || '';
-        const consignorName = manifest.consignor ?
-          `${manifest.consignor.firstName} ${manifest.consignor.lastName}`.trim() : '';
+  clearManifestFilter() {
+    this.selectedManifestId.set('');
+    if (this.viewMode() === 'pending') {
+      this.loadItems(); // Reload without filter
+    }
+  }
 
-        // Convert manifest items to PendingSquareImportDto format for pending imports table
-        const pendingItems = manifest.items?.map((item: any, index: number) => ({
-          pendingImportId: `manifest-${manifestId}-${index}`,
-          name: item.name, // Use 'name' to match template expectation
-          description: item.notes || '',
-          price: item.suggestedPrice || 0,
-          sku: '', // SKU will be generated during import
-          consignorNumber: consignorNumber,
-          consignorName: consignorName,
-          category: item.category || '',
-          condition: 'Good', // Default condition
-          importedAt: manifest.plannedDate || new Date().toISOString(),
-          location: '',
-          notes: item.notes || '',
-          // Add manifest-specific fields
-          isManifestItem: true,
-          manifestId: manifestId
-        })) || [];
-
-        // Create a PagedResult structure for the pending imports
-        const pagedResult: PagedResult<PendingSquareImportDto> = {
-          items: pendingItems,
-          totalCount: pendingItems.length,
-          page: 1,
-          pageSize: pendingItems.length,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPreviousPage: false,
-          organizationId: '' // Will be set by the API if needed
-        };
-
-        this.pendingImportsResult.set(pagedResult);
-        this.itemsResult.set(null); // Clear regular items
-
-        // Try to auto-select consignor (this handles both immediate and deferred selection)
-        this.tryAutoSelectConsignorFromManifest();
-
-        // Auto-assign the manifest consignor to all manifest items
-        if (manifest.consignor?.id) {
-          const assignments = new Map(this.assignedConsignors());
-          pendingItems.forEach(item => {
-            assignments.set(item.pendingImportId, manifest.consignor.id);
-          });
-          this.assignedConsignors.set(assignments);
-          console.log('📋 Auto-assigned consignor to', pendingItems.length, 'manifest items');
-        }
-
-        console.log('📦 Manifest loaded as pending imports:', {
-          manifestId,
-          consignorNumber: consignorNumber,
-          consignorName: consignorName,
-          itemCount: pendingItems.length,
-          sampleItem: pendingItems[0] // Show first item structure for debugging
-        });
-
-      },
-      error: (error) => {
-        console.error('Error loading manifest for pending imports:', error);
-        this.error.set('Failed to load manifest data. Please try again.');
-        this.pendingImportsResult.set(null);
-      },
-      complete: () => {
-        this.loadingService.stop('inventory-list');
-      }
-    });
+  clearFilter(filterType: string) {
+    if (filterType === 'manifest') {
+      this.clearManifestFilter();
+    }
   }
 
   openBulkImportWithManifest(manifestId: string) {
     // Legacy method - now redirects to pending imports view
     this.viewMode.set('pending');
     this.manifestIdToLoad.set(manifestId);
-    this.loadItems();
+    this.createPendingImportsFromManifest(manifestId);
+  }
+
+  private createPendingImportsFromManifest(manifestId: string) {
+    console.log('📦 Creating pending imports from manifest:', manifestId);
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.inventoryService.createFromManifest(manifestId, true) // Auto-assign consignor
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          console.log('✅ API handled manifest processing:', response.data?.length, 'items returned');
+          // Set the manifest ID filter and load the pending imports
+          this.selectedManifestId.set(manifestId);
+          this.loadItems();
+        },
+        error: (err) => {
+          console.error('❌ Failed to create pending imports from manifest:', err);
+          this.error.set('Failed to import items from manifest. Please try again.');
+          this.isLoading.set(false);
+        },
+        complete: () => {
+          this.isLoading.set(false);
+        }
+      });
   }
 
   openColorGuideModal() {
@@ -638,6 +631,123 @@ export class InventoryListComponent implements OnInit {
 
   closeColorGuideModal() {
     this.isColorGuideModalOpen.set(false);
+  }
+
+  openBulkImport() {
+    this.isBulkImportModalOpen.set(true);
+  }
+
+  closeBulkImport() {
+    this.isBulkImportModalOpen.set(false);
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.processCsvFile(file);
+    }
+  }
+
+  private processCsvFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const csvContent = e.target?.result as string;
+      this.parseCsvAndCreatePendingImports(csvContent, file.name);
+    };
+    reader.readAsText(file);
+  }
+
+  private parseCsvAndCreatePendingImports(csvContent: string, fileName: string) {
+    try {
+      const lines = csvContent.split('\n').filter(line => line.trim());
+      if (lines.length < 2) {
+        this.error.set('CSV file must contain at least a header row and one data row');
+        return;
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const items: any[] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length === headers.length) {
+          const item: any = {};
+          headers.forEach((header, index) => {
+            switch (header) {
+              case 'name':
+                item.name = values[index];
+                break;
+              case 'description':
+                item.description = values[index];
+                break;
+              case 'price':
+                item.price = parseFloat(values[index]) || 0;
+                break;
+              case 'sku':
+                item.sku = values[index];
+                break;
+              case 'category':
+                item.category = values[index];
+                break;
+              case 'condition':
+                item.condition = values[index];
+                break;
+              case 'consignornumber':
+                item.consignorNumber = values[index];
+                break;
+              case 'notes':
+                item.notes = values[index];
+                break;
+            }
+          });
+
+          if (item.name && item.price > 0) {
+            items.push(item);
+          }
+        }
+      }
+
+      if (items.length === 0) {
+        this.error.set('No valid items found in CSV file');
+        return;
+      }
+
+      // Create pending imports via API
+      this.createPendingImportsFromCsv(items, fileName);
+
+    } catch (error) {
+      this.error.set('Error parsing CSV file: ' + (error as Error).message);
+    }
+  }
+
+  private createPendingImportsFromCsv(items: any[], fileName: string) {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    // Create request matching the API expectations
+    const request = {
+      fileName: fileName,
+      items: items
+    };
+
+    // Call the API to create pending imports
+    this.inventoryService.createFromCsv(request)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          console.log('✅ CSV import successful:', response);
+          this.closeBulkImport();
+          this.switchViewMode('pending');
+          this.loadPendingImports();
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('❌ CSV import failed:', error);
+          this.error.set('Failed to import CSV: ' + (error.error?.message || error.message || 'Unknown error'));
+          this.isLoading.set(false);
+        }
+      });
   }
 
   viewItem(id: string) {
@@ -808,41 +918,41 @@ export class InventoryListComponent implements OnInit {
   }
 
   // Individual assignment methods for pending imports
-  toggleAssignmentDropdown(pendingImportId: string) {
-    if (this.assignmentDropdownOpen() === pendingImportId) {
+  toggleAssignmentDropdown(itemId: string) {
+    if (this.assignmentDropdownOpen() === itemId) {
       this.assignmentDropdownOpen.set(null);
     } else {
-      this.assignmentDropdownOpen.set(pendingImportId);
+      this.assignmentDropdownOpen.set(itemId);
       // Clear any previous selection for this item
       this.individualConsignorSelections.update(map => {
         const newMap = new Map(map);
-        newMap.delete(pendingImportId);
+        newMap.delete(itemId);
         return newMap;
       });
     }
   }
 
-  onConsignorSelectionChange(pendingImportId: string, event: Event) {
+  onConsignorSelectionChange(itemId: string, event: Event) {
     const target = event.target as HTMLSelectElement;
     const consignorId = target.value;
 
     this.individualConsignorSelections.update(map => {
       const newMap = new Map(map);
       if (consignorId) {
-        newMap.set(pendingImportId, consignorId);
+        newMap.set(itemId, consignorId);
       } else {
-        newMap.delete(pendingImportId);
+        newMap.delete(itemId);
       }
       return newMap;
     });
   }
 
-  getIndividualConsignorSelection(pendingImportId: string): string {
-    return this.individualConsignorSelections().get(pendingImportId) || '';
+  getIndividualConsignorSelection(itemId: string): string {
+    return this.individualConsignorSelections().get(itemId) || '';
   }
 
-  async confirmIndividualAssignment(pendingImportId: string) {
-    const consignorId = this.getIndividualConsignorSelection(pendingImportId);
+  async confirmIndividualAssignment(itemId: string) {
+    const consignorId = this.getIndividualConsignorSelection(itemId);
     if (!consignorId) {
       this.error.set('Please select a consignor before confirming assignment.');
       return;
@@ -850,13 +960,13 @@ export class InventoryListComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
-      const request = { pendingImportIds: [pendingImportId], consignorId };
+      const request = { pendingImportIds: [itemId], consignorId };
       await firstValueFrom(this.inventoryService.bulkAssignConsignorToPendingImports(request));
 
       // Update the local state to show the assignment
       this.assignedConsignors.update(map => {
         const newMap = new Map(map);
-        newMap.set(pendingImportId, consignorId);
+        newMap.set(itemId, consignorId);
         return newMap;
       });
 
@@ -866,7 +976,7 @@ export class InventoryListComponent implements OnInit {
       // Clear the individual selection
       this.individualConsignorSelections.update(map => {
         const newMap = new Map(map);
-        newMap.delete(pendingImportId);
+        newMap.delete(itemId);
         return newMap;
       });
 
@@ -882,18 +992,18 @@ export class InventoryListComponent implements OnInit {
     }
   }
 
-  cancelIndividualAssignment(pendingImportId: string) {
+  cancelIndividualAssignment(itemId: string) {
     this.assignmentDropdownOpen.set(null);
     this.individualConsignorSelections.update(map => {
       const newMap = new Map(map);
-      newMap.delete(pendingImportId);
+      newMap.delete(itemId);
       return newMap;
     });
   }
 
-  getAssignedConsignorName(pendingImportId: string): string | null {
+  getAssignedConsignorName(itemId: string): string | null {
     // First check if we have a local assignment
-    const localConsignorId = this.assignedConsignors().get(pendingImportId);
+    const localConsignorId = this.assignedConsignors().get(itemId);
     if (localConsignorId) {
       const consignor = this.consignors().find(c => c.id === localConsignorId);
       if (consignor) return `${consignor.name} (${consignor.consignorNumber})`;
@@ -902,7 +1012,7 @@ export class InventoryListComponent implements OnInit {
     // Check the pending imports result for existing assignments
     const pendingResult = this.pendingImportsResult();
     if (pendingResult) {
-      const item = pendingResult.items.find(i => i.pendingImportId === pendingImportId);
+      const item = pendingResult.items.find(i => i.id === itemId);
       if (item && item.consignorName) {
         return `${item.consignorName} (${item.consignorNumber || 'N/A'})`;
       }
@@ -911,7 +1021,7 @@ export class InventoryListComponent implements OnInit {
     return null;
   }
 
-  async deletePendingItem(pendingImportId: string) {
+  async deletePendingItem(itemId: string) {
     const confirmed = await firstValueFrom(this.confirmationService.confirm({
       title: 'Delete Pending Import',
       message: 'Are you sure you want to delete this pending import item? This action cannot be undone.',
@@ -924,24 +1034,24 @@ export class InventoryListComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
-      await firstValueFrom(this.inventoryService.deletePendingImport(pendingImportId));
+      await firstValueFrom(this.inventoryService.deletePendingImport(itemId));
 
       // Remove from local state
       this.selectedPendingImports.update(set => {
         const newSet = new Set(set);
-        newSet.delete(pendingImportId);
+        newSet.delete(itemId);
         return newSet;
       });
 
       this.verifiedPendingImports.update(set => {
         const newSet = new Set(set);
-        newSet.delete(pendingImportId);
+        newSet.delete(itemId);
         return newSet;
       });
 
       this.assignedConsignors.update(map => {
         const newMap = new Map(map);
-        newMap.delete(pendingImportId);
+        newMap.delete(itemId);
         return newMap;
       });
 

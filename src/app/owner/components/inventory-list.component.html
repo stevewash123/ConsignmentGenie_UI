@@ -48,6 +48,12 @@
           <span class="tab-count" *ngIf="pendingImportsResult()?.totalCount">({{ pendingImportsResult()!.totalCount }})</span>
         </button>
       </div>
+      <div class="tab-actions">
+        <button class="btn-secondary" (click)="openBulkImport()" title="Import items from CSV file">
+          <span class="btn-icon">📤</span>
+          Bulk Import
+        </button>
+      </div>
     </div>
 
     <!-- Regular Inventory Tab -->
@@ -325,14 +331,14 @@
               </tr>
             </thead>
             <tbody>
-              @for (item of pendingImportsResult()?.items; track item.pendingImportId; let i = $index) {
+              @for (item of pendingImportsResult()?.items; track item.id; let i = $index) {
                 <tr class="pending-item-row" [class.even]="i % 2 === 0">
                   <td class="checkbox-cell">
                     <label class="checkbox-label">
                       <input
                         type="checkbox"
-                        [checked]="verifiedPendingImports().has(item.pendingImportId)"
-                        (change)="toggleItemVerification(item.pendingImportId, $event)"
+                        [checked]="verifiedPendingImports().has(item.id)"
+                        (change)="toggleItemVerification(item.id, $event)"
                         class="checkbox-input">
                       <span class="checkbox-custom"></span>
                     </label>
@@ -341,9 +347,9 @@
                     <label class="checkbox-label">
                       <input
                         type="checkbox"
-                        [checked]="selectedPendingImports().has(item.pendingImportId)"
-                        [disabled]="!!getAssignedConsignorName(item.pendingImportId)"
-                        (change)="toggleSelectItem(item.pendingImportId)"
+                        [checked]="selectedPendingImports().has(item.id)"
+                        [disabled]="!!getAssignedConsignorName(item.id)"
+                        (change)="toggleSelectItem(item.id)"
                         class="checkbox-input">
                       <span class="checkbox-custom"></span>
                     </label>
@@ -362,10 +368,10 @@
                   </td>
                   <td class="consignor-cell">
                     <div class="consignor-assignment"
-                         [class.assigned]="getAssignedConsignorName(item.pendingImportId)"
-                         [class.unassigned]="!getAssignedConsignorName(item.pendingImportId)">
-                      @if (getAssignedConsignorName(item.pendingImportId); as consignorName) {
-                        <span class="assigned-consignor">{{ consignorName }}</span>
+                         [class.assigned]="item.consignorName"
+                         [class.unassigned]="!item.consignorName">
+                      @if (item.consignorName; as consignorName) {
+                        <span class="assigned-consignor">{{ consignorName }} ({{ item.consignorNumber || 'N/A' }})</span>
                       } @else {
                         <span class="needs-assignment">Needs Assignment</span>
                       }
@@ -373,20 +379,16 @@
                   </td>
                   <td class="source-cell">
                     <span class="source-badge" [class]="'source-' + item.source?.toLowerCase()">
-                      @if (item.isManifestItem) {
-                        Manifest
-                      } @else {
-                        Square Import
-                      }
+                      {{ item.source || 'Unknown' }}
                     </span>
                   </td>
                   <td class="actions-cell">
                     <div class="action-buttons">
-                      @if (assignmentDropdownOpen() === item.pendingImportId) {
+                      @if (assignmentDropdownOpen() === item.id) {
                         <div class="assignment-dropdown">
                           <select
-                            [value]="getIndividualConsignorSelection(item.pendingImportId)"
-                            (change)="onConsignorSelectionChange(item.pendingImportId, $event)"
+                            [value]="getIndividualConsignorSelection(item.id)"
+                            (change)="onConsignorSelectionChange(item.id, $event)"
                             class="consignor-select-small">
                             <option value="">Select consignor...</option>
                             @for (consignor of consignors(); track consignor.id) {
@@ -396,14 +398,14 @@
                           <div class="assignment-actions">
                             <button
                               class="btn-primary-small"
-                              [disabled]="!getIndividualConsignorSelection(item.pendingImportId) || isLoading()"
-                              (click)="confirmIndividualAssignment(item.pendingImportId)"
+                              [disabled]="!getIndividualConsignorSelection(item.id) || isLoading()"
+                              (click)="confirmIndividualAssignment(item.id)"
                               title="Confirm Assignment">
                               ✓
                             </button>
                             <button
                               class="btn-secondary-small"
-                              (click)="cancelIndividualAssignment(item.pendingImportId)"
+                              (click)="cancelIndividualAssignment(item.id)"
                               title="Cancel Assignment">
                               ✕
                             </button>
@@ -412,15 +414,15 @@
                       } @else {
                         <button
                           class="btn-icon"
-                          [title]="getAssignedConsignorName(item.pendingImportId) ? 'Change assigned consignor' : 'Assign to Consignor'"
+                          [title]="getAssignedConsignorName(item.id) ? 'Change assigned consignor' : 'Assign to Consignor'"
                           [disabled]="selectedPendingImports().size > 1"
-                          (click)="toggleAssignmentDropdown(item.pendingImportId)">
+                          (click)="toggleAssignmentDropdown(item.id)">
                           👤
                         </button>
                         <button
                           class="btn-icon btn-danger"
                           title="Delete Item"
-                          (click)="deletePendingItem(item.pendingImportId)">
+                          (click)="deletePendingItem(item.id)">
                           🗑️
                         </button>
                       }
@@ -537,6 +539,32 @@
                 <span class="condition-badge condition-poor">Poor</span>
                 <span>Significant wear, priced accordingly</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Import Modal -->
+    <div class="modal-overlay" *ngIf="isBulkImportModalOpen()" (click)="closeBulkImport()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">📦 Bulk Import Items</h2>
+          <button class="close-button" (click)="closeBulkImport()" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="upload-section">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title">Import Items from CSV</div>
+            <div class="upload-description">
+              Upload a CSV file to import multiple items at once.<br>
+              Items will be created as pending imports that you can review and assign to consignors.
+            </div>
+            <div class="upload-buttons">
+              <input type="file" #fileInput accept=".csv" style="display: none;" (change)="onFileSelected($event)" />
+              <button class="btn-primary" (click)="fileInput.click()">
+                Choose CSV File
+              </button>
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ import {
   UpdateItemCategoryDto,
   ItemCategoryDto,
   ApiResponse,
-  PendingSquareImportDto,
+  PendingImportItemDto,
   BulkAssignConsignorRequest,
   BulkAssignResult
 } from '../models/inventory.model';
@@ -51,42 +51,48 @@ export class InventoryService {
     return this.http.get<PagedResult<ItemListDto>>(`${this.apiUrl}/items`, { params: httpParams });
   }
 
-  // Square inventory methods - these return pending Square imports that need consignor assignment
-  private getSquareItems(params?: ItemQueryParams): Observable<PagedResult<PendingSquareImportDto>> {
+  // Unified method to get all pending imports (Square, CSV, Manifest, etc.)
+  getPendingSquareImports(params?: ItemQueryParams): Observable<PagedResult<PendingImportItemDto>> {
     let httpParams = new HttpParams();
 
     if (params) {
-      // Map common parameters to Square API parameters
       if (params.page) httpParams = httpParams.set('page', params.page.toString());
       if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize.toString());
       if (params.search) httpParams = httpParams.set('search', params.search);
-      // Note: Other filters like status, condition may not apply to pending imports
+      if (params.status) httpParams = httpParams.set('status', params.status);
+      if (params.consignorId) httpParams = httpParams.set('consignorId', params.consignorId);
+      if (params.sourceReference) httpParams = httpParams.set('sourceReference', params.sourceReference);
     }
 
-    return this.http.get<PagedResult<PendingSquareImportDto>>(`${this.apiUrl}/owner/integrations/square/inventory/items`, { params: httpParams });
+    return this.http.get<PagedResult<PendingImportItemDto>>(`${this.apiUrl}/pending-imports`, { params: httpParams });
   }
 
-  // Public method to get pending Square imports
-  getPendingSquareImports(params?: ItemQueryParams): Observable<PagedResult<PendingSquareImportDto>> {
-    return this.getSquareItems(params);
-  }
-
-  // Method to assign consignor to pending Square imports
-  assignConsignorToPendingImport(pendingImportId: string, consignorId: string): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/inventory/pending-imports/${pendingImportId}/assign`, { consignorId });
+  // Method to assign consignor to pending imports
+  assignConsignorToPendingImport(pendingImportId: string, consignorId: string): Observable<ApiResponse<PendingImportItemDto>> {
+    return this.http.post<ApiResponse<PendingImportItemDto>>(`${this.apiUrl}/pending-imports/${pendingImportId}/assign`, { consignorId });
   }
 
   // Method to bulk assign consignor to multiple pending imports
   bulkAssignConsignorToPendingImports(request: BulkAssignConsignorRequest): Observable<ApiResponse<BulkAssignResult>> {
-    return this.http.post<ApiResponse<BulkAssignResult>>(`${this.apiUrl}/inventory/pending-imports/bulk-assign`, request);
+    return this.http.post<ApiResponse<BulkAssignResult>>(`${this.apiUrl}/pending-imports/assign/bulk`, request);
   }
 
   importPendingItems(request: { pendingImportIds: string[] }): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/inventory/pending-imports/import`, request);
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/pending-imports/import`, request);
   }
 
   deletePendingImport(pendingImportId: string): Observable<ApiResponse<any>> {
     return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/pending-imports/${pendingImportId}`);
+  }
+
+  // Method to create pending imports from a manifest (dropoff request)
+  createFromManifest(manifestId: string, autoAssignConsignor: boolean = true): Observable<ApiResponse<PendingImportItemDto[]>> {
+    const request = { autoAssignConsignor };
+    return this.http.post<ApiResponse<PendingImportItemDto[]>>(`${this.apiUrl}/pending-imports/from-manifest/${manifestId}`, request);
+  }
+
+  createFromCsv(request: { fileName: string, items: any[] }): Observable<ApiResponse<PendingImportItemDto[]>> {
+    return this.http.post<ApiResponse<PendingImportItemDto[]>>(`${this.apiUrl}/pending-imports/from-csv`, request);
   }
 
   getItem(id: string): Observable<ApiResponse<ItemDetailDto>> {
