@@ -1,80 +1,72 @@
 <app-owner-layout>
   <div class="inventory-page">
-    <!-- Header -->
+    <!-- Page Header -->
     <div class="page-header">
       <div class="header-content">
         <h1>Inventory Management</h1>
-        <p *ngIf="!isSquareInventoryMode()">View and manage all inventory items</p>
-        <p *ngIf="isSquareInventoryMode()">Viewing inventory from Square</p>
+        <p class="header-subtitle" *ngIf="!isSquareInventoryMode()">View and manage all inventory items</p>
+        <p class="header-subtitle" *ngIf="isSquareInventoryMode()">Viewing inventory from Square</p>
       </div>
       <div class="header-actions">
-        <button *ngIf="isSquareInventoryMode()" class="btn-secondary" (click)="refreshInventory()" [disabled]="isLoading()" title="Refresh Square inventory data">
-          <span class="btn-icon">🔄</span>
-          {{ isLoading() ? 'Refreshing Square Data...' : 'Refresh Square Data' }}
+        <button *ngIf="isSquareInventoryMode()" class="btn-primary secondary" (click)="refreshInventory()" [disabled]="isLoading()">
+          🔄 {{ isLoading() ? 'Refreshing...' : 'Refresh Square Data' }}
         </button>
-        <button *ngIf="!isSquareInventoryMode()" class="btn-secondary" (click)="manageCategories()" title="Organize inventory with categories">
-          <span class="btn-icon">🏷️</span>
-          Manage Categories
+        <button *ngIf="!isSquareInventoryMode()" class="btn-primary secondary" (click)="manageCategories()">
+          🏷️ Manage Categories
         </button>
-        <button *ngIf="!isSquareInventoryMode()" class="btn-secondary" (click)="openBulkImport()" title="Upload multiple items at once">
-          <span class="btn-icon">📤</span>
-          Bulk Upload
+        <button *ngIf="!isSquareInventoryMode()" class="btn-primary secondary" (click)="openBulkImport()">
+          📤 Bulk Upload
         </button>
-        <button *ngIf="!isSquareInventoryMode()" class="btn-primary" (click)="createNewItem()">
-          <span class="btn-icon">📦</span>
-          Add New Item
+        <button *ngIf="!isSquareInventoryMode()" class="btn-primary secondary" (click)="createNewItem()">
+          📦 Add New Item
         </button>
       </div>
     </div>
 
     <!-- Tab Navigation -->
-    <div class="tab-navigation">
-      <div class="tab-list">
+    <div class="tab-bar">
+      <div class="tab-buttons">
         <button
-          class="tab-button"
+          class="tab-btn"
           [class.active]="viewMode() === 'regular'"
           (click)="switchViewMode('regular')">
-          <span class="tab-icon">📦</span>
-          Regular Inventory
+          📦 Regular Inventory
           <span class="tab-count" *ngIf="itemsResult()?.totalCount">({{ itemsResult()!.totalCount }})</span>
         </button>
         <button
-          class="tab-button"
+          class="tab-btn"
           [class.active]="viewMode() === 'pending'"
           (click)="switchViewMode('pending')"
           *ngIf="isSquareInventoryMode()">
-          <span class="tab-icon">⏳</span>
-          Pending Imports
+          ⏳ Pending Imports
           <span class="tab-count" *ngIf="pendingImportsResult()?.totalCount">({{ pendingImportsResult()!.totalCount }})</span>
         </button>
       </div>
-      <div class="tab-actions">
-        <button class="btn-secondary" (click)="openBulkImport()" title="Import items from CSV file">
-          <span class="btn-icon">📤</span>
-          Bulk Import
+      <div class="tab-bar-actions">
+        <button class="btn-primary" (click)="openBulkImport()">
+          📤 Bulk Import
         </button>
       </div>
     </div>
 
     <!-- Regular Inventory Tab -->
-    <div class="tab-panel" [class.active]="viewMode() === 'regular'" *ngIf="viewMode() === 'regular'">
-      <!-- Search and Controls -->
-      <div class="tab-controls">
-        <div class="search-section">
+    <div class="tab-content" *ngIf="viewMode() === 'regular'">
+      <!-- Controls Row -->
+      <div class="controls-bar">
+        <div class="search-group">
           <input
             type="text"
             [(ngModel)]="searchQuery"
             (keyup.enter)="applyFilters()"
             placeholder="Search items..."
-            class="search-input">
-          <button class="btn-secondary" (click)="applyFilters()">Search</button>
+            class="filter-input search-input">
+          <button class="btn-primary secondary" (click)="applyFilters()">Search</button>
         </div>
-        <div class="controls-section">
-          <button class="btn-secondary" (click)="openColorGuideModal()" type="button">
-            <span class="btn-icon">🎨</span>
-            Color Guide
+        <div class="controls-group">
+          <button class="btn-primary secondary" (click)="openColorGuideModal()">
+            🎨 Color Guide
           </button>
-          <select [(ngModel)]="pageSize" (change)="changePageSize()" class="page-size-select">
+          <select [(ngModel)]="pageSize" (change)="changePageSize()" class="filter-select page-size-select">
             <option value="10">10 per page</option>
             <option value="25">25 per page</option>
             <option value="50">50 per page</option>
@@ -83,203 +75,189 @@
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="filters-section">
-        <select [(ngModel)]="selectedCategory" (change)="applyFilters()" class="filter-select">
-          <option value="">All Categories</option>
-          @for (category of categories(); track category.id) {
-            <option [value]="category.name">{{ category.name }}</option>
-          }
-        </select>
-        <select [(ngModel)]="selectedStatus" (change)="applyFilters()" class="filter-select">
-          <option value="">All Statuses</option>
-          <option value="Available">Available</option>
-          <option value="Sold">Sold</option>
-          <option value="Removed">Removed</option>
-        </select>
-        <select [(ngModel)]="selectedCondition" (change)="applyFilters()" class="filter-select">
-          <option value="">All Conditions</option>
-          <option value="New">New</option>
-          <option value="LikeNew">Like New</option>
-          <option value="Good">Good</option>
-          <option value="Fair">Fair</option>
-          <option value="Poor">Poor</option>
-        </select>
-        <select [(ngModel)]="selectedConsignor" (change)="applyFilters()" class="filter-select">
-          <option value="">All Consignors</option>
-          @for (consignor of consignors(); track consignor.id) {
-            <option [value]="consignor.id">{{ consignor.name }}</option>
-          }
-        </select>
-        <select [(ngModel)]="selectedExpiration" (change)="applyFilters()" class="filter-select">
-          <option value="">All Items</option>
-          <option value="expiring-soon">⚠️ Expiring Soon (≤7 days)</option>
-          <option value="expired">🔴 Expired</option>
-          <option value="this-month">This Month</option>
-          <option value="next-month">Next Month</option>
-        </select>
+      <!-- Regular Inventory Table -->
+      <div class="table-wrapper" *ngIf="!isInventoryLoading() && itemsResult(); else loadingInventory">
+        <table class="data-table">
+          <thead>
+            <tr class="header-row">
+              <th>Image</th>
+              <th class="sortable" (click)="setSorting('title')">
+                Title / SKU
+                <span class="sort-indicator" [class.active]="sortBy === 'title'">
+                  {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th>
+                Category
+                <app-column-filter
+                  filterType="select"
+                  label="Category"
+                  [options]="categoryOptions()"
+                  [value]="selectedCategory"
+                  placeholder="All Categories"
+                  (filterChange)="onFilterChange('category', $event)"
+                  (filterClear)="onFilterClear('category')">
+                </app-column-filter>
+              </th>
+              <th>
+                Status
+                <app-column-filter
+                  filterType="select"
+                  label="Status"
+                  [options]="statusOptions"
+                  [value]="selectedStatus"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('status', $event)"
+                  (filterClear)="onFilterClear('status')">
+                </app-column-filter>
+              </th>
+              <th class="sortable" (click)="setSorting('price')">
+                Price
+                <span class="sort-indicator" [class.active]="sortBy === 'price'">
+                  {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th>
+                Condition
+                <app-column-filter
+                  filterType="select"
+                  label="Condition"
+                  [options]="conditionOptions"
+                  [value]="selectedCondition"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('condition', $event)"
+                  (filterClear)="onFilterClear('condition')">
+                </app-column-filter>
+              </th>
+              <th>
+                Consignor
+                <app-column-filter
+                  filterType="select"
+                  label="Consignor"
+                  [options]="consignorOptions()"
+                  [value]="selectedConsignor"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('consignor', $event)"
+                  (filterClear)="onFilterClear('consignor')">
+                </app-column-filter>
+              </th>
+              <th class="sortable" (click)="setSorting('receivedDate')">
+                Received
+                <span class="sort-indicator" [class.active]="sortBy === 'receivedDate'">
+                  {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th>
+                Expires
+                <app-column-filter
+                  filterType="select"
+                  label="Expiration"
+                  [options]="expirationOptions"
+                  [value]="selectedExpiration"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('expiration', $event)"
+                  (filterClear)="onFilterClear('expiration')">
+                </app-column-filter>
+              </th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of itemsResult()?.items; track item.id) {
+              <tr>
+                <td class="image-cell">
+                  @if (item.primaryImageUrl) {
+                    <img [src]="item.primaryImageUrl" [alt]="item.title" class="item-thumbnail">
+                  } @else {
+                    <div class="no-image">📷</div>
+                  }
+                </td>
+                <td>
+                  <div class="cell-primary">{{ item.title }}</div>
+                  <div class="cell-secondary">{{ item.sku }}</div>
+                </td>
+                <td>{{ item.category || '—' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-success': item.status === 'Available',
+                    'badge-info': item.status === 'Sold',
+                    'badge-neutral': item.status === 'Removed'
+                  }">{{ item.status }}</span>
+                </td>
+                <td class="cell-money">${{ item.price | number:'1.2-2' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-success': item.condition === 'New',
+                    'badge-info': item.condition === 'LikeNew',
+                    'badge-neutral': item.condition === 'Good',
+                    'badge-warn': item.condition === 'Fair',
+                    'badge-error': item.condition === 'Poor'
+                  }">{{ getConditionLabel(item.condition) }}</span>
+                </td>
+                <td>
+                  <span class="consignor-link" 
+                        [class.clickable]="item.consignorId"
+                        (click)="item.consignorId && viewConsignor(item.consignorId)">
+                    {{ item.consignorName || 'Unassigned' }}
+                  </span>
+                </td>
+                <td>{{ item.receivedDate | date:'MMM d, y' }}</td>
+                <td [ngClass]="{
+                  'expiration-expired': getExpirationStatusClass(item.expirationDate) === 'expiration-expired',
+                  'expiration-warning': getExpirationStatusClass(item.expirationDate) === 'expiration-warning'
+                }">
+                  {{ getExpirationDisplayText(item.expirationDate) }}
+                </td>
+                <td>
+                  <button class="btn-icon" (click)="viewItem(item.id)" title="View Details">👁️</button>
+                  <button class="btn-icon" (click)="editItem(item.id)" title="Edit">✏️</button>
+                  <button class="btn-icon danger" *ngIf="item.status === 'Available'" (click)="removeFromInventory(item)" title="Remove">📤</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
 
-      <!-- Regular Inventory Table -->
-      <div class="table-container" *ngIf="!isInventoryLoading() && itemsResult(); else loadingInventory">
-        <div class="table-wrapper">
-          <table class="inventory-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th (click)="setSorting('title')" class="sortable">
-                  Title / SKU
-                  <span class="sort-indicator" [class.active]="sortBy === 'title'">
-                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th>Category</th>
-                <th>Status</th>
-                <th (click)="setSorting('price')" class="sortable">
-                  Price
-                  <span class="sort-indicator" [class.active]="sortBy === 'price'">
-                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th>Condition</th>
-                <th>Consignor</th>
-                <th (click)="setSorting('receivedDate')" class="sortable">
-                  Received
-                  <span class="sort-indicator" [class.active]="sortBy === 'receivedDate'">
-                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th>Expires</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of itemsResult()?.items; track item.id; let i = $index) {
-                <tr class="item-row" [class.even]="i % 2 === 0">
-                  <td class="image-cell">
-                    @if (item.primaryImageUrl) {
-                      <img [src]="item.primaryImageUrl" [alt]="item.title" class="item-thumbnail">
-                    } @else {
-                      <div class="no-image">📷</div>
-                    }
-                  </td>
-                  <td class="title-cell">
-                    <div class="item-title" [title]="item.description || null">{{ item.title }}</div>
-                    <div class="item-sku">{{ item.sku }}</div>
-                  </td>
-                  <td class="category-cell">{{ item.category }}</td>
-                  <td class="status-cell">
-                    <span class="status-badge" [class]="'status-' + item.status.toLowerCase()">
-                      {{ item.status }}
-                    </span>
-                  </td>
-                  <td class="price-cell">${{ item.price | number:'1.2-2' }}</td>
-                  <td class="condition-cell">
-                    <span class="condition-badge" [class]="getConditionClass(item.condition)">
-                      {{ getConditionLabel(item.condition) }}
-                    </span>
-                  </td>
-                  <td class="consignor-cell">
-                    <div class="consignor-name"
-                         [class.clickable]="item.consignorId"
-                         (click)="viewConsignor(item.consignorId)"
-                         [title]="item.consignorId ? 'Click to view consignor details' : ''">
-                      {{ item.consignorName || 'Unassigned' }}
-                    </div>
-                  </td>
-                  <td class="received-cell">{{ item.receivedDate | date:'MMM d, y' }}</td>
-                  <td class="expires-cell" [class]="getExpirationStatusClass(item.expirationDate)">
-                    {{ getExpirationDisplayText(item.expirationDate) }}
-                  </td>
-                  <td class="actions-cell">
-                    <div class="action-buttons">
-                      <button class="btn-secondary-small" (click)="editItem(item.id)" title="Edit Item">
-                        <span class="btn-icon">✏️</span>
-                      </button>
-                      <button class="btn-secondary-small" (click)="markAsSold(item.id)" title="Mark as Sold" *ngIf="item.status === 'Available'">
-                        <span class="btn-icon">💰</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination for Regular Inventory -->
-        <div class="pagination" *ngIf="itemsResult() && itemsResult()!.totalPages > 1">
-          <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
-            Previous
-          </button>
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="itemsResult() && itemsResult()!.totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">Previous</button>
+        <div class="page-numbers">
           @for (page of getPageNumbers(); track page) {
-            <button
-              class="page-btn"
-              [class.active]="page === currentPage()"
-              (click)="goToPage(page)">
-              {{ page }}
-            </button>
+            <button class="page-btn" [class.active]="page === currentPage()" (click)="goToPage(page)">{{ page }}</button>
           }
-          <button class="page-btn" [disabled]="currentPage() === itemsResult()?.totalPages" (click)="goToPage(currentPage() + 1)">
-            Next
-          </button>
         </div>
+        <button class="page-btn" [disabled]="currentPage() === itemsResult()?.totalPages" (click)="goToPage(currentPage() + 1)">Next</button>
       </div>
     </div>
 
     <!-- Pending Imports Tab -->
-    <div class="tab-panel" [class.active]="viewMode() === 'pending'" *ngIf="viewMode() === 'pending'">
-
-      <!-- Bulk Actions Section -->
-      <div class="bulk-actions-section">
-        <div class="bulk-actions-header">
-          <h3>Bulk Operations</h3>
-          <div class="selected-count" *ngIf="selectedPendingImports().size > 0">
-            {{ selectedPendingImports().size }} item(s) selected for assignment
-          </div>
-        </div>
-        <div class="bulk-actions-controls">
-          <div class="consignor-assignment">
-            <label for="bulkConsignorSelect">Assign to Consignor:</label>
-            <select id="bulkConsignorSelect" [(ngModel)]="selectedConsignorId" class="consignor-select">
-              <option value="">Select a consignor...</option>
-              @for (consignor of consignors(); track consignor.id) {
-                <option [value]="consignor.id">{{ consignor.name }} ({{ consignor.consignorNumber }})</option>
-              }
-            </select>
-            <button
-              class="btn-secondary"
-              [disabled]="!selectedConsignorId() || selectedPendingImports().size === 0 || isLoading()"
-              (click)="bulkAssignConsignor()">
-              <span *ngIf="isLoading()" class="loading-spinner"></span>
-              {{ isLoading() ? 'Assigning...' : 'Assign Selected' }}
-            </button>
-          </div>
-          <div class="verification-actions">
-            <button
-              class="btn-primary"
-              [disabled]="verifiedPendingImports().size === 0 || isLoading()"
-              (click)="submitVerifiedItems()">
-              <span *ngIf="isLoading()" class="loading-spinner"></span>
-              {{ isLoading() ? 'Importing...' : 'Import Verified Items (' + verifiedPendingImports().size + ')' }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search and Controls -->
-      <div class="tab-controls">
-        <div class="search-section">
+    <div class="tab-content" *ngIf="viewMode() === 'pending'">
+      <!-- Controls Row -->
+      <div class="controls-bar">
+        <div class="search-group">
           <input
             type="text"
             [(ngModel)]="searchQuery"
             (keyup.enter)="applyFilters()"
             placeholder="Search pending imports..."
-            class="search-input">
-          <button class="btn-secondary" (click)="applyFilters()">Search</button>
+            class="filter-input search-input">
+          <button class="btn-primary secondary" (click)="applyFilters()">Search</button>
         </div>
-        <div class="controls-section">
-          <select [(ngModel)]="pageSize" (change)="changePageSize()" class="page-size-select">
+        <div class="controls-group">
+          <button
+            class="btn-primary secondary"
+            [disabled]="selectedPendingImports().size === 0"
+            (click)="openAssignModal()">
+            👤 Assign Selected ({{ selectedPendingImports().size }})
+          </button>
+          <button
+            class="btn-primary"
+            [disabled]="verifiedPendingImports().size === 0 || isLoading()"
+            (click)="submitVerifiedItems()">
+            {{ isLoading() ? 'Importing...' : '✓ Import Verified (' + verifiedPendingImports().size + ')' }}
+          </button>
+          <select [(ngModel)]="pageSize" (change)="changePageSize()" class="filter-select page-size-select">
             <option value="10">10 per page</option>
             <option value="25">25 per page</option>
             <option value="50">50 per page</option>
@@ -289,168 +267,153 @@
       </div>
 
       <!-- Pending Imports Table -->
-      <div class="table-container" *ngIf="!isInventoryLoading() && pendingImportsResult(); else loadingPending">
-        <div class="table-wrapper">
-          <table class="inventory-table pending-table">
-            <thead>
+      <div class="table-wrapper" *ngIf="!isInventoryLoading() && pendingImportsResult(); else loadingPending">
+        <table class="data-table">
+          <thead>
+            <tr class="header-row">
+              <th class="checkbox-col">
+                <div class="checkbox-header">
+                  <input type="checkbox" [checked]="allPendingVerified()" (change)="toggleAllVerification($event)" class="checkbox-input" title="Verify all">
+                  <span class="checkbox-label-text">Verified</span>
+                </div>
+              </th>
+              <th class="checkbox-col">
+                <div class="checkbox-header">
+                  <input type="checkbox" [checked]="allPendingSelected()" (change)="toggleSelectAll()" class="checkbox-input" title="Select all">
+                  <span class="checkbox-label-text">Select</span>
+                </div>
+              </th>
+              <th>Item</th>
+              <th>Price</th>
+              <th>SKU</th>
+              <th>
+                Category
+                <app-column-filter
+                  filterType="select"
+                  label="Category"
+                  [options]="categoryOptions()"
+                  [value]="selectedCategory"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('category', $event)"
+                  (filterClear)="onFilterClear('category')">
+                </app-column-filter>
+              </th>
+              <th>
+                Condition
+                <app-column-filter
+                  filterType="select"
+                  label="Condition"
+                  [options]="conditionOptions"
+                  [value]="selectedCondition"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('condition', $event)"
+                  (filterClear)="onFilterClear('condition')">
+                </app-column-filter>
+              </th>
+              <th>
+                Consignor
+                <app-column-filter
+                  filterType="select"
+                  label="Consignor"
+                  [options]="consignorOptions()"
+                  [value]="selectedConsignor"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('consignor', $event)"
+                  (filterClear)="onFilterClear('consignor')">
+                </app-column-filter>
+              </th>
+              <th>
+                Source
+                <app-column-filter
+                  filterType="select"
+                  label="Source"
+                  [options]="sourceOptions"
+                  [value]="selectedSource"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('source', $event)"
+                  (filterClear)="onFilterClear('source')">
+                </app-column-filter>
+              </th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of pendingImportsResult()?.items; track item.id) {
               <tr>
-                <th class="checkbox-cell">
-                  <div class="checkbox-header">
-                    <label class="checkbox-label">
-                      <input
-                        type="checkbox"
-                        [checked]="allPendingVerified()"
-                        (change)="toggleAllVerification($event)"
-                        class="checkbox-input">
-                      <span class="checkbox-custom"></span>
-                      <span class="checkbox-text">Verified</span>
-                    </label>
-                  </div>
-                </th>
-                <th class="checkbox-cell">
-                  <div class="checkbox-header">
-                    <label class="checkbox-label">
-                      <input
-                        type="checkbox"
-                        [checked]="allPendingSelected()"
-                        (change)="toggleSelectAll()"
-                        class="checkbox-input">
-                      <span class="checkbox-custom"></span>
-                      <span class="checkbox-text">Assign</span>
-                    </label>
-                  </div>
-                </th>
-                <th>Item</th>
-                <th>Price</th>
-                <th>SKU</th>
-                <th>Category</th>
-                <th>Condition</th>
-                <th>Assigned Consignor</th>
-                <th>Source</th>
-                <th>Actions</th>
+                <td class="checkbox-col">
+                  <input
+                    type="checkbox"
+                    [checked]="verifiedPendingImports().has(item.id)"
+                    (change)="toggleItemVerification(item.id, $event)"
+                    class="checkbox-input">
+                </td>
+                <td class="checkbox-col">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedPendingImports().has(item.id)"
+                    [disabled]="!!getAssignedConsignorName(item.id)"
+                    (change)="toggleSelectItem(item.id)"
+                    class="checkbox-input">
+                </td>
+                <td>
+                  <div class="cell-primary">{{ item.name }}</div>
+                  <div class="cell-secondary" *ngIf="item.description">{{ item.description }}</div>
+                </td>
+                <td class="cell-money">${{ item.price | number:'1.2-2' }}</td>
+                <td class="cell-secondary">{{ item.sku || '—' }}</td>
+                <td>{{ item.category || '—' }}</td>
+                <td>
+                  <span class="badge badge-neutral">{{ item.condition || 'Imported' }}</span>
+                </td>
+                <td>
+                  @if (item.consignorName) {
+                    <span class="badge badge-success">{{ item.consignorName }}</span>
+                  } @else {
+                    <span class="badge badge-warn">Needs Assignment</span>
+                  }
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-info': item.source === 'Square',
+                    'badge-neutral': item.source === 'CSV',
+                    'badge-warn': item.source === 'Manifest'
+                  }">{{ item.source || 'Unknown' }}</span>
+                </td>
+                <td>
+                  @if (assignmentDropdownOpen() === item.id) {
+                    <div class="inline-assign">
+                      <select
+                        [value]="getIndividualConsignorSelection(item.id)"
+                        (change)="onConsignorSelectionChange(item.id, $event)"
+                        class="filter-select">
+                        <option value="">Select...</option>
+                        @for (consignor of consignors(); track consignor.id) {
+                          <option [value]="consignor.id">{{ consignor.name }}</option>
+                        }
+                      </select>
+                      <button class="btn-icon" [disabled]="!getIndividualConsignorSelection(item.id)" (click)="confirmIndividualAssignment(item.id)" title="Confirm">✓</button>
+                      <button class="btn-icon" (click)="cancelIndividualAssignment(item.id)" title="Cancel">✕</button>
+                    </div>
+                  } @else {
+                    <button class="btn-icon" [disabled]="selectedPendingImports().size > 1" (click)="toggleAssignmentDropdown(item.id)" title="Assign Consignor">👤</button>
+                    <button class="btn-icon danger" (click)="deletePendingItem(item.id)" title="Reject">🗑️</button>
+                  }
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              @for (item of pendingImportsResult()?.items; track item.id; let i = $index) {
-                <tr class="pending-item-row" [class.even]="i % 2 === 0">
-                  <td class="checkbox-cell">
-                    <label class="checkbox-label">
-                      <input
-                        type="checkbox"
-                        [checked]="verifiedPendingImports().has(item.id)"
-                        (change)="toggleItemVerification(item.id, $event)"
-                        class="checkbox-input">
-                      <span class="checkbox-custom"></span>
-                    </label>
-                  </td>
-                  <td class="checkbox-cell">
-                    <label class="checkbox-label">
-                      <input
-                        type="checkbox"
-                        [checked]="selectedPendingImports().has(item.id)"
-                        [disabled]="!!getAssignedConsignorName(item.id)"
-                        (change)="toggleSelectItem(item.id)"
-                        class="checkbox-input">
-                      <span class="checkbox-custom"></span>
-                    </label>
-                  </td>
-                  <td class="item-cell">
-                    <div class="item-info">
-                      <div class="item-name" [title]="item.description || null">{{ item.name }}</div>
-                      <div class="item-description" *ngIf="item.description">{{ item.description }}</div>
-                    </div>
-                  </td>
-                  <td class="price-cell">${{ item.price | number:'1.2-2' }}</td>
-                  <td class="sku-cell">{{ item.sku || '—' }}</td>
-                  <td class="category-cell">{{ item.category || '—' }}</td>
-                  <td class="condition-cell">
-                    <span class="condition-badge condition-new">{{ item.condition || 'Imported' }}</span>
-                  </td>
-                  <td class="consignor-cell">
-                    <div class="consignor-assignment"
-                         [class.assigned]="item.consignorName"
-                         [class.unassigned]="!item.consignorName">
-                      @if (item.consignorName; as consignorName) {
-                        <span class="assigned-consignor">{{ consignorName }} ({{ item.consignorNumber || 'N/A' }})</span>
-                      } @else {
-                        <span class="needs-assignment">Needs Assignment</span>
-                      }
-                    </div>
-                  </td>
-                  <td class="source-cell">
-                    <span class="source-badge" [class]="'source-' + item.source?.toLowerCase()">
-                      {{ item.source || 'Unknown' }}
-                    </span>
-                  </td>
-                  <td class="actions-cell">
-                    <div class="action-buttons">
-                      @if (assignmentDropdownOpen() === item.id) {
-                        <div class="assignment-dropdown">
-                          <select
-                            [value]="getIndividualConsignorSelection(item.id)"
-                            (change)="onConsignorSelectionChange(item.id, $event)"
-                            class="consignor-select-small">
-                            <option value="">Select consignor...</option>
-                            @for (consignor of consignors(); track consignor.id) {
-                              <option [value]="consignor.id">{{ consignor.name }} ({{ consignor.consignorNumber }})</option>
-                            }
-                          </select>
-                          <div class="assignment-actions">
-                            <button
-                              class="btn-primary-small"
-                              [disabled]="!getIndividualConsignorSelection(item.id) || isLoading()"
-                              (click)="confirmIndividualAssignment(item.id)"
-                              title="Confirm Assignment">
-                              ✓
-                            </button>
-                            <button
-                              class="btn-secondary-small"
-                              (click)="cancelIndividualAssignment(item.id)"
-                              title="Cancel Assignment">
-                              ✕
-                            </button>
-                          </div>
-                        </div>
-                      } @else {
-                        <button
-                          class="btn-icon"
-                          [title]="getAssignedConsignorName(item.id) ? 'Change assigned consignor' : 'Assign to Consignor'"
-                          [disabled]="selectedPendingImports().size > 1"
-                          (click)="toggleAssignmentDropdown(item.id)">
-                          👤
-                        </button>
-                        <button
-                          class="btn-icon btn-danger"
-                          title="Delete Item"
-                          (click)="deletePendingItem(item.id)">
-                          🗑️
-                        </button>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+            }
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Pagination for Pending Imports -->
-        <div class="pagination" *ngIf="pendingImportsResult() && pendingImportsResult()!.totalPages > 1">
-          <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
-            Previous
-          </button>
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="pendingImportsResult() && pendingImportsResult()!.totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">Previous</button>
+        <div class="page-numbers">
           @for (page of getPageNumbers(); track page) {
-            <button
-              class="page-btn"
-              [class.active]="page === currentPage()"
-              (click)="goToPage(page)">
-              {{ page }}
-            </button>
+            <button class="page-btn" [class.active]="page === currentPage()" (click)="goToPage(page)">{{ page }}</button>
           }
-          <button class="page-btn" [disabled]="currentPage() === pendingImportsResult()?.totalPages" (click)="goToPage(currentPage() + 1)">
-            Next
-          </button>
         </div>
+        <button class="page-btn" [disabled]="currentPage() === pendingImportsResult()?.totalPages" (click)="goToPage(currentPage() + 1)">Next</button>
       </div>
     </div>
 
@@ -479,7 +442,7 @@
     <div class="empty-state" *ngIf="!isInventoryLoading() && viewMode() === 'pending' && pendingImportsResult()?.items.length === 0">
       <div class="empty-icon">⏳</div>
       <h3>No pending imports found</h3>
-      <p>Import items from Square or upload via manifest to see them here.</p>
+      <p>Import items from Square or upload via CSV to see them here.</p>
     </div>
 
     <!-- Error State -->
@@ -490,57 +453,124 @@
       <button class="btn-primary" (click)="loadItems()">Try Again</button>
     </div>
 
-    <!-- Color Guide Modal (preserved from original) -->
-    <div class="color-guide-modal" *ngIf="isColorGuideModalOpen()">
-      <div class="modal-backdrop" (click)="closeColorGuideModal()"></div>
-      <div class="modal-content">
+    <!-- Color Guide Modal -->
+    <div class="modal-overlay" *ngIf="isColorGuideModalOpen()" (click)="closeColorGuideModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Status & Condition Color Guide</h3>
-          <button class="modal-close" (click)="closeColorGuideModal()">&times;</button>
+          <h2>Status & Condition Color Guide</h2>
+          <button class="close-btn" (click)="closeColorGuideModal()">×</button>
         </div>
         <div class="modal-body">
           <div class="guide-section">
             <h4>Status Colors</h4>
-            <div class="color-examples">
-              <div class="color-example">
-                <span class="status-badge status-available">Available</span>
-                <span>Available for sale</span>
-              </div>
-              <div class="color-example">
-                <span class="status-badge status-sold">Sold</span>
-                <span>Successfully sold</span>
-              </div>
-              <div class="color-example">
-                <span class="status-badge status-removed">Removed</span>
-                <span>Removed from inventory</span>
-              </div>
+            <div class="guide-items">
+              <div class="guide-item"><span class="badge badge-success">Available</span> Available for sale</div>
+              <div class="guide-item"><span class="badge badge-info">Sold</span> Successfully sold</div>
+              <div class="guide-item"><span class="badge badge-neutral">Removed</span> Removed from inventory</div>
             </div>
           </div>
           <div class="guide-section">
             <h4>Condition Colors</h4>
-            <div class="color-examples">
-              <div class="color-example">
-                <span class="condition-badge condition-new">New</span>
-                <span>Brand new, tags attached</span>
-              </div>
-              <div class="color-example">
-                <span class="condition-badge condition-like-new">Like New</span>
-                <span>Excellent condition, barely used</span>
-              </div>
-              <div class="color-example">
-                <span class="condition-badge condition-good">Good</span>
-                <span>Normal wear, good condition</span>
-              </div>
-              <div class="color-example">
-                <span class="condition-badge condition-fair">Fair</span>
-                <span>Visible wear, still functional</span>
-              </div>
-              <div class="color-example">
-                <span class="condition-badge condition-poor">Poor</span>
-                <span>Significant wear, priced accordingly</span>
-              </div>
+            <div class="guide-items">
+              <div class="guide-item"><span class="badge badge-success">New</span> Brand new, tags attached</div>
+              <div class="guide-item"><span class="badge badge-info">Like New</span> Excellent condition</div>
+              <div class="guide-item"><span class="badge badge-neutral">Good</span> Normal wear</div>
+              <div class="guide-item"><span class="badge badge-warn">Fair</span> Visible wear</div>
+              <div class="guide-item"><span class="badge badge-error">Poor</span> Significant wear</div>
             </div>
           </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeColorGuideModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Assign Modal -->
+    <div class="modal-overlay" *ngIf="isAssignModalOpen()" (click)="closeAssignModal()">
+      <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>👤 Assign to Consignor</h2>
+          <button class="close-btn" (click)="closeAssignModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <p class="assign-count">Assigning {{ selectedPendingImports().size }} selected item(s)</p>
+
+          <div class="form-group">
+            <label for="assignConsignor">Consignor <span class="required">*</span></label>
+            <select id="assignConsignor" [(ngModel)]="selectedConsignorId" class="form-control">
+              <option value="">Select consignor...</option>
+              @for (consignor of consignors(); track consignor.id) {
+                <option [value]="consignor.id">{{ consignor.name }} ({{ consignor.consignorNumber }})</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeAssignModal()">Cancel</button>
+          <button
+            class="btn-primary"
+            [disabled]="!selectedConsignorId() || isLoading()"
+            (click)="bulkAssignConsignor()">
+            {{ isLoading() ? 'Assigning...' : 'Assign' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remove from Inventory Modal -->
+    <div class="modal-overlay" *ngIf="isRemovalModalOpen()" (click)="closeRemovalModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>📤 Remove from Inventory</h2>
+          <button class="close-btn" (click)="closeRemovalModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="item-summary">
+            <h4>{{ selectedItemForRemoval()?.title }}</h4>
+            <p class="cell-secondary">SKU: {{ selectedItemForRemoval()?.sku }}</p>
+            <p class="cell-secondary">Consignor: {{ selectedItemForRemoval()?.consignorName }}</p>
+          </div>
+
+          <div class="form-group">
+            <label for="removalReason">Reason for Removal <span class="required">*</span></label>
+            <select id="removalReason" [(ngModel)]="selectedRemovalReason" class="form-control">
+              <option value="">Select a reason...</option>
+              <option value="return-to-consignor">Return to Consignor</option>
+              <option value="shop-inventory">Keep in Shop Inventory</option>
+              <option value="damaged">Damaged</option>
+              <option value="expired">Expired/End of Term</option>
+              <option value="lost">Lost/Missing</option>
+              <option value="customer-return">Customer Return</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="removalNotes">Additional Notes</label>
+            <textarea
+              id="removalNotes"
+              [(ngModel)]="removalNotes"
+              class="form-control"
+              rows="3"
+              placeholder="Optional notes..."></textarea>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="notifyConsignor" class="checkbox-input">
+              <span>Notify consignor about removal</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeRemovalModal()">Cancel</button>
+          <button
+            class="btn-danger"
+            [disabled]="!selectedRemovalReason || isProcessingRemoval()"
+            (click)="confirmRemoval()">
+            {{ isProcessingRemoval() ? 'Removing...' : 'Remove from Inventory' }}
+          </button>
         </div>
       </div>
     </div>
@@ -549,23 +579,23 @@
     <div class="modal-overlay" *ngIf="isBulkImportModalOpen()" (click)="closeBulkImport()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2 class="modal-title">📦 Bulk Import Items</h2>
-          <button class="close-button" (click)="closeBulkImport()" type="button">×</button>
+          <h2>📦 Bulk Import Items</h2>
+          <button class="close-btn" (click)="closeBulkImport()">×</button>
         </div>
         <div class="modal-body">
-          <div class="upload-section">
+          <div class="upload-zone"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)"
+               [class.drag-active]="isDragActive()">
             <div class="upload-icon">📄</div>
             <div class="upload-title">Import Items from CSV</div>
             <div class="upload-description">
-              Upload a CSV file to import multiple items at once.<br>
-              Items will be created as pending imports that you can review and assign to consignors.
+              Drag and drop a CSV file here or click to browse.<br>
+              Items will be created as pending imports for review.
             </div>
-            <div class="upload-buttons">
-              <input type="file" #fileInput accept=".csv" style="display: none;" (change)="onFileSelected($event)" />
-              <button class="btn-primary" (click)="fileInput.click()">
-                Choose CSV File
-              </button>
-            </div>
+            <input type="file" #fileInput accept=".csv" style="display: none;" (change)="onFileSelected($event)" />
+            <button class="btn-primary" (click)="fileInput.click()">Choose CSV File</button>
           </div>
         </div>
       </div>

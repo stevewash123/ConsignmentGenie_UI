@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
 import { OwnerLayoutComponent } from './owner-layout.component';
+import { ColumnFilterComponent, FilterOption } from '../../shared/components/column-filter.component';
 import { PayoutService, PayoutStatus } from '../../services/payout.service';
 import {
   PayoutListDto,
@@ -48,7 +49,7 @@ const SUCCESS_MESSAGES = {
 @Component({
   selector: 'app-owner-payouts',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ConsignorStatementModalComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ColumnFilterComponent, ConsignorStatementModalComponent],
   templateUrl: './owner-payouts.component.html',
   styleUrls: ['./owner-payouts.component.scss']
 })
@@ -73,7 +74,7 @@ export class OwnerPayoutsComponent implements OnInit {
   currentPage = signal(1);
   totalPages = signal(1);
   totalPayouts = signal(0);
-  readonly pageSize = DEFAULT_PAGE_SIZE;
+  pageSize = signal(DEFAULT_PAGE_SIZE);
 
   // Filters
   selectedConsignorId = signal('');
@@ -90,6 +91,16 @@ export class OwnerPayoutsComponent implements OnInit {
 
   // View toggle
   pendingPayoutsViewMode = signal<'cards' | 'table'>('cards');
+  viewMode = signal<'pending' | 'history'>('pending');
+  preSelectedConsignorId = signal<string | null>(null);
+
+  // Additional filters for history tab
+  // Note: paymentMethod filtering removed - not supported by backend API
+
+  // Pending payouts filters (client-side)
+  pendingConsignorFilter = signal('');
+  pendingSortBy = signal('amount');
+  pendingSortDirection = signal<'asc' | 'desc'>('desc');
 
   // Form data
   newPayout = signal<Partial<CreatePayoutRequest>>({
@@ -125,6 +136,66 @@ export class OwnerPayoutsComponent implements OnInit {
       name: consignor.name,
       email: consignor.email
     }));
+  });
+
+  // Computed date range for filter component
+  dateRangeFilter = computed(() => ({
+    from: this.dateFrom() || null,
+    to: this.dateTo() || null
+  }));
+
+  // ============================================================================
+  // Filter Options
+  // ============================================================================
+
+  // Static filter options
+  readonly statusOptions: FilterOption[] = [
+    { value: 'Paid', label: 'Paid' },
+    { value: 'Pending', label: 'Pending' }
+  ];
+
+  // paymentMethodOptions removed - backend API doesn't support payment method filtering
+
+  // Dynamic filter options from data
+  consignorOptions = computed<FilterOption[]>(() => {
+    return this.consignors().map(c => ({
+      value: c.id.toString(),
+      label: c.name
+    }));
+  });
+
+  pendingConsignorOptions = computed<FilterOption[]>(() => {
+    return this.pendingPayouts().map(p => ({
+      value: p.consignorId,
+      label: p.consignorName
+    }));
+  });
+
+  // Filtered and sorted pending payouts (client-side filtering)
+  filteredPendingPayouts = computed(() => {
+    let result = [...this.pendingPayouts()];
+
+    // Apply consignor filter
+    const consignorFilter = this.pendingConsignorFilter();
+    if (consignorFilter) {
+      result = result.filter(p => p.consignorId === consignorFilter);
+    }
+
+    // Apply sorting
+    const sortBy = this.pendingSortBy();
+    const sortDir = this.pendingSortDirection();
+
+    result.sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === 'amount') {
+        comparison = a.pendingAmount - b.pendingAmount;
+      } else if (sortBy === 'consignor') {
+        comparison = a.consignorName.localeCompare(b.consignorName);
+      }
+      return sortDir === 'asc' ? comparison : -comparison;
+    });
+
+    return result;
   });
 
   // ============================================================================
@@ -308,6 +379,7 @@ export class OwnerPayoutsComponent implements OnInit {
 
   closeStatementModal(): void {
     this.showStatementModal.set(false);
+    this.preSelectedConsignorId.set(null);
   }
 
   openCreateModal(): void {
@@ -339,7 +411,7 @@ export class OwnerPayoutsComponent implements OnInit {
   private buildPayoutSearchRequest(): PayoutSearchRequest {
     const request: PayoutSearchRequest = {
       page: this.currentPage(),
-      pageSize: this.pageSize,
+      pageSize: this.pageSize(),
       sortBy: this.sortBy(),
       sortDirection: this.sortDirection()
     };
@@ -384,5 +456,83 @@ export class OwnerPayoutsComponent implements OnInit {
 
   updateNotes(notes: string): void {
     this.newPayout.update(p => ({ ...p, notes }));
+  }
+
+  // ============================================================================
+  // Filter Handler Methods
+  // ============================================================================
+
+  // History tab filter handlers
+  onFilterChange(field: string, value: any) {
+    switch (field) {
+      case 'consignor':
+        this.selectedConsignorId.set(value || '');
+        break;
+      case 'status':
+        this.selectedStatus.set(value || '');
+        break;
+      // paymentMethod filter removed - not supported by backend API
+      case 'dateRange':
+        this.dateFrom.set(value?.from || '');
+        this.dateTo.set(value?.to || '');
+        break;
+    }
+    this.applyFilters();
+  }
+
+  onFilterClear(field: string) {
+    if (field === 'dateRange') {
+      this.onFilterChange(field, { from: null, to: null });
+    } else {
+      this.onFilterChange(field, '');
+    }
+  }
+
+  // Pending tab filter handlers
+  onPendingFilterChange(field: string, value: any) {
+    if (field === 'consignor') {
+      this.pendingConsignorFilter.set(value || '');
+    }
+  }
+
+  onPendingFilterClear(field: string) {
+    this.onPendingFilterChange(field, '');
+  }
+
+  // Pending payouts sorting
+  sortPending(column: string) {
+    if (this.pendingSortBy() === column) {
+      this.pendingSortDirection.update(dir => dir === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.pendingSortBy.set(column);
+      this.pendingSortDirection.set('desc');
+    }
+  }
+
+  // Page size change handler
+  onPageSizeChange() {
+    this.currentPage.set(1);
+    this.loadPayouts();
+  }
+
+  // Status badge helper
+  getStatusBadgeClass(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'paid':
+        return 'badge-success';
+      case 'pending':
+        return 'badge-warn';
+      case 'cancelled':
+      case 'voided':
+        return 'badge-error';
+      default:
+        return 'badge-neutral';
+    }
+  }
+
+  // Generate statement for a specific consignor (opens modal pre-filled)
+  generateStatementForConsignor(consignorId: string) {
+    this.preSelectedConsignorId.set(consignorId);
+    this.showStatementModal.set(true);
   }
 }

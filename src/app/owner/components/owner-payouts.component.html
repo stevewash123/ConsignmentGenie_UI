@@ -1,283 +1,245 @@
 <app-owner-layout>
-  <div class="page-container">
+  <div class="payouts-page">
     <!-- Page Header -->
     <div class="page-header">
-      <h1 class="page-title">Payouts Management</h1>
+      <div class="header-content">
+        <h1>Payouts Management</h1>
+      </div>
       <div class="header-actions">
+        <button class="btn-primary secondary" (click)="refreshData()">
+          🔄 Refresh
+        </button>
+        <button class="btn-primary" (click)="openCreateModal()" [disabled]="pendingPayouts().length === 0">
+          💰 Create Payout
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <div class="tab-buttons">
         <button
-          (click)="openCreateModal()"
-          class="btn btn-primary"
-          [disabled]="pendingPayouts().length === 0"
-        >
-          Create Payout
+          class="tab-btn"
+          [class.active]="viewMode() === 'pending'"
+          (click)="viewMode.set('pending')">
+          ⏳ Pending Payouts
+          <span class="tab-count" *ngIf="pendingPayouts().length > 0">{{ pendingPayouts().length }}</span>
         </button>
         <button
-          (click)="openStatementModal()"
-          class="btn btn-outline-primary"
-          [disabled]="consignors().length === 0"
-        >
-          Generate Statement
-        </button>
-        <button (click)="refreshData()" class="btn btn-secondary">
-          Refresh
+          class="tab-btn"
+          [class.active]="viewMode() === 'history'"
+          (click)="viewMode.set('history')">
+          📋 Payout History
+          <span class="tab-count" *ngIf="totalPayouts() > 0">{{ totalPayouts() }}</span>
         </button>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="filters-section">
-      <div class="filter-row">
-        <select 
-          [ngModel]="selectedConsignorId()" 
-          (ngModelChange)="selectedConsignorId.set($event); applyFilters()" 
-          class="form-select"
-        >
-          <option value="">All Consignors</option>
-          <option *ngFor="let consignor of consignors()" [value]="consignor.id">
-            {{ consignor.name }}
-          </option>
-        </select>
+    <!-- Pending Payouts Tab -->
+    <div class="tab-content" *ngIf="viewMode() === 'pending'">
+      <!--
+        NOTE: Card/Table view toggle intentionally hidden - deferred until after MVP.
+        Currently defaulting to table view only.
+        TODO: Re-enable view toggle post-MVP
+      -->
 
-        <select 
-          [ngModel]="selectedStatus()" 
-          (ngModelChange)="selectedStatus.set($event); applyFilters()" 
-          class="form-select"
-        >
-          <option value="">All Status</option>
-          <option value="Paid">Paid</option>
-        </select>
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="pendingPayouts().length === 0">
+        <div class="empty-icon">✅</div>
+        <h3>No pending payouts</h3>
+        <p>All consignors have been paid. New payouts will appear here when sales are made.</p>
+      </div>
 
-        <input
-          type="date"
-          [ngModel]="dateFrom()"
-          (ngModelChange)="dateFrom.set($event); applyFilters()"
-          class="form-control"
-          placeholder="From Date"
-        />
-
-        <input
-          type="date"
-          [ngModel]="dateTo()"
-          (ngModelChange)="dateTo.set($event); applyFilters()"
-          class="form-control"
-          placeholder="To Date"
-        />
+      <!-- Pending Payouts Table -->
+      <div class="table-wrapper" *ngIf="pendingPayouts().length > 0">
+        <table class="data-table">
+          <thead>
+            <tr class="header-row">
+              <th>
+                Consignor
+                <app-column-filter
+                  filterType="select"
+                  label="Consignor"
+                  [options]="pendingConsignorOptions()"
+                  [value]="pendingConsignorFilter()"
+                  placeholder="All"
+                  (filterChange)="onPendingFilterChange('consignor', $event)"
+                  (filterClear)="onPendingFilterClear('consignor')">
+                </app-column-filter>
+              </th>
+              <th class="sortable" (click)="sortPending('amount')">
+                Amount
+                <span class="sort-indicator" [class.active]="pendingSortBy() === 'amount'">
+                  {{ pendingSortDirection() === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th>Transactions</th>
+              <th>Period</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pending of filteredPendingPayouts(); track pending.consignorId) {
+              <tr>
+                <td class="cell-primary">{{ pending.consignorName }}</td>
+                <td class="cell-money">${{ pending.pendingAmount.toFixed(2) }}</td>
+                <td>{{ pending.transactionCount }}</td>
+                <td class="cell-secondary">{{ formatDate(pending.earliestSale) }} - {{ formatDate(pending.latestSale) }}</td>
+                <td class="actions-cell">
+                  <!-- TODO: Add chevron to expand row and show transaction details -->
+                  <button class="btn-icon" (click)="generateStatementForConsignor(pending.consignorId)" title="Generate Statement">📄</button>
+                  <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Create Payout">💰</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Pending Payouts Section -->
-    <div class="pending-section" *ngIf="pendingPayouts().length > 0">
-      <div class="pending-section-header">
-        <h2>Pending Payouts</h2>
-        <div class="view-toggle">
-          <button
-            class="toggle-btn"
-            [class.active]="pendingPayoutsViewMode() === 'cards'"
-            (click)="pendingPayoutsViewMode.set('cards')"
-            title="Card View"
-          >
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-            </svg>
-          </button>
-          <button
-            class="toggle-btn"
-            [class.active]="pendingPayoutsViewMode() === 'table'"
-            (click)="pendingPayoutsViewMode.set('table')"
-            title="Table View"
-          >
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Card View -->
-      <div class="pending-grid" *ngIf="pendingPayoutsViewMode() === 'cards'">
-        <div *ngFor="let pending of pendingPayouts()" class="pending-card">
-          <div class="card-header">
-            <h3>{{ pending.consignorName }}</h3>
-            <span class="amount">${{ pending.pendingAmount.toFixed(2) }}</span>
-          </div>
-          <div class="card-body">
-            <p><strong>Transactions:</strong> {{ pending.transactionCount }}</p>
-            <p><strong>Period:</strong> {{ formatDate(pending.earliestSale) }} - {{ formatDate(pending.latestSale) }}</p>
-            <button
-              (click)="createPayoutForConsignor(pending)"
-              class="btn btn-sm btn-success"
-            >
-              Create Payout
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Table View -->
-      <table class="pending-table" *ngIf="pendingPayoutsViewMode() === 'table'">
-        <thead>
-          <tr>
-            <th>Consignor</th>
-            <th>Amount</th>
-            <th>Transactions</th>
-            <th>Period</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let pending of pendingPayouts()">
-            <td>{{ pending.consignorName }}</td>
-            <td class="amount-cell">${{ pending.pendingAmount.toFixed(2) }}</td>
-            <td>{{ pending.transactionCount }}</td>
-            <td>{{ formatDate(pending.earliestSale) }} - {{ formatDate(pending.latestSale) }}</td>
-            <td>
-              <button
-                (click)="createPayoutForConsignor(pending)"
-                class="btn btn-sm btn-success"
-              >
-                Create Payout
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Payouts Table -->
-    <div class="table-section">
-      <div class="table-header">
-        <h2>Payout History</h2>
-        <div class="table-info">
+    <!-- Payout History Tab -->
+    <div class="tab-content" *ngIf="viewMode() === 'history'">
+      <!-- Controls Bar -->
+      <div class="controls-bar">
+        <div class="controls-info">
           {{ totalPayouts() }} total payouts
         </div>
+        <div class="controls-group">
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="filter-select page-size-select">
+            <option value="10">10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+            <option value="100">100 per page</option>
+          </select>
+        </div>
       </div>
 
-      <div *ngIf="isComponentLoading()" class="loading">Loading payouts...</div>
-
-      <div *ngIf="!isComponentLoading() && payouts().length === 0" class="empty-state">
-        No payouts found.
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isComponentLoading()">
+        <div class="loading-spinner"></div>
+        <p>Loading payouts...</p>
       </div>
 
-      <table *ngIf="!isComponentLoading() && payouts().length > 0" class="payouts-table">
-        <thead>
-          <tr>
-            <th (click)="sort('payoutNumber')" class="sortable">
-              Payout #
-              <span class="sort-indicator" [ngClass]="getSortClass('payoutNumber')"></span>
-            </th>
-            <th (click)="sort('consignor')" class="sortable">
-              Consignor
-              <span class="sort-indicator" [ngClass]="getSortClass('consignor')"></span>
-            </th>
-            <th (click)="sort('payoutDate')" class="sortable">
-              Payout Date
-              <span class="sort-indicator" [ngClass]="getSortClass('payoutDate')"></span>
-            </th>
-            <th (click)="sort('amount')" class="sortable">
-              Amount
-              <span class="sort-indicator" [ngClass]="getSortClass('amount')"></span>
-            </th>
-            <th>Payment Method</th>
-            <th>Period</th>
-            <th>Transactions</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let payout of payouts()">
-            <td class="payout-number">{{ payout.payoutNumber }}</td>
-            <td class="consignor-name">{{ payout.consignor.name }}</td>
-            <td>{{ formatDate(payout.payoutDate) }}</td>
-            <td class="amount">${{ payout.amount.toFixed(2) }}</td>
-            <td>{{ payout.paymentMethod }}</td>
-            <td class="period">
-              {{ formatDate(payout.periodStart) }} - {{ formatDate(payout.periodEnd) }}
-            </td>
-            <td class="text-center">{{ payout.transactionCount }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="'status-' + payout.status.toLowerCase()">
-                {{ payout.status }}
-              </span>
-            </td>
-            <td class="actions">
-              <button
-                (click)="viewPayout(payout.id)"
-                class="btn btn-sm btn-outline-primary"
-                title="View Details"
-              >
-                View
-              </button>
-              <button
-                (click)="editPayout(payout)"
-                class="btn btn-sm btn-outline-secondary"
-                title="Edit"
-              >
-                Edit
-              </button>
-              <button
-                (click)="exportPayout(payout.id, 'csv')"
-                class="btn btn-sm btn-outline-success"
-                title="Export CSV"
-              >
-                CSV
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isComponentLoading() && payouts().length === 0">
+        <div class="empty-icon">📋</div>
+        <h3>No payouts found</h3>
+        <p>Completed payouts will appear here. Create a payout from the Pending Payouts tab.</p>
+      </div>
+
+      <!-- Payouts Table -->
+      <div class="table-wrapper" *ngIf="!isComponentLoading() && payouts().length > 0">
+        <table class="data-table">
+          <thead>
+            <tr class="header-row">
+              <th class="sortable" (click)="sort('payoutNumber')">
+                Payout #
+                <span class="sort-indicator" [class.active]="sortBy() === 'payoutNumber'">
+                  {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th>
+                Consignor
+                <app-column-filter
+                  filterType="select"
+                  label="Consignor"
+                  [options]="consignorOptions()"
+                  [value]="selectedConsignorId()"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('consignor', $event)"
+                  (filterClear)="onFilterClear('consignor')">
+                </app-column-filter>
+              </th>
+              <th class="sortable" (click)="sort('payoutDate')">
+                Payout Date
+                <span class="sort-indicator" [class.active]="sortBy() === 'payoutDate'">
+                  {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                </span>
+                <app-column-filter
+                  filterType="dateRange"
+                  label="Date Range"
+                  [value]="dateRangeFilter()"
+                  (filterChange)="onFilterChange('dateRange', $event)"
+                  (filterClear)="onFilterClear('dateRange')">
+                </app-column-filter>
+              </th>
+              <th class="sortable" (click)="sort('amount')">
+                Amount
+                <span class="sort-indicator" [class.active]="sortBy() === 'amount'">
+                  {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th>Payment Method</th>
+              <th>Period</th>
+              <th>Transactions</th>
+              <th>
+                Status
+                <app-column-filter
+                  filterType="select"
+                  label="Status"
+                  [options]="statusOptions"
+                  [value]="selectedStatus()"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('status', $event)"
+                  (filterClear)="onFilterClear('status')">
+                </app-column-filter>
+              </th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payout of payouts(); track payout.id) {
+              <tr>
+                <td class="cell-mono">{{ payout.payoutNumber }}</td>
+                <td class="cell-primary">{{ payout.consignor.name }}</td>
+                <td>{{ formatDate(payout.payoutDate) }}</td>
+                <td class="cell-money">${{ payout.amount.toFixed(2) }}</td>
+                <td>{{ payout.paymentMethod }}</td>
+                <td class="cell-secondary">{{ formatDate(payout.periodStart) }} - {{ formatDate(payout.periodEnd) }}</td>
+                <td class="text-center">{{ payout.transactionCount }}</td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusBadgeClass(payout.status)">
+                    {{ payout.status }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button class="btn-icon" (click)="viewPayout(payout.id)" title="View Details">👁️</button>
+                  <button class="btn-icon" (click)="editPayout(payout)" title="Edit">✏️</button>
+                  <button class="btn-icon" (click)="exportPayout(payout.id, 'csv')" title="Export CSV">📥</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
       <!-- Pagination -->
-      <div class="pagination-section" *ngIf="totalPages() > 1">
-        <div class="pagination-info">
-          Page {{ currentPage() }} of {{ totalPages() }} ({{ totalPayouts() }} total)
+      <div class="pagination" *ngIf="totalPages() > 1">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">Previous</button>
+        <div class="page-numbers">
+          @for (page of visiblePages(); track page) {
+            <button class="page-btn" [class.active]="page === currentPage()" (click)="goToPage(page)">{{ page }}</button>
+          }
         </div>
-        <div class="pagination-controls">
-          <button
-            (click)="goToPage(currentPage() - 1)"
-            [disabled]="currentPage() === 1"
-            class="btn btn-sm btn-outline-secondary"
-          >
-            Previous
-          </button>
-          <button
-            *ngFor="let page of visiblePages()"
-            (click)="goToPage(page)"
-            [ngClass]="{'active': page === currentPage()}"
-            class="btn btn-sm btn-outline-secondary page-btn"
-          >
-            {{ page }}
-          </button>
-          <button
-            (click)="goToPage(currentPage() + 1)"
-            [disabled]="currentPage() === totalPages()"
-            class="btn btn-sm btn-outline-secondary"
-          >
-            Next
-          </button>
-        </div>
+        <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">Next</button>
       </div>
     </div>
-  </div>
 
-  <!-- Create Payout Modal -->
-  <div *ngIf="showCreatePayoutModal()" class="modal-overlay" (click)="closeModal($event)">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Create New Payout</h3>
-        <button (click)="closeCreateModal()" class="close-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form (ngSubmit)="createPayout()">
+    <!-- Create Payout Modal -->
+    <div class="modal-overlay" *ngIf="showCreatePayoutModal()" (click)="closeModal($event)">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>💰 Create New Payout</h2>
+          <button class="close-btn" (click)="closeCreateModal()">×</button>
+        </div>
+        <div class="modal-body">
           <div class="form-group">
-            <label>Consignor</label>
-            <select 
-              [ngModel]="newPayout().consignorId" 
+            <label for="consignorId">Consignor <span class="required">*</span></label>
+            <select
+              id="consignorId"
+              [ngModel]="newPayout().consignorId"
               (ngModelChange)="updateConsignorId($event)"
-              name="consignorId" 
-              required 
-              class="form-control"
-            >
+              class="form-control">
               <option value="">Select Consignor</option>
               <option *ngFor="let pending of pendingPayouts()" [value]="pending.consignorId">
                 {{ pending.consignorName }} - ${{ pending.pendingAmount.toFixed(2) }}
@@ -285,151 +247,154 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Payout Date</label>
-            <input 
-              type="date" 
-              [ngModel]="newPayout().payoutDate" 
-              (ngModelChange)="updatePayoutDate($event)"
-              name="payoutDate" 
-              required 
-              class="form-control"
-            >
-          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="payoutDate">Payout Date <span class="required">*</span></label>
+              <input
+                type="date"
+                id="payoutDate"
+                [ngModel]="newPayout().payoutDate"
+                (ngModelChange)="updatePayoutDate($event)"
+                class="form-control">
+            </div>
 
-          <div class="form-group">
-            <label>Payment Method</label>
-            <select 
-              [ngModel]="newPayout().paymentMethod" 
-              (ngModelChange)="updatePaymentMethod($event)"
-              name="paymentMethod" 
-              required 
-              class="form-control"
-            >
-              <option value="">Select Method</option>
-              <option value="Venmo">Venmo</option>
-              <option value="Zelle">Zelle</option>
-              <option value="PayPal">PayPal</option>
-              <option value="Check">Check</option>
-              <option value="Cash">Cash</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Other">Other</option>
-            </select>
+            <div class="form-group">
+              <label for="paymentMethod">Payment Method <span class="required">*</span></label>
+              <select
+                id="paymentMethod"
+                [ngModel]="newPayout().paymentMethod"
+                (ngModelChange)="updatePaymentMethod($event)"
+                class="form-control">
+                <option value="">Select Method</option>
+                <option value="Venmo">Venmo</option>
+                <option value="Zelle">Zelle</option>
+                <option value="PayPal">PayPal</option>
+                <option value="Check">Check</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-group" *ngIf="newPayout().paymentMethod === 'Check'">
-            <label>Check No.</label>
-            <input 
-              type="text" 
-              [ngModel]="newPayout().paymentReference" 
+            <label for="paymentReference">Check Number</label>
+            <input
+              type="text"
+              id="paymentReference"
+              [ngModel]="newPayout().paymentReference"
               (ngModelChange)="updatePaymentReference($event)"
-              name="paymentReference"
-              class="form-control" 
-              placeholder="Check number"
-            >
+              class="form-control"
+              placeholder="Enter check number">
           </div>
 
           <div class="form-group">
-            <label>Notes</label>
-            <textarea 
-              [ngModel]="newPayout().notes" 
+            <label for="notes">Notes</label>
+            <textarea
+              id="notes"
+              [ngModel]="newPayout().notes"
               (ngModelChange)="updateNotes($event)"
-              name="notes" 
-              class="form-control" 
-              rows="3" 
-              placeholder="Additional details"
-            ></textarea>
+              class="form-control"
+              rows="3"
+              placeholder="Optional notes..."></textarea>
           </div>
-
-          <div class="form-actions">
-            <button type="button" (click)="closeCreateModal()" class="btn btn-secondary">Cancel</button>
-            <button type="submit" class="btn btn-primary">Create Payout</button>
-          </div>
-        </form>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
+          <button class="btn-primary" (click)="createPayout()">Create Payout</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- View Payout Modal -->
-  <div *ngIf="showViewModal() && selectedPayout()" class="modal-overlay" (click)="closeModal($event)">
-    <div class="modal-content large">
-      <div class="modal-header">
-        <h3>Payout Details - {{ selectedPayout()?.payoutNumber }}</h3>
-        <button (click)="closeViewModal()" class="close-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="payout-details">
+    <!-- View Payout Modal -->
+    <div class="modal-overlay" *ngIf="showViewModal() && selectedPayout()" (click)="closeModal($event)">
+      <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>📋 Payout Details - {{ selectedPayout()?.payoutNumber }}</h2>
+          <button class="close-btn" (click)="closeViewModal()">×</button>
+        </div>
+        <div class="modal-body">
           <div class="details-grid">
             <div class="detail-item">
-              <label>Consignor:</label>
+              <label>Consignor</label>
               <span>{{ selectedPayout()?.consignor.name }}</span>
             </div>
             <div class="detail-item">
-              <label>Amount:</label>
-              <span class="amount">${{ selectedPayout()?.amount.toFixed(2) }}</span>
+              <label>Amount</label>
+              <span class="cell-money">${{ selectedPayout()?.amount.toFixed(2) }}</span>
             </div>
             <div class="detail-item">
-              <label>Payout Date:</label>
+              <label>Payout Date</label>
               <span>{{ formatDate(selectedPayout()?.payoutDate!) }}</span>
             </div>
             <div class="detail-item">
-              <label>Payment Method:</label>
+              <label>Payment Method</label>
               <span>{{ selectedPayout()?.paymentMethod }}</span>
             </div>
             <div class="detail-item">
-              <label>Period:</label>
+              <label>Period</label>
               <span>{{ formatDate(selectedPayout()?.periodStart!) }} - {{ formatDate(selectedPayout()?.periodEnd!) }}</span>
             </div>
             <div class="detail-item">
-              <label>Status:</label>
-              <span class="status-badge" [ngClass]="'status-' + selectedPayout()?.status.toLowerCase()">
+              <label>Status</label>
+              <span class="badge" [ngClass]="getStatusBadgeClass(selectedPayout()?.status || '')">
                 {{ selectedPayout()?.status }}
               </span>
             </div>
           </div>
 
-          <div *ngIf="selectedPayout()?.paymentReference" class="detail-item">
-            <label>Payment Reference:</label>
+          <div class="detail-item" *ngIf="selectedPayout()?.paymentReference">
+            <label>Payment Reference</label>
             <span>{{ selectedPayout()?.paymentReference }}</span>
           </div>
 
-          <div *ngIf="selectedPayout()?.notes" class="detail-item">
-            <label>Notes:</label>
+          <div class="detail-item" *ngIf="selectedPayout()?.notes">
+            <label>Notes</label>
             <p>{{ selectedPayout()?.notes }}</p>
           </div>
 
+          <!-- Transactions Table -->
           <div class="transactions-section">
             <h4>Transactions ({{ selectedPayout()?.transactions.length }})</h4>
-            <table class="transactions-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Sale Date</th>
-                  <th>Sale Price</th>
-                  <th>Consignor Amount</th>
-                  <th>Shop Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let transaction of selectedPayout()?.transactions">
-                  <td>{{ transaction.itemName }}</td>
-                  <td>{{ formatDate(transaction.saleDate) }}</td>
-                  <td>${{ transaction.salePrice.toFixed(2) }}</td>
-                  <td>${{ transaction.consignorAmount.toFixed(2) }}</td>
-                  <td>${{ transaction.shopAmount.toFixed(2) }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr class="header-row">
+                    <th>Item</th>
+                    <th>Sale Date</th>
+                    <th>Sale Price</th>
+                    <th>Consignor Amount</th>
+                    <th>Shop Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (transaction of selectedPayout()?.transactions; track transaction.transactionId) {
+                    <tr>
+                      <td>{{ transaction.itemName }}</td>
+                      <td>{{ formatDate(transaction.saleDate) }}</td>
+                      <td>${{ transaction.salePrice.toFixed(2) }}</td>
+                      <td class="cell-money">${{ transaction.consignorAmount.toFixed(2) }}</td>
+                      <td>${{ transaction.shopAmount.toFixed(2) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeViewModal()">Close</button>
+          <button class="btn-primary secondary" (click)="exportPayout(selectedPayout()!.id, 'csv')">📥 Export CSV</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Consignor Statement Modal -->
-  <app-consignor-statement-modal
-    [isVisible]="showStatementModal()"
-    [availableConsignors]="availableConsignorOptions()"
-    (onClose)="closeStatementModal()"
-  ></app-consignor-statement-modal>
+    <!-- Consignor Statement Modal -->
+    <!-- Note: preSelectedConsignorId support requires updating ConsignorStatementModalComponent -->
+    <app-consignor-statement-modal
+      [isVisible]="showStatementModal()"
+      [availableConsignors]="availableConsignorOptions()"
+      (onClose)="closeStatementModal()">
+    </app-consignor-statement-modal>
+  </div>
 </app-owner-layout>

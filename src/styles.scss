@@ -1,4 +1,834 @@
-/* You can add global styles to this file, and also import other style files */
+/* ============================================================================
+   ConsignmentGenie Global Styles
+   ============================================================================ */
 
 /* Import ngx-toastr styles */
 @use 'ngx-toastr/toastr';
+
+/* ============================================================================
+   CSS Custom Properties (available globally without imports)
+   ============================================================================ */
+
+:root {
+  /* ==========================================================================
+     THEME COLORS - Green (Default)
+     To switch themes, override these variables
+     ========================================================================== */
+
+  --color-light: #f0fdf4;                    /* Level 1: Page/shell background */
+  --color-light-med: hsl(130, 25%, 92%);     /* Level 2: Section backgrounds */
+  --color-med-light: hsl(130, 30%, 85%);     /* Level 3: Table headers */
+  --color-med: #059669;                      /* Level 4: Primary actions, links */
+  --color-med-dark: #047857;                 /* Level 5: Borders, dividers */
+  --color-dark: #065f46;                     /* Level 6: Deep accents, pressed states */
+
+  /* ==========================================================================
+     TEXT COLORS - Neutral (consistent across all themes)
+     ========================================================================== */
+
+  --color-text-primary: #1f2937;             /* Main body text, headers */
+  --color-text-secondary: #374151;           /* Secondary text */
+  --color-text-muted: #6b7280;               /* De-emphasized text only */
+  --color-text-inverse: #ffffff;             /* Text on dark backgrounds */
+
+  /* ==========================================================================
+     SEMANTIC STATUS COLORS
+     ========================================================================== */
+
+  /* Success (Green) */
+  --color-success-light: #dcfce7;
+  --color-success-med: #22c55e;
+  --color-success-dark: #16a34a;
+
+  /* Warning (Amber/Orange) */
+  --color-warn-light: #fef3c7;
+  --color-warn-med: #f59e0b;
+  --color-warn-dark: #d97706;
+
+  /* Error (Red) */
+  --color-error-light: #fee2e2;
+  --color-error-med: #ef4444;
+  --color-error-dark: #dc2626;
+
+  /* Info (Blue) */
+  --color-info-light: #dbeafe;
+  --color-info-med: #3b82f6;
+  --color-info-dark: #2563eb;
+
+  /* Neutral (Slate/Gray) */
+  --color-neutral-light: #f3f4f6;
+  --color-neutral-med: #9ca3af;
+  --color-neutral-dark: #6b7280;
+
+  /* ==========================================================================
+     BORDERS & SHADOWS
+     ========================================================================== */
+
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  --border-radius-xl: 12px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* ==========================================================================
+     BORDER WEIGHTS (per style guide)
+     ========================================================================== */
+
+   --border-outer: 2px;      /* Table/section borders */
+   --border-inner: 1px;      /* Row dividers */
+   --border-button: 1.5px;   /* Button borders - in between */
+}
+
+/* ============================================================================
+   SCSS VARIABLES (for use in component .scss files)
+   Components should @use this file or define their own matching variables
+   ============================================================================ */
+
+/* Theme Colors */
+$color-light: var(--color-light);
+$color-light-med: var(--color-light-med);
+$color-med-light: var(--color-med-light);
+$color-med: var(--color-med);
+$color-med-dark: var(--color-med-dark);
+$color-dark: var(--color-dark);
+
+/* Text Colors */
+$color-text-primary: var(--color-text-primary);
+$color-text-secondary: var(--color-text-secondary);
+$color-text-muted: var(--color-text-muted);
+$color-text-inverse: var(--color-text-inverse);
+
+/* Semantic Status Colors */
+$color-success-light: var(--color-success-light);
+$color-success-med: var(--color-success-med);
+$color-success-dark: var(--color-success-dark);
+
+$color-warn-light: var(--color-warn-light);
+$color-warn-med: var(--color-warn-med);
+$color-warn-dark: var(--color-warn-dark);
+
+$color-error-light: var(--color-error-light);
+$color-error-med: var(--color-error-med);
+$color-error-dark: var(--color-error-dark);
+
+$color-info-light: var(--color-info-light);
+$color-info-med: var(--color-info-med);
+$color-info-dark: var(--color-info-dark);
+
+$color-neutral-light: var(--color-neutral-light);
+$color-neutral-med: var(--color-neutral-med);
+$color-neutral-dark: var(--color-neutral-dark);
+
+/* Border & Shadow */
+$border-radius-sm: var(--border-radius-sm);
+$border-radius-md: var(--border-radius-md);
+$border-radius-lg: var(--border-radius-lg);
+$border-radius-xl: var(--border-radius-xl);
+
+$shadow-sm: var(--shadow-sm);
+$shadow-md: var(--shadow-md);
+$shadow-lg: var(--shadow-lg);
+
+$border-outer: var(--border-outer);
+$border-inner: var(--border-inner);
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: var(--color-light);
+}
+
+/* ============================================================================
+   TYPOGRAPHY
+   ============================================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.125rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.875rem; }
+
+p {
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary);
+}
+
+a {
+  color: var(--color-med-dark);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-dark);
+    text-decoration: underline;
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+/* Text colors */
+.text-primary { color: var(--color-text-primary) !important; }
+.text-secondary { color: var(--color-text-secondary) !important; }
+.text-muted { color: var(--color-text-muted) !important; }
+.text-success { color: var(--color-success-dark) !important; }
+.text-warn { color: var(--color-warn-dark) !important; }
+.text-error { color: var(--color-error-dark) !important; }
+.text-info { color: var(--color-info-dark) !important; }
+
+/* Background colors */
+.bg-light { background-color: var(--color-light) !important; }
+.bg-light-med { background-color: var(--color-light-med) !important; }
+.bg-white { background-color: #ffffff !important; }
+.bg-success-light { background-color: var(--color-success-light) !important; }
+.bg-warn-light { background-color: var(--color-warn-light) !important; }
+.bg-error-light { background-color: var(--color-error-light) !important; }
+.bg-info-light { background-color: var(--color-info-light) !important; }
+
+/* Font weights */
+.font-normal { font-weight: 400 !important; }
+.font-medium { font-weight: 500 !important; }
+.font-semibold { font-weight: 600 !important; }
+.font-bold { font-weight: 700 !important; }
+
+/* ============================================================================
+   STATUS BADGES (reusable)
+   ============================================================================ */
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.badge-success {
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+  border: 1px solid var(--color-success-med);
+}
+
+.badge-warn {
+  background-color: var(--color-warn-light);
+  color: var(--color-warn-dark);
+  border: 1px solid var(--color-warn-med);
+}
+
+.badge-error {
+  background-color: var(--color-error-light);
+  color: var(--color-error-dark);
+  border: 1px solid var(--color-error-med);
+}
+
+.badge-info {
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
+  border: 1px solid var(--color-info-med);
+}
+
+.badge-neutral {
+  background-color: var(--color-neutral-light);
+  color: var(--color-neutral-dark);
+  border: 1px solid var(--color-neutral-med);
+}
+
+/* ============================================================================
+   FORM ELEMENTS BASE
+   ============================================================================ */
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-med-dark);
+  border-radius: var(--border-radius-md);
+  padding: 0.5rem 0.75rem;
+  background-color: #ffffff;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-med);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  }
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+}
+
+/* ============================================================================
+   BUTTON BASE STYLES
+   ============================================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--border-radius-lg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Primary Action - uses theme Medium color */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--border-radius-lg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Secondary action modifier - gray outline */
+  &.secondary {
+    background: rgba(107, 114, 128, 0.1);
+    color: #374151;
+    border: 2px solid rgba(107, 114, 128, 0.35);
+    box-shadow: none;
+
+    &:hover:not(:disabled) {
+      background: rgba(107, 114, 128, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Danger modifier - red outline */
+  &.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error-dark);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    box-shadow: none;
+
+    &:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.2);
+      box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3);
+    }
+  }
+}
+
+/* Standard Action - outline style */
+.btn-action {
+  background-color: transparent;
+  color: var(--color-med);
+  border: 2px solid var(--color-med-dark);
+
+  &:hover:not(:disabled) {
+    background-color: rgba(5, 150, 105, 0.1);
+    transform: translateY(-1px);
+  }
+}
+
+/* Icon-only button */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-success-light);
+  color: var(--color-med-dark);
+  border: 1px solid var(--color-med);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 0.875rem;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-med-light);
+  }
+
+  &.danger {
+    background-color: var(--color-error-light);
+    color: var(--color-error-dark);
+    border-color: var(--color-error-med);
+
+    &:hover:not(:disabled) {
+      background-color: #fecaca;
+    }
+  }
+}
+
+/* Secondary button - gray outline */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--border-radius-lg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  background: rgba(107, 114, 128, 0.1);
+  color: #374151;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+
+  &:hover:not(:disabled) {
+    background: rgba(107, 114, 128, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Danger button - red outline */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--border-radius-lg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error-dark);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+
+  &:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Semantic button variants */
+.btn-success {
+  background-color: transparent;
+  color: var(--color-success-dark);
+  border: 2px solid var(--color-success-dark);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-success-light);
+  }
+}
+
+.btn-warn {
+  background-color: transparent;
+  color: var(--color-warn-dark);
+  border: 2px solid var(--color-warn-dark);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-warn-light);
+  }
+}
+
+.btn-error {
+  background-color: transparent;
+  color: var(--color-error-dark);
+  border: 2px solid var(--color-error-dark);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-error-light);
+  }
+}
+
+.btn-info {
+  background-color: transparent;
+  color: var(--color-info-dark);
+  border: 2px solid var(--color-info-dark);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-info-light);
+  }
+}
+
+/* ============================================================================
+   DATATABLE PATTERN
+   Standard table with header row + filter row in <thead>
+   ============================================================================ */
+
+.table-wrapper {
+  background: #ffffff;
+  border: var(--border-outer) solid var(--color-med-dark);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: var(--border-inner) solid var(--color-med-dark);
+  }
+
+  /* Header row - column labels */
+  .header-row th {
+    background: var(--color-light-med);
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    border-bottom: none;
+
+    &.sortable {
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        background: var(--color-med-light);
+      }
+    }
+
+    .sort-icon {
+      margin-left: 0.25rem;
+      opacity: 0.4;
+
+      &.active {
+        opacity: 1;
+        color: var(--color-med);
+      }
+    }
+  }
+
+  /* Filter row - inputs below headers */
+  .filter-row th {
+    background: var(--color-light-med);
+    padding: 0.5rem 1rem;
+    border-bottom: var(--border-outer) solid var(--color-med-dark);
+  }
+
+  /* Body rows */
+  tbody tr {
+    &:hover {
+      background-color: var(--color-light);
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  /* Cell variants */
+  .cell-primary {
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .cell-secondary {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-top: 0.125rem;
+  }
+
+  .cell-mono {
+    font-family: 'Courier New', Consolas, monospace;
+    font-weight: 600;
+    color: var(--color-med);
+  }
+
+  .actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+}
+
+/* Filter inputs in table headers */
+.filter-input,
+.filter-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--color-neutral-dark);
+  border-radius: var(--border-radius-md);
+  font-size: 0.8125rem;
+  background: #ffffff;
+  color: var(--color-text-primary);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-med);
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
+  }
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+}
+
+.filter-select {
+  cursor: pointer;
+}
+
+/* ============================================================================
+   LOADING & EMPTY STATES
+   ============================================================================ */
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--color-text-muted);
+
+  p {
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+  }
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 3px solid var(--color-neutral-light);
+  border-top-color: var(--color-med);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   PAGINATION
+   ============================================================================ */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: var(--border-inner) solid var(--color-neutral-med);
+  background: var(--color-light-med);
+}
+
+.page-btn {
+  padding: 0.5rem 1rem;
+  border: var(--border-inner) solid var(--color-neutral-med);
+  border-radius: var(--border-radius-md);
+  background: #ffffff;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-med);
+    color: var(--color-med);
+  }
+
+  &.active {
+    background: var(--color-med);
+    border-color: var(--color-med);
+    color: var(--color-text-inverse);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* ============================================================================
+   MODALS
+   ============================================================================ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: var(--border-inner) solid var(--color-neutral-light);
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: var(--border-inner) solid var(--color-neutral-light);
+  background: var(--color-light-med);
+}
+
+/* ============================================================================
+   FORM GROUPS (for modals and forms)
+   ============================================================================ */
+
+.form-group {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: var(--border-inner) solid var(--color-neutral-med);
+  border-radius: var(--border-radius-md);
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-med);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  }
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+select.form-control {
+  cursor: pointer;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 500px) {
+    grid-template-columns: 1fr;
+  }
+}

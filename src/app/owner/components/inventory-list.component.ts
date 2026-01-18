@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { OwnerLayoutComponent } from './owner-layout.component';
+import { ColumnFilterComponent, FilterOption } from '../../shared/components/column-filter.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SquareIntegrationService } from '../../services/square-integration.service';
@@ -41,7 +42,7 @@ export interface ImportedItem {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ColumnFilterComponent],
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.scss']
 })
@@ -110,6 +111,7 @@ export class InventoryListComponent implements OnInit {
   selectedCategory = '';
   selectedExpiration = '';
   selectedConsignor = '';
+  selectedSource = '';  // Add this property for source filtering
   priceMin: number | null = null;
   priceMax: number | null = null;
   sortBy = 'sku';
@@ -117,6 +119,56 @@ export class InventoryListComponent implements OnInit {
   currentPage = signal(1);
   pageSize = 25;
 
+  // Filter modal state - signals for the actual filtering UI
+  showAddModal = signal(false);
+  showEditModal = signal(false);
+  showViewModal = signal(false);
+  selectedItem = signal<ItemListDto | null>(null);
+
+  // Form data for item add/edit modal
+  itemForm = {
+    name: '',
+    description: '',
+    salePrice: 0,
+    consignorSplit: 50,
+    consignorId: '',
+    category: ''
+  };
+
+  // For search term on filter UI
+  searchTerm = '';
+
+  // Pending item assignment/removal modal state
+  itemToAssign = signal<ItemListDto | null>(null);
+  itemToRemove = signal<ItemListDto | null>(null);
+  selectedConsignorForAssignment = '';
+  assignmentNotes = '';
+  removalNotes = '';
+
+  // Additional methods needed by templates
+  // Note: This returns union type - use inventoryItems() for type-safe ItemListDto access
+  items = computed(() => {
+    return this.viewMode() === 'pending' ?
+      this.pendingImportsResult()?.items || [] :
+      this.itemsResult()?.items || [];
+  });
+
+  // Type-safe accessor for regular inventory items only
+  inventoryItems = computed((): ItemListDto[] => {
+    return this.itemsResult()?.items || [];
+  });
+
+  totalItems = computed(() => {
+    return this.viewMode() === 'pending' ?
+      this.pendingImportsResult()?.totalCount || 0 :
+      this.itemsResult()?.totalCount || 0;
+  });
+
+  totalPages = computed(() => {
+    return this.viewMode() === 'pending' ?
+      this.pendingImportsResult()?.totalPages || 1 :
+      this.itemsResult()?.totalPages || 1;
+  });
 
   // Computed values
   visiblePages = computed(() => {
@@ -321,11 +373,16 @@ export class InventoryListComponent implements OnInit {
     this.selectedCategory = '';
     this.selectedExpiration = '';
     this.selectedConsignor = '';
+    this.selectedSource = '';
     this.priceMin = null;
     this.priceMax = null;
     this.sortBy = 'sku';
     this.sortDirection = 'desc';
     this.applyFilters();
+  }
+
+  clearAllFilters() {
+    this.clearFilters();
   }
 
   setSorting(column: string) {
@@ -338,6 +395,17 @@ export class InventoryListComponent implements OnInit {
     this.loadItems();
   }
 
+  sort(column: string) {
+    this.setSorting(column);
+  }
+
+  getSortClass(column: string): string {
+    if (this.sortBy === column) {
+      return `sorted-${this.sortDirection}`;
+    }
+    return '';
+  }
+
   changePageSize() {
     this.currentPage.set(1);
     this.loadItems();
@@ -345,6 +413,12 @@ export class InventoryListComponent implements OnInit {
 
   goToPage(page: number) {
     this.currentPage.set(page);
+    this.loadItems();
+  }
+
+  Math = Math;
+
+  refreshItems() {
     this.loadItems();
   }
 
@@ -562,9 +636,17 @@ export class InventoryListComponent implements OnInit {
     }
   }
 
-
   createNewItem() {
     this.router.navigate(['/owner/inventory/new']);
+  }
+
+  openAddModal() {
+    this.showAddModal.set(true);
+  }
+
+  closeItemModal() {
+    this.showAddModal.set(false);
+    this.showEditModal.set(false);
   }
 
   manageCategories() {
@@ -751,11 +833,22 @@ export class InventoryListComponent implements OnInit {
   }
 
   viewItem(id: string) {
-    this.router.navigate(['/owner/inventory', id]);
+    // Use inventoryItems() for type-safe access to ItemListDto
+    const item = this.inventoryItems().find(i => i.itemId === id);
+    if (item) {
+      this.selectedItem.set(item);
+      this.showViewModal.set(true);
+    }
   }
 
-  editItem(id: string) {
-    this.router.navigate(['/owner/inventory', id, 'edit']);
+  closeViewModal() {
+    this.showViewModal.set(false);
+    this.selectedItem.set(null);
+  }
+
+  editItem(item: ItemListDto) {
+    // For now, navigate to edit - you can implement inline edit modal later
+    this.router.navigate(['/owner/inventory', item.itemId, 'edit']);
   }
 
   viewConsignor(consignorId?: string) {
@@ -796,7 +889,11 @@ export class InventoryListComponent implements OnInit {
     });
   }
 
-  deleteItem(item: ItemListDto) {
+  deleteItem(id: string) {
+    // Use inventoryItems() for type-safe access to ItemListDto
+    const item = this.inventoryItems().find(i => i.itemId === id);
+    if (!item) return;
+
     this.confirmationService.confirm({
       title: 'Delete Item',
       message: `Are you sure you want to delete "${item.title}"? This action cannot be undone.`,
@@ -1065,5 +1162,203 @@ export class InventoryListComponent implements OnInit {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  // Helper method for search input handling
+  onSearch() {
+    this.applyFilters();
+  }
+
+  // Helper method for close modal handling
+  closeModal(event: Event) {
+    if (event.target === event.currentTarget) {
+      this.closeItemModal();
+      this.closeViewModal();
+    }
+  }
+
+  // Helper methods for form validation
+  isItemFormValid(): boolean {
+    return this.itemForm.name.trim() !== '' &&
+           this.itemForm.salePrice > 0 &&
+           this.itemForm.category.trim() !== '';
+  }
+
+  // Placeholder methods for add/edit functionality
+  addItem() {
+    if (!this.isItemFormValid()) return;
+
+    // TODO: Implement add item functionality
+    console.log('Add item:', this.itemForm);
+    this.closeItemModal();
+  }
+
+  updateItem() {
+    if (!this.isItemFormValid()) return;
+
+    // TODO: Implement update item functionality
+    console.log('Update item:', this.itemForm);
+    this.closeItemModal();
+  }
+
+  formatDate(date: Date | string | undefined): string {
+    if (!date) return '';
+
+    if (typeof date === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        const [year, month, day] = date.split('-').map(Number);
+        return new Date(year, month - 1, day).toLocaleDateString();
+      }
+    }
+
+    return new Date(date).toLocaleDateString();
+  }
+
+  // Methods for pending modal assignments
+  openAssignModal(item: ItemListDto) {
+    this.itemToAssign.set(item);
+  }
+
+  closeAssignModal() {
+    this.itemToAssign.set(null);
+    this.selectedConsignorForAssignment = '';
+    this.assignmentNotes = '';
+  }
+
+  openRemovalModal(item: ItemListDto) {
+    this.itemToRemove.set(item);
+  }
+
+  closeRemovalModal() {
+    this.itemToRemove.set(null);
+    this.removalNotes = '';
+  }
+
+  assignToConsignor() {
+    const item = this.itemToAssign();
+    if (!item || !this.selectedConsignorForAssignment) return;
+
+    // TODO: Implement assign to consignor functionality
+    console.log('Assign item to consignor:', item.itemId, this.selectedConsignorForAssignment);
+    this.closeAssignModal();
+  }
+
+  removeFromConsignor() {
+    const item = this.itemToRemove();
+    if (!item) return;
+
+    // TODO: Implement remove from consignor functionality
+    console.log('Remove item from consignor:', item.itemId, this.removalNotes);
+    this.closeRemovalModal();
+  }
+
+  // Modal state checks
+  isAssignModalOpen(): boolean {
+    return this.itemToAssign() !== null;
+  }
+
+  isRemovalModalOpen(): boolean {
+    return this.itemToRemove() !== null;
+  }
+
+  // ============================================================================
+  // Filter Options and Methods
+  // ============================================================================
+
+  // Static filter options
+  readonly statusOptions: FilterOption[] = [
+    { value: 'Available', label: 'Available' },
+    { value: 'Sold', label: 'Sold' },
+    { value: 'Removed', label: 'Removed' }
+  ];
+
+  readonly conditionOptions: FilterOption[] = [
+    { value: 'New', label: 'New' },
+    { value: 'LikeNew', label: 'Like New' },
+    { value: 'Good', label: 'Good' },
+    { value: 'Fair', label: 'Fair' },
+    { value: 'Poor', label: 'Poor' }
+  ];
+
+  readonly expirationOptions: FilterOption[] = [
+    { value: 'expiring-soon', label: 'Expiring Soon' },
+    { value: 'expired', label: 'Expired' },
+    { value: 'this-month', label: 'This Month' },
+    { value: 'next-month', label: 'Next Month' }
+  ];
+
+  readonly sourceOptions: FilterOption[] = [
+    { value: 'CSV', label: 'CSV' },
+    { value: 'Square', label: 'Square' },
+    { value: 'Manifest', label: 'Manifest' }
+  ];
+
+  // Dynamic filter options (computed from data)
+  categoryOptions = computed<FilterOption[]>(() => {
+    return this.categories().map(cat => ({
+      value: cat.name,
+      label: cat.name
+    }));
+  });
+
+  consignorOptions = computed<FilterOption[]>(() => {
+    return this.consignors().map(con => ({
+      value: con.id,
+      label: con.name
+    }));
+  });
+
+  // Column filter handlers
+  onFilterChange(field: string, value: any) {
+    switch (field) {
+      case 'category':
+        this.selectedCategory = value || '';
+        break;
+      case 'status':
+        this.selectedStatus = value || '';
+        break;
+      case 'condition':
+        this.selectedCondition = value || '';
+        break;
+      case 'consignor':
+        this.selectedConsignor = value || '';
+        break;
+      case 'expiration':
+        this.selectedExpiration = value || '';
+        break;
+      case 'source':
+        this.selectedSource = value || '';
+        break;
+    }
+    this.applyFilters();
+  }
+
+  onFilterClear(field: string) {
+    this.onFilterChange(field, '');
+  }
+
+  // Filter handlers for specific filters
+  onCategoryFilter(value: string) {
+    this.onFilterChange('category', value);
+  }
+
+  clearCategoryFilter() {
+    this.onFilterClear('category');
+  }
+
+  onStatusFilter(value: string) {
+    this.onFilterChange('status', value);
+  }
+
+  clearStatusFilter() {
+    this.onFilterClear('status');
+  }
+
+  onConsignorFilter(value: string) {
+    this.onFilterChange('consignor', value);
+  }
+
+  clearConsignorFilter() {
+    this.onFilterClear('consignor');
   }
 }

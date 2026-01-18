@@ -1,717 +1,384 @@
-// ============================================================================
-// Inventory List Component Styles - Redesigned with Tabs
-// ============================================================================
+/* Inventory List Component - Page-specific styles only */
+/* Shared styles (buttons, .data-table, badges, modals, forms, pagination) are in global styles.scss */
 
-// ----------------------------------------------------------------------------
-// Theme Colors - Five-Tier Green System
-// ----------------------------------------------------------------------------
-
-// Green Theme Hierarchy (5 levels)
-$color-shell-background: #f0fdf4;        // Level 1: Main shell/body background
-$color-section-background: hsl(130, 25%, 92%);  // Level 2: Cards/sections background
-$color-primary: #059669;                  // Level 3: Headers, borders, primary actions
-$color-primary-dark: #047857;            // Level 4: Badges, accents, hover states
-$color-primary-darker: #065f46;          // Level 5: Deep accents, pressed states
-
-// Other Theme Colors
-$color-text-primary: #1f2937;
-$color-text-secondary: #6b7280;
-$color-text-muted: #374151;
-$color-border: #e5e7eb;
-$color-border-light: #d1d5db;
-$color-background-light: #f3f4f6;
-$color-background-hover: #e5e7eb;
-
-$color-blue-primary: #3b82f6;
-$color-blue-dark: #2563eb;
-$color-blue-darker: #1d4ed8;
-$color-blue-light: #dbeafe;
-
-$color-danger: #dc2626;
-$color-danger-light: #fee2e2;
-$color-warning: #ea580c;
-$color-success: #059669;
-$color-success-light: #d1fae5;
-
-$border-radius-sm: 4px;
-$border-radius-md: 6px;
-$border-radius-lg: 8px;
-$border-radius-xl: 12px;
-
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
-// ----------------------------------------------------------------------------
-// Page Layout
-// ----------------------------------------------------------------------------
 .inventory-page {
-  padding: 1.5rem;
-  max-width: 1400px;
+  padding: 2rem;
+  max-width: 1600px;
   margin: 0 auto;
-  min-height: 100vh;
-  background-color: $color-shell-background;
 }
 
-// ----------------------------------------------------------------------------
-// Page Header
-// ----------------------------------------------------------------------------
+/* Page Header */
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid $color-primary;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
 
   .header-content {
     h1 {
-      color: $color-text-primary;
-      margin-bottom: 0.5rem;
+      margin: 0;
       font-size: 2rem;
-      font-weight: 600;
+      font-weight: 700;
+      color: var(--color-text-primary);
     }
 
-    p {
-      color: $color-text-secondary;
-      margin: 0;
+    .header-subtitle {
+      margin: 0.25rem 0 0 0;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
     }
   }
 
   .header-actions {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 }
 
-// ----------------------------------------------------------------------------
-// Tab Navigation
-// ----------------------------------------------------------------------------
-.tab-navigation {
-  margin-bottom: 1.5rem;
+/* Tab Bar */
+.tab-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 0;
+  border-bottom: 2px solid var(--color-med-dark);
 
-  .tab-list {
+  .tab-buttons {
     display: flex;
-    border-bottom: 2px solid $color-border-light;
-    background: white;
-    border-radius: $border-radius-lg $border-radius-lg 0 0;
-    box-shadow: $shadow-sm;
-    overflow: hidden;
+    gap: 0;
+    margin-bottom: -2px; /* Tabs overlap the border */
   }
 
-  .tab-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 1.5rem;
-    background: white;
-    border: none;
-    border-bottom: 3px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-    color: $color-text-secondary;
-    position: relative;
-
-    &:hover {
-      background: $color-background-light;
-      color: $color-primary;
-    }
-
-    &.active {
-      color: $color-primary;
-      background: $color-shell-background;
-      border-bottom-color: $color-primary;
-      font-weight: 600;
-
-      .tab-icon {
-        transform: scale(1.1);
-      }
-    }
-
-    .tab-icon {
-      font-size: 1.1rem;
-      transition: transform 0.2s ease;
-    }
-
-    .tab-count {
-      background: $color-primary;
-      color: white;
-      padding: 0.2rem 0.5rem;
-      border-radius: $border-radius-sm;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-left: 0.3rem;
-    }
+  .tab-bar-actions {
+    margin-bottom: 0.5rem;
   }
 }
 
-// ----------------------------------------------------------------------------
-// Tab Content
-// ----------------------------------------------------------------------------
-.tab-panel {
-  display: none;
-  background: white;
-  border-radius: 0 0 $border-radius-lg $border-radius-lg;
-  box-shadow: $shadow-md;
-  min-height: 500px;
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-neutral-light);
+  border: 2px solid var(--color-med-dark);
+  border-bottom: 2px solid var(--color-med-dark);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+  margin-right: -2px;
+
+  &:hover:not(.active) {
+    background: #e5e7eb;
+    color: var(--color-text-primary);
+  }
 
   &.active {
-    display: block;
+    background: var(--color-light-med);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    border-bottom-color: var(--color-light-med);
+    position: relative;
+    z-index: 1;
+  }
+
+  .tab-count {
+    background: var(--color-med);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
   }
 }
 
-// ----------------------------------------------------------------------------
-// Controls Section
-// ----------------------------------------------------------------------------
-.tab-controls {
+/* Tab Content */
+.tab-content {
+  background: white;
+  border: 2px solid var(--color-med-dark);
+  border-top: none;
+  border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) var(--border-radius-lg);
+  overflow: hidden;
+}
+
+/* Controls Bar */
+.controls-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  background: $color-background-light;
-  border-bottom: 1px solid $color-border;
+  padding: 0.75rem 1rem;
+  background: var(--color-light-med);
 
-  .search-section {
+  .search-group {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     align-items: center;
 
     .search-input {
-      padding: 0.5rem 1rem;
-      border: 1px solid $color-border;
-      border-radius: $border-radius-md;
-      font-size: 0.9rem;
-      width: 300px;
-
-      &:focus {
-        outline: none;
-        border-color: $color-primary;
-        box-shadow: 0 0 0 2px rgba($color-primary, 0.2);
-      }
+      width: 280px;
     }
   }
 
-  .controls-section {
+  .controls-group {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     align-items: center;
-
-    .page-size-select {
-      padding: 0.5rem;
-      border: 1px solid $color-border;
-      border-radius: $border-radius-md;
-      background: white;
-    }
   }
-}
 
-// ----------------------------------------------------------------------------
-// Filters Section (Regular Inventory)
-// ----------------------------------------------------------------------------
-.filters-section {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  background: white;
-  border-bottom: 1px solid $color-border;
-  flex-wrap: wrap;
-
-  .filter-select {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid $color-border;
-    border-radius: $border-radius-md;
-    background: white;
-    font-size: 0.9rem;
+  .page-size-select {
     min-width: 120px;
-
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
-    }
   }
 }
 
-// ----------------------------------------------------------------------------
-// Bulk Actions Section (Pending Imports)
-// ----------------------------------------------------------------------------
-.bulk-actions-section {
-  padding: 1rem 1.5rem;
-  background: $color-success-light;
-  border-bottom: 1px solid $color-border;
+/* Small modal variant */
+.modal-sm {
+  max-width: 400px;
+}
 
-  .bulk-actions-header {
+.assign-count {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* Table Overrides - remove borders since tab-content provides them */
+.table-wrapper {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.data-table {
+  th, td {
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--color-med-dark);
+  }
+
+  thead {
+    background: var(--color-light-med);
+  }
+
+  .header-row th {
+    background: var(--color-light-med);
+    padding: 0.75rem;
+    border-bottom: 2px solid var(--color-med-dark);
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .checkbox-col {
+    width: 70px;
+    text-align: center;
+  }
+
+  .checkbox-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 1rem;
+    gap: 0.25rem;
 
-    h3 {
-      color: $color-primary-darker;
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-
-    .selected-count {
-      color: $color-primary;
+    .checkbox-label-text {
+      font-size: 0.75rem;
       font-weight: 500;
-      font-size: 0.9rem;
     }
   }
 
-  .bulk-actions-controls {
+  .image-cell {
+    width: 60px;
+  }
+
+  .item-thumbnail {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-light);
+  }
+
+  .no-image {
+    width: 48px;
+    height: 48px;
     display: flex;
-    gap: 2rem;
     align-items: center;
-    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--color-neutral-light);
+    border-radius: var(--border-radius-sm);
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+  }
 
-    .consignor-assignment,
-    .verification-actions {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-    }
-
-    .consignor-select {
-      padding: 0.5rem 0.75rem;
-      border: 1px solid $color-border;
-      border-radius: $border-radius-md;
-      background: white;
-      min-width: 200px;
-    }
-
-    label {
-      font-weight: 500;
-      color: $color-text-primary;
-    }
+  td {
+    vertical-align: middle;
   }
 }
 
-// ----------------------------------------------------------------------------
-// Table Container with Scrolling
-// ----------------------------------------------------------------------------
-.table-container {
-  .table-wrapper {
-    overflow-x: auto;
-    overflow-y: auto;
-    max-height: 600px;
-    border: 1px solid $color-border;
-    border-radius: 0;
-
-    // Custom scrollbar
-    &::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: $color-background-light;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: $color-border;
-      border-radius: 4px;
-
-      &:hover {
-        background: $color-text-secondary;
-      }
-    }
-  }
-
-  .inventory-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    font-size: 0.9rem;
-
-    thead {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: white;
-
-      th {
-        padding: 0.75rem 1rem;
-        text-align: left;
-        font-weight: 600;
-        color: $color-text-primary;
-        border-bottom: 2px solid $color-border;
-        background: $color-background-light;
-        white-space: nowrap;
-
-        &.sortable {
-          cursor: pointer;
-          user-select: none;
-
-          &:hover {
-            background: $color-background-hover;
-          }
-
-          .sort-indicator {
-            margin-left: 0.5rem;
-            opacity: 0.5;
-
-            &.active {
-              opacity: 1;
-              color: $color-primary;
-            }
-          }
-        }
-
-        &.checkbox-cell {
-          width: 60px;
-          text-align: center;
-          padding: 0.5rem;
-        }
-      }
-    }
-
-    tbody {
-      tr {
-        border-bottom: 1px solid $color-border-light;
-        transition: background-color 0.15s ease;
-
-        &:hover {
-          background: $color-shell-background;
-        }
-
-        &.even {
-          background: rgba($color-background-light, 0.3);
-
-          &:hover {
-            background: $color-shell-background;
-          }
-        }
-      }
-
-      td {
-        padding: 0.75rem 1rem;
-        vertical-align: middle;
-        border-bottom: 1px solid $color-border-light;
-
-        &.checkbox-cell {
-          text-align: center;
-          padding: 0.5rem;
-        }
-
-        &.image-cell {
-          width: 80px;
-          padding: 0.5rem;
-        }
-
-        &.title-cell,
-        &.item-cell {
-          max-width: 200px;
-        }
-
-        &.price-cell {
-          font-weight: 600;
-          color: $color-primary-dark;
-        }
-
-        &.actions-cell {
-          width: 120px;
-          text-align: center;
-        }
-      }
-    }
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Checkbox Styling
-// ----------------------------------------------------------------------------
-.checkbox-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  user-select: none;
-
-  .checkbox-input {
-    position: absolute;
-    opacity: 0;
-
-    &:checked + .checkbox-custom {
-      background: $color-primary;
-      border-color: $color-primary;
-
-      &::after {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-  }
-
-  .checkbox-custom {
-    width: 16px;
-    height: 16px;
-    border: 2px solid $color-border;
-    border-radius: $border-radius-sm;
-    background: white;
-    position: relative;
-    transition: all 0.2s ease;
-
-    &::after {
-      content: "✓";
-      position: absolute;
-      top: -2px;
-      left: 2px;
-      color: white;
-      font-size: 12px;
-      font-weight: bold;
-      opacity: 0;
-      transform: scale(0.8);
-      transition: all 0.2s ease;
-    }
-  }
-
-  .checkbox-text {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: $color-text-primary;
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Table Cell Content Styling
-// ----------------------------------------------------------------------------
-.item-thumbnail {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: $border-radius-sm;
-  border: 1px solid $color-border;
-}
-
-.no-image {
-  width: 50px;
-  height: 50px;
-  background: $color-background-light;
-  border: 1px solid $color-border;
-  border-radius: $border-radius-sm;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: $color-text-muted;
-  font-size: 1.2rem;
-}
-
-.item-title,
-.item-name {
-  font-weight: 500;
-  color: $color-text-primary;
-  margin-bottom: 0.25rem;
-  line-height: 1.3;
-}
-
-.item-sku,
-.item-description {
-  color: $color-text-secondary;
-  font-size: 0.8rem;
-  line-height: 1.2;
-}
-
-.item-info {
-  .item-description {
-    margin-top: 0.25rem;
-    font-style: italic;
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Badge Styling
-// ----------------------------------------------------------------------------
-.status-badge,
-.condition-badge,
-.source-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: $border-radius-sm;
-  font-size: 0.75rem;
+/* Money cells */
+.cell-money {
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+  color: var(--color-text-primary);
 }
 
-// Status badges
-.status-badge {
-  &.status-available {
-    background: $color-success-light;
-    color: $color-success;
-  }
-
-  &.status-sold {
-    background: $color-blue-light;
-    color: $color-blue-dark;
-  }
-
-  &.status-removed {
-    background: $color-danger-light;
-    color: $color-danger;
-  }
-
-  &.status-pending {
-    background: #fef3c7;
-    color: #d97706;
-  }
-}
-
-// Condition badges
-.condition-badge {
-  &.condition-new {
-    background: $color-success-light;
-    color: $color-success;
-  }
-
-  &.condition-like-new {
-    background: $color-blue-light;
-    color: $color-blue-dark;
-  }
-
-  &.condition-good {
-    background: #e0e7ff;
-    color: #5b21b6;
-  }
-
-  &.condition-fair {
-    background: #fef3c7;
-    color: #d97706;
-  }
-
-  &.condition-poor {
-    background: $color-danger-light;
-    color: $color-danger;
-  }
-}
-
-// Source badges
-.source-badge {
-  &.source-manifest {
-    background: #e0f2fe;
-    color: #0277bd;
-  }
-
-  &.source-square {
-    background: #f3e5f5;
-    color: #7b1fa2;
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Consignor Assignment Styling
-// ----------------------------------------------------------------------------
-.consignor-name,
-.consignor-assignment {
-  font-weight: 500;
-
+/* Consignor link */
+.consignor-link {
   &.clickable {
-    color: $color-primary;
+    color: var(--color-med-dark);
     cursor: pointer;
 
     &:hover {
       text-decoration: underline;
     }
   }
-
-  &.assigned .assigned-consignor {
-    color: $color-success;
-  }
-
-  &.unassigned .needs-assignment {
-    color: $color-warning;
-    font-style: italic;
-  }
 }
 
-.assignment-dropdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 200px;
-
-  .consignor-select-small {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.8rem;
-    border: 1px solid $color-border;
-    border-radius: $border-radius-sm;
-  }
-
-  .assignment-actions {
-    display: flex;
-    gap: 0.25rem;
-    justify-content: center;
-  }
+/* Expiration states */
+.expiration-expired {
+  color: var(--color-error-dark);
+  font-weight: 600;
 }
 
-// ----------------------------------------------------------------------------
-// Action Buttons
-// ----------------------------------------------------------------------------
-.action-buttons {
+.expiration-warning {
+  color: var(--color-warn-dark);
+  font-weight: 500;
+}
+
+/* Inline assign dropdown */
+.inline-assign {
   display: flex;
-  gap: 0.5rem;
-  justify-content: center;
+  gap: 0.25rem;
   align-items: center;
+
+  .filter-select {
+    min-width: 120px;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
 }
 
-// ----------------------------------------------------------------------------
-// Pagination
-// ----------------------------------------------------------------------------
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-top: 1px solid $color-border;
-  background: $color-background-light;
+/* Checkbox styling */
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-med);
+}
 
-  .page-btn {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid $color-border;
-    background: white;
-    border-radius: $border-radius-sm;
-    cursor: pointer;
-    transition: all 0.2s ease;
+/* Color Guide Modal */
+.guide-section {
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h4 {
+    margin: 0 0 0.75rem 0;
     font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-neutral-light);
+    padding-bottom: 0.5rem;
+  }
 
-    &:hover:not(:disabled) {
-      background: $color-primary;
-      color: white;
-      border-color: $color-primary;
-    }
+  .guide-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 
-    &.active {
-      background: $color-primary;
-      color: white;
-      border-color: $color-primary;
-    }
+  .guide-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
 
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .badge {
+      min-width: 80px;
+      text-align: center;
     }
   }
 }
 
-// ----------------------------------------------------------------------------
-// Loading and Empty States
-// ----------------------------------------------------------------------------
-.loading-state,
+/* Item summary in removal modal */
+.item-summary {
+  background: var(--color-info-light);
+  border: 1px solid var(--color-info-med);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+
+  h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--color-text-primary);
+  }
+
+  p {
+    margin: 0.25rem 0;
+  }
+}
+
+/* Upload zone */
+.upload-zone {
+  text-align: center;
+  padding: 2rem;
+  border: 2px dashed var(--color-neutral-med);
+  border-radius: var(--border-radius-lg);
+  transition: all 0.2s ease;
+
+  &.drag-active {
+    border-color: var(--color-med);
+    background: var(--color-light);
+  }
+
+  .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .upload-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .upload-description {
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+}
+
+/* Checkbox form group */
+.checkbox-group {
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+
+    span {
+      font-size: 0.9rem;
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+.required {
+  color: var(--color-error-dark);
+}
+
+/* Empty & Error States */
 .empty-state,
 .error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2rem;
   text-align: center;
+  padding: 4rem 2rem;
+  color: var(--color-text-muted);
 
   .empty-icon,
   .error-icon {
@@ -720,300 +387,79 @@ $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
   }
 
   h3 {
-    color: $color-text-primary;
-    margin-bottom: 0.5rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--color-text-primary);
+    font-size: 1.25rem;
   }
 
   p {
-    color: $color-text-secondary;
-    margin-bottom: 1rem;
+    margin: 0 0 1.5rem 0;
   }
 }
 
-.loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid $color-border;
-  border-top: 2px solid $color-primary;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-// ----------------------------------------------------------------------------
-// Button Styles (including existing styles)
-// ----------------------------------------------------------------------------
-.btn-primary,
-.btn-secondary,
-.btn-primary-small,
-.btn-secondary-small {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: $border-radius-md;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: 1px solid transparent;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.btn-primary {
-  background: $color-primary;
-  color: white;
-
-  &:hover:not(:disabled) {
-    background: $color-primary-dark;
-  }
-}
-
-.btn-secondary {
-  background: white;
-  color: $color-primary;
-  border-color: $color-primary;
-
-  &:hover:not(:disabled) {
-    background: $color-primary;
-    color: white;
-  }
-}
-
-.btn-primary-small,
-.btn-secondary-small {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.8rem;
-}
-
-.btn-primary-small {
-  background: $color-primary;
-  color: white;
-
-  &:hover:not(:disabled) {
-    background: $color-primary-dark;
-  }
-}
-
-.btn-secondary-small {
-  background: white;
-  color: $color-text-secondary;
-  border-color: $color-border;
-
-  &:hover:not(:disabled) {
-    background: $color-background-light;
-    border-color: $color-primary;
-    color: $color-primary;
-  }
-}
-
-.btn-icon {
-  font-size: 1rem;
-  background: transparent;
-  border: none;
-  padding: 0.25rem 0.5rem;
-  border-radius: $border-radius-sm;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
-
-  &:hover:not(:disabled) {
-    background: rgba(0, 0, 0, 0.1);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &.btn-danger {
-    &:hover:not(:disabled) {
-      background: rgba(220, 53, 69, 0.1);
-      color: #dc3545;
-    }
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Color Guide Modal (preserved from original)
-// ----------------------------------------------------------------------------
-.color-guide-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-
-  .modal-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-  }
-
-  .modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    border-radius: $border-radius-lg;
-    box-shadow: $shadow-lg;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 1.5rem 1rem;
-      border-bottom: 1px solid $color-border;
-
-      h3 {
-        margin: 0;
-        color: $color-text-primary;
-      }
-
-      .modal-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: $color-text-secondary;
-
-        &:hover {
-          color: $color-text-primary;
-        }
-      }
-    }
-
-    .modal-body {
-      padding: 1.5rem;
-
-      .guide-section {
-        margin-bottom: 2rem;
-
-        h4 {
-          margin-bottom: 1rem;
-          color: $color-text-primary;
-        }
-
-        .color-examples {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-
-          .color-example {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-
-            span:last-child {
-              color: $color-text-secondary;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Responsive Design
-// ----------------------------------------------------------------------------
+/* Responsive */
 @media (max-width: 1200px) {
   .inventory-page {
-    padding: 1rem;
+    padding: 1.5rem;
   }
 
-  .table-wrapper {
-    max-height: 500px;
-  }
-
-  .filters-section {
+  .bulk-actions-bar {
     flex-direction: column;
-    align-items: stretch;
+    gap: 1rem;
+    align-items: flex-start;
 
-    .filter-select {
-      margin-bottom: 0.5rem;
+    .bulk-actions-controls {
+      flex-wrap: wrap;
     }
   }
 }
 
 @media (max-width: 768px) {
+  .inventory-page {
+    padding: 1rem;
+  }
+
   .page-header {
     flex-direction: column;
-    align-items: stretch;
     gap: 1rem;
 
     .header-actions {
+      width: 100%;
       flex-wrap: wrap;
-      justify-content: center;
     }
   }
 
-  .tab-controls {
+  .tab-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+
+    .tab-bar-actions {
+      margin-bottom: 0;
+    }
+  }
+
+  .tab-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .controls-bar {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
 
-    .search-section {
-      justify-content: center;
+    .search-group {
+      width: 100%;
 
       .search-input {
-        width: 100%;
-        max-width: 300px;
+        flex: 1;
+        width: auto;
       }
     }
 
-    .controls-section {
-      justify-content: center;
-    }
-  }
-
-  .bulk-actions-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-
-    .consignor-assignment,
-    .verification-actions {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .consignor-select {
-      min-width: unset;
-    }
-  }
-
-  .table-wrapper {
-    max-height: 400px;
-  }
-
-  .inventory-table {
-    font-size: 0.8rem;
-
-    th,
-    td {
-      padding: 0.5rem 0.75rem;
+    .controls-group {
+      justify-content: space-between;
     }
   }
 }
