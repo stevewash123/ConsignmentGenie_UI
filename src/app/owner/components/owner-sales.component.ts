@@ -9,6 +9,7 @@ import { OwnerLayoutComponent } from './owner-layout.component';
 import { TransactionService, TransactionQueryParams, UpdateTransactionRequest, VoidTransactionResponse } from '../../services/transaction.service';
 import { Transaction } from '../../models/transaction.model';
 import { LoadingService } from '../../shared/services/loading.service';
+import { ColumnFilterComponent, FilterOption } from '../../shared/components/column-filter.component';
 
 // ============================================================================
 // Constants
@@ -36,7 +37,7 @@ const SUCCESS_MESSAGES = {
 @Component({
   selector: 'app-owner-sales',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule, OwnerLayoutComponent, ColumnFilterComponent],
   templateUrl: './owner-sales.component.html',
   styleUrls: ['./owner-sales.component.scss']
 })
@@ -71,6 +72,13 @@ export class OwnerSalesComponent implements OnInit {
     consignorSearch: '',   // UI filter only - not sent to API
     paymentMethod: ''
   };
+
+  // Payment method options for select filter
+  paymentMethodOptions: FilterOption[] = [
+    { value: 'Cash', label: 'Cash' },
+    { value: 'Card', label: 'Card' },
+    { value: 'Online', label: 'Online' }
+  ];
 
   // Sorting - regular properties for template binding
   sortBy = DEFAULT_SORT_BY;
@@ -294,6 +302,43 @@ export class OwnerSalesComponent implements OnInit {
       consignorSearch: '',
       paymentMethod: ''
     };
+    this.applyFilters();
+  }
+
+  // Column filter handlers
+  onFilterChange(field: string, value: any): void {
+    switch (field) {
+      case 'startDate':
+        this.filters.startDate = value || '';
+        break;
+      case 'itemSearch':
+        this.filters.itemSearch = value || '';
+        break;
+      case 'consignorSearch':
+        this.filters.consignorSearch = value || '';
+        break;
+      case 'paymentMethod':
+        this.filters.paymentMethod = value || '';
+        break;
+    }
+    this.applyFilters();
+  }
+
+  onFilterClear(field: string): void {
+    switch (field) {
+      case 'startDate':
+        this.filters.startDate = '';
+        break;
+      case 'itemSearch':
+        this.filters.itemSearch = '';
+        break;
+      case 'consignorSearch':
+        this.filters.consignorSearch = '';
+        break;
+      case 'paymentMethod':
+        this.filters.paymentMethod = '';
+        break;
+    }
     this.applyFilters();
   }
 

@@ -18,15 +18,15 @@
     <!-- Tab Bar -->
     <div class="tab-bar">
       <div class="tab-buttons">
-        <button
-          class="tab-btn"
+        <button 
+          class="tab-btn" 
           [class.active]="viewMode() === 'pending'"
           (click)="viewMode.set('pending')">
           ⏳ Pending Payouts
           <span class="tab-count" *ngIf="pendingPayouts().length > 0">{{ pendingPayouts().length }}</span>
         </button>
-        <button
-          class="tab-btn"
+        <button 
+          class="tab-btn" 
           [class.active]="viewMode() === 'history'"
           (click)="viewMode.set('history')">
           📋 Payout History
@@ -37,7 +37,7 @@
 
     <!-- Pending Payouts Tab -->
     <div class="tab-content" *ngIf="viewMode() === 'pending'">
-      <!--
+      <!-- 
         NOTE: Card/Table view toggle intentionally hidden - deferred until after MVP.
         Currently defaulting to table view only.
         TODO: Re-enable view toggle post-MVP
@@ -88,12 +88,19 @@
                 <td class="actions-cell">
                   <!-- TODO: Add chevron to expand row and show transaction details -->
                   <button class="btn-icon" (click)="generateStatementForConsignor(pending.consignorId)" title="Generate Statement">📄</button>
-                  <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Create Payout">💰</button>
+                  <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Pay Now">💰</button>
                 </td>
               </tr>
             }
           </tbody>
         </table>
+
+        <!-- No results after filtering -->
+        <div class="empty-state" *ngIf="filteredPendingPayouts().length === 0">
+          <div class="empty-icon">🔍</div>
+          <h3>No matching payouts</h3>
+          <p>No pending payouts match your current filter. Try adjusting or clearing the filter.</p>
+        </div>
       </div>
     </div>
 
@@ -169,7 +176,18 @@
                   {{ sortDirection() === 'asc' ? '↑' : '↓' }}
                 </span>
               </th>
-              <th>Payment Method</th>
+              <th>
+                Payment Method
+                <app-column-filter
+                  filterType="select"
+                  label="Payment Method"
+                  [options]="paymentMethodOptions"
+                  [value]="selectedPaymentMethod()"
+                  placeholder="All"
+                  (filterChange)="onFilterChange('paymentMethod', $event)"
+                  (filterClear)="onFilterClear('paymentMethod')">
+                </app-column-filter>
+              </th>
               <th>Period</th>
               <th>Transactions</th>
               <th>
@@ -235,9 +253,9 @@
         <div class="modal-body">
           <div class="form-group">
             <label for="consignorId">Consignor <span class="required">*</span></label>
-            <select
+            <select 
               id="consignorId"
-              [ngModel]="newPayout().consignorId"
+              [ngModel]="newPayout().consignorId" 
               (ngModelChange)="updateConsignorId($event)"
               class="form-control">
               <option value="">Select Consignor</option>
@@ -250,19 +268,19 @@
           <div class="form-row">
             <div class="form-group">
               <label for="payoutDate">Payout Date <span class="required">*</span></label>
-              <input
-                type="date"
+              <input 
+                type="date" 
                 id="payoutDate"
-                [ngModel]="newPayout().payoutDate"
+                [ngModel]="newPayout().payoutDate" 
                 (ngModelChange)="updatePayoutDate($event)"
                 class="form-control">
             </div>
 
             <div class="form-group">
               <label for="paymentMethod">Payment Method <span class="required">*</span></label>
-              <select
+              <select 
                 id="paymentMethod"
-                [ngModel]="newPayout().paymentMethod"
+                [ngModel]="newPayout().paymentMethod" 
                 (ngModelChange)="updatePaymentMethod($event)"
                 class="form-control">
                 <option value="">Select Method</option>
@@ -279,23 +297,23 @@
 
           <div class="form-group" *ngIf="newPayout().paymentMethod === 'Check'">
             <label for="paymentReference">Check Number</label>
-            <input
-              type="text"
+            <input 
+              type="text" 
               id="paymentReference"
-              [ngModel]="newPayout().paymentReference"
+              [ngModel]="newPayout().paymentReference" 
               (ngModelChange)="updatePaymentReference($event)"
-              class="form-control"
+              class="form-control" 
               placeholder="Enter check number">
           </div>
 
           <div class="form-group">
             <label for="notes">Notes</label>
-            <textarea
+            <textarea 
               id="notes"
-              [ngModel]="newPayout().notes"
+              [ngModel]="newPayout().notes" 
               (ngModelChange)="updateNotes($event)"
-              class="form-control"
-              rows="3"
+              class="form-control" 
+              rows="3" 
               placeholder="Optional notes..."></textarea>
           </div>
         </div>
@@ -390,7 +408,6 @@
     </div>
 
     <!-- Consignor Statement Modal -->
-    <!-- Note: preSelectedConsignorId support requires updating ConsignorStatementModalComponent -->
     <app-consignor-statement-modal
       [isVisible]="showStatementModal()"
       [availableConsignors]="availableConsignorOptions()"

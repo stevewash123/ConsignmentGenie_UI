@@ -27,6 +27,18 @@
   }
 }
 
+
+/* Fix actions-cell border rendering issue - override global flex display */
+.data-table .actions-cell {
+  display: table-cell !important;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.data-table .actions-cell .btn-icon {
+  margin: 0 0.25rem;
+}
+
 /* Money cells - black text */
 .cell-money {
   font-weight: 600;

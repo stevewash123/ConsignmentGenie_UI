@@ -16,76 +16,63 @@
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
-          <!-- Column Headers -->
           <tr class="header-row">
             <th (click)="setSorting('saleDate')" class="sortable">
               Date
               <span class="sort-indicator" [class.active]="sortBy === 'saleDate'">
                 {{ sortDirection === 'asc' ? '↑' : '↓' }}
               </span>
+              <app-column-filter
+                filterType="date"
+                label="Date"
+                [value]="filters.startDate"
+                (filterChange)="onFilterChange('startDate', $event)"
+                (filterClear)="onFilterClear('startDate')">
+              </app-column-filter>
             </th>
-            <th>Item</th>
-            <th>Consignor</th>
+            <th>
+              Item
+              <app-column-filter
+                filterType="text"
+                label="Item"
+                [value]="filters.itemSearch"
+                placeholder="Search items..."
+                (filterChange)="onFilterChange('itemSearch', $event)"
+                (filterClear)="onFilterClear('itemSearch')">
+              </app-column-filter>
+            </th>
+            <th>
+              Consignor
+              <app-column-filter
+                filterType="text"
+                label="Consignor"
+                [value]="filters.consignorSearch"
+                placeholder="Search consignors..."
+                (filterChange)="onFilterChange('consignorSearch', $event)"
+                (filterClear)="onFilterClear('consignorSearch')">
+              </app-column-filter>
+            </th>
             <th (click)="setSorting('salePrice')" class="sortable">
               Sale Price
               <span class="sort-indicator" [class.active]="sortBy === 'salePrice'">
                 {{ sortDirection === 'asc' ? '↑' : '↓' }}
               </span>
             </th>
-            <th>Payment</th>
+            <th>
+              Payment
+              <app-column-filter
+                filterType="select"
+                label="Payment Method"
+                [options]="paymentMethodOptions"
+                [value]="filters.paymentMethod"
+                placeholder="All"
+                (filterChange)="onFilterChange('paymentMethod', $event)"
+                (filterClear)="onFilterClear('paymentMethod')">
+              </app-column-filter>
+            </th>
             <th>Commission</th>
             <th>Shop Amount</th>
             <th>Actions</th>
-          </tr>
-          <!-- Filter Row -->
-          <tr class="filter-row">
-            <th>
-              <input
-                type="date"
-                [(ngModel)]="filters.startDate"
-                (change)="applyFilters()"
-                class="filter-input"
-                placeholder="From...">
-            </th>
-            <th>
-              <input
-                type="text"
-                [(ngModel)]="filters.itemSearch"
-                (input)="applyFilters()"
-                class="filter-input"
-                placeholder="Search items...">
-            </th>
-            <th>
-              <input
-                type="text"
-                [(ngModel)]="filters.consignorSearch"
-                (input)="applyFilters()"
-                class="filter-input"
-                placeholder="Search consignors...">
-            </th>
-            <th>
-              <!-- No filter for price -->
-            </th>
-            <th>
-              <select
-                [(ngModel)]="filters.paymentMethod"
-                (change)="applyFilters()"
-                class="filter-select">
-                <option value="">All</option>
-                <option value="Cash">Cash</option>
-                <option value="Card">Card</option>
-                <option value="Online">Online</option>
-              </select>
-            </th>
-            <th>
-              <!-- No filter for commission -->
-            </th>
-            <th>
-              <!-- No filter for shop amount -->
-            </th>
-            <th>
-              <!-- No filter for actions -->
-            </th>
           </tr>
         </thead>
         <tbody *ngIf="!isComponentLoading() && pagedResult()">

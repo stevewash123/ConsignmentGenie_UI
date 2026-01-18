@@ -70,7 +70,6 @@
                         <ng-container *ngIf="!isPendingApproval(consignor)">
                           <button class="btn-view" [routerLink]="['/owner/consignors', consignor.id]">
                             <span>👁️</span>
-                            View
                           </button>
                           <button class="btn-message"
                                   (click)="sendMessage(consignor)"
