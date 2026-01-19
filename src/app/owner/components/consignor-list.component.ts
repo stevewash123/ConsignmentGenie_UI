@@ -8,14 +8,13 @@ import { InviteConsignorModalComponent } from '../../shared/components/invite-co
 import { BulkInviteConsignorModalComponent } from '../../shared/components/bulk-invite-consignor-modal.component';
 import { ENTITY_LABELS } from '../../shared/constants/labels';
 import { ConsignorStatus } from '../../models/consignor.model';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { LoadingService } from '../../shared/services/loading.service';
 import { AgreementService } from '../../services/agreement.service';
 
 @Component({
   selector: 'app-consignor-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, InviteConsignorModalComponent, BulkInviteConsignorModalComponent, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, InviteConsignorModalComponent, BulkInviteConsignorModalComponent],
   templateUrl: './consignor-list.component.html',
   styleUrls: ['./consignor-list.component.scss']
 })

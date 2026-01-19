@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { OwnerLayoutComponent } from './owner-layout.component';
 
 @Component({
   selector: 'app-inventory-edit',
   standalone: true,
-  imports: [CommonModule, OwnerLayoutComponent],
+  imports: [CommonModule],
   templateUrl: './inventory-edit.component.html',
   styleUrls: ['./inventory-edit.component.scss']
 })

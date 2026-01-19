@@ -3,9 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-// Import your layout component - adjust path as needed
-// For Owner: import { OwnerLayoutComponent as LayoutComponent } from './owner-layout.component';
-// For Consignor: import { ConsignorLayoutComponent as LayoutComponent } from './consignor-layout.component';
 
 // Notification model interface
 export interface Notification {
@@ -274,16 +271,16 @@ export class NotificationCenterComponent implements OnInit {
     return icons[type] || '🔔';
   }
 
-  getActionIcon(type: NotificationType): string {
-    const icons: Record<NotificationType, string> = {
-      manifest: '👁️',
-      payout: '💳',
-      sale: '📊',
-      expiring: '📋',
-      agreement: '✍️',
-      system: '➡️'
+  getActionItem(type: NotificationType): { icon: string; tooltip: string } {
+    const actions: Record<NotificationType, { icon: string; tooltip: string }> = {
+      manifest: { icon: '👁️', tooltip: 'View manifest details' },
+      payout: { icon: '💳', tooltip: 'Process payout' },
+      sale: { icon: '📊', tooltip: 'View sale details' },
+      expiring: { icon: '📋', tooltip: 'Review expiring items' },
+      agreement: { icon: '✍️', tooltip: 'View agreement' },
+      system: { icon: '➡️', tooltip: 'View details' }
     };
-    return icons[type] || '👁️';
+    return actions[type] || { icon: '👁️', tooltip: 'View details' };
   }
 
   trackById(index: number, notification: Notification): string {

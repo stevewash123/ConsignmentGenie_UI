@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { ColumnFilterComponent, FilterOption } from '../../shared/components/column-filter.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -42,7 +41,7 @@ export interface ImportedItem {
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ColumnFilterComponent],
+  imports: [CommonModule, FormsModule, ColumnFilterComponent],
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.scss']
 })

@@ -4,12 +4,11 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MockConsignorItemService, ItemReturnRequestDto } from '../../consignor/services/mock-consignor-item.service';
 import { LoadingService } from '../../shared/services/loading.service';
-import { OwnerLayoutComponent } from './owner-layout.component';
 
 @Component({
   selector: 'app-return-requests-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './return-requests-list.component.html',
   styleUrls: ['./return-requests-list.component.css']
 })

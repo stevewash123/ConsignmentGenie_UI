@@ -9,12 +9,11 @@ import {
   ReviewPriceRequestDto
 } from '../../../consignor/services/mock-consignor-item.service';
 import { PriceRequestReviewModalComponent } from './price-request-review-modal.component';
-import { OwnerLayoutComponent } from '../owner-layout.component';
 
 @Component({
   selector: 'app-price-request-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PriceRequestReviewModalComponent, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PriceRequestReviewModalComponent],
   templateUrl: './price-request-list.component.html',
   styleUrls: ['./price-request-list.component.scss']
 })

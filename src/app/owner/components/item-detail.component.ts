@@ -5,14 +5,13 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { ItemDetailDto, ItemStatus, ItemCondition } from '../../models/inventory.model';
 import { ApiResponse } from '../../models/inventory.model';
 
 @Component({
   selector: 'app-item-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './item-detail.component.html',
   styleUrls: ['./item-detail.component.scss']
 })

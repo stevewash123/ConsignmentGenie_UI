@@ -7,7 +7,6 @@ import { ConsignorService } from '../../services/consignor.service';
 import { SettingsService } from '../../services/settings.service';
 import { Consignor, ConsignorDetailDto, ConsignorStatus, ApiResponse } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { environment } from '../../../environments/environment';
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
 import { CommunicationService } from '../../services/communication.service';
@@ -27,7 +26,7 @@ interface ConsignorAgreementStatus {
 @Component({
   selector: 'app-consignor-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './consignor-detail.component.html',
   styleUrls: ['./consignor-detail.component.scss']
 })

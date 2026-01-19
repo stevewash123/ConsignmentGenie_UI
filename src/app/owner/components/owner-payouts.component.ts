@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { ColumnFilterComponent, FilterOption } from '../../shared/components/column-filter.component';
 import { PayoutService, PayoutStatus } from '../../services/payout.service';
 import {
@@ -49,7 +48,7 @@ const SUCCESS_MESSAGES = {
 @Component({
   selector: 'app-owner-payouts',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ColumnFilterComponent, ConsignorStatementModalComponent],
+  imports: [CommonModule, FormsModule, ColumnFilterComponent, ConsignorStatementModalComponent],
   templateUrl: './owner-payouts.component.html',
   styleUrls: ['./owner-payouts.component.scss']
 })

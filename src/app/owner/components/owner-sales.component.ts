@@ -5,7 +5,6 @@ import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { TransactionService, TransactionQueryParams, UpdateTransactionRequest, VoidTransactionResponse } from '../../services/transaction.service';
 import { Transaction } from '../../models/transaction.model';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -37,7 +36,7 @@ const SUCCESS_MESSAGES = {
 @Component({
   selector: 'app-owner-sales',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, OwnerLayoutComponent, ColumnFilterComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ColumnFilterComponent],
   templateUrl: './owner-sales.component.html',
   styleUrls: ['./owner-sales.component.scss']
 })

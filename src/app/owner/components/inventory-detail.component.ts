@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { OwnerLayoutComponent } from './owner-layout.component';
 
 @Component({
   selector: 'app-inventory-detail',
   standalone: true,
-  imports: [CommonModule, OwnerLayoutComponent],
+  imports: [CommonModule],
   templateUrl: './inventory-detail.component.html',
   styleUrls: ['./inventory-detail.component.scss']
 })

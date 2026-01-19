@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { LoadingService } from '../../shared/services/loading.service';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { Transaction, TransactionItem } from '../../models/transaction.model';
 import { TransactionService } from '../../services/transaction.service';
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
@@ -12,7 +11,7 @@ import { ConfirmationDialogService } from '../../shared/services/confirmation-di
 @Component({
   selector: 'app-sale-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './sale-detail.component.html',
   styleUrls: ['./sale-detail.component.scss']
 })

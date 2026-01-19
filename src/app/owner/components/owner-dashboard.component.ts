@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { OwnerWelcomeModalComponent } from './owner-welcome-modal.component';
 import { ConsignorService } from '../../services/consignor.service';
 import { TransactionService, SalesMetrics, MetricsQueryParams, TransactionQueryParams } from '../../services/transaction.service';
@@ -38,7 +37,7 @@ interface DashboardTransaction {
 @Component({
   selector: 'app-owner-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, OwnerLayoutComponent, OwnerWelcomeModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, OwnerWelcomeModalComponent],
   templateUrl: './owner-dashboard.component.html',
   styleUrls: ['./owner-dashboard.component.scss']
 })

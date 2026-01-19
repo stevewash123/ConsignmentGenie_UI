@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { OwnerLayoutComponent } from '../components/owner-layout.component';
 import { filter } from 'rxjs/operators';
 
 interface SettingsSubMenuItem {
@@ -23,7 +22,7 @@ interface SettingsMenuItem {
 @Component({
   selector: 'app-settings-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, OwnerLayoutComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './settings-layout.component.html',
   styleUrls: ['./settings-layout.component.scss']
 })

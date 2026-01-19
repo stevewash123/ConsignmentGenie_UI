@@ -1,5 +1,4 @@
-<app-owner-layout>
-  <div class="detail-page" *ngIf="!isProviderLoading(); else loading">
+<div class="detail-page" *ngIf="!isProviderLoading(); else loading">
     
     <!-- Page Header -->
     <div class="page-header">
@@ -333,6 +332,4 @@
   <!-- Success Toast -->
   <div class="toast toast-success" *ngIf="showSuccessToast()">
     {{ successMessage() }}
-  </div>
-
-</app-owner-layout>
+</div>

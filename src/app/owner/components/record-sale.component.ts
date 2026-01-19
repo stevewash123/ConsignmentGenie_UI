@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { ItemSearchComponent } from './item-search.component';
 import { CartComponent } from './cart.component';
 import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-sale.service';
@@ -11,7 +10,7 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
 @Component({
   selector: 'app-record-sale',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent, ItemSearchComponent, CartComponent],
+  imports: [CommonModule, FormsModule, ItemSearchComponent, CartComponent],
   templateUrl: './record-sale.component.html',
   styleUrls: ['./record-sale.component.scss']
 })

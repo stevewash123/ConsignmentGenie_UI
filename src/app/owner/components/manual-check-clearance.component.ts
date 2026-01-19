@@ -2,7 +2,6 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { OwnerLayoutComponent } from './owner-layout.component';
 import { CheckClearanceService } from '../../services/check-clearance.service';
 
 export interface PendingCheck {
@@ -19,7 +18,7 @@ export interface PendingCheck {
 @Component({
   selector: 'app-manual-check-clearance',
   standalone: true,
-  imports: [CommonModule, FormsModule, OwnerLayoutComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './manual-check-clearance.component.html',
   styleUrls: ['./manual-check-clearance.component.css']
 })
