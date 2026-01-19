@@ -1,355 +1,338 @@
-
 <app-owner-layout>
-      <div class="consignor-detail-container" *ngIf="!isProviderLoading(); else loading">
-      <!-- Header with breadcrumb and actions following UI patterns guide -->
-      <div class="detail-header">
-        <div class="breadcrumb">
-          <button class="btn-secondary back-button" routerLink="/owner/consignors">
-            ← Back to Consignors
+  <div class="detail-page" *ngIf="!isProviderLoading(); else loading">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <button class="btn-secondary" routerLink="/owner/consignors">
+          ← Back to Consignors
+        </button>
+      </div>
+      <div class="header-actions">
+        <div class="dropdown">
+          <button class="btn-primary dropdown-toggle" type="button">
+            Actions ▼
           </button>
-        </div>
-        <div class="header-actions">
-          <div class="dropdown">
-            <button class="btn-primary dropdown-toggle" type="button">
-              Actions ▼
+          <div class="dropdown-menu">
+            <a class="dropdown-item" [routerLink]="['/owner/consignors', providerId(), 'edit']">
+              ✏️ Edit Consignor
+            </a>
+            <div class="dropdown-divider"></div>
+            <button
+              class="dropdown-item"
+              *ngIf="consignor()?.status === 'active'"
+              (click)="deactivateProvider()"
+              [disabled]="isSubmitting()"
+            >
+              {{ isSubmitting() ? 'Deactivating...' : '⏸️ Deactivate' }}
             </button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" [routerLink]="['/owner/consignors', providerId(), 'edit']">
-                Edit Consignor
-              </a>
-              <div class="dropdown-divider"></div>
+            <button
+              class="dropdown-item"
+              *ngIf="consignor()?.status !== 'active'"
+              (click)="activateProvider()"
+              [disabled]="isSubmitting()"
+            >
+              {{ isSubmitting() ? 'Activating...' : '▶️ Activate' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entity Title Row -->
+    <div class="entity-header" *ngIf="consignor()">
+      <h1>{{ consignor()!.name }}</h1>
+      <div class="entity-meta">
+        <span class="badge" [ngClass]="{
+          'badge-success': consignor()!.status === 'active',
+          'badge-error': consignor()!.status !== 'active'
+        }">
+          {{ consignor()!.status === 'active' ? 'Active' : 'Inactive' }}
+        </span>
+        <span class="meta-id">Consignor #{{ consignor()!.consignorNumber }}</span>
+      </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="detail-card" *ngIf="consignor()">
+      
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-value">{{ stats().totalItems || 0 }}</span>
+          <span class="stat-label">Total Items</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ stats().activeItems || 0 }}</span>
+          <span class="stat-label">Active Items</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ stats().soldItems || 0 }}</span>
+          <span class="stat-label">Sold Items</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ stats().totalEarnings | currency:'USD':'symbol':'1.2-2' }}</span>
+          <span class="stat-label">Total Earnings</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ stats().pendingPayout | currency:'USD':'symbol':'1.2-2' }}</span>
+          <span class="stat-label">Pending Payout</span>
+        </div>
+      </div>
+
+      <!-- Info Sections -->
+      <div class="info-container">
+        <div class="info-row">
+          <!-- Contact Information -->
+          <div class="info-section">
+            <div class="section-header">
+              <h3>Contact Information</h3>
               <button
-                class="dropdown-item"
-                *ngIf="consignor()?.status === 'active'"
-                (click)="deactivateProvider()"
-                [disabled]="isSubmitting()"
+                class="btn-secondary btn-sm"
+                (click)="textContactInfo()"
+                [disabled]="isSendingContactInfo()"
+                title="Send contact info to owner notifications"
               >
-                {{ isSubmitting() ? 'Deactivating...' : 'Deactivate' }}
-              </button>
-              <button
-                class="dropdown-item"
-                *ngIf="consignor()?.status !== 'active'"
-                (click)="activateProvider()"
-                [disabled]="isSubmitting()"
-              >
-                {{ isSubmitting() ? 'Activating...' : 'Activate' }}
+                {{ isSendingContactInfo() ? 'Sending...' : '📱 Text Contact Info' }}
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Entity header following UI patterns guide -->
-      <div class="entity-header" *ngIf="consignor()">
-        <div class="entity-title-section">
-          <h1 class="entity-name">{{ consignor()!.name }}</h1>
-          <div class="entity-meta">
-            <span class="status-badge" [class.status-active]="consignor()!.status === 'active'" [class.status-inactive]="consignor()!.status !== 'active'">
-              {{ consignor()!.status === 'active' ? 'Active' : 'Inactive' }}
-            </span>
-            <span class="secondary-info">Consignor #{{ consignor()!.consignorNumber }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="consignor-detail-card" *ngIf="consignor()">
-
-        <div class="consignor-info">
-          <div class="info-section">
-            <h3>Contact Information</h3>
             <div class="info-grid">
               <div class="info-item">
-                <label>Email:</label>
-                <span>{{ consignor()!.email }}</span>
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ consignor()!.email }}</span>
               </div>
-              <div class="info-item" *ngIf="consignor()!.phone">
-                <label>Phone:</label>
-                <span>{{ consignor()!.phone }}</span>
+              <div class="info-item" *ngIf="consignorDetails()?.phone">
+                <span class="info-label">Phone</span>
+                <span class="info-value">{{ formatPhoneNumber(consignorDetails()!.phone) }}</span>
               </div>
-              <div class="info-item" *ngIf="consignor()!.address">
-                <label>Address:</label>
-                <span>{{ consignor()!.address }}</span>
+              <div class="info-item">
+                <span class="info-label">Mailing Address</span>
+                <ng-container *ngIf="consignorDetails()?.addressLine1">
+                  <span class="info-value">
+                    {{ consignorDetails()!.addressLine1 }}<br>
+                    <ng-container *ngIf="consignorDetails()!.addressLine2">{{ consignorDetails()!.addressLine2 }}<br></ng-container>
+                    <ng-container *ngIf="consignorDetails()!.city">{{ consignorDetails()!.city }}</ng-container><ng-container *ngIf="consignorDetails()!.city && consignorDetails()!.state">, </ng-container>{{ consignorDetails()!.state }} {{ consignorDetails()!.postalCode }}
+                  </span>
+                </ng-container>
+                <span class="info-value" *ngIf="!consignorDetails()?.addressLine1 && consignor()?.address">
+                  {{ consignor()!.address }}
+                </span>
+                <span class="info-value text-muted" *ngIf="!consignorDetails()?.addressLine1 && !consignor()?.address">
+                  No address on file
+                </span>
               </div>
             </div>
           </div>
 
+          <!-- Business Information -->
           <div class="info-section">
             <h3>Business Information</h3>
             <div class="info-grid">
               <div class="info-item">
-                <label>Commission Rate:</label>
-                <span>{{ consignor()!.commissionRate }}%</span>
+                <span class="info-label">Commission Rate</span>
+                <span class="info-value">{{ consignor()!.commissionRate }}%</span>
               </div>
               <div class="info-item" *ngIf="consignor()!.preferredPaymentMethod">
-                <label>Preferred Payment:</label>
-                <span>{{ consignor()!.preferredPaymentMethod }}</span>
+                <span class="info-label">Preferred Payment</span>
+                <span class="info-value">{{ consignor()!.preferredPaymentMethod }}</span>
               </div>
               <div class="info-item" *ngIf="consignor()!.paymentDetails">
-                <label>Payment Details:</label>
-                <span>{{ consignor()!.paymentDetails }}</span>
+                <span class="info-label">Payment Details</span>
+                <span class="info-value">{{ consignor()!.paymentDetails }}</span>
               </div>
-              <div class="info-item" *ngIf="consignor()!.consignorNumber">
-                <label>consignor Number:</label>
-                <span>{{ consignor()!.consignorNumber }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-section" *ngIf="consignor()!.notes">
-            <h3>Notes</h3>
-            <p class="notes">{{ consignor()!.notes }}</p>
-          </div>
-
-          <!-- Agreement Section -->
-          <div class="info-section agreement-section" *ngIf="showAgreementSection()">
-            <h3>Agreement</h3>
-            <div class="agreement-card" [ngClass]="'status-' + agreementStatus()?.status">
-
-              <!-- Pending State -->
-              <div *ngIf="agreementStatus()?.status === 'pending'" class="agreement-pending">
-                <div class="status-header">
-                  <span class="status-icon">⚠️</span>
-                  <span class="status-text">Agreement Status: Pending</span>
-                </div>
-                <p class="status-message">Consignor has not completed the agreement requirement</p>
-                <div class="agreement-actions">
-                  <button class="btn-secondary" (click)="openMarkOnFileModal()">
-                    Mark Agreement on File
-                  </button>
-                  <button class="btn-secondary" (click)="openUploadModal()">
-                    Upload Signed Copy
-                  </button>
-                </div>
-              </div>
-
-              <!-- On File State (owner marked, no document) -->
-              <div *ngIf="agreementStatus()?.status === 'on_file'" class="agreement-on-file">
-                <div class="status-header">
-                  <span class="status-icon">✅</span>
-                  <span class="status-text">Agreement Status: On file</span>
-                </div>
-                <div class="status-details">
-                  <span>Marked by {{ agreementStatus()?.markedBy?.name }} · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
-                </div>
-                <div class="notes" *ngIf="agreementNotes()">
-                  Note: "{{ agreementNotes() }}"
-                </div>
-                <div class="agreement-actions">
-                  <button class="btn-secondary" (click)="openUploadModal()">
-                    Upload Document
-                  </button>
-                  <button class="btn-danger-outline" (click)="confirmRemoveAgreement()">
-                    Remove
-                  </button>
-                </div>
-              </div>
-
-              <!-- Uploaded State (document stored) -->
-              <div *ngIf="agreementStatus()?.status === 'uploaded'" class="agreement-uploaded">
-                <div class="status-header">
-                  <span class="status-icon">✅</span>
-                  <span class="status-text">Agreement Status: On file</span>
-                </div>
-                <div class="status-details">
-                  <span>Uploaded by {{ agreementStatus()?.markedBy?.name }} · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
-                </div>
-                <div class="document-info">
-                  <span class="document-icon">📄</span>
-                  <span class="document-name">{{ getDocumentName() }}</span>
-                </div>
-                <div class="notes" *ngIf="agreementNotes()">
-                  Note: "{{ agreementNotes() }}"
-                </div>
-                <div class="agreement-actions">
-                  <button class="btn-secondary" (click)="viewDocument()">
-                    View Document
-                  </button>
-                  <button class="btn-secondary" (click)="openUploadModal()">
-                    Replace
-                  </button>
-                  <button class="btn-danger-outline" (click)="confirmRemoveAgreement()">
-                    Remove
-                  </button>
-                </div>
-              </div>
-
-              <!-- Completed by Consignor State -->
-              <div *ngIf="isConsignorCompleted()" class="agreement-completed">
-                <div class="status-header">
-                  <span class="status-icon">✅</span>
-                  <span class="status-text">Agreement Status: Completed</span>
-                </div>
-                <div class="status-details" *ngIf="agreementStatus()?.method === 'consignor_acknowledge'">
-                  <span>Acknowledged by consignor · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
-                </div>
-                <div class="status-details" *ngIf="agreementStatus()?.method === 'consignor_upload'">
-                  <span>Uploaded by consignor · {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
-                  <div class="document-info">
-                    <span class="document-icon">📄</span>
-                    <span class="document-name">{{ getDocumentName() }}</span>
-                  </div>
-                </div>
-                <div class="agreement-actions">
-                  <button class="btn-secondary" *ngIf="agreementStatus()?.method === 'consignor_acknowledge'" (click)="viewAcknowledgedTerms()">
-                    View Terms Acknowledged
-                  </button>
-                  <button class="btn-secondary" *ngIf="agreementStatus()?.method === 'consignor_upload'" (click)="viewDocument()">
-                    View Document
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-
-        <div class="consignor-stats">
-          <div class="stat-card">
-            <div class="stat-number">{{ stats().totalItems || 0 }}</div>
-            <div class="stat-label">Total Items</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">{{ stats().activeItems || 0 }}</div>
-            <div class="stat-label">Active Items</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">{{ stats().soldItems || 0 }}</div>
-            <div class="stat-label">Sold Items</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">{{ stats().totalEarnings | currency:'USD':'symbol':'1.2-2' }}</div>
-            <div class="stat-label">Total Earnings</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">{{ stats().pendingPayout | currency:'USD':'symbol':'1.2-2' }}</div>
-            <div class="stat-label">Pending Payout</div>
-          </div>
-        </div>
-
-        <div class="recent-activity">
-          <h3>Recent Activity</h3>
-          <div class="activity-list">
-            <div class="activity-item" *ngFor="let activity of recentActivity()">
-              <div class="activity-icon">{{ getActivityIcon(activity.type) }}</div>
-              <div class="activity-content">
-                <div class="activity-description">{{ activity.description }}</div>
-                <div class="activity-date">{{ activity.date | date:'short' }}</div>
-              </div>
-              <div class="activity-amount" *ngIf="activity.amount">
-                {{ activity.amount | currency:'USD':'symbol':'1.2-2' }}
+              <div class="info-item">
+                <span class="info-label">Consignor Number</span>
+                <span class="info-value cell-mono">{{ consignor()!.consignorNumber }}</span>
               </div>
             </div>
           </div>
-          <div class="no-activity" *ngIf="recentActivity().length === 0">
-            No recent activity
+        </div>
+
+        <!-- Notes Section -->
+        <div class="info-section full-width" *ngIf="consignor()!.notes">
+          <h3>Notes</h3>
+          <div class="notes-display">{{ consignor()!.notes }}</div>
+        </div>
+
+        <!-- Agreement Section -->
+        <div class="info-section full-width" *ngIf="showAgreementSection()">
+          <h3>Agreement</h3>
+          <div class="agreement-box" [ngClass]="{
+            'agreement-pending': agreementStatus()?.status === 'pending',
+            'agreement-complete': agreementStatus()?.status === 'on_file' || agreementStatus()?.status === 'uploaded' || isConsignorCompleted()
+          }">
+            
+            <!-- Pending State -->
+            <ng-container *ngIf="agreementStatus()?.status === 'pending'">
+              <div class="agreement-status">
+                <span class="badge badge-warn">Pending</span>
+                <span>Consignor has not completed the agreement requirement</span>
+              </div>
+              <div class="agreement-actions">
+                <button class="btn-secondary" (click)="openMarkOnFileModal()">
+                  Mark Agreement on File
+                </button>
+                <button class="btn-secondary" (click)="openUploadModal()">
+                  Upload Signed Copy
+                </button>
+              </div>
+            </ng-container>
+
+            <!-- Completed State -->
+            <ng-container *ngIf="agreementStatus()?.status === 'on_file' || agreementStatus()?.status === 'uploaded' || isConsignorCompleted()">
+              <div class="agreement-status">
+                <span class="badge badge-success">Completed</span>
+                <span *ngIf="agreementStatus()?.receivedAt">Uploaded {{ agreementStatus()?.receivedAt | date:'MMM d, y' }}</span>
+              </div>
+              <div class="agreement-note" *ngIf="agreementNotes()">
+                Note: "{{ agreementNotes() }}"
+              </div>
+              <div class="agreement-actions">
+                <button class="btn-secondary" *ngIf="agreementStatus()?.method === 'consignor_acknowledge'" (click)="viewAcknowledgedTerms()">
+                  View Terms Acknowledged
+                </button>
+                <button class="btn-secondary" *ngIf="agreementStatus()?.status === 'uploaded' || agreementStatus()?.method === 'consignor_upload'" (click)="viewDocument()">
+                  View Document
+                </button>
+                <button class="btn-secondary" (click)="openUploadModal()">
+                  Upload Signed Agreement
+                </button>
+                <button class="btn-danger" *ngIf="agreementStatus()?.status === 'on_file' || agreementStatus()?.status === 'uploaded'" (click)="confirmRemoveAgreement()">
+                  Remove
+                </button>
+              </div>
+            </ng-container>
           </div>
         </div>
       </div>
 
-      <div class="error-message" *ngIf="errorMessage()">
-        {{ errorMessage() }}
-      </div>
-    </div>
-
-    <ng-template #loading>
-      <div class="loading">Loading consignor details...</div>
-    </ng-template>
-
-    <!-- Mark Agreement on File Modal -->
-    <div class="modal-overlay" *ngIf="showMarkOnFileModal()" (click)="closeMarkOnFileModal()">
-      <div class="modal-dialog" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Mark Agreement as Received</h3>
-          <button type="button" class="modal-close" (click)="closeMarkOnFileModal()">×</button>
-        </div>
-        <div class="modal-body">
-          <p>Mark this consignor's agreement as received and on file.</p>
-          <div class="form-group">
-            <label for="onFileNotes">Notes (optional)</label>
-            <textarea
-              id="onFileNotes"
-              [(ngModel)]="onFileNotes"
-              class="form-textarea"
-              placeholder="e.g., Signed in store on 1/8/2025"
-              rows="3"></textarea>
+      <!-- Recent Activity -->
+      <div class="activity-section">
+        <h3>Recent Activity</h3>
+        <div class="activity-table" *ngIf="recentActivity().length > 0">
+          <div class="activity-row" *ngFor="let activity of recentActivity()">
+            <span class="activity-icon">{{ getActivityIcon(activity.type) }}</span>
+            <span class="activity-desc">{{ activity.description }}</span>
+            <span class="activity-date">{{ activity.date | date:'short' }}</span>
+            <span class="activity-amount" *ngIf="activity.amount">
+              {{ activity.amount | currency:'USD':'symbol':'1.2-2' }}
+            </span>
+            <span class="activity-amount" *ngIf="!activity.amount">—</span>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" (click)="closeMarkOnFileModal()">Cancel</button>
-          <button type="button" class="btn-primary" (click)="markAgreementOnFile()" [disabled]="isProcessingAgreement()">
-            {{ isProcessingAgreement() ? 'Marking...' : 'Mark as Received' }}
-          </button>
+        <div class="empty-message" *ngIf="recentActivity().length === 0">
+          No recent activity
         </div>
       </div>
     </div>
 
-    <!-- Upload Agreement Modal -->
-    <div class="modal-overlay" *ngIf="showUploadModal()" (click)="closeUploadModal()">
-      <div class="modal-dialog" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>{{ agreementStatus()?.status === 'uploaded' ? 'Replace Agreement Document' : 'Upload Agreement Document' }}</h3>
-          <button type="button" class="modal-close" (click)="closeUploadModal()">×</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="agreementFile">Agreement Document</label>
-            <input
-              type="file"
-              id="agreementFile"
-              (change)="onFileSelected($event)"
-              accept=".pdf,.png,.jpg,.jpeg"
-              class="form-file">
-            <div class="field-hint">PDF, PNG, or JPG files only. Maximum 10MB.</div>
-          </div>
-          <div class="form-group">
-            <label for="uploadNotes">Notes (optional)</label>
-            <textarea
-              id="uploadNotes"
-              [(ngModel)]="uploadNotes"
-              class="form-textarea"
-              placeholder="e.g., Scanned from physical copy"
-              rows="3"></textarea>
-          </div>
-          <div class="upload-progress" *ngIf="uploadProgress() > 0">
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
-            </div>
-            <span>{{ uploadProgress() }}%</span>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" (click)="closeUploadModal()">Cancel</button>
-          <button type="button" class="btn-primary" (click)="uploadAgreement()" [disabled]="!selectedFile() || isProcessingAgreement()">
-            {{ isProcessingAgreement() ? 'Uploading...' : 'Upload' }}
-          </button>
+    <!-- Error Message -->
+    <div class="error-banner" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <ng-template #loading>
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading consignor details...</p>
+    </div>
+  </ng-template>
+
+  <!-- Mark Agreement on File Modal -->
+  <div class="modal-overlay" *ngIf="showMarkOnFileModal()" (click)="closeMarkOnFileModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Mark Agreement as Received</h2>
+        <button type="button" class="close-btn" (click)="closeMarkOnFileModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Mark this consignor's agreement as received and on file.</p>
+        <div class="form-group">
+          <label for="onFileNotes">Notes (optional)</label>
+          <textarea
+            id="onFileNotes"
+            [(ngModel)]="onFileNotes"
+            class="form-control"
+            placeholder="e.g., Signed in store on 1/8/2025"
+            rows="3"></textarea>
         </div>
       </div>
-    </div>
-
-    <!-- Remove Agreement Confirmation Modal -->
-    <div class="modal-overlay" *ngIf="showRemoveConfirmModal()" (click)="closeRemoveConfirmModal()">
-      <div class="modal-dialog" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Remove Agreement</h3>
-          <button type="button" class="modal-close" (click)="closeRemoveConfirmModal()">×</button>
-        </div>
-        <div class="modal-body">
-          <p>Remove this agreement? The consignor may need to resubmit their agreement.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" (click)="closeRemoveConfirmModal()">Cancel</button>
-          <button type="button" class="btn-danger" (click)="removeAgreement()" [disabled]="isProcessingAgreement()">
-            {{ isProcessingAgreement() ? 'Removing...' : 'Remove Agreement' }}
-          </button>
-        </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeMarkOnFileModal()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="markAgreementOnFile()" [disabled]="isProcessingAgreement()">
+          {{ isProcessingAgreement() ? 'Marking...' : 'Mark as Received' }}
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Success Toast -->
-    <div class="toast success-toast" *ngIf="showSuccessToast()">
-      {{ successMessage() }}
+  <!-- Upload Agreement Modal -->
+  <div class="modal-overlay" *ngIf="showUploadModal()" (click)="closeUploadModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ agreementStatus()?.status === 'uploaded' ? 'Replace Agreement Document' : 'Upload Agreement Document' }}</h2>
+        <button type="button" class="close-btn" (click)="closeUploadModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="agreementFile">Agreement Document</label>
+          <input
+            type="file"
+            id="agreementFile"
+            (change)="onFileSelected($event)"
+            accept=".pdf,.png,.jpg,.jpeg"
+            class="form-control">
+          <small class="form-hint">PDF, PNG, or JPG files only. Maximum 10MB.</small>
+        </div>
+        <div class="form-group">
+          <label for="uploadNotes">Notes (optional)</label>
+          <textarea
+            id="uploadNotes"
+            [(ngModel)]="uploadNotes"
+            class="form-control"
+            placeholder="e.g., Scanned from physical copy"
+            rows="3"></textarea>
+        </div>
+        <div class="upload-progress" *ngIf="uploadProgress() > 0">
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+          </div>
+          <span>{{ uploadProgress() }}%</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeUploadModal()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="uploadAgreement()" [disabled]="!selectedFile() || isProcessingAgreement()">
+          {{ isProcessingAgreement() ? 'Uploading...' : 'Upload' }}
+        </button>
+      </div>
     </div>
+  </div>
 
-    </app-owner-layout>
-  
+  <!-- Remove Agreement Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showRemoveConfirmModal()" (click)="closeRemoveConfirmModal()">
+    <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Remove Agreement</h2>
+        <button type="button" class="close-btn" (click)="closeRemoveConfirmModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Remove this agreement? The consignor may need to resubmit their agreement.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeRemoveConfirmModal()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="removeAgreement()" [disabled]="isProcessingAgreement()">
+          {{ isProcessingAgreement() ? 'Removing...' : 'Remove Agreement' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="toast toast-success" *ngIf="showSuccessToast()">
+    {{ successMessage() }}
+  </div>
+
+</app-owner-layout>

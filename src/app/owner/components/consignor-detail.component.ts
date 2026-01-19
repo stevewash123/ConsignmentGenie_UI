@@ -5,10 +5,12 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ConsignorService } from '../../services/consignor.service';
 import { SettingsService } from '../../services/settings.service';
-import { Consignor } from '../../models/consignor.model';
+import { Consignor, ConsignorDetailDto, ConsignorStatus, ApiResponse } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 import { OwnerLayoutComponent } from './owner-layout.component';
 import { environment } from '../../../environments/environment';
+import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
+import { CommunicationService } from '../../services/communication.service';
 
 interface ConsignorAgreementStatus {
   status: string; // "none" | "pending" | "on_file" | "uploaded"
@@ -31,6 +33,7 @@ interface ConsignorAgreementStatus {
 })
 export class ConsignorDetailComponent implements OnInit {
   consignor = signal<Consignor | null>(null);
+  consignorDetails = signal<ConsignorDetailDto | null>(null);
   providerId = signal<string>('');
   isSubmitting = signal(false);
   errorMessage = signal('');
@@ -56,6 +59,9 @@ export class ConsignorDetailComponent implements OnInit {
   successMessage = signal('');
   uploadProgress = signal(0);
 
+  // Communication-related signals
+  isSendingContactInfo = signal(false);
+
   // Form data
   onFileNotes = '';
   uploadNotes = '';
@@ -71,7 +77,9 @@ export class ConsignorDetailComponent implements OnInit {
     private router: Router,
     private loadingService: LoadingService,
     private settingsService: SettingsService,
-    private http: HttpClient
+    private http: HttpClient,
+    private confirmationDialog: ConfirmationDialogService,
+    private communicationService: CommunicationService
   ) {}
 
   ngOnInit(): void {
@@ -88,8 +96,31 @@ export class ConsignorDetailComponent implements OnInit {
 
   loadProvider(): void {
     this.loadingService.start('consignor-detail');
-    this.ConsignorService.getConsignor(this.providerId()).subscribe({
-      next: (consignor) => {
+
+    // Load the detailed consignor data
+    this.http.get<ApiResponse<ConsignorDetailDto>>(`${environment.apiUrl}/api/consignors/${this.providerId()}`).subscribe({
+      next: (response) => {
+        const detailDto = response.data;
+        this.consignorDetails.set(detailDto);
+
+        // Transform for backward compatibility with existing UI
+        const consignor: Consignor = {
+          id: detailDto.consignorId,
+          name: detailDto.fullName,
+          email: detailDto.email || '',
+          phone: detailDto.phone,
+          address: detailDto.fullAddress,
+          commissionRate: detailDto.commissionRate,
+          preferredPaymentMethod: detailDto.preferredPaymentMethod,
+          paymentDetails: detailDto.paymentDetails,
+          notes: detailDto.notes,
+          status: this.mapApiStatusToConsignorStatus(detailDto.status),
+          organizationId: 1, // Will be handled by backend
+          consignorNumber: detailDto.consignorNumber,
+          createdAt: new Date(detailDto.createdAt),
+          updatedAt: new Date(detailDto.updatedAt),
+          activatedAt: detailDto.approvalDate ? new Date(detailDto.approvalDate) : undefined
+        };
         this.consignor.set(consignor);
       },
       error: (error) => {
@@ -264,6 +295,25 @@ export class ConsignorDetailComponent implements OnInit {
   }
 
   openUploadModal(): void {
+    const status = this.agreementStatus();
+
+    // If an agreement is already uploaded, show confirmation dialog
+    if (status?.status === 'uploaded' || status?.method === 'consignor_upload') {
+      this.confirmationDialog.confirmAction(
+        'Replace Agreement Document',
+        'An agreement document is already on file. Upload a new document to replace it?',
+        'Upload New Document'
+      ).subscribe(result => {
+        if (result.confirmed) {
+          this.proceedWithUpload();
+        }
+      });
+    } else {
+      this.proceedWithUpload();
+    }
+  }
+
+  private proceedWithUpload(): void {
     this.uploadNotes = '';
     this.selectedFile.set(null);
     this.uploadProgress.set(0);
@@ -407,5 +457,91 @@ export class ConsignorDetailComponent implements OnInit {
     setTimeout(() => {
       this.showSuccessToast.set(false);
     }, 3000);
+  }
+
+  formatPhoneNumber(phone: string | undefined): string {
+    if (!phone) return '';
+
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+
+    // Format as (XXX)XXX-XXXX if we have 10 digits
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)})${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+
+    // Return original if not 10 digits
+    return phone;
+  }
+
+  private mapApiStatusToConsignorStatus(apiStatus: string): ConsignorStatus {
+    switch (apiStatus.toLowerCase()) {
+      case 'active': return 'active';
+      case 'invited': return 'invited';
+      case 'inactive': return 'inactive';
+      case 'suspended': return 'suspended';
+      case 'closed': return 'closed';
+      case 'pending': return 'pending';
+      default: return 'inactive';
+    }
+  }
+
+  textContactInfo(): void {
+    const consignor = this.consignor();
+    const consignorDetails = this.consignorDetails();
+
+    if (!consignor || !consignorDetails) {
+      console.error('No consignor data available');
+      return;
+    }
+
+    this.isSendingContactInfo.set(true);
+
+    // Prepare contact info with detailed address if available
+    const contactInfo = {
+      consignorId: consignor.id,
+      email: consignor.email,
+      phone: consignorDetails.phone,
+      address: this.formatFullAddress(consignorDetails)
+    };
+
+    this.communicationService.sendContactInfoToOwner(consignor.name, contactInfo).subscribe({
+      next: (response) => {
+        this.showToast('Contact info sent to owner successfully');
+      },
+      error: (error) => {
+        console.error('Error sending contact info:', error);
+        this.errorMessage.set('Failed to send contact info. Please try again.');
+      },
+      complete: () => {
+        this.isSendingContactInfo.set(false);
+      }
+    });
+  }
+
+  private formatFullAddress(details: ConsignorDetailDto): string {
+    if (details.addressLine1) {
+      let address = details.addressLine1;
+      if (details.addressLine2) {
+        address += `\n${details.addressLine2}`;
+      }
+      if (details.city || details.state || details.postalCode) {
+        address += '\n';
+        if (details.city) {
+          address += details.city;
+        }
+        if (details.city && details.state) {
+          address += ', ';
+        }
+        if (details.state) {
+          address += details.state;
+        }
+        if (details.postalCode) {
+          address += ` ${details.postalCode}`;
+        }
+      }
+      return address;
+    }
+    return details.fullAddress || '';
   }
 }
