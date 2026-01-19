@@ -1,0 +1,177 @@
+client:733 [vite] connecting...
+client:827 [vite] connected.
+debug_node.mjs:18274 Angular is running in development mode.
+ OwnerGuard: Checking user data: {userId: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', organizationName: 'Goat Closet'}
+ OwnerGuard: String role check - role: Owner allowed: true
+ OwnerGuard: Access granted
+ Functional AuthInterceptor called for: http://localhost:5000/api/consignors/3abffdcd-c6fc-4eaa-9721-11d824701f82
+ AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+ AuthService: Token contains sub: false
+ AuthService: Token contains userId: false
+ Token from service: exists
+ Added Bearer token to request
+ Functional AuthInterceptor called for: http://localhost:5000/api/consignors/3abffdcd-c6fc-4eaa-9721-11d824701f82
+ AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+ AuthService: Token contains sub: false
+ AuthService: Token contains userId: false
+ Token from service: exists
+ Added Bearer token to request
+ Functional AuthInterceptor called for: http://localhost:5000/api/owner/settings/consignor-onboarding
+ AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+ AuthService: Token contains sub: false
+ AuthService: Token contains userId: false
+ Token from service: exists
+ Added Bearer token to request
+ Functional AuthInterceptor called for: http://localhost:5000/api/owner/consignors/3abffdcd-c6fc-4eaa-9721-11d824701f82/agreement
+ AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+ AuthService: Token contains sub: false
+ AuthService: Token contains userId: false
+ Token from service: exists
+ Added Bearer token to request
+ NotificationBell component initialized for role: owner
+ Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+ AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+ AuthService: Token contains sub: false
+ AuthService: Token contains userId: false
+ Token from service: exists
+ Added Bearer token to request
+ Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications
+ AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+ AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+ AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/itemcategories
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/consignors
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/items
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+notification-bell.component.ts:40 NotificationBell component initialized for role: owner
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications/unread-count
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+auth.interceptor.ts:7 Functional AuthInterceptor called for: http://localhost:5000/api/owner/notifications
+auth.service.ts:258 AuthService: Retrieved token from localStorage
+auth.service.ts:262 AuthService: Decoded token payload: {nameid: '79626a18-2360-4fad-9dfa-ed29f277ed69', email: 'owner1@microsaasbuilders.com', role: 'Owner', organizationId: 'a6fdc923-4d4d-4284-8ec1-8acf4ef13e80', nbf: 1768821457, …}
+auth.service.ts:263 AuthService: Token contains nameid: true
+auth.service.ts:264 AuthService: Token contains sub: false
+auth.service.ts:265 AuthService: Token contains userId: false
+auth.interceptor.ts:12 Token from service: exists
+auth.interceptor.ts:19 Added Bearer token to request
+inventory-list.component.html:166 NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+
+inventory-list.component.html:166 NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+
+inventory-list.component.html:166 NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+inventory-list.component.html:212 ERROR RuntimeError: NG04008: The requested path contains undefined segment at index 1
+    at validateCommands (router2.mjs:6118:13)
+    at _Router.navigate (router2.mjs:6011:5)
+    at _InventoryListComponent.viewItem (inventory-list.component.ts:836:17)

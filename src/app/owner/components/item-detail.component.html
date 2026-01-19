@@ -1,203 +1,250 @@
 <app-owner-layout>
-  <div class="item-detail-page">
-    <!-- Header -->
+  <div class="detail-page" *ngIf="!isLoading(); else loading">
+
+    <!-- Page Header -->
     <div class="page-header">
       <div class="header-content">
-        <button class="back-button" (click)="goBack()">
-          ← Back to Inventory
-        </button>
-        <h1 *ngIf="item()">{{ item()!.title }}</h1>
-        <h1 *ngIf="isLoading()">Loading...</h1>
-      </div>
-      <div class="header-actions" *ngIf="item()">
-        <button class="btn-secondary" (click)="editItem()">
-          <span class="btn-icon">✏️</span>
-          Edit Item
-        </button>
-        <button class="btn-primary" (click)="openPriceChangeModal()" *ngIf="item()!.status === 'Available'">
-          <span class="btn-icon">💰</span>
-          Change Price
+        <button class="btn-secondary" (click)="goBack()" title="Go back to previous page">
+          ← Back
         </button>
       </div>
-    </div>
-
-    <!-- Loading State -->
-    <div class="loading-state" *ngIf="isLoading()">
-      <div class="loading-spinner"></div>
-      <p>Loading item details...</p>
-    </div>
-
-    <!-- Error State -->
-    <div class="error-state" *ngIf="error()">
-      <div class="error-icon">⚠️</div>
-      <h2>Error Loading Item</h2>
-      <p>{{ error() }}</p>
-      <button class="btn-primary" (click)="goBack()">Back to Inventory</button>
-    </div>
-
-    <!-- Item Details -->
-    <div class="item-content" *ngIf="item() && !isLoading() && !error()">
-      <div class="item-layout">
-        <!-- Left Column - Images -->
-        <div class="item-images">
-          <div class="primary-image">
-            <img
-              *ngIf="item()!.images && item()!.images.length > 0"
-              [src]="item()!.images[0].imageUrl"
-              [alt]="item()!.title"
-              class="main-image">
-            <div class="no-image" *ngIf="!item()!.images || item()!.images.length === 0">
-              📷<br>
-              <span>No Image</span>
-            </div>
-          </div>
-
-          <div class="thumbnail-list" *ngIf="item()!.images && item()!.images.length > 1">
-            <img
-              *ngFor="let image of item()!.images; let i = index"
-              [src]="image.imageUrl"
-              [alt]="item()!.title + ' - Image ' + (i + 1)"
-              class="thumbnail"
-              [class.active]="i === 0">
+      <div class="header-actions">
+        <div class="dropdown">
+          <button class="btn-primary dropdown-toggle" type="button">
+            Actions ▼
+          </button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item" (click)="editItem()">
+              ✏️ Edit Item
+            </button>
+            <button
+              class="dropdown-item"
+              *ngIf="item()?.status === 'Available'"
+              (click)="openPriceChangeModal()"
+            >
+              💰 Change Price
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item">
+              🏷️ Print Label
+            </button>
+            <button class="dropdown-item">
+              📤 Remove from Inventory
+            </button>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Right Column - Details -->
-        <div class="item-info">
-          <!-- Basic Info -->
-          <div class="info-section">
-            <div class="price-info">
-              <div class="current-price">{{ formatCurrency(item()!.price) }}</div>
-              <div class="price-breakdown">
-                <div class="breakdown-item">
-                  <span class="label">Shop Amount:</span>
-                  <span class="value">{{ formatCurrency(item()!.shopAmount) }}</span>
-                </div>
-                <div class="breakdown-item">
-                  <span class="label">Consignor Amount:</span>
-                  <span class="value">{{ formatCurrency(item()!.consignorAmount) }}</span>
-                </div>
-                <div class="breakdown-item">
-                  <span class="label">Commission Rate:</span>
-                  <span class="value">{{ item()!.commissionRate }}%</span>
-                </div>
-              </div>
-            </div>
+    <!-- Entity Title Row -->
+    <div class="entity-header" *ngIf="item()">
+      <h1>{{ item()!.title }}</h1>
+      <div class="entity-meta">
+        <span class="badge" [ngClass]="getStatusClass(item()!.status)">
+          {{ item()!.status }}
+        </span>
+        <span class="meta-id">SKU: {{ item()!.sku }}</span>
+      </div>
+    </div>
 
-            <div class="status-badges">
-              <span class="status-badge" [class]="getStatusClass(item()!.status)">
-                {{ item()!.status }}
-              </span>
-              <span class="condition-badge" [class]="getConditionClass(item()!.condition)">
-                {{ getConditionLabel(item()!.condition) }}
-              </span>
-            </div>
-          </div>
+    <!-- Main Content Card -->
+    <div class="detail-card" *ngIf="item()">
 
-          <!-- Consignor Info -->
-          <div class="info-section">
-            <h3>Consignor Information</h3>
-            <div class="consignor-info">
-              <div class="info-row">
-                <span class="label">Name:</span>
-                <span class="value">{{ item()!.consignorName }}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">Commission Rate:</span>
-                <span class="value">{{ item()!.commissionRate }}% (Consignor gets {{ formatCurrency(item()!.consignorAmount) }})</span>
-              </div>
-            </div>
-          </div>
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-value">{{ formatCurrency(item()!.price) }}</span>
+          <span class="stat-label">Current Price</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ formatCurrency(getCorrectConsignorAmount(item()!)) }}</span>
+          <span class="stat-label">Consignor Split</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ formatCurrency(getCorrectShopAmount(item()!)) }}</span>
+          <span class="stat-label">Shop Split</span>
+        </div>
+        <div class="stat-item" [ngClass]="getExpirationStatusClass()">
+          <span class="stat-value">{{ getExpirationDisplayText() }}</span>
+          <span class="stat-label">Expiration</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ formatCommissionRate(item()!.commissionRate) }}%</span>
+          <span class="stat-label">Commission</span>
+        </div>
+      </div>
 
+      <!-- Info Sections -->
+      <div class="info-container">
+        <div class="info-row">
           <!-- Item Details -->
           <div class="info-section">
             <h3>Item Details</h3>
-            <div class="details-grid">
-              <div class="detail-item" *ngIf="item()!.sku">
-                <span class="label">SKU:</span>
-                <span class="value">{{ item()!.sku }}</span>
+            <div class="info-grid">
+              <div class="info-item" *ngIf="item()!.category">
+                <span class="info-label">Category</span>
+                <span class="info-value">{{ item()!.category }}</span>
               </div>
-              <div class="detail-item" *ngIf="item()!.category">
-                <span class="label">Category:</span>
-                <span class="value">{{ item()!.category }}</span>
+              <div class="info-item" *ngIf="item()!.brand">
+                <span class="info-label">Brand</span>
+                <span class="info-value">{{ item()!.brand }}</span>
               </div>
-              <div class="detail-item" *ngIf="item()!.brand">
-                <span class="label">Brand:</span>
-                <span class="value">{{ item()!.brand }}</span>
+              <div class="info-item">
+                <span class="info-label">Condition</span>
+                <span class="info-value condition-badge" [ngClass]="getConditionClass(item()!.condition)">
+                  {{ getConditionLabel(item()!.condition) }}
+                </span>
               </div>
-              <div class="detail-item" *ngIf="item()!.size">
-                <span class="label">Size:</span>
-                <span class="value">{{ item()!.size }}</span>
+              <div class="info-item" *ngIf="item()!.size">
+                <span class="info-label">Size</span>
+                <span class="info-value">{{ item()!.size }}</span>
               </div>
-              <div class="detail-item" *ngIf="item()!.color">
-                <span class="label">Color:</span>
-                <span class="value">{{ item()!.color }}</span>
+              <div class="info-item" *ngIf="item()!.color">
+                <span class="info-label">Color</span>
+                <span class="info-value">{{ item()!.color }}</span>
               </div>
-              <div class="detail-item" *ngIf="item()!.materials">
-                <span class="label">Materials:</span>
-                <span class="value">{{ item()!.materials }}</span>
+              <div class="info-item" *ngIf="item()!.barcode">
+                <span class="info-label">Barcode</span>
+                <span class="info-value cell-mono">{{ item()!.barcode }}</span>
               </div>
-              <div class="detail-item">
-                <span class="label">Received:</span>
-                <span class="value">{{ formatDate(item()!.receivedDate) }}</span>
+              <div class="info-item">
+                <span class="info-label">Received</span>
+                <span class="info-value">{{ item()!.receivedDate | date:'MMM d, y' }}</span>
               </div>
-              <div class="detail-item" *ngIf="item()!.listedDate">
-                <span class="label">Listed:</span>
-                <span class="value">{{ formatDate(item()!.listedDate) }} ({{ getDaysListed() }} days ago)</span>
-              </div>
-              <div class="detail-item" *ngIf="item()!.location">
-                <span class="label">Location:</span>
-                <span class="value">{{ item()!.location }}</span>
+              <div class="info-item" *ngIf="item()!.expirationDate">
+                <span class="info-label">Expiration</span>
+                <span class="info-value">{{ item()!.expirationDate | date:'MMM d, y' }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Description -->
-          <div class="info-section" *ngIf="item()!.description">
-            <h3>Description</h3>
-            <p class="description">{{ item()!.description }}</p>
-          </div>
-
-          <!-- Pricing History -->
-          <div class="info-section" *ngIf="item()!.originalPrice && item()!.originalPrice !== item()!.price">
-            <h3>Pricing History</h3>
-            <div class="pricing-history">
-              <div class="price-change">
-                <span class="label">Original Price:</span>
-                <span class="value">{{ formatCurrency(item()!.originalPrice) }}</span>
+          <!-- Consignor Information -->
+          <div class="info-section">
+            <h3>Consignor Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Consignor</span>
+                <span class="info-value consignor-link clickable" (click)="viewConsignor()">
+                  {{ item()!.consignorName }}
+                </span>
               </div>
-              <div class="price-change">
-                <span class="label">Current Price:</span>
-                <span class="value">{{ formatCurrency(item()!.price) }}</span>
+              <div class="info-item">
+                <span class="info-label">Commission Rate</span>
+                <span class="info-value">{{ formatCommissionRate(item()!.commissionRate) }}%</span>
               </div>
-            </div>
-          </div>
-
-          <!-- Notes -->
-          <div class="info-section" *ngIf="item()!.notes || item()!.internalNotes">
-            <h3>Notes</h3>
-            <div class="notes">
-              <div class="note" *ngIf="item()!.notes">
-                <strong>Public Notes:</strong>
-                <p>{{ item()!.notes }}</p>
+              <div class="info-item" *ngIf="item()!.originalPrice">
+                <span class="info-label">Original Price</span>
+                <span class="info-value">{{ formatCurrency(item()!.originalPrice) }}</span>
               </div>
-              <div class="note" *ngIf="item()!.internalNotes">
-                <strong>Internal Notes:</strong>
-                <p>{{ item()!.internalNotes }}</p>
+              <div class="info-item" *ngIf="item()!.minimumPrice">
+                <span class="info-label">Minimum Price</span>
+                <span class="info-value">{{ formatCurrency(item()!.minimumPrice) }}</span>
+              </div>
+              <div class="info-item" *ngIf="item()!.location">
+                <span class="info-label">Location</span>
+                <span class="info-value">{{ item()!.location }}</span>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Description Section -->
+        <div class="info-section full-width" *ngIf="item()!.description">
+          <h3>Description</h3>
+          <div class="notes-display">{{ item()!.description }}</div>
+        </div>
+
+        <!-- Materials/Measurements Section -->
+        <div class="info-section full-width" *ngIf="item()!.materials || item()!.measurements">
+          <h3>Additional Details</h3>
+          <div class="info-grid">
+            <div class="info-item" *ngIf="item()!.materials">
+              <span class="info-label">Materials</span>
+              <span class="info-value">{{ item()!.materials }}</span>
+            </div>
+            <div class="info-item" *ngIf="item()!.measurements">
+              <span class="info-label">Measurements</span>
+              <span class="info-value">{{ item()!.measurements }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item History -->
+      <div class="history-section">
+        <h3>Item History</h3>
+        <div class="history-table" *ngIf="itemHistory().length > 0">
+          <div class="history-row" *ngFor="let activity of itemHistory()">
+            <span class="history-icon">{{ getHistoryIcon(activity.type) }}</span>
+            <span class="history-desc">{{ activity.description }}</span>
+            <span class="history-date">{{ activity.date | date:'short' }}</span>
+            <span class="history-amount" *ngIf="activity.amount">
+              {{ activity.amount | currency:'USD':'symbol':'1.2-2' }}
+            </span>
+            <span class="history-amount" *ngIf="!activity.amount">—</span>
+          </div>
+        </div>
+        <div class="empty-message" *ngIf="itemHistory().length === 0">
+          No history available
+        </div>
       </div>
     </div>
 
-    <!-- Price Change Modal -->
-    <app-initiate-price-change
-      *ngIf="showPriceChangeModal() && item()"
-      [isVisible]="showPriceChangeModal"
-      [item]="item()!"
-      (close)="closePriceChangeModal()"
-      (priceChangeSubmitted)="onPriceChangeSubmitted()">
-    </app-initiate-price-change>
+    <!-- Error Message -->
+    <div class="error-banner" *ngIf="error()">
+      {{ error() }}
+    </div>
   </div>
+
+  <!-- Loading State -->
+  <ng-template #loading>
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading item details...</p>
+    </div>
+  </ng-template>
+
+  <!-- Price Change Modal -->
+  <div class="modal-overlay" *ngIf="showPriceChangeModal()" (click)="closePriceChangeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Change Item Price</h2>
+        <button type="button" class="close-btn" (click)="closePriceChangeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="newPrice">New Price</label>
+          <input
+            type="number"
+            id="newPrice"
+            [(ngModel)]="newPrice"
+            class="form-control"
+            step="0.01"
+            min="0.01"
+            placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="priceReason">Reason (optional)</label>
+          <textarea
+            id="priceReason"
+            [(ngModel)]="priceChangeReason"
+            class="form-control"
+            placeholder="e.g., End of season markdown"
+            rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closePriceChangeModal()">Cancel</button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="updatePrice()"
+          [disabled]="isUpdatingPrice() || newPrice <= 0"
+        >
+          {{ isUpdatingPrice() ? 'Updating...' : 'Update Price' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </app-owner-layout>

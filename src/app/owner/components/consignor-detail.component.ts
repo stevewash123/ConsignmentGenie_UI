@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -75,6 +75,7 @@ export class ConsignorDetailComponent implements OnInit {
     private ConsignorService: ConsignorService,
     private route: ActivatedRoute,
     private router: Router,
+    private location: Location,
     private loadingService: LoadingService,
     private settingsService: SettingsService,
     private http: HttpClient,
@@ -543,5 +544,9 @@ export class ConsignorDetailComponent implements OnInit {
       return address;
     }
     return details.fullAddress || '';
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

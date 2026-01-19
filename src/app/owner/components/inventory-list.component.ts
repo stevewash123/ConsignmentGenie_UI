@@ -833,12 +833,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   viewItem(id: string) {
-    // Use inventoryItems() for type-safe access to ItemListDto
-    const item = this.inventoryItems().find(i => i.itemId === id);
-    if (item) {
-      this.selectedItem.set(item);
-      this.showViewModal.set(true);
-    }
+    this.router.navigate(['/owner/inventory', id]);
   }
 
   closeViewModal() {

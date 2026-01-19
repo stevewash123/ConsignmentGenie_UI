@@ -40,7 +40,7 @@ export const ownerRoutes: Routes = [
   },
   {
     path: 'inventory/:id',
-    loadComponent: () => import('./components/inventory-detail.component').then(m => m.InventoryDetailComponent)
+    loadComponent: () => import('./components/item-detail.component').then(m => m.ItemDetailComponent)
   },
   {
     path: 'inventory/:id/edit',

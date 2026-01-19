@@ -163,7 +163,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (item of itemsResult()?.items; track item.id) {
+            @for (item of itemsResult()?.items; track item.itemId) {
               <tr>
                 <td class="image-cell">
                   @if (item.primaryImageUrl) {
@@ -209,8 +209,8 @@
                   {{ getExpirationDisplayText(item.expirationDate) }}
                 </td>
                 <td>
-                  <button class="btn-icon" (click)="viewItem(item.id)" title="View Details">👁️</button>
-                  <button class="btn-icon" (click)="editItem(item.id)" title="Edit">✏️</button>
+                  <button class="btn-icon" (click)="viewItem(item.itemId)" title="View Details">👁️</button>
+                  <button class="btn-icon" (click)="editItem(item)" title="Edit">✏️</button>
                   <button class="btn-icon danger" *ngIf="item.status === 'Available'" (click)="removeFromInventory(item)" title="Remove">📤</button>
                 </td>
               </tr>

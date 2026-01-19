@@ -1,5 +1,0 @@
-
-> temp-angular-project@0.0.1 test
-> ng test --watch=false --browsers=ChromeHeadless
-
-❯ Building...

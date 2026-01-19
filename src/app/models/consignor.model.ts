@@ -23,7 +23,11 @@ export interface CreateConsignorRequest {
   name: string;
   email: string;
   phone?: string;
-  address?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
   commissionRate: number;
   preferredPaymentMethod?: string;
   paymentDetails?: string;
