@@ -1,8 +1,11 @@
-import { Component, OnInit, signal, computed, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, Input, signal, computed, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+// User role type
+export type UserRole = 'owner' | 'consignor';
 
 // Notification model interface
 export interface Notification {
@@ -45,15 +48,20 @@ export interface NotificationQueryParams {
   selector: 'app-notification-center',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    RouterModule,
-    // LayoutComponent - uncomment and use appropriate layout
+    CommonModule,
+    FormsModule,
+    RouterModule
   ],
   templateUrl: './notification-center.component.html',
-  styleUrls: ['./notification-center.component.scss']
+  styleUrls: ['./notification-center.component.scss'],
+  host: {
+    '[class.theme-owner]': 'role === "owner"',
+    '[class.theme-consignor]': 'role === "consignor"'
+  }
 })
 export class NotificationCenterComponent implements OnInit {
+  @Input() role: UserRole = 'owner';
+
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   // private notificationService = inject(NotificationService); // Inject your notification service

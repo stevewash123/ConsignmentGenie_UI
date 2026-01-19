@@ -1,0 +1,42 @@
+❯ Building...
+✔ Building...
+Initial chunk files | Names                            |  Raw size
+chunk-EBBMH74P.js   | -                                |   1.08 MB | 
+chunk-2QI3LIL2.js   | -                                | 228.66 kB | 
+chunk-6MXE3OYS.js   | -                                | 216.75 kB | 
+main.js             | main                             | 194.04 kB | 
+polyfills.js        | polyfills                        |  89.77 kB | 
+chunk-RZMZKE3V.js   | -                                |  87.08 kB | 
+chunk-7PWLIUQW.js   | -                                |  60.20 kB | 
+chunk-GQ4TXWS4.js   | -                                |  58.27 kB | 
+styles.css          | styles                           |  21.09 kB | 
+chunk-T2GCILSX.js   | -                                |  12.60 kB | 
+chunk-7LJY33OI.js   | -                                |   2.78 kB | 
+chunk-TIYFTCBC.js   | -                                |   1.99 kB | 
+chunk-WDMUDEB6.js   | -                                |   1.93 kB | 
+chunk-LXHLCQ2Q.js   | -                                | 490 bytes | 
+
+                    | Initial total                    |   2.06 MB
+
+Lazy chunk files    | Names                            |  Raw size
+chunk-5MQV5TX2.js   | inventory-list-component         | 162.92 kB | 
+chunk-HJZHRT3F.js   | owner-payouts-component          | 155.19 kB | 
+chunk-JHMGRQ67.js   | consignor-list-component         | 128.19 kB | 
+chunk-RHNZYYHR.js   | item-list-component              | 125.31 kB | 
+chunk-DMS3M6GS.js   | price-request-list-component     | 125.28 kB | 
+chunk-KT745UDL.js   | consignor-item-detail-component  | 121.54 kB | 
+chunk-B5GHCFJV.js   | consignor-payouts-component      | 118.94 kB | 
+chunk-6KKVRGWI.js   | owner-approval-component         | 117.14 kB | 
+chunk-CQ6MP7Y4.js   | consignor-detail-component       |  98.30 kB | 
+chunk-ZTBSKSWX.js   | agreements-component             |  93.56 kB | 
+chunk-SAVIBNLN.js   | record-sale-component            |  92.30 kB | 
+chunk-OEWEQVJB.js   | payout-history-component         |  87.03 kB | 
+chunk-O6VN5CTT.js   | create-dropoff-request-component |  83.83 kB | 
+chunk-J3YKEBX7.js   | account-settings-component       |  74.62 kB | 
+chunk-VXVU332A.js   | store-layout-component           |  72.17 kB | 
+...and 125 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [42.560 seconds] - 2026-01-19T15:23:57.584Z
+
+Output location: /mnt/c/Projects/ConsignmentGenie/ConsignmentGenie_UI/dist/temp-angular-project
+

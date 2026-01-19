@@ -15,6 +15,7 @@
    Apply .theme-consignor class to body or a parent element to activate
    ============================================================================ */
 
+:host(.theme-consignor),
 :host-context(.theme-consignor),
 .theme-consignor {
   --color-light: #faf5ff;                    /* Level 1: Page/shell background */
