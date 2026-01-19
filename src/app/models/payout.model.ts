@@ -52,9 +52,12 @@ export interface PayoutTransaction {
   transactionId: string;
   itemName: string;
   saleDate: Date;
+  clearDate?: Date;
+  isCleared: boolean;
   salePrice: number;
   consignorAmount: number;
   shopAmount: number;
+  paymentMethod?: string;
 }
 
 export interface CreatePayoutRequest {
@@ -98,12 +101,25 @@ export interface PendingPayoutsRequest {
 export interface PendingPayoutData {
   consignorId: string;
   consignorName: string;
+  consignorNumber?: string;
   consignorEmail?: string;
+
+  // Existing (backwards compatible)
   pendingAmount: number;
   transactionCount: number;
-  earliestSale: Date;
-  latestSale: Date;
+
+  // NEW: Breakdown by clearance status
+  clearedAmount: number;
+  unclearedAmount: number;
+  clearedTransactionCount: number;
+  unclearedTransactionCount: number;
+
+  // Transaction list with clear status
   transactions: PayoutTransaction[];
+
+  earliestSale?: Date;
+  latestSale?: Date;
+  earliestClearDate?: Date;  // When first uncleared will clear
 }
 
 export interface PayoutSearchResponse {

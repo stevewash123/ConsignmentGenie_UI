@@ -67,11 +67,12 @@
                 </app-column-filter>
               </th>
               <th class="sortable" (click)="sortPending('amount')">
-                Amount
+                Cleared
                 <span class="sort-indicator" [class.active]="pendingSortBy() === 'amount'">
                   {{ pendingSortDirection() === 'asc' ? '↑' : '↓' }}
                 </span>
               </th>
+              <th>Uncleared</th>
               <th>Transactions</th>
               <th>Period</th>
               <th>Actions</th>
@@ -81,11 +82,27 @@
             @for (pending of filteredPendingPayouts(); track pending.consignorId) {
               <tr>
                 <td class="cell-primary">{{ pending.consignorName }}</td>
-                <td class="cell-money">${{ pending.pendingAmount.toFixed(2) }}</td>
+                <td class="cell-money">
+                  <span class="cleared-amount">${{ pending.clearedAmount?.toFixed(2) || '0.00' }}</span>
+                  @if (pending.clearedTransactionCount) {
+                    <span class="transaction-count">({{ pending.clearedTransactionCount }})</span>
+                  }
+                </td>
+                <td class="cell-money">
+                  <span class="uncleared-amount">${{ pending.unclearedAmount?.toFixed(2) || '0.00' }}</span>
+                  @if (pending.unclearedTransactionCount) {
+                    <span class="transaction-count">({{ pending.unclearedTransactionCount }})</span>
+                    @if (pending.earliestClearDate) {
+                      <div class="clear-date-hint">
+                        Next clears: {{ formatDate(pending.earliestClearDate) }}
+                      </div>
+                    }
+                  }
+                </td>
                 <td>{{ pending.transactionCount }}</td>
                 <td class="cell-secondary">{{ formatDate(pending.earliestSale) }} - {{ formatDate(pending.latestSale) }}</td>
                 <td class="actions-cell">
-                  <!-- TODO: Add chevron to expand row and show transaction details -->
+                  <button class="btn-icon" (click)="viewTransactionDetails(pending)" title="View Transactions">🔍</button>
                   <button class="btn-icon" (click)="generateStatementForConsignor(pending.consignorId)" title="Generate Statement">📄</button>
                   <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Pay Now">💰</button>
                 </td>
@@ -412,4 +429,85 @@
       [availableConsignors]="availableConsignorOptions()"
       (onClose)="closeStatementModal()">
     </app-consignor-statement-modal>
+
+    <!-- Transaction Selection Modal -->
+    <div class="modal-overlay" *ngIf="showTransactionModal()" (click)="closeModal($event)">
+      <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Select Transactions for Payout</h2>
+          <div class="header-info" *ngIf="selectedPendingPayout()">
+            <span class="consignor-name">{{ selectedPendingPayout()!.consignorName }}</span>
+            <span class="amount-summary">
+              Cleared: <span class="cleared-amount">${{ selectedPendingPayout()!.clearedAmount?.toFixed(2) || '0.00' }}</span> |
+              Uncleared: <span class="uncleared-amount">${{ selectedPendingPayout()!.unclearedAmount?.toFixed(2) || '0.00' }}</span>
+            </span>
+          </div>
+          <button type="button" class="close-btn" (click)="closeTransactionModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="transaction-selection" *ngIf="selectedPendingPayout()">
+            <!-- Selection Controls -->
+            <div class="selection-controls">
+              <label class="checkbox-wrapper">
+                <input type="checkbox" (change)="toggleSelectAll($event)">
+                <span class="checkmark"></span>
+                Select All Cleared ({{ selectedPendingPayout()!.clearedTransactionCount || 0 }})
+              </label>
+              <div class="selection-summary">
+                Selected: <span class="selected-count">{{ getSelectedTransactionCount() }}</span> transactions
+                | Amount: <span class="selected-amount">${{ getSelectedAmount().toFixed(2) }}</span>
+              </div>
+            </div>
+
+            <!-- Transaction List -->
+            <div class="transaction-list">
+              @for (transaction of selectedPendingPayout()!.transactions; track transaction.transactionId) {
+                <div class="transaction-row" [class.uncleared]="!transaction.isCleared">
+                  <label class="checkbox-wrapper">
+                    <input type="checkbox"
+                           [checked]="isTransactionSelected(transaction.transactionId)"
+                           (change)="toggleTransaction(transaction.transactionId, $event)">
+                    <span class="checkmark"></span>
+                  </label>
+
+                  <div class="transaction-details">
+                    <div class="transaction-main">
+                      <span class="item-name">{{ transaction.itemName || 'Item' }}</span>
+                      <span class="sale-date">{{ formatDate(transaction.saleDate) }}</span>
+                      <span class="clear-status" [class.cleared]="transaction.isCleared" [class.uncleared]="!transaction.isCleared">
+                        {{ transaction.isCleared ? '✅ Cleared' : '⏳ Uncleared' }}
+                      </span>
+                      @if (!transaction.isCleared && transaction.clearDate) {
+                        <span class="clear-date">Clears: {{ formatDate(transaction.clearDate) }}</span>
+                      }
+                    </div>
+
+                    <div class="transaction-amounts">
+                      <span class="payment-method" *ngIf="transaction.paymentMethod">{{ transaction.paymentMethod }}</span>
+                      <span class="consignor-amount">${{ transaction.consignorAmount.toFixed(2) }}</span>
+                    </div>
+                  </div>
+
+                  @if (!transaction.isCleared) {
+                    <div class="uncleared-warning">
+                      ⚠️ Funds not yet cleared - consider waiting until {{ formatDate(transaction.clearDate) }}
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeTransactionModal()">Cancel</button>
+          <button type="button" class="btn-primary"
+                  [disabled]="getSelectedTransactionCount() === 0"
+                  (click)="proceedWithSelectedTransactions()">
+            Create Payout for {{ getSelectedTransactionCount() }} Transactions
+          </button>
+        </div>
+      </div>
+    </div>
 </div>

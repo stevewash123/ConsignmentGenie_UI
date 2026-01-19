@@ -87,6 +87,11 @@ export class OwnerPayoutsComponent implements OnInit {
   showCreatePayoutModal = signal(false);
   showViewModal = signal(false);
   showStatementModal = signal(false);
+  showTransactionModal = signal(false);
+
+  // Current pending payout for transaction selection
+  selectedPendingPayout = signal<PendingPayoutData | null>(null);
+  selectedTransactionIds = signal<Set<string>>(new Set());
 
   // View toggle
   pendingPayoutsViewMode = signal<'cards' | 'table'>('cards');
@@ -365,6 +370,8 @@ export class OwnerPayoutsComponent implements OnInit {
       this.showCreatePayoutModal.set(false);
       this.showViewModal.set(false);
       this.showStatementModal.set(false);
+      this.showTransactionModal.set(false);
+      this.selectedPendingPayout.set(null);
     }
   }
 
@@ -533,5 +540,103 @@ export class OwnerPayoutsComponent implements OnInit {
   generateStatementForConsignor(consignorId: string) {
     this.preSelectedConsignorId.set(consignorId);
     this.showStatementModal.set(true);
+  }
+
+  viewTransactionDetails(pending: PendingPayoutData): void {
+    // Open transaction selection modal
+    this.selectedPendingPayout.set(pending);
+    this.showTransactionModal.set(true);
+  }
+
+  closeTransactionModal(): void {
+    this.showTransactionModal.set(false);
+    this.selectedPendingPayout.set(null);
+    this.selectedTransactionIds.set(new Set());
+  }
+
+  // Transaction selection methods
+  isTransactionSelected(transactionId: string): boolean {
+    return this.selectedTransactionIds().has(transactionId);
+  }
+
+  toggleTransaction(transactionId: string, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const currentSet = this.selectedTransactionIds();
+    const newSet = new Set(currentSet);
+
+    if (target.checked) {
+      newSet.add(transactionId);
+    } else {
+      newSet.delete(transactionId);
+    }
+
+    this.selectedTransactionIds.set(newSet);
+  }
+
+  toggleSelectAll(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const pending = this.selectedPendingPayout();
+    if (!pending) return;
+
+    if (target.checked) {
+      // Select all cleared transactions by default
+      const clearedTransactionIds = pending.transactions
+        .filter(t => t.isCleared)
+        .map(t => t.transactionId);
+      this.selectedTransactionIds.set(new Set(clearedTransactionIds));
+    } else {
+      this.selectedTransactionIds.set(new Set());
+    }
+  }
+
+  getSelectedTransactionCount(): number {
+    return this.selectedTransactionIds().size;
+  }
+
+  getSelectedAmount(): number {
+    const pending = this.selectedPendingPayout();
+    if (!pending) return 0;
+
+    const selectedIds = this.selectedTransactionIds();
+    return pending.transactions
+      .filter(t => selectedIds.has(t.transactionId))
+      .reduce((sum, t) => sum + t.consignorAmount, 0);
+  }
+
+  proceedWithSelectedTransactions(): void {
+    const pending = this.selectedPendingPayout();
+    if (!pending) return;
+
+    const selectedIds = Array.from(this.selectedTransactionIds());
+    const selectedTransactions = pending.transactions.filter(t =>
+      selectedIds.includes(t.transactionId)
+    );
+
+    // Check for uncleared transactions and warn
+    const unclearedCount = selectedTransactions.filter(t => !t.isCleared).length;
+    if (unclearedCount > 0) {
+      const proceed = confirm(
+        `⚠️ Warning: You have selected ${unclearedCount} uncleared transactions. ` +
+        'These funds may not be available yet. Proceed anyway?'
+      );
+      if (!proceed) return;
+    }
+
+    // Close transaction modal and open create payout modal with selected transactions
+    this.closeTransactionModal();
+
+    // Pre-populate the create modal with selected transactions
+    this.newPayout.set({
+      consignorId: pending.consignorId,
+      payoutDate: new Date(),
+      paymentMethod: '',
+      paymentReference: '',
+      periodStart: pending.earliestSale || new Date(),
+      periodEnd: pending.latestSale || new Date(),
+      notes: '',
+      transactionIds: selectedIds
+    });
+
+    this.showCreatePayoutModal.set(true);
   }
 }
