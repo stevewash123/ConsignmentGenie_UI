@@ -1,175 +1,235 @@
+/* Owner Dashboard Component - Updated to match design system */
+/* Uses CSS custom properties from global styles.scss */
+
 .owner-dashboard {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  background: #f8fafc;
+  background: var(--color-light);
   min-height: 100vh;
 }
 
+/* ==========================================================================
+   Dashboard Header
+   ========================================================================== */
+
 .dashboard-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem 2rem;
+  background: white;
+  border: 2px solid var(--color-med-dark);
+  border-radius: var(--border-radius-lg);
+  
+  h1 {
+    font-size: 2rem;
+    color: var(--color-text-primary);
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    margin: 0;
+  }
 }
 
-.dashboard-header h1 {
-  font-size: 2.5rem;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
+/* ==========================================================================
+   Key Metrics Grid
+   ========================================================================== */
 
-.dashboard-header p {
-  color: #6b7280;
-  font-size: 1.1rem;
-  margin: 0;
-}
-
-/* Key Metrics Grid */
 .metrics-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-@media (max-width: 768px) {
-  .metrics-grid {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .metric-card {
   background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  border: 2px solid var(--color-med-dark);
   text-decoration: none;
   color: inherit;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  /* Subtle top accent bar */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--color-med);
+  }
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  &.pending-payouts {
+    cursor: pointer;
+
+    &::before {
+      background: var(--color-warn-med);
+    }
+
+    &.has-pending {
+      border-color: var(--color-warn-med);
+      background: var(--color-warn-light);
+
+      &::before {
+        background: var(--color-error-med);
+      }
+
+      .metric-value {
+        color: var(--color-warn-dark);
+      }
+    }
+  }
 }
 
-.metric-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
-.metric-card.pending-payouts {
-  cursor: pointer;
-}
-
-.metric-card.pending-payouts.has-pending {
-  border-left: 4px solid #ef4444;
-}
-
-.metric-content h3 {
-  font-size: 0.875rem;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-  font-weight: 600;
+.metric-content {
+  h3 {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.75rem 0;
+    font-weight: 600;
+  }
 }
 
 .metric-value {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-med-dark);
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
 }
 
 .action-hint {
-  color: #ef4444;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-/* Quick Actions Section */
-.actions-section {
-  margin-bottom: 3rem;
-}
-
-.actions-section h2 {
-  font-size: 1.875rem;
-  color: #1f2937;
-  margin-bottom: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-error-dark);
+  font-size: 0.8125rem;
   font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* ==========================================================================
+   Quick Actions Section
+   ========================================================================== */
+
+.actions-section {
+  margin-bottom: 2.5rem;
+
+  h2 {
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-med-dark);
+  }
 }
 
 .action-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-
-@media (max-width: 1024px) {
-  .action-grid {
-    grid-template-columns: 1fr;
-  }
+  gap: 1rem;
 }
 
 .action-card {
   background: white;
-  border-radius: 12px;
-  padding: 2rem;
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem 1.5rem;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s;
+  border: 2px solid var(--color-med-dark);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &:hover {
+    background: var(--color-light-med);
+    border-color: var(--color-med);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+
+    h3 {
+      color: var(--color-med-dark);
+    }
+  }
+
+  h3 {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::before {
+      content: '→';
+      color: var(--color-med);
+      font-weight: 700;
+    }
+  }
+
+  p {
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    margin: 0;
+  }
 }
 
-.action-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
+/* ==========================================================================
+   Recent Activity Section (Transactions Table)
+   ========================================================================== */
 
-.action-card h3 {
-  font-size: 1.25rem;
-  color: #1f2937;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-}
-
-.action-card p {
-  color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* Recent Activity Section */
 .activity-section {
-  margin-bottom: 3rem;
-}
+  margin-bottom: 2.5rem;
 
-.activity-section h2 {
-  font-size: 1.875rem;
-  color: #1f2937;
-  margin-bottom: 2rem;
-  font-weight: 600;
+  h2 {
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-med-dark);
+  }
 }
 
 .transactions-table {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--border-radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 2px solid var(--color-med-dark);
 }
 
 .table-header {
-  background: #f9fafb;
+  background: var(--color-light-med);
   display: grid;
   grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
   gap: 1rem;
-  padding: 1rem;
+  padding: 0.875rem 1rem;
   font-weight: 600;
-  color: #374151;
-  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid var(--color-med-dark);
 }
 
 .table-body {
@@ -181,76 +241,136 @@
   display: grid;
   grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
   gap: 1rem;
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--color-neutral-light);
   align-items: center;
-}
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 
-.transaction-row:last-child {
-  border-bottom: none;
-}
+  &:last-child {
+    border-bottom: none;
+  }
 
-.transaction-row:hover {
-  background: #f9fafb;
+  &:hover {
+    background: var(--color-light);
+  }
 }
 
 .col-date,
 .col-item,
-.col-consignor,
-.col-amount,
-.col-commission {
-  padding: 0;
+.col-consignor {
+  color: var(--color-text-secondary);
+}
+
+.col-item {
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .col-amount,
 .col-commission {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-med-dark);
 }
 
-/* Loading State */
+.col-commission {
+  color: var(--color-success-dark);
+}
+
+/* ==========================================================================
+   Loading State
+   ========================================================================== */
+
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #6b7280;
-  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  background: white;
+  border: 2px solid var(--color-med-dark);
+  border-radius: var(--border-radius-lg);
 }
 
-/* Responsive Design for Transactions Table */
-@media (max-width: 768px) {
-  .table-header,
-  .transaction-row {
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .action-grid {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .owner-dashboard {
+    padding: 1rem;
   }
 
+  .dashboard-header {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric-card {
+    padding: 1.25rem;
+  }
+
+  .metric-value {
+    font-size: 1.75rem;
+  }
+
+  .actions-section,
+  .activity-section {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      font-size: 1.125rem;
+    }
+  }
+
+  .action-card {
+    padding: 1rem 1.25rem;
+  }
+
+  /* Mobile table layout */
   .table-header {
-    display: none; /* Hide header on mobile */
+    display: none;
   }
 
   .transaction-row {
-    padding: 1.5rem;
-    display: block;
-    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-neutral-light);
+
+    > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      &::before {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+    }
   }
 
-  .transaction-row > div {
-    margin-bottom: 0.5rem;
-  }
-
-  .transaction-row > div:before {
-    content: attr(class);
-    font-weight: 600;
-    text-transform: capitalize;
-    color: #6b7280;
-    font-size: 0.875rem;
-    display: block;
-    margin-bottom: 0.25rem;
-  }
-
-  .col-date:before { content: "Date: "; }
-  .col-item:before { content: "Item: "; }
-  .col-consignor:before { content: "Consignor: "; }
-  .col-amount:before { content: "Sale Amount: "; }
-  .col-commission:before { content: "Commission: "; }
+  .col-date::before { content: "Date"; }
+  .col-item::before { content: "Item"; }
+  .col-consignor::before { content: "Consignor"; }
+  .col-amount::before { content: "Sale Amount"; }
+  .col-commission::before { content: "Commission"; }
 }
