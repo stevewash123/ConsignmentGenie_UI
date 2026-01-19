@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
@@ -47,13 +47,13 @@ export class OwnerSalesComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly loadingService = inject(LoadingService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   // ============================================================================
   // State Signals
   // ============================================================================
   transactions = signal<Transaction[]>([]);
   selectedTransaction = signal<Transaction | null>(null);
-  selectedTransactionForDetail = signal<Transaction | null>(null);
   selectedTransactionForEdit = signal<Transaction | null>(null);
   isSubmitting = signal(false);
 
@@ -85,7 +85,6 @@ export class OwnerSalesComponent implements OnInit {
   sortDirection = DEFAULT_SORT_DIRECTION;
 
   // Modals - regular properties for template binding
-  showDetailModal = false;
   showEditModal = false;
   showConfirmDialog = false;
 
@@ -190,8 +189,7 @@ export class OwnerSalesComponent implements OnInit {
   }
 
   viewTransaction(transaction: Transaction): void {
-    this.selectedTransactionForDetail.set(transaction);
-    this.showDetailModal = true;
+    this.router.navigate(['/owner/sales', transaction.id]);
   }
 
   editTransaction(transaction: Transaction): void {
@@ -344,17 +342,9 @@ export class OwnerSalesComponent implements OnInit {
 
   closeModal(event: Event): void {
     if (event.target === event.currentTarget) {
-      this.showDetailModal = false;
       this.showEditModal = false;
       this.showConfirmDialog = false;
     }
-  }
-
-  closeDetailModal(event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.showDetailModal = false;
   }
 
   closeEditModal(event?: Event): void {
@@ -373,22 +363,6 @@ export class OwnerSalesComponent implements OnInit {
     this.closeConfirmDialog();
   }
 
-  // Methods called from detail modal
-  editTransactionFromDetail(): void {
-    const transaction = this.selectedTransactionForDetail();
-    if (transaction) {
-      this.showDetailModal = false;
-      this.editTransaction(transaction);
-    }
-  }
-
-  voidTransactionFromDetail(): void {
-    const transaction = this.selectedTransactionForDetail();
-    if (transaction) {
-      this.showDetailModal = false;
-      this.voidTransaction(transaction);
-    }
-  }
 
   formatDate(date: Date | string | undefined): string {
     if (!date) return '';

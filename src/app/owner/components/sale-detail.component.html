@@ -1,0 +1,253 @@
+<app-owner-layout>
+  <div class="detail-page" *ngIf="!isLoading(); else loading">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <button class="btn-secondary" (click)="goBack()" title="Go back to previous page">
+          ← Back
+        </button>
+      </div>
+      <div class="header-actions">
+        <div class="dropdown">
+          <button class="btn-primary dropdown-toggle" type="button">
+            Actions ▼
+          </button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item" (click)="editTransaction()">
+              ✏️ Edit Sale
+            </button>
+            <button class="dropdown-item" (click)="viewItem()">
+              👁️ View Item
+            </button>
+            <button class="dropdown-item" (click)="viewConsignor()">
+              👤 View Consignor
+            </button>
+            <div class="dropdown-divider"></div>
+            <button
+              class="dropdown-item"
+              *ngIf="canVoidTransaction()"
+              (click)="voidTransaction()"
+            >
+              🗑️ Void Sale
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entity Title Row -->
+    <div class="entity-header" *ngIf="transaction()">
+      <h1>{{ transaction()!.items[0]?.item?.title || 'Sale Transaction' }}</h1>
+      <div class="entity-meta">
+        <span class="badge" [ngClass]="getPaymentMethodClass(transaction()!.paymentType)">
+          {{ transaction()!.paymentType | uppercase }}
+        </span>
+        <span class="meta-id">ID: {{ getTransactionShortId() }}</span>
+      </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="detail-card" *ngIf="transaction()">
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-value">{{ formatCurrency(transaction()!.total) }}</span>
+          <span class="stat-label">Total Sale</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ formatCurrency(transaction()!.items[0]?.consignorAmount || 0) }}</span>
+          <span class="stat-label">Consignor Split</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ formatCurrency(transaction()!.items[0]?.storeAmount || 0) }}</span>
+          <span class="stat-label">Shop Split</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ getDaysSinceSale() }}</span>
+          <span class="stat-label">Days Ago</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ (transaction()!.items[0]?.consignorSplitPercentage || 0) * 100 }}%</span>
+          <span class="stat-label">Commission</span>
+        </div>
+      </div>
+
+      <!-- Info Sections -->
+      <div class="info-container">
+        <div class="info-row">
+          <!-- Item Details -->
+          <div class="info-section">
+            <h3>Item Details</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Item Name</span>
+                <span class="info-value clickable" (click)="viewItem()">
+                  {{ transaction()!.items[0]?.item?.title || 'N/A' }}
+                </span>
+              </div>
+              <div class="info-item" *ngIf="transaction()!.items[0]?.item?.description">
+                <span class="info-label">Description</span>
+                <span class="info-value">{{ transaction()!.items[0]?.item?.description }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Sale Price</span>
+                <span class="info-value">{{ formatCurrency(transaction()!.subtotal) }}</span>
+              </div>
+              <div class="info-item" *ngIf="transaction()!.taxAmount">
+                <span class="info-label">Sales Tax</span>
+                <span class="info-value">{{ formatCurrency(transaction()!.taxAmount) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Quantity</span>
+                <span class="info-value">{{ transaction()!.items[0]?.quantity || 1 }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction Information -->
+          <div class="info-section">
+            <h3>Transaction Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Sale Date</span>
+                <span class="info-value">{{ transaction()!.saleDate | date:'MMM d, y h:mm a' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Payment Method</span>
+                <span class="info-value">
+                  <span class="badge" [ngClass]="getPaymentMethodClass(transaction()!.paymentType)">
+                    {{ transaction()!.paymentType | uppercase }}
+                  </span>
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Transaction ID</span>
+                <span class="info-value cell-mono">{{ transaction()!.id }}</span>
+              </div>
+              <div class="info-item" *ngIf="transaction()!.customerEmail">
+                <span class="info-label">Customer Email</span>
+                <span class="info-value">{{ transaction()!.customerEmail }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Source</span>
+                <span class="info-value">{{ transaction()!.source || 'In-Store' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consignor Information -->
+        <div class="info-section full-width">
+          <h3>Consignor Information</h3>
+          <div class="info-row">
+            <div class="info-section">
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Consignor</span>
+                  <span class="info-value consignor-link clickable" (click)="viewConsignor()">
+                    {{ transaction()!.items[0]?.consignor?.name || 'N/A' }}
+                  </span>
+                </div>
+                <div class="info-item" *ngIf="transaction()!.items[0]?.consignor?.email">
+                  <span class="info-label">Email</span>
+                  <span class="info-value">{{ transaction()!.items[0]?.consignor?.email }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Commission Rate</span>
+                  <span class="info-value">{{ (transaction()!.items[0]?.consignorSplitPercentage || 0) * 100 }}%</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Consignor Amount</span>
+                  <span class="info-value">{{ formatCurrency(transaction()!.items[0]?.consignorAmount || 0) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="info-section full-width" *ngIf="transaction()!.notes">
+          <h3>Notes</h3>
+          <div class="notes-display">{{ transaction()!.notes }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-banner" *ngIf="error()">
+      {{ error() }}
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <ng-template #loading>
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading sale details...</p>
+    </div>
+  </ng-template>
+
+  <!-- Edit Transaction Modal -->
+  <div class="modal-overlay" *ngIf="showEditModal()" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Transaction</h2>
+        <button type="button" class="close-btn" (click)="closeEditModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editSalePrice">Sale Price</label>
+          <input
+            type="number"
+            id="editSalePrice"
+            [(ngModel)]="editForm_salePrice"
+            class="form-control"
+            step="0.01"
+            min="0.01"
+            placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="editPaymentType">Payment Method</label>
+          <select
+            id="editPaymentType"
+            [(ngModel)]="editForm_paymentType"
+            class="form-control">
+            <option value="Cash">Cash</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="Check">Check</option>
+            <option value="Online">Online</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editNotes">Notes (optional)</label>
+          <textarea
+            id="editNotes"
+            [(ngModel)]="editForm_notes"
+            class="form-control"
+            placeholder="Additional transaction notes"
+            rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeEditModal()">Cancel</button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="updateTransaction()"
+          [disabled]="isUpdating() || editForm_salePrice <= 0"
+        >
+          {{ isUpdating() ? 'Updating...' : 'Update Transaction' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</app-owner-layout>
