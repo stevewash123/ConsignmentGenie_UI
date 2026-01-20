@@ -480,6 +480,107 @@
 }
 
 /* ============================================================================
+   STATUS MANAGEMENT SECTION
+   ============================================================================ */
+
+.status-management-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--color-light-light);
+  border: 1px solid var(--color-neutral-light);
+  border-radius: var(--border-radius-md);
+
+  h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .status-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    .current-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      label {
+        font-weight: 500;
+        color: var(--color-text-muted);
+      }
+
+      .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+    }
+
+    .status-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+}
+
+/* Status Action Buttons */
+.btn-status {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &.btn-status-pending {
+    background: var(--color-warn-light);
+    color: var(--color-warn-dark);
+    border-color: var(--color-warn-med);
+
+    &:hover {
+      background: var(--color-warn-med);
+      color: white;
+    }
+  }
+
+  &.btn-status-paid {
+    background: var(--color-success-light);
+    color: var(--color-success-dark);
+    border-color: var(--color-success-med);
+
+    &:hover {
+      background: var(--color-success-med);
+      color: white;
+    }
+  }
+
+  &.btn-status-cancelled {
+    background: var(--color-error-light);
+    color: var(--color-error-dark);
+    border-color: var(--color-error-med);
+
+    &:hover {
+      background: var(--color-error-med);
+      color: white;
+    }
+  }
+}
+
+/* ============================================================================
    REQUIRED FIELD INDICATOR
    ============================================================================ */
 

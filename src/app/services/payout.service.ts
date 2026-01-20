@@ -416,4 +416,13 @@ export class PayoutService {
       responseType: 'text'
     });
   }
+
+  updatePayoutStatus(id: string, status: PayoutStatus): Observable<void> {
+    return this.http.put<{ success: boolean; message: string }>(`${this.apiUrl}/${id}/status`, { Status: status })
+      .pipe(map(response => {
+        if (!response.success) {
+          throw new Error('Failed to update payout status');
+        }
+      }));
+  }
 }

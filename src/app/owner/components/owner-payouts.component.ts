@@ -61,6 +61,9 @@ export class OwnerPayoutsComponent implements OnInit {
   private readonly downloadService = inject(DownloadService);
   private readonly destroyRef = inject(DestroyRef);
 
+  // Expose enum for template use
+  readonly PayoutStatus = PayoutStatus;
+
   // ============================================================================
   // State Signals
   // ============================================================================
@@ -308,6 +311,39 @@ export class OwnerPayoutsComponent implements OnInit {
       }
     } catch {
       this.toastr.error(ERROR_MESSAGES.VIEW_PAYOUT);
+    }
+  }
+
+  async updatePayoutStatus(payoutId: string, newStatus: PayoutStatus): Promise<void> {
+    try {
+      await firstValueFrom(this.payoutService.updatePayoutStatus(payoutId, newStatus));
+
+      // Update the payout in our state
+      const currentPayout = this.selectedPayout();
+      if (currentPayout && currentPayout.id === payoutId) {
+        this.selectedPayout.set({
+          ...currentPayout,
+          status: newStatus
+        });
+      }
+
+      // Update the payout in the payouts list
+      this.payouts.update(payouts =>
+        payouts.map(p => p.id === payoutId ? { ...p, status: newStatus } : p)
+      );
+
+      // Show success message
+      const statusText = newStatus === PayoutStatus.Paid ? 'paid' :
+                        newStatus === PayoutStatus.Pending ? 'pending' : 'cancelled';
+      this.toastr.success(`Payout status updated to ${statusText}`);
+
+      // Reload pending payouts if status changed
+      if (this.viewMode() === 'pending') {
+        await this.loadPendingPayouts();
+      }
+
+    } catch (error: any) {
+      this.toastr.error(error.message || 'Failed to update payout status');
     }
   }
 

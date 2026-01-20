@@ -416,6 +416,43 @@
             </div>
           </div>
         </div>
+
+        <!-- Status Management Section -->
+        <div class="status-management-section" *ngIf="selectedPayout()">
+          <h4>Status Management</h4>
+          <div class="status-controls">
+            <div class="current-status">
+              <label>Current Status:</label>
+              <span class="badge" [ngClass]="getStatusBadgeClass(selectedPayout()?.status || '')">
+                {{ selectedPayout()?.status }}
+              </span>
+            </div>
+            <div class="status-actions">
+              <button
+                class="btn-status btn-status-pending"
+                *ngIf="selectedPayout()?.status !== 'Pending'"
+                (click)="updatePayoutStatus(selectedPayout()!.id, PayoutStatus.Pending)"
+                title="Mark as pending">
+                ⏳ Mark Pending
+              </button>
+              <button
+                class="btn-status btn-status-paid"
+                *ngIf="selectedPayout()?.status !== 'Paid'"
+                (click)="updatePayoutStatus(selectedPayout()!.id, PayoutStatus.Paid)"
+                title="Mark as paid">
+                ✅ Mark Paid
+              </button>
+              <button
+                class="btn-status btn-status-cancelled"
+                *ngIf="selectedPayout()?.status !== 'Cancelled'"
+                (click)="updatePayoutStatus(selectedPayout()!.id, PayoutStatus.Cancelled)"
+                title="Cancel payout">
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="modal-actions">
           <button class="btn-secondary" (click)="closeViewModal()">Close</button>
           <button class="btn-primary secondary" (click)="exportPayout(selectedPayout()!.id, 'csv')">📥 Export CSV</button>
