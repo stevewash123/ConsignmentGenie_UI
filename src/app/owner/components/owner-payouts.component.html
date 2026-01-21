@@ -276,18 +276,7 @@
                   {{ sortDirection() === 'asc' ? '↑' : '↓' }}
                 </span>
               </th>
-              <th>
-                Payment Method
-                <app-column-filter
-                  filterType="select"
-                  label="Payment Method"
-                  [options]="paymentMethodOptions"
-                  [value]="selectedPaymentMethod()"
-                  placeholder="All"
-                  (filterChange)="onFilterChange('paymentMethod', $event)"
-                  (filterClear)="onFilterClear('paymentMethod')">
-                </app-column-filter>
-              </th>
+              <th>Payment Method</th>
               <th>Period</th>
               <th>Transactions</th>
               <th>
