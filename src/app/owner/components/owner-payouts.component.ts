@@ -318,7 +318,7 @@ export class OwnerPayoutsComponent implements OnInit {
    *
    * Notifications:
    * - Success toaster notification to owner
-   * - TODO: Email notification to consignor (when notification service is ready)
+   * - Email/system notification to consignor via unified notification system
    * - Backend logs payout creation for audit trail
    */
   async createPayout(): Promise<void> {
