@@ -8,8 +8,8 @@
         <button class="btn-primary secondary" (click)="refreshData()">
           🔄 Update Payouts
         </button>
-        <button class="btn-primary" (click)="openCreateModal()" [disabled]="pendingPayouts().length === 0">
-          💰 Create Payout
+        <button class="btn-primary" (click)="openPayAllModal()" [disabled]="pendingPayouts().length === 0">
+          💰 Pay All
         </button>
       </div>
     </div>
@@ -108,8 +108,8 @@
                 <td>{{ pending.transactionCount }}</td>
                 <td class="cell-secondary">{{ formatDate(pending.earliestSale) }} - {{ formatDate(pending.latestSale) }}</td>
                 <td class="actions-cell">
+                  <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Create Payout">💰</button>
                   <button class="btn-icon" (click)="generateStatementForConsignor(pending.consignorId)" title="Generate Statement">📄</button>
-                  <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Pay Now">💰</button>
                 </td>
               </tr>
 
@@ -409,6 +409,102 @@
         <div class="modal-actions">
           <button class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
           <button class="btn-primary" (click)="createPayout()">Create Payout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pay All Modal -->
+    <div class="modal-overlay" *ngIf="showPayAllModal()" (click)="closeModal($event)">
+      <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>💰 Pay All Pending Consignors</h2>
+          <button class="btn-close" (click)="closePayAllModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="pay-all-summary">
+            <div class="summary-totals">
+              <div class="total-item">
+                <span class="label">Total Consignors:</span>
+                <span class="value">{{ pendingPayouts().length }}</span>
+              </div>
+              <div class="total-item">
+                <span class="label">Total Amount:</span>
+                <span class="value total-amount">${{ getTotalPayoutAmount().toFixed(2) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="consignor-list">
+            <h3>Consignors to be Paid</h3>
+            <div class="list-headers">
+              <div class="header-name">Consignor</div>
+              <div class="header-amount">Amount</div>
+              <div class="header-transactions">Transactions</div>
+            </div>
+
+            @for (pending of pendingPayouts(); track pending.consignorId) {
+              <div class="consignor-row">
+                <div class="consignor-name">
+                  {{ pending.consignorName }}
+                  @if (pending.consignorNumber) {
+                    <span class="consignor-number">#{{ pending.consignorNumber }}</span>
+                  }
+                </div>
+                <div class="consignor-amount">${{ pending.pendingAmount.toFixed(2) }}</div>
+                <div class="consignor-transactions">{{ pending.transactionCount }}</div>
+              </div>
+            }
+          </div>
+
+          <div class="payment-method-section">
+            <h3>Payment Method</h3>
+            <div class="form-group">
+              <label for="payAllPaymentMethod">Method*</label>
+              <select
+                id="payAllPaymentMethod"
+                [(ngModel)]="payAllPaymentMethod"
+                class="form-input">
+                <option value="">Select payment method</option>
+                <option value="Check">Check</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="PayPal">PayPal</option>
+                <option value="Venmo">Venmo</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="payAllPaymentReference">Payment Reference</label>
+              <input
+                type="text"
+                id="payAllPaymentReference"
+                [(ngModel)]="payAllPaymentReference"
+                placeholder="Check number, transaction ID, etc."
+                class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label for="payAllNotes">Notes</label>
+              <textarea
+                id="payAllNotes"
+                [(ngModel)]="payAllNotes"
+                placeholder="Optional notes for all payouts"
+                class="form-textarea"
+                rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closePayAllModal()">Cancel</button>
+          <button
+            class="btn-primary"
+            (click)="createAllPayouts()"
+            [disabled]="!payAllPaymentMethod || pendingPayouts().length === 0">
+            Create {{ pendingPayouts().length }} Payouts
+          </button>
         </div>
       </div>
     </div>

@@ -93,6 +93,12 @@ export class OwnerPayoutsComponent implements OnInit {
   showViewModal = signal(false);
   showStatementModal = signal(false);
   showTransactionModal = signal(false);
+  showPayAllModal = signal(false);
+
+  // Pay All modal state
+  payAllPaymentMethod = signal('');
+  payAllPaymentReference = signal('');
+  payAllNotes = signal('');
 
   // Current pending payout for transaction selection
   selectedPendingPayout = signal<PendingPayoutData | null>(null);
@@ -351,6 +357,60 @@ export class OwnerPayoutsComponent implements OnInit {
     }
   }
 
+  async createAllPayouts(): Promise<void> {
+    const paymentMethod = this.payAllPaymentMethod();
+    const paymentReference = this.payAllPaymentReference();
+    const notes = this.payAllNotes();
+
+    if (!paymentMethod) {
+      this.toastr.error('Please select a payment method');
+      return;
+    }
+
+    const payoutDate = new Date();
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      // Create payouts for all pending consignors
+      for (const pending of this.pendingPayouts()) {
+        try {
+          const request: CreatePayoutRequest = {
+            consignorId: pending.consignorId,
+            payoutDate: payoutDate,
+            paymentMethod: paymentMethod,
+            paymentReference: paymentReference || undefined,
+            periodStart: pending.earliestSale || payoutDate,
+            periodEnd: pending.latestSale || payoutDate,
+            notes: notes || undefined,
+            transactionIds: pending.transactions.map(t => t.transactionId)
+          };
+
+          await firstValueFrom(this.payoutService.createPayout(request));
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to create payout for consignor ${pending.consignorName}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Show results
+      if (successCount > 0 && errorCount === 0) {
+        this.toastr.success(`Successfully created ${successCount} payouts`);
+      } else if (successCount > 0 && errorCount > 0) {
+        this.toastr.warning(`Created ${successCount} payouts, ${errorCount} failed`);
+      } else {
+        this.toastr.error('Failed to create any payouts');
+      }
+
+      this.closePayAllModal();
+      this.refreshData();
+    } catch (error) {
+      this.toastr.error('Error creating payouts');
+      console.error('Error in createAllPayouts:', error);
+    }
+  }
+
   async viewPayout(id: string): Promise<void> {
     try {
       const payout = await firstValueFrom(this.payoutService.getPayoutById(id));
@@ -497,6 +557,22 @@ export class OwnerPayoutsComponent implements OnInit {
   closeStatementModal(): void {
     this.showStatementModal.set(false);
     this.preSelectedConsignorId.set(null);
+  }
+
+  // Pay All modal methods
+  openPayAllModal(): void {
+    this.payAllPaymentMethod.set('');
+    this.payAllPaymentReference.set('');
+    this.payAllNotes.set('');
+    this.showPayAllModal.set(true);
+  }
+
+  closePayAllModal(): void {
+    this.showPayAllModal.set(false);
+  }
+
+  getTotalPayoutAmount(): number {
+    return this.pendingPayouts().reduce((total, pending) => total + pending.pendingAmount, 0);
   }
 
   openCreateModal(): void {
