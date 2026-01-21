@@ -8,7 +8,7 @@
 Initial chunk files   | Names                            |  Raw size | Estimated transfer size
 chunk-AZHQZ6O6.js     | -                                | 200.15 kB |                57.88 kB
 chunk-I7W5O5CG.js     | -                                |  79.66 kB |                19.80 kB
-main-5352BDX7.js      | main                             |  77.78 kB |                20.53 kB
+main-VDNOPRO5.js      | main                             |  77.78 kB |                20.50 kB
 chunk-VIGUXUE4.js     | -                                |  52.32 kB |                10.17 kB
 polyfills-5CFQRCPP.js | polyfills                        |  34.59 kB |                11.33 kB
 chunk-Y52DO3OV.js     | -                                |  23.53 kB |                 5.12 kB
@@ -21,10 +21,10 @@ chunk-4CLCTAJ7.js     | -                                | 830 bytes |          
 chunk-NU3H4WHG.js     | -                                | 734 bytes |               734 bytes
 chunk-MUTJNURO.js     | -                                | 386 bytes |               386 bytes
 
-                      | Initial total                    | 527.60 kB |               142.57 kB
+                      | Initial total                    | 527.60 kB |               142.54 kB
 
 Lazy chunk files      | Names                            |  Raw size | Estimated transfer size
-chunk-2NJSKTHH.js     | owner-payouts-component          |  84.62 kB |                15.94 kB
+chunk-TNJFA2U5.js     | owner-payouts-component          |  85.34 kB |                16.04 kB
 chunk-SRMKRDCZ.js     | inventory-list-component         |  60.32 kB |                11.98 kB
 chunk-UJVFZAH6.js     | price-request-list-component     |  51.46 kB |                 8.28 kB
 chunk-4MM5ZJ5M.js     | item-list-component              |  51.45 kB |                10.41 kB
@@ -41,7 +41,7 @@ chunk-7MAT22QK.js     | create-dropoff-request-component |  29.20 kB |          
 chunk-MVA5EGLH.js     | store-layout-component           |  28.31 kB |                 5.10 kB
 ...and 123 more lazy chunks files. Use "--verbose" to show all the files.
 
-Application bundle generation complete. [61.519 seconds] - 2026-01-21T15:59:03.397Z
+Application bundle generation complete. [57.302 seconds] - 2026-01-21T17:20:10.765Z
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 500.00 kB was not met by 27.60 kB with a total of 527.60 kB.[0m
 

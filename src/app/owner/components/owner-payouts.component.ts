@@ -294,6 +294,33 @@ export class OwnerPayoutsComponent implements OnInit {
     this.showCreatePayoutModal.set(true);
   }
 
+  /**
+   * Create Payout Flow
+   *
+   * This creates a new payout record and updates the system state:
+   *
+   * Database Updates:
+   * - Creates new Payout record with status 'Paid'
+   * - Updates all selected Transactions:
+   *   * Sets PayoutId to link to the new payout
+   *   * Sets PayoutStatus to 'Paid'
+   *   * Sets ConsignorPaidOut to true
+   *   * Sets ConsignorPaidOutDate to payout date
+   *   * Sets PayoutMethod to selected method
+   * - Generates unique payout number (PO{YYYYMMDD}{sequence})
+   *
+   * Business Logic:
+   * - Validates consignor exists and has permission
+   * - Ensures all transactions are unpaid and belong to consignor
+   * - Calculates total payout amount from transaction items
+   * - Records payment method and reference for tracking
+   * - Updates cached PayoutSummary data (via refresh)
+   *
+   * Notifications:
+   * - Success toaster notification to owner
+   * - TODO: Email notification to consignor (when notification service is ready)
+   * - Backend logs payout creation for audit trail
+   */
   async createPayout(): Promise<void> {
     const payout = this.newPayout();
 
@@ -473,6 +500,17 @@ export class OwnerPayoutsComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    // Reset form to defaults
+    this.newPayout.set({
+      consignorId: '',
+      payoutDate: new Date(),
+      paymentMethod: '',
+      paymentReference: '',
+      notes: '',
+      transactionIds: [],
+      periodStart: new Date(),
+      periodEnd: new Date()
+    });
     this.showCreatePayoutModal.set(true);
   }
 
@@ -529,7 +567,46 @@ export class OwnerPayoutsComponent implements OnInit {
 
   // Template helper methods for form binding
   updateConsignorId(consignorId: string): void {
-    this.newPayout.update(p => ({ ...p, consignorId }));
+    if (!consignorId) {
+      // Clear everything if no consignor selected
+      this.newPayout.update(p => ({
+        ...p,
+        consignorId,
+        transactionIds: [],
+        periodStart: new Date(),
+        periodEnd: new Date()
+      }));
+      return;
+    }
+
+    // Find the pending payout data for this consignor
+    const pending = this.pendingPayouts().find(p => p.consignorId === consignorId);
+    if (pending) {
+      // Get all transactions for this consignor (both cleared and uncleared)
+      const allTransactionIds = pending.transactions.map(t => t.transactionId);
+
+      // Calculate period dates from all transactions
+      const transactionDates = pending.transactions.map(t => new Date(t.saleDate));
+      const earliestDate = transactionDates.length > 0 ? new Date(Math.min(...transactionDates.map(d => d.getTime()))) : new Date();
+      const latestDate = transactionDates.length > 0 ? new Date(Math.max(...transactionDates.map(d => d.getTime()))) : new Date();
+
+      this.newPayout.update(p => ({
+        ...p,
+        consignorId,
+        transactionIds: allTransactionIds,
+        periodStart: earliestDate,
+        periodEnd: latestDate
+      }));
+    } else {
+      // Fallback if no pending data found
+      this.newPayout.update(p => ({
+        ...p,
+        consignorId,
+        transactionIds: [],
+        periodStart: new Date(),
+        periodEnd: new Date()
+      }));
+    }
   }
 
   updatePayoutDate(payoutDate: string): void {
