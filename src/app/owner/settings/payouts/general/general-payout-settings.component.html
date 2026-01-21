@@ -1,0 +1,134 @@
+<div class="general-payout-settings">
+  <div class="settings-header">
+    <h2>General Payout Settings</h2>
+    <div class="auto-save-status">
+      <div class="save-indicator">
+        <span class="status-icon">✓</span>
+        <span>{{ autoSaveStatus() }}</span>
+      </div>
+      <small class="save-note">Changes are saved automatically as you type</small>
+    </div>
+  </div>
+
+  <div class="settings-form" *ngIf="settings()">
+
+    <!-- Payout Methods Offered -->
+    <div class="form-section">
+      <h3>Payout Methods Offered</h3>
+      <p class="section-description">Select the methods you use to pay consignors</p>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="settings()!.payoutMethodCheck"
+            (change)="onCheckMethodChange($event)">
+          <span class="checkmark"></span>
+          Check
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="settings()!.payoutMethodCash"
+            (change)="onCashMethodChange($event)">
+          <span class="checkmark"></span>
+          Cash
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="settings()!.payoutMethodStoreCredit"
+            (change)="onStoreCreditMethodChange($event)">
+          <span class="checkmark"></span>
+          Store Credit
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="settings()!.payoutMethodPayPal"
+            (change)="onPayPalMethodChange($event)">
+          <span class="checkmark"></span>
+          PayPal <span class="method-note">(manual)</span>
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="settings()!.payoutMethodVenmo"
+            (change)="onVenmoMethodChange($event)">
+          <span class="checkmark"></span>
+          Venmo <span class="method-note">(manual)</span>
+        </label>
+
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="settings()!.payoutMethodACH"
+            (change)="onACHMethodChange($event)">
+          <span class="checkmark"></span>
+          Direct Deposit (ACH)
+        </label>
+      </div>
+
+      <div class="info-note">
+        <i class="icon-info">ℹ️</i>
+        <span>PayPal and Venmo are marked "(manual)" to indicate you handle these payments outside the system - we just track that this method was used.</span>
+      </div>
+    </div>
+
+    <!-- Hold Period -->
+    <div class="form-section">
+      <h3>Hold Period</h3>
+
+      <div class="form-group">
+        <div class="input-group">
+          <input
+            type="number"
+            min="0"
+            [value]="settings()!.holdPeriodDays"
+            (input)="onHoldPeriodInputChange($event)"
+            class="form-input">
+          <span class="input-suffix">days</span>
+        </div>
+
+        <div class="info-note">
+          <i class="icon-info">ℹ️</i>
+          <span>Days after sale before consignor can be paid. Protects against returns and chargebacks.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimum Payout Threshold -->
+    <div class="form-section">
+      <h3>Minimum Payout Threshold</h3>
+
+      <div class="form-group">
+        <div class="input-group">
+          <span class="input-prefix">$</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            [value]="settings()!.minimumPayoutThreshold"
+            (input)="onMinimumThresholdInputChange($event)"
+            class="form-input">
+        </div>
+
+        <div class="info-note">
+          <i class="icon-info">ℹ️</i>
+          <span>Balances below this stay pending until they reach the threshold.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage() || errorMessage()">
+    <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
+    <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
+  </div>
+</div>

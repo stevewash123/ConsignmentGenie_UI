@@ -96,6 +96,9 @@ export class OwnerPayoutsComponent implements OnInit {
   selectedPendingPayout = signal<PendingPayoutData | null>(null);
   selectedTransactionIds = signal<Set<string>>(new Set());
 
+  // Expandable rows for transaction details
+  expandedRows = signal<Set<string>>(new Set());
+
   // View toggle
   pendingPayoutsViewMode = signal<'cards' | 'table'>('cards');
   viewMode = signal<'pending' | 'history'>('pending');
@@ -231,30 +234,42 @@ export class OwnerPayoutsComponent implements OnInit {
   }
 
   async loadPendingPayouts(): Promise<void> {
+    console.log('  -> loadPendingPayouts: Starting...');
     try {
       const pending = await firstValueFrom(this.payoutService.getPendingPayouts());
+      console.log('  -> loadPendingPayouts: API returned', pending?.length || 0, 'items');
       this.pendingPayouts.set(pending || []);
-    } catch {
+      console.log('  -> loadPendingPayouts: Set signal successfully');
+    } catch (error) {
+      console.error('  -> loadPendingPayouts: ERROR', error);
       this.toastr.error(ERROR_MESSAGES.LOAD_PENDING);
+      throw error; // Re-throw so refreshData can catch it
     }
   }
 
   async loadPayouts(): Promise<void> {
+    console.log('  -> loadPayouts: Starting...');
     this.loadingService.start(LOADING_KEY);
 
     try {
       const request = this.buildPayoutSearchRequest();
+      console.log('  -> loadPayouts: Built request', request);
       const response = await firstValueFrom(this.payoutService.getPayouts(request));
+      console.log('  -> loadPayouts: API returned', response);
 
       if (response) {
         this.payouts.set(response.data);
         this.totalPages.set(response.totalPages);
         this.totalPayouts.set(response.totalCount);
+        console.log('  -> loadPayouts: Set signals successfully - payouts:', response.data?.length, 'totalPages:', response.totalPages, 'totalCount:', response.totalCount);
       }
-    } catch {
+    } catch (error) {
+      console.error('  -> loadPayouts: ERROR', error);
       this.toastr.error(ERROR_MESSAGES.LOAD_PAYOUTS);
+      throw error; // Re-throw so refreshData can catch it
     } finally {
       this.loadingService.stop(LOADING_KEY);
+      console.log('  -> loadPayouts: Loading stopped');
     }
   }
 
@@ -367,9 +382,35 @@ export class OwnerPayoutsComponent implements OnInit {
     }
   }
 
-  refreshData(): void {
-    this.loadPendingPayouts();
-    this.loadPayouts();
+  async refreshData(): Promise<void> {
+    console.log('=== REFRESH DATA STARTED ===');
+    try {
+      this.loadingService.start(LOADING_KEY);
+      this.toastr.info('Updating payout summaries...', 'Processing', { timeOut: 2000 });
+
+      console.log('Calling refreshSummaries API...');
+      await firstValueFrom(this.payoutService.refreshSummaries());
+      console.log('✅ refreshSummaries API completed successfully');
+
+      this.toastr.success('Payout summaries updated successfully', 'Success');
+
+      // Refresh the displayed data after successful computation
+      console.log('Loading pending payouts...');
+      await this.loadPendingPayouts();
+      console.log('✅ loadPendingPayouts completed');
+
+      console.log('Loading payouts...');
+      await this.loadPayouts();
+      console.log('✅ loadPayouts completed');
+
+      console.log('=== REFRESH DATA COMPLETED SUCCESSFULLY ===');
+    } catch (error) {
+      console.error('❌ ERROR in refreshData:', error);
+      this.toastr.error('Failed to update payout summaries', 'Error');
+    } finally {
+      this.loadingService.stop(LOADING_KEY);
+      console.log('=== REFRESH DATA FINISHED (loading stopped) ===');
+    }
   }
 
   sort(column: string): void {
@@ -579,9 +620,69 @@ export class OwnerPayoutsComponent implements OnInit {
   }
 
   viewTransactionDetails(pending: PendingPayoutData): void {
-    // Open transaction selection modal
-    this.selectedPendingPayout.set(pending);
-    this.showTransactionModal.set(true);
+    // Toggle expanded row instead of modal
+    this.toggleRowExpansion(pending.consignorId);
+  }
+
+  // Row expansion methods
+  toggleRowExpansion(consignorId: string): void {
+    const currentExpanded = this.expandedRows();
+    const newExpanded = new Set(currentExpanded);
+
+    if (newExpanded.has(consignorId)) {
+      newExpanded.delete(consignorId);
+    } else {
+      newExpanded.add(consignorId);
+      // Set the selected payout data when expanding
+      const pending = this.filteredPendingPayouts().find(p => p.consignorId === consignorId);
+      if (pending) {
+        this.selectedPendingPayout.set(pending);
+        // Pre-select cleared transactions
+        this.preselectClearedTransactions(pending);
+      }
+    }
+
+    this.expandedRows.set(newExpanded);
+  }
+
+  isRowExpanded(consignorId: string): boolean {
+    return this.expandedRows().has(consignorId);
+  }
+
+  preselectClearedTransactions(pending: PendingPayoutData): void {
+    const clearedTransactionIds = pending.transactions
+      ?.filter(t => t.isCleared)
+      .map(t => t.transactionId) || [];
+
+    this.selectedTransactionIds.set(new Set(clearedTransactionIds));
+  }
+
+  areAllClearedTransactionsSelected(pending: PendingPayoutData): boolean {
+    const clearedTransactionIds = pending.transactions
+      ?.filter(t => t.isCleared)
+      .map(t => t.transactionId) || [];
+
+    return clearedTransactionIds.length > 0 &&
+           clearedTransactionIds.every(id => this.selectedTransactionIds().has(id));
+  }
+
+  toggleSelectAllCleared(pending: PendingPayoutData, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const clearedTransactionIds = pending.transactions
+      ?.filter(t => t.isCleared)
+      .map(t => t.transactionId) || [];
+
+    const currentSet = new Set(this.selectedTransactionIds());
+
+    if (target.checked) {
+      // Add all cleared transactions
+      clearedTransactionIds.forEach(id => currentSet.add(id));
+    } else {
+      // Remove all cleared transactions
+      clearedTransactionIds.forEach(id => currentSet.delete(id));
+    }
+
+    this.selectedTransactionIds.set(currentSet);
   }
 
   closeTransactionModal(): void {

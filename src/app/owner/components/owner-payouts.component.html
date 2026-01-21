@@ -6,7 +6,7 @@
       </div>
       <div class="header-actions">
         <button class="btn-primary secondary" (click)="refreshData()">
-          🔄 Refresh
+          🔄 Update Payouts
         </button>
         <button class="btn-primary" (click)="openCreateModal()" [disabled]="pendingPayouts().length === 0">
           💰 Create Payout
@@ -80,8 +80,14 @@
           </thead>
           <tbody>
             @for (pending of filteredPendingPayouts(); track pending.consignorId) {
-              <tr>
-                <td class="cell-primary">{{ pending.consignorName }}</td>
+              <!-- Main payout row -->
+              <tr class="payout-row" [class.expanded]="isRowExpanded(pending.consignorId)">
+                <td class="cell-primary">
+                  <button class="expand-toggle" (click)="toggleRowExpansion(pending.consignorId)" title="Toggle transaction details">
+                    <span class="chevron" [class.expanded]="isRowExpanded(pending.consignorId)">▶</span>
+                  </button>
+                  {{ pending.consignorName }}
+                </td>
                 <td class="cell-money">
                   <span class="cleared-amount">${{ pending.clearedAmount?.toFixed(2) || '0.00' }}</span>
                   @if (pending.clearedTransactionCount) {
@@ -102,11 +108,89 @@
                 <td>{{ pending.transactionCount }}</td>
                 <td class="cell-secondary">{{ formatDate(pending.earliestSale) }} - {{ formatDate(pending.latestSale) }}</td>
                 <td class="actions-cell">
-                  <button class="btn-icon" (click)="viewTransactionDetails(pending)" title="View Transactions">🔍</button>
                   <button class="btn-icon" (click)="generateStatementForConsignor(pending.consignorId)" title="Generate Statement">📄</button>
                   <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Pay Now">💰</button>
                 </td>
               </tr>
+
+              <!-- Expanded transaction details row -->
+              @if (isRowExpanded(pending.consignorId)) {
+                <tr class="expanded-details-row">
+                  <td colspan="6" class="expanded-content">
+                    <div class="transaction-details">
+                      <!-- Controls Header -->
+                      <div class="controls-header">
+                        <div class="header-title">
+                          <h4>Transactions for {{ pending.consignorName }}</h4>
+                        </div>
+                        <div class="header-controls">
+                          <label class="select-all-control">
+                            <input type="checkbox"
+                                   [checked]="areAllClearedTransactionsSelected(pending)"
+                                   (change)="toggleSelectAllCleared(pending, $event)">
+                            <span class="checkmark"></span>
+                            Select All Cleared ({{ pending.clearedTransactionCount || 0 }})
+                          </label>
+                          <div class="selection-summary">
+                            Selected: <span class="count">{{ getSelectedTransactionCount() }}</span> | <span class="amount">${{ getSelectedAmount().toFixed(2) }}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Transaction Table -->
+                      <div class="transaction-table-wrapper">
+                        <table class="transaction-table">
+                          <tbody>
+                            @for (transaction of pending.transactions; track transaction.transactionId) {
+                              <tr class="transaction-row" [class.selected]="isTransactionSelected(transaction.transactionId)">
+                                <td class="checkbox-cell">
+                                  <label class="checkbox-wrapper">
+                                    <input type="checkbox"
+                                           [checked]="isTransactionSelected(transaction.transactionId)"
+                                           (change)="toggleTransaction(transaction.transactionId, $event)">
+                                    <span class="checkmark"></span>
+                                  </label>
+                                </td>
+
+                                <td class="item-cell">
+                                  {{ transaction.itemName || 'Item' }}
+                                </td>
+
+                                <td class="status-cell">
+                                  @if (transaction.isCleared) {
+                                    <span class="status-cleared">✓ Cleared</span>
+                                  } @else {
+                                    <span class="status-badge">⚠ Uncleared</span>
+                                  }
+                                </td>
+
+                                <td class="dates-cell">
+                                  <div class="sale-date">Sale: {{ formatDate(transaction.saleDate) }}</div>
+                                  @if (!transaction.isCleared && transaction.clearDate) {
+                                    <div class="clear-date">Clears: {{ formatDate(transaction.clearDate) }}</div>
+                                  }
+                                </td>
+
+                                <td class="amount-cell">
+                                  ${{ transaction.consignorAmount.toFixed(2) }}
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+
+                      @if (getSelectedTransactionCount() > 0) {
+                        <div class="expanded-actions">
+                          <button class="btn-primary" (click)="proceedWithSelectedTransactions()">
+                            Create Payout for {{ getSelectedTransactionCount() }} (${{ getSelectedAmount().toFixed(2) }})
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
             }
           </tbody>
         </table>

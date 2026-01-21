@@ -203,24 +203,16 @@ export const ownerRoutes: Routes = [
             children: [
               {
                 path: '',
-                redirectTo: 'schedule-thresholds',
+                redirectTo: 'general',
                 pathMatch: 'full'
               },
               {
-                path: 'schedule-thresholds',
-                loadComponent: () => import('./settings/payouts/schedule-thresholds.component').then(m => m.ScheduleThresholdsComponent)
+                path: 'general',
+                loadComponent: () => import('./settings/payouts/general/general-payout-settings.component').then(m => m.GeneralPayoutSettingsComponent)
               },
               {
-                path: 'payment-methods',
-                loadComponent: () => import('./settings/payouts/payment-methods.component').then(m => m.PaymentMethodsComponent)
-              },
-              {
-                path: 'automation',
-                loadComponent: () => import('./settings/payouts/automation.component').then(m => m.AutomationComponent)
-              },
-              {
-                path: 'reports',
-                loadComponent: () => import('./settings/payouts/reports.component').then(m => m.ReportsComponent)
+                path: 'direct-deposit',
+                loadComponent: () => import('./settings/payouts/direct-deposit/direct-deposit-setup.component').then(m => m.DirectDepositSetupComponent)
               }
             ]
           },
@@ -239,10 +231,6 @@ export const ownerRoutes: Routes = [
               {
                 path: 'accounting',
                 loadComponent: () => import('./settings/integrations/accounting/accounting.component').then(m => m.AccountingComponent)
-              },
-              {
-                path: 'payouts',
-                loadComponent: () => import('./settings/integrations/payouts/payouts.component').then(m => m.Payouts)
               }
             ]
           },

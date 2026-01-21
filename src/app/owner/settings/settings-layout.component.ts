@@ -118,31 +118,19 @@ export class SettingsLayoutComponent implements OnInit {
       id: 'payouts',
       label: 'Payout Settings',
       icon: '💰',
-      description: 'Configure payout schedules, methods, and automation',
+      description: 'Configure payout methods, schedules, and automation',
       children: [
         {
-          id: 'schedule-thresholds',
-          label: 'Schedule & Thresholds',
-          route: 'payouts/schedule-thresholds',
-          description: 'Payout frequency, minimum amounts, and hold periods'
+          id: 'general',
+          label: 'General',
+          route: 'payouts/general',
+          description: 'Payout methods, hold period, and minimum threshold'
         },
         {
-          id: 'payment-methods',
-          label: 'Payment Methods',
-          route: 'payouts/payment-methods',
-          description: 'Available payment options and processing fees'
-        },
-        {
-          id: 'automation',
-          label: 'Automation',
-          route: 'payouts/automation',
-          description: 'Automatic payout generation and approval settings'
-        },
-        {
-          id: 'reports',
-          label: 'Reports & Statements',
-          route: 'payouts/reports',
-          description: 'Statement generation and formatting options'
+          id: 'direct-deposit',
+          label: 'Direct Deposit',
+          route: 'payouts/direct-deposit',
+          description: 'Bank account setup and automated payout scheduling'
         }
       ]
     },
@@ -163,12 +151,6 @@ export class SettingsLayoutComponent implements OnInit {
           label: 'Accounting',
           route: 'integrations/accounting',
           description: 'QuickBooks, Xero integrations'
-        },
-        {
-          id: 'payouts',
-          label: 'Payouts',
-          route: 'integrations/payouts',
-          description: 'Configure payout methods and banking integrations'
         }
       ]
     },

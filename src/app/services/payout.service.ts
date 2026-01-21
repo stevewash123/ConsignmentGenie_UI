@@ -425,4 +425,13 @@ export class PayoutService {
         }
       }));
   }
+
+  refreshSummaries(): Observable<void> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/summaries/refresh`, {})
+      .pipe(map(response => {
+        if (!response.success) {
+          throw new Error('Failed to refresh payout summaries');
+        }
+      }));
+  }
 }

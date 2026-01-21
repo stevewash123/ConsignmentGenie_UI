@@ -68,6 +68,78 @@ export interface UpdatePayoutSettingsRequest {
   minimumPayoutZelle?: number | null;
 }
 
+// New PayoutSettings interfaces per the spec document
+export interface NewPayoutSettings {
+  id: string;
+  organizationId: string;
+  // General Settings
+  payoutMethodCheck: boolean;
+  payoutMethodCash: boolean;
+  payoutMethodStoreCredit: boolean;
+  payoutMethodPayPal: boolean;
+  payoutMethodVenmo: boolean;
+  payoutMethodACH: boolean;
+  holdPeriodDays: number;
+  minimumPayoutThreshold: number;
+  // Direct Deposit Settings
+  bankAccountConnected: boolean;
+  plaidAccessToken?: string;
+  plaidAccountId?: string;
+  bankName?: string;
+  bankAccountLast4?: string;
+  minimumBalanceProtection: number;
+  autoPayEnabled: boolean;
+  autoPayMonday: boolean;
+  autoPayTuesday: boolean;
+  autoPayWednesday: boolean;
+  autoPayThursday: boolean;
+  autoPayFriday: boolean;
+  autoPaySaturday: boolean;
+  autoPaySunday: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface CreateNewPayoutSettingsRequest {
+  payoutMethodCheck?: boolean;
+  payoutMethodCash?: boolean;
+  payoutMethodStoreCredit?: boolean;
+  payoutMethodPayPal?: boolean;
+  payoutMethodVenmo?: boolean;
+  payoutMethodACH?: boolean;
+  holdPeriodDays?: number;
+  minimumPayoutThreshold?: number;
+  minimumBalanceProtection?: number;
+  autoPayEnabled?: boolean;
+  autoPayMonday?: boolean;
+  autoPayTuesday?: boolean;
+  autoPayWednesday?: boolean;
+  autoPayThursday?: boolean;
+  autoPayFriday?: boolean;
+  autoPaySaturday?: boolean;
+  autoPaySunday?: boolean;
+}
+
+export interface UpdateNewPayoutSettingsRequest {
+  payoutMethodCheck?: boolean | null;
+  payoutMethodCash?: boolean | null;
+  payoutMethodStoreCredit?: boolean | null;
+  payoutMethodPayPal?: boolean | null;
+  payoutMethodVenmo?: boolean | null;
+  payoutMethodACH?: boolean | null;
+  holdPeriodDays?: number | null;
+  minimumPayoutThreshold?: number | null;
+  minimumBalanceProtection?: number | null;
+  autoPayEnabled?: boolean | null;
+  autoPayMonday?: boolean | null;
+  autoPayTuesday?: boolean | null;
+  autoPayWednesday?: boolean | null;
+  autoPayThursday?: boolean | null;
+  autoPayFriday?: boolean | null;
+  autoPaySaturday?: boolean | null;
+  autoPaySunday?: boolean | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -124,6 +196,40 @@ export class PayoutSettingsService {
         if (!response.success) {
           throw new Error('Failed to delete payout settings');
         }
+      }));
+  }
+
+  // New API methods for the restructured payout settings
+  getNewPayoutSettings(): Observable<NewPayoutSettings> {
+    return this.http.get<NewPayoutSettings>(`${this.apiUrl}/new`)
+      .pipe(map(response => {
+        return {
+          ...response,
+          createdAt: new Date(response.createdAt),
+          updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined
+        };
+      }));
+  }
+
+  createNewPayoutSettings(request: CreateNewPayoutSettingsRequest): Observable<NewPayoutSettings> {
+    return this.http.post<NewPayoutSettings>(`${this.apiUrl}/new`, request)
+      .pipe(map(response => {
+        return {
+          ...response,
+          createdAt: new Date(response.createdAt),
+          updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined
+        };
+      }));
+  }
+
+  updateNewPayoutSettings(request: UpdateNewPayoutSettingsRequest): Observable<NewPayoutSettings> {
+    return this.http.put<NewPayoutSettings>(`${this.apiUrl}/new`, request)
+      .pipe(map(response => {
+        return {
+          ...response,
+          createdAt: new Date(response.createdAt),
+          updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined
+        };
       }));
   }
 }
