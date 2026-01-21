@@ -18,6 +18,7 @@ import { Consignor } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 import { DownloadService } from '../../shared/services/download.service';
 import { ConsignorStatementModalComponent, ConsignorOption } from '../../shared/components/consignor-statement-modal.component';
+import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
 
 // ============================================================================
 // Constants
@@ -59,6 +60,7 @@ export class OwnerPayoutsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly loadingService = inject(LoadingService);
   private readonly downloadService = inject(DownloadService);
+  private readonly confirmationService = inject(ConfirmationDialogService);
   private readonly destroyRef = inject(DestroyRef);
 
   // Expose enum for template use
@@ -121,6 +123,11 @@ export class OwnerPayoutsComponent implements OnInit {
     notes: '',
     transactionIds: []
   });
+
+  // Helper to format date for HTML date input
+  formatDateForInput(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
 
   // ============================================================================
   // Computed Values
@@ -740,7 +747,7 @@ export class OwnerPayoutsComponent implements OnInit {
       .reduce((sum, t) => sum + t.consignorAmount, 0);
   }
 
-  proceedWithSelectedTransactions(): void {
+  async proceedWithSelectedTransactions(): Promise<void> {
     const pending = this.selectedPendingPayout();
     if (!pending) return;
 
@@ -752,11 +759,19 @@ export class OwnerPayoutsComponent implements OnInit {
     // Check for uncleared transactions and warn
     const unclearedCount = selectedTransactions.filter(t => !t.isCleared).length;
     if (unclearedCount > 0) {
-      const proceed = confirm(
-        `⚠️ Warning: You have selected ${unclearedCount} uncleared transactions. ` +
-        'These funds may not be available yet. Proceed anyway?'
-      );
-      if (!proceed) return;
+      try {
+        const result = await firstValueFrom(
+          this.confirmationService.confirmAction(
+            'Uncleared Transactions Warning',
+            `⚠️ Warning: You have selected ${unclearedCount} uncleared transactions. ` +
+            'These funds may not be available yet. Proceed anyway?',
+            'Proceed'
+          )
+        );
+        if (!result.confirmed) return;
+      } catch (error) {
+        return; // User cancelled or error occurred
+      }
     }
 
     // Close transaction modal and open create payout modal with selected transactions
