@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ConfirmationDialogComponent } from './shared/components/confirmation-dialog.component';
+import { ToastNotificationsComponent } from './shared/components/toast-notifications/toast-notifications.component';
 import { LoadingService } from './shared/services/loading.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, ConfirmationDialogComponent],
+  imports: [CommonModule, RouterOutlet, ConfirmationDialogComponent, ToastNotificationsComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

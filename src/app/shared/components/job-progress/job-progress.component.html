@@ -1,0 +1,114 @@
+<div class="job-progress-container">
+  <!-- Connection Status -->
+  <div class="connection-status" [ngClass]="{'connected': isConnected, 'disconnected': !isConnected}">
+    <div class="connection-indicator">
+      <div class="status-dot"></div>
+      <span class="status-text">
+        {{ isConnected ? 'Connected' : 'Disconnected' }}
+      </span>
+    </div>
+
+    <!-- Test button (remove in production) -->
+    <button
+      class="test-button"
+      (click)="startTestJob()"
+      [disabled]="!isConnected"
+      title="Test job notifications">
+      Test Payout Job
+    </button>
+  </div>
+
+  <!-- Active Jobs -->
+  @if (activeJobs.length > 0) {
+    <div class="active-jobs">
+      <h3 class="section-title">Active Jobs</h3>
+
+      @for (job of activeJobs; track job.jobId) {
+        <div class="job-item active" [attr.data-job-id]="job.jobId">
+          <div class="job-header">
+            <div class="job-info">
+              <span class="job-icon">{{ getJobIcon(job.jobType) }}</span>
+              <span class="job-name">{{ getJobTypeDisplay(job.jobType) }}</span>
+            </div>
+            <div class="job-status">
+              <span class="status-icon">{{ getStatusIcon(job.status) }}</span>
+              <span class="status-text" [style.color]="getStatusColor(job.status)">
+                {{ job.status | titlecase }}
+              </span>
+            </div>
+          </div>
+
+          @if (job.message) {
+            <div class="job-message">{{ job.message }}</div>
+          }
+
+          <div class="job-progress">
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                [style.width.%]="job.progress"
+                [style.background-color]="getStatusColor(job.status)">
+              </div>
+            </div>
+            <span class="progress-text">{{ job.progress }}%</span>
+          </div>
+
+          @if (job.jobType === 'payout-generation') {
+            <div class="job-details">
+              Processing {{ (job as any).processedConsignors || 0 }} of {{ (job as any).consignorCount || 0 }} consignors
+            </div>
+          }
+
+          @if (job.jobType === 'bank-sync') {
+            <div class="job-details">
+              Synced {{ (job as any).processedTransactions || 0 }} of {{ (job as any).transactionCount || 0 }} transactions
+            </div>
+          }
+
+          @if (job.jobType === 'quickbooks-sync') {
+            <div class="job-details">
+              Synced {{ (job as any).processedRecords || 0 }} of {{ (job as any).recordCount || 0 }} records
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Recent Completed Jobs -->
+  @if (recentCompletedJobs.length > 0) {
+    <div class="recent-jobs">
+      <h3 class="section-title">Recent Jobs</h3>
+
+      @for (job of recentCompletedJobs; track job.jobId) {
+        <div class="job-item completed" [attr.data-job-id]="job.jobId">
+          <div class="job-header">
+            <div class="job-info">
+              <span class="job-icon">{{ getJobIcon(job.jobType) }}</span>
+              <span class="job-name">{{ getJobTypeDisplay(job.jobType) }}</span>
+            </div>
+            <div class="job-status">
+              <span class="status-icon">{{ getStatusIcon(job.status) }}</span>
+              <span class="status-text" [style.color]="getStatusColor(job.status)">
+                {{ job.status | titlecase }}
+              </span>
+            </div>
+          </div>
+
+          @if (job.endTime) {
+            <div class="job-timestamp">
+              Completed {{ job.endTime | date:'short' }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (activeJobs.length === 0 && recentCompletedJobs.length === 0) {
+    <div class="no-jobs">
+      <div class="no-jobs-icon">⚙️</div>
+      <div class="no-jobs-text">No active jobs</div>
+    </div>
+  }
+</div>

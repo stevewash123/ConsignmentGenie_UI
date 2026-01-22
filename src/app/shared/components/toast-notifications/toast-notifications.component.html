@@ -1,0 +1,41 @@
+<div class="toast-container">
+  @for (notification of notifications; track notification.id) {
+    <div
+      class="toast-notification"
+      [ngClass]="getNotificationClass(notification.type)"
+      [attr.data-notification-id]="notification.id">
+
+      <div class="toast-content">
+        <div class="toast-header">
+          <span class="toast-icon">{{ getNotificationIcon(notification.type) }}</span>
+          <span class="toast-title">{{ notification.title }}</span>
+          <button
+            class="toast-close"
+            (click)="removeNotification(notification.id)"
+            aria-label="Close notification">
+            ×
+          </button>
+        </div>
+
+        <div class="toast-message">{{ notification.message }}</div>
+
+        @if (notification.actions && notification.actions.length > 0) {
+          <div class="toast-actions">
+            @for (action of notification.actions; track action.label) {
+              <button
+                class="toast-action-btn"
+                [ngClass]="'btn-' + (action.style || 'secondary')"
+                (click)="executeAction(action)">
+                {{ action.label }}
+              </button>
+            }
+          </div>
+        }
+
+        <div class="toast-timestamp">
+          {{ notification.timestamp | date:'short' }}
+        </div>
+      </div>
+    </div>
+  }
+}</div>
