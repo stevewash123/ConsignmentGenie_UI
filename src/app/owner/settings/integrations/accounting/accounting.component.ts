@@ -33,6 +33,11 @@ export class AccountingComponent implements OnInit {
     accountMappings: {}
   });
 
+  salesSyncEnabled = signal(false);
+  consignorSyncEnabled = signal(true);
+  payoutRecordingMethod = signal<'bill-payment' | 'direct-expense'>('direct-expense');
+  lineItemDetail = signal<'lump-sum' | 'itemized'>('lump-sum');
+
   isLoading = signal(false);
   isSaving = signal(false);
 
@@ -142,11 +147,46 @@ export class AccountingComponent implements OnInit {
     }
   }
 
+  onSalesSyncToggle() {
+    this.salesSyncEnabled.update(value => !value);
+    this.autoSave();
+  }
+
+  onConsignorSyncToggle() {
+    this.consignorSyncEnabled.update(value => !value);
+    this.autoSave();
+  }
+
+  onPayoutRecordingChange(method: 'bill-payment' | 'direct-expense') {
+    this.payoutRecordingMethod.set(method);
+    this.autoSave();
+  }
+
+  onLineItemDetailChange(detail: 'lump-sum' | 'itemized') {
+    this.lineItemDetail.set(detail);
+    this.autoSave();
+  }
+
+  getSyncFrequencyDisplay(): string {
+    const frequency = this.quickBooksStatus().syncFrequency;
+    switch (frequency) {
+      case 'manual':
+        return 'Manual sync only';
+      case 'daily':
+        return 'Daily automatic sync';
+      case 'real-time':
+        return 'Real-time sync';
+      default:
+        return 'Manual sync only';
+    }
+  }
+
   updateSyncFrequency(frequency: 'manual' | 'daily' | 'real-time') {
     this.quickBooksStatus.update(status => ({
       ...status,
       syncFrequency: frequency
     }));
+    this.autoSave();
   }
 
   configureAccountMapping() {
@@ -182,5 +222,30 @@ export class AccountingComponent implements OnInit {
       hour: 'numeric',
       minute: '2-digit'
     }).format(date);
+  }
+
+  private async autoSave() {
+    if (this.isSaving()) return;
+
+    this.isSaving.set(true);
+    try {
+      // Include all settings in the save
+      const settings = {
+        salesSync: this.salesSyncEnabled(),
+        consignorSync: this.consignorSyncEnabled(),
+        payoutRecordingMethod: this.payoutRecordingMethod(),
+        lineItemDetail: this.lineItemDetail(),
+        syncFrequency: this.quickBooksStatus().syncFrequency,
+        accountMappings: this.quickBooksStatus().accountMappings
+      };
+
+      // TODO: Replace with actual API call
+      console.log('Auto-saving QuickBooks settings:', settings);
+      await new Promise(resolve => setTimeout(resolve, 300));
+    } catch (error) {
+      console.error('Failed to auto-save settings:', error);
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 }
