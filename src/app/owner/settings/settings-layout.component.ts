@@ -115,8 +115,22 @@ export class SettingsLayoutComponent implements OnInit {
       ]
     },
     {
+      id: 'sales',
+      label: 'Sales',
+      icon: '🛒',
+      description: 'POS systems and sales management',
+      children: [
+        {
+          id: 'general',
+          label: 'General',
+          route: 'sales/general',
+          description: 'POS systems and storefront configuration'
+        }
+      ]
+    },
+    {
       id: 'payouts',
-      label: 'Payout Settings',
+      label: 'Payouts',
       icon: '💰',
       description: 'Configure payout methods, schedules, and automation',
       children: [
@@ -135,22 +149,22 @@ export class SettingsLayoutComponent implements OnInit {
       ]
     },
     {
-      id: 'integrations',
-      label: 'Integrations',
-      icon: '🔗',
-      description: 'External services and connections',
+      id: 'book-keeping',
+      label: 'Book Keeping',
+      icon: '📊',
+      description: 'Financial management and accounting',
       children: [
         {
-          id: 'sales',
-          label: 'Sales',
-          route: 'integrations/sales',
-          description: 'POS systems and online storefronts'
+          id: 'general',
+          label: 'General',
+          route: 'book-keeping/general',
+          description: 'General accounting settings and configuration'
         },
         {
-          id: 'accounting',
-          label: 'Accounting',
-          route: 'integrations/accounting',
-          description: 'QuickBooks, Xero integrations'
+          id: 'quickbooks',
+          label: 'QuickBooks',
+          route: 'book-keeping/quickbooks',
+          description: 'QuickBooks Online integration and sync settings'
         }
       ]
     },

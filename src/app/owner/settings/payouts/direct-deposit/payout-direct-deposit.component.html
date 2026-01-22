@@ -1,0 +1,251 @@
+<div class="direct-deposit-settings">
+  <!-- Header -->
+  <div class="settings-header">
+    <div class="header-content">
+      <h1>Direct Deposit Setup</h1>
+      <div class="auto-save-indicator">
+        @if (isSaving()) {
+          <div class="saving-indicator">
+            <div class="spinner"></div>
+            <span>Saving...</span>
+          </div>
+        } @else {
+          <span class="auto-save-text">Saved automatically</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner-large"></div>
+      <p>Loading direct deposit settings...</p>
+    </div>
+  } @else {
+    <!-- Direct Deposit Disabled Notice -->
+    @if (!directDepositEnabled()) {
+      <div class="disabled-notice">
+        <div class="notice-icon">⚠️</div>
+        <div class="notice-content">
+          <h3>Direct Deposit Not Enabled</h3>
+          <p>You need to enable "Direct Deposit (ACH)" in the <strong>General</strong> payout settings first.</p>
+          <a href="/owner/settings/payouts/general" class="enable-link">Go to General Settings →</a>
+        </div>
+      </div>
+    } @else {
+      <!-- Settings Content -->
+      <div class="settings-content">
+
+        <!-- Bank Account Section -->
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>BANK ACCOUNT</h2>
+          </div>
+
+          @if (!bankAccount().connected) {
+            <!-- Not Connected State -->
+            <div class="bank-setup-card">
+              <div class="setup-icon">🏦</div>
+              <div class="setup-content">
+                <h3>Bank Account Verification</h3>
+                <p>Connect your shop's bank account securely using Plaid to enable automated ACH transfers to consignors.</p>
+
+                <button
+                  class="connect-button"
+                  (click)="connectBankAccount()"
+                  [disabled]="isConnecting()">
+                  @if (isConnecting()) {
+                    <div class="spinner"></div>
+                    Connecting...
+                  } @else {
+                    🔗 Connect Bank Account
+                  }
+                </button>
+
+                <div class="security-features">
+                  <div class="feature">✓ Secure bank connection via Plaid</div>
+                  <div class="feature">✓ Automated ACH transfers to verified accounts</div>
+                  <div class="feature">✓ Built-in fraud protection and compliance</div>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <!-- Connected State -->
+            <div class="bank-connected-card">
+              <div class="connection-status">
+                <div class="status-icon">✓</div>
+                <div class="status-content">
+                  <h3>Connected</h3>
+                  <p>{{ bankAccount().bankName }} ••••{{ bankAccount().accountLast4 }}</p>
+                </div>
+                <button
+                  class="disconnect-button"
+                  (click)="disconnectBankAccount()">
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Minimum Balance Protection Section -->
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>MINIMUM BALANCE PROTECTION</h2>
+          </div>
+
+          <div class="input-group">
+            <span class="input-prefix">$</span>
+            <input
+              type="number"
+              class="balance-input"
+              [value]="minimumBalanceProtection()"
+              (input)="onMinimumBalanceChange($any($event.target).value)"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </div>
+
+          <div class="section-info">
+            <i class="info-icon">ℹ️</i>
+            <span>Auto-payouts will pause if your account would drop below this amount.</span>
+          </div>
+        </section>
+
+        <!-- Auto-Pay Schedule Section -->
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>AUTO-PAY SCHEDULE</h2>
+          </div>
+
+          <div class="auto-pay-toggle">
+            <label class="toggle-checkbox">
+              <input
+                type="checkbox"
+                [checked]="autoPayEnabled()"
+                [disabled]="!canEnableAutoPay"
+                (change)="onAutoPayToggle()"
+              />
+              <span class="toggle-slider"></span>
+              <span class="toggle-label">Auto-pay consignors (no approval needed)</span>
+            </label>
+          </div>
+
+          @if (!canEnableAutoPay) {
+            <div class="requirement-notice">
+              <i class="info-icon">ℹ️</i>
+              <span>Bank account connection required to enable auto-pay</span>
+            </div>
+          }
+
+          @if (autoPayEnabled()) {
+            <div class="schedule-settings">
+              <h4>Run payouts on:</h4>
+              <div class="days-grid">
+                <label class="day-checkbox" [class.selected]="selectedDays().monday">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDays().monday"
+                    (change)="onDayToggle('monday')"
+                  />
+                  <span>Mon</span>
+                </label>
+                <label class="day-checkbox" [class.selected]="selectedDays().tuesday">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDays().tuesday"
+                    (change)="onDayToggle('tuesday')"
+                  />
+                  <span>Tue</span>
+                </label>
+                <label class="day-checkbox" [class.selected]="selectedDays().wednesday">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDays().wednesday"
+                    (change)="onDayToggle('wednesday')"
+                  />
+                  <span>Wed</span>
+                </label>
+                <label class="day-checkbox" [class.selected]="selectedDays().thursday">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDays().thursday"
+                    (change)="onDayToggle('thursday')"
+                  />
+                  <span>Thu</span>
+                </label>
+                <label class="day-checkbox" [class.selected]="selectedDays().friday">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDays().friday"
+                    (change)="onDayToggle('friday')"
+                  />
+                  <span>Fri</span>
+                </label>
+                <label class="day-checkbox" [class.selected]="selectedDays().saturday">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDays().saturday"
+                    (change)="onDayToggle('saturday')"
+                  />
+                  <span>Sat</span>
+                </label>
+                <label class="day-checkbox" [class.selected]="selectedDays().sunday">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDays().sunday"
+                    (change)="onDayToggle('sunday')"
+                  />
+                  <span>Sun</span>
+                </label>
+              </div>
+
+              <div class="schedule-info">
+                <i class="info-icon">ℹ️</i>
+                <span>Payouts process at 2:00 AM on selected days</span>
+              </div>
+
+              @if (selectedDaysDisplay) {
+                <div class="schedule-summary">
+                  <strong>Current Schedule:</strong> {{ selectedDaysDisplay }}
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Current Settings Summary -->
+        @if (bankAccount().connected) {
+          <section class="settings-section summary-section">
+            <div class="section-header">
+              <h2>SUMMARY</h2>
+            </div>
+
+            <div class="summary-content">
+              <div class="summary-item">
+                <span class="summary-label">Bank Account:</span>
+                <span class="summary-value">{{ bankAccount().bankName }} ••••{{ bankAccount().accountLast4 }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Balance Protection:</span>
+                <span class="summary-value">${{ minimumBalanceProtection().toFixed(2) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Auto-Pay:</span>
+                <span class="summary-value">{{ autoPayEnabled() ? 'Enabled' : 'Disabled' }}</span>
+              </div>
+              @if (autoPayEnabled() && selectedDaysDisplay) {
+                <div class="summary-item">
+                  <span class="summary-label">Schedule:</span>
+                  <span class="summary-value">{{ selectedDaysDisplay }}</span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    }
+  }
+</div>

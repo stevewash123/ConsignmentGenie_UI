@@ -5,7 +5,7 @@
         <h1>Payouts Management</h1>
       </div>
       <div class="header-actions">
-        <button class="btn-primary secondary" (click)="refreshData()">
+        <button class="btn-primary secondary" (click)="refreshData()" title="Recalculate which payments are pending">
           🔄 Update Payouts
         </button>
         <button class="btn-primary" (click)="openPayAllModal()" [disabled]="pendingPayouts().length === 0">
@@ -108,7 +108,7 @@
                 <td>{{ pending.transactionCount }}</td>
                 <td class="cell-secondary">{{ formatDate(pending.earliestSale) }} - {{ formatDate(pending.latestSale) }}</td>
                 <td class="actions-cell">
-                  <button class="btn-icon" (click)="createPayoutForConsignor(pending)" title="Create Payout">💰</button>
+                  <button class="btn-icon btn-primary-bg" (click)="createPayoutForConsignor(pending)" title="Pay this Consignor">💰</button>
                   <button class="btn-icon" (click)="generateStatementForConsignor(pending.consignorId)" title="Generate Statement">📄</button>
                 </td>
               </tr>
@@ -311,7 +311,6 @@
                 </td>
                 <td class="actions-cell">
                   <button class="btn-icon" (click)="viewPayout(payout.id)" title="View Details">👁️</button>
-                  <button class="btn-icon" (click)="editPayout(payout)" title="Edit">✏️</button>
                   <button class="btn-icon" (click)="exportPayout(payout.id, 'csv')" title="Export CSV">📥</button>
                 </td>
               </tr>

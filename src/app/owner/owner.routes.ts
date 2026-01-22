@@ -208,28 +208,42 @@ export const ownerRoutes: Routes = [
               },
               {
                 path: 'general',
-                loadComponent: () => import('./settings/payouts/general/general-payout-settings.component').then(m => m.GeneralPayoutSettingsComponent)
+                loadComponent: () => import('./settings/payouts/general/payout-general.component').then(m => m.PayoutGeneralComponent)
               },
               {
                 path: 'direct-deposit',
-                loadComponent: () => import('./settings/payouts/direct-deposit/direct-deposit-setup.component').then(m => m.DirectDepositSetupComponent)
+                loadComponent: () => import('./settings/payouts/direct-deposit/payout-direct-deposit.component').then(m => m.PayoutDirectDepositComponent)
               }
             ]
           },
           {
-            path: 'integrations',
+            path: 'sales',
             children: [
               {
                 path: '',
-                redirectTo: 'sales',
+                redirectTo: 'general',
                 pathMatch: 'full'
               },
               {
-                path: 'sales',
+                path: 'general',
                 loadComponent: () => import('./settings/integrations/sales/sales.component').then(m => m.SalesComponent)
+              }
+            ]
+          },
+          {
+            path: 'book-keeping',
+            children: [
+              {
+                path: '',
+                redirectTo: 'general',
+                pathMatch: 'full'
               },
               {
-                path: 'accounting',
+                path: 'general',
+                loadComponent: () => import('./settings/book-keeping/general/book-keeping-general.component').then(m => m.BookKeepingGeneralComponent)
+              },
+              {
+                path: 'quickbooks',
                 loadComponent: () => import('./settings/integrations/accounting/accounting.component').then(m => m.AccountingComponent)
               }
             ]

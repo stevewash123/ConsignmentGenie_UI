@@ -362,6 +362,18 @@
     gap: 0.5rem;
     justify-content: center;
   }
+
+  /* Blue background for primary action button */
+  .btn-primary-bg {
+    background: var(--color-med);
+    color: white;
+    border-color: var(--color-med-dark);
+
+    &:hover {
+      background: var(--color-med-dark);
+      border-color: var(--color-dark);
+    }
+  }
 }
 
 /* Sort indicator */

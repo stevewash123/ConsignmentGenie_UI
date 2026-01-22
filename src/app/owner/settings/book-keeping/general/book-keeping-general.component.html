@@ -1,0 +1,140 @@
+<div class="bookkeeping-general">
+  <!-- Header -->
+  <div class="settings-header">
+    <div class="header-content">
+      <h1>Bookkeeping</h1>
+      <div class="auto-save-indicator">
+        @if (isSaving()) {
+          <div class="saving-indicator">
+            <div class="spinner"></div>
+            <span>Saving...</span>
+          </div>
+        } @else {
+          <span class="auto-save-text">Saved automatically</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner-large"></div>
+      <p>Loading bookkeeping settings...</p>
+    </div>
+  } @else {
+    <!-- Settings Content -->
+    <div class="settings-content">
+
+      <!-- Accounting Software Section -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>ACCOUNTING SOFTWARE</h2>
+        </div>
+
+        <div class="software-option">
+          <label class="software-checkbox">
+            <input
+              type="checkbox"
+              [checked]="useQuickBooks()"
+              (change)="onQuickBooksToggle()"
+            />
+            <span class="checkmark"></span>
+            <span class="software-label">I use QuickBooks</span>
+          </label>
+
+          <div class="software-info">
+            <i class="info-icon">ℹ️</i>
+            <span>Enable to sync payouts and consignors with QuickBooks</span>
+          </div>
+        </div>
+
+        @if (useQuickBooks()) {
+          <div class="enabled-notice">
+            <div class="notice-icon">📊</div>
+            <div class="notice-content">
+              <h3>QuickBooks Integration Enabled</h3>
+              <p>Configure connection and sync settings in the <strong>QuickBooks</strong> tab.</p>
+              @if (!quickBooksConnected()) {
+                <p class="connection-status">Connection: <span class="status-pending">Not Connected</span></p>
+              } @else {
+                <p class="connection-status">Connection: <span class="status-connected">✓ Connected</span></p>
+              }
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Manual Export Options -->
+      @if (!useQuickBooks()) {
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>MANUAL EXPORT OPTIONS</h2>
+            <p class="section-description">Export your financial data for use with various accounting systems</p>
+          </div>
+
+          <div class="export-options">
+            <div class="export-item">
+              <div class="export-icon">📄</div>
+              <div class="export-content">
+                <h4>Transaction Exports</h4>
+                <p>CSV format for sales and transaction data</p>
+              </div>
+            </div>
+            <div class="export-item">
+              <div class="export-icon">💰</div>
+              <div class="export-content">
+                <h4>Payout Reports</h4>
+                <p>CSV and PDF format for consignor payments</p>
+              </div>
+            </div>
+            <div class="export-item">
+              <div class="export-icon">📊</div>
+              <div class="export-content">
+                <h4>Sales Summaries</h4>
+                <p>CSV format for sales analytics and reporting</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="export-note">
+            <i class="info-icon">ℹ️</i>
+            <span>Access these exports from their respective pages (Sales, Payouts, etc.)</span>
+          </div>
+        </section>
+      }
+
+      <!-- Future Integrations -->
+      <section class="settings-section future-section">
+        <div class="section-header">
+          <h2>FUTURE INTEGRATIONS</h2>
+          <p class="section-description">Additional accounting software support coming soon</p>
+        </div>
+
+        <div class="future-integrations">
+          <div class="future-item">
+            <div class="future-icon">🚧</div>
+            <div class="future-content">
+              <span class="future-name">Xero</span>
+              <span class="future-status">Coming Soon</span>
+            </div>
+          </div>
+          <div class="future-item">
+            <div class="future-icon">🚧</div>
+            <div class="future-content">
+              <span class="future-name">Wave Accounting</span>
+              <span class="future-status">Coming Soon</span>
+            </div>
+          </div>
+          <div class="future-item">
+            <div class="future-icon">🚧</div>
+            <div class="future-content">
+              <span class="future-name">FreshBooks</span>
+              <span class="future-status">Planned</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  }
+</div>

@@ -1,0 +1,145 @@
+<div class="payout-general-settings">
+  <!-- Header -->
+  <div class="settings-header">
+    <div class="header-content">
+      <h1>General Payout Settings</h1>
+      <div class="auto-save-indicator">
+        @if (isSaving()) {
+          <div class="saving-indicator">
+            <div class="spinner"></div>
+            <span>Saving...</span>
+          </div>
+        } @else {
+          <span class="auto-save-text">Saved automatically</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner-large"></div>
+      <p>Loading payout settings...</p>
+    </div>
+  } @else {
+    <!-- Settings Content -->
+    <div class="settings-content">
+
+      <!-- Payout Methods Section -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>PAYOUT METHODS OFFERED</h2>
+          <p class="section-description">Select the methods you use to pay consignors</p>
+        </div>
+
+        <div class="methods-grid">
+          @for (method of payoutMethods(); track method.id) {
+            <div class="method-option">
+              <label class="method-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="method.enabled"
+                  (change)="onMethodToggle(method.id)"
+                />
+                <span class="checkmark"></span>
+                <span class="method-label">{{ method.label }}</span>
+              </label>
+            </div>
+          }
+        </div>
+
+        <div class="methods-note">
+          <i class="info-icon">ℹ️</i>
+          <span>PayPal and Venmo are marked "(manual)" to indicate the owner handles these payments outside the system - we just track that this method was used.</span>
+        </div>
+      </section>
+
+      <!-- Hold Period Section -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>HOLD PERIOD</h2>
+        </div>
+
+        <div class="input-group">
+          <input
+            type="number"
+            class="period-input"
+            [value]="holdPeriodDays()"
+            (input)="onHoldPeriodChange($any($event.target).value)"
+            min="0"
+            max="365"
+          />
+          <span class="input-suffix">days</span>
+        </div>
+
+        <div class="section-info">
+          <i class="info-icon">ℹ️</i>
+          <span>Days after sale before consignor can be paid. Protects against returns and chargebacks.</span>
+        </div>
+      </section>
+
+      <!-- Minimum Threshold Section -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>MINIMUM PAYOUT THRESHOLD</h2>
+        </div>
+
+        <div class="input-group">
+          <span class="input-prefix">$</span>
+          <input
+            type="number"
+            class="amount-input"
+            [value]="minimumThreshold()"
+            (input)="onThresholdChange($any($event.target).value)"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </div>
+
+        <div class="section-info">
+          <i class="info-icon">ℹ️</i>
+          <span>Balances below this stay pending until they reach the threshold.</span>
+        </div>
+      </section>
+
+      <!-- Direct Deposit Notice -->
+      @if (isDirectDepositEnabled) {
+        <section class="settings-section highlight-section">
+          <div class="direct-deposit-notice">
+            <div class="notice-icon">💰</div>
+            <div class="notice-content">
+              <h3>Direct Deposit Enabled</h3>
+              <p>You've enabled Direct Deposit (ACH). Configure bank connection and automation in the <strong>Direct Deposit</strong> tab.</p>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- Current Settings Summary -->
+      @if (enabledMethods.length > 0) {
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>SUMMARY</h2>
+          </div>
+
+          <div class="summary-content">
+            <div class="summary-item">
+              <span class="summary-label">Enabled Payment Methods:</span>
+              <span class="summary-value">{{ enabledMethods.join(', ') }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Hold Period:</span>
+              <span class="summary-value">{{ holdPeriodDays() }} days</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Minimum Threshold:</span>
+              <span class="summary-value">${{ minimumThreshold().toFixed(2) }}</span>
+            </div>
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>

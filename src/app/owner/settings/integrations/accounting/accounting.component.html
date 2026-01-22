@@ -1,6 +1,20 @@
-<div class="section">
-  <h2 class="section-title">Accounting</h2>
-  <p class="section-description">Connect with QuickBooks, Xero, and other accounting systems</p>
+<div class="quickbooks-integration">
+  <!-- Header -->
+  <div class="settings-header">
+    <div class="header-content">
+      <h1>QuickBooks Integration</h1>
+      <div class="auto-save-indicator">
+        @if (isSaving()) {
+          <div class="saving-indicator">
+            <div class="spinner"></div>
+            <span>Saving...</span>
+          </div>
+        } @else {
+          <span class="auto-save-text">Saved automatically</span>
+        }
+      </div>
+    </div>
+  </div>
 
   <!-- Loading State -->
   @if (isLoading()) {
