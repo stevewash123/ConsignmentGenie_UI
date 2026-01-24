@@ -84,8 +84,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading unread count:', error);
-          // Set a default count to ensure component is visible
-          this.unreadCount = 3;
+          this.unreadCount = 0; // Show actual zero count when API fails
         }
       });
   }
@@ -105,7 +104,6 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading notifications:', error);
-          // Set some mock notifications for development
           this.recentNotifications = [];
         },
         complete: () => {
