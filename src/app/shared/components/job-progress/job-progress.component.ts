@@ -2,7 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SignalRNotificationsService } from '../../../services/signalr-notifications.service';
-import { NotificationUpdate } from '../../../models/notifications.models';
+import {
+  NotificationUpdate,
+  PayoutJobUpdate,
+  BankSyncJobUpdate,
+  QuickBooksSyncJobUpdate
+} from '../../../models/notifications.models';
 
 @Component({
   selector: 'app-job-progress',
@@ -99,6 +104,19 @@ export class JobProgressComponent implements OnInit, OnDestroy {
       case 'failed': return '#ef4444';
       default: return '#6b7280';
     }
+  }
+
+  // Properly typed helper methods for job-specific properties
+  getPayoutJobProperty(job: PayoutJobUpdate, property: keyof PayoutJobUpdate): number {
+    return job[property] as number || 0;
+  }
+
+  getBankSyncJobProperty(job: BankSyncJobUpdate, property: keyof BankSyncJobUpdate): number {
+    return job[property] as number || 0;
+  }
+
+  getQuickBooksSyncJobProperty(job: QuickBooksSyncJobUpdate, property: keyof QuickBooksSyncJobUpdate): number {
+    return job[property] as number || 0;
   }
 
   // Test method to simulate job progress (remove in production)
