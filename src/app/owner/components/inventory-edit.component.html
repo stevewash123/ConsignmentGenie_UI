@@ -1,16 +1,445 @@
-<div class="inventory-edit-page">
-        <div class="page-header">
-          <div class="header-nav">
-            <button class="btn-back" (click)="goBack()">← Back to Inventory</button>
+<div *ngIf="isLoading" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Loading item details...</p>
+</div>
+
+<div class="detail-page" *ngIf="!isLoading">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button class="btn-secondary" (click)="goBack()" title="Go back to item details">
+        ← Back
+      </button>
+    </div>
+    <div class="header-actions">
+      <!-- Save/Cancel actions moved to bottom of form -->
+    </div>
+  </div>
+
+  <!-- Entity Title Row -->
+  <div class="entity-header" *ngIf="item()">
+    <h1>Edit: {{ item()!.title }}</h1>
+    <div class="entity-meta">
+      <span class="badge" [ngClass]="getStatusClass(item()!.status)">
+        {{ item()!.status }}
+      </span>
+      <span class="meta-id">SKU: {{ item()!.sku }}</span>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="detail-card">
+    <form (ngSubmit)="onSubmit()" #itemForm="ngForm">
+      <!-- General Error -->
+      <div class="error-banner" *ngIf="errors['general']">
+        {{ errors['general'] }}
+      </div>
+
+      <!-- Basic Information and Pricing Row -->
+      <div class="form-section-row">
+        <!-- Basic Information -->
+        <div class="form-section">
+          <h3>Basic Information</h3>
+
+          <!-- Title -->
+          <div class="form-group">
+            <label for="title" class="form-label required">Item Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              class="form-input"
+              [(ngModel)]="formData.title"
+              [disabled]="isSubmitting"
+              placeholder="Enter item title"
+              maxlength="200"
+              required>
+            <div class="form-error" *ngIf="errors['title']">
+              {{ errors['title'] }}
+            </div>
           </div>
-          <h1>Edit Item</h1>
-          <p>Update inventory item details</p>
+
+          <!-- SKU -->
+          <div class="form-group">
+            <label for="sku" class="form-label">SKU</label>
+            <input
+              type="text"
+              id="sku"
+              name="sku"
+              class="form-input"
+              [(ngModel)]="formData.sku"
+              [disabled]="isSubmitting"
+              placeholder="Item SKU"
+              maxlength="50">
+            <div class="form-error" *ngIf="errors['sku']">
+              {{ errors['sku'] }}
+            </div>
+          </div>
+
+          <!-- Category and Condition Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category-basic" class="form-label required">Category</label>
+              <input
+                type="text"
+                id="category-basic"
+                name="category-basic"
+                class="form-input"
+                [(ngModel)]="formData.category"
+                [disabled]="isSubmitting"
+                placeholder="Item category"
+                required>
+              <div class="form-error" *ngIf="errors['category']">
+                {{ errors['category'] }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="condition-basic" class="form-label required">Condition</label>
+              <select
+                id="condition-basic"
+                name="condition-basic"
+                class="form-select"
+                [(ngModel)]="formData.condition"
+                [disabled]="isSubmitting"
+                required>
+                <option *ngFor="let option of conditionOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+              <div class="form-error" *ngIf="errors['condition']">
+                {{ errors['condition'] }}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="edit-placeholder">
-          <div class="placeholder-icon">✏️</div>
-          <h2>Item Edit Form Coming Soon</h2>
-          <p>This page will allow editing of all item properties including photos, pricing, and consignor assignment.</p>
-          <p class="item-id">Editing Item ID: {{ itemId }}</p>
+        <!-- Pricing Information -->
+        <div class="form-section">
+          <h3>Pricing</h3>
+
+          <div class="form-group">
+            <label for="price" class="form-label required">Price</label>
+            <div class="price-input-group">
+              <span class="currency-symbol">$</span>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                class="form-input"
+                [(ngModel)]="formData.price"
+                [disabled]="isSubmitting"
+                placeholder="85"
+                min="0"
+                step="0.01"
+                required>
+            </div>
+            <div class="form-error" *ngIf="errors['price']">
+              {{ errors['price'] }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="minimumPrice" class="form-label">Minimum Price</label>
+            <div class="price-input-group">
+              <span class="currency-symbol">$</span>
+              <input
+                type="number"
+                id="minimumPrice"
+                name="minimumPrice"
+                class="form-input"
+                [(ngModel)]="formData.minimumPrice"
+                [disabled]="isSubmitting"
+                placeholder="0.00"
+                min="0"
+                step="0.01">
+            </div>
+          </div>
+
+          <!-- Consignor -->
+          <div class="form-group">
+            <label for="consignorId" class="form-label required">Consignor</label>
+            <select
+              id="consignorId"
+              name="consignorId"
+              class="form-select"
+              [(ngModel)]="formData.consignorId"
+              [disabled]="isSubmitting"
+              required>
+              <option value="">Select Consignor</option>
+              <option *ngFor="let consignor of consignors()" [value]="consignor.id">
+                {{ consignor.name }} ({{ consignor.consignorNumber || consignor.id }})
+              </option>
+            </select>
+            <div class="form-error" *ngIf="errors['consignorId']">
+              {{ errors['consignorId'] }}
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Category and Condition Row (Full Width) -->
+      <div class="form-section-separator"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category" class="form-label required">Category</label>
+          <select
+            id="category"
+            name="category"
+            class="form-select"
+            [(ngModel)]="formData.category"
+            [disabled]="isSubmitting"
+            required>
+            <option value="">Select Category</option>
+            <option *ngFor="let category of categories()" [value]="category.name">
+              {{ category.name }}
+            </option>
+          </select>
+          <div class="form-error" *ngIf="errors['category']">
+            {{ errors['category'] }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="condition" class="form-label required">Condition</label>
+          <select
+            id="condition"
+            name="condition"
+            class="form-select"
+            [(ngModel)]="formData.condition"
+            [disabled]="isSubmitting"
+            required>
+            <option value="" disabled>Select Condition</option>
+            <option *ngFor="let option of conditionOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <div class="form-error" *ngIf="errors['condition']">
+            {{ errors['condition'] }}
+          </div>
+        </div>
+      </div>
+
+        <!-- Details Section (Collapsible) -->
+        <div class="details-section full-width">
+          <button type="button"
+                  class="details-toggle"
+                  (click)="toggleDetailsSection()"
+                  [disabled]="isSubmitting">
+            <span class="toggle-icon" [class.expanded]="isDetailsExpanded">▶</span>
+            Additional Details
+          </button>
+
+          <div class="details-content" [class.expanded]="isDetailsExpanded">
+            <!-- Brand and Size Row -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="brand" class="form-label">Brand</label>
+                <input
+                  type="text"
+                  id="brand"
+                  name="brand"
+                  class="form-input"
+                  [(ngModel)]="formData.brand"
+                  [disabled]="isSubmitting"
+                  placeholder="Brand name"
+                  maxlength="100">
+              </div>
+
+              <div class="form-group">
+                <label for="size" class="form-label">Size</label>
+                <input
+                  type="text"
+                  id="size"
+                  name="size"
+                  class="form-input"
+                  [(ngModel)]="formData.size"
+                  [disabled]="isSubmitting"
+                  placeholder="Size"
+                  maxlength="50">
+              </div>
+            </div>
+
+            <!-- Color and Materials Row -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="color" class="form-label">Color</label>
+                <input
+                  type="text"
+                  id="color"
+                  name="color"
+                  class="form-input"
+                  [(ngModel)]="formData.color"
+                  [disabled]="isSubmitting"
+                  placeholder="Color"
+                  maxlength="50">
+              </div>
+
+              <div class="form-group">
+                <label for="materials" class="form-label">Materials</label>
+                <input
+                  type="text"
+                  id="materials"
+                  name="materials"
+                  class="form-input"
+                  [(ngModel)]="formData.materials"
+                  [disabled]="isSubmitting"
+                  placeholder="Materials"
+                  maxlength="200">
+              </div>
+            </div>
+
+            <!-- Measurements -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="measurements" class="form-label">Measurements</label>
+                <input
+                  type="text"
+                  id="measurements"
+                  name="measurements"
+                  class="form-input"
+                  [(ngModel)]="formData.measurements"
+                  [disabled]="isSubmitting"
+                  placeholder="Dimensions"
+                  maxlength="200">
+              </div>
+              <div class="form-group">
+                <!-- Empty space to maintain grid alignment -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="receivedDate" class="form-label">Received Date</label>
+            <input
+              type="date"
+              id="receivedDate"
+              name="receivedDate"
+              class="form-input"
+              [ngModel]="formatDateForInput(formData.receivedDate)"
+              (ngModelChange)="setReceivedDate($event)"
+              [disabled]="isSubmitting">
+            <div class="form-error" *ngIf="errors['receivedDate']">
+              {{ errors['receivedDate'] }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Expiration Date</label>
+            <div class="form-display-text">
+              {{ formData.expirationDate ? formatDateForDisplay(formData.expirationDate) : 'mm/dd/yyyy' }}
+            </div>
+            <div class="form-helper-text">
+              (90 days from received)
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Description -->
+        <div class="form-group full-width">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            class="form-textarea"
+            [(ngModel)]="formData.description"
+            [disabled]="isSubmitting"
+            placeholder="Optional item description"
+            maxlength="1000"
+            rows="4">
+          </textarea>
+          <div class="form-error" *ngIf="errors['description']">
+            {{ errors['description'] }}
+          </div>
+        </div>
+
+        <!-- Photos Section -->
+        <div class="form-group full-width">
+          <label class="form-label">Photos ({{ (item()?.photos || []).length }} of {{ maxPhotos }})</label>
+
+          <!-- Existing photos -->
+          <div class="photo-grid" *ngIf="item()?.photos && item()!.photos.length > 0">
+            <div *ngFor="let photo of item()!.photos; let i = index"
+                 class="photo-item"
+                 [class.primary]="photo.isPrimary">
+              <img [src]="getThumbnailUrl(photo.url)" [alt]="'Photo ' + (i + 1)" class="photo-thumbnail">
+              <div class="photo-actions">
+                <button type="button"
+                        *ngIf="!photo.isPrimary"
+                        (click)="setPrimaryPhoto(i)"
+                        title="Set as primary"
+                        [disabled]="isSubmitting"
+                        class="btn-icon btn-primary">
+                  ⭐
+                </button>
+                <button type="button"
+                        (click)="deletePhoto(i)"
+                        title="Delete photo"
+                        [disabled]="isSubmitting"
+                        class="btn-icon btn-danger">
+                  🗑️
+                </button>
+              </div>
+              <span *ngIf="photo.isPrimary" class="primary-badge">Primary</span>
+            </div>
+          </div>
+
+          <!-- Upload zone (shown if under max photos) -->
+          <div *ngIf="((item()?.photos || []).length) < maxPhotos"
+               class="upload-zone"
+               [class.drag-over]="isDragOver"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)">
+            <input type="file"
+                   #fileInput
+                   accept=".jpg,.jpeg,.png,.webp"
+                   (change)="onFileSelected($event)"
+                   style="display: none"
+                   [disabled]="isSubmitting">
+            <button type="button"
+                    class="btn btn-secondary"
+                    (click)="fileInput.click()"
+                    [disabled]="isSubmitting">
+              📷 Add Photo
+            </button>
+            <p class="upload-hint">or drag & drop (max 10MB)</p>
+          </div>
+
+          <!-- Upload progress -->
+          <div *ngIf="isUploadingPhoto" class="upload-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+            </div>
+            <span class="progress-text">Uploading... {{ uploadProgress }}%</span>
+          </div>
+
+          <div class="form-error" *ngIf="errors['photos']">
+            {{ errors['photos'] }}
+          </div>
+        </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancel()"
+          [disabled]="isSubmitting">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isSubmitting">
+          <div class="loading-spinner" *ngIf="isSubmitting"></div>
+          {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
