@@ -32,9 +32,23 @@ export class EarningsWidgetComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Unable to load earnings. Please try again.';
         this.loading = false;
         console.error('Earnings error:', err);
+
+        // For new consignors or if the endpoint doesn't exist, show a default state instead of error
+        if (err.status === 500 || err.status === 404) {
+          // Show a default empty earnings summary for new consignors
+          this.earningsSummary = {
+            totalEarnings: 0,
+            currentMonthEarnings: 0,
+            pendingPayouts: 0,
+            totalItems: 0,
+            soldItems: 0,
+            nextPayoutDate: null
+          };
+        } else {
+          this.error = 'Unable to load earnings. Please try again.';
+        }
       }
     });
   }

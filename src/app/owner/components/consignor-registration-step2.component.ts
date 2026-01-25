@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ConsignorService, ConsignorRegistrationRequest } from '../../services/consignor.service';
+import { PhoneFormatter } from '../../shared/utils/phone-formatter.util';
 
 interface RegistrationData {
   invitationToken: string;
@@ -63,7 +64,7 @@ export class ConsignorRegistrationStep2Component implements OnInit {
 
   ngOnInit(): void {
     // Check if we have registration data from step 1
-    const storedData = sessionStorage.getItem('provider_registration_data');
+    const storedData = sessionStorage.getItem('consignor_registration_data');
 
     if (!storedData) {
       this.isInvalidRegistration.set(true);
@@ -120,7 +121,7 @@ export class ConsignorRegistrationStep2Component implements OnInit {
         if (response.success) {
           this.isSubmitted.set(true);
           // Clear session storage
-          sessionStorage.removeItem('provider_registration_data');
+          sessionStorage.removeItem('consignor_registration_data');
         } else {
           this.errorMessage.set(response.message || 'Registration failed');
         }
@@ -142,5 +143,11 @@ export class ConsignorRegistrationStep2Component implements OnInit {
 
   goToHome(): void {
     this.router.navigate(['/']);
+  }
+
+  onPhoneChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = PhoneFormatter.formatPhoneInput(input);
+    this.details.phone = formatted.value;
   }
 }

@@ -13,7 +13,7 @@
         <!-- Auth Method Selector -->
         <div class="auth-section" *ngIf="!isInvalidToken() && invitationDetails()">
           <app-auth-method-selector
-            [enabledProviders]="['google', 'facebook']"
+            [enabledProviders]="['google', 'apple', 'twitter']"
             [showEmailPassword]="true"
             [isLoading]="isProcessing"
             [prefilledEmail]="invitationDetails()?.invitedEmail || ''"

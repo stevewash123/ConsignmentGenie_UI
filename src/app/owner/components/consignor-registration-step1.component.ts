@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ConsignorService } from '../../services/consignor.service';
 import { AuthService } from '../../services/auth.service';
+import { SocialAuthService } from '../../services/social-auth.service';
 import { AuthMethodSelectorComponent, ProviderAuthEvent, CredentialsEvent } from '../../shared/auth/components/auth-method-selector/auth-method-selector.component';
 
 interface InvitationDetails {
@@ -36,6 +37,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
   constructor(
     private consignorService: ConsignorService,
     private authService: AuthService,
+    private socialAuthService: SocialAuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -79,12 +81,38 @@ export class ConsignorRegistrationStep1Component implements OnInit {
   handleProviderAuth(event: ProviderAuthEvent): void {
     this.isProcessing.set(true);
     this.selectedProvider = event.provider;
+    this.errorMessage.set('');
 
-    // TODO: Implement OAuth flow
-    setTimeout(() => {
-      this.isProcessing.set(false);
-      this.errorMessage.set('OAuth sign-in coming soon! Please use email/password for now.');
-    }, 1000);
+    this.socialAuthService.authenticateWithProvider(event.provider)
+      .subscribe({
+        next: (authResult) => {
+          console.log('Social auth successful:', authResult);
+
+          // Store social auth data and invitation details for step 2
+          const registrationData = {
+            invitationToken: this.invitationToken,
+            authMethod: 'social',
+            provider: event.provider,
+            socialAuthData: authResult,
+            invitationDetails: this.invitationDetails()
+          };
+
+          sessionStorage.setItem('consignor_registration_data', JSON.stringify(registrationData));
+
+          // Navigate to step 2
+          this.router.navigate(['/register/consignor/details'], {
+            queryParams: { token: this.invitationToken }
+          });
+        },
+        error: (error) => {
+          console.error('Social auth failed:', error);
+          this.isProcessing.set(false);
+          this.errorMessage.set('Authentication failed. Please try again or use email/password.');
+        },
+        complete: () => {
+          this.isProcessing.set(false);
+        }
+      });
   }
 
   handleCredentials(event: CredentialsEvent): void {
@@ -113,7 +141,7 @@ export class ConsignorRegistrationStep1Component implements OnInit {
       invitationDetails: this.invitationDetails()
     };
 
-    sessionStorage.setItem('provider_registration_data', JSON.stringify(registrationData));
+    sessionStorage.setItem('consignor_registration_data', JSON.stringify(registrationData));
 
     // Navigate to step 2
     setTimeout(() => {
