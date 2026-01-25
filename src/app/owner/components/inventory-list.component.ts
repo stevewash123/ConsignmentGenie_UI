@@ -208,10 +208,59 @@ export class InventoryListComponent implements OnInit {
         this.selectedManifestId.set(params['manifestId']); // Apply the manifest filter
         this.loadItems(); // Load the already-created pending imports
       } else {
-        // Only load regular items if we're not handling manifest parameters
-        this.loadItems();
+        // First load regular inventory to check if it's empty
+        this.checkInventoryAndSetDefaultView();
       }
     });
+  }
+
+  private checkInventoryAndSetDefaultView() {
+    this.loadingService.start('inventory-list');
+
+    // Load regular inventory first to check if it's empty
+    const params: ItemQueryParams = {
+      page: 1,
+      pageSize: 1, // Just check if any items exist
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection
+    };
+
+    this.inventoryService.getItems(params)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          if (result.totalCount === 0) {
+            // No regular inventory - check if there are pending imports
+            this.inventoryService.getPendingSquareImports(params)
+              .pipe(takeUntilDestroyed(this.destroyRef))
+              .subscribe({
+                next: (pendingResult) => {
+                  if (pendingResult.totalCount > 0) {
+                    console.log('🔀 No regular inventory found, but pending imports exist. Showing pending imports tab by default.');
+                    this.viewMode.set('pending');
+                  }
+                  this.loadItems(); // Load the appropriate view
+                },
+                error: (err) => {
+                  console.error('Failed to check pending imports:', err);
+                  this.loadItems(); // Fall back to regular inventory
+                },
+                complete: () => {
+                  this.loadingService.stop('inventory-list');
+                }
+              });
+          } else {
+            // Regular inventory exists - show regular view
+            this.loadItems();
+            this.loadingService.stop('inventory-list');
+          }
+        },
+        error: (err) => {
+          console.error('Failed to check inventory:', err);
+          this.loadItems(); // Fall back to regular inventory
+          this.loadingService.stop('inventory-list');
+        }
+      });
   }
 
   private loadCategories() {
