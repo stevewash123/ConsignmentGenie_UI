@@ -64,6 +64,25 @@ export interface FacebookAuthRequest {
   providerId: string;
 }
 
+export interface TwitterAuthRequest {
+  accessToken: string;
+  accessTokenSecret: string;
+  mode: 'signup' | 'login' | 'link';
+  email: string;
+  name: string;
+  providerId: string;
+  username: string;
+}
+
+export interface AppleAuthRequest {
+  idToken: string;
+  authorizationCode: string;
+  mode: 'signup' | 'login' | 'link';
+  email: string;
+  name: string;
+  providerId: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }

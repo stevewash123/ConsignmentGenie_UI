@@ -7,9 +7,10 @@ export interface AuthProvider {
 
 export const AUTH_PROVIDERS: AuthProvider[] = [
   { id: 'google', name: 'Google', icon: 'G', enabled: true },
-  { id: 'facebook', name: 'Facebook', icon: 'f', enabled: true },
-  // Future providers:
-  // { id: 'apple', name: 'Apple', icon: '', enabled: false },
+  { id: 'apple', name: 'Apple', icon: '🍎', enabled: true },
+  { id: 'twitter', name: 'X (Twitter)', icon: '𝕏', enabled: true },
+  // Disabled providers:
+  // { id: 'facebook', name: 'Facebook', icon: 'f', enabled: false },
   // { id: 'microsoft', name: 'Microsoft', icon: '', enabled: false },
 ];
 

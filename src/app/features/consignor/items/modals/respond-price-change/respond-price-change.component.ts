@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 
-import { MockConsignorItemService } from '../../services/mock-consignor-item.service';
+import { ConsignorItemService } from '../../services/consignor-item.service';
 import {
   ConsignorItemSummary,
   PriceChangeDecisionRequest,
@@ -31,7 +31,7 @@ export class RespondPriceChangeComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private consignorItemService: MockConsignorItemService
+    private consignorItemService: ConsignorItemService
   ) {}
 
   ngOnInit(): void {

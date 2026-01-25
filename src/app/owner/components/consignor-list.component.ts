@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ConsignorService, PendingInvitation } from '../../services/consignor.service';
 import { Consignor } from '../../models/consignor.model';
@@ -38,11 +38,22 @@ export class ConsignorListComponent implements OnInit {
   constructor(
     private ConsignorService: ConsignorService,
     private loadingService: LoadingService,
-    private agreementService: AgreementService
+    private agreementService: AgreementService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.loadData();
+
+    // Check for invite query parameter from onboarding
+    this.route.queryParams.subscribe(params => {
+      if (params['invite'] === 'true') {
+        // Small delay to ensure component is fully initialized
+        setTimeout(() => {
+          this.showInviteModal();
+        }, 100);
+      }
+    });
   }
 
   loadData(): void {

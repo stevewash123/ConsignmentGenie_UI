@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { PhoneFormatter } from '../shared/utils/phone-formatter.util';
 
 @Component({
   selector: 'app-owner-signup-step2',
@@ -118,6 +119,12 @@ export class OwnerSignupStep2Component implements OnInit {
         this.isSubmitting.set(false);
       }
     });
+  }
+
+  onPhoneInput(event: Event): void {
+    const formattedPhone = PhoneFormatter.handlePhoneInput(event);
+    const rawValue = PhoneFormatter.getRawValue(formattedPhone);
+    this.profileForm.patchValue({ phone: rawValue });
   }
 
   private markAllFieldsTouched() {

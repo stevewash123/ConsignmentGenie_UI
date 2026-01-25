@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, Input, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { Subject, takeUntil, interval } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
+import { SignalRNotificationsService } from '../../services/signalr-notifications.service';
 import {
   NotificationDto,
   UserRole
@@ -30,6 +31,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
+    private signalRService: SignalRNotificationsService,
     public loadingService: LoadingService,
     private router: Router
   ) {}
@@ -41,21 +43,19 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     this.loadUnreadCount();
     this.loadRecentNotifications();
 
-    // Subscribe to unread count changes
+    // Subscribe to unread count changes from SignalR
+    this.signalRService.unreadCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => {
+        console.log(`SignalR unread count update received: ${count}`);
+        this.unreadCount = count;
+      });
+
+    // Subscribe to local notification service updates (for immediate UI feedback)
     this.notificationService.unreadCount$
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => {
         this.unreadCount = count;
-      });
-
-    // Auto-refresh every 30 seconds
-    interval(30000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadUnreadCount();
-        if (this.isDropdownOpen) {
-          this.loadRecentNotifications();
-        }
       });
 
     // Close dropdown when clicking outside

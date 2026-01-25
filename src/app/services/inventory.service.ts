@@ -13,6 +13,7 @@ import {
   CreateItemCategoryDto,
   UpdateItemCategoryDto,
   ItemCategoryDto,
+  PhotoInfo,
   ApiResponse,
   PendingImportItemDto,
   BulkAssignConsignorRequest,
@@ -120,18 +121,21 @@ export class InventoryService {
   }
 
   // Photo management endpoints
-  uploadItemImage(itemId: string, file: File): Observable<ApiResponse<any>> {
+  uploadItemImage(itemId: string, file: File): Observable<ApiResponse<string>> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/items/${itemId}/images`, formData);
+    formData.append('itemId', itemId);
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/photos/upload`, formData);
   }
 
-  deleteItemImage(itemId: string, imageId: string): Observable<ApiResponse<any>> {
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/items/${itemId}/images/${imageId}`);
+  getItemPhotos(itemId: string): Observable<ApiResponse<PhotoInfo[]>> {
+    return this.http.get<ApiResponse<PhotoInfo[]>>(`${this.apiUrl}/items/${itemId}/photos`);
   }
 
-  reorderItemImages(itemId: string, images: any[]): Observable<ApiResponse<any>> {
-    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/items/${itemId}/images/reorder`, { images });
+  deleteItemImage(photoId: string): Observable<ApiResponse<boolean>> {
+    // Encode the photo URL to safely pass as URL parameter
+    const encodedPhotoId = encodeURIComponent(photoId);
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/photos/${encodedPhotoId}`);
   }
 
   // Bulk operations

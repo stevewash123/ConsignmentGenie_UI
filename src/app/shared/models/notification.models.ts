@@ -12,6 +12,9 @@ export interface NotificationDto {
   title: string;
   message: string;
   isRead: boolean;
+  isImportant: boolean;
+  markedImportantAt?: string;
+  markedImportantByUserId?: string;
   createdAt: string;
   readAt?: string;
 

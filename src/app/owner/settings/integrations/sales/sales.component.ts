@@ -350,8 +350,9 @@ export class SalesComponent implements OnInit {
   private async handleSquareCallback() {
     const code = this.route.snapshot.queryParams['code'];
     const state = this.route.snapshot.queryParams['state'];
+    const fromSquare = this.route.snapshot.queryParams['fromSquare'];
 
-    console.log('🔧 [Sales] handleSquareCallback - code:', !!code, 'state:', !!state);
+    console.log('🔧 [Sales] handleSquareCallback - code:', !!code, 'state:', !!state, 'fromSquare:', fromSquare);
     console.log('🔧 [Sales] handleSquareCallback - Raw code:', code, 'Raw state:', state);
 
     if (code && state) {
@@ -410,9 +411,16 @@ export class SalesComponent implements OnInit {
       console.log('🔧 [Sales] handleSquareCallback - Choice restored and localStorage cleared, final choice:', this.shopChoice);
 
       // Navigate back to the sales page without the callback params
-      this.router.navigate(['/owner/settings/integrations/sales'], { replaceUrl: true });
+      this.router.navigate(['/owner/settings/sales/general'], { replaceUrl: true });
     } else {
       console.log('🔧 [Sales] handleSquareCallback - No valid OAuth callback detected');
+
+      // Handle direct navigation with fromSquare parameter (e.g., from onboarding)
+      if (fromSquare === 'true') {
+        console.log('🔧 [Sales] handleSquareCallback - Navigation from Square onboarding detected, cleaning URL');
+        // Clean the URL by removing the fromSquare parameter
+        this.router.navigate(['/owner/settings/sales/general'], { replaceUrl: true });
+      }
 
       // If we have query params but they're not OAuth, still try to restore the choice
       const pendingShopChoice = localStorage.getItem('pendingSalesShopChoice');

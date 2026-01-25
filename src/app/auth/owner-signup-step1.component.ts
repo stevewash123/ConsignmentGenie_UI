@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { SocialAuthService, SocialAuthResult } from '../services/social-auth.service';
+import { GoogleAuthRequest, AppleAuthRequest, TwitterAuthRequest } from '../models/auth.model';
 
 @Component({
   selector: 'app-owner-signup-step1',
@@ -19,6 +21,7 @@ export class OwnerSignupStep1Component {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private socialAuthService: SocialAuthService,
     private router: Router
   ) {
     this.authForm = this.fb.group({
@@ -71,35 +74,127 @@ export class OwnerSignupStep1Component {
     }, 1000);
   }
 
-  // Social authentication methods (placeholder implementations)
+  // Social authentication methods
   signInWithGoogle() {
-    console.log('Google sign in clicked');
-    // TODO: Implement Google OAuth
-    this.errorMessage.set('Social login coming soon! Please use email/password for now.');
-  }
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
 
-  signInWithFacebook() {
-    console.log('Facebook sign in clicked');
-    // TODO: Implement Facebook OAuth
-    this.errorMessage.set('Social login coming soon! Please use email/password for now.');
+    this.socialAuthService.signInWithGoogle().subscribe({
+      next: (result: SocialAuthResult) => {
+        this.handleSocialAuthResult(result);
+      },
+      error: (error) => {
+        console.error('Google sign-in error:', error);
+        this.errorMessage.set('Google sign-in failed. Please try again.');
+        this.isSubmitting.set(false);
+      }
+    });
   }
 
   signInWithTwitter() {
-    console.log('Twitter sign in clicked');
-    // TODO: Implement Twitter OAuth
-    this.errorMessage.set('Social login coming soon! Please use email/password for now.');
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
+
+    this.socialAuthService.signInWithTwitter().subscribe({
+      next: (result: SocialAuthResult) => {
+        this.handleSocialAuthResult(result);
+      },
+      error: (error) => {
+        console.error('Twitter sign-in error:', error);
+        this.errorMessage.set('Twitter sign-in failed. Please try again.');
+        this.isSubmitting.set(false);
+      }
+    });
   }
 
   signInWithApple() {
-    console.log('Apple sign in clicked');
-    // TODO: Implement Apple OAuth
-    this.errorMessage.set('Social login coming soon! Please use email/password for now.');
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
+
+    this.socialAuthService.signInWithApple().subscribe({
+      next: (result: SocialAuthResult) => {
+        this.handleSocialAuthResult(result);
+      },
+      error: (error) => {
+        console.error('Apple sign-in error:', error);
+        this.errorMessage.set('Apple sign-in failed. Please try again.');
+        this.isSubmitting.set(false);
+      }
+    });
   }
 
-  signInWithLinkedIn() {
-    console.log('LinkedIn sign in clicked');
-    // TODO: Implement LinkedIn OAuth
-    this.errorMessage.set('Social login coming soon! Please use email/password for now.');
+  private handleSocialAuthResult(result: SocialAuthResult) {
+    console.log('Social auth result:', result);
+
+    switch (result.provider) {
+      case 'google':
+        const googleAuthRequest: GoogleAuthRequest = {
+          idToken: result.token,
+          mode: 'signup',
+          email: result.email,
+          name: result.name,
+          providerId: result.providerId
+        };
+
+        this.authService.googleAuth(googleAuthRequest).subscribe({
+          next: (response) => this.handleAuthResponse(response),
+          error: (error) => this.handleAuthError(error)
+        });
+        break;
+
+      case 'apple':
+        const appleAuthRequest: AppleAuthRequest = {
+          idToken: result.token,
+          authorizationCode: result.additionalData?.authorizationCode || '',
+          mode: 'signup',
+          email: result.email,
+          name: result.name,
+          providerId: result.providerId
+        };
+
+        this.authService.appleAuth(appleAuthRequest).subscribe({
+          next: (response) => this.handleAuthResponse(response),
+          error: (error) => this.handleAuthError(error)
+        });
+        break;
+
+      case 'twitter':
+        const twitterAuthRequest: TwitterAuthRequest = {
+          accessToken: result.token,
+          accessTokenSecret: result.additionalData?.accessTokenSecret || '',
+          mode: 'signup',
+          email: result.email,
+          name: result.name,
+          providerId: result.providerId,
+          username: result.additionalData?.username || ''
+        };
+
+        this.authService.twitterAuth(twitterAuthRequest).subscribe({
+          next: (response) => this.handleAuthResponse(response),
+          error: (error) => this.handleAuthError(error)
+        });
+        break;
+    }
+  }
+
+  private handleAuthResponse(response: any) {
+    console.log('Auth response:', response);
+    this.isSubmitting.set(false);
+
+    if (response.needsProfileCompletion) {
+      // Store social auth data for profile completion
+      sessionStorage.setItem('socialAuthData', JSON.stringify(response));
+      this.router.navigate(['/signup/owner/profile']);
+    } else {
+      // User is fully registered, redirect to dashboard
+      this.router.navigate(['/owner/dashboard']);
+    }
+  }
+
+  private handleAuthError(error: any) {
+    console.error('Auth error:', error);
+    this.isSubmitting.set(false);
+    this.errorMessage.set(error.error?.message || 'Authentication failed. Please try again.');
   }
 
   private markAllFieldsTouched() {

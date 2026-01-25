@@ -6,7 +6,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { ItemCardComponent } from '../item-card/item-card.component';
 import { RespondPriceChangeComponent } from '../modals/respond-price-change/respond-price-change.component';
-import { MockConsignorItemService } from '../services/mock-consignor-item.service';
+import { ConsignorItemService } from '../services/consignor-item.service';
 import {
   ConsignorItemSummary,
   ConsignorItemsRequest,
@@ -47,7 +47,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
   showSuccessMessage = false;
 
   constructor(
-    private consignorItemService: MockConsignorItemService,
+    private consignorItemService: ConsignorItemService,
     private router: Router
   ) {}
 

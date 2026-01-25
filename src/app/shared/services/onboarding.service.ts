@@ -34,12 +34,29 @@ export class OnboardingService {
     return this.http.get<OnboardingResponse>(url)
       .pipe(
         tap(response => console.log('🔍 SERVICE: Raw API response:', response)),
-        map(response => response.data),
+        map(response => this.normalizeStatus(response.data)),
         tap(status => {
           console.log('🔍 SERVICE: Processed status:', status);
           this.onboardingStatusSubject.next(status);
         })
       );
+  }
+
+  /**
+   * Normalize status to handle legacy field names
+   */
+  private normalizeStatus(status: OnboardingStatus): OnboardingStatus {
+    return {
+      ...status,
+      steps: {
+        ...status.steps,
+        // Handle legacy field name (hasconsignors -> hasConsignors)
+        hasConsignors: status.steps.hasConsignors ?? status.steps.hasconsignors ?? false,
+        // Ensure new fields have defaults if API hasn't been updated yet
+        shopConfigured: status.steps.shopConfigured ?? false,
+        agreementUploaded: status.steps.agreementUploaded ?? false,
+      }
+    };
   }
 
   /**
@@ -91,44 +108,58 @@ export class OnboardingService {
 
   /**
    * Get onboarding steps with completion status and routing information
+   *
+   * NEW ORDER (logical setup flow):
+   * 1. Configure shop settings (commission rates, payout schedules)
+   * 2. Upload consignment agreement (required before inviting consignors)
+   * 3. Set up storefront (how you'll sell)
+   * 4. Invite consignors (now that everything is configured)
+   *
+   * Optional steps shown after core setup:
+   * 5. Add inventory
+   * 6. Connect QuickBooks (optional)
    */
   getOnboardingSteps(status: OnboardingStatus): OnboardingStep[] {
     const steps: OnboardingStep[] = [
+      // STEP 1: Configure shop settings FIRST
       {
-        id: 'consignors',
-        title: 'Add your consignors',
-        description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
-        completed: status.steps.hasconsignors,
-        actionText: 'Add Consignors',
-        routerLink: '/owner/consignors',
-        icon: '👥'
+        id: 'settings',
+        title: 'Configure your shop',
+        description: 'Set your default commission rates, payout schedules, and business rules.',
+        completed: status.steps.shopConfigured,
+        actionText: 'Configure Settings',
+        routerLink: '/owner/settings/store-profile/basic-info',
+        icon: '⚙️'
       },
+      // STEP 2: Upload agreement BEFORE inviting anyone
+      {
+        id: 'agreement',
+        title: 'Upload consignment agreement',
+        description: 'Add your legal agreement that consignors will review and sign when they join.',
+        completed: status.steps.agreementUploaded,
+        actionText: 'Add Agreement',
+        routerLink: '/owner/settings/consignors/agreement',
+        icon: '📄'
+      },
+      // STEP 3: Storefront setup
       {
         id: 'storefront',
-        title: 'Change your storefront or use ours',
+        title: 'Set up your storefront',
         description: 'Decide how you\'ll sell: Use our built-in shop or connect Shopify/Square.',
         completed: status.steps.storefrontConfigured,
         actionText: 'Set Up Storefront',
-        routerLink: '/owner/settings/storefront',
-        icon: '🛍️'
+        routerLink: '/owner/settings/sales/general',
+        icon: '🏪'
       },
+      // STEP 4: NOW invite consignors (after everything is configured)
       {
-        id: 'inventory',
-        title: 'Add inventory',
-        description: 'Enter items manually or upload in bulk via CSV.',
-        completed: status.steps.hasInventory,
-        actionText: 'Add Inventory',
-        routerLink: '/owner/inventory',
-        icon: '📦'
-      },
-      {
-        id: 'quickbooks',
-        title: 'Connect QuickBooks',
-        description: 'Sync transactions and payouts with your accounting. (optional)',
-        completed: status.steps.quickBooksConnected,
-        actionText: 'Connect QuickBooks',
-        routerLink: '/owner/settings/integrations',
-        icon: '📊'
+        id: 'consignors',
+        title: 'Invite your consignors',
+        description: 'Now you\'re ready! Invite people who consign items with you. They\'ll review your agreement and track their inventory.',
+        completed: status.steps.hasConsignors,
+        actionText: 'Invite Consignors',
+        routerLink: '/owner/consignors?invite=true',
+        icon: '👥'
       }
     ];
 
@@ -169,11 +200,11 @@ export class OnboardingService {
       return false;
     }
 
-    // Show if any setup steps are incomplete
-    const showModal = !status.steps.hasconsignors ||
-                     !status.steps.storefrontConfigured ||
-                     !status.steps.hasInventory ||
-                     !status.steps.quickBooksConnected;
+    // Show if any core setup steps are incomplete (not counting optional integrations)
+    const showModal = !status.steps.shopConfigured ||
+                      !status.steps.agreementUploaded ||
+                      !status.steps.storefrontConfigured ||
+                      !status.steps.hasConsignors;
 
     console.log('🔍 SERVICE: Final decision - should show:', showModal);
     return showModal;

@@ -46,7 +46,7 @@ export interface ItemDetailDto {
   listedDate?: Date;
   expirationDate?: Date;
   soldDate?: Date;
-  images: ItemImageDto[];
+  photos: PhotoInfo[];
   location?: string;
   notes?: string;
   internalNotes?: string;
@@ -61,6 +61,14 @@ export interface ItemImageDto {
   imageUrl: string;
   displayOrder: number;
   isPrimary: boolean;
+}
+
+export interface PhotoInfo {
+  url: string;
+  publicId: string;
+  isPrimary: boolean;
+  order: number;
+  uploadedAt: string;
 }
 
 export interface CreateItemRequest {

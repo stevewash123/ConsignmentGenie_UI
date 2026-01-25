@@ -249,4 +249,14 @@ export class ItemDetailComponent implements OnInit {
       this.router.navigate(['/owner/consignors', item.consignorId]);
     }
   }
+
+  getThumbnailUrl(url: string, width = 200, height = 200): string {
+    // Insert transform params into Cloudinary URL
+    return url.replace('/upload/', `/upload/w_${width},h_${height},c_fill/`);
+  }
+
+  viewFullPhoto(photoUrl: string): void {
+    // Open photo in new window/tab for full view
+    window.open(photoUrl, '_blank');
+  }
 }

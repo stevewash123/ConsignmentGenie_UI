@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { NotificationUpdate, ToastNotification } from '../models/notifications.models';
+import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
-
-// TODO: Install @microsoft/signalr package when dependencies can be updated
-// For now, this service provides the interface for SignalR notifications
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -13,28 +12,31 @@ export class SignalRNotificationsService {
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
   private jobProgressSubject = new Subject<NotificationUpdate>();
   private toastNotificationSubject = new Subject<ToastNotification>();
+  private unreadCountSubject = new Subject<number>();
 
-  // TODO: Uncomment when @microsoft/signalr is available
-  // private hubConnection?: HubConnection;
+  private hubConnection?: HubConnection;
 
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
   public jobProgress$ = this.jobProgressSubject.asObservable();
   public toastNotifications$ = this.toastNotificationSubject.asObservable();
+  public unreadCount$ = this.unreadCountSubject.asObservable();
 
-  constructor() {
-    // TODO: Uncomment when @microsoft/signalr is available
-    // this.createConnection();
-
-    // Mock connection for now
-    setTimeout(() => {
-      this.connectionStatusSubject.next(true);
-    }, 1000);
+  constructor(private authService: AuthService) {
+    // Only connect if user is authenticated
+    if (this.authService.getToken() && !this.authService.isTokenExpired()) {
+      this.createConnection();
+    }
   }
 
-  /* TODO: Uncomment when @microsoft/signalr is available
   private createConnection(): void {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl(`${environment.apiUrl.replace('/api', '')}/notificationHub`)
+      .withUrl(`${environment.apiUrl.replace('/api', '')}/hubs/notifications`, {
+        accessTokenFactory: () => {
+          const token = this.authService.getToken();
+          console.log('SignalR accessTokenFactory called, token:', token ? 'exists' : 'null');
+          return token || '';
+        }
+      })
       .configureLogging(LogLevel.Information)
       .build();
 
@@ -72,9 +74,20 @@ export class SignalRNotificationsService {
         console.log('Received toast notification:', notification);
         this.toastNotificationSubject.next(notification);
       });
+
+      // New event for unread count updates
+      this.hubConnection.on('UnreadCountUpdated', (count: number) => {
+        console.log('Received unread count update:', count);
+        this.unreadCountSubject.next(count);
+      });
+
+      // Generic INFO messages for Hangfire jobs and system events
+      this.hubConnection.on('InfoMessage', (message: { title: string; message: string; type?: string; duration?: number }) => {
+        console.log('Received INFO message:', message);
+        this.createInfoToast(message.title, message.message, message.type || 'info', message.duration);
+      });
     }
   }
-  */
 
   // Mock methods for testing until SignalR is available
   public simulatePayoutJobProgress(): void {
@@ -127,6 +140,19 @@ export class SignalRNotificationsService {
         this.createToastFromJobUpdate(update);
       }, index * 2000);
     });
+  }
+
+  private createInfoToast(title: string, message: string, type: string = 'info', duration?: number): void {
+    const notification: ToastNotification = {
+      id: `info-${Date.now()}`,
+      type: type as ToastNotification['type'],
+      title,
+      message,
+      timestamp: new Date(),
+      duration: duration || 5000
+    };
+
+    this.toastNotificationSubject.next(notification);
   }
 
   private createToastFromJobUpdate(update: NotificationUpdate): void {
@@ -197,17 +223,25 @@ export class SignalRNotificationsService {
   }
 
   public isConnected(): boolean {
-    // TODO: Uncomment when @microsoft/signalr is available
-    // return this.hubConnection?.state === 'Connected';
-    return this.connectionStatusSubject.value;
+    return this.hubConnection?.state === 'Connected';
+  }
+
+  public start(): void {
+    if (!this.hubConnection && this.authService.getToken() && !this.authService.isTokenExpired()) {
+      this.createConnection();
+    }
   }
 
   public async stop(): Promise<void> {
-    // TODO: Uncomment when @microsoft/signalr is available
-    // if (this.hubConnection) {
-    //   await this.hubConnection.stop();
-    //   this.connectionStatusSubject.next(false);
-    // }
-    this.connectionStatusSubject.next(false);
+    if (this.hubConnection) {
+      await this.hubConnection.stop();
+      this.connectionStatusSubject.next(false);
+      this.hubConnection = undefined;
+    }
+  }
+
+  // Public method to send INFO messages (for testing or manual triggers)
+  public sendInfoMessage(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', duration?: number): void {
+    this.createInfoToast(title, message, type, duration);
   }
 }

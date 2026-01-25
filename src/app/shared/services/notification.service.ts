@@ -69,11 +69,29 @@ export class NotificationService {
       );
   }
 
+  markAsUnread(role: UserRole, notificationId: string): Observable<void> {
+    return this.http.post<void>(`${this.getApiPath(role)}/${notificationId}/unread`, {})
+      .pipe(
+        tap(() => {
+          const currentCount = this.unreadCountSubject.value;
+          this.unreadCountSubject.next(currentCount + 1);
+        })
+      );
+  }
+
   markAllAsRead(role: UserRole): Observable<void> {
     return this.http.post<void>(`${this.getApiPath(role)}/read-all`, {})
       .pipe(
         tap(() => this.unreadCountSubject.next(0))
       );
+  }
+
+  markAsImportant(role: UserRole, notificationId: string): Observable<void> {
+    return this.http.post<void>(`${this.getApiPath(role)}/${notificationId}/important`, {});
+  }
+
+  markAsNotImportant(role: UserRole, notificationId: string): Observable<void> {
+    return this.http.delete<void>(`${this.getApiPath(role)}/${notificationId}/important`);
   }
 
   deleteNotification(role: UserRole, notificationId: string): Observable<void> {

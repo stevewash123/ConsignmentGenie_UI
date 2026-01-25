@@ -13,10 +13,16 @@ export interface OnboardingStatus {
   welcomeGuideCompleted: boolean;
   showModal: boolean;
   steps: {
-    hasconsignors: boolean;
-    storefrontConfigured: boolean;
+    // NEW: Configuration must happen first
+    shopConfigured: boolean;          // Commission rates, payout schedules, business rules
+    agreementUploaded: boolean;       // Consignment agreement document
+    storefrontConfigured: boolean;    // Shopify/Square or built-in shop
+    // MOVED: Consignors now come after configuration
+    hasConsignors: boolean;           // Renamed from hasconsignors for consistency
     hasInventory: boolean;
     quickBooksConnected: boolean;
+    // Legacy field support (for backwards compatibility during migration)
+    hasconsignors?: boolean;          // @deprecated - use hasConsignors
   };
 }
 

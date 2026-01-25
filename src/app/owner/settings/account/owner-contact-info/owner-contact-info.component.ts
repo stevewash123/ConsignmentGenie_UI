@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SettingsService, ShopProfile } from '../../../../services/settings.service';
 import { Subscription } from 'rxjs';
+import { PhoneFormatter } from '../../../../shared/utils/phone-formatter.util';
 
 @Component({
   selector: 'app-owner-contact-info',
@@ -67,8 +68,10 @@ export class OwnerContactInfoComponent implements OnInit, OnDestroy {
     this.settingsService.updateProfileSetting('shopEmail', value || null);
   }
 
-  onShopPhoneChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopPhone', value || null);
+  onShopPhoneChange(event: Event): void {
+    const formattedPhone = PhoneFormatter.handlePhoneInput(event);
+    const rawValue = PhoneFormatter.getRawValue(formattedPhone);
+    this.settingsService.updateProfileSetting('shopPhone', rawValue || null);
   }
 
   onShopWebsiteChange(value: string): void {
@@ -97,6 +100,11 @@ export class OwnerContactInfoComponent implements OnInit, OnDestroy {
 
   onShopTimezoneChange(value: string): void {
     this.settingsService.updateProfileSetting('shopTimezone', value);
+  }
+
+  getFormattedPhone(): string {
+    const rawPhone = this.profile()?.shopPhone;
+    return rawPhone ? PhoneFormatter.formatPhone(rawPhone) : '';
   }
 
   resetToDefaults(): void {

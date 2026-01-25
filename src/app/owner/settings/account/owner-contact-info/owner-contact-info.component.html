@@ -43,8 +43,8 @@
             id="shopPhone"
             type="tel"
             class="form-input"
-            [value]="profile()?.shopPhone || ''"
-            (input)="onShopPhoneChange($any($event.target).value)"
+            [value]="getFormattedPhone()"
+            (input)="onShopPhoneChange($event)"
             placeholder="(555) 123-4567">
         </div>
 

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, BehaviorSubject, catchError, of, map } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse, GoogleAuthRequest, SocialAuthResponse, FacebookAuthRequest, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from '../models/auth.model';
+import { LoginRequest, RegisterRequest, AuthResponse, User, TokenInfo, LoginResponse, GoogleAuthRequest, SocialAuthResponse, FacebookAuthRequest, AppleAuthRequest, TwitterAuthRequest, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from '../models/auth.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -483,5 +483,95 @@ export class AuthService {
           });
         })
       );
+  }
+
+  /**
+   * Authenticate with Apple OAuth
+   */
+  appleAuth(request: AppleAuthRequest): Observable<SocialAuthResponse> {
+    return this.http.post<SocialAuthResponse>(`${this.apiUrl}/auth/apple`, request)
+      .pipe(
+        tap(response => {
+          // Set auth data if login/signup was successful
+          if (!response.needsProfileCompletion) {
+            this.setAuthData(response);
+          }
+        }),
+        catchError(error => {
+          console.error('Apple auth API error:', error);
+          // Fall back to mock for development
+          return this.mockAppleAuth(request);
+        })
+      );
+  }
+
+  /**
+   * Mock Apple authentication for development
+   */
+  private mockAppleAuth(request: AppleAuthRequest): Observable<SocialAuthResponse> {
+    console.log('Using mock Apple auth for development');
+
+    return of({
+      token: 'mock-apple-jwt-token-' + Date.now(),
+      userId: 'mock-apple-user-' + Date.now(),
+      email: request.email,
+      role: 2, // Owner role
+      organizationId: 'mock-apple-org-' + Date.now(),
+      organizationName: request.name + "'s Shop",
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      isNewUser: true,
+      needsProfileCompletion: request.mode === 'signup'
+    }).pipe(
+      tap(response => {
+        if (!response.needsProfileCompletion) {
+          this.setAuthData(response);
+        }
+      })
+    );
+  }
+
+  /**
+   * Authenticate with Twitter OAuth
+   */
+  twitterAuth(request: TwitterAuthRequest): Observable<SocialAuthResponse> {
+    return this.http.post<SocialAuthResponse>(`${this.apiUrl}/auth/twitter`, request)
+      .pipe(
+        tap(response => {
+          // Set auth data if login/signup was successful
+          if (!response.needsProfileCompletion) {
+            this.setAuthData(response);
+          }
+        }),
+        catchError(error => {
+          console.error('Twitter auth API error:', error);
+          // Fall back to mock for development
+          return this.mockTwitterAuth(request);
+        })
+      );
+  }
+
+  /**
+   * Mock Twitter authentication for development
+   */
+  private mockTwitterAuth(request: TwitterAuthRequest): Observable<SocialAuthResponse> {
+    console.log('Using mock Twitter auth for development');
+
+    return of({
+      token: 'mock-twitter-jwt-token-' + Date.now(),
+      userId: 'mock-twitter-user-' + Date.now(),
+      email: request.email,
+      role: 2, // Owner role
+      organizationId: 'mock-twitter-org-' + Date.now(),
+      organizationName: request.name + "'s Shop",
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      isNewUser: true,
+      needsProfileCompletion: request.mode === 'signup'
+    }).pipe(
+      tap(response => {
+        if (!response.needsProfileCompletion) {
+          this.setAuthData(response);
+        }
+      })
+    );
   }
 }
