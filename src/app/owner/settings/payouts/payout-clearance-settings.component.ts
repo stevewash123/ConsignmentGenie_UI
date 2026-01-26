@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PayoutSettingsService, PayoutSettingsDto, UpdatePayoutSettingsRequest } from '../../../services/payout-settings.service';
+import { SettingsService } from '../../../services/settings.service';
 
 @Component({
   selector: 'app-payout-clearance-settings',
@@ -12,7 +12,7 @@ import { PayoutSettingsService, PayoutSettingsDto, UpdatePayoutSettingsRequest }
 })
 export class PayoutClearanceSettingsComponent implements OnInit {
   settingsForm!: FormGroup;
-  settings = signal<PayoutSettingsDto | null>(null);
+  settings = signal<any>(null);
   loading = signal(false);
   saving = signal(false);
   successMessage = signal('');
@@ -25,7 +25,7 @@ export class PayoutClearanceSettingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private payoutSettingsService: PayoutSettingsService
+    private settingsService: SettingsService
   ) {
     this.initForm();
   }
@@ -62,20 +62,20 @@ export class PayoutClearanceSettingsComponent implements OnInit {
   async loadSettings() {
     this.loading.set(true);
     try {
-      const settings = await this.payoutSettingsService.getPayoutSettings().toPromise();
-      if (settings) {
-        this.settings.set(settings);
-        this.populateForm(settings);
+      await this.settingsService.loadPayoutSettings();
+      const payoutSettings = this.settingsService.getCurrentPayoutSettings();
+      if (payoutSettings?.clearanceSettings) {
+        this.settings.set(payoutSettings.clearanceSettings);
+        this.populateForm(payoutSettings.clearanceSettings);
       }
     } catch (error) {
-      console.log('Using default payout settings (none exist yet)');
-      // Form already has default values, no need to show error
+      console.log('Using default payout clearance settings');
     } finally {
       this.loading.set(false);
     }
   }
 
-  private populateForm(settings: PayoutSettingsDto) {
+  private populateForm(settings: any) {
     this.settingsForm.patchValue({
       clearanceDaysCash: settings.clearanceDaysCash,
       clearanceDaysDebitCard: settings.clearanceDaysDebitCard,
@@ -106,32 +106,37 @@ export class PayoutClearanceSettingsComponent implements OnInit {
 
     this.saving.set(true);
     try {
-      const formValue = this.settingsForm.value;
-      const request: UpdatePayoutSettingsRequest = {
-        clearanceDaysCash: formValue.clearanceDaysCash,
-        clearanceDaysDebitCard: formValue.clearanceDaysDebitCard,
-        clearanceDaysCreditCard: formValue.clearanceDaysCreditCard,
-        clearanceDaysCheck: formValue.clearanceDaysCheck,
-        clearanceDaysStoreCredit: formValue.clearanceDaysStoreCredit,
-        clearanceDaysGiftCard: formValue.clearanceDaysGiftCard,
-        clearanceDaysSquare: formValue.clearanceDaysSquare,
-        clearanceDaysVenmo: formValue.clearanceDaysVenmo,
-        clearanceDaysPayPal: formValue.clearanceDaysPayPal,
-        clearanceDaysOther: formValue.clearanceDaysOther,
-        minimumPayoutCheck: formValue.minimumPayoutCheck,
-        minimumPayoutCash: formValue.minimumPayoutCash,
-        minimumPayoutVenmo: formValue.minimumPayoutVenmo,
-        minimumPayoutPayPal: formValue.minimumPayoutPayPal,
-        minimumPayoutStoreCredit: formValue.minimumPayoutStoreCredit,
-        minimumPayoutBankTransfer: formValue.minimumPayoutBankTransfer,
-        minimumPayoutZelle: formValue.minimumPayoutZelle
-      };
+      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      if (currentSettings) {
+        const formValue = this.settingsForm.value;
+        const clearanceSettings = {
+          clearanceDaysCash: formValue.clearanceDaysCash,
+          clearanceDaysDebitCard: formValue.clearanceDaysDebitCard,
+          clearanceDaysCreditCard: formValue.clearanceDaysCreditCard,
+          clearanceDaysCheck: formValue.clearanceDaysCheck,
+          clearanceDaysStoreCredit: formValue.clearanceDaysStoreCredit,
+          clearanceDaysGiftCard: formValue.clearanceDaysGiftCard,
+          clearanceDaysSquare: formValue.clearanceDaysSquare,
+          clearanceDaysVenmo: formValue.clearanceDaysVenmo,
+          clearanceDaysPayPal: formValue.clearanceDaysPayPal,
+          clearanceDaysOther: formValue.clearanceDaysOther,
+          minimumPayoutCheck: formValue.minimumPayoutCheck,
+          minimumPayoutCash: formValue.minimumPayoutCash,
+          minimumPayoutVenmo: formValue.minimumPayoutVenmo,
+          minimumPayoutPayPal: formValue.minimumPayoutPayPal,
+          minimumPayoutStoreCredit: formValue.minimumPayoutStoreCredit,
+          minimumPayoutBankTransfer: formValue.minimumPayoutBankTransfer,
+          minimumPayoutZelle: formValue.minimumPayoutZelle
+        };
 
-      const updatedSettings = await this.payoutSettingsService.updatePayoutSettings(request).toPromise();
-      if (updatedSettings) {
-        this.settings.set(updatedSettings);
+        const updatedSettings = {
+          ...currentSettings,
+          clearanceSettings: clearanceSettings,
+          lastUpdated: new Date()
+        };
+        await this.settingsService.updatePayoutSettings(updatedSettings);
+        this.settings.set(clearanceSettings);
         this.settingsForm.markAsPristine();
-        this.showSuccess('Payout clearance settings saved successfully');
       }
     } catch (error: any) {
       this.showError(error.message || 'Failed to save payout clearance settings');

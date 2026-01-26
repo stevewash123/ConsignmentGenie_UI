@@ -90,6 +90,7 @@ export interface PayoutSettings {
   notifications: PayoutNotifications;
   reports: PayoutReportConfiguration;
   scheduleThresholds?: ScheduleThresholdSettings;
+  clearanceSettings?: any;
   lastUpdated: Date;
   organizationId: string;
 }
