@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { PayoutSettings } from '../models/payout-settings.model';
 import { ReceiptSettings } from '../owner/settings/business/receipt-settings/receipt-settings.component';
+import { BusinessPolicies } from '../owner/settings/business/policies/policies.component';
 
 export interface OrganizationSettings {
   // Consignment Agreements
@@ -90,6 +91,7 @@ export interface BusinessSettings {
     autoApproveItems?: boolean;
   };
   receipts?: ReceiptSettings;
+  policies?: BusinessPolicies;
 }
 
 export interface ConsignorPermissions {

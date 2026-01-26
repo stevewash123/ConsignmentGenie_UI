@@ -1,8 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { SettingsService } from '../../../../services/settings.service';
 
 // Data model interfaces
 export interface StoreHoursSettings {
@@ -70,7 +69,7 @@ export class PoliciesComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private settingsService: SettingsService
   ) {
     this.policiesForm.set(this.createForm());
   }
@@ -125,10 +124,11 @@ export class PoliciesComponent implements OnInit {
 
   async loadPolicies() {
     try {
-      const response = await this.http.get<BusinessPolicies>(`${environment.apiUrl}/api/organizations/business-policies`).toPromise();
-      if (response) {
-        this.policies.set(response);
-        this.populateForm(response);
+      await this.settingsService.loadBusinessSettings();
+      const businessSettings = this.settingsService.getCurrentBusinessSettings();
+      if (businessSettings?.policies) {
+        this.policies.set(businessSettings.policies);
+        this.populateForm(businessSettings.policies);
       }
     } catch (error) {
       // If policies don't exist, use defaults - no error message needed
@@ -250,9 +250,8 @@ export class PoliciesComponent implements OnInit {
 
     this.saving.set(true);
     try {
-      await this.http.put(`${environment.apiUrl}/api/organizations/business-policies`, businessPolicies).toPromise();
+      await this.settingsService.updateBusinessSettings({ policies: businessPolicies });
       this.policies.set(businessPolicies);
-      this.showSuccess('Business policies saved successfully');
     } catch (error) {
       this.showError('Failed to save business policies');
     } finally {
