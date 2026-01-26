@@ -39,11 +39,10 @@ export class EarningsWidgetComponent implements OnInit {
         if (err.status === 500 || err.status === 404) {
           // Show a default empty earnings summary for new consignors
           this.earningsSummary = {
-            totalEarnings: 0,
-            currentMonthEarnings: 0,
-            pendingPayouts: 0,
-            totalItems: 0,
-            soldItems: 0,
+            pending: 0,
+            pendingTooltip: 'No earnings yet',
+            paidThisMonth: 0,
+            payoutCountThisMonth: 0,
             nextPayoutDate: null
           };
         } else {

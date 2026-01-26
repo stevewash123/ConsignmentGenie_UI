@@ -104,7 +104,8 @@ export const ownerRoutes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('./settings/hub/settings-hub.component').then(m => m.SettingsHubComponent)
+            redirectTo: 'store-profile/basic-info',
+            pathMatch: 'full'
           },
           {
             path: 'store-profile',

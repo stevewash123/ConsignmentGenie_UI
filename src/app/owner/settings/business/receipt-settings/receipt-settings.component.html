@@ -10,31 +10,8 @@
     <section class="form-section" formGroupName="header">
       <h3>Receipt Header</h3>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="includeLogo">
-          <span class="checkmark"></span>
-          Include store logo on receipts
-        </label>
-        <span class="help-text">Requires logo upload in Store Profile > Branding</span>
-      </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="showStoreInfo">
-          <span class="checkmark"></span>
-          Show store name and contact information
-        </label>
-      </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="showAddress">
-          <span class="checkmark"></span>
-          Show store address
-        </label>
-        <span class="help-text">Uncheck for home-based or privacy concerns</span>
-      </div>
 
       <div class="form-row">
         <div class="form-group">
@@ -60,38 +37,8 @@
     <section class="form-section" formGroupName="content">
       <h3>Receipt Content & Layout</h3>
 
-      <div class="form-group">
-        <label for="layoutStyle">Layout Style</label>
-        <select id="layoutStyle" formControlName="layoutStyle" class="form-select">
-          <option value="compact">Compact (essential info only)</option>
-          <option value="detailed">Detailed (comprehensive information)</option>
-        </select>
-      </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="showItemDescriptions">
-          <span class="checkmark"></span>
-          Show detailed item descriptions
-        </label>
-      </div>
 
-      <div class="form-group" *ngIf="receiptForm().get('content.showItemDescriptions')?.value">
-        <label for="descriptionLength">Maximum description length</label>
-        <select id="descriptionLength" formControlName="descriptionLength" class="form-select">
-          <option value="30">Short (30 characters)</option>
-          <option value="50">Medium (50 characters)</option>
-          <option value="100">Long (100 characters)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="showTaxBreakdown">
-          <span class="checkmark"></span>
-          Show detailed tax breakdown
-        </label>
-      </div>
 
       <div class="form-group">
         <label class="checkbox-label">
@@ -138,13 +85,6 @@
         <span class="char-count">{{ returnPolicyLength() }}/300 characters</span>
       </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="includeWebsite">
-          <span class="checkmark"></span>
-          Include website/social media information
-        </label>
-      </div>
     </section>
 
     <!-- Digital Receipts -->
@@ -249,14 +189,6 @@
         <span class="help-text">Adjust for your thermal printer</span>
       </div>
 
-      <div class="form-group" *ngIf="receiptForm().get('header.includeLogo')?.value">
-        <label for="logoSize">Logo size on printed receipts</label>
-        <select id="logoSize" formControlName="logoSize" class="form-select">
-          <option value="small">Small</option>
-          <option value="medium">Medium</option>
-          <option value="large">Large</option>
-        </select>
-      </div>
     </section>
 
     <div class="form-actions">

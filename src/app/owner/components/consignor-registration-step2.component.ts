@@ -146,8 +146,7 @@ export class ConsignorRegistrationStep2Component implements OnInit {
   }
 
   onPhoneChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const formatted = PhoneFormatter.formatPhoneInput(input);
-    this.details.phone = formatted.value;
+    const formatted = PhoneFormatter.handlePhoneInput(event);
+    this.details.phone = formatted;
   }
 }

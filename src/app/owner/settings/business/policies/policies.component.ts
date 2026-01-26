@@ -24,11 +24,13 @@ export interface StoreHoursSettings {
 
 
 export interface ReturnSettings {
-  noReturns: boolean;
+  returnPolicy: 'none' | 'days';
   periodDays: number;
-  requiresReceipt: boolean;
-  acceptsExchanges: boolean;
-  storeCreditOnly: boolean;
+  allowRefunds: boolean;
+  allowExchanges: boolean;
+  allowStoreCredit: boolean;
+  receiptPolicy: 'required' | 'flexible';
+  noReceiptStoreCreditOnly: boolean;
 }
 
 export interface PaymentSettings {
@@ -37,10 +39,6 @@ export interface PaymentSettings {
   layawayTerms?: string;
 }
 
-export interface ConsignorPolicySettings {
-  policies?: string;
-  notifyOnRegistration: boolean;
-}
 
 
 
@@ -48,7 +46,6 @@ export interface BusinessPolicies {
   storeHours: StoreHoursSettings;
   returns: ReturnSettings;
   payments: PaymentSettings;
-  consignorPolicies: ConsignorPolicySettings;
   lastUpdated: Date;
 }
 
@@ -69,13 +66,7 @@ export class PoliciesComponent implements OnInit {
   readonly weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   readonly paymentMethods = ['cash', 'credit', 'debit', 'check', 'mobile'];
 
-  // Character counting for text areas
-  consignorPoliciesLength = computed(() => {
-    const form = this.policiesForm();
-    if (!form) return 0;
-    const value = form.get('consignorPolicies.policies')?.value || '';
-    return value.length;
-  });
+  // Character counting for text areas (removed consignorPoliciesLength)
 
   constructor(
     private fb: FormBuilder,
@@ -95,20 +86,18 @@ export class PoliciesComponent implements OnInit {
         timezone: ['EST']
       }),
       returns: this.fb.group({
-        noReturns: [false],
-        periodDays: [30, [Validators.min(0), Validators.max(365)]],
-        requiresReceipt: [true],
-        acceptsExchanges: [true],
-        storeCreditOnly: [false]
+        returnPolicy: ['days'],
+        periodDays: [30, [Validators.min(1), Validators.max(365)]],
+        allowRefunds: [true],
+        allowExchanges: [true],
+        allowStoreCredit: [true],
+        receiptPolicy: ['required'],
+        noReceiptStoreCreditOnly: [false]
       }),
       payments: this.fb.group({
         acceptedMethods: this.fb.array([]),
         layawayAvailable: [false],
         layawayTerms: ['', Validators.maxLength(300)]
-      }),
-      consignorPolicies: this.fb.group({
-        policies: ['', Validators.maxLength(1000)],
-        notifyOnRegistration: [false]
       })
     });
 
@@ -126,7 +115,9 @@ export class PoliciesComponent implements OnInit {
     // Initialize payment methods
     const methodsArray = form.get('payments.acceptedMethods') as FormArray;
     this.paymentMethods.forEach(method => {
-      methodsArray.push(this.fb.control(method === 'cash' || method === 'credit'));
+      // Set cash, credit, debit, and check to true by default
+      const defaultValue = ['cash', 'credit', 'debit', 'check'].includes(method);
+      methodsArray.push(this.fb.control(defaultValue));
     });
 
     return form;
@@ -159,17 +150,28 @@ export class PoliciesComponent implements OnInit {
       };
     });
 
+    // Map legacy return settings to new structure
+    const legacyReturns = policies.returns as any;
+    const returnSettings = {
+      returnPolicy: legacyReturns.noReturns ? 'none' : 'days',
+      periodDays: legacyReturns.periodDays || 30,
+      allowRefunds: !legacyReturns.storeCreditOnly,
+      allowExchanges: legacyReturns.acceptsExchanges ?? true,
+      allowStoreCredit: legacyReturns.storeCreditOnly ?? true,
+      receiptPolicy: legacyReturns.requiresReceipt ? 'required' : 'flexible',
+      noReceiptStoreCreditOnly: false
+    };
+
     form.patchValue({
       storeHours: {
         schedule: scheduleControls,
         timezone: policies.storeHours.timezone
       },
-      returns: policies.returns,
+      returns: returnSettings,
       payments: {
         layawayAvailable: policies.payments.layawayAvailable,
         layawayTerms: policies.payments.layawayTerms
-      },
-      consignorPolicies: policies.consignorPolicies
+      }
     });
 
     // Update payment methods checkboxes
@@ -243,7 +245,6 @@ export class PoliciesComponent implements OnInit {
         ...formValue.payments,
         acceptedMethods: this.getSelectedPaymentMethods()
       },
-      consignorPolicies: formValue.consignorPolicies,
       lastUpdated: new Date()
     };
 
@@ -268,6 +269,19 @@ export class PoliciesComponent implements OnInit {
     this.successMessage.set(message);
     this.errorMessage.set('');
     setTimeout(() => this.successMessage.set(''), 5000);
+  }
+
+  onReturnPolicyChange(policy: string) {
+    const form = this.policiesForm();
+    if (form) {
+      // Enable/disable period days based on policy
+      const periodDaysControl = form.get('returns.periodDays');
+      if (policy === 'none') {
+        periodDaysControl?.disable();
+      } else {
+        periodDaysControl?.enable();
+      }
+    }
   }
 
   private showError(message: string) {

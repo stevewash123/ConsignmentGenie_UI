@@ -32,7 +32,7 @@ export class SettingsLayoutComponent implements OnInit {
   menuItems: SettingsMenuItem[] = [
     {
       id: 'store-profile',
-      label: 'Store Profile',
+      label: 'Profile',
       icon: '🏪',
       description: 'Shop branding, contact info, domain',
       children: [
@@ -203,6 +203,9 @@ export class SettingsLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Auto-expand Store Profile section by default
+    this.expandedSections.add('store-profile');
+
     // Initialize expanded sections based on current route
     this.updateExpandedSectionFromRoute();
 
@@ -233,10 +236,10 @@ export class SettingsLayoutComponent implements OnInit {
   private updateExpandedSectionFromRoute(): void {
     const currentUrl = this.router.url;
 
-    // Clear previous state
-    this.expandedSections.clear();
+    // Always keep Store Profile expanded
+    this.expandedSections.add('store-profile');
 
-    // Find which section should be expanded based on current route
+    // Find which sections should be expanded based on current route
     for (const item of this.menuItems) {
       if (item.children) {
         for (const child of item.children) {

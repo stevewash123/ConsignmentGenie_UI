@@ -7,7 +7,7 @@
   <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
   <div *ngIf="errorMessage()" class="message error">{{ errorMessage() }}</div>
 
-  <div *ngIf="permissions()">
+  <div *ngIf="!isLoading(); else loadingTemplate">
     <!-- Permissions Form -->
     <section class="form-section">
       <div class="permission-group">
@@ -17,8 +17,9 @@
             <input
               type="checkbox"
               id="canAddItems"
-              [checked]="permissions()?.inventory?.canAddItems || false"
-              (change)="onCanAddItemsChange($any($event.target).checked)">
+              [checked]="permissions().canAddItems"
+              (change)="onCanAddItemsChange($any($event.target).checked)"
+              [disabled]="isSaving()">
             <div class="permission-content">
               <div class="permission-label">Can add new items</div>
               <div class="permission-description">Allow consignors to add new items to the inventory</div>
@@ -29,8 +30,9 @@
             <input
               type="checkbox"
               id="canEditOwnItems"
-              [checked]="permissions()?.inventory?.canEditOwnItems || false"
-              (change)="onCanEditOwnItemsChange($any($event.target).checked)">
+              [checked]="permissions().canEditOwnItems"
+              (change)="onCanEditOwnItemsChange($any($event.target).checked)"
+              [disabled]="isSaving()">
             <div class="permission-content">
               <div class="permission-label">Can edit their own items</div>
               <div class="permission-description">Allow consignors to modify descriptions, photos, etc. of their items</div>
@@ -41,8 +43,9 @@
             <input
               type="checkbox"
               id="canRemoveOwnItems"
-              [checked]="permissions()?.inventory?.canRemoveOwnItems || false"
-              (change)="onCanRemoveOwnItemsChange($any($event.target).checked)">
+              [checked]="permissions().canRemoveOwnItems"
+              (change)="onCanRemoveOwnItemsChange($any($event.target).checked)"
+              [disabled]="isSaving()">
             <div class="permission-content">
               <div class="permission-label">Can remove/withdraw their own items</div>
               <div class="permission-description">Allow consignors to remove items from sale</div>
@@ -53,8 +56,9 @@
             <input
               type="checkbox"
               id="canEditPrices"
-              [checked]="permissions()?.inventory?.canEditPrices || false"
-              (change)="onCanEditPricesChange($any($event.target).checked)">
+              [checked]="permissions().canEditPrices"
+              (change)="onCanEditPricesChange($any($event.target).checked)"
+              [disabled]="isSaving()">
             <div class="permission-content">
               <div class="permission-label">Can edit item prices</div>
               <div class="permission-description">Allow consignors to change prices on their items</div>
@@ -63,13 +67,14 @@
         </div>
 
 
-        <!-- Form Actions -->
-        <div class="form-actions">
-          <button type="button" (click)="resetToDefaults()" class="btn-secondary">
-            Reset to Defaults
-          </button>
-        </div>
       </div>
     </section>
   </div>
+
+  <!-- Loading Template -->
+  <ng-template #loadingTemplate>
+    <div class="loading-state">
+      <p>Loading permissions...</p>
+    </div>
+  </ng-template>
 </div>

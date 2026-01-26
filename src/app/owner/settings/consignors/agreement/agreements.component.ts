@@ -29,8 +29,11 @@ export class AgreementsComponent implements OnInit {
   isUploading = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
-  viewMode = signal<'sample' | 'agreement'>('sample');
-  hasCustomTemplate = signal(false);
+  viewMode = signal<'sample' | 'agreement' | 'keywords'>('sample');
+  hasCustomTemplate = computed(() => {
+    const template = this.template();
+    return template?.isCustomized === true;
+  });
   onboardingSettings = signal<ConsignorOnboardingSettings | null>(null);
   isTemplateEditingEnabled = computed(() => {
     const settings = this.onboardingSettings();
@@ -59,6 +62,36 @@ export class AgreementsComponent implements OnInit {
     { tag: '{{AGREEMENT_DATE}}', description: 'Date the agreement was generated' }
   ];
 
+  keyWords = [
+    { word: 'CONSIGNMENT', description: 'Items placed for sale on behalf of owner' },
+    { word: 'COMMISSION', description: 'Shop percentage of sales price' },
+    { word: 'SPLIT', description: 'Division of proceeds between shop and consignor' },
+    { word: 'RETRIEVAL', description: 'Collection of unsold items' },
+    { word: 'AGREEMENT', description: 'Contract between shop and consignor' },
+    { word: 'CONSIGNOR', description: 'Person bringing items to sell' },
+    { word: 'TERMS', description: 'Conditions and rules of consignment' },
+    { word: 'LIABILITY', description: 'Legal responsibility for items' },
+    { word: 'PERIOD', description: 'Length of time items remain for sale' },
+    { word: 'PAYMENT', description: 'How and when consignor is paid' },
+    { word: 'PRICING', description: 'Setting sale prices for items' },
+    { word: 'MARKDOWN', description: 'Reducing prices over time' },
+    { word: 'DONATION', description: 'Items given to charity if unclaimed' },
+    { word: 'INVENTORY', description: 'List of items being consigned' },
+    { word: 'RECEIPT', description: 'Documentation of items received' },
+    { word: 'SIGNATURE', description: 'Legal confirmation of agreement' }
+  ];
+
+  // Computed properties for splitting keywords into two columns
+  firstHalfKeywords = computed(() => {
+    const midpoint = Math.ceil(this.metaTagsHelp.length / 2);
+    return this.metaTagsHelp.slice(0, midpoint);
+  });
+
+  secondHalfKeywords = computed(() => {
+    const midpoint = Math.ceil(this.metaTagsHelp.length / 2);
+    return this.metaTagsHelp.slice(midpoint);
+  });
+
   sampleTemplate = `CONSIGNMENT AGREEMENT - SAMPLE TEMPLATE
 **IMPORTANT: CUSTOMIZE THIS TEMPLATE BEFORE USE**
 
@@ -84,6 +117,17 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   constructor(private settingsService: SettingsService) {
     this.settings = toSignal(this.settingsService.settings);
+
+    // Ensure view mode consistency with hasCustomTemplate
+    effect(() => {
+      const hasCustom = this.hasCustomTemplate();
+      const currentMode = this.viewMode();
+
+      // If no custom template but view mode is 'agreement', switch to 'sample'
+      if (!hasCustom && currentMode === 'agreement') {
+        this.viewMode.set('sample');
+      }
+    });
   }
 
   ngOnInit() {
@@ -109,14 +153,43 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   async loadTemplate() {
     try {
+      // Force refresh settings from server to avoid stale cache
+      await this.settingsService.loadSettings();
+
       // Check if there's an uploaded template from settings
       const settings = this.settings();
       const hasUploadedTemplate = settings?.agreementTemplateId != null;
 
+      let content = this.sampleTemplate;
+
+      // If there's an uploaded template, try to get its content
+      if (hasUploadedTemplate) {
+        try {
+          content = await this.getAgreementTemplateContent(settings!.agreementTemplateId!);
+        } catch (error) {
+          console.warn('Could not load agreement template content:', error);
+          // If we can't get the text content, try to download and extract it
+          try {
+            const blob = await this.settingsService.downloadAgreementTemplate(settings!.agreementTemplateId!);
+            if (blob.type === 'text/plain' || blob.type.includes('text')) {
+              content = await blob.text();
+            } else {
+              // For non-text files, use the sample template
+              console.warn('Uploaded file is not a text file, showing sample template');
+              content = this.sampleTemplate;
+            }
+          } catch (downloadError) {
+            console.error('Could not download agreement template:', downloadError);
+            // Last fallback to sample
+            content = this.sampleTemplate;
+          }
+        }
+      }
+
       // Create local template based on whether there's an uploaded file
       const localTemplate: LocalAgreementTemplate = {
         id: hasUploadedTemplate ? settings!.agreementTemplateId! : '1',
-        content: this.sampleTemplate,
+        content: content,
         isCustomized: hasUploadedTemplate,
         lastModified: new Date(),
         metaTags: this.metaTagsHelp.map(tag => tag.tag)
@@ -124,7 +197,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
       this.template.set(localTemplate);
       this.templateContent.set(localTemplate.content);
-      this.hasCustomTemplate.set(localTemplate.isCustomized);
 
       // Set view mode based on whether custom template exists
       if (localTemplate.isCustomized) {
@@ -248,7 +320,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       this.settingsService.updateSetting('agreementTemplateId', uploadedTemplate.id);
 
       // Update local state
-      this.hasCustomTemplate.set(true);
       this.viewMode.set('agreement');
 
       // Reload the template to update the display
@@ -279,7 +350,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     this.showSuccess('Agreement reset to sample');
   }
 
-  setViewMode(mode: 'sample' | 'agreement') {
+  setViewMode(mode: 'sample' | 'agreement' | 'keywords') {
     this.viewMode.set(mode);
   }
 
@@ -287,25 +358,14 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     if (this.viewMode() === 'sample') {
       return this.sampleTemplate;
     } else {
-      // If we have an uploaded PDF template, show a message instead of content
-      const settings = this.settings();
-      if (settings?.agreementTemplateId) {
-        return `PDF Agreement Template Uploaded
-
-Your custom consignment agreement PDF template has been uploaded successfully.
-
-Template ID: ${settings.agreementTemplateId}
-
-To view or edit the agreement template, download the PDF file using the download button above.
-
-This PDF template will be used when generating agreements for new consignors.`;
-      }
+      // For uploaded agreements, show the actual template content
       return this.template()?.content || '';
     }
   }
 
   async downloadCurrentView() {
-    if (this.viewMode() === 'sample') {
+    if (this.viewMode() === 'sample' || this.viewMode() === 'keywords') {
+      // For both sample view and keywords view, download the sample agreement
       this.downloadSample();
     } else {
       // Check if we have an uploaded PDF template
@@ -357,7 +417,6 @@ This PDF template will be used when generating agreements for new consignors.`;
       this.settingsService.updateSetting('agreementTemplateId', uploadedTemplate.id);
 
       // Update local state
-      this.hasCustomTemplate.set(true);
       this.viewMode.set('agreement');
       this.isEditing.set(false);
 
@@ -374,34 +433,46 @@ This PDF template will be used when generating agreements for new consignors.`;
     }
   }
 
-  async sendSampleAgreement() {
+
+  async deleteTemplate() {
+    if (!confirm('Are you sure you want to delete the uploaded agreement template? This action cannot be undone.')) {
+      return;
+    }
+
     this.isSaving.set(true);
     try {
-      // Get the current template content (either from editor or current template)
-      const contentToSend = this.isEditing()
-        ? this.templateContent()
-        : this.template()?.content || this.sampleTemplate;
+      const settings = this.settings();
+      const templateId = settings?.agreementTemplateId;
 
-      if (!contentToSend.trim()) {
-        this.showError('No agreement content to send');
+      if (!templateId) {
+        this.showError('No agreement template to delete');
         return;
       }
 
-      // Send sample agreement notification
-      await this.settingsService.sendSampleAgreement(contentToSend);
+      // Delete the template file
+      await this.settingsService.deleteAgreementTemplate(templateId);
 
-      this.showSuccess('Sample agreement sent to your notifications! Check your notifications panel to view it.');
+      // Update the settings to remove the template reference
+      this.settingsService.updateSetting('agreementTemplateId', null);
+
+      // Reset local state
+      this.viewMode.set('sample');
+
+      // Reload the template to update the display
+      await this.loadTemplate();
+
+      this.showSuccess('Agreement template deleted successfully');
 
     } catch (error: any) {
-      console.error('Sample agreement error:', error);
-      this.showError(error?.error || 'Failed to send sample agreement');
+      console.error('Delete error:', error);
+      this.showError(error?.error || 'Failed to delete agreement template');
     } finally {
       this.isSaving.set(false);
     }
   }
 
   getDownloadTooltip(): string {
-    if (this.viewMode() === 'sample') {
+    if (this.viewMode() === 'sample' || this.viewMode() === 'keywords') {
       return 'Download Sample';
     } else {
       return 'Download Agreement';
@@ -468,5 +539,26 @@ This PDF template will be used when generating agreements for new consignors.`;
   private clearMessages() {
     this.successMessage.set('');
     this.errorMessage.set('');
+  }
+
+  // Get agreement template content as text
+  private async getAgreementTemplateContent(templateId: string): Promise<string> {
+    try {
+      // First try to get the template as text if there's an API endpoint for it
+      const response = await this.settingsService.getAgreementTemplateAsText(templateId);
+      return response;
+    } catch (error) {
+      // If no text endpoint exists, try to download and extract text from file
+      const blob = await this.settingsService.downloadAgreementTemplate(templateId);
+
+      // For text files, we can read them directly
+      if (blob.type === 'text/plain' || blob.type === 'text/html' || blob.type.includes('text')) {
+        return await blob.text();
+      } else {
+        // For PDFs and other binary formats, we can't display inline
+        // But instead of showing a useless message, throw an error so we fall back to sample
+        throw new Error('Binary file cannot be displayed as text');
+      }
+    }
   }
 }

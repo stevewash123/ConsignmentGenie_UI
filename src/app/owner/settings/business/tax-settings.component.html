@@ -61,11 +61,13 @@
           <span class="label">Item price: $100.00</span>
           <div class="calculation" *ngIf="!taxForm.get('rates.isInclusive')?.value">
             + Tax ({{ taxForm.get('rates.defaultRate')?.value || 0 }}%): ${{ calculateTax(100) }}<br>
-            <strong>Total: ${{ calculateTotal(100) }}</strong>
+            <strong>Total: ${{ calculateTotal(100) }}</strong><br>
+            <span class="consignment-split">Payout: ${{ calculateConsignmentPayout(100) }} (50% of pre-tax amount)</span>
           </div>
           <div class="calculation" *ngIf="taxForm.get('rates.isInclusive')?.value">
             (includes ${{ calculateIncludedTax(100) }} tax)<br>
-            <strong>Customer pays: $100.00</strong>
+            <strong>Customer pays: $100.00</strong><br>
+            <span class="consignment-split">Payout: ${{ calculateInclusiveConsignmentPayout(100) }} (50% of pre-tax amount)</span>
           </div>
         </div>
       </div>
@@ -127,41 +129,6 @@
       </div>
     </section>
 
-    <!-- Commission Calculation -->
-    <section class="form-section" formGroupName="calculation">
-      <h3>Commission Calculation</h3>
-
-      <div class="form-group">
-        <label>Calculate consignor commission:</label>
-        <div class="radio-group">
-          <label class="radio-label">
-            <input type="radio" formControlName="applyToCommission" value="before">
-            <span class="radio-mark"></span>
-            Before tax (commission on pre-tax amount)
-          </label>
-          <label class="radio-label">
-            <input type="radio" formControlName="applyToCommission" value="after">
-            <span class="radio-mark"></span>
-            After tax (commission on total sale amount)
-          </label>
-        </div>
-
-        <div class="commission-example">
-          <h5>Example Impact:</h5>
-          <div class="example-calculation">
-            Item sells for: $100.00<br>
-            Tax ({{ taxForm.get('rates.defaultRate')?.value || 0 }}%): ${{ calculateTax(100) }}<br>
-            Total sale: ${{ calculateTotal(100) }}<br>
-            <strong *ngIf="taxForm.get('calculation.applyToCommission')?.value === 'before'">
-              50% commission on $100.00 = $50.00
-            </strong>
-            <strong *ngIf="taxForm.get('calculation.applyToCommission')?.value === 'after'">
-              50% commission on ${{ calculateTotal(100) }} = ${{ getCommissionAfterTax() }}
-            </strong>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Reporting Preferences -->
     <section class="form-section" formGroupName="reporting">

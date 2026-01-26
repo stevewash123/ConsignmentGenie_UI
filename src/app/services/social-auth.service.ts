@@ -269,14 +269,30 @@ export class SocialAuthService {
     });
   }
 
+  // Generic method to authenticate with any provider
+  authenticateWithProvider(provider: string): Observable<SocialAuthResult> {
+    switch (provider.toLowerCase()) {
+      case 'google':
+        return this.signInWithGoogle();
+      case 'apple':
+        return this.signInWithApple();
+      case 'twitter':
+      case 'x':
+        return this.signInWithTwitter();
+      default:
+        return throwError(() => new Error(`Unsupported provider: ${provider}`));
+    }
+  }
+
   // Helper method to check if a provider is available
-  isProviderAvailable(provider: 'google' | 'apple' | 'twitter'): boolean {
-    switch (provider) {
+  isProviderAvailable(provider: string): boolean {
+    switch (provider.toLowerCase()) {
       case 'google':
         return this.isGoogleSDKLoaded && !!window.google;
       case 'apple':
         return this.isAppleSDKLoaded && !!window.AppleID;
       case 'twitter':
+      case 'x':
         return true; // Twitter auth is handled by backend redirect
       default:
         return false;

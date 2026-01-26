@@ -49,7 +49,7 @@ export class TaxSettingsComponent implements OnInit {
       }),
       reporting: this.fb.group({
         period: ['monthly'],
-        autoGenerate: [false],
+        autoGenerate: [true],
         exportFormat: ['csv']
       })
     });
@@ -113,6 +113,18 @@ export class TaxSettingsComponent implements OnInit {
   getCommissionAfterTax(): string {
     const total = parseFloat(this.calculateTotal(100));
     return (total * 0.5).toFixed(2);
+  }
+
+  calculateConsignmentPayout(amount: number): string {
+    // Always calculate payout on pre-tax amount (BeforeTax only)
+    return (amount * 0.5).toFixed(2);
+  }
+
+  calculateInclusiveConsignmentPayout(amount: number): string {
+    // For tax-inclusive, extract the pre-tax amount first, then calculate 50%
+    const rate = this.taxForm.get('rates.defaultRate')?.value || 0;
+    const preTaxAmount = amount / (1 + rate / 100);
+    return (preTaxAmount * 0.5).toFixed(2);
   }
 
   previewTaxCalculation() {

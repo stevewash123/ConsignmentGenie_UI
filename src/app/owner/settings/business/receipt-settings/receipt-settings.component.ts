@@ -105,25 +105,25 @@ export class ReceiptSettingsComponent implements OnInit {
   private createForm(): FormGroup {
     return this.fb.group({
       header: this.fb.group({
-        includeLogo: [true],
-        showStoreInfo: [true],
-        showAddress: [true],
+        includeLogo: [false], // Set to FALSE per requirements
+        showStoreInfo: [true], // Always TRUE per requirements
+        showAddress: [true], // Always TRUE per requirements
         dateFormat: ['MM/dd/yyyy'],
         timeFormat: ['12h']
       }),
       content: this.fb.group({
-        layoutStyle: ['detailed'],
-        showItemDescriptions: [true],
-        descriptionLength: [50],
-        showTaxBreakdown: [true],
-        showPaymentMethod: [true]
+        layoutStyle: ['simple'], // Simple layout always
+        showItemDescriptions: [true], // Always show descriptions
+        descriptionLength: [50], // Always 50 characters
+        showTaxBreakdown: [true], // Always TRUE per requirements
+        showPaymentMethod: [true] // Always TRUE per requirements
       }),
       footer: this.fb.group({
         customMessage: ['', Validators.maxLength(200)],
         includeReturnPolicy: [false],
         returnPolicyText: ['', Validators.maxLength(300)],
         thankYouMessage: [''],
-        includeWebsite: [true]
+        includeWebsite: [false] // Set to FALSE per requirements
       }),
       digital: this.fb.group({
         autoEmailReceipts: [false],
@@ -138,7 +138,7 @@ export class ReceiptSettingsComponent implements OnInit {
         printerWidth: [80],
         copies: [1],
         printDensity: ['medium'],
-        logoSize: ['medium']
+        logoSize: ['medium'] // Keep this for data consistency even though UI option removed
       })
     });
   }

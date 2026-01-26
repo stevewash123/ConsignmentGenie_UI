@@ -45,54 +45,77 @@
     <section class="form-section" formGroupName="returns">
       <h3>Returns & Exchanges</h3>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="noReturns">
-          <span class="checkmark"></span>
-          No returns accepted (all sales final)
-        </label>
-      </div>
-
-      <div class="returns-details" *ngIf="!policiesForm().get('returns.noReturns')?.value">
+      <div class="returns-section">
+        <!-- Return Policy -->
         <div class="form-group">
-          <label for="periodDays">Return period</label>
-          <div class="input-group">
-            <input
-              id="periodDays"
-              type="number"
-              min="0"
-              max="365"
-              formControlName="periodDays"
-              class="form-input">
-            <span class="input-suffix">days</span>
+          <label class="form-label">Return Policy</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" value="none" [formControlName]="'returnPolicy'" (change)="onReturnPolicyChange('none')">
+              <span class="radio-mark"></span>
+              No returns (all sales final)
+            </label>
+            <label class="radio-label">
+              <input type="radio" value="days" [formControlName]="'returnPolicy'" (change)="onReturnPolicyChange('days')">
+              <span class="radio-mark"></span>
+              Returns within
+              <input
+                type="number"
+                min="1"
+                max="365"
+                [formControlName]="'periodDays'"
+                [disabled]="policiesForm().get('returns.returnPolicy')?.value !== 'days'"
+                class="inline-number-input">
+              days
+            </label>
           </div>
-          <span class="help-text">Number of days customers can return items</span>
         </div>
 
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="requiresReceipt">
-            <span class="checkmark"></span>
-            Receipt required for returns
-          </label>
+        <!-- What customers can receive (only show if returns allowed) -->
+        <div class="form-group" *ngIf="policiesForm().get('returns.returnPolicy')?.value === 'days'">
+          <label class="form-label">What can customers receive?</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="allowRefunds">
+              <span class="checkmark"></span>
+              Refunds (money back)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="allowExchanges">
+              <span class="checkmark"></span>
+              Exchanges (different item)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="allowStoreCredit">
+              <span class="checkmark"></span>
+              Store credit
+            </label>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="acceptsExchanges">
-            <span class="checkmark"></span>
-            Accept exchanges for different items
-          </label>
+        <!-- Receipt Policy (only show if returns allowed) -->
+        <div class="form-group" *ngIf="policiesForm().get('returns.returnPolicy')?.value === 'days'">
+          <label class="form-label">Receipt Policy</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" value="required" [formControlName]="'receiptPolicy'">
+              <span class="radio-mark"></span>
+              Receipt required for all returns
+            </label>
+            <label class="radio-label">
+              <input type="radio" value="flexible" [formControlName]="'receiptPolicy'">
+              <span class="radio-mark"></span>
+              Receipt preferred but not required
+            </label>
+            <label class="checkbox-label no-receipt-option"
+                   *ngIf="policiesForm().get('returns.receiptPolicy')?.value === 'flexible' &&
+                          policiesForm().get('returns.allowStoreCredit')?.value">
+              <input type="checkbox" formControlName="noReceiptStoreCreditOnly">
+              <span class="checkmark"></span>
+              No receipt = store credit only
+            </label>
+          </div>
         </div>
-
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="storeCreditOnly">
-            <span class="checkmark"></span>
-            Store credit only (no cash refunds)
-          </label>
-        </div>
-
       </div>
     </section>
 
@@ -133,31 +156,6 @@
 
     </section>
 
-    <!-- Consignor Policies -->
-    <section class="form-section" formGroupName="consignorPolicies">
-      <h3>Consignor Policies</h3>
-
-      <div class="form-group">
-        <label for="policies">Consignor policies and guidelines</label>
-        <textarea
-          id="policies"
-          formControlName="policies"
-          placeholder="Describe your consignor policies including item acceptance criteria, condition requirements, brand restrictions, seasonal guidelines, commission rates, payment terms, etc..."
-          maxlength="1000"
-          class="form-textarea"
-          rows="8"></textarea>
-        <span class="char-count">{{ consignorPoliciesLength() }}/1000 characters</span>
-      </div>
-
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="notifyOnRegistration">
-          <span class="checkmark"></span>
-          Send policies to consignors when they register
-        </label>
-        <span class="help-text">When checked, new consignors will receive these policies via email after registration</span>
-      </div>
-    </section>
 
 
 

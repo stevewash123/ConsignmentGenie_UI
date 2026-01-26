@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { SettingsService, ConsignorPermissions } from '../../../../services/settings.service';
-import { Subscription } from 'rxjs';
 
 interface PermissionTemplate {
   name: string;
@@ -17,89 +16,107 @@ interface PermissionTemplate {
   templateUrl: './permissions.component.html',
   styleUrls: ['./permissions.component.scss']
 })
-export class PermissionsComponent implements OnInit, OnDestroy {
-  permissions = signal<ConsignorPermissions | null>(null);
-  successMessage = signal('');
-  errorMessage = signal('');
-  private subscriptions = new Subscription();
-
-  // Auto-save status computed from permissions state
-  autoSaveStatus = computed(() => {
-    const permissions = this.permissions();
-    return permissions ? 'Saved automatically' : 'Loading...';
+export class PermissionsComponent implements OnInit {
+  permissions = signal<ConsignorPermissions>({
+    canAddItems: true,
+    canEditOwnItems: true,
+    canRemoveOwnItems: false,
+    canEditPrices: true,
+    isActive: true
   });
 
-  constructor(
-    private settingsService: SettingsService
-  ) {}
+  successMessage = signal('');
+  errorMessage = signal('');
+  isLoading = signal(false);
+  isSaving = signal(false);
+
+  constructor(private settingsService: SettingsService) {}
 
   ngOnInit(): void {
-    this.setupSubscriptions();
     this.loadPermissions();
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
-  private setupSubscriptions(): void {
-    // Subscribe to permissions changes from the service
-    this.subscriptions.add(
-      this.settingsService.consignorPermissions.subscribe(permissions => {
-        this.permissions.set(permissions);
-      })
-    );
-  }
-
   async loadPermissions(): Promise<void> {
+    this.isLoading.set(true);
     try {
+      // For now, use the existing endpoint, but clean up the data structure
       await this.settingsService.loadConsignorPermissions();
+      // Get the current permissions and flatten them
+      const currentPermissions = this.settingsService.getCurrentConsignorPermissions();
+      if (currentPermissions) {
+        // Handle both old nested and new flat structure
+        if ('inventory' in currentPermissions) {
+          // Old structure - extract from nested object
+          const nested = currentPermissions as any;
+          this.permissions.set({
+            canAddItems: nested.inventory?.canAddItems || true,
+            canEditOwnItems: nested.inventory?.canEditOwnItems || true,
+            canRemoveOwnItems: nested.inventory?.canRemoveOwnItems || false,
+            canEditPrices: nested.inventory?.canEditPrices || true,
+            isActive: nested.isActive || true
+          });
+        } else {
+          // New flat structure
+          this.permissions.set(currentPermissions as ConsignorPermissions);
+        }
+      }
     } catch (error) {
       console.error('Error loading consignor permissions:', error);
       this.showError('Failed to load permissions');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
-  // Individual permission update methods - these trigger debounced saves
+  async updatePermission(key: keyof ConsignorPermissions, value: boolean): Promise<void> {
+    // Optimistic update
+    const current = this.permissions();
+    const updated = { ...current, [key]: value };
+    this.permissions.set(updated);
+
+    // Save to server with debounce-like behavior
+    this.isSaving.set(true);
+    try {
+      // Use the old service method for now, but with fixed structure
+      this.settingsService.updateConsignorPermission(key, value);
+      this.showSuccess('Permission updated');
+    } catch (error) {
+      // Revert on error
+      this.permissions.set(current);
+      console.error('Error updating permission:', error);
+      this.showError('Failed to update permission');
+    } finally {
+      // Delay clearing saving state to show user feedback
+      setTimeout(() => this.isSaving.set(false), 1000);
+    }
+  }
+
+  // Individual permission update methods
   onCanAddItemsChange(value: boolean): void {
-    this.settingsService.updateConsignorPermission('canAddItems', value);
+    this.updatePermission('canAddItems', value);
   }
 
   onCanEditOwnItemsChange(value: boolean): void {
-    this.settingsService.updateConsignorPermission('canEditOwnItems', value);
+    this.updatePermission('canEditOwnItems', value);
   }
 
   onCanRemoveOwnItemsChange(value: boolean): void {
-    this.settingsService.updateConsignorPermission('canRemoveOwnItems', value);
+    this.updatePermission('canRemoveOwnItems', value);
   }
 
   onCanEditPricesChange(value: boolean): void {
-    this.settingsService.updateConsignorPermission('canEditPrices', value);
+    this.updatePermission('canEditPrices', value);
   }
 
   onIsActiveChange(value: boolean): void {
-    this.settingsService.updateConsignorPermission('isActive', value);
+    this.updatePermission('isActive', value);
   }
-
-  resetToDefaults(): void {
-    // Reset to default values with auto-save
-    const defaultPermissions = {
-      'canAddItems': true,
-      'canEditOwnItems': true,
-      'canRemoveOwnItems': false,
-      'canEditPrices': true,
-      'isActive': true
-    };
-
-    this.settingsService.updateConsignorPermissions(defaultPermissions);
-  }
-
 
 
   private showSuccess(message: string): void {
     this.successMessage.set(message);
     this.errorMessage.set('');
-    setTimeout(() => this.successMessage.set(''), 5000);
+    setTimeout(() => this.successMessage.set(''), 3000);
   }
 
   private showError(message: string): void {

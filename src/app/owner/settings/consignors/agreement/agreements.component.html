@@ -66,7 +66,10 @@
   <!-- Agreement Preview -->
   <div class="template-preview">
     <div class="preview-header">
-      <h3>Sample Consignment Agreement</h3>
+      <div class="header-content">
+        <h3>Agreement Template</h3>
+        <p class="header-subtext">Your agreement contract with keyword symbols</p>
+      </div>
       <div class="preview-description">
         <div class="view-mode-selector">
           <label class="radio-option">
@@ -88,11 +91,22 @@
               (change)="setViewMode('agreement')">
             <span>View Agreement</span>
           </label>
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="viewMode"
+              value="keywords"
+              [checked]="viewMode() === 'keywords'"
+              (change)="setViewMode('keywords')">
+            <span>View Key Words</span>
+          </label>
         </div>
         <div class="preview-actions">
+          <!-- Show edit button only when NOT in sample mode -->
           <button
+            *ngIf="viewMode() !== 'sample'"
             type="button"
-            class="btn-icon-small"
+            class="btn-icon-small btn-secondary"
             (click)="startEditing()"
             [disabled]="!isTemplateEditingEnabled()"
             title="Edit Agreement Template">
@@ -100,59 +114,67 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
           </button>
-          <button type="button" class="btn-icon-small" (click)="downloadCurrentView()" [title]="getDownloadTooltip()">
+          <button type="button" class="btn-icon-small btn-secondary" (click)="downloadCurrentView()" [title]="getDownloadTooltip()">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
           </button>
-          <button type="button" class="btn-icon-small" (click)="sendSampleAgreement()" [disabled]="isSaving()" title="Send Sample Agreement to Me">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-            </svg>
-          </button>
-          <label
-            for="template-upload-preview"
-            class="btn-icon-small"
-            [class.disabled]="!isTemplateEditingEnabled()"
-            title="Upload Agreement">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-            </svg>
-          </label>
-          <input
-            id="template-upload-preview"
-            type="file"
-            accept="application/pdf,.pdf,.txt,.rtf,.html,.htm,text/plain,text/rtf,text/html"
-            (change)="onFileSelected($event)"
-            [disabled]="isUploading() || !isTemplateEditingEnabled()"
-            style="display: none;">
+          <!-- Show upload button only when no custom template exists -->
+          <ng-container *ngIf="!hasCustomTemplate()">
+            <label
+              for="template-upload-preview"
+              class="btn-icon-small btn-primary"
+              [class.disabled]="!isTemplateEditingEnabled()"
+              title="Upload Agreement">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+              </svg>
+            </label>
+            <input
+              id="template-upload-preview"
+              type="file"
+              accept="application/pdf,.pdf,.txt,.rtf,.html,.htm,text/plain,text/rtf,text/html"
+              (change)="onFileSelected($event)"
+              [disabled]="isUploading() || !isTemplateEditingEnabled()"
+              style="display: none;">
+          </ng-container>
+
+          <!-- Show delete button when custom template exists and viewing agreement -->
+          <ng-container *ngIf="hasCustomTemplate() && viewMode() === 'agreement'">
+            <button
+              type="button"
+              class="btn-icon-small btn-danger btn-secondary"
+              (click)="deleteTemplate()"
+              [disabled]="isSaving()"
+              title="Delete Agreement Template">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </ng-container>
         </div>
       </div>
     </div>
 
     <div class="preview-content" *ngIf="!isEditing()">
-      <!-- Show PDF download prompt for uploaded agreements -->
-      <div *ngIf="viewMode() === 'agreement' && settings()?.agreementTemplateId; else textContent" class="pdf-download-prompt">
-        <div class="pdf-info">
-          <div class="pdf-icon">📄</div>
-          <h4>PDF Agreement Template</h4>
-          <p>Your custom agreement template is saved as a PDF file.</p>
-          <p><strong>Template ID:</strong> {{ settings()?.agreementTemplateId }}</p>
+      <!-- Show keywords list when in keywords mode -->
+      <div *ngIf="viewMode() === 'keywords'" class="keywords-grid">
+        <div class="keywords-column">
+          <div *ngFor="let tag of firstHalfKeywords()" class="keyword-item">
+            <span class="keyword-word">{{ tag.tag }}</span>
+            <span class="keyword-description">{{ tag.description }}</span>
+          </div>
         </div>
-
-        <div class="pdf-actions">
-          <button type="button" class="btn-primary" (click)="downloadCurrentView()">
-            <span>📥</span>
-            Download & View Agreement PDF
-          </button>
-          <p class="help-text">The PDF will download to your computer where you can view and print it.</p>
+        <div class="keywords-column">
+          <div *ngFor="let tag of secondHalfKeywords()" class="keyword-item">
+            <span class="keyword-word">{{ tag.tag }}</span>
+            <span class="keyword-description">{{ tag.description }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Show text content for sample template or text-based agreements -->
-      <ng-template #textContent>
-        <pre class="template-preview-text">{{ getDisplayedContent() }}</pre>
-      </ng-template>
+      <!-- Show text content for sample and agreement modes -->
+      <pre *ngIf="viewMode() !== 'keywords'" class="template-preview-text">{{ getDisplayedContent() }}</pre>
     </div>
 
     <!-- Template Editor -->
@@ -161,9 +183,6 @@
         <h4>Edit Agreement Template</h4>
         <div class="editor-actions">
           <button type="button" class="btn-secondary" (click)="cancelEditing()">Cancel</button>
-          <button type="button" class="btn-secondary" (click)="sendSampleAgreement()" [disabled]="isSaving()">
-            {{ isSaving() ? 'Sending...' : 'Send Sample to Me' }}
-          </button>
           <button type="button" class="btn-primary" (click)="generatePdfFromTemplate()" [disabled]="isSaving()">
             {{ isSaving() ? 'Generating...' : 'Generate PDF' }}
           </button>

@@ -90,13 +90,22 @@ export interface BusinessSettings {
 }
 
 export interface ConsignorPermissions {
-  inventory: {
-    canAddItems: boolean;
-    canEditOwnItems: boolean;
-    canRemoveOwnItems: boolean;
-    canEditPrices: boolean;
-  };
+  canAddItems: boolean;
+  canEditOwnItems: boolean;
+  canRemoveOwnItems: boolean;
+  canEditPrices: boolean;
   isActive: boolean;
+}
+
+export interface ConsignorPageSettings {
+  agreementRequirement: string;
+  agreementTemplateId: string | null;
+  requireSignedAgreement: boolean;
+  approvalMode: string;
+  acknowledgeTermsText: string | null;
+  autoSendAgreementOnRegister: boolean;
+  emailOnNewConsignor: boolean;
+  defaultPermissions: ConsignorPermissions;
   lastUpdated: Date;
 }
 
@@ -354,6 +363,27 @@ export class SettingsService {
     );
 
     return response;
+  }
+
+  /**
+   * Get agreement template content as text
+   */
+  async getAgreementTemplateAsText(templateId: string): Promise<string> {
+    const response = await firstValueFrom(
+      this.http.get(`${environment.apiUrl}/api/organizations/agreement-templates/${templateId}/text`,
+        { responseType: 'text' })
+    );
+
+    return response;
+  }
+
+  /**
+   * Delete agreement template file
+   */
+  async deleteAgreementTemplate(templateId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.delete(`${environment.apiUrl}/api/organizations/agreement-templates/${templateId}`)
+    );
   }
 
   /**
