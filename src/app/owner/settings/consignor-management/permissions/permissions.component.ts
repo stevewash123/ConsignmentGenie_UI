@@ -79,15 +79,15 @@ export class PermissionsComponent implements OnInit {
     try {
       // Use the old service method for now, but with fixed structure
       this.settingsService.updateConsignorPermission(key, value);
-      this.showSuccess('Permission updated');
+      // No success message for checkbox saves - they're immediate and obvious
     } catch (error) {
       // Revert on error
       this.permissions.set(current);
       console.error('Error updating permission:', error);
       this.showError('Failed to update permission');
     } finally {
-      // Delay clearing saving state to show user feedback
-      setTimeout(() => this.isSaving.set(false), 1000);
+      // Quick clear since no success message to show
+      setTimeout(() => this.isSaving.set(false), 300);
     }
   }
 
@@ -112,12 +112,6 @@ export class PermissionsComponent implements OnInit {
     this.updatePermission('isActive', value);
   }
 
-
-  private showSuccess(message: string): void {
-    this.successMessage.set(message);
-    this.errorMessage.set('');
-    setTimeout(() => this.successMessage.set(''), 3000);
-  }
 
   private showError(message: string): void {
     this.errorMessage.set(message);

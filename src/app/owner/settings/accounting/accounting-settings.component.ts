@@ -1,8 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { SettingsService } from '../../../services/settings.service';
 
 interface AccountingSettings {
   quickBooks: {
@@ -37,7 +36,7 @@ export class AccountingSettingsComponent implements OnInit {
   isSaving = signal(false);
   recipientsText = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private settingsService: SettingsService) {}
 
   ngOnInit() {
     this.loadSettings();
@@ -112,6 +111,6 @@ export class AccountingSettingsComponent implements OnInit {
   exportFinancialData() {
     // Mock export - in real app, trigger export download
     console.log('Exporting financial data with format:', this.settings()?.exports.format);
-    alert('Financial data export would be downloaded here');
+    // Export would trigger download here
   }
 }

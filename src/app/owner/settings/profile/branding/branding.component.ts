@@ -138,7 +138,6 @@ export class BrandingComponent implements OnInit {
 
       this.brandingService.saveBranding(brandingData).subscribe({
         next: (result) => {
-          this.showSuccess('Branding settings saved successfully');
           this.saving.set(false);
         },
         error: (error) => {
@@ -205,7 +204,6 @@ export class BrandingComponent implements OnInit {
           });
 
           this.currentLogo.set('');
-          this.showSuccess('Logo removed successfully');
           this.saving.set(false);
         },
         error: (error) => {

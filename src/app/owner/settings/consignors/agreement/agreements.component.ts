@@ -240,7 +240,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
       this.template.set(updatedTemplate);
       this.isEditing.set(false);
-      this.showSuccess('Agreement saved successfully');
     } catch (error) {
       this.showError('Failed to save agreement');
     } finally {
@@ -259,7 +258,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
-    this.showSuccess('Sample agreement downloaded');
   }
 
   downloadTemplate() {
@@ -279,7 +277,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
-    this.showSuccess('Agreement downloaded');
   }
 
   async onFileSelected(event: Event) {
@@ -325,8 +322,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       // Reload the template to update the display
       await this.loadTemplate();
 
-      this.showSuccess(`Agreement template "${uploadedTemplate.fileName}" uploaded successfully`);
-
+      this.showSuccess('Agreement template uploaded successfully');
     } catch (error: any) {
       console.error('Upload error:', error);
       this.showError(error?.error || 'Failed to upload agreement template');
@@ -347,7 +343,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     }
 
     this.templateContent.set(this.sampleTemplate);
-    this.showSuccess('Agreement reset to sample');
   }
 
   setViewMode(mode: 'sample' | 'agreement' | 'keywords') {
@@ -390,7 +385,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      this.showSuccess('Agreement template downloaded');
     } catch (error) {
       this.showError('Failed to download agreement template');
     }
@@ -423,7 +417,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       // Reload the template to update the display
       await this.loadTemplate();
 
-      this.showSuccess('Agreement PDF generated and uploaded successfully');
 
     } catch (error: any) {
       console.error('PDF generation error:', error);
@@ -461,7 +454,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       // Reload the template to update the display
       await this.loadTemplate();
 
-      this.showSuccess('Agreement template deleted successfully');
 
     } catch (error: any) {
       console.error('Delete error:', error);
@@ -524,6 +516,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     return allowedExtensions.includes(fileExtension);
   }
 
+
   private showSuccess(message: string) {
     this.successMessage.set(message);
     this.errorMessage.set('');
@@ -537,7 +530,6 @@ Consult with an attorney to ensure your agreement meets local legal requirements
   }
 
   private clearMessages() {
-    this.successMessage.set('');
     this.errorMessage.set('');
   }
 
