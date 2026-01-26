@@ -3,6 +3,8 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { PayoutSettings } from '../models/payout-settings.model';
+import { ReceiptSettings } from '../owner/settings/business/receipt-settings/receipt-settings.component';
 
 export interface OrganizationSettings {
   // Consignment Agreements
@@ -87,6 +89,7 @@ export interface BusinessSettings {
     itemSubmissionMode?: string;
     autoApproveItems?: boolean;
   };
+  receipts?: ReceiptSettings;
 }
 
 export interface ConsignorPermissions {
@@ -185,6 +188,9 @@ export class SettingsService {
 
   // Accounting settings state
   private accountingSettings$ = new BehaviorSubject<AccountingSettings | null>(null);
+
+  // Payout settings state
+  private payoutSettings$ = new BehaviorSubject<PayoutSettings | null>(null);
 
   // Consignor permissions state
   private consignorPermissions$ = new BehaviorSubject<ConsignorPermissions | null>(null);
@@ -741,6 +747,31 @@ export class SettingsService {
 
   getCurrentAccountingSettings(): AccountingSettings | null {
     return this.accountingSettings$.value;
+  }
+
+  // ===== PAYOUT SETTINGS METHODS =====
+
+  async loadPayoutSettings(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.http.get<PayoutSettings>(`${environment.apiUrl}/api/organizations/payout-settings`)
+      );
+      this.payoutSettings$.next(response);
+    } catch (error) {
+      console.error('Error loading payout settings:', error);
+      throw error;
+    }
+  }
+
+  async updatePayoutSettings(settings: PayoutSettings): Promise<void> {
+    this.payoutSettings$.next(settings);
+    await firstValueFrom(
+      this.http.patch<PayoutSettings>(`${environment.apiUrl}/api/organizations/payout-settings`, settings)
+    );
+  }
+
+  getCurrentPayoutSettings(): PayoutSettings | null {
+    return this.payoutSettings$.value;
   }
 
   // ===== CONSIGNOR PERMISSIONS METHODS =====

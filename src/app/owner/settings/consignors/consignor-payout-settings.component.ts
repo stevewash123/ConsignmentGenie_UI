@@ -1,8 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { SettingsService } from '../../../services/settings.service';
 import { PayoutSettings, PayoutMethodOption, DEFAULT_PAYOUT_SETTINGS, validatePayoutSettings } from '../../../models/payout-settings.model';
 
 @Component({
@@ -74,7 +73,7 @@ export class ConsignorPayoutSettingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private settingsService: SettingsService
   ) {
     this.initForm();
   }
@@ -176,15 +175,16 @@ export class ConsignorPayoutSettingsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      const response = await this.http.get<PayoutSettings>(`${environment.apiUrl}/api/organizations/payout-settings`).toPromise();
-      if (response) {
-        this.settings.set(response);
-        this.populateForm(response);
+      await this.settingsService.loadPayoutSettings();
+      const settings = this.settingsService.getCurrentPayoutSettings();
+      if (settings) {
+        this.settings.set(settings);
+        this.populateForm(settings);
       } else {
         // Use default settings if none exist
         const defaultSettings = { ...DEFAULT_PAYOUT_SETTINGS } as PayoutSettings;
         defaultSettings.lastUpdated = new Date();
-        defaultSettings.organizationId = 'current'; // Will be set by API
+        defaultSettings.organizationId = 'current';
         this.populateForm(defaultSettings);
       }
     } catch (error) {
@@ -267,9 +267,8 @@ export class ConsignorPayoutSettingsComponent implements OnInit {
 
     this.saving.set(true);
     try {
-      await this.http.put(`${environment.apiUrl}/api/organizations/payout-settings`, settings).toPromise();
+      await this.settingsService.updatePayoutSettings(settings);
       this.settings.set(settings);
-      this.showSuccess('Payout settings saved successfully');
     } catch (error) {
       this.showError('Failed to save payout settings');
     } finally {

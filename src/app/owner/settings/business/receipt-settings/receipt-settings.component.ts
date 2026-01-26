@@ -1,8 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { SettingsService } from '../../../../services/settings.service';
 
 // Data model interfaces
 export interface ReceiptHeaderSettings {
@@ -93,7 +92,7 @@ export class ReceiptSettingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private settingsService: SettingsService
   ) {
     this.receiptForm.set(this.createForm());
   }
@@ -145,10 +144,11 @@ export class ReceiptSettingsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      const response = await this.http.get<ReceiptSettings>(`${environment.apiUrl}/api/organizations/receipt-settings`).toPromise();
-      if (response) {
-        this.settings.set(response);
-        this.populateForm(response);
+      await this.settingsService.loadBusinessSettings();
+      const businessSettings = this.settingsService.getCurrentBusinessSettings();
+      if (businessSettings?.receipts) {
+        this.settings.set(businessSettings.receipts);
+        this.populateForm(businessSettings.receipts);
       }
     } catch (error) {
       // If settings don't exist, use defaults - no error message needed
@@ -189,9 +189,8 @@ export class ReceiptSettingsComponent implements OnInit {
 
     this.saving.set(true);
     try {
-      await this.http.put(`${environment.apiUrl}/api/organizations/receipt-settings`, receiptSettings).toPromise();
+      await this.settingsService.updateBusinessSettings({ receipts: receiptSettings });
       this.settings.set(receiptSettings);
-      this.showSuccess('Receipt settings saved successfully');
     } catch (error) {
       this.showError('Failed to save receipt settings');
     } finally {

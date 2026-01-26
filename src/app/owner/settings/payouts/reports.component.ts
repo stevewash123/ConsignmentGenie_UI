@@ -1,8 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { SettingsService } from '../../../services/settings.service';
 
 @Component({
   selector: 'app-reports',
@@ -19,7 +18,7 @@ export class ReportsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit() {
@@ -41,11 +40,13 @@ export class ReportsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      // TODO: Load from API
-      // const response = await this.http.get<any>(`${environment.apiUrl}/api/organizations/report-settings`).toPromise();
-      // if (response) {
-      //   this.reportsForm.patchValue(response);
-      // }
+      await this.settingsService.loadPayoutSettings();
+      const settings = this.settingsService.getCurrentPayoutSettings();
+      if (settings?.reports) {
+        this.reportsForm.patchValue({
+          reports: settings.reports
+        });
+      }
     } catch (error) {
       console.error('Failed to load report settings:', error);
     }
@@ -58,9 +59,16 @@ export class ReportsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      // TODO: Save to API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      this.successMessage.set('Report settings saved successfully');
+      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      if (currentSettings) {
+        const formValue = this.reportsForm.value;
+        const updatedSettings = {
+          ...currentSettings,
+          reports: formValue.reports,
+          lastUpdated: new Date()
+        };
+        await this.settingsService.updatePayoutSettings(updatedSettings);
+      }
     } catch (error) {
       console.error('Failed to save report settings:', error);
       this.errorMessage.set('Failed to save report settings. Please try again.');

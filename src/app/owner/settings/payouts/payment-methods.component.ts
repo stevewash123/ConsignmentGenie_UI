@@ -1,8 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { SettingsService } from '../../../services/settings.service';
 
 interface PayoutMethodOption {
   method: string;
@@ -54,7 +53,7 @@ export class PaymentMethodsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit() {
@@ -108,11 +107,14 @@ export class PaymentMethodsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      // TODO: Load from API
-      // const response = await this.http.get<any>(`${environment.apiUrl}/api/organizations/payment-settings`).toPromise();
-      // if (response) {
-      //   this.paymentForm.patchValue(response);
-      // }
+      await this.settingsService.loadPayoutSettings();
+      const settings = this.settingsService.getCurrentPayoutSettings();
+      if (settings?.paymentMethods) {
+        this.paymentForm.patchValue({
+          paymentMethods: settings.paymentMethods,
+          fees: settings.fees
+        });
+      }
     } catch (error) {
       console.error('Failed to load payment settings:', error);
     }
@@ -125,9 +127,17 @@ export class PaymentMethodsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      // TODO: Save to API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      this.successMessage.set('Payment method settings saved successfully');
+      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      if (currentSettings) {
+        const formValue = this.paymentForm.value;
+        const updatedSettings = {
+          ...currentSettings,
+          paymentMethods: formValue.paymentMethods,
+          fees: formValue.fees,
+          lastUpdated: new Date()
+        };
+        await this.settingsService.updatePayoutSettings(updatedSettings);
+      }
     } catch (error) {
       console.error('Failed to save payment settings:', error);
       this.errorMessage.set('Failed to save payment settings. Please try again.');
