@@ -1,50 +1,45 @@
 ❯ Building...
 ✔ Building...
 Initial chunk files   | Names                            |  Raw size | Estimated transfer size
-chunk-VIWDXCW5.js     | -                                | 200.21 kB |                57.95 kB
-main-ZT562AKL.js      | main                             |  86.50 kB |                22.29 kB
-chunk-RCW4QQJ4.js     | -                                |  79.66 kB |                19.80 kB
-chunk-C6ZVJZZG.js     | -                                |  52.32 kB |                10.17 kB
+chunk-W6P2QBHJ.js     | -                                | 201.78 kB |                58.37 kB
+main-QUGNFAKM.js      | main                             |  84.11 kB |                21.72 kB
+chunk-EVEK5ZHR.js     | -                                |  79.66 kB |                19.81 kB
+chunk-4YQ6SOF4.js     | -                                |  60.91 kB |                13.81 kB
+chunk-EHTOFX2A.js     | -                                |  52.32 kB |                10.17 kB
 polyfills-5CFQRCPP.js | polyfills                        |  34.59 kB |                11.33 kB
-chunk-S5DQN2SE.js     | -                                |  23.53 kB |                 5.12 kB
-chunk-5KS6IDG3.js     | -                                |  18.10 kB |                 5.34 kB
+chunk-FGU4ACCE.js     | -                                |  23.53 kB |                 5.12 kB
 styles-VK42JH4N.css   | styles                           |  17.80 kB |                 4.10 kB
-chunk-KPAEGIXB.js     | -                                |  12.94 kB |                 4.06 kB
-chunk-CKHLMLWO.js     | -                                |   7.35 kB |                 1.74 kB
-chunk-MVCAEU4N.js     | -                                |   1.39 kB |               530 bytes
-chunk-4CLCTAJ7.js     | -                                | 830 bytes |               830 bytes
-chunk-GUOGCHOP.js     | -                                | 734 bytes |               734 bytes
+chunk-AGWUVNSR.js     | -                                |  17.54 kB |                 5.21 kB
+chunk-NGYIOSHQ.js     | -                                |  12.94 kB |                 4.06 kB
+chunk-FDRJRPDO.js     | -                                |   8.62 kB |                 1.86 kB
+chunk-O52BGMKR.js     | -                                |   1.39 kB |               532 bytes
+chunk-AP4OEWII.js     | -                                |   1.09 kB |               488 bytes
+chunk-4AHQALB7.js     | -                                | 734 bytes |               734 bytes
 chunk-MUTJNURO.js     | -                                | 386 bytes |               386 bytes
 
-                      | Initial total                    | 536.34 kB |               144.41 kB
+                      | Initial total                    | 597.39 kB |               157.71 kB
 
 Lazy chunk files      | Names                            |  Raw size | Estimated transfer size
-chunk-LOOZNYQL.js     | owner-payouts-component          |  93.03 kB |                17.14 kB
-chunk-ZP7JMIVQ.js     | inventory-list-component         |  60.32 kB |                11.96 kB
-chunk-76NMCZ7I.js     | price-request-list-component     |  51.46 kB |                 8.29 kB
-chunk-NY2K2SHI.js     | item-list-component              |  51.45 kB |                10.44 kB
-chunk-K5HS4X2V.js     | consignor-list-component         |  47.17 kB |                 9.74 kB
-chunk-7O4KRITJ.js     | consignor-item-detail-component  |  46.17 kB |                 8.85 kB
-chunk-OJGFRDPK.js     | agreements-component             |  45.02 kB |                 7.80 kB
-chunk-KJKJYONP.js     | consignor-payouts-component      |  44.69 kB |                 9.17 kB
-chunk-ZKPC55FF.js     | owner-approval-component         |  40.65 kB |                 8.58 kB
-chunk-HBOAPHRS.js     | consignor-detail-component       |  36.28 kB |                 7.99 kB
-chunk-C4ZVRQEO.js     | record-sale-component            |  34.65 kB |                 8.28 kB
-chunk-LGF32LPI.js     | owner-dashboard-component        |  29.31 kB |                 7.08 kB
-chunk-VAJJFA2R.js     | payout-history-component         |  29.29 kB |                 6.39 kB
-chunk-2CMRJSC7.js     | create-dropoff-request-component |  29.20 kB |                 6.08 kB
-chunk-FYQI64AF.js     | store-layout-component           |  28.31 kB |                 5.10 kB
-...and 123 more lazy chunks files. Use "--verbose" to show all the files.
+chunk-YPVWLIBN.js     | owner-payouts-component          |  93.03 kB |                17.18 kB
+chunk-DMFJBFCD.js     | inventory-list-component         |  61.20 kB |                12.09 kB
+chunk-AGOM5PAH.js     | price-request-list-component     |  51.46 kB |                 8.29 kB
+chunk-KJNLNTZB.js     | agreements-component             |  50.31 kB |                 8.45 kB
+chunk-SHKGXQSK.js     | item-list-component              |  48.17 kB |                 9.79 kB
+chunk-SWQXMHZ4.js     | consignor-list-component         |  47.30 kB |                 9.80 kB
+chunk-WMCDQT4G.js     | consignor-item-detail-component  |  46.17 kB |                 8.77 kB
+chunk-NQFSK6O3.js     | consignor-payouts-component      |  44.69 kB |                 9.17 kB
+chunk-DYTIPUDA.js     | owner-approval-component         |  40.68 kB |                 8.56 kB
+chunk-OQFLQUR7.js     | consignor-detail-component       |  36.05 kB |                 7.87 kB
+chunk-U5Y4AGEL.js     | record-sale-component            |  34.65 kB |                 8.27 kB
+chunk-S6SMINOH.js     | inventory-edit-component         |  34.02 kB |                 7.18 kB
+chunk-YDMJPC7U.js     | owner-dashboard-component        |  29.66 kB |                 7.28 kB
+chunk-76YIOLMU.js     | payout-history-component         |  29.29 kB |                 6.35 kB
+chunk-EWXERTSY.js     | create-dropoff-request-component |  29.20 kB |                 6.08 kB
+...and 124 more lazy chunks files. Use "--verbose" to show all the files.
 
-Application bundle generation complete. [72.391 seconds] - 2026-01-24T01:01:36.582Z
+Application bundle generation complete. [67.864 seconds] - 2026-01-26T21:06:03.546Z
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 500.00 kB was not met by 36.34 kB with a total of 536.34 kB.[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/owner/settings/consignors/agreement/agreements.component.scss exceeded maximum budget. Budget 12.00 kB was not met by 3.97 kB with a total of 15.97 kB.[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/owner/components/owner-payouts.component.scss exceeded maximum budget. Budget 12.00 kB was not met by 3.77 kB with a total of 15.77 kB.[0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 500.00 kB was not met by 97.39 kB with a total of 597.39 kB.[0m
 
 
 Output location: /mnt/c/Projects/ConsignmentGenie/ConsignmentGenie_UI/dist/production

@@ -222,6 +222,23 @@ export class ConsignorService {
     return this.http.post<ConsignorApprovalResponse>(`${this.apiUrl}/approvals/${approvalId}`, request);
   }
 
+  // Agreement management methods
+  getAgreementStatus(consignorId: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement`);
+  }
+
+  markAgreementOnFile(consignorId: string, notes: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement/mark-on-file`, { notes });
+  }
+
+  uploadAgreement(consignorId: string, formData: FormData): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement/upload`, formData);
+  }
+
+  removeAgreement(consignorId: string): Observable<any> {
+    return this.http.delete<any>(`${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement`);
+  }
+
   private mapApiStatusToConsignorStatus(apiStatus: string): ConsignorStatus {
     switch (apiStatus?.toLowerCase()) {
       case 'active': return 'active';

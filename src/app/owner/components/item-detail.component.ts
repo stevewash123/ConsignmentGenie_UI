@@ -2,7 +2,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { ItemDetailDto, ItemStatus, ItemCondition } from '../../models/inventory.model';
@@ -38,8 +37,7 @@ export class ItemDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
-    private loadingService: LoadingService,
-    private http: HttpClient
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {

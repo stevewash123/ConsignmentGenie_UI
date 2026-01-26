@@ -1,7 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { AdminLayoutComponent } from './admin-layout.component';
 import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, NewSignup } from '../../services/admin.service';
 
@@ -9,7 +8,7 @@ import { AdminService, AdminMetrics, InviteOwnerRequest, OwnerInvitation, NewSig
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, AdminLayoutComponent],
+  imports: [CommonModule, FormsModule, AdminLayoutComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss']
 })

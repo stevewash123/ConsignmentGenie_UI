@@ -2,12 +2,10 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { ConsignorService } from '../../services/consignor.service';
 import { SettingsService } from '../../services/settings.service';
 import { Consignor, ConsignorDetailDto, ConsignorStatus, ApiResponse } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
-import { environment } from '../../../environments/environment';
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
 import { CommunicationService } from '../../services/communication.service';
 
@@ -77,7 +75,6 @@ export class ConsignorDetailComponent implements OnInit {
     private location: Location,
     private loadingService: LoadingService,
     private settingsService: SettingsService,
-    private http: HttpClient,
     private confirmationDialog: ConfirmationDialogService,
     private communicationService: CommunicationService
   ) {}
@@ -97,31 +94,38 @@ export class ConsignorDetailComponent implements OnInit {
   loadProvider(): void {
     this.loadingService.start('consignor-detail');
 
-    // Load the detailed consignor data
-    this.http.get<ApiResponse<ConsignorDetailDto>>(`${environment.apiUrl}/api/consignors/${this.providerId()}`).subscribe({
-      next: (response) => {
-        const detailDto = response.data;
-        this.consignorDetails.set(detailDto);
-
-        // Transform for backward compatibility with existing UI
-        const consignor: Consignor = {
-          id: detailDto.consignorId,
-          name: detailDto.fullName,
-          email: detailDto.email || '',
-          phone: detailDto.phone,
-          address: detailDto.fullAddress,
-          commissionRate: detailDto.commissionRate,
-          preferredPaymentMethod: detailDto.preferredPaymentMethod,
-          paymentDetails: detailDto.paymentDetails,
-          notes: detailDto.notes,
-          status: this.mapApiStatusToConsignorStatus(detailDto.status),
-          organizationId: 1, // Will be handled by backend
-          consignorNumber: detailDto.consignorNumber,
-          createdAt: new Date(detailDto.createdAt),
-          updatedAt: new Date(detailDto.updatedAt),
-          activatedAt: detailDto.approvalDate ? new Date(detailDto.approvalDate) : undefined
-        };
+    // Use ConsignorService to get consignor details
+    this.ConsignorService.getConsignor(this.providerId()).subscribe({
+      next: (consignor) => {
         this.consignor.set(consignor);
+
+        // Also get the detailed DTO for additional fields
+        this.ConsignorService.getConsignor(this.providerId()).subscribe({
+          next: (detailedConsignor) => {
+            // Set consignorDetails for backward compatibility
+            // Note: This is a temporary workaround until the component is refactored
+            const detailDto = {
+              consignorId: detailedConsignor.id,
+              fullName: detailedConsignor.name,
+              email: detailedConsignor.email,
+              phone: detailedConsignor.phone,
+              fullAddress: detailedConsignor.address || '',
+              commissionRate: detailedConsignor.commissionRate,
+              preferredPaymentMethod: detailedConsignor.preferredPaymentMethod,
+              paymentDetails: detailedConsignor.paymentDetails,
+              notes: detailedConsignor.notes,
+              status: detailedConsignor.status,
+              consignorNumber: detailedConsignor.consignorNumber,
+              createdAt: detailedConsignor.createdAt.toISOString(),
+              updatedAt: detailedConsignor.updatedAt.toISOString(),
+              approvalDate: detailedConsignor.activatedAt?.toISOString()
+            };
+            this.consignorDetails.set(detailDto as any);
+          },
+          error: (error) => {
+            console.error('Error loading detailed consignor:', error);
+          }
+        });
       },
       error: (error) => {
         console.error('Error loading consignor:', error);
@@ -234,25 +238,24 @@ export class ConsignorDetailComponent implements OnInit {
     }
   }
 
-  async loadAgreementStatus(): Promise<void> {
+  loadAgreementStatus(): void {
     const consignorId = this.providerId();
     if (!consignorId) return;
 
-    try {
-      const status = await this.http.get<ConsignorAgreementStatus>(
-        `${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement`
-      ).toPromise();
-
-      this.agreementStatus.set(status || { status: 'none' });
-    } catch (error: any) {
-      console.error('Error loading agreement status:', error);
-      // If 404, it means no agreement exists yet, which is pending if required
-      if (error.status === 404 && this.requiresAgreement()) {
-        this.agreementStatus.set({ status: 'pending' });
-      } else {
-        this.agreementStatus.set({ status: 'none' });
+    this.ConsignorService.getAgreementStatus(consignorId).subscribe({
+      next: (status) => {
+        this.agreementStatus.set(status || { status: 'none' });
+      },
+      error: (error: any) => {
+        console.error('Error loading agreement status:', error);
+        // If 404, it means no agreement exists yet, which is pending if required
+        if (error.status === 404 && this.requiresAgreement()) {
+          this.agreementStatus.set({ status: 'pending' });
+        } else {
+          this.agreementStatus.set({ status: 'none' });
+        }
       }
-    }
+    });
   }
 
   showAgreementSection(): boolean {
@@ -354,30 +357,29 @@ export class ConsignorDetailComponent implements OnInit {
     }
   }
 
-  async markAgreementOnFile(): Promise<void> {
+  markAgreementOnFile(): void {
     const consignorId = this.providerId();
     if (!consignorId) return;
 
     this.isProcessingAgreement.set(true);
 
-    try {
-      const response = await this.http.post(
-        `${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement/mark-on-file`,
-        { notes: this.onFileNotes }
-      ).toPromise();
-
-      this.closeMarkOnFileModal();
-      await this.loadAgreementStatus();
-      this.showToast('Agreement marked as on file');
-    } catch (error) {
-      console.error('Error marking agreement on file:', error);
-      this.errorMessage.set('Failed to mark agreement on file');
-    } finally {
-      this.isProcessingAgreement.set(false);
-    }
+    this.ConsignorService.markAgreementOnFile(consignorId, this.onFileNotes).subscribe({
+      next: () => {
+        this.closeMarkOnFileModal();
+        this.loadAgreementStatus();
+        this.showToast('Agreement marked as on file');
+      },
+      error: (error) => {
+        console.error('Error marking agreement on file:', error);
+        this.errorMessage.set('Failed to mark agreement on file');
+      },
+      complete: () => {
+        this.isProcessingAgreement.set(false);
+      }
+    });
   }
 
-  async uploadAgreement(): Promise<void> {
+  uploadAgreement(): void {
     const consignorId = this.providerId();
     const file = this.selectedFile();
     if (!consignorId || !file) return;
@@ -385,56 +387,54 @@ export class ConsignorDetailComponent implements OnInit {
     this.isProcessingAgreement.set(true);
     this.uploadProgress.set(0);
 
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      if (this.uploadNotes) {
-        formData.append('notes', this.uploadNotes);
-      }
-
-      // Simple upload without progress tracking for now
-      const response = await this.http.post(
-        `${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement/upload`,
-        formData
-      ).toPromise();
-
-      this.uploadProgress.set(100);
-      this.closeUploadModal();
-      await this.loadAgreementStatus();
-      this.showToast('Agreement document uploaded successfully');
-    } catch (error: any) {
-      console.error('Error uploading agreement:', error);
-      if (error.error?.error) {
-        this.errorMessage.set(error.error.error);
-      } else {
-        this.errorMessage.set('Failed to upload agreement document');
-      }
-    } finally {
-      this.isProcessingAgreement.set(false);
-      this.uploadProgress.set(0);
+    const formData = new FormData();
+    formData.append('file', file);
+    if (this.uploadNotes) {
+      formData.append('notes', this.uploadNotes);
     }
+
+    this.ConsignorService.uploadAgreement(consignorId, formData).subscribe({
+      next: () => {
+        this.uploadProgress.set(100);
+        this.closeUploadModal();
+        this.loadAgreementStatus();
+        this.showToast('Agreement document uploaded successfully');
+      },
+      error: (error: any) => {
+        console.error('Error uploading agreement:', error);
+        if (error.error?.error) {
+          this.errorMessage.set(error.error.error);
+        } else {
+          this.errorMessage.set('Failed to upload agreement document');
+        }
+      },
+      complete: () => {
+        this.isProcessingAgreement.set(false);
+        this.uploadProgress.set(0);
+      }
+    });
   }
 
-  async removeAgreement(): Promise<void> {
+  removeAgreement(): void {
     const consignorId = this.providerId();
     if (!consignorId) return;
 
     this.isProcessingAgreement.set(true);
 
-    try {
-      await this.http.delete(
-        `${environment.apiUrl}/api/owner/consignors/${consignorId}/agreement`
-      ).toPromise();
-
-      this.closeRemoveConfirmModal();
-      await this.loadAgreementStatus();
-      this.showToast('Agreement removed');
-    } catch (error) {
-      console.error('Error removing agreement:', error);
-      this.errorMessage.set('Failed to remove agreement');
-    } finally {
-      this.isProcessingAgreement.set(false);
-    }
+    this.ConsignorService.removeAgreement(consignorId).subscribe({
+      next: () => {
+        this.closeRemoveConfirmModal();
+        this.loadAgreementStatus();
+        this.showToast('Agreement removed');
+      },
+      error: (error) => {
+        console.error('Error removing agreement:', error);
+        this.errorMessage.set('Failed to remove agreement');
+      },
+      complete: () => {
+        this.isProcessingAgreement.set(false);
+      }
+    });
   }
 
   viewDocument(): void {

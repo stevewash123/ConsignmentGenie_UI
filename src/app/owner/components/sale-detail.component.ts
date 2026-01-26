@@ -2,7 +2,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { LoadingService } from '../../shared/services/loading.service';
 import { Transaction, TransactionItem } from '../../models/transaction.model';
 import { TransactionService } from '../../services/transaction.service';
@@ -37,7 +36,6 @@ export class SaleDetailComponent implements OnInit {
     private router: Router,
     private location: Location,
     private loadingService: LoadingService,
-    private http: HttpClient,
     private confirmationDialog: ConfirmationDialogService
   ) {}
 
