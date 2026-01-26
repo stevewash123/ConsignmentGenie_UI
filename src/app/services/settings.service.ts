@@ -117,6 +117,26 @@ export interface PaymentSettings {
   layawayTermsInDays: number;
 }
 
+export interface AccountingSettings {
+  quickBooks: {
+    isConnected: boolean;
+    companyId?: string;
+    companyName?: string;
+    autoSync: boolean;
+    syncFrequency: 'daily' | 'weekly' | 'manual';
+  };
+  reports: {
+    emailReports: boolean;
+    reportFrequency: 'daily' | 'weekly' | 'monthly';
+    recipients: string[];
+  };
+  exports: {
+    format: 'csv' | 'xlsx' | 'pdf';
+    includeConsignorDetails: boolean;
+    includeTaxBreakdown: boolean;
+  };
+}
+
 export interface ShippingSettings {
   enableShipping: boolean;
   flatRate: number;
@@ -162,6 +182,9 @@ export class SettingsService {
   private pendingBusinessChanges: Record<string, any> = {};
   private businessSaveTimeout: ReturnType<typeof setTimeout> | null = null;
   private isBusinessSaving = false;
+
+  // Accounting settings state
+  private accountingSettings$ = new BehaviorSubject<AccountingSettings | null>(null);
 
   // Consignor permissions state
   private consignorPermissions$ = new BehaviorSubject<ConsignorPermissions | null>(null);
@@ -687,6 +710,37 @@ export class SettingsService {
    */
   getCurrentBusinessSettings(): BusinessSettings | null {
     return this.businessSettings$.value;
+  }
+
+  // ===== ACCOUNTING SETTINGS METHODS =====
+
+  async loadAccountingSettings(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.http.get<AccountingSettings>(`${environment.apiUrl}/api/organizations/accounting-settings`)
+      );
+      this.accountingSettings$.next(response);
+    } catch (error) {
+      console.error('Failed to load accounting settings:', error);
+      this.accountingSettings$.next(null);
+      throw error;
+    }
+  }
+
+  updateAccountingSettings(settings: AccountingSettings): void {
+    this.accountingSettings$.next(settings);
+    // Auto-save to server
+    this.http.patch<AccountingSettings>(`${environment.apiUrl}/api/organizations/accounting-settings`, settings)
+      .subscribe({
+        error: (error) => {
+          console.error('Failed to save accounting settings:', error);
+          // Could revert state here or show error to user
+        }
+      });
+  }
+
+  getCurrentAccountingSettings(): AccountingSettings | null {
+    return this.accountingSettings$.value;
   }
 
   // ===== CONSIGNOR PERMISSIONS METHODS =====

@@ -42,40 +42,52 @@ export class AccountingSettingsComponent implements OnInit {
     this.loadSettings();
   }
 
-  private loadSettings() {
-    // Mock data for now - in real app, load from API
-    setTimeout(() => {
-      const mockSettings: AccountingSettings = {
-        quickBooks: {
-          isConnected: false,
-          autoSync: false,
-          syncFrequency: 'weekly'
-        },
-        reports: {
-          emailReports: false,
-          reportFrequency: 'monthly',
-          recipients: []
-        },
-        exports: {
-          format: 'csv',
-          includeConsignorDetails: true,
-          includeTaxBreakdown: true
-        }
-      };
-      this.settings.set(mockSettings);
-      this.updateRecipientsText();
+  private async loadSettings() {
+    try {
+      await this.settingsService.loadAccountingSettings();
+      const settings = this.settingsService.getCurrentAccountingSettings();
+      if (settings) {
+        this.settings.set(settings);
+        this.updateRecipientsText();
+      } else {
+        // Use defaults if no settings exist
+        const defaultSettings: AccountingSettings = {
+          quickBooks: {
+            isConnected: false,
+            autoSync: false,
+            syncFrequency: 'weekly'
+          },
+          reports: {
+            emailReports: false,
+            reportFrequency: 'monthly',
+            recipients: []
+          },
+          exports: {
+            format: 'csv',
+            includeConsignorDetails: true,
+            includeTaxBreakdown: true
+          }
+        };
+        this.settings.set(defaultSettings);
+        this.updateRecipientsText();
+      }
+    } catch (error) {
+      console.error('Error loading accounting settings:', error);
+    } finally {
       this.isLoading.set(false);
-    }, 500);
+    }
   }
 
   saveSettings() {
     this.isSaving.set(true);
-
-    // Mock save - in real app, send to API
-    setTimeout(() => {
+    try {
+      this.settingsService.updateAccountingSettings(this.settings()!);
       console.log('Saving accounting settings:', this.settings());
+    } catch (error) {
+      console.error('Error saving accounting settings:', error);
+    } finally {
       this.isSaving.set(false);
-    }, 1000);
+    }
   }
 
   connectQuickBooks() {
