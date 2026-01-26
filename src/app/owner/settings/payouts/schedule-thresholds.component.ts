@@ -1,22 +1,8 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-interface ScheduleThresholdSettings {
-  schedule: {
-    frequency: 'weekly' | 'biweekly' | 'monthly' | 'manual';
-    dayOfWeek?: number;
-    dayOfMonth?: number;
-    cutoffTime?: string;
-    processingDays?: number;
-  };
-  thresholds: {
-    minimumAmount?: number;
-    holdPeriodDays?: number;
-    carryoverEnabled?: boolean;
-    earlyPayoutForTrusted?: boolean;
-  };
-}
+import { SettingsService } from '../../../services/settings.service';
+import { ScheduleThresholdSettings } from '../../../models/payout-settings.model';
 
 @Component({
   selector: 'app-schedule-thresholds',
@@ -27,6 +13,7 @@ interface ScheduleThresholdSettings {
 })
 export class ScheduleThresholdsComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private settingsService = inject(SettingsService);
 
   settingsForm: FormGroup;
   saving = signal(false);
@@ -75,7 +62,15 @@ export class ScheduleThresholdsComponent implements OnInit {
   }
 
   async loadSettings() {
-    // TODO: Load from API
+    try {
+      await this.settingsService.loadPayoutSettings();
+      const payoutSettings = this.settingsService.getCurrentPayoutSettings();
+      if (payoutSettings?.scheduleThresholds) {
+        this.settingsForm.patchValue(payoutSettings.scheduleThresholds);
+      }
+    } catch (error) {
+      console.log('Using default schedule threshold settings');
+    }
   }
 
   async onSave() {
@@ -85,9 +80,16 @@ export class ScheduleThresholdsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      // TODO: Save to API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      this.successMessage.set('Schedule and threshold settings saved successfully');
+      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      if (currentSettings) {
+        const formValue = this.settingsForm.value;
+        const updatedSettings = {
+          ...currentSettings,
+          scheduleThresholds: formValue,
+          lastUpdated: new Date()
+        };
+        await this.settingsService.updatePayoutSettings(updatedSettings);
+      }
     } catch (error) {
       console.error('Failed to save settings:', error);
       this.errorMessage.set('Failed to save settings. Please try again.');

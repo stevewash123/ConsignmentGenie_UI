@@ -1,3 +1,19 @@
+export interface ScheduleThresholdSettings {
+  schedule: {
+    frequency: 'weekly' | 'biweekly' | 'monthly' | 'manual';
+    dayOfWeek?: number;
+    dayOfMonth?: number;
+    cutoffTime?: string;
+    processingDays?: number;
+  };
+  thresholds: {
+    minimumAmount?: number;
+    holdPeriodDays?: number;
+    carryoverEnabled?: boolean;
+    earlyPayoutForTrusted?: boolean;
+  };
+}
+
 export interface PayoutSchedule {
   frequency: 'weekly' | 'biweekly' | 'monthly' | 'manual';
   dayOfWeek?: number; // 0-6 for weekly (0=Sunday, 1=Monday, etc.)
@@ -73,6 +89,7 @@ export interface PayoutSettings {
   automation: PayoutAutomation;
   notifications: PayoutNotifications;
   reports: PayoutReportConfiguration;
+  scheduleThresholds?: ScheduleThresholdSettings;
   lastUpdated: Date;
   organizationId: string;
 }
