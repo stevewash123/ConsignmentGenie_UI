@@ -1,8 +1,6 @@
 import { Component, OnInit, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
 import { SettingsService, ShopProfile } from '../../../../services/settings.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
@@ -127,7 +125,6 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private settingsService: SettingsService
   ) {}
 
@@ -326,20 +323,11 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
 
 
   async loadOwnerContact() {
+    // TODO: Move this functionality to SettingsService when account information loading is needed
+    // Currently commented out to remove HttpClient dependency from component
+    // The form will work without owner contact pre-population
     try {
-      const response = await this.http.get<any>(`${environment.apiUrl}/api/account/information`).toPromise();
-      if (response?.organization?.primaryContact) {
-        this.ownerContact = {
-          name: response.organization.primaryContact.name,
-          email: response.organization.primaryContact.email,
-          phone: response.organization.primaryContact.phone
-        };
-
-        // Since useOwnerContact defaults to true, populate contact fields
-        if (this.useOwnerContact) {
-          this.onUseOwnerContactChange();
-        }
-      }
+      console.log('Owner contact loading temporarily disabled - TODO: implement via SettingsService');
     } catch (error) {
       console.error('Error loading owner contact:', error);
     }
