@@ -37,7 +37,10 @@ export interface NotificationSettings {
   phoneNumber?: string;
   emailPreferences: Record<string, boolean>;
   smsPreferences: Record<string, boolean>;
+  systemPreferences: Record<string, boolean>;
   thresholds: NotificationThresholds;
+  payoutReportFrequency: 'daily' | 'weekly';
+  weeklyPayoutDay: string;
 }
 
 export interface ShopProfile {
@@ -1139,6 +1142,25 @@ export class SettingsService {
   }
 
   /**
+   * Update System preference for a specific notification type
+   */
+  updateSystemPreference(notificationType: string, enabled: boolean): void {
+    const current = this.notificationSettings$.value;
+    if (!current) return;
+
+    // Optimistic update
+    const updated = {
+      ...current,
+      systemPreferences: { ...current.systemPreferences, [notificationType]: enabled }
+    };
+    this.notificationSettings$.next(updated);
+
+    // Queue for save with flat key structure
+    this.pendingNotificationChanges[`System_${notificationType}`] = enabled;
+    this.scheduleNotificationSave();
+  }
+
+  /**
    * Update notification threshold
    */
   updateNotificationThreshold(thresholdType: keyof NotificationThresholds, value: number): void {
@@ -1229,10 +1251,13 @@ export class SettingsService {
   // ============================================================================
 
   async loadStorefrontSettings(): Promise<void> {
+    console.log('🔄 Loading storefront settings...');
+    this.storefrontSettings$.next(null); // This causes loading spinner
     try {
       const settings = await firstValueFrom(
         this.http.get<StorefrontSettings>(`${environment.apiUrl}/api/organizations/storefront-settings`)
       );
+      console.log('✅ Storefront settings loaded:', settings);
       this.storefrontSettings$.next(settings);
     } catch (error) {
       console.error('Failed to load storefront settings:', error);
@@ -1292,24 +1317,29 @@ export class SettingsService {
 
   private async saveStorefrontSettings(): Promise<void> {
     if (this.isStorefrontSaving || Object.keys(this.pendingStorefrontChanges).length === 0) {
+      console.log('🚫 Skipping save - already saving or no changes');
       return;
     }
 
+    console.log('🚀 Starting save, setting isStorefrontSaving = true');
     this.isStorefrontSaving = true;
     const changesToSave = { ...this.pendingStorefrontChanges };
     this.pendingStorefrontChanges = {};
 
     try {
+      console.log('💾 Saving storefront settings:', changesToSave);
       const response = await firstValueFrom(
         this.http.patch<{success: boolean, data: StorefrontSettings}>(`${environment.apiUrl}/api/organizations/storefront-settings`, changesToSave)
       );
 
       // Update with server response
+      console.log('✅ Save successful, updating settings:', response.data);
       this.storefrontSettings$.next(response.data);
       console.log('Storefront settings saved successfully');
     } catch (error) {
-      console.error('Failed to save storefront settings:', error);
+      console.error('❌ Failed to save storefront settings:', error);
       // Revert optimistic updates
+      console.log('🔄 Reverting changes due to error...');
       this.revertStorefrontChanges(changesToSave);
 
       // Retry once
@@ -1318,11 +1348,13 @@ export class SettingsService {
         this.scheduleStorefrontSave();
       }
     } finally {
+      console.log('🏁 Setting isStorefrontSaving = false');
       this.isStorefrontSaving = false;
     }
   }
 
   private revertStorefrontChanges(changes: Record<string, any>): void {
+    console.log('🔄 Reverting storefront changes:', changes);
     // Re-fetch from server to get correct state
     this.loadStorefrontSettings();
   }

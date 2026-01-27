@@ -45,6 +45,7 @@
           <div class="notification-type-header">Type</div>
           <div class="channel-header">Email</div>
           <div class="channel-header">SMS</div>
+          <div class="channel-header">System</div>
         </div>
 
         <!-- Business Operations -->
@@ -71,6 +72,13 @@
                    [disabled]="!notificationSettings()?.phoneNumber">
             <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
           </div>
+          <div class="notification-channel">
+            <input type="checkbox"
+                   [checked]="isSystemEnabled(notification.key)"
+                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
+                   [id]="'system_' + notification.key">
+            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
+          </div>
         </div>
 
         <!-- Consignor Activity -->
@@ -78,9 +86,28 @@
           <div class="category-title">Consignor Activity</div>
         </div>
 
-        <div class="notification-row" *ngFor="let notification of consignorNotifications; trackBy: trackByNotificationKey">
+        <!-- All consignor notifications including separate Daily/Weekly Payout Ready -->
+        <div class="notification-row" *ngFor="let notification of consignorNotifications; trackBy: trackByNotificationKey"
+             [class.weekly-payout-row]="notification.key === 'weekly_payout_ready'">
           <div class="notification-type">
             <div class="notification-name" [title]="notification.description">{{ notification.name }}</div>
+            <!-- Day selector for Weekly Payout Ready -->
+            <div *ngIf="notification.key === 'weekly_payout_ready'" class="weekly-day-inline">
+              <label for="weeklyPayoutDayInline" class="day-selector-label">Day:</label>
+              <select
+                id="weeklyPayoutDayInline"
+                class="day-select-inline"
+                [value]="getWeeklyPayoutDay()"
+                (change)="onWeeklyPayoutDayChange($any($event.target).value)">
+                <option value="monday">Mon</option>
+                <option value="tuesday">Tue</option>
+                <option value="wednesday">Wed</option>
+                <option value="thursday">Thu</option>
+                <option value="friday">Fri</option>
+                <option value="saturday">Sat</option>
+                <option value="sunday">Sun</option>
+              </select>
+            </div>
           </div>
           <div class="notification-channel">
             <input type="checkbox"
@@ -96,6 +123,13 @@
                    [id]="'sms_' + notification.key"
                    [disabled]="!notificationSettings()?.phoneNumber">
             <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
+          </div>
+          <div class="notification-channel">
+            <input type="checkbox"
+                   [checked]="isSystemEnabled(notification.key)"
+                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
+                   [id]="'system_' + notification.key">
+            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
           </div>
         </div>
 
@@ -123,6 +157,13 @@
                    [disabled]="!notificationSettings()?.phoneNumber">
             <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
           </div>
+          <div class="notification-channel">
+            <input type="checkbox"
+                   [checked]="isSystemEnabled(notification.key)"
+                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
+                   [id]="'system_' + notification.key">
+            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
+          </div>
         </div>
 
         <!-- System Alerts -->
@@ -149,8 +190,18 @@
                    [disabled]="!notificationSettings()?.phoneNumber">
             <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
           </div>
+          <div class="notification-channel">
+            <input type="checkbox"
+                   [checked]="isSystemEnabled(notification.key)"
+                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
+                   [id]="'system_' + notification.key"
+                   [disabled]="isSystemNotificationDisabled(notification.key)"
+                   [title]="isSystemNotificationDisabled(notification.key) ? 'System alerts must be enabled for system notifications' : ''">
+            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
+          </div>
         </div>
       </div>
+
     </section>
 
     <!-- Threshold Settings -->

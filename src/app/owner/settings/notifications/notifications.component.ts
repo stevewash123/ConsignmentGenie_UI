@@ -42,7 +42,8 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
     { key: 'consignor_signup', name: 'New Consignor Signup', description: 'When a new consignor registers to join your store', category: 'consignor' },
     { key: 'consignor_item_added', name: 'New Items Added', description: 'When consignors add new items to inventory', category: 'consignor' },
     { key: 'pending_approval', name: 'Pending Approvals', description: 'When consignors need approval for account or items', category: 'consignor' },
-    { key: 'consignor_payout_ready', name: 'Payout Ready', description: 'When consignor payouts are calculated and ready to send', category: 'consignor' }
+    { key: 'daily_payout_ready', name: 'Daily Payout Ready Report', description: 'Daily notification when consignor payouts are calculated and ready to send', category: 'consignor' },
+    { key: 'weekly_payout_ready', name: 'Weekly Payout Ready Report', description: 'Weekly notification when consignor payouts are calculated and ready to send', category: 'consignor' }
   ];
 
   salesNotifications: NotificationType[] = [
@@ -76,7 +77,46 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
     // Subscribe to notification settings changes from the service
     this.subscriptions.add(
       this.settingsService.notificationSettings.subscribe(settings => {
-        this.notificationSettings.set(settings);
+        if (settings) {
+          // Set defaults for new properties if they don't exist
+          const defaultSystemPreferences = {
+            // Business Operations
+            daily_sales_summary: true,
+            weekly_report: true,
+            monthly_statement: true,
+            // Consignor Activity
+            consignor_signup: true,
+            consignor_item_added: true,
+            pending_approval: true,
+            daily_payout_ready: true,
+            weekly_payout_ready: true,
+            // Sales & Inventory
+            item_sold: true,
+            high_value_sale: true,
+            low_inventory: true,
+            pricing_suggestions: true,
+            // System Alerts (always true, can't be disabled)
+            system_maintenance: true,
+            security_alerts: true,
+            account_changes: true,
+            backup_status: true
+          };
+
+          const updatedSettings = {
+            ...settings,
+            systemPreferences: { ...defaultSystemPreferences, ...settings.systemPreferences },
+            weeklyPayoutDay: settings.weeklyPayoutDay || 'monday',
+            emailPreferences: {
+              ...settings.emailPreferences,
+              // Set defaults for Security Alerts & Account Changes
+              security_alerts: settings.emailPreferences?.security_alerts ?? true,
+              account_changes: settings.emailPreferences?.account_changes ?? true
+            }
+          };
+          this.notificationSettings.set(updatedSettings);
+        } else {
+          this.notificationSettings.set(settings);
+        }
       })
     );
   }
@@ -115,6 +155,14 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
     this.settingsService.updateSmsPreference(notificationType, enabled);
   }
 
+  onSystemPreferenceChange(notificationType: string, enabled: boolean): void {
+    this.settingsService.updateSystemPreference(notificationType, enabled);
+  }
+
+  onWeeklyPayoutDayChange(day: string): void {
+    this.settingsService.updateNotificationSetting('weeklyPayoutDay', day);
+  }
+
   // Helper methods for template
   isEmailEnabled(notificationType: string): boolean {
     const settings = this.notificationSettings();
@@ -124,6 +172,21 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
   isSmsEnabled(notificationType: string): boolean {
     const settings = this.notificationSettings();
     return settings?.smsPreferences[notificationType] || false;
+  }
+
+  isSystemEnabled(notificationType: string): boolean {
+    const settings = this.notificationSettings();
+    return settings?.systemPreferences?.[notificationType] || false;
+  }
+
+  getWeeklyPayoutDay(): string {
+    const settings = this.notificationSettings();
+    return settings?.weeklyPayoutDay || 'monday';
+  }
+
+  isSystemNotificationDisabled(notificationType: string): boolean {
+    // System Alert notifications can't be unchecked for System
+    return ['system_maintenance', 'security_alerts', 'account_changes', 'backup_status'].includes(notificationType);
   }
 
 
