@@ -233,4 +233,24 @@ export class StorefrontSettingsComponent implements OnInit, OnDestroy {
     this.successMessage.set('');
     setTimeout(() => this.errorMessage.set(''), 5000);
   }
+
+  // Stripe integration methods
+  connectToStripe(): void {
+    this.showSuccess('Redirecting to Stripe...');
+    // TODO: Implement Stripe OAuth connection flow
+    console.log('Connect to Stripe initiated');
+  }
+
+  disconnectFromStripe(): void {
+    // TODO: Implement Stripe disconnection
+    this.onStripeConnectedChange(false);
+    this.showSuccess('Disconnected from Stripe');
+    console.log('Disconnect from Stripe initiated');
+  }
+
+  configureStripe(): void {
+    // TODO: Implement Stripe configuration modal/page
+    console.log('Configure Stripe settings initiated');
+    this.showSuccess('Stripe configuration opened');
+  }
 }

@@ -10,7 +10,7 @@
           <!-- Sidebar Navigation -->
           <nav class="settings-sidebar">
             <div class="sidebar-menu">
-              <div *ngFor="let item of menuItems" class="menu-section">
+              <div *ngFor="let item of menuItems()" class="menu-section">
                 <!-- Menu Item with Children (Expandable Section) -->
                 <div *ngIf="item.children"
                   class="menu-item"
@@ -34,10 +34,14 @@
                 <div class="submenu" [class.expanded]="isExpanded(item.id)" *ngIf="item.children">
                   <a
                     *ngFor="let subItem of item.children"
-                    [routerLink]="[subItem.route]"
+                    [routerLink]="subItem.disabled ? null : [subItem.route]"
                     routerLinkActive="active"
-                    class="submenu-item">
+                    class="submenu-item"
+                    [class.disabled]="subItem.disabled"
+                    [title]="subItem.disabledReason || null"
+                    (click)="subItem.disabled ? $event.preventDefault() : navigateToSubItem(subItem)">
                     <span class="submenu-label">{{ subItem.label }}</span>
+                    <span *ngIf="subItem.disabled" class="disabled-indicator">🔒</span>
                   </a>
                 </div>
               </div>

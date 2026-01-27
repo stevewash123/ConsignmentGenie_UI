@@ -1,9 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { OwnerService, ConsignorPermissions } from '../../../services/owner.service';
+import { OwnerService, ConsignorPermissions, ConsignorDefaults } from '../../../services/owner.service';
 import { environment } from '../../../../environments/environment';
+import { Subscription, Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 interface ConsignorSettings {
   storeCode: string;
@@ -22,12 +24,6 @@ interface ConsignorInventoryPermissions {
   canViewDetailedAnalytics: boolean;
 }
 
-interface ConsignorDefaults {
-  shopCommissionPercent: number;
-  consignmentPeriodDays: number;
-  retrievalPeriodDays: number;
-  unsoldItemPolicy: 'donate' | 'dispose' | 'return-to-consignor' | 'become-shop-property';
-}
 
 interface ConsignorAgreements {
   autoSendOnRegistration: boolean;
@@ -56,7 +52,7 @@ interface PendingInvitation {
   templateUrl: './consignor-settings.component.html',
   styleUrls: ['./consignor-settings.component.scss']
 })
-export class ConsignorSettingsComponent implements OnInit {
+export class ConsignorSettingsComponent implements OnInit, OnDestroy {
   settings = signal<ConsignorSettings | null>(null);
   pendingInvitations = signal<PendingInvitation[]>([]);
   inviteEmailsText = '';
@@ -65,17 +61,35 @@ export class ConsignorSettingsComponent implements OnInit {
   isSending = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  private settingsSubscription = new Subscription();
+  private autoSaveSubject = new Subject<void>();
 
-  constructor(private ownerService: OwnerService) {}
+  constructor(private ownerService: OwnerService) {
+    // Set up auto-save with debounce
+    this.settingsSubscription.add(
+      this.autoSaveSubject.pipe(
+        debounceTime(500)
+      ).subscribe(() => {
+        this.autoSaveDefaults();
+      })
+    );
+  }
 
   ngOnInit() {
     this.loadSettings();
     this.loadPendingInvitations();
   }
 
+  ngOnDestroy() {
+    this.settingsSubscription.unsubscribe();
+  }
+
   async loadSettings() {
     try {
-      // Mock data - replace with actual API call
+      // Load consignor defaults from the API
+      const defaults = await this.ownerService.getConsignorDefaults().toPromise();
+
+      // Mock data for other settings - replace with actual API calls later
       const mockSettings: ConsignorSettings = {
         storeCode: 'VINT-2024-7X9K',
         autoApprove: true,
@@ -86,7 +100,7 @@ export class ConsignorSettingsComponent implements OnInit {
           canRemoveItems: false,
           canViewDetailedAnalytics: false
         },
-        defaults: {
+        defaults: defaults || {
           shopCommissionPercent: 50,
           consignmentPeriodDays: 90,
           retrievalPeriodDays: 14,
@@ -129,6 +143,31 @@ export class ConsignorSettingsComponent implements OnInit {
     } catch (error) {
       console.error('Error loading pending invitations:', error);
       this.showError('Failed to load pending invitations');
+    }
+  }
+
+  onDefaultsChange() {
+    this.autoSaveSubject.next();
+  }
+
+  async autoSaveDefaults() {
+    if (!this.settings() || this.isSaving()) return;
+
+    this.isSaving.set(true);
+    try {
+      const currentSettings = this.settings();
+      if (currentSettings?.defaults) {
+        const response = await this.ownerService.updateConsignorDefaults(currentSettings.defaults).toPromise();
+
+        if (response?.success) {
+          this.showSuccess('Default terms saved automatically');
+        }
+      }
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      // Don't show error for auto-save failures to avoid annoying the user
+    } finally {
+      this.isSaving.set(false);
     }
   }
 

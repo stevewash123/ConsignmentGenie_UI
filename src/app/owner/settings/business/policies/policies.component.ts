@@ -1,7 +1,8 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { SettingsService } from '../../../../services/settings.service';
+import { Subscription, debounceTime } from 'rxjs';
 
 // Data model interfaces
 export interface StoreHoursSettings {
@@ -55,12 +56,13 @@ export interface BusinessPolicies {
   templateUrl: './policies.component.html',
   styleUrls: ['./policies.component.css']
 })
-export class PoliciesComponent implements OnInit {
+export class PoliciesComponent implements OnInit, OnDestroy {
   policiesForm = signal<FormGroup | null>(null); // Will be set up in constructor
   policies = signal<BusinessPolicies | null>(null);
   saving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  private formSubscription = new Subscription();
 
   readonly weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   readonly paymentMethods = ['cash', 'credit', 'debit', 'check', 'mobile'];
@@ -76,6 +78,58 @@ export class PoliciesComponent implements OnInit {
 
   ngOnInit() {
     this.loadPolicies();
+    this.setupFormChangeListeners();
+  }
+
+  ngOnDestroy() {
+    this.formSubscription.unsubscribe();
+  }
+
+  private setupFormChangeListeners() {
+    const form = this.policiesForm();
+    if (form) {
+      // Listen to form changes and auto-save with debounce
+      this.formSubscription.add(
+        form.valueChanges
+          .pipe(debounceTime(500)) // Wait 500ms after user stops making changes
+          .subscribe(() => {
+            if (form.valid && !this.saving()) {
+              this.autoSave();
+            }
+          })
+      );
+    }
+  }
+
+  private async autoSave() {
+    const form = this.policiesForm();
+    if (!form || form.invalid) return;
+
+    const formValue = form.value;
+    const businessPolicies: BusinessPolicies = {
+      storeHours: formValue.storeHours,
+      returns: formValue.returns,
+      payments: {
+        acceptedMethods: this.paymentMethods.filter((_, index) =>
+          formValue.payments.acceptedMethods[index]
+        ),
+        layawayAvailable: formValue.payments.layawayAvailable,
+        layawayTerms: formValue.payments.layawayTerms
+      },
+      lastUpdated: new Date()
+    };
+
+    this.saving.set(true);
+    try {
+      await this.settingsService.updateBusinessSettings({ policies: businessPolicies });
+      this.policies.set(businessPolicies);
+      this.showSuccess('Policies saved automatically');
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      // Don't show error for auto-save failures to avoid annoying the user
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   private createForm(): FormGroup {
@@ -118,6 +172,13 @@ export class PoliciesComponent implements OnInit {
       const defaultValue = ['cash', 'credit', 'debit', 'check'].includes(method);
       methodsArray.push(this.fb.control(defaultValue));
     });
+
+    // Set initial disabled state based on default returnPolicy value
+    // Since default is 'days', periodDays should be enabled (which it already is)
+    // This is mainly for consistency and if the default changes in the future
+    setTimeout(() => {
+      this.onReturnPolicyChange('days');
+    }, 0);
 
     return form;
   }
@@ -179,6 +240,9 @@ export class PoliciesComponent implements OnInit {
     this.paymentMethods.forEach((method, index) => {
       methodsArray.at(index).setValue(policies.payments.acceptedMethods.includes(method));
     });
+
+    // Set initial disabled state for periodDays based on return policy
+    this.onReturnPolicyChange(returnSettings.returnPolicy);
   }
 
   formatHours(day: string): string {
@@ -214,55 +278,6 @@ export class PoliciesComponent implements OnInit {
     return selected;
   }
 
-  async onSave() {
-    const form = this.policiesForm();
-    if (!form) return;
-
-    if (form.invalid) {
-      this.showError('Please correct the validation errors before saving');
-      return;
-    }
-
-    const formValue = form.value;
-
-    // Build schedule object
-    const schedule: any = {};
-    this.weekDays.forEach(day => {
-      schedule[day] = {
-        isOpen: formValue.storeHours.schedule[day].isOpen,
-        openTime: formValue.storeHours.schedule[day].isOpen ? formValue.storeHours.schedule[day].openTime : undefined,
-        closeTime: formValue.storeHours.schedule[day].isOpen ? formValue.storeHours.schedule[day].closeTime : undefined
-      };
-    });
-
-    const businessPolicies: BusinessPolicies = {
-      storeHours: {
-        schedule,
-        timezone: formValue.storeHours.timezone
-      },
-      returns: formValue.returns,
-      payments: {
-        ...formValue.payments,
-        acceptedMethods: this.getSelectedPaymentMethods()
-      },
-      lastUpdated: new Date()
-    };
-
-    this.saving.set(true);
-    try {
-      await this.settingsService.updateBusinessSettings({ policies: businessPolicies });
-      this.policies.set(businessPolicies);
-    } catch (error) {
-      this.showError('Failed to save business policies');
-    } finally {
-      this.saving.set(false);
-    }
-  }
-
-  previewPolicies() {
-    // For now, just show a message that this would open a preview
-    this.showSuccess('Customer policy preview would open here (feature coming soon)');
-  }
 
   private showSuccess(message: string) {
     this.successMessage.set(message);

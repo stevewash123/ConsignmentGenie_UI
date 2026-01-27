@@ -1,7 +1,7 @@
 <div class="storefront-settings">
   <header class="section-header">
-    <h2 class="section-title">Storefront Settings</h2>
-    <p class="section-description">Configure your online store and sales channels</p>
+    <h2 class="section-title">Online Storefront Settings</h2>
+    <p class="section-description">Configure how customers shop online</p>
   </header>
 
   <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
@@ -34,17 +34,6 @@
           (input)="onBannerImageUrlChange($any($event.target).value)"
           placeholder="https://example.com/banner.jpg">
       </div>
-
-      <div class="checkbox-group">
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            [checked]="getStripeConnected()"
-            (change)="onStripeConnectedChange($any($event.target).checked)">
-          <span class="checkmark"></span>
-          Stripe Connected
-        </label>
-      </div>
     </section>
 
     <!-- Payment Settings -->
@@ -58,7 +47,7 @@
             [checked]="getEnableCreditCards()"
             (change)="onEnableCreditCardsChange($any($event.target).checked)">
           <span class="checkmark"></span>
-          Enable Credit Cards
+          Enable Credit Cards with Stripe
         </label>
 
         <label class="checkbox-label">
@@ -102,6 +91,43 @@
             class="form-input"
             [value]="getLayawayTermsInDays()"
             (input)="onLayawayTermsInDaysChange(+$any($event.target).value)">
+        </div>
+      </div>
+
+      <!-- Stripe Configuration (shows as disabled when credit cards are off) -->
+      <div class="stripe-configuration" [class.disabled]="!getEnableCreditCards()">
+        <div class="stripe-config-header">
+          <div class="stripe-description">
+            <p>Configure Stripe payment processing for credit card transactions.</p>
+          </div>
+          <div class="stripe-status">
+            <span class="status-badge" [class]="getStripeConnected() ? 'connected' : 'disconnected'">
+              {{ getStripeConnected() ? 'Connected' : 'Not Connected' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="stripe-actions">
+          <div class="form-actions" *ngIf="!getStripeConnected()">
+            <button type="button" class="btn btn-primary"
+                    [disabled]="!getEnableCreditCards()"
+                    (click)="connectToStripe()">
+              Connect to Stripe
+            </button>
+          </div>
+
+          <div class="form-actions" *ngIf="getStripeConnected()">
+            <button type="button" class="btn btn-secondary"
+                    [disabled]="!getEnableCreditCards()"
+                    (click)="disconnectFromStripe()">
+              Disconnect Stripe
+            </button>
+            <button type="button" class="btn btn-primary"
+                    [disabled]="!getEnableCreditCards()"
+                    (click)="configureStripe()">
+              Configure Stripe Settings
+            </button>
+          </div>
         </div>
       </div>
     </section>

@@ -1,6 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BookkeepingSettingsService } from '../../../../services/bookkeeping-settings.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-book-keeping-general',
@@ -16,6 +18,10 @@ export class BookKeepingGeneralComponent implements OnInit {
   useQuickBooks = signal(false);
   quickBooksConnected = signal(false);
 
+  constructor(
+    private bookkeepingService: BookkeepingSettingsService
+  ) {}
+
   ngOnInit() {
     this.loadSettings();
   }
@@ -23,14 +29,14 @@ export class BookKeepingGeneralComponent implements OnInit {
   async loadSettings() {
     this.isLoading.set(true);
     try {
-      // TODO: Load settings from API
-      await this.simulateApiCall();
-
-      // Mock data for demonstration
-      this.useQuickBooks.set(false);
-      this.quickBooksConnected.set(false);
+      const settings = await firstValueFrom(this.bookkeepingService.getSettings());
+      this.useQuickBooks.set(settings.useQuickBooks);
+      this.quickBooksConnected.set(settings.quickBooksConnected);
     } catch (error) {
       console.error('Failed to load bookkeeping settings:', error);
+      // Set defaults on error
+      this.useQuickBooks.set(false);
+      this.quickBooksConnected.set(false);
     } finally {
       this.isLoading.set(false);
     }
@@ -53,16 +59,18 @@ export class BookKeepingGeneralComponent implements OnInit {
 
     this.isSaving.set(true);
     try {
-      // TODO: Save to API
-      await this.simulateApiCall();
+      const updates = {
+        useQuickBooks: this.useQuickBooks(),
+        quickBooksConnected: this.quickBooksConnected()
+      };
+
+      await firstValueFrom(this.bookkeepingService.patchSettings(updates));
+      console.log('Bookkeeping settings saved successfully');
     } catch (error) {
       console.error('Failed to save bookkeeping settings:', error);
+      // TODO: Show error message to user
     } finally {
       this.isSaving.set(false);
     }
-  }
-
-  private async simulateApiCall(): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, 500));
   }
 }

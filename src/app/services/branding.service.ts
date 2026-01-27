@@ -29,12 +29,12 @@ export class BrandingService {
   }
 
   saveBranding(branding: StoreBranding): Observable<StoreBranding> {
-    return this.http.put<StoreBranding>(`${this.apiUrl}/branding`, branding).pipe(
+    return this.http.put<{success: boolean, data: StoreBranding}>(`${this.apiUrl}/branding`, branding).pipe(
       map(response => {
-        if (!response) {
+        if (!response?.success || !response.data) {
           throw new Error('No response received');
         }
-        return response;
+        return response.data;
       }),
       catchError(error => {
         console.error('Error saving branding settings:', error);
@@ -62,7 +62,13 @@ export class BrandingService {
   }
 
   removeLogo(): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/branding/logo`).pipe(
+    return this.http.delete<{success: boolean, message: string}>(`${this.apiUrl}/branding/logo`).pipe(
+      map(response => {
+        if (!response?.success) {
+          throw new Error('Failed to remove logo');
+        }
+        return void 0;
+      }),
       catchError(error => {
         console.error('Error removing logo:', error);
         throw error;

@@ -4,7 +4,7 @@
     <p>Customize how receipts appear and what information they contain</p>
   </header>
 
-  <form [formGroup]="receiptForm()" (ngSubmit)="onSave()" class="settings-form">
+  <form [formGroup]="receiptForm()" class="settings-form">
 
     <!-- Receipt Header -->
     <section class="form-section" formGroupName="header">
@@ -191,14 +191,6 @@
 
     </section>
 
-    <div class="form-actions">
-      <button type="button" (click)="previewReceipt()" class="btn-secondary">
-        Preview Receipt
-      </button>
-      <button type="submit" [disabled]="receiptForm().invalid || saving()" class="btn-primary">
-        {{ saving() ? 'Saving...' : 'Save Receipt Settings' }}
-      </button>
-    </div>
   </form>
 
   <!-- Messages -->

@@ -1,6 +1,7 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { StoreBranding, ColorPreset } from '../../../../models/store-branding.interface';
 import { BrandingService } from '../../../../services/branding.service';
 
@@ -11,13 +12,25 @@ import { BrandingService } from '../../../../services/branding.service';
   templateUrl: './branding.component.html',
   styleUrls: ['./branding.component.css']
 })
-export class BrandingComponent implements OnInit {
+export class BrandingComponent implements OnInit, OnDestroy {
   brandingForm!: FormGroup;
   currentLogo = signal<string>('');
   saving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
   selectedPreset = signal('');
+
+  // Auto-save functionality
+  private subscriptions = new Subscription();
+  private pendingChanges: Partial<StoreBranding> = {};
+  private saveTimeout: ReturnType<typeof setTimeout> | null = null;
+  private isSaving = false;
+  private readonly DEBOUNCE_MS = 800;
+
+  // Auto-save status computed from form state
+  autoSaveStatus = computed(() => {
+    return this.saving() ? 'Saving...' : 'Saved automatically';
+  });
 
   colorPresets: ColorPreset[] = [
     {
@@ -80,6 +93,14 @@ export class BrandingComponent implements OnInit {
 
   ngOnInit() {
     this.loadBrandingSettings();
+    this.setupFormChangeListeners();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
   }
 
   private initializeForm() {
@@ -128,43 +149,129 @@ export class BrandingComponent implements OnInit {
     });
   }
 
-  onSave() {
-    if (this.brandingForm.valid) {
-      this.saving.set(true);
-      const brandingData: StoreBranding = {
-        ...this.brandingForm.value,
-        lastUpdated: new Date()
-      };
-
-      this.brandingService.saveBranding(brandingData).subscribe({
-        next: (result) => {
-          this.saving.set(false);
-        },
-        error: (error) => {
-          this.showError('Failed to save branding settings');
-          this.saving.set(false);
+  private setupFormChangeListeners(): void {
+    // Subscribe to form value changes for auto-save
+    // Exclude logo changes from auto-save since logo uploads are handled separately
+    this.subscriptions.add(
+      this.brandingForm.valueChanges.subscribe((values) => {
+        // Don't auto-save logo changes - those are handled by uploadLogo()
+        const { logo, ...otherValues } = values;
+        if (Object.keys(otherValues).length > 0) {
+          this.pendingChanges = otherValues;
+          this.scheduleSave();
         }
-      });
+      })
+    );
+  }
+
+  private scheduleSave(): void {
+    // Clear existing timer
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
     }
+
+    // Set new timer
+    this.saveTimeout = setTimeout(() => this.autoSave(), this.DEBOUNCE_MS);
+  }
+
+  private autoSave(): void {
+    if (this.isSaving || Object.keys(this.pendingChanges).length === 0 || !this.brandingForm.valid) {
+      return;
+    }
+
+    this.isSaving = true;
+    this.saving.set(true);
+    const changesToSave = { ...this.pendingChanges };
+    this.pendingChanges = {};
+
+    const brandingData: StoreBranding = {
+      // Provide sensible defaults for required fields
+      colors: changesToSave.colors || {
+        primary: '#3b82f6',
+        secondary: '#64748b',
+        accent: '#06b6d4',
+        text: '#1e293b',
+        background: '#ffffff'
+      },
+      typography: changesToSave.typography || {
+        headingFont: 'Inter',
+        bodyFont: 'Inter',
+        fontSizeScale: 'medium' as const
+      },
+      // Optional fields - only include if present
+      ...(changesToSave.logo && { logo: changesToSave.logo }),
+      ...(changesToSave.style && { style: changesToSave.style }),
+      lastUpdated: new Date()
+    };
+
+    this.brandingService.saveBranding(brandingData).subscribe({
+      next: (result) => {
+        this.saving.set(false);
+        this.isSaving = false;
+
+        // If more changes came in while saving, save again
+        if (Object.keys(this.pendingChanges).length > 0) {
+          this.scheduleSave();
+        }
+      },
+      error: (error) => {
+        this.showError('Failed to save branding settings');
+        this.saving.set(false);
+        this.isSaving = false;
+
+        // Retry by putting changes back
+        Object.assign(this.pendingChanges, changesToSave);
+        this.scheduleSave();
+      }
+    });
+  }
+
+  // Keep onSave method for form submit (no-op now, but prevents errors)
+  onSave() {
+    // Auto-save handles all saving now
   }
 
   onLogoSelect(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
-      // Validate file size (2MB max)
-      if (file.size > 2 * 1024 * 1024) {
-        this.showError('Logo file must be less than 2MB');
-        return;
-      }
-
-      // Validate file type
-      if (!['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].includes(file.type)) {
-        this.showError('Logo must be PNG, JPG, or SVG format');
-        return;
-      }
-
-      this.uploadLogo(file);
+      this.processFile(file);
     }
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processFile(files[0]);
+    }
+  }
+
+  private processFile(file: File) {
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      this.showError('Logo file must be less than 2MB');
+      return;
+    }
+
+    // Validate file type
+    if (!['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].includes(file.type)) {
+      this.showError('Logo must be PNG, JPG, or SVG format');
+      return;
+    }
+
+    this.uploadLogo(file);
   }
 
   private uploadLogo(file: File) {

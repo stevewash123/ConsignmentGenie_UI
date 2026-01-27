@@ -67,10 +67,11 @@
             (change)="onUseOwnerContactChange()"
             [ngModelOptions]="{standalone: true}"
             class="checkbox-input">
+          <span class="checkmark"></span>
           <span class="checkbox-text">Use Owner's Contact Information</span>
         </label>
         <div class="help-text" *ngIf="ownerContact">
-          Owner: {{ ownerContact.name }} ({{ ownerContact.email }})
+          Owner: {{ ownerContact.fullName || (ownerContact.firstName + ' ' + ownerContact.lastName) }} ({{ ownerContact.email }})
           <span *ngIf="ownerContact.phone"> • {{ ownerContact.phone }}</span>
         </div>
       </div>
@@ -110,6 +111,28 @@
     </section>
 
     <section class="form-section" formGroupName="address">
+      <h3>Store Address</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="useOwnerAddress"
+            (change)="onUseOwnerAddressChange()"
+            [ngModelOptions]="{standalone: true}"
+            class="checkbox-input">
+          <span class="checkmark"></span>
+          <span class="checkbox-text">Use Owner's Address</span>
+        </label>
+        <div class="help-text" *ngIf="ownerAddress">
+          Owner Address: {{ ownerAddress.shopAddress1 }}
+          <span *ngIf="ownerAddress.shopAddress2">, {{ ownerAddress.shopAddress2 }}</span>
+          <span *ngIf="ownerAddress.shopCity">, {{ ownerAddress.shopCity }}</span>
+          <span *ngIf="ownerAddress.shopState"> {{ ownerAddress.shopState }}</span>
+          <span *ngIf="ownerAddress.shopZip"> {{ ownerAddress.shopZip }}</span>
+        </div>
+      </div>
+
       <div class="form-group">
         <label for="street1">Street Address *</label>
         <input
@@ -186,6 +209,7 @@
             type="checkbox"
             formControlName="showPublicly"
             class="checkbox-input">
+          <span class="checkmark"></span>
           <span class="checkbox-text">Show address to customers publicly</span>
         </label>
         <div class="help-text">Uncheck if you operate from home or prefer privacy</div>

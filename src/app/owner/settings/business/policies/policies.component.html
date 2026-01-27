@@ -4,7 +4,7 @@
     <p>Configure store policies and operational guidelines for customers and staff</p>
   </header>
 
-  <form [formGroup]="policiesForm()" (ngSubmit)="onSave()" class="settings-form">
+  <form [formGroup]="policiesForm()" class="settings-form">
 
     <!-- Store Hours -->
     <section class="form-section" formGroupName="storeHours">
@@ -64,7 +64,6 @@
                 min="1"
                 max="365"
                 [formControlName]="'periodDays'"
-                [disabled]="policiesForm().get('returns.returnPolicy')?.value !== 'days'"
                 class="inline-number-input">
               days
             </label>
@@ -121,37 +120,24 @@
 
     <!-- Payment Policies -->
     <section class="form-section" formGroupName="payments">
-      <h3>Payment Policies</h3>
+      <h3>In-Store Payment Methods</h3>
+      <p class="section-description">What payment methods do you accept at your physical store?</p>
 
-      <div class="form-group">
-        <label>Accepted payment methods</label>
-        <div class="payment-methods" formArrayName="acceptedMethods">
-          <label *ngFor="let method of paymentMethods; let i = index" class="checkbox-label">
-            <input type="checkbox" [formControlName]="i">
-            <span class="checkmark"></span>
-            {{ method | titlecase }}
-            <span *ngIf="method === 'mobile'" class="help-text">(Apple Pay, Google Pay, etc.)</span>
-          </label>
-        </div>
+      <div class="payment-methods-grid" formArrayName="acceptedMethods">
+        <label *ngFor="let method of paymentMethods; let i = index" class="checkbox-label">
+          <input type="checkbox" [formControlName]="i">
+          <span class="checkmark"></span>
+          {{ method | titlecase }}
+          <span *ngIf="method === 'mobile'" class="method-note">Payments</span>
+        </label>
       </div>
 
       <div class="form-group">
         <label class="checkbox-label">
           <input type="checkbox" formControlName="layawayAvailable">
           <span class="checkmark"></span>
-          Layaway/hold service available
+          Layaway/payment plans available
         </label>
-      </div>
-
-      <div class="form-group" *ngIf="policiesForm().get('payments.layawayAvailable')?.value">
-        <label for="layawayTerms">Layaway terms</label>
-        <textarea
-          id="layawayTerms"
-          formControlName="layawayTerms"
-          placeholder="50% down payment, 30-day hold period, non-refundable..."
-          maxlength="300"
-          class="form-textarea"
-          rows="3"></textarea>
       </div>
 
     </section>
@@ -159,14 +145,6 @@
 
 
 
-    <div class="form-actions">
-      <button type="button" (click)="previewPolicies()" class="btn-secondary">
-        Preview Customer View
-      </button>
-      <button type="submit" [disabled]="policiesForm().invalid || saving()" class="btn-primary">
-        {{ saving() ? 'Saving...' : 'Save Policies' }}
-      </button>
-    </div>
   </form>
 
   <!-- Messages -->

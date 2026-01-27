@@ -1,13 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { SquareIntegrationService } from '../../services/square-integration.service';
 
 interface SettingsSubMenuItem {
   id: string;
   label: string;
   route: string;
   description: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 interface SettingsMenuItem {
@@ -28,8 +31,20 @@ interface SettingsMenuItem {
 })
 export class SettingsLayoutComponent implements OnInit {
   expandedSections: Set<string> = new Set();
+  private squareService = inject(SquareIntegrationService);
 
-  menuItems: SettingsMenuItem[] = [
+  // Check if user is using Square for online store (should hide Storefront tab)
+  private isUsingSquareForOnline = computed(() => {
+    try {
+      const settings = this.squareService.getSquareUsageSettings();
+      return settings?.onlineChoice === 'square-online';
+    } catch (error) {
+      console.error('Error getting Square usage settings:', error);
+      return false; // Default to showing storefront if error
+    }
+  });
+
+  baseMenuItems: SettingsMenuItem[] = [
     {
       id: 'store-profile',
       label: 'Profile',
@@ -47,12 +62,6 @@ export class SettingsLayoutComponent implements OnInit {
           label: 'Branding',
           route: 'profile/branding',
           description: 'Logo, colors, shop description'
-        },
-        {
-          id: 'online-storefront',
-          label: 'Online Storefront',
-          route: 'storefront',
-          description: 'Online store configuration and integrations'
         }
       ]
     },
@@ -125,6 +134,12 @@ export class SettingsLayoutComponent implements OnInit {
           label: 'General',
           route: 'sales/general',
           description: 'POS systems and storefront configuration'
+        },
+        {
+          id: 'online-storefront',
+          label: 'Online Storefront',
+          route: 'storefront',
+          description: 'Configure how customers shop online'
         }
       ]
     },
@@ -197,6 +212,30 @@ export class SettingsLayoutComponent implements OnInit {
     }
   ];
 
+  // Computed property that modifies menu items based on Square usage
+  menuItems = computed(() => {
+    const usingSquareForOnline = this.isUsingSquareForOnline();
+
+    return this.baseMenuItems.map(item => {
+      if (item.id === 'sales' && item.children) {
+        // Disable storefront tab if using Square for online sales
+        const modifiedChildren = item.children.map(child => {
+          if (child.id === 'online-storefront') {
+            const disabled = usingSquareForOnline;
+            return {
+              ...child,
+              disabled: disabled,
+              disabledReason: disabled ? 'Using Square for online sales' : undefined
+            };
+          }
+          return child;
+        });
+        return { ...item, children: modifiedChildren };
+      }
+      return item;
+    });
+  });
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute
@@ -230,6 +269,9 @@ export class SettingsLayoutComponent implements OnInit {
   }
 
   navigateToSubItem(subItem: SettingsSubMenuItem): void {
+    if (subItem.disabled) {
+      return;
+    }
     this.router.navigate([subItem.route], { relativeTo: this.activatedRoute });
   }
 
@@ -240,7 +282,7 @@ export class SettingsLayoutComponent implements OnInit {
     this.expandedSections.add('store-profile');
 
     // Find which sections should be expanded based on current route
-    for (const item of this.menuItems) {
+    for (const item of this.menuItems()) {
       if (item.children) {
         for (const child of item.children) {
           if (currentUrl.includes(child.route)) {

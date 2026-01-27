@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { SettingsService, ShopProfile } from '../../../../services/settings.service';
+import { SettingsService, ShopProfile, OwnerContact, OwnerAddress } from '../../../../services/settings.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 
@@ -24,11 +24,6 @@ interface StoreBasicInfo {
   lastUpdated: Date;
 }
 
-interface OwnerContact {
-  name: string;
-  email: string;
-  phone?: string;
-}
 
 // Legacy API interface for compatibility
 interface LegacyShopProfile {
@@ -58,7 +53,9 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
   successMessage = signal('');
   errorMessage = signal('');
   ownerContact: OwnerContact | null = null;
-  useOwnerContact = true;
+  useOwnerContact = false;
+  ownerAddress: OwnerAddress | null = null;
+  useOwnerAddress = false;
   private subscriptions = new Subscription();
 
   // Profile signal - initialized in ngOnInit
@@ -133,6 +130,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.setupProfileSubscription();
     this.loadProfile();
     this.loadOwnerContact();
+    this.loadOwnerAddress();
     this.setupFormChangeListeners();
   }
 
@@ -170,10 +168,6 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
         showPublicly: [true]
       })
     });
-
-    // Set initial disabled state for contact fields since useOwnerContact defaults to true
-    this.basicInfoForm.get('contact.phone')?.disable();
-    this.basicInfoForm.get('contact.email')?.disable();
   }
 
   private phoneValidator(control: any) {
@@ -323,13 +317,53 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
 
 
   async loadOwnerContact() {
-    // TODO: Move this functionality to SettingsService when account information loading is needed
-    // Currently commented out to remove HttpClient dependency from component
-    // The form will work without owner contact pre-population
     try {
-      console.log('Owner contact loading temporarily disabled - TODO: implement via SettingsService');
+      this.ownerContact = await this.settingsService.loadOwnerContact();
+      console.log('Loaded owner contact:', this.ownerContact);
     } catch (error) {
       console.error('Error loading owner contact:', error);
+      this.showError('Failed to load owner contact information');
+    }
+  }
+
+  async loadOwnerAddress() {
+    try {
+      this.ownerAddress = await this.settingsService.loadOwnerAddress();
+      console.log('Loaded owner address:', this.ownerAddress);
+
+      // If useOwnerAddress is true by default, populate the form immediately
+      if (this.useOwnerAddress && this.ownerAddress) {
+        this.populateAddressFields();
+      }
+    } catch (error) {
+      console.error('Error loading owner address:', error);
+      this.showError('Failed to load owner address information');
+    }
+  }
+
+  private formatPhoneNumber(phone: string): string {
+    if (!phone) return '';
+
+    // Remove all non-numeric characters
+    const cleaned = phone.replace(/\D/g, '');
+
+    // Format as (XXX) XXX-XXXX if it's a 10-digit US number
+    if (cleaned.length === 10) {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    }
+
+    // Return original if not a standard 10-digit format
+    return phone;
+  }
+
+  private populateContactFields() {
+    if (this.ownerContact) {
+      this.basicInfoForm.patchValue({
+        contact: {
+          phone: this.formatPhoneNumber(this.ownerContact.phone || ''),
+          email: this.ownerContact.email
+        }
+      }); // Keep emitEvent: true so the data gets saved to settings
     }
   }
 
@@ -341,19 +375,50 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
       // Disable fields and populate with owner contact info
       phoneControl?.disable();
       emailControl?.disable();
-
-      if (this.ownerContact) {
-        this.basicInfoForm.patchValue({
-          contact: {
-            phone: this.ownerContact.phone || '',
-            email: this.ownerContact.email
-          }
-        });
-      }
+      this.populateContactFields(); // This will trigger save to settings
     } else {
       // Enable fields for user input
       phoneControl?.enable();
       emailControl?.enable();
+    }
+  }
+
+  private populateAddressFields() {
+    if (this.ownerAddress) {
+      this.basicInfoForm.patchValue({
+        address: {
+          street1: this.ownerAddress.shopAddress1 || '',
+          street2: this.ownerAddress.shopAddress2 || '',
+          city: this.ownerAddress.shopCity || '',
+          state: this.ownerAddress.shopState || '',
+          zipCode: this.ownerAddress.shopZip || ''
+        }
+      }, { emitEvent: false }); // Don't emit events to prevent unnecessary API calls
+    }
+  }
+
+  onUseOwnerAddressChange() {
+    const address1Control = this.basicInfoForm.get('address.street1');
+    const address2Control = this.basicInfoForm.get('address.street2');
+    const cityControl = this.basicInfoForm.get('address.city');
+    const stateControl = this.basicInfoForm.get('address.state');
+    const zipControl = this.basicInfoForm.get('address.zipCode');
+
+    if (this.useOwnerAddress) {
+      // Disable fields and populate with owner address info
+      address1Control?.disable();
+      address2Control?.disable();
+      cityControl?.disable();
+      stateControl?.disable();
+      zipControl?.disable();
+      this.populateAddressFields();
+    } else {
+      // Enable fields for user input
+      address1Control?.enable();
+      address2Control?.enable();
+      cityControl?.enable();
+      stateControl?.enable();
+      zipControl?.enable();
     }
   }
 

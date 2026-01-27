@@ -136,6 +136,14 @@ export interface ConsignorPermissions {
   requireApprovalForChanges: boolean;
 }
 
+export interface ConsignorDefaults {
+  shopCommissionPercent: number;
+  consignmentPeriodDays: number;
+  retrievalPeriodDays: number;
+  unsoldItemPolicy: 'donate' | 'dispose' | 'return-to-consignor' | 'become-shop-property';
+  lastUpdated?: Date;
+}
+
 export interface BusinessSettings {
   commission: {
     defaultSplit: string;
@@ -284,6 +292,15 @@ export class OwnerService {
 
   updateDefaultConsignorPermissions(permissions: ConsignorPermissions): Observable<any> {
     return this.http.put(`${this.apiUrl}/organization/default-consignor-permissions`, permissions);
+  }
+
+  // === Consignor Defaults ===
+  getConsignorDefaults(): Observable<ConsignorDefaults> {
+    return this.http.get<ConsignorDefaults>(`${this.apiUrl}/settings/consignor-defaults`);
+  }
+
+  updateConsignorDefaults(defaults: ConsignorDefaults): Observable<{success: boolean, data: ConsignorDefaults, message: string}> {
+    return this.http.put<{success: boolean, data: ConsignorDefaults, message: string}>(`${this.apiUrl}/settings/consignor-defaults`, defaults);
   }
 
   // === Business Settings ===

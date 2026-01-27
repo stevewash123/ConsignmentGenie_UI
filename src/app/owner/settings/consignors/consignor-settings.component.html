@@ -18,6 +18,7 @@
           type="number"
           id="shopCommissionPercent"
           [(ngModel)]="settings()!.defaults.shopCommissionPercent"
+          (ngModelChange)="onDefaultsChange()"
           name="shopCommissionPercent"
           class="form-input number-input"
           min="1"
@@ -33,6 +34,7 @@
             type="number"
             id="consignmentPeriodDays"
             [(ngModel)]="settings()!.defaults.consignmentPeriodDays"
+            (ngModelChange)="onDefaultsChange()"
             name="consignmentPeriodDays"
             class="form-input number-input"
             min="1"
@@ -46,6 +48,7 @@
             type="number"
             id="retrievalPeriodDays"
             [(ngModel)]="settings()!.defaults.retrievalPeriodDays"
+            (ngModelChange)="onDefaultsChange()"
             name="retrievalPeriodDays"
             class="form-input number-input"
             min="1"
@@ -59,6 +62,7 @@
         <select
           id="unsoldItemPolicy"
           [(ngModel)]="settings()!.defaults.unsoldItemPolicy"
+          (ngModelChange)="onDefaultsChange()"
           name="unsoldItemPolicy"
           class="form-select">
           <option value="return-to-consignor">Return to consignor</option>
@@ -70,13 +74,6 @@
       </div>
     </div>
 
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn-secondary" (click)="loadSettings()">Cancel</button>
-      <button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="isSaving()">
-        {{ isSaving() ? 'Saving...' : 'Save Changes' }}
-      </button>
-    </div>
   </div>
 
   <!-- Messages -->

@@ -1,7 +1,8 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SettingsService } from '../../../../services/settings.service';
+import { Subscription, debounceTime } from 'rxjs';
 
 // Data model interfaces
 export interface ReceiptHeaderSettings {
@@ -61,12 +62,13 @@ export interface ReceiptSettings {
   templateUrl: './receipt-settings.component.html',
   styleUrls: ['./receipt-settings.component.css']
 })
-export class ReceiptSettingsComponent implements OnInit {
+export class ReceiptSettingsComponent implements OnInit, OnDestroy {
   receiptForm = signal<FormGroup | null>(null); // Will be set up in constructor
   settings = signal<ReceiptSettings | null>(null);
   saving = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  private formSubscription = new Subscription();
 
   // Character counting
   customMessageLength = computed(() => {
@@ -99,6 +101,54 @@ export class ReceiptSettingsComponent implements OnInit {
 
   ngOnInit() {
     this.loadSettings();
+    this.setupFormChangeListeners();
+  }
+
+  ngOnDestroy() {
+    this.formSubscription.unsubscribe();
+  }
+
+  private setupFormChangeListeners() {
+    const form = this.receiptForm();
+    if (form) {
+      // Listen to form changes and auto-save with debounce
+      this.formSubscription.add(
+        form.valueChanges
+          .pipe(debounceTime(500)) // Wait 500ms after user stops typing
+          .subscribe(() => {
+            if (form.valid && !this.saving()) {
+              this.autoSave();
+            }
+          })
+      );
+    }
+  }
+
+  private async autoSave() {
+    const form = this.receiptForm();
+    if (!form || form.invalid) return;
+
+    const formValue = form.value;
+    const receiptSettings: ReceiptSettings = {
+      header: formValue.header,
+      content: formValue.content,
+      footer: formValue.footer,
+      digital: formValue.digital,
+      print: formValue.print,
+      lastUpdated: new Date()
+    };
+
+    this.saving.set(true);
+    try {
+      await this.settingsService.updateBusinessSettings({ receipts: receiptSettings });
+      this.settings.set(receiptSettings);
+      this.showSuccess('Settings saved automatically');
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      // Don't show error for auto-save failures to avoid annoying the user
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   private createForm(): FormGroup {
@@ -159,49 +209,17 @@ export class ReceiptSettingsComponent implements OnInit {
   private populateForm(settings: ReceiptSettings) {
     const form = this.receiptForm();
     if (!form) return;
+
+    // Use emitEvent: false to prevent triggering change listeners during initial population
     form.patchValue({
       header: settings.header,
       content: settings.content,
       footer: settings.footer,
       digital: settings.digital,
       print: settings.print
-    });
+    }, { emitEvent: false });
   }
 
-  async onSave() {
-    const form = this.receiptForm();
-    if (!form) return;
-
-    if (form.invalid) {
-      this.showError('Please correct the validation errors before saving');
-      return;
-    }
-
-    const formValue = form.value;
-    const receiptSettings: ReceiptSettings = {
-      header: formValue.header,
-      content: formValue.content,
-      footer: formValue.footer,
-      digital: formValue.digital,
-      print: formValue.print,
-      lastUpdated: new Date()
-    };
-
-    this.saving.set(true);
-    try {
-      await this.settingsService.updateBusinessSettings({ receipts: receiptSettings });
-      this.settings.set(receiptSettings);
-    } catch (error) {
-      this.showError('Failed to save receipt settings');
-    } finally {
-      this.saving.set(false);
-    }
-  }
-
-  previewReceipt() {
-    // For now, just show a message that this would open a preview
-    this.showSuccess('Receipt preview would open here (feature coming soon)');
-  }
 
   private showSuccess(message: string) {
     this.successMessage.set(message);
