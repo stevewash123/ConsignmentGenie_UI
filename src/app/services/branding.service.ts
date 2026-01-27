@@ -47,12 +47,12 @@ export class BrandingService {
     const formData = new FormData();
     formData.append('logo', file);
 
-    return this.http.post<LogoUploadResult>(`${this.apiUrl}/branding/logo`, formData).pipe(
+    return this.http.post<{success: boolean, data: LogoUploadResult}>(`${this.apiUrl}/branding/logo`, formData).pipe(
       map(response => {
-        if (!response) {
-          throw new Error('No response received');
+        if (!response?.success || !response.data) {
+          throw new Error('Upload failed or no data received');
         }
-        return response;
+        return response.data;
       }),
       catchError(error => {
         console.error('Error uploading logo:', error);
