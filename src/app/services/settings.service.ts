@@ -169,6 +169,23 @@ export interface StorefrontSettings {
   cgStorefront: CgStorefrontSettings;
 }
 
+export interface OwnerContact {
+  firstName: string | null;
+  lastName: string | null;
+  fullName: string | null;
+  email: string;
+  phone: string | null;
+}
+
+export interface OwnerAddress {
+  shopAddress1: string | null;
+  shopAddress2: string | null;
+  shopCity: string | null;
+  shopState: string | null;
+  shopZip: string | null;
+  shopCountry: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
   private settings$ = new BehaviorSubject<OrganizationSettings | null>(null);
@@ -458,7 +475,7 @@ export class SettingsService {
    */
   async getConsignorOnboardingSettings(): Promise<ConsignorOnboardingSettings> {
     return await firstValueFrom(
-      this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/owner/settings/consignor-onboarding`)
+      this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/settings/consignor-onboarding`)
     );
   }
 
@@ -516,12 +533,12 @@ export class SettingsService {
     this.pendingProfileChanges = {};
 
     try {
-      const updatedProfile = await firstValueFrom(
-        this.http.patch<ShopProfile>(`${environment.apiUrl}/api/organizations/profile`, changesToSave)
+      const response = await firstValueFrom(
+        this.http.patch<{success: boolean, data: ShopProfile}>(`${environment.apiUrl}/api/organizations/profile`, changesToSave)
       );
 
       // Update with server response (authoritative)
-      this.profile$.next(updatedProfile);
+      this.profile$.next(response.data);
 
     } catch (error) {
       console.error('Failed to save profile:', error);
@@ -673,12 +690,12 @@ export class SettingsService {
     this.pendingBusinessChanges = {};
 
     try {
-      const updatedSettings = await firstValueFrom(
-        this.http.patch<BusinessSettings>(`${environment.apiUrl}/api/organizations/business-settings`, changesToSave)
+      const response = await firstValueFrom(
+        this.http.patch<{success: boolean, data: BusinessSettings}>(`${environment.apiUrl}/api/organizations/business-settings`, changesToSave)
       );
 
       // Update with server response (authoritative)
-      this.businessSettings$.next(updatedSettings);
+      this.businessSettings$.next(response.data);
 
     } catch (error) {
       console.error('Failed to save business settings:', error);
@@ -738,8 +755,12 @@ export class SettingsService {
   updateAccountingSettings(settings: AccountingSettings): void {
     this.accountingSettings$.next(settings);
     // Auto-save to server
-    this.http.patch<AccountingSettings>(`${environment.apiUrl}/api/organizations/accounting-settings`, settings)
+    this.http.patch<{success: boolean, data: AccountingSettings}>(`${environment.apiUrl}/api/organizations/accounting-settings`, settings)
       .subscribe({
+        next: (response) => {
+          // Update with server response (authoritative)
+          this.accountingSettings$.next(response.data);
+        },
         error: (error) => {
           console.error('Failed to save accounting settings:', error);
           // Could revert state here or show error to user
@@ -767,9 +788,11 @@ export class SettingsService {
 
   async updatePayoutSettings(settings: PayoutSettings): Promise<void> {
     this.payoutSettings$.next(settings);
-    await firstValueFrom(
-      this.http.patch<PayoutSettings>(`${environment.apiUrl}/api/organizations/payout-settings`, settings)
+    const response = await firstValueFrom(
+      this.http.patch<{success: boolean, data: PayoutSettings}>(`${environment.apiUrl}/api/organizations/payout-settings`, settings)
     );
+    // Update with server response (authoritative)
+    this.payoutSettings$.next(response.data);
   }
 
   getCurrentPayoutSettings(): PayoutSettings | null {
@@ -875,12 +898,12 @@ export class SettingsService {
     this.pendingPermissionsChanges = {};
 
     try {
-      const updatedPermissions = await firstValueFrom(
-        this.http.patch<ConsignorPermissions>(`${environment.apiUrl}/api/organizations/default-consignor-permissions`, changesToSave)
+      const response = await firstValueFrom(
+        this.http.patch<{success: boolean, data: ConsignorPermissions}>(`${environment.apiUrl}/api/organizations/default-consignor-permissions`, changesToSave)
       );
 
       // Update with server response (authoritative)
-      this.consignorPermissions$.next(updatedPermissions);
+      this.consignorPermissions$.next(response.data);
 
     } catch (error) {
       console.error('Failed to save consignor permissions:', error);
@@ -930,8 +953,9 @@ export class SettingsService {
   async loadConsignorOnboarding(): Promise<void> {
     try {
       const settings = await firstValueFrom(
-        this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/owner/settings/consignor-onboarding`)
+        this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/settings/consignor-onboarding`)
       );
+
       this.consignorOnboarding$.next(settings);
     } catch (error) {
       console.error('Failed to load consignor onboarding settings:', error);
@@ -991,15 +1015,17 @@ export class SettingsService {
     this.pendingOnboardingChanges = {};
 
     try {
-      const updatedSettings = await firstValueFrom(
-        this.http.put<ConsignorOnboardingSettings>(
-          `${environment.apiUrl}/api/owner/settings/consignor-onboarding`,
-          { ...this.consignorOnboarding$.value, ...changesToSave }
+      const requestData = { ...this.consignorOnboarding$.value, ...changesToSave };
+
+      const response = await firstValueFrom(
+        this.http.put<{success: boolean, data: ConsignorOnboardingSettings, message: string}>(
+          `${environment.apiUrl}/api/settings/consignor-onboarding`,
+          requestData
         )
       );
 
-      // Update with server response (authoritative)
-      this.consignorOnboarding$.next(updatedSettings);
+      // Update with server response (enums now properly camelCase)
+      this.consignorOnboarding$.next(response.data);
 
     } catch (error) {
       console.error('Failed to save consignor onboarding settings:', error);
@@ -1151,12 +1177,12 @@ export class SettingsService {
     this.pendingNotificationChanges = {};
 
     try {
-      const updatedSettings = await firstValueFrom(
-        this.http.patch<NotificationSettings>(`${environment.apiUrl}/api/organizations/notification-settings`, changesToSave)
+      const response = await firstValueFrom(
+        this.http.patch<{success: boolean, data: NotificationSettings}>(`${environment.apiUrl}/api/organizations/notification-settings`, changesToSave)
       );
 
       // Update with server response (authoritative)
-      this.notificationSettings$.next(updatedSettings);
+      this.notificationSettings$.next(response.data);
 
     } catch (error) {
       console.error('Failed to save notification settings:', error);
@@ -1274,12 +1300,12 @@ export class SettingsService {
     this.pendingStorefrontChanges = {};
 
     try {
-      const updatedSettings = await firstValueFrom(
-        this.http.patch<StorefrontSettings>(`${environment.apiUrl}/api/organizations/storefront-settings`, changesToSave)
+      const response = await firstValueFrom(
+        this.http.patch<{success: boolean, data: StorefrontSettings}>(`${environment.apiUrl}/api/organizations/storefront-settings`, changesToSave)
       );
 
       // Update with server response
-      this.storefrontSettings$.next(updatedSettings);
+      this.storefrontSettings$.next(response.data);
       console.log('Storefront settings saved successfully');
     } catch (error) {
       console.error('Failed to save storefront settings:', error);
@@ -1335,6 +1361,26 @@ export class SettingsService {
     }
 
     current[keys[keys.length - 1]] = value;
+  }
+
+  // ===== OWNER INFORMATION METHODS =====
+
+  /**
+   * Load owner contact information from API
+   */
+  async loadOwnerContact(): Promise<OwnerContact> {
+    return await firstValueFrom(
+      this.http.get<OwnerContact>(`${environment.apiUrl}/api/settings/owner-contact`)
+    );
+  }
+
+  /**
+   * Load owner address information from API
+   */
+  async loadOwnerAddress(): Promise<OwnerAddress> {
+    return await firstValueFrom(
+      this.http.get<OwnerAddress>(`${environment.apiUrl}/api/settings/owner-address`)
+    );
   }
 }
 
