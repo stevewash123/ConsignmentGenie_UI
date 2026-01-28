@@ -69,6 +69,11 @@
       margin-bottom: 1.25rem;
     }
 
+    /* Reduce margin specifically for zip code field */
+    .form-row .form-group:last-child {
+      margin-bottom: 1rem;
+    }
+
     .form-row {
       display: grid;
       gap: 1rem;
@@ -93,7 +98,7 @@
 
     input, select {
       width: 100%;
-      padding: 0.75rem;
+      padding: 0.625rem;
       border: 2px solid #e5e7eb;
       border-radius: 8px;
       font-size: 1rem;

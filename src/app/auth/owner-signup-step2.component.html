@@ -30,9 +30,10 @@
                 <div class="form-group">
                   <label for="phone">Phone</label>
                   <input
+                    #phoneInput
                     id="phone"
                     type="tel"
-                    formControlName="phone"
+                    [value]="phoneDisplayValue"
                     (input)="onPhoneInput($event)"
                     placeholder="(555) 123-4567">
                 </div>
@@ -167,18 +168,6 @@
               </div>
             </div>
 
-            <!-- Email Confirmation -->
-            <div class="form-section">
-              <div class="form-group">
-                <label for="confirmEmail">Confirm email:</label>
-                <input
-                  id="confirmEmail"
-                  type="email"
-                  [value]="userEmail"
-                  readonly
-                  class="readonly-input">
-              </div>
-            </div>
 
             <button
               type="submit"

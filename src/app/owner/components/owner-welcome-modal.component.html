@@ -6,71 +6,69 @@
           <button class="close-btn" (click)="closeModal()" aria-label="Close modal">
             <span aria-hidden="true">×</span>
           </button>
-          <h2 class="modal-title">{{ welcomeMessage.title }}</h2>
-          <p class="modal-subtitle">{{ welcomeMessage.subtitle }}</p>
+          <div class="header-icon">⚙️</div>
+          <h2 class="modal-title">Welcome to Consignment Genie!</h2>
+          <p class="modal-subtitle">Before you invite consignors, let's configure your shop.</p>
+        </div>
 
-          <!-- Progress Bar -->
-          <div class="progress-section" *ngIf="progress">
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="progress.progressPercentage"></div>
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <!-- Setup Items -->
+          <div class="setup-items">
+            <!-- Commission rates & payout schedules -->
+            <div class="setup-item">
+              <div class="setup-icon">💰</div>
+              <div class="setup-content">
+                <h4 class="setup-title">Commission rates & payout schedules</h4>
+                <p class="setup-description">
+                  Set your default split percentages and when consignors get paid. We'll make sure consignors
+                  are informed of these key settings when they register.
+                </p>
+              </div>
             </div>
-            <p class="progress-text">
-              {{ progress.completedSteps }} of {{ progress.totalSteps }} completed
-              <span class="progress-percentage">({{ progress.progressPercentage }}%)</span>
+
+            <!-- Consignment agreement -->
+            <div class="setup-item">
+              <div class="setup-icon">📄</div>
+              <div class="setup-content">
+                <h4 class="setup-title">Consignment agreement</h4>
+                <p class="setup-description">
+                  Upload the legal agreement consignors will need to review and sign. We'll gather, store, and
+                  track the signed agreements for you.
+                </p>
+              </div>
+            </div>
+
+            <!-- Online storefront -->
+            <div class="setup-item">
+              <div class="setup-icon">🏪</div>
+              <div class="setup-content">
+                <h4 class="setup-title">Online storefront</h4>
+                <p class="setup-description">
+                  Configure your online store or connect to Square. We'll help you market items online.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button class="btn-primary" (click)="goToSettings()">
+            Go to Settings
+          </button>
+
+          <!-- Info Card -->
+          <div class="info-card">
+            <h3 class="info-title">Why setup first?</h3>
+            <p class="info-text">
+              These settings determine how your shop operates. Getting them right now before consignors register
+              ensures a smooth experience for everyone.
             </p>
           </div>
-        </div>
 
-        <!-- Steps List -->
-        <div class="modal-body">
-          <div class="steps-list">
-            <div
-              *ngFor="let step of steps; trackBy: trackByStepId"
-              class="step-item"
-              [class.completed]="step.completed"
-              [class.next-step]="!step.completed && isNextStep(step)">
-
-              <!-- Icon and Status -->
-              <div class="step-icon-container">
-                <div class="step-icon" *ngIf="!step.completed">{{ step.icon }}</div>
-                <div class="step-check" *ngIf="step.completed">✅</div>
-              </div>
-
-              <!-- Content -->
-              <div class="step-content">
-                <h3 class="step-title">{{ step.title }}</h3>
-                <p class="step-description">{{ step.description }}</p>
-              </div>
-
-              <!-- Action Button -->
-              <div class="step-action">
-                <a
-                  *ngIf="!step.completed"
-                  [routerLink]="step.routerLink"
-                  class="step-button primary"
-                  (click)="onStepClick(step)">
-                  {{ step.actionText }}
-                </a>
-                <div
-                  *ngIf="step.completed"
-                  class="step-completed">
-                  ✓ Done
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="modal-footer">
-          <div class="footer-center">
-            <button
-              class="btn-dismiss"
-              (click)="dismissOrClose()"
-              [disabled]="isDismissing()">
-              {{ isDismissing() ? 'Saving...' : (isManualOpen ? 'Close' : 'No thanks, I can find my own way') }}
-            </button>
-          </div>
+          <!-- Dismiss Link -->
+          <button class="btn-dismiss" (click)="dismissOrClose()" [disabled]="isDismissing()">
+            {{ isDismissing() ? 'Saving...' : (isManualOpen ? 'Close' : 'No thanks, I can find my own way') }}
+          </button>
         </div>
 
         <!-- Loading Overlay -->

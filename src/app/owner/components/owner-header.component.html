@@ -3,8 +3,7 @@
       <div class="header-container">
         <div class="header-left">
           <div class="logo">
-            <h2>{{ getCurrentUser()?.organizationName || 'ConsignmentGenie' }}</h2>
-            <span class="owner-badge">Shop Management</span>
+            <h2 class="shop-name">{{ getCurrentUser()?.organizationName || 'ConsignmentGenie' }}</h2>
           </div>
 
           <nav class="main-nav" *ngIf="getCurrentUser()">
@@ -15,7 +14,6 @@
               <a routerLink="/owner/sales" routerLinkActive="active">Sales</a>
               <a routerLink="/owner/payouts" routerLinkActive="active">Payouts</a>
               <a routerLink="/owner/reports" routerLinkActive="active">Reports</a>
-              <a routerLink="/owner/notifications" routerLinkActive="active">Notifications</a>
             </div>
           </nav>
         </div>
@@ -24,12 +22,6 @@
           <!-- Notification Bell -->
           <app-notification-bell role="owner"></app-notification-bell>
 
-          <div class="user-info">
-            <div class="user-details">
-              <div class="user-email">{{ getCurrentUser()?.email }}</div>
-              <div class="org-name">{{ getCurrentUser()?.organizationName }}</div>
-            </div>
-          </div>
 
           <div class="user-menu">
             <button class="profile-btn" (click)="toggleUserMenu()">

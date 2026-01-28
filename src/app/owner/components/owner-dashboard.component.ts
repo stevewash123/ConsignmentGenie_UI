@@ -12,7 +12,7 @@ import { Transaction } from '../../models/transaction.model';
 import { PendingPayoutData } from '../../models/payout.model';
 import { AuthService } from '../../services/auth.service';
 import { OnboardingService } from '../../shared/services/onboarding.service';
-import { OnboardingStatus, OnboardingStep } from '../../shared/models/onboarding.models';
+import { OnboardingStatus } from '../../shared/models/onboarding.models';
 
 interface ShopSummary {
   activeConsignors: number;
@@ -199,8 +199,4 @@ export class OwnerDashboardComponent implements OnInit, OnDestroy {
     this.loadOnboardingStatus();
   }
 
-  navigateToStep(step: OnboardingStep) {
-    this.closeWelcomeModal();
-    // The router navigation will happen automatically via the routerLink in the modal
-  }
 }

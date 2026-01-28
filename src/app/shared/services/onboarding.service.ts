@@ -34,7 +34,11 @@ export class OnboardingService {
     return this.http.get<OnboardingResponse>(url)
       .pipe(
         tap(response => console.log('🔍 SERVICE: Raw API response:', response)),
-        map(response => this.normalizeStatus(response.data)),
+        map(response => {
+          // Handle both wrapped and unwrapped API responses
+          const statusData = response.data || response;
+          return this.normalizeStatus(statusData as OnboardingStatus);
+        }),
         tap(status => {
           console.log('🔍 SERVICE: Processed status:', status);
           this.onboardingStatusSubject.next(status);

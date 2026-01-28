@@ -114,7 +114,7 @@ export class LoginSimpleComponent implements OnInit {
     console.log('Redirecting user:', { email, role, returnUrl, rawRole: userData?.role });
 
     // Admin always goes to admin dashboard (unless specific return URL)
-    if (email === 'admin@microsaasbuilders.com' || role === 'Admin') {
+    if (email === 'admin@microsaasbuilders.com' || role === 'admin') {
       if (returnUrl && returnUrl.startsWith('/admin/')) {
         this.router.navigateByUrl(returnUrl);
       } else {
@@ -131,14 +131,14 @@ export class LoginSimpleComponent implements OnInit {
 
     // Standard role-based routing
     switch (role) {
-      case 'Admin':
+      case 'admin':
         console.log('Navigating to /admin/dashboard');
         this.router.navigate(['/admin/dashboard']).then(
           success => console.log('Admin navigation success:', success),
           error => console.error('Admin navigation failed:', error)
         );
         break;
-      case 'Owner':
+      case 'owner':
         console.log('Navigating to /owner/dashboard');
         this.router.navigate(['/owner/dashboard']).then(
           success => console.log('Owner navigation success:', success),
@@ -146,11 +146,10 @@ export class LoginSimpleComponent implements OnInit {
         );
         break;
       case 'consignor':
-      case 'Consignor':
         console.log('Checking consignor agreement status before redirect...');
         this.redirectConsignorBasedOnAgreement();
         break;
-      case 'Customer':
+      case 'customer':
         console.log('Navigating to /customer/dashboard');
         this.router.navigate(['/customer/dashboard']).then(
           success => console.log('Customer navigation success:', success),
@@ -183,7 +182,7 @@ export class LoginSimpleComponent implements OnInit {
     }
 
     switch (role) {
-      case 'Customer':
+      case 'customer':
         // Customer: return to the shop they were viewing
         this.router.navigateByUrl(returnUrl);
         break;
@@ -193,7 +192,7 @@ export class LoginSimpleComponent implements OnInit {
         this.router.navigate(['/consignor/dashboard']);
         break;
 
-      case 'Owner':
+      case 'owner':
         // Owner: check if they own this shop (TODO: implement ownership check)
         // For now, redirect to owner dashboard
         this.router.navigate(['/owner/dashboard']);
@@ -207,16 +206,16 @@ export class LoginSimpleComponent implements OnInit {
 
   private redirectToStandardDashboard(role: string) {
     switch (role) {
-      case 'Admin':
+      case 'admin':
         this.router.navigate(['/admin/dashboard']);
         break;
-      case 'Owner':
+      case 'owner':
         this.router.navigate(['/owner/dashboard']);
         break;
       case 'consignor':
         this.router.navigate(['/consignor/dashboard']);
         break;
-      case 'Customer':
+      case 'customer':
         this.router.navigate(['/customer/dashboard']);
         break;
       default:
@@ -236,17 +235,24 @@ export class LoginSimpleComponent implements OnInit {
     // Handle numeric role values (enum numbers from API)
     if (typeof role === 'number' || !isNaN(Number(role))) {
       const roleMap: { [key: number]: string } = {
-        0: 'Admin',
-        1: 'Owner',
-        // 2: 'Manager', // Planned feature - commented out for now
-        2: 'Consignor',
-        3: 'Customer'
+        0: 'admin',
+        1: 'owner',
+        // 2: 'manager', // Planned feature - commented out for now
+        2: 'consignor',
+        3: 'customer'
       };
-      return roleMap[Number(role)] || 'Owner';
+      return roleMap[Number(role)] || 'owner';
     }
 
-    // Return string role as-is
-    return String(role);
+    // Convert to lowercase for consistency (API now sends lowercase)
+    const roleString = String(role).toLowerCase();
+
+    // Handle legacy "provider" terminology
+    if (roleString === 'provider') {
+      return 'consignor';
+    }
+
+    return roleString;
   }
 
   private redirectConsignorBasedOnAgreement(): void {

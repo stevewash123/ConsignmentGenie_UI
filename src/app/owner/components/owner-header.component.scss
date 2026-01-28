@@ -30,22 +30,22 @@
       gap: 1rem;
     }
 
-    .logo h2 {
+    .logo h2.shop-name {
       margin: 0;
       font-size: 1.5rem;
       font-weight: bold;
       color: white;
+      max-width: 400px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      line-height: 1.2;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    .owner-badge {
-      background: #047857;
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
 
     .main-nav {
       display: flex;
@@ -107,24 +107,6 @@
       gap: 1rem;
     }
 
-    .user-info {
-      text-align: right;
-    }
-
-    .user-details {
-      font-size: 0.875rem;
-    }
-
-    .user-email {
-      font-weight: 600;
-      color: white;
-    }
-
-    .org-name {
-      color: #fbbf24;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
 
     .user-menu {
       position: relative;
@@ -243,7 +225,8 @@
         display: none;
       }
 
-      .user-details {
-        display: none;
+      .logo h2.shop-name {
+        max-width: 200px;
+        font-size: 1.25rem;
       }
     }

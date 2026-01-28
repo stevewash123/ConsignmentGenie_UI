@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { OnboardingService } from '../../shared/services/onboarding.service';
-import { OnboardingStatus, OnboardingStep, OnboardingProgress } from '../../shared/models/onboarding.models';
+import { OnboardingStatus } from '../../shared/models/onboarding.models';
 
 @Component({
   selector: 'app-owner-welcome-modal',
@@ -20,26 +20,22 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy, OnChanges 
   @Input() isManualOpen: boolean = false; // Controls button text ("Close" vs "No thanks...")
   @Output() closed = new EventEmitter<void>();
   @Output() dismissed = new EventEmitter<void>();
-  @Output() stepClicked = new EventEmitter<OnboardingStep>();
 
   private destroy$ = new Subject<void>();
 
-  steps: OnboardingStep[] = [];
-  progress: OnboardingProgress | null = null;
-  welcomeMessage: { title: string; subtitle: string } = { title: '', subtitle: '' };
   isDismissing = signal(false);
 
-  constructor(private onboardingService: OnboardingService) {}
+  constructor(
+    private onboardingService: OnboardingService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.setupStaticModal();
+    // No setup needed - template uses shopName directly
   }
 
   ngOnChanges() {
-    // Refresh modal content when onboarding status changes
-    if (this.onboardingStatus) {
-      this.setupStaticModal();
-    }
+    // No setup needed - template uses shopName directly
   }
 
   ngOnDestroy() {
@@ -47,70 +43,12 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy, OnChanges 
     this.destroy$.complete();
   }
 
-  private setupStaticModal() {
-    // Use onboarding service for dynamic content if status is available
-    if (this.onboardingStatus) {
-      this.welcomeMessage = this.onboardingService.getWelcomeMessage(this.onboardingStatus, this.shopName);
-      this.steps = this.onboardingService.getOnboardingSteps(this.onboardingStatus);
-      this.progress = this.onboardingService.getOnboardingProgress(this.onboardingStatus);
-    } else {
-      // Fallback to static content
-      this.welcomeMessage = {
-        title: `Welcome to ${this.shopName}! 🎉`,
-        subtitle: "Let's get your shop set up. Here's what to do next:"
-      };
-
-      this.steps = [
-        {
-          id: 'consignors',
-          title: 'Add your consignors',
-          description: 'Invite the people who consign items with you. They\'ll be able to track their inventory and payouts.',
-          completed: false,
-          actionText: 'Add Consignors',
-          routerLink: '/owner/consignors',
-          icon: '1'
-        },
-        {
-          id: 'storefront',
-          title: 'Change your storefront or use ours',
-          description: 'Decide how you\'ll sell: Use our built-in shop or connect Shopify/Square.',
-          completed: false,
-          actionText: 'Set Up Storefront',
-          routerLink: '/owner/settings/storefront',
-          icon: '2'
-        },
-        {
-          id: 'inventory',
-          title: 'Add inventory',
-          description: 'Enter items manually or upload in bulk via CSV.',
-          completed: false,
-          actionText: 'Add Inventory',
-          routerLink: '/owner/inventory',
-          icon: '3'
-        },
-        {
-          id: 'quickbooks',
-          title: 'Connect QuickBooks',
-          description: 'Sync transactions and payouts with your accounting. (optional)',
-          completed: false,
-          actionText: 'Connect QuickBooks',
-          routerLink: '/owner/settings/integrations',
-          icon: '4'
-        }
-      ];
-
-      this.progress = null;
-    }
-  }
-
-  trackByStepId(index: number, step: OnboardingStep): string {
-    return step.id;
-  }
-
-  isNextStep(step: OnboardingStep): boolean {
-    // Find the first incomplete step
-    const firstIncompleteStep = this.steps.find(s => !s.completed);
-    return firstIncompleteStep?.id === step.id;
+  /**
+   * Navigate to owner settings and close modal
+   */
+  goToSettings(): void {
+    this.closed.emit();
+    this.router.navigate(['/owner/settings']);
   }
 
   onBackdropClick(event: Event) {
@@ -124,10 +62,6 @@ export class OwnerWelcomeModalComponent implements OnInit, OnDestroy, OnChanges 
     this.closed.emit();
   }
 
-  onStepClick(step: OnboardingStep) {
-    this.stepClicked.emit(step);
-    // Modal will close when navigation occurs
-  }
 
   dismissOrClose() {
     if (this.isDismissing()) return;

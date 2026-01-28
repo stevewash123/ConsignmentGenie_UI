@@ -79,7 +79,6 @@
   [shopName]="getCurrentUser()?.organizationName || 'Your Shop'"
   [onboardingStatus]="onboardingStatus()"
   (closed)="closeWelcomeModal()"
-  (dismissed)="dismissWelcomeModal()"
-  (stepClicked)="navigateToStep($event)">
+  (dismissed)="dismissWelcomeModal()">
 </app-owner-welcome-modal>
   

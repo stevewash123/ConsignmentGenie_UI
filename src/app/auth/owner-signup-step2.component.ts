@@ -17,6 +17,7 @@ export class OwnerSignupStep2Component implements OnInit {
   isSubmitting = signal(false);
   errorMessage = signal('');
   userEmail = '';
+  phoneDisplayValue = '';
 
   constructor(
     private fb: FormBuilder,
@@ -122,9 +123,20 @@ export class OwnerSignupStep2Component implements OnInit {
   }
 
   onPhoneInput(event: Event): void {
-    const formattedPhone = PhoneFormatter.handlePhoneInput(event);
+    const input = event.target as HTMLInputElement;
+    const formattedPhone = PhoneFormatter.formatPhone(input.value);
     const rawValue = PhoneFormatter.getRawValue(formattedPhone);
+
+    // Update display value
+    this.phoneDisplayValue = formattedPhone;
+
+    // Store raw value in form
     this.profileForm.patchValue({ phone: rawValue });
+
+    // Update input display with timeout to handle cursor positioning
+    setTimeout(() => {
+      input.value = formattedPhone;
+    }, 0);
   }
 
   private markAllFieldsTouched() {
