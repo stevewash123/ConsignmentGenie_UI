@@ -2,7 +2,10 @@ import { Component, OnInit, signal, computed, effect, Signal } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { SettingsService, OrganizationSettings, AgreementTemplate, ConsignorOnboardingSettings } from '../../../../services/settings.service';
+import { AgreementService, AgreementSettings } from '../../../../services/agreement.service';
+import { ConsignorService } from '../../../../services/consignor.service';
+import { ConsignorOnboardingSettings } from '../../../../models/consignor.models';
+import { AgreementTemplate } from '../../../../models/agreements.models';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 interface LocalAgreementTemplate {
@@ -45,8 +48,8 @@ export class AgreementsComponent implements OnInit {
     return settings?.requireSignedAgreement === true && !this.hasAgreementUploaded();
   });
 
-  // Use the settings service - initialized in constructor
-  settings!: Signal<OrganizationSettings | null>;
+  // Use the agreement service - initialized in constructor
+  settings!: Signal<AgreementSettings | null>;
 
   metaTagsHelp = [
     { tag: '{{SHOP_NAME}}', description: 'Your shop\'s business name' },
@@ -115,8 +118,11 @@ Shop Representative: _________________________ Date: _________
 DISCLAIMER: This is sample content only and does not constitute legal advice.
 Consult with an attorney to ensure your agreement meets local legal requirements.`;
 
-  constructor(private settingsService: SettingsService) {
-    this.settings = toSignal(this.settingsService.settings);
+  constructor(
+    private agreementService: AgreementService,
+    private consignorService: ConsignorService
+  ) {
+    this.settings = toSignal(this.agreementService.agreementSettings);
 
     // Ensure view mode consistency with hasCustomTemplate
     effect(() => {
@@ -137,14 +143,14 @@ Consult with an attorney to ensure your agreement meets local legal requirements
   }
 
   async loadSettings() {
-    await this.settingsService.loadSettings();
+    await this.agreementService.loadAgreementSettings();
     // Reload template after settings are loaded to update hasCustomTemplate state
     await this.loadTemplate();
   }
 
   async loadOnboardingSettings() {
     try {
-      const settings = await this.settingsService.getConsignorOnboardingSettings();
+      const settings = await this.consignorService.getConsignorOnboardingSettings();
       this.onboardingSettings.set(settings);
     } catch (error) {
       console.error('Failed to load onboarding settings:', error);
@@ -154,7 +160,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
   async loadTemplate() {
     try {
       // Force refresh settings from server to avoid stale cache
-      await this.settingsService.loadSettings();
+      await this.agreementService.loadAgreementSettings();
 
       // Check if there's an uploaded template from settings
       const settings = this.settings();
@@ -170,7 +176,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
           console.warn('Could not load agreement template content:', error);
           // If we can't get the text content, try to download and extract it
           try {
-            const blob = await this.settingsService.downloadAgreementTemplate(settings!.agreementTemplateId!);
+            const blob = await this.agreementService.downloadAgreementTemplate(settings!.agreementTemplateId!);
             if (blob.type === 'text/plain' || blob.type.includes('text')) {
               content = await blob.text();
             } else {
@@ -310,11 +316,11 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     this.isUploading.set(true);
 
     try {
-      // Upload the file using the settings service
-      const uploadedTemplate = await this.settingsService.uploadAgreementTemplate(file);
+      // Upload the file using the agreement service
+      const uploadedTemplate = await this.agreementService.uploadAgreementTemplate(file);
 
       // Update the settings to reference the new template
-      this.settingsService.updateSetting('agreementTemplateId', uploadedTemplate.id);
+      await this.agreementService.updateAgreementSettings({ agreementTemplateId: uploadedTemplate.id });
 
       // Update local state
       this.viewMode.set('agreement');
@@ -375,7 +381,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   async downloadPdfTemplate(templateId: string) {
     try {
-      const blob = await this.settingsService.downloadAgreementTemplate(templateId);
+      const blob = await this.agreementService.downloadAgreementTemplate(templateId);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -399,16 +405,16 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     this.isSaving.set(true);
     try {
       // Generate PDF from text content on the server
-      const pdfBlob = await this.settingsService.generatePdfFromText(this.templateContent());
+      const pdfBlob = await this.agreementService.generatePdfFromText(this.templateContent());
 
       // Create a File object from the blob to upload
       const pdfFile = new File([pdfBlob], 'agreement-template.pdf', { type: 'application/pdf' });
 
       // Upload the generated PDF
-      const uploadedTemplate = await this.settingsService.uploadAgreementTemplate(pdfFile);
+      const uploadedTemplate = await this.agreementService.uploadAgreementTemplate(pdfFile);
 
       // Update the settings to reference the new template
-      this.settingsService.updateSetting('agreementTemplateId', uploadedTemplate.id);
+      await this.agreementService.updateAgreementSettings({ agreementTemplateId: uploadedTemplate.id });
 
       // Update local state
       this.viewMode.set('agreement');
@@ -443,10 +449,10 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       }
 
       // Delete the template file
-      await this.settingsService.deleteAgreementTemplate(templateId);
+      await this.agreementService.deleteAgreementTemplate(templateId);
 
       // Update the settings to remove the template reference
-      this.settingsService.updateSetting('agreementTemplateId', null);
+      await this.agreementService.updateAgreementSettings({ agreementTemplateId: null });
 
       // Reset local state
       this.viewMode.set('sample');
@@ -507,7 +513,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   // Settings change handlers
   onRequireSignedChange(checked: boolean): void {
-    this.settingsService.updateSetting('requireSignedAgreement', checked);
+    this.agreementService.updateAgreementSetting('requireSignedAgreement', checked);
   }
 
   private isValidFileExtension(fileName: string): boolean {
@@ -537,11 +543,11 @@ Consult with an attorney to ensure your agreement meets local legal requirements
   private async getAgreementTemplateContent(templateId: string): Promise<string> {
     try {
       // First try to get the template as text if there's an API endpoint for it
-      const response = await this.settingsService.getAgreementTemplateAsText(templateId);
+      const response = await this.agreementService.getAgreementTemplateAsText(templateId);
       return response;
     } catch (error) {
       // If no text endpoint exists, try to download and extract text from file
-      const blob = await this.settingsService.downloadAgreementTemplate(templateId);
+      const blob = await this.agreementService.downloadAgreementTemplate(templateId);
 
       // For text files, we can read them directly
       if (blob.type === 'text/plain' || blob.type === 'text/html' || blob.type.includes('text')) {

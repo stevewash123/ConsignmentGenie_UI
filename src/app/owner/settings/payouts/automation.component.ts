@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SettingsService } from '../../../services/settings.service';
+import { BusinessSettingsService } from '../../../services/business-settings.service';
 
 @Component({
   selector: 'app-automation',
@@ -18,7 +18,7 @@ export class AutomationComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private businessSettingsService: BusinessSettingsService
   ) {}
 
   ngOnInit() {
@@ -39,8 +39,8 @@ export class AutomationComponent implements OnInit {
 
   async loadSettings() {
     try {
-      await this.settingsService.loadBusinessSettings();
-      const settings = this.settingsService.getCurrentBusinessSettings();
+      await this.businessSettingsService.loadBusinessSettings();
+      const settings = this.businessSettingsService.getCurrentBusinessSettings();
       if (settings?.payouts) {
         this.automationForm.patchValue({
           automation: {
@@ -67,7 +67,7 @@ export class AutomationComponent implements OnInit {
       const payoutSettings = {
         autoProcessing: formValue.automation.autoGeneratePayouts
       };
-      await this.settingsService.updateBusinessSettings({ payouts: payoutSettings });
+      await this.businessSettingsService.updateBusinessSettings({ payouts: payoutSettings });
     } catch (error) {
       console.error('Failed to save automation settings:', error);
       this.errorMessage.set('Failed to save automation settings. Please try again.');

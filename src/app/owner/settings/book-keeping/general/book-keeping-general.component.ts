@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BookkeepingSettingsService } from '../../../../services/bookkeeping-settings.service';
+import { IntegrationPricingService } from '../../../../shared/services/integration-pricing.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -17,6 +18,8 @@ export class BookKeepingGeneralComponent implements OnInit {
 
   useQuickBooks = signal(false);
   quickBooksConnected = signal(false);
+
+  private integrationPricingService = inject(IntegrationPricingService);
 
   constructor(
     private bookkeepingService: BookkeepingSettingsService
@@ -42,8 +45,32 @@ export class BookKeepingGeneralComponent implements OnInit {
     }
   }
 
-  onQuickBooksToggle() {
+  async onQuickBooksToggle(): Promise<void> {
     const newValue = !this.useQuickBooks();
+
+    // Don't show confirmation if no change is being made
+    if (newValue === this.useQuickBooks()) {
+      return;
+    }
+
+    // Show confirmation with pricing impact warning
+    try {
+      const confirmed = await this.integrationPricingService.showPricingConfirmation(
+        'quickbooks',
+        newValue,
+        '⚠️ Pricing Impact',
+        newValue ? 'Enable Integration' : 'Disable Integration'
+      );
+      if (!confirmed) {
+        console.log('🔧 [BookKeeping] onQuickBooksToggle - User cancelled the integration change');
+        return;
+      }
+    } catch (error) {
+      console.error('🔧 [BookKeeping] onQuickBooksToggle - Error showing pricing confirmation:', error);
+      return;
+    }
+
+    // Proceed with the change
     this.useQuickBooks.set(newValue);
 
     // If disabling, also mark as not connected
@@ -51,7 +78,10 @@ export class BookKeepingGeneralComponent implements OnInit {
       this.quickBooksConnected.set(false);
     }
 
-    this.autoSave();
+    await this.autoSave();
+
+    // Update subscription with new integration status
+    await this.updateSubscriptionWithQuickBooksIntegration(newValue);
   }
 
   private async autoSave() {
@@ -71,6 +101,33 @@ export class BookKeepingGeneralComponent implements OnInit {
       // TODO: Show error message to user
     } finally {
       this.isSaving.set(false);
+    }
+  }
+
+
+  private async updateSubscriptionWithQuickBooksIntegration(isEnabled: boolean): Promise<void> {
+    try {
+      console.log('🔧 [BookKeeping] updateSubscriptionWithQuickBooksIntegration - Updating subscription for QuickBooks enabled:', isEnabled);
+
+      // For now, we're just logging the integration change
+      // In the future, this could call a specific API endpoint to update the Stripe subscription
+      // based on the integration choices (add/remove QuickBooks add-on)
+
+      const integrationStatus = {
+        quickBooksEnabled: isEnabled,
+        timestamp: new Date().toISOString(),
+        source: 'bookkeeping-settings'
+      };
+
+      console.log('🔧 [BookKeeping] updateSubscriptionWithQuickBooksIntegration - Integration status:', integrationStatus);
+
+      // TODO: Call backend API to update Stripe subscription with integration status
+      // This could be implemented as:
+      // await this.ownerService.updateSubscriptionIntegrations(integrationStatus).toPromise();
+
+    } catch (error) {
+      console.error('🔧 [BookKeeping] updateSubscriptionWithQuickBooksIntegration - Error updating subscription:', error);
+      // Don't throw error to avoid blocking the UI flow
     }
   }
 }

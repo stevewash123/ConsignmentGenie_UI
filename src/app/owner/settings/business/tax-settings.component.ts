@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SettingsService, BusinessSettings } from '../../../services/settings.service';
+import { BusinessSettingsService } from '../../../services/business-settings.service';
+import { BusinessSettings } from '../../../models/business.models';
 
 
 @Component({
@@ -18,7 +19,7 @@ export class TaxSettingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private businessSettingsService: BusinessSettingsService
   ) {}
 
   ngOnInit() {
@@ -37,8 +38,8 @@ export class TaxSettingsComponent implements OnInit {
 
   async loadTaxSettings() {
     try {
-      await this.settingsService.loadBusinessSettings();
-      const settings = this.settingsService.getCurrentBusinessSettings();
+      await this.businessSettingsService.loadBusinessSettings();
+      const settings = this.businessSettingsService.getCurrentBusinessSettings();
       if (settings?.tax) {
         this.taxForm.patchValue(settings.tax);
       }
@@ -92,7 +93,7 @@ export class TaxSettingsComponent implements OnInit {
     this.saving.set(true);
     try {
       const taxSettings = this.taxForm.value;
-      this.settingsService.updateBusinessSettings({ tax: taxSettings });
+      this.businessSettingsService.updateBusinessSettings({ tax: taxSettings });
     } catch (error) {
       this.showError('Failed to save tax settings. Please try again.');
     } finally {

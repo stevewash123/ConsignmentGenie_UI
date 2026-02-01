@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { SettingsService, ConsignorOnboardingSettings } from '../../../../services/settings.service';
+import { ConsignorOnboardingService } from '../../../../services/consignor-onboarding.service';
+import { ConsignorOnboardingSettings } from '../../../../models/consignor.models';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -26,7 +27,7 @@ export class ConsignorOnboardingComponent implements OnInit, OnDestroy {
     return settings ? 'Saved automatically' : 'Loading...';
   });
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(private consignorOnboardingService: ConsignorOnboardingService) {}
 
   ngOnInit(): void {
     this.setupSubscriptions();
@@ -40,7 +41,7 @@ export class ConsignorOnboardingComponent implements OnInit, OnDestroy {
   private setupSubscriptions(): void {
     // Subscribe to onboarding settings changes from the service
     this.subscriptions.add(
-      this.settingsService.consignorOnboarding.subscribe(settings => {
+      this.consignorOnboardingService.consignorOnboarding.subscribe(settings => {
         this.settings.set(settings);
       })
     );
@@ -48,7 +49,7 @@ export class ConsignorOnboardingComponent implements OnInit, OnDestroy {
 
   async loadSettings(): Promise<void> {
     try {
-      await this.settingsService.loadConsignorOnboarding();
+      await this.consignorOnboardingService.loadConsignorOnboarding();
     } catch (error) {
       console.error('Error loading consignor onboarding settings:', error);
       this.showError('Failed to load settings');
@@ -58,16 +59,16 @@ export class ConsignorOnboardingComponent implements OnInit, OnDestroy {
 
   onAgreementRequirementChange(value: 'none' | 'acknowledge' | 'upload'): void {
     // Update the agreement requirement with debounced save
-    this.settingsService.updateConsignorOnboardingSetting('agreementRequirement', value);
+    this.consignorOnboardingService.updateConsignorOnboardingSetting('agreementRequirement', value);
 
     // Validation Rule 1: If "none", approval mode must be "manual"
     if (value === 'none') {
-      this.settingsService.updateConsignorOnboardingSetting('approvalMode', 'manual');
+      this.consignorOnboardingService.updateConsignorOnboardingSetting('approvalMode', 'manual');
     }
   }
 
   onApprovalModeChange(value: 'auto' | 'manual'): void {
-    this.settingsService.updateConsignorOnboardingSetting('approvalMode', value);
+    this.consignorOnboardingService.updateConsignorOnboardingSetting('approvalMode', value);
   }
 
   isAutoApprovalDisabled(): boolean {
@@ -92,7 +93,7 @@ export class ConsignorOnboardingComponent implements OnInit, OnDestroy {
   }
 
   saveConfigureTerms(): void {
-    this.settingsService.updateConsignorOnboardingSetting('acknowledgeTermsText', this.tempAcknowledgeText());
+    this.consignorOnboardingService.updateConsignorOnboardingSetting('acknowledgeTermsText', this.tempAcknowledgeText());
     this.closeConfigureTermsModal();
   }
 

@@ -4,9 +4,6 @@ export enum ItemSubmissionMode {
   DirectAdd = 'direct_add'           // Consignors add directly
 }
 
-export interface ConsignorPermissions {
-  itemSubmissionMode: ItemSubmissionMode;
-}
 
 export interface BusinessSettings {
   commission: {

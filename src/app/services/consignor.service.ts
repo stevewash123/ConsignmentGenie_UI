@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Consignor, ConsignorListDto, ConsignorDetailDto, ApiResponse, CreateConsignorRequest, UpdateConsignorRequest, ConsignorStatusChangeRequest, ConsignorStatusChangeResponse, PendingConsignorApproval, ConsignorApprovalRequest, ConsignorApprovalResponse, ConsignorStatus } from '../models/consignor.model';
+import { ConsignorOnboardingSettings } from '../models/consignor.models';
 import { BalanceAdjustment, CreateBalanceAdjustmentRequest, BalanceAdjustmentResponse, ConsignorBalance } from '../models/balance-adjustment.model';
 import { PagedResult } from '../shared/models/api.models';
 import { environment } from '../../environments/environment';
+
+export interface ConsignorNotificationSettings {
+  emailOnNewConsignor: boolean;
+  emailOnItemSold: boolean;
+}
 
 export interface ConsignorInvitationRequest {
   name: string;
@@ -80,6 +86,10 @@ export interface BulkInvitationResponse {
 export class ConsignorService {
   private readonly apiUrl = `${environment.apiUrl}/api/consignors`;
   private readonly authUrl = `${environment.apiUrl}/api/auth`;
+  private notificationSettings$ = new BehaviorSubject<ConsignorNotificationSettings | null>(null);
+
+  // Observable for components to subscribe to
+  readonly notificationSettings = this.notificationSettings$.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -249,5 +259,68 @@ export class ConsignorService {
       case 'pending': return 'pending';
       default: return 'inactive';
     }
+  }
+
+  // === CONSIGNOR NOTIFICATION SETTINGS ===
+
+  /**
+   * Load consignor notification settings
+   */
+  async loadNotificationSettings(): Promise<void> {
+    try {
+      const settings = await firstValueFrom(
+        this.http.get<ConsignorNotificationSettings>(`${environment.apiUrl}/api/settings/consignors/notifications`)
+      );
+      this.notificationSettings$.next(settings);
+    } catch (error) {
+      console.error('Failed to load consignor notification settings:', error);
+      // Set default settings on error
+      this.notificationSettings$.next({
+        emailOnNewConsignor: true,
+        emailOnItemSold: false
+      });
+    }
+  }
+
+  /**
+   * Update consignor notification settings
+   */
+  async updateNotificationSettings(settings: Partial<ConsignorNotificationSettings>): Promise<void> {
+    const current = this.notificationSettings$.value || {
+      emailOnNewConsignor: true,
+      emailOnItemSold: false
+    };
+
+    const updated = { ...current, ...settings };
+
+    // Optimistic update
+    this.notificationSettings$.next(updated);
+
+    try {
+      const response = await firstValueFrom(
+        this.http.patch<ConsignorNotificationSettings>(`${environment.apiUrl}/api/settings/consignors/notifications`, updated)
+      );
+      this.notificationSettings$.next(response);
+    } catch (error) {
+      // Revert on error
+      this.notificationSettings$.next(current);
+      throw error;
+    }
+  }
+
+  /**
+   * Get current consignor notification settings
+   */
+  getCurrentNotificationSettings(): ConsignorNotificationSettings | null {
+    return this.notificationSettings$.value;
+  }
+
+  /**
+   * Get consignor onboarding settings
+   */
+  async getConsignorOnboardingSettings(): Promise<ConsignorOnboardingSettings> {
+    return await firstValueFrom(
+      this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/settings/consignors/onboarding`)
+    );
   }
 }

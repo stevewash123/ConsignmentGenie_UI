@@ -1,7 +1,8 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SettingsService, ConsignorPermissions } from '../../../../services/settings.service';
+import { ConsignorPermissionsService } from '../../../../services/consignor-permissions.service';
+import { ConsignorPermissions } from '../../../../models/consignor.models';
 
 interface PermissionTemplate {
   name: string;
@@ -30,7 +31,7 @@ export class PermissionsComponent implements OnInit {
   isLoading = signal(false);
   isSaving = signal(false);
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(private consignorPermissionsService: ConsignorPermissionsService) {}
 
   ngOnInit(): void {
     this.loadPermissions();
@@ -40,9 +41,9 @@ export class PermissionsComponent implements OnInit {
     this.isLoading.set(true);
     try {
       // For now, use the existing endpoint, but clean up the data structure
-      await this.settingsService.loadConsignorPermissions();
+      await this.consignorPermissionsService.loadConsignorPermissions();
       // Get the current permissions and flatten them
-      const currentPermissions = this.settingsService.getCurrentConsignorPermissions();
+      const currentPermissions = this.consignorPermissionsService.getCurrentConsignorPermissions();
       if (currentPermissions) {
         // Handle both old nested and new flat structure
         if ('inventory' in currentPermissions) {
@@ -78,7 +79,7 @@ export class PermissionsComponent implements OnInit {
     this.isSaving.set(true);
     try {
       // Use the old service method for now, but with fixed structure
-      this.settingsService.updateConsignorPermission(key, value);
+      this.consignorPermissionsService.updateConsignorPermission(key, value);
       // No success message for checkbox saves - they're immediate and obvious
     } catch (error) {
       // Revert on error

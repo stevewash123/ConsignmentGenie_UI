@@ -1,235 +1,133 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export interface PayoutSettingsDto {
-  id: string;
-  organizationId: string;
-  clearanceDaysCash: number;
-  clearanceDaysDebitCard: number;
-  clearanceDaysCreditCard: number;
-  clearanceDaysCheck: number;
-  clearanceDaysStoreCredit: number;
-  clearanceDaysGiftCard: number;
-  clearanceDaysSquare: number;
-  clearanceDaysVenmo: number;
-  clearanceDaysPayPal: number;
-  clearanceDaysOther: number;
-  minimumPayoutCheck: number;
-  minimumPayoutCash: number;
-  minimumPayoutVenmo: number;
-  minimumPayoutPayPal: number;
-  minimumPayoutStoreCredit: number;
-  minimumPayoutBankTransfer: number;
-  minimumPayoutZelle: number;
-  createdAt: Date;
-  updatedAt?: Date;
-}
-
-export interface CreatePayoutSettingsRequest {
-  clearanceDaysCash?: number;
-  clearanceDaysDebitCard?: number;
-  clearanceDaysCreditCard?: number;
-  clearanceDaysCheck?: number;
-  clearanceDaysStoreCredit?: number;
-  clearanceDaysGiftCard?: number;
-  clearanceDaysSquare?: number;
-  clearanceDaysVenmo?: number;
-  clearanceDaysPayPal?: number;
-  clearanceDaysOther?: number;
-  minimumPayoutCheck?: number;
-  minimumPayoutCash?: number;
-  minimumPayoutVenmo?: number;
-  minimumPayoutPayPal?: number;
-  minimumPayoutStoreCredit?: number;
-  minimumPayoutBankTransfer?: number;
-  minimumPayoutZelle?: number;
-}
-
-export interface UpdatePayoutSettingsRequest {
-  clearanceDaysCash?: number | null;
-  clearanceDaysDebitCard?: number | null;
-  clearanceDaysCreditCard?: number | null;
-  clearanceDaysCheck?: number | null;
-  clearanceDaysStoreCredit?: number | null;
-  clearanceDaysGiftCard?: number | null;
-  clearanceDaysSquare?: number | null;
-  clearanceDaysVenmo?: number | null;
-  clearanceDaysPayPal?: number | null;
-  clearanceDaysOther?: number | null;
-  minimumPayoutCheck?: number | null;
-  minimumPayoutCash?: number | null;
-  minimumPayoutVenmo?: number | null;
-  minimumPayoutPayPal?: number | null;
-  minimumPayoutStoreCredit?: number | null;
-  minimumPayoutBankTransfer?: number | null;
-  minimumPayoutZelle?: number | null;
-}
-
-// New PayoutSettings interfaces per the spec document
-export interface NewPayoutSettings {
-  id: string;
-  organizationId: string;
-  // General Settings
-  payoutMethodCheck: boolean;
-  payoutMethodCash: boolean;
-  payoutMethodStoreCredit: boolean;
-  payoutMethodPayPal: boolean;
-  payoutMethodVenmo: boolean;
-  payoutMethodACH: boolean;
-  holdPeriodDays: number;
-  minimumPayoutThreshold: number;
-  // Direct Deposit Settings
-  bankAccountConnected: boolean;
-  plaidAccessToken?: string;
-  plaidAccountId?: string;
-  bankName?: string;
-  bankAccountLast4?: string;
-  minimumBalanceProtection: number;
-  autoPayEnabled: boolean;
-  autoPayMonday: boolean;
-  autoPayTuesday: boolean;
-  autoPayWednesday: boolean;
-  autoPayThursday: boolean;
-  autoPayFriday: boolean;
-  autoPaySaturday: boolean;
-  autoPaySunday: boolean;
-  createdAt: Date;
-  updatedAt?: Date;
-}
-
-export interface CreateNewPayoutSettingsRequest {
-  payoutMethodCheck?: boolean;
-  payoutMethodCash?: boolean;
-  payoutMethodStoreCredit?: boolean;
-  payoutMethodPayPal?: boolean;
-  payoutMethodVenmo?: boolean;
-  payoutMethodACH?: boolean;
-  holdPeriodDays?: number;
-  minimumPayoutThreshold?: number;
-  minimumBalanceProtection?: number;
-  autoPayEnabled?: boolean;
-  autoPayMonday?: boolean;
-  autoPayTuesday?: boolean;
-  autoPayWednesday?: boolean;
-  autoPayThursday?: boolean;
-  autoPayFriday?: boolean;
-  autoPaySaturday?: boolean;
-  autoPaySunday?: boolean;
-}
-
-export interface UpdateNewPayoutSettingsRequest {
-  payoutMethodCheck?: boolean | null;
-  payoutMethodCash?: boolean | null;
-  payoutMethodStoreCredit?: boolean | null;
-  payoutMethodPayPal?: boolean | null;
-  payoutMethodVenmo?: boolean | null;
-  payoutMethodACH?: boolean | null;
-  holdPeriodDays?: number | null;
-  minimumPayoutThreshold?: number | null;
-  minimumBalanceProtection?: number | null;
-  autoPayEnabled?: boolean | null;
-  autoPayMonday?: boolean | null;
-  autoPayTuesday?: boolean | null;
-  autoPayWednesday?: boolean | null;
-  autoPayThursday?: boolean | null;
-  autoPayFriday?: boolean | null;
-  autoPaySaturday?: boolean | null;
-  autoPaySunday?: boolean | null;
-}
+import { PayoutSettings, DEFAULT_PAYOUT_SETTINGS } from '../models/payout-settings.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PayoutSettingsService {
-  private readonly apiUrl = `${environment.apiUrl}/api/payoutsettings`;
+  private payoutSettings$ = new BehaviorSubject<PayoutSettings | null>(null);
+  private readonly DEBOUNCE_MS = 800;
+
+  // Observable for components to subscribe to
+  readonly payoutSettings = this.payoutSettings$.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  getPayoutSettings(): Observable<PayoutSettingsDto> {
-    return this.http.get<{ success: boolean; data: PayoutSettingsDto }>(this.apiUrl)
-      .pipe(map(response => {
-        if (!response.success) {
-          throw new Error('Failed to get payout settings');
-        }
-        return {
-          ...response.data,
-          createdAt: new Date(response.data.createdAt),
-          updatedAt: response.data.updatedAt ? new Date(response.data.updatedAt) : undefined
-        };
-      }));
+  /**
+   * Load payout settings from API
+   */
+  async loadPayoutSettings(): Promise<void> {
+    try {
+      const settings = await firstValueFrom(
+        this.http.get<PayoutSettings>(`${environment.apiUrl}/api/settings/payouts/general`)
+      );
+      this.payoutSettings$.next(settings);
+    } catch (error) {
+      console.error('Failed to load payout settings:', error);
+      // Set default settings on error
+      this.payoutSettings$.next(DEFAULT_PAYOUT_SETTINGS as PayoutSettings);
+    }
   }
 
-  createPayoutSettings(request: CreatePayoutSettingsRequest): Observable<PayoutSettingsDto> {
-    return this.http.post<{ success: boolean; data: PayoutSettingsDto }>(this.apiUrl, request)
-      .pipe(map(response => {
-        if (!response.success) {
-          throw new Error('Failed to create payout settings');
-        }
-        return {
-          ...response.data,
-          createdAt: new Date(response.data.createdAt),
-          updatedAt: response.data.updatedAt ? new Date(response.data.updatedAt) : undefined
-        };
-      }));
+  /**
+   * Get payout settings as Observable (for components that need reactive updates)
+   */
+  getPayoutSettings(): Observable<PayoutSettings | null> {
+    return this.payoutSettings$.asObservable();
   }
 
-  updatePayoutSettings(request: UpdatePayoutSettingsRequest): Observable<PayoutSettingsDto> {
-    return this.http.put<{ success: boolean; data: PayoutSettingsDto }>(this.apiUrl, request)
-      .pipe(map(response => {
-        if (!response.success) {
-          throw new Error('Failed to update payout settings');
-        }
-        return {
-          ...response.data,
-          createdAt: new Date(response.data.createdAt),
-          updatedAt: response.data.updatedAt ? new Date(response.data.updatedAt) : undefined
-        };
-      }));
+  /**
+   * Get current payout settings synchronously
+   */
+  getCurrentPayoutSettings(): PayoutSettings | null {
+    return this.payoutSettings$.value;
   }
 
-  deletePayoutSettings(): Observable<void> {
-    return this.http.delete<{ success: boolean; message: string }>(this.apiUrl)
-      .pipe(map(response => {
-        if (!response.success) {
-          throw new Error('Failed to delete payout settings');
-        }
-      }));
+  /**
+   * Create payout settings (initialize with defaults + custom values)
+   */
+  async createPayoutSettings(settings: Partial<PayoutSettings>): Promise<PayoutSettings> {
+    // Merge with defaults to ensure all required properties are present
+    const fullSettings: PayoutSettings = {
+      ...DEFAULT_PAYOUT_SETTINGS,
+      ...this.payoutSettings$.value,
+      ...settings
+    } as PayoutSettings;
+
+    const response = await firstValueFrom(
+      this.http.post<{success: boolean, data: PayoutSettings}>(`${environment.apiUrl}/api/settings/payouts/general`, fullSettings)
+    );
+
+    this.payoutSettings$.next(response.data);
+    return response.data;
   }
 
-  // New API methods for the restructured payout settings
-  getNewPayoutSettings(): Observable<NewPayoutSettings> {
-    return this.http.get<NewPayoutSettings>(`${this.apiUrl}/new`)
-      .pipe(map(response => {
-        return {
-          ...response,
-          createdAt: new Date(response.createdAt),
-          updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined
-        };
-      }));
+  /**
+   * Update payout settings (supports partial updates)
+   */
+  async updatePayoutSettings(settings: Partial<PayoutSettings>): Promise<void> {
+    // Get current settings and merge with updates
+    const current = this.payoutSettings$.value || DEFAULT_PAYOUT_SETTINGS as PayoutSettings;
+    const updated: PayoutSettings = { ...current, ...settings };
+
+    // Optimistic update
+    this.payoutSettings$.next(updated);
+
+    try {
+      const response = await firstValueFrom(
+        this.http.patch<{success: boolean, data: PayoutSettings}>(`${environment.apiUrl}/api/settings/payouts/general`, updated)
+      );
+
+      // Update with server response (authoritative)
+      this.payoutSettings$.next(response.data);
+    } catch (error) {
+      // Revert optimistic update on error
+      this.payoutSettings$.next(current);
+      throw error;
+    }
   }
 
-  createNewPayoutSettings(request: CreateNewPayoutSettingsRequest): Observable<NewPayoutSettings> {
-    return this.http.post<NewPayoutSettings>(`${this.apiUrl}/new`, request)
-      .pipe(map(response => {
-        return {
-          ...response,
-          createdAt: new Date(response.createdAt),
-          updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined
-        };
-      }));
+  /**
+   * Update a single payout setting with debounced save
+   */
+  updatePayoutSetting<K extends keyof PayoutSettings>(
+    key: K,
+    value: PayoutSettings[K]
+  ): void {
+    const current = this.payoutSettings$.value;
+    if (!current) return;
+
+    // Optimistic update
+    const updated = { ...current, [key]: value };
+    this.payoutSettings$.next(updated);
+
+    // Debounced save (could be implemented similar to SettingsService if needed)
+    this.updatePayoutSettings({ [key]: value } as Partial<PayoutSettings>);
   }
 
-  updateNewPayoutSettings(request: UpdateNewPayoutSettingsRequest): Observable<NewPayoutSettings> {
-    return this.http.put<NewPayoutSettings>(`${this.apiUrl}/new`, request)
-      .pipe(map(response => {
-        return {
-          ...response,
-          createdAt: new Date(response.createdAt),
-          updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined
-        };
-      }));
+  /**
+   * Reset payout settings to defaults
+   */
+  async resetToDefaults(): Promise<void> {
+    await this.updatePayoutSettings(DEFAULT_PAYOUT_SETTINGS);
+  }
+
+  /**
+   * Check if payout settings are properly configured
+   */
+  isConfigured(): boolean {
+    const settings = this.getCurrentPayoutSettings();
+    if (!settings) return false;
+
+    // At least one payment method should be enabled
+    return settings.payoutMethodCheck ||
+           settings.payoutMethodCash ||
+           settings.payoutMethodStoreCredit ||
+           settings.payoutMethodPayPal ||
+           settings.payoutMethodVenmo ||
+           settings.payoutMethodACH;
   }
 }

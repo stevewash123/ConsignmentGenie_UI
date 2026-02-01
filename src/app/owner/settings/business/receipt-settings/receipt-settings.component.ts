@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SettingsService } from '../../../../services/settings.service';
+import { BusinessSettingsService } from '../../../../services/business-settings.service';
 import { Subscription, debounceTime } from 'rxjs';
 
 // Data model interfaces
@@ -94,7 +94,7 @@ export class ReceiptSettingsComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private businessSettingsService: BusinessSettingsService
   ) {
     this.receiptForm.set(this.createForm());
   }
@@ -140,7 +140,7 @@ export class ReceiptSettingsComponent implements OnInit, OnDestroy {
 
     this.saving.set(true);
     try {
-      await this.settingsService.updateBusinessSettings({ receipts: receiptSettings });
+      await this.businessSettingsService.updateBusinessSettings({ receipts: receiptSettings });
       this.settings.set(receiptSettings);
       this.showSuccess('Settings saved automatically');
     } catch (error) {
@@ -194,8 +194,8 @@ export class ReceiptSettingsComponent implements OnInit, OnDestroy {
 
   async loadSettings() {
     try {
-      await this.settingsService.loadBusinessSettings();
-      const businessSettings = this.settingsService.getCurrentBusinessSettings();
+      await this.businessSettingsService.loadBusinessSettings();
+      const businessSettings = this.businessSettingsService.getCurrentBusinessSettings();
       if (businessSettings?.receipts) {
         this.settings.set(businessSettings.receipts);
         this.populateForm(businessSettings.receipts);

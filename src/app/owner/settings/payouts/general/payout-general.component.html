@@ -4,13 +4,13 @@
     <div class="header-content">
       <h1>General Payout Settings</h1>
       <div class="auto-save-indicator">
-        @if (isSaving()) {
+        @if (saving()) {
           <div class="saving-indicator">
             <div class="spinner"></div>
             <span>Saving...</span>
           </div>
         } @else {
-          <span class="auto-save-text">Saved automatically</span>
+          <span class="auto-save-text">{{ autoSaveStatus() }}</span>
         }
       </div>
     </div>
@@ -23,6 +23,20 @@
       <p>Loading payout settings...</p>
     </div>
   } @else {
+    <!-- Messages -->
+    @if (successMessage()) {
+      <div class="alert alert-success">
+        <i class="icon">✓</i>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        <i class="icon">⚠️</i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
     <!-- Settings Content -->
     <div class="settings-content">
 

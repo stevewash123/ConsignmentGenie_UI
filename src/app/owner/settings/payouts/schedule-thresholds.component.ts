@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SettingsService } from '../../../services/settings.service';
+import { PayoutSettingsService } from '../../../services/payout-settings.service';
 import { ScheduleThresholdSettings } from '../../../models/payout-settings.model';
 
 @Component({
@@ -13,7 +13,7 @@ import { ScheduleThresholdSettings } from '../../../models/payout-settings.model
 })
 export class ScheduleThresholdsComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private settingsService = inject(SettingsService);
+  private payoutSettingsService = inject(PayoutSettingsService);
 
   settingsForm: FormGroup;
   saving = signal(false);
@@ -63,8 +63,8 @@ export class ScheduleThresholdsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      await this.settingsService.loadPayoutSettings();
-      const payoutSettings = this.settingsService.getCurrentPayoutSettings();
+      await this.payoutSettingsService.loadPayoutSettings();
+      const payoutSettings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (payoutSettings?.scheduleThresholds) {
         this.settingsForm.patchValue(payoutSettings.scheduleThresholds);
       }
@@ -80,7 +80,7 @@ export class ScheduleThresholdsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      const currentSettings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (currentSettings) {
         const formValue = this.settingsForm.value;
         const updatedSettings = {
@@ -88,7 +88,7 @@ export class ScheduleThresholdsComponent implements OnInit {
           scheduleThresholds: formValue,
           lastUpdated: new Date()
         };
-        await this.settingsService.updatePayoutSettings(updatedSettings);
+        await this.payoutSettingsService.updatePayoutSettings(updatedSettings);
       }
     } catch (error) {
       console.error('Failed to save settings:', error);

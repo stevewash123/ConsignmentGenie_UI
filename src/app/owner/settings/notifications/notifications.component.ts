@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SettingsService, NotificationSettings } from '../../../services/settings.service';
+import { NotificationSettingsService } from '../../../services/notification-settings.service';
+import { NotificationSettings } from '../../../models/notifications.models';
 import { Subscription } from 'rxjs';
 
 interface NotificationType {
@@ -61,7 +62,7 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private settingsService: SettingsService
+    private notificationSettingsService: NotificationSettingsService
   ) {}
 
   ngOnInit(): void {
@@ -76,7 +77,7 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
   private setupSubscriptions(): void {
     // Subscribe to notification settings changes from the service
     this.subscriptions.add(
-      this.settingsService.notificationSettings.subscribe(settings => {
+      this.notificationSettingsService.notificationSettings.subscribe(settings => {
         if (settings) {
           // Set defaults for new properties if they don't exist
           const defaultSystemPreferences = {
@@ -123,7 +124,7 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
 
   async loadNotificationSettings(): Promise<void> {
     try {
-      await this.settingsService.loadNotificationSettings();
+      await this.notificationSettingsService.loadNotificationSettings();
     } catch (error) {
       console.error('Error loading notification settings:', error);
       this.showError('Failed to load notification settings');
@@ -132,35 +133,35 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
 
   // Individual change handlers for debounced auto-save
   onPrimaryEmailChange(value: string): void {
-    this.settingsService.updateNotificationSetting('primaryEmail', value);
+    this.notificationSettingsService.updateNotificationSetting('primaryEmail', value);
   }
 
   onPhoneNumberChange(value: string): void {
-    this.settingsService.updateNotificationSetting('phoneNumber', value || undefined);
+    this.notificationSettingsService.updateNotificationSetting('phoneNumber', value || undefined);
   }
 
   onHighValueThresholdChange(value: number): void {
-    this.settingsService.updateNotificationThreshold('highValueSale', value);
+    this.notificationSettingsService.updateNotificationThreshold('highValueSale', value);
   }
 
   onLowInventoryThresholdChange(value: number): void {
-    this.settingsService.updateNotificationThreshold('lowInventory', value);
+    this.notificationSettingsService.updateNotificationThreshold('lowInventory', value);
   }
 
   onEmailPreferenceChange(notificationType: string, enabled: boolean): void {
-    this.settingsService.updateEmailPreference(notificationType, enabled);
+    this.notificationSettingsService.updateEmailPreference(notificationType, enabled);
   }
 
   onSmsPreferenceChange(notificationType: string, enabled: boolean): void {
-    this.settingsService.updateSmsPreference(notificationType, enabled);
+    this.notificationSettingsService.updateSmsPreference(notificationType, enabled);
   }
 
   onSystemPreferenceChange(notificationType: string, enabled: boolean): void {
-    this.settingsService.updateSystemPreference(notificationType, enabled);
+    this.notificationSettingsService.updateSystemPreference(notificationType, enabled);
   }
 
   onWeeklyPayoutDayChange(day: string): void {
-    this.settingsService.updateNotificationSetting('weeklyPayoutDay', day);
+    this.notificationSettingsService.updateNotificationSetting('weeklyPayoutDay', day);
   }
 
   // Helper methods for template

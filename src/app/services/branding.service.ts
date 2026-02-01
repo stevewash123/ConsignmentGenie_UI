@@ -14,12 +14,12 @@ export interface LogoUploadResult {
   providedIn: 'root'
 })
 export class BrandingService {
-  private readonly apiUrl = `${environment.apiUrl}/api/organizations`;
+  private readonly apiUrl = `${environment.apiUrl}/api/organization/settings/branding`;
 
   constructor(private http: HttpClient) {}
 
   getBranding(): Observable<StoreBranding | null> {
-    return this.http.get<StoreBranding>(`${this.apiUrl}/branding`).pipe(
+    return this.http.get<StoreBranding>(`${this.apiUrl}/theme`).pipe(
       map(response => response || null),
       catchError(error => {
         console.error('Error loading branding settings:', error);
@@ -29,7 +29,7 @@ export class BrandingService {
   }
 
   saveBranding(branding: StoreBranding): Observable<StoreBranding> {
-    return this.http.put<{success: boolean, data: StoreBranding}>(`${this.apiUrl}/branding`, branding).pipe(
+    return this.http.put<{success: boolean, data: StoreBranding}>(`${this.apiUrl}/theme`, branding).pipe(
       map(response => {
         if (!response?.success || !response.data) {
           throw new Error('No response received');
@@ -47,7 +47,7 @@ export class BrandingService {
     const formData = new FormData();
     formData.append('logo', file);
 
-    return this.http.post<{success: boolean, data: LogoUploadResult}>(`${this.apiUrl}/branding/logo`, formData).pipe(
+    return this.http.post<{success: boolean, data: LogoUploadResult}>(`${this.apiUrl}/logo`, formData).pipe(
       map(response => {
         if (!response?.success || !response.data) {
           throw new Error('Upload failed or no data received');
@@ -62,7 +62,7 @@ export class BrandingService {
   }
 
   removeLogo(): Observable<void> {
-    return this.http.delete<{success: boolean, message: string}>(`${this.apiUrl}/branding/logo`).pipe(
+    return this.http.delete<{success: boolean, message: string}>(`${this.apiUrl}/logo`).pipe(
       map(response => {
         if (!response?.success) {
           throw new Error('Failed to remove logo');

@@ -10,15 +10,15 @@
       <div class="subscription-info">
         <h3>Current Subscription</h3>
         <div class="plan-details" *ngIf="subscriptionInfo()">
-          <div class="plan-name">{{ subscriptionInfo()!.planName }}</div>
+          <div class="plan-name">{{ subscriptionInfo()!.plan }}</div>
           <div class="plan-status" [class]="'status-' + subscriptionInfo()!.status">
             {{ getStatusLabel(subscriptionInfo()!.status) }}
           </div>
-          <div *ngIf="subscriptionInfo()!.nextBillingDate && !subscriptionInfo()!.cancelAtPeriodEnd" class="billing-info">
+          <div *ngIf="subscriptionInfo()!.nextBillingDate" class="billing-info">
             Next billing date: {{ subscriptionInfo()!.nextBillingDate | date:'mediumDate' }}
           </div>
-          <div *ngIf="subscriptionInfo()!.cancelAtPeriodEnd" class="cancellation-notice">
-            Your subscription will end on {{ subscriptionInfo()!.nextBillingDate | date:'mediumDate' }}
+          <div class="amount-info" *ngIf="subscriptionInfo()!.amount">
+            Amount: ${{ subscriptionInfo()!.amount / 100 | number:'1.2-2' }}
           </div>
         </div>
       </div>

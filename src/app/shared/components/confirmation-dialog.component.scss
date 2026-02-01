@@ -103,6 +103,12 @@
       margin: 0 0 1rem 0;
       color: #374151;
       line-height: 1.6;
+      font-family: inherit; // Use the same font as other text, not monospace
+      white-space: pre-wrap; // Preserve whitespace and line breaks
+      word-wrap: break-word; // Allow long words to wrap
+      background: none; // Remove default pre background
+      border: none; // Remove default pre border
+      padding: 0; // Remove default pre padding
     }
 
     .input-group {

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SettingsService } from '../../../services/settings.service';
+import { PayoutSettingsService } from '../../../services/payout-settings.service';
 import { PayoutSettings, PayoutMethodOption, DEFAULT_PAYOUT_SETTINGS, validatePayoutSettings } from '../../../models/payout-settings.model';
 
 @Component({
@@ -73,7 +73,7 @@ export class ConsignorPayoutSettingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private payoutSettingsService: PayoutSettingsService
   ) {
     this.initForm();
   }
@@ -175,8 +175,8 @@ export class ConsignorPayoutSettingsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      await this.settingsService.loadPayoutSettings();
-      const settings = this.settingsService.getCurrentPayoutSettings();
+      await this.payoutSettingsService.loadPayoutSettings();
+      const settings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (settings) {
         this.settings.set(settings);
         this.populateForm(settings);
@@ -230,19 +230,30 @@ export class ConsignorPayoutSettingsComponent implements OnInit {
 
     const formValue = this.payoutForm.value;
 
+    // Map the complex form structure to the simplified PayoutSettings interface
     return {
-      schedule: formValue.schedule,
-      thresholds: formValue.thresholds,
-      paymentMethods: {
-        ...formValue.paymentMethods,
-        availableMethods: formValue.paymentMethods.availableMethods
-      },
-      fees: formValue.fees,
-      automation: formValue.automation,
-      notifications: formValue.notifications,
-      reports: formValue.reports,
-      lastUpdated: new Date(),
-      organizationId: this.settings()?.organizationId || 'current'
+      // Payment Method Toggles
+      payoutMethodCheck: formValue.paymentMethods?.availableMethods?.some((m: any) => m.method === 'check' && m.enabled) || false,
+      payoutMethodCash: formValue.paymentMethods?.availableMethods?.some((m: any) => m.method === 'cash' && m.enabled) || false,
+      payoutMethodStoreCredit: formValue.paymentMethods?.availableMethods?.some((m: any) => m.method === 'store_credit' && m.enabled) || false,
+      payoutMethodPayPal: formValue.paymentMethods?.availableMethods?.some((m: any) => m.method === 'paypal' && m.enabled) || false,
+      payoutMethodVenmo: formValue.paymentMethods?.availableMethods?.some((m: any) => m.method === 'venmo' && m.enabled) || false,
+      payoutMethodACH: formValue.paymentMethods?.availableMethods?.some((m: any) => m.method === 'ach' && m.enabled) || false,
+
+      // Bank/Plaid Integration (preserve existing values)
+      bankAccountConnected: this.settings()?.bankAccountConnected || false,
+      plaidAccountId: this.settings()?.plaidAccountId,
+      plaidAccessToken: this.settings()?.plaidAccessToken,
+      bankName: this.settings()?.bankName,
+      bankAccountLast4: this.settings()?.bankAccountLast4,
+
+      // Payout Rules & Thresholds
+      holdPeriodDays: formValue.thresholds?.holdPeriodDays || 7,
+      minimumPayoutThreshold: formValue.thresholds?.minimumAmount || 25.00,
+
+      // Timestamps
+      updatedAt: new Date(),
+      createdAt: this.settings()?.createdAt
     };
   }
 
@@ -267,7 +278,7 @@ export class ConsignorPayoutSettingsComponent implements OnInit {
 
     this.saving.set(true);
     try {
-      await this.settingsService.updatePayoutSettings(settings);
+      await this.payoutSettingsService.updatePayoutSettings(settings);
       this.settings.set(settings);
     } catch (error) {
       this.showError('Failed to save payout settings');

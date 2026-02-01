@@ -1,12 +1,11 @@
 <div class="direct-deposit-setup">
   <div class="settings-header">
     <h2>Direct Deposit Setup</h2>
-    <div class="auto-save-status">
-      <div class="save-indicator">
-        <span class="status-icon">✓</span>
-        <span>{{ autoSaveStatus() }}</span>
-      </div>
-      <small class="save-note">Changes are saved automatically as you type</small>
+    <div class="ach-status" *ngIf="payoutSettings()">
+      <span class="status-icon" [class.enabled]="achEnabled()">
+        {{ achEnabled() ? '✅' : '❌' }}
+      </span>
+      <span>{{ achEnabled() ? 'ACH Enabled' : 'ACH Disabled' }}</span>
     </div>
   </div>
 
@@ -22,7 +21,7 @@
   </div>
 
   <!-- Settings Form - Only show if settings are loaded -->
-  <div class="settings-form" *ngIf="settings()">
+  <div class="settings-form" *ngIf="payoutSettings()">
 
     <!-- ACH Settings - Only show if ACH is enabled -->
     <div *ngIf="achEnabled()">
@@ -41,8 +40,10 @@
           <h4>Bank Account Verification</h4>
           <p>Connect your shop's bank account securely using Plaid to enable automated ACH transfers to consignors.</p>
 
-          <button class="btn-primary connect-btn" (click)="onConnectBank()" [disabled]="connecting()">
-            {{ connecting() ? '⏳ Connecting...' : '🔗 Connect Bank Account' }}
+          <button class="btn-primary connect-btn" (click)="onConnectBank()" [disabled]="connecting() || !plaidReady()">
+            <span *ngIf="connecting()">⏳ Connecting...</span>
+            <span *ngIf="!connecting() && !plaidReady()">⏳ Loading Plaid...</span>
+            <span *ngIf="!connecting() && plaidReady()">🔗 Connect Bank Account</span>
           </button>
 
           <div class="feature-list">
@@ -71,8 +72,9 @@
           <div class="connection-status">
             <span class="connected-icon">✓</span>
             <div class="connection-details">
-              <h4>{{ settings()!.bankName || 'First National Bank' }}</h4>
-              <p>Account ••••{{ settings()!.bankAccountLast4 || '4567' }}</p>
+              <h4>{{ connectedBank()?.bankName || 'Connected Bank Account' }}</h4>
+              <p>{{ connectedBank()?.accountType }} Account {{ connectedBank()?.accountNumberMask || '••••****' }}</p>
+              <small>Connected {{ connectedBank()?.connectedAt | date:'short' }}</small>
             </div>
             <button class="btn-secondary disconnect-btn" (click)="onDisconnectBank()">
               Disconnect
@@ -83,118 +85,14 @@
 
     </div>
 
-    <!-- Auto-Pay Schedule - Always show when settings are loaded -->
-    <div class="form-section">
-      <h3>Auto-Pay Schedule</h3>
-
-      <div class="form-group">
-        <label class="checkbox-label auto-pay-toggle">
-          <input
-            type="checkbox"
-            [checked]="autoPayEnabled()"
-            [disabled]="!achEnabled()"
-            (change)="onAutoPayEnabledChange($event)">
-          <span class="checkmark"></span>
-          Auto-pay consignors (no approval needed)
-        </label>
-      </div>
-
-      <!-- Day Selection - Always show but disable when auto-pay is not enabled or bank not connected -->
-      <div class="schedule-section">
-        <h4>Run payouts on:</h4>
-
-        <div class="day-selector">
-          <label class="day-checkbox">
-            <input
-              type="checkbox"
-              [checked]="settings()!.autoPayMonday"
-              [disabled]="!autoPayEnabled() || !bankConnected()"
-              (change)="onMondayChange($event)">
-            <span class="day-label">Mon</span>
-          </label>
-
-          <label class="day-checkbox">
-            <input
-              type="checkbox"
-              [checked]="settings()!.autoPayTuesday"
-              [disabled]="!autoPayEnabled() || !bankConnected()"
-              (change)="onTuesdayChange($event)">
-            <span class="day-label">Tue</span>
-          </label>
-
-          <label class="day-checkbox">
-            <input
-              type="checkbox"
-              [checked]="settings()!.autoPayWednesday"
-              [disabled]="!autoPayEnabled() || !bankConnected()"
-              (change)="onWednesdayChange($event)">
-            <span class="day-label">Wed</span>
-          </label>
-
-          <label class="day-checkbox">
-            <input
-              type="checkbox"
-              [checked]="settings()!.autoPayThursday"
-              [disabled]="!autoPayEnabled() || !bankConnected()"
-              (change)="onThursdayChange($event)">
-            <span class="day-label">Thu</span>
-          </label>
-
-          <label class="day-checkbox">
-            <input
-              type="checkbox"
-              [checked]="settings()!.autoPayFriday"
-              [disabled]="!autoPayEnabled() || !bankConnected()"
-              (change)="onFridayChange($event)">
-            <span class="day-label">Fri</span>
-          </label>
-
-          <label class="day-checkbox">
-            <input
-              type="checkbox"
-              [checked]="settings()!.autoPaySaturday"
-              [disabled]="!autoPayEnabled() || !bankConnected()"
-              (change)="onSaturdayChange($event)">
-            <span class="day-label">Sat</span>
-          </label>
-
-          <label class="day-checkbox">
-            <input
-              type="checkbox"
-              [checked]="settings()!.autoPaySunday"
-              [disabled]="!autoPayEnabled() || !bankConnected()"
-              (change)="onSundayChange($event)">
-            <span class="day-label">Sun</span>
-          </label>
-        </div>
-
+    <!-- Future Features Info -->
+    <div class="form-section" *ngIf="bankConnected()">
+      <h3>What's Next?</h3>
+      <div class="feature-info">
+        <p>Your bank account is connected and ready for ACH transfers. Additional automation features like scheduled payouts will be available in future updates.</p>
         <div class="info-note">
           <i class="icon-info">ℹ️</i>
-          <span>Payouts process at 2:00 AM on selected days</span>
-        </div>
-      </div>
-
-      <!-- Minimum Balance Protection - Only show when auto-pay is enabled -->
-      <div class="balance-protection-section" *ngIf="autoPayEnabled()">
-        <h4>Minimum Balance Protection</h4>
-
-        <div class="form-group">
-          <div class="input-group">
-            <span class="input-prefix">$</span>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              [value]="settings()!.minimumBalanceProtection"
-              [disabled]="!bankConnected()"
-              (input)="onMinimumBalanceChange($event)"
-              class="form-input">
-          </div>
-
-          <div class="info-note">
-            <i class="icon-info">ℹ️</i>
-            <span>Auto-payouts will pause if your account would drop below this amount.</span>
-          </div>
+          <span>For now, you can initiate direct deposit payouts from the Payouts section when ready.</span>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SettingsService } from '../../../services/settings.service';
+import { PayoutSettingsService } from '../../../services/payout-settings.service';
 
 interface PayoutMethodOption {
   method: string;
@@ -53,7 +53,7 @@ export class PaymentMethodsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private payoutSettingsService: PayoutSettingsService
   ) {}
 
   ngOnInit() {
@@ -107,8 +107,8 @@ export class PaymentMethodsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      await this.settingsService.loadPayoutSettings();
-      const settings = this.settingsService.getCurrentPayoutSettings();
+      await this.payoutSettingsService.loadPayoutSettings();
+      const settings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (settings?.paymentMethods) {
         this.paymentForm.patchValue({
           paymentMethods: settings.paymentMethods,
@@ -127,7 +127,7 @@ export class PaymentMethodsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      const currentSettings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (currentSettings) {
         const formValue = this.paymentForm.value;
         const updatedSettings = {
@@ -136,7 +136,7 @@ export class PaymentMethodsComponent implements OnInit {
           fees: formValue.fees,
           lastUpdated: new Date()
         };
-        await this.settingsService.updatePayoutSettings(updatedSettings);
+        await this.payoutSettingsService.updatePayoutSettings(updatedSettings);
       }
     } catch (error) {
       console.error('Failed to save payment settings:', error);

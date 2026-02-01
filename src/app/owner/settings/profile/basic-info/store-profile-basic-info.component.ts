@@ -1,7 +1,9 @@
 import { Component, OnInit, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { SettingsService, ShopProfile, OwnerContact, OwnerAddress } from '../../../../services/settings.service';
+import { OwnerInformationService } from '../../../../services/owner-information.service';
+import { OwnerContact, OwnerAddress } from '../../../../models/owner.models';
+import { ProfileService, ShopProfile } from '../../../../services/profile.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 
@@ -122,7 +124,8 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private ownerInformationService: OwnerInformationService,
+    private profileService: ProfileService
   ) {}
 
   ngOnInit() {
@@ -141,7 +144,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
   private setupProfileSubscription() {
     // Subscribe to profile changes from settings service
     this.subscriptions.add(
-      this.settingsService.profile.subscribe(profile => {
+      this.profileService.profile.subscribe(profile => {
         this.profile.set(profile);
         if (profile) {
           this.updateFormFromProfile(profile);
@@ -204,7 +207,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('storeName')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopName) {
-          this.settingsService.updateProfileSetting('shopName', value);
+          this.profileService.updateProfileSetting('shopName', value);
         }
       })
     );
@@ -212,7 +215,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('description')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopDescription) {
-          this.settingsService.updateProfileSetting('shopDescription', value);
+          this.profileService.updateProfileSetting('shopDescription', value);
         }
       })
     );
@@ -220,7 +223,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('website')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopWebsite) {
-          this.settingsService.updateProfileSetting('shopWebsite', value);
+          this.profileService.updateProfileSetting('shopWebsite', value);
         }
       })
     );
@@ -228,7 +231,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('contact.phone')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopPhone) {
-          this.settingsService.updateProfileSetting('shopPhone', value);
+          this.profileService.updateProfileSetting('shopPhone', value);
         }
       })
     );
@@ -236,7 +239,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('contact.email')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopEmail) {
-          this.settingsService.updateProfileSetting('shopEmail', value);
+          this.profileService.updateProfileSetting('shopEmail', value);
         }
       })
     );
@@ -244,7 +247,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('address.street1')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopAddress1) {
-          this.settingsService.updateProfileSetting('shopAddress1', value);
+          this.profileService.updateProfileSetting('shopAddress1', value);
         }
       })
     );
@@ -252,7 +255,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('address.street2')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopAddress2) {
-          this.settingsService.updateProfileSetting('shopAddress2', value);
+          this.profileService.updateProfileSetting('shopAddress2', value);
         }
       })
     );
@@ -260,7 +263,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('address.city')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopCity) {
-          this.settingsService.updateProfileSetting('shopCity', value);
+          this.profileService.updateProfileSetting('shopCity', value);
         }
       })
     );
@@ -268,7 +271,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('address.state')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopState) {
-          this.settingsService.updateProfileSetting('shopState', value);
+          this.profileService.updateProfileSetting('shopState', value);
         }
       })
     );
@@ -276,7 +279,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.basicInfoForm.get('address.zipCode')?.valueChanges.subscribe(value => {
         if (value !== this.profile()?.shopZip) {
-          this.settingsService.updateProfileSetting('shopZip', value);
+          this.profileService.updateProfileSetting('shopZip', value);
         }
       })
     );
@@ -308,7 +311,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
   async loadProfile() {
     try {
       // Load profile through settings service
-      await this.settingsService.loadProfile();
+      await this.profileService.loadProfile();
     } catch (error) {
       console.error('Error loading profile:', error);
       this.showError('Failed to load profile information');
@@ -318,7 +321,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
 
   async loadOwnerContact() {
     try {
-      this.ownerContact = await this.settingsService.loadOwnerContact();
+      this.ownerContact = await this.ownerInformationService.loadOwnerContact();
       console.log('Loaded owner contact:', this.ownerContact);
     } catch (error) {
       console.error('Error loading owner contact:', error);
@@ -328,7 +331,7 @@ export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {
 
   async loadOwnerAddress() {
     try {
-      this.ownerAddress = await this.settingsService.loadOwnerAddress();
+      this.ownerAddress = await this.ownerInformationService.loadOwnerAddress();
       console.log('Loaded owner address:', this.ownerAddress);
 
       // If useOwnerAddress is true by default, populate the form immediately

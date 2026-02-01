@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { SquareIntegrationService } from '../../../../services/square-integration.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
+import { IntegrationPricingService } from '../../../../shared/services/integration-pricing.service';
 import { ConfirmationDialogService } from '../../../../shared/services/confirmation-dialog.service';
 
 export interface SquareStatus {
@@ -42,6 +43,7 @@ export class SalesComponent implements OnInit {
   private squareService = inject(SquareIntegrationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private integrationPricingService = inject(IntegrationPricingService);
   private confirmationService = inject(ConfirmationDialogService);
 
   configForm: FormGroup;
@@ -102,10 +104,33 @@ export class SalesComponent implements OnInit {
     console.log('🔧 [Sales] ngOnInit - Final shopChoice after initialization:', this.shopChoice);
   }
 
-  selectShopChoice(choice: 'square' | 'consignmentgenie'): void {
+  async selectShopChoice(choice: 'square' | 'consignmentgenie'): Promise<void> {
     console.log('🔧 [Sales] selectShopChoice - User selected:', choice);
     console.log('🔧 [Sales] selectShopChoice - Current Square status:', this.squareStatus());
     console.log('🔧 [Sales] selectShopChoice - Current shopChoice:', this.shopChoice);
+
+    // Don't proceed if user selected the same choice
+    if (choice === this.shopChoice) {
+      console.log('🔧 [Sales] selectShopChoice - User selected the same choice, no action needed');
+      return;
+    }
+
+    // Show confirmation with pricing impact warning
+    try {
+      const confirmed = await this.integrationPricingService.showPricingConfirmation(
+        'square',
+        choice === 'square',
+        '⚠️ Pricing Impact',
+        choice === 'square' ? 'Enable Integration' : 'Disable Integration'
+      );
+      if (!confirmed) {
+        console.log('🔧 [Sales] selectShopChoice - User cancelled the integration change');
+        return;
+      }
+    } catch (error) {
+      console.error('🔧 [Sales] selectShopChoice - Error showing pricing confirmation:', error);
+      return;
+    }
 
     // If user selects Square and isn't connected, just set the choice (don't auto-trigger OAuth)
     if (choice === 'square' && !this.squareStatus().isConnected) {
@@ -142,7 +167,10 @@ export class SalesComponent implements OnInit {
     }
 
     // Save settings to API immediately
-    this.saveSalesSettings();
+    await this.saveSalesSettings();
+
+    // Update subscription with new integration status
+    await this.updateSubscriptionWithIntegration(choice);
 
     // Clear any pending choice since user made a new selection
     localStorage.removeItem('pendingSalesShopChoice');
@@ -436,5 +464,32 @@ export class SalesComponent implements OnInit {
 
   get hasSquareOptions(): boolean {
     return this.shopChoice === 'square';
+  }
+
+
+  private async updateSubscriptionWithIntegration(choice: 'square' | 'consignmentgenie'): Promise<void> {
+    try {
+      console.log('🔧 [Sales] updateSubscriptionWithIntegration - Updating subscription for choice:', choice);
+
+      // For now, we're just logging the integration change
+      // In the future, this could call a specific API endpoint to update the Stripe subscription
+      // based on the integration choices (add/remove Square add-on)
+
+      const integrationStatus = {
+        squareEnabled: choice === 'square',
+        timestamp: new Date().toISOString(),
+        source: 'sales-settings'
+      };
+
+      console.log('🔧 [Sales] updateSubscriptionWithIntegration - Integration status:', integrationStatus);
+
+      // TODO: Call backend API to update Stripe subscription with integration status
+      // This could be implemented as:
+      // await this.ownerService.updateSubscriptionIntegrations(integrationStatus).toPromise();
+
+    } catch (error) {
+      console.error('🔧 [Sales] updateSubscriptionWithIntegration - Error updating subscription:', error);
+      // Don't throw error to avoid blocking the UI flow
+    }
   }
 }

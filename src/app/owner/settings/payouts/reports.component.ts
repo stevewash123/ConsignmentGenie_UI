@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { SettingsService } from '../../../services/settings.service';
+import { PayoutSettingsService } from '../../../services/payout-settings.service';
 
 @Component({
   selector: 'app-reports',
@@ -18,7 +18,7 @@ export class ReportsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private payoutSettingsService: PayoutSettingsService
   ) {}
 
   ngOnInit() {
@@ -40,8 +40,8 @@ export class ReportsComponent implements OnInit {
 
   async loadSettings() {
     try {
-      await this.settingsService.loadPayoutSettings();
-      const settings = this.settingsService.getCurrentPayoutSettings();
+      await this.payoutSettingsService.loadPayoutSettings();
+      const settings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (settings?.reports) {
         this.reportsForm.patchValue({
           reports: settings.reports
@@ -59,7 +59,7 @@ export class ReportsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      const currentSettings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (currentSettings) {
         const formValue = this.reportsForm.value;
         const updatedSettings = {
@@ -67,7 +67,7 @@ export class ReportsComponent implements OnInit {
           reports: formValue.reports,
           lastUpdated: new Date()
         };
-        await this.settingsService.updatePayoutSettings(updatedSettings);
+        await this.payoutSettingsService.updatePayoutSettings(updatedSettings);
       }
     } catch (error) {
       console.error('Failed to save report settings:', error);

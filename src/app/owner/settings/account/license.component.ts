@@ -1,13 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OwnerService } from '../../../services/owner.service';
-
-interface SubscriptionInfo {
-  planName: string;
-  status: 'active' | 'canceled' | 'past_due' | 'incomplete';
-  nextBillingDate?: Date;
-  cancelAtPeriodEnd: boolean;
-}
+import { firstValueFrom } from 'rxjs';
+import { OwnerService, SubscriptionInfo } from '../../../services/owner.service';
 
 @Component({
   selector: 'app-license',
@@ -33,20 +27,9 @@ export class LicenseComponent implements OnInit {
     this.errorMessage.set('');
 
     try {
-      // TODO: Replace with actual service call to get subscription info
-      // const response = await this.ownerService.getSubscriptionInfo().toPromise();
-
-      // Mock data for now
-      setTimeout(() => {
-        const mockSubscription: SubscriptionInfo = {
-          planName: 'Professional Plan',
-          status: 'active',
-          nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
-          cancelAtPeriodEnd: false
-        };
-        this.subscriptionInfo.set(mockSubscription);
-        this.isLoading.set(false);
-      }, 500);
+      const response = await firstValueFrom(this.ownerService.getSubscriptionInfo());
+      this.subscriptionInfo.set(response);
+      this.isLoading.set(false);
     } catch (error) {
       console.error('Failed to load subscription info:', error);
       this.errorMessage.set('Failed to load subscription information. Please try again later.');
@@ -59,15 +42,8 @@ export class LicenseComponent implements OnInit {
     this.errorMessage.set('');
 
     try {
-      // TODO: Replace with actual service call to create Stripe portal session
-      // const response = await this.ownerService.createStripePortalSession().toPromise();
-      // window.location.href = response.url;
-
-      // Mock implementation - in real app, this would redirect to Stripe
-      console.log('Opening Stripe portal...');
-      alert('This would redirect to the Stripe customer portal where you can manage your subscription, payment methods, and billing history.');
-
-      this.isProcessing.set(false);
+      const response = await firstValueFrom(this.ownerService.openBillingPortal());
+      window.location.href = response.url;
     } catch (error) {
       console.error('Failed to open Stripe portal:', error);
       this.errorMessage.set('Failed to open subscription portal. Please try again later.');
@@ -78,9 +54,9 @@ export class LicenseComponent implements OnInit {
   getStatusLabel(status: SubscriptionInfo['status']): string {
     const labels = {
       active: 'Active',
-      canceled: 'Canceled',
+      cancelled: 'Canceled',
       past_due: 'Past Due',
-      incomplete: 'Incomplete'
+      trialing: 'Trial Membership'
     };
     return labels[status] || status;
   }

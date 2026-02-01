@@ -213,7 +213,8 @@ export const ownerRoutes: Routes = [
               },
               {
                 path: 'direct-deposit',
-                loadComponent: () => import('./settings/payouts/direct-deposit/payout-direct-deposit.component').then(m => m.PayoutDirectDepositComponent)
+                // Load real ACH integration component (mock component deleted)
+                loadComponent: () => import('./settings/payouts/direct-deposit/direct-deposit-setup.component').then(m => m.DirectDepositSetupComponent)
               }
             ]
           },

@@ -3,7 +3,6 @@ import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ConsignorService } from '../../services/consignor.service';
-import { SettingsService } from '../../services/settings.service';
 import { Consignor, ConsignorDetailDto, ConsignorStatus, ApiResponse } from '../../models/consignor.model';
 import { LoadingService } from '../../shared/services/loading.service';
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
@@ -74,7 +73,6 @@ export class ConsignorDetailComponent implements OnInit {
     private router: Router,
     private location: Location,
     private loadingService: LoadingService,
-    private settingsService: SettingsService,
     private confirmationDialog: ConfirmationDialogService,
     private communicationService: CommunicationService
   ) {}
@@ -229,7 +227,7 @@ export class ConsignorDetailComponent implements OnInit {
   // Agreement-related methods
   async loadOnboardingSettings(): Promise<void> {
     try {
-      const settings = await this.settingsService.getConsignorOnboardingSettings();
+      const settings = await this.ConsignorService.getConsignorOnboardingSettings();
       this.onboardingSettings.set(settings);
     } catch (error) {
       console.error('Error loading onboarding settings:', error);

@@ -1,55 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { ConsignorPermissions } from '../models/consignor.models';
+import { NotificationSettings } from '../models/notifications.models';
+import { BusinessSettings } from '../models/business.models';
+import { StorefrontSettings } from '../models/storefront.models';
 
 // Export types for use in components
 export type SalesChannel = 'square' | 'shopify' | 'cg_storefront' | 'in_store_only';
-
-export interface StorefrontSettings {
-  selectedChannel: SalesChannel;
-  square?: {
-    connected: boolean;
-    businessName?: string;
-    locationName?: string;
-    connectedAt?: Date;
-    syncInventory: boolean;
-    importSales: boolean;
-    syncCustomers: boolean;
-    syncFrequency: string;
-    categoryMappings: Array<{ cgCategory: string; squareCategory: string }>;
-  };
-  shopify?: {
-    connected: boolean;
-    storeName?: string;
-    connectedAt?: Date;
-    pushInventory: boolean;
-    importOrders: boolean;
-    syncImages: boolean;
-    autoMarkSold: boolean;
-    collectionMappings: Array<{ cgCategory: string; shopifyCollection: string }>;
-  };
-  cgStorefront?: {
-    storeSlug: string;
-    useCustomDomain?: string;
-    customDomain?: string;
-    dnsVerified: boolean;
-    stripeConnected: boolean;
-    stripeAccountName?: string;
-    bannerImageUrl?: string;
-    primaryColor: string;
-    accentColor: string;
-    displayStoreHours: boolean;
-    storeHours: Array<{ day: string; open: string; close: string; enabled: boolean }>;
-    metaTitle: string;
-    metaDescription: string;
-  };
-  inStoreOnly?: {
-    defaultPaymentMethod: string;
-    requireReceiptNumber: boolean;
-    autoGenerateReceipts: boolean;
-  };
-}
 
 export interface TaxSettings {
   taxEnabled: boolean;
@@ -88,35 +48,6 @@ export interface TaxSettings {
   lastUpdated?: Date;
 }
 
-export interface NotificationSettings {
-  primaryEmail?: string;
-  phoneNumber?: string;
-  thresholds?: {
-    highValueSale?: number;
-    lowInventory?: number;
-  };
-  emailPreferences?: {
-    [key: string]: boolean;
-  };
-  smsPreferences?: {
-    [key: string]: boolean;
-  };
-  emailNotifications: {
-    newSales: boolean;
-    newConsignors: boolean;
-    lowInventory: boolean;
-    payoutReady: boolean;
-  };
-  smsNotifications: {
-    newSales: boolean;
-    emergencyAlerts: boolean;
-  };
-  pushNotifications: {
-    newSales: boolean;
-    consignorActivity: boolean;
-  };
-}
-
 export interface PayoutSettings {
   defaultCommissionRate: number;
   minimumPayoutAmount: number;
@@ -126,15 +57,6 @@ export interface PayoutSettings {
   automaticPayout: boolean;
 }
 
-export interface ConsignorPermissions {
-  canViewOwnItems: boolean;
-  canEditItemDetails: boolean;
-  canRequestPayout: boolean;
-  canViewSalesHistory: boolean;
-  canUpdateContactInfo: boolean;
-  maxItemsPerSubmission: number;
-  requireApprovalForChanges: boolean;
-}
 
 export interface ConsignorDefaults {
   shopCommissionPercent: number;
@@ -142,64 +64,6 @@ export interface ConsignorDefaults {
   retrievalPeriodDays: number;
   unsoldItemPolicy: 'donate' | 'dispose' | 'return-to-consignor' | 'become-shop-property';
   lastUpdated?: Date;
-}
-
-export interface BusinessSettings {
-  commission: {
-    defaultSplit: string;
-    categoryBasedSplits: boolean;
-    minimumCommission: number;
-    allowCustomSplitsPerConsignor?: boolean;
-    allowCustomSplitsPerItem?: boolean;
-  };
-  tax: {
-    enabled: boolean;
-    rate: number;
-    label: string;
-    salesTaxRate?: number;
-    taxIncludedInPrice?: boolean;
-    taxIncludedInPrices?: boolean;
-    chargeTaxOnShipping?: boolean;
-    taxIdEin?: string;
-  };
-  policies: {
-    consignmentPeriod: number;
-    returnPolicy: string;
-    itemSubmissionMode: string;
-    autoApproveItems: boolean;
-  };
-  schedule: {
-    businessHours: Array<{
-      day: string;
-      open: string;
-      close: string;
-      closed: boolean;
-    }>;
-    timezone: string;
-  };
-  consignorPermissions?: {
-    itemSubmissionMode: string;
-  };
-  payouts?: {
-    holdPeriodDays?: number;
-    minimumAmount?: number;
-    method?: string;
-    schedule?: string;
-    autoProcessing?: boolean;
-    refundPolicy?: string;
-    refundWindowDays?: number;
-    defaultPayoutMethod?: string;
-  };
-  items?: {
-    defaultConsignmentPeriodDays?: number;
-    enableAutoMarkdowns?: boolean;
-    markdownSchedule?: {
-      after30Days?: number;
-      after60Days?: number;
-      after90Days?: number;
-      after90DaysAction?: string;
-    };
-  };
 }
 
 export interface OwnerContactInfo {
@@ -218,11 +82,37 @@ export interface OwnerContactInfo {
 
 export interface SubscriptionInfo {
   plan: string;
-  status: 'active' | 'cancelled' | 'past_due';
+  status: 'active' | 'cancelled' | 'past_due' | 'trialing';
   currentPeriodEnd: string;
   nextBillingDate: string;
   amount: number;
   features: string[];
+}
+
+export interface IntegrationPricingInfo {
+  success: boolean;
+  errorMessage?: string;
+  integration: string;
+  lookupKey: string;
+  priceId: string;
+  monthlyAmount: number; // Amount in cents
+  currency: string;
+  productName: string;
+  description?: string;
+  isFounderPricing: boolean;
+}
+
+export interface PricingImpactData {
+  action: 'enable' | 'disable';
+  productName: string;
+  currentMonthlyTotal: number;
+  changeAmount: number;           // negative for disable, positive for enable
+  newMonthlyTotal: number;
+  isFounder: boolean;
+  isProductFounderPriced: boolean;
+  isTrial: boolean;
+  trialEndsAt: Date | null;
+  billedNowAmount: number;        // $0 if trial, otherwise same as current
 }
 
 @Injectable({
@@ -259,14 +149,6 @@ export class OwnerService {
     return this.http.put(`${this.apiUrl}/user/notification-settings`, settings);
   }
 
-  // === Payout Settings ===
-  getPayoutSettings(): Observable<PayoutSettings> {
-    return this.http.get<PayoutSettings>(`${this.apiUrl}/organizations/payout-settings`);
-  }
-
-  updatePayoutSettings(settings: PayoutSettings): Observable<any> {
-    return this.http.put(`${this.apiUrl}/organizations/payout-settings`, settings);
-  }
 
   // === Consignor Management ===
   getConsignorInvitations(): Observable<any[]> {
@@ -328,6 +210,37 @@ export class OwnerService {
 
   openBillingPortal(): Observable<{ url: string }> {
     return this.http.post<{ url: string }>(`${this.apiUrl}/subscription/portal`, {});
+  }
+
+  getIntegrationPricing(integration: string): Observable<IntegrationPricingInfo> {
+    return this.http.get<{success: boolean, data: IntegrationPricingInfo}>(`${this.apiUrl}/subscription/integration-pricing/${integration}`)
+      .pipe(map(response => response.data));
+  }
+
+  async calculatePricingImpact(action: 'enable' | 'disable', integration: string): Promise<PricingImpactData> {
+    const [subscription, integrationPricing] = await Promise.all([
+      firstValueFrom(this.getSubscriptionInfo()),
+      firstValueFrom(this.getIntegrationPricing(integration))
+    ]);
+
+    const currentMonthlyTotal = (subscription.amount || 0) / 100; // Convert from cents with fallback
+    const integrationMonthlyAmount = (integrationPricing.monthlyAmount || 0) / 100; // Convert from cents with fallback
+    const changeAmount = action === 'enable' ? integrationMonthlyAmount : -integrationMonthlyAmount;
+    const newMonthlyTotal = currentMonthlyTotal + changeAmount;
+    const isTrial = subscription.status === 'trialing';
+
+    return {
+      action,
+      productName: integrationPricing.productName,
+      currentMonthlyTotal,
+      changeAmount,
+      newMonthlyTotal,
+      isFounder: integrationPricing.isFounderPricing, // This represents if the user has founder status
+      isProductFounderPriced: integrationPricing.isFounderPricing,
+      isTrial,
+      trialEndsAt: isTrial ? new Date(subscription.currentPeriodEnd) : null,
+      billedNowAmount: isTrial ? 0 : currentMonthlyTotal
+    };
   }
 
   // === Integration Settings ===

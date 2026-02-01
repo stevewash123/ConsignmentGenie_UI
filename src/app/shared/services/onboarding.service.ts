@@ -29,7 +29,7 @@ export class OnboardingService {
    * Get current onboarding/setup status for the organization
    */
   getOnboardingStatus(): Observable<OnboardingStatus> {
-    const url = `${this.baseUrl}/api/organizations/setup-status`;
+    const url = `${this.baseUrl}/api/organization/setup/status`;
     console.log('🔍 SERVICE: Making API call to:', url);
     return this.http.get<OnboardingResponse>(url)
       .pipe(
@@ -92,7 +92,7 @@ export class OnboardingService {
    */
   dismissWelcomeGuide(): Observable<DismissWelcomeGuideResponse> {
     return this.http.post<DismissWelcomeGuideResponse>(
-      `${this.baseUrl}/api/organization/dismiss-welcome-guide`,
+      `${this.baseUrl}/api/organization/setup/welcome/dismiss`,
       {}
     ).pipe(
       tap(response => {

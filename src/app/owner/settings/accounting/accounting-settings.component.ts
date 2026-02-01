@@ -1,27 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SettingsService } from '../../../services/settings.service';
-
-interface AccountingSettings {
-  quickBooks: {
-    isConnected: boolean;
-    companyId?: string;
-    companyName?: string;
-    autoSync: boolean;
-    syncFrequency: 'daily' | 'weekly' | 'manual';
-  };
-  reports: {
-    emailReports: boolean;
-    reportFrequency: 'daily' | 'weekly' | 'monthly';
-    recipients: string[];
-  };
-  exports: {
-    format: 'csv' | 'xlsx' | 'pdf';
-    includeConsignorDetails: boolean;
-    includeTaxBreakdown: boolean;
-  };
-}
+import { AccountingSettingsService } from '../../../services/accounting-settings.service';
+import { AccountingSettings } from '../../../models/business.models';
 
 @Component({
   selector: 'app-accounting-settings',
@@ -36,7 +17,7 @@ export class AccountingSettingsComponent implements OnInit {
   isSaving = signal(false);
   recipientsText = '';
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(private accountingSettingsService: AccountingSettingsService) {}
 
   ngOnInit() {
     this.loadSettings();
@@ -44,8 +25,8 @@ export class AccountingSettingsComponent implements OnInit {
 
   private async loadSettings() {
     try {
-      await this.settingsService.loadAccountingSettings();
-      const settings = this.settingsService.getCurrentAccountingSettings();
+      await this.accountingSettingsService.loadAccountingSettings();
+      const settings = this.accountingSettingsService.getCurrentAccountingSettings();
       if (settings) {
         this.settings.set(settings);
         this.updateRecipientsText();
@@ -81,7 +62,7 @@ export class AccountingSettingsComponent implements OnInit {
   saveSettings() {
     this.isSaving.set(true);
     try {
-      this.settingsService.updateAccountingSettings(this.settings()!);
+      this.accountingSettingsService.updateAccountingSettings(this.settings()!);
       console.log('Saving accounting settings:', this.settings());
     } catch (error) {
       console.error('Error saving accounting settings:', error);

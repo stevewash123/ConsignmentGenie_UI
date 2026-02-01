@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { PayoutSettingsService, NewPayoutSettings } from '../../../../services/payout-settings.service';
+import { Subscription, firstValueFrom } from 'rxjs';
+import { PayoutSettingsService } from '../../../../services/payout-settings.service';
+import { PayoutSettings } from '../../../../models/payout-settings.model';
 
 @Component({
   selector: 'app-general-payout-settings',
@@ -12,7 +13,7 @@ import { PayoutSettingsService, NewPayoutSettings } from '../../../../services/p
   styleUrls: ['./general-payout-settings.component.scss']
 })
 export class GeneralPayoutSettingsComponent implements OnInit, OnDestroy {
-  settings = signal<NewPayoutSettings | null>(null);
+  settings = signal<PayoutSettings | null>(null);
   successMessage = signal('');
   errorMessage = signal('');
   private subscriptions = new Subscription();
@@ -35,7 +36,7 @@ export class GeneralPayoutSettingsComponent implements OnInit, OnDestroy {
 
   async loadSettings() {
     try {
-      const settings = await this.payoutSettingsService.getNewPayoutSettings().toPromise();
+      const settings = await firstValueFrom(this.payoutSettingsService.getPayoutSettings());
       this.settings.set(settings);
     } catch (error) {
       console.error('Error loading payout settings:', error);
@@ -90,14 +91,15 @@ export class GeneralPayoutSettingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async updateSetting<T extends keyof NewPayoutSettings>(field: T, value: NewPayoutSettings[T]) {
+  private async updateSetting<T extends keyof PayoutSettings>(field: T, value: PayoutSettings[T]) {
     try {
       const currentSettings = this.settings();
       if (!currentSettings) return;
 
       const updateRequest = { [field]: value };
-      const updatedSettings = await this.payoutSettingsService.updateNewPayoutSettings(updateRequest).toPromise();
-      this.settings.set(updatedSettings);
+      await this.payoutSettingsService.updatePayoutSettings(updateRequest);
+      // Reload settings to get updated data
+      await this.loadSettings();
 
       // Brief success indication
       this.showSuccess('Settings updated');

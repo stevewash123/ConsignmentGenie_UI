@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { SettingsService } from '../../../../services/settings.service';
+import { BusinessSettingsService } from '../../../../services/business-settings.service';
 import { Subscription, debounceTime } from 'rxjs';
 
 // Data model interfaces
@@ -71,7 +71,7 @@ export class PoliciesComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private businessSettingsService: BusinessSettingsService
   ) {
     this.policiesForm.set(this.createForm());
   }
@@ -121,7 +121,7 @@ export class PoliciesComponent implements OnInit, OnDestroy {
 
     this.saving.set(true);
     try {
-      await this.settingsService.updateBusinessSettings({ policies: businessPolicies });
+      await this.businessSettingsService.updateBusinessSettings({ policies: businessPolicies });
       this.policies.set(businessPolicies);
       this.showSuccess('Policies saved automatically');
     } catch (error) {
@@ -185,8 +185,8 @@ export class PoliciesComponent implements OnInit, OnDestroy {
 
   async loadPolicies() {
     try {
-      await this.settingsService.loadBusinessSettings();
-      const businessSettings = this.settingsService.getCurrentBusinessSettings();
+      await this.businessSettingsService.loadBusinessSettings();
+      const businessSettings = this.businessSettingsService.getCurrentBusinessSettings();
       if (businessSettings?.policies) {
         this.policies.set(businessSettings.policies);
         this.populateForm(businessSettings.policies);

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SettingsService, ShopProfile } from '../../../../services/settings.service';
+import { ProfileService, ShopProfile } from '../../../../services/profile.service';
 import { Subscription } from 'rxjs';
 import { PhoneFormatter } from '../../../../shared/utils/phone-formatter.util';
 
@@ -25,7 +25,7 @@ export class OwnerContactInfoComponent implements OnInit, OnDestroy {
   });
 
   constructor(
-    private settingsService: SettingsService
+    private profileService: ProfileService
   ) {}
 
   ngOnInit(): void {
@@ -40,7 +40,7 @@ export class OwnerContactInfoComponent implements OnInit, OnDestroy {
   private setupSubscriptions(): void {
     // Subscribe to profile changes from the service
     this.subscriptions.add(
-      this.settingsService.profile.subscribe(profile => {
+      this.profileService.profile.subscribe(profile => {
         this.profile.set(profile);
       })
     );
@@ -48,7 +48,7 @@ export class OwnerContactInfoComponent implements OnInit, OnDestroy {
 
   async loadContactInfo(): Promise<void> {
     try {
-      await this.settingsService.loadProfile();
+      await this.profileService.loadProfile();
     } catch (error) {
       console.error('Error loading owner contact info:', error);
       this.showError('Failed to load contact information');
@@ -57,49 +57,49 @@ export class OwnerContactInfoComponent implements OnInit, OnDestroy {
 
   // Individual field update methods - these trigger debounced saves
   onShopNameChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopName', value);
+    this.profileService.updateProfileSetting('shopName', value);
   }
 
   onShopDescriptionChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopDescription', value || null);
+    this.profileService.updateProfileSetting('shopDescription', value || null);
   }
 
   onShopEmailChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopEmail', value || null);
+    this.profileService.updateProfileSetting('shopEmail', value || null);
   }
 
   onShopPhoneChange(event: Event): void {
     const formattedPhone = PhoneFormatter.handlePhoneInput(event);
     const rawValue = PhoneFormatter.getRawValue(formattedPhone);
-    this.settingsService.updateProfileSetting('shopPhone', rawValue || null);
+    this.profileService.updateProfileSetting('shopPhone', rawValue || null);
   }
 
   onShopWebsiteChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopWebsite', value || null);
+    this.profileService.updateProfileSetting('shopWebsite', value || null);
   }
 
   onShopAddress1Change(value: string): void {
-    this.settingsService.updateProfileSetting('shopAddress1', value || null);
+    this.profileService.updateProfileSetting('shopAddress1', value || null);
   }
 
   onShopAddress2Change(value: string): void {
-    this.settingsService.updateProfileSetting('shopAddress2', value || null);
+    this.profileService.updateProfileSetting('shopAddress2', value || null);
   }
 
   onShopCityChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopCity', value || null);
+    this.profileService.updateProfileSetting('shopCity', value || null);
   }
 
   onShopStateChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopState', value || null);
+    this.profileService.updateProfileSetting('shopState', value || null);
   }
 
   onShopZipChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopZip', value || null);
+    this.profileService.updateProfileSetting('shopZip', value || null);
   }
 
   onShopTimezoneChange(value: string): void {
-    this.settingsService.updateProfileSetting('shopTimezone', value);
+    this.profileService.updateProfileSetting('shopTimezone', value);
   }
 
   getFormattedPhone(): string {

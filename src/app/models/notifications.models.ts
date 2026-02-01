@@ -1,58 +1,66 @@
-export interface JobProgressUpdate {
-  jobId: string;
-  jobType: 'payout-generation' | 'bank-sync' | 'quickbooks-sync' | 'plaid-connection';
-  progress: number;
-  status: 'queued' | 'running' | 'completed' | 'failed';
-  message?: string;
-  startTime?: string;
-  endTime?: string;
-  organizationId: string;
+export interface NotificationThresholds {
+  highValueSale: number;
+  lowInventory: number;
 }
 
-export interface PayoutJobUpdate extends JobProgressUpdate {
-  jobType: 'payout-generation';
-  payoutId?: string;
+export interface NotificationSettings {
+  primaryEmail: string;
+  phoneNumber?: string;
+  emailPreferences: Record<string, boolean>;
+  smsPreferences: Record<string, boolean>;
+  systemPreferences: Record<string, boolean>;
+  thresholds: NotificationThresholds;
+  payoutReportFrequency: 'daily' | 'weekly';
+  weeklyPayoutDay: string;
+}
+
+export interface NotificationUpdate {
+  type?: 'info' | 'success' | 'warning' | 'error';
+  message?: string;
+  timestamp?: Date;
+  data?: any;
+  jobId?: string;
+  status?: 'running' | 'completed' | 'failed' | 'queued';
+  jobType?: 'payout' | 'bank_sync' | 'quickbooks_sync' | string;
+  progress?: number;
+  organizationId?: string;
   consignorCount?: number;
   processedConsignors?: number;
+  // Allow any additional properties for flexibility
+  [key: string]: any;
 }
-
-export interface BankSyncJobUpdate extends JobProgressUpdate {
-  jobType: 'bank-sync';
-  accountId?: string;
-  transactionCount?: number;
-  processedTransactions?: number;
-}
-
-export interface QuickBooksSyncJobUpdate extends JobProgressUpdate {
-  jobType: 'quickbooks-sync';
-  companyId?: string;
-  syncType?: 'sales' | 'consignors' | 'payouts';
-  recordCount?: number;
-  processedRecords?: number;
-}
-
-export interface PlaidConnectionJobUpdate extends JobProgressUpdate {
-  jobType: 'plaid-connection';
-  linkToken?: string;
-  institutionName?: string;
-  accountsConnected?: number;
-}
-
-export type NotificationUpdate = PayoutJobUpdate | BankSyncJobUpdate | QuickBooksSyncJobUpdate | PlaidConnectionJobUpdate;
 
 export interface ToastNotification {
   id: string;
-  type: 'success' | 'error' | 'info' | 'warning';
+  type: 'success' | 'error' | 'warning' | 'info';
   title: string;
   message: string;
-  timestamp: Date;
-  duration?: number; // milliseconds, undefined = permanent
+  duration?: number;
+  actions?: any[];
+  timestamp?: Date;
   jobId?: string;
-  actions?: NotificationAction[];
 }
 
-export interface NotificationAction {
-  label: string;
-  action: () => void;
-  style?: 'primary' | 'secondary' | 'success' | 'danger';
+export interface PayoutJobUpdate {
+  jobId: string;
+  status: 'running' | 'completed' | 'failed';
+  progress: number;
+  message?: string;
+  completedAt?: Date;
+}
+
+export interface BankSyncJobUpdate {
+  jobId: string;
+  status: 'running' | 'completed' | 'failed';
+  progress: number;
+  message?: string;
+  itemsSynced?: number;
+}
+
+export interface QuickBooksSyncJobUpdate {
+  jobId: string;
+  status: 'running' | 'completed' | 'failed';
+  progress: number;
+  message?: string;
+  recordsSynced?: number;
 }

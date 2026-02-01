@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SettingsService } from '../../../services/settings.service';
+import { PayoutSettingsService } from '../../../services/payout-settings.service';
 
 @Component({
   selector: 'app-payout-clearance-settings',
@@ -25,7 +25,7 @@ export class PayoutClearanceSettingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private payoutSettingsService: PayoutSettingsService
   ) {
     this.initForm();
   }
@@ -62,8 +62,8 @@ export class PayoutClearanceSettingsComponent implements OnInit {
   async loadSettings() {
     this.loading.set(true);
     try {
-      await this.settingsService.loadPayoutSettings();
-      const payoutSettings = this.settingsService.getCurrentPayoutSettings();
+      await this.payoutSettingsService.loadPayoutSettings();
+      const payoutSettings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (payoutSettings?.clearanceSettings) {
         this.settings.set(payoutSettings.clearanceSettings);
         this.populateForm(payoutSettings.clearanceSettings);
@@ -106,7 +106,7 @@ export class PayoutClearanceSettingsComponent implements OnInit {
 
     this.saving.set(true);
     try {
-      const currentSettings = this.settingsService.getCurrentPayoutSettings();
+      const currentSettings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (currentSettings) {
         const formValue = this.settingsForm.value;
         const clearanceSettings = {
@@ -134,7 +134,7 @@ export class PayoutClearanceSettingsComponent implements OnInit {
           clearanceSettings: clearanceSettings,
           lastUpdated: new Date()
         };
-        await this.settingsService.updatePayoutSettings(updatedSettings);
+        await this.payoutSettingsService.updatePayoutSettings(updatedSettings);
         this.settings.set(clearanceSettings);
         this.settingsForm.markAsPristine();
       }

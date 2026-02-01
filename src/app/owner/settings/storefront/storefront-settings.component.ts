@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SettingsService, StorefrontSettings } from '../../../services/settings.service';
+import { StorefrontSettingsService } from '../../../services/storefront-settings.service';
+import { StorefrontSettings } from '../../../models/storefront.models';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -41,7 +42,7 @@ export class StorefrontSettingsComponent implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(private storefrontSettingsService: StorefrontSettingsService) {}
 
   ngOnInit(): void {
     this.setupSubscriptions();
@@ -55,7 +56,7 @@ export class StorefrontSettingsComponent implements OnInit, OnDestroy {
   private setupSubscriptions(): void {
     // Subscribe to storefront settings changes from the service
     this.subscriptions.add(
-      this.settingsService.storefrontSettings.subscribe(settings => {
+      this.storefrontSettingsService.storefrontSettings.subscribe(settings => {
         this.storefrontSettings.set(settings);
       })
     );
@@ -63,7 +64,7 @@ export class StorefrontSettingsComponent implements OnInit, OnDestroy {
 
   async loadStorefrontSettings(): Promise<void> {
     try {
-      await this.settingsService.loadStorefrontSettings();
+      await this.storefrontSettingsService.loadStorefrontSettings();
     } catch (error) {
       console.error('Error loading storefront settings:', error);
       this.showError('Failed to load storefront settings');
@@ -72,66 +73,66 @@ export class StorefrontSettingsComponent implements OnInit, OnDestroy {
 
   // Individual change handlers for debounced auto-save
   onStoreSlugChange(value: string): void {
-    this.settingsService.updateStorefrontSetting('storeSlug', value);
+    this.storefrontSettingsService.updateStorefrontSetting('storeSlug', value);
   }
 
   onBannerImageUrlChange(value: string): void {
-    this.settingsService.updateStorefrontSetting('bannerImageUrl', value);
+    this.storefrontSettingsService.updateStorefrontSetting('bannerImageUrl', value);
   }
 
   onStripeConnectedChange(value: boolean): void {
-    this.settingsService.updateStorefrontSetting('stripeConnected', value);
+    this.storefrontSettingsService.updateStorefrontSetting('stripeConnected', value);
   }
 
   // Payment settings handlers
   onEnableCreditCardsChange(value: boolean): void {
-    this.settingsService.updateStorefrontSetting('paymentSettings.enableCreditCards', value);
+    this.storefrontSettingsService.updateStorefrontSetting('paymentSettings.enableCreditCards', value);
   }
 
   onEnableBuyNowChange(value: boolean): void {
-    this.settingsService.updateStorefrontSetting('paymentSettings.enableBuyNow', value);
+    this.storefrontSettingsService.updateStorefrontSetting('paymentSettings.enableBuyNow', value);
   }
 
   onEnableLayawayChange(value: boolean): void {
-    this.settingsService.updateStorefrontSetting('paymentSettings.enableLayaway', value);
+    this.storefrontSettingsService.updateStorefrontSetting('paymentSettings.enableLayaway', value);
   }
 
   onLayawayDepositPercentageChange(value: number): void {
-    this.settingsService.updateStorefrontSetting('paymentSettings.layawayDepositPercentage', value);
+    this.storefrontSettingsService.updateStorefrontSetting('paymentSettings.layawayDepositPercentage', value);
   }
 
   onLayawayTermsInDaysChange(value: number): void {
-    this.settingsService.updateStorefrontSetting('paymentSettings.layawayTermsInDays', value);
+    this.storefrontSettingsService.updateStorefrontSetting('paymentSettings.layawayTermsInDays', value);
   }
 
   // Shipping settings handlers
   onEnableShippingChange(value: boolean): void {
-    this.settingsService.updateStorefrontSetting('shippingSettings.enableShipping', value);
+    this.storefrontSettingsService.updateStorefrontSetting('shippingSettings.enableShipping', value);
   }
 
   onFlatRateChange(value: number): void {
-    this.settingsService.updateStorefrontSetting('shippingSettings.flatRate', value);
+    this.storefrontSettingsService.updateStorefrontSetting('shippingSettings.flatRate', value);
   }
 
   onFreeShippingThresholdChange(value: number): void {
-    this.settingsService.updateStorefrontSetting('shippingSettings.freeShippingThreshold', value);
+    this.storefrontSettingsService.updateStorefrontSetting('shippingSettings.freeShippingThreshold', value);
   }
 
   onShipsFromZipCodeChange(value: string): void {
-    this.settingsService.updateStorefrontSetting('shippingSettings.shipsFromZipCode', value);
+    this.storefrontSettingsService.updateStorefrontSetting('shippingSettings.shipsFromZipCode', value);
   }
 
   // Sales settings handlers
   onEnableBestOfferChange(value: boolean): void {
-    this.settingsService.updateStorefrontSetting('salesSettings.enableBestOffer', value);
+    this.storefrontSettingsService.updateStorefrontSetting('salesSettings.enableBestOffer', value);
   }
 
   onAutoAcceptPercentageChange(value: number): void {
-    this.settingsService.updateStorefrontSetting('salesSettings.autoAcceptPercentage', value);
+    this.storefrontSettingsService.updateStorefrontSetting('salesSettings.autoAcceptPercentage', value);
   }
 
   onMinimumOfferPercentageChange(value: number): void {
-    this.settingsService.updateStorefrontSetting('salesSettings.minimumOfferPercentage', value);
+    this.storefrontSettingsService.updateStorefrontSetting('salesSettings.minimumOfferPercentage', value);
   }
 
   onChannelChange(selectedChannel: string): void {

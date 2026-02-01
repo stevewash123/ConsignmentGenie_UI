@@ -2,8 +2,12 @@ import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { PayoutSettingsService, NewPayoutSettings } from '../../../../services/payout-settings.service';
+import { Subscription, firstValueFrom } from 'rxjs';
+import { PayoutSettingsService } from '../../../../services/payout-settings.service';
+import { PayoutSettings } from '../../../../models/payout-settings.model';
+import { AchSettingsService } from '../../../../services/ach-settings.service';
+import { PlaidLinkService, PlaidLinkConfig } from '../../../../services/plaid-link.service';
+import { IntegrationPricingService } from '../../../../shared/services/integration-pricing.service';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -14,27 +18,54 @@ import { environment } from '../../../../../environments/environment';
   styleUrls: ['./direct-deposit-setup.component.scss']
 })
 export class DirectDepositSetupComponent implements OnInit, OnDestroy {
-  settings = signal<NewPayoutSettings | null>(null);
+  payoutSettings = signal<PayoutSettings | null>(null);
   successMessage = signal('');
   errorMessage = signal('');
   connecting = signal(false);
+  plaidReady = signal(false);
   private subscriptions = new Subscription();
 
-  // Auto-save status computed from settings state
-  autoSaveStatus = computed(() => {
-    const settings = this.settings();
-    return settings ? 'Saved automatically' : 'Loading...';
+  // Computed properties for easier template use
+  achEnabled = computed(() => this.payoutSettings()?.payoutMethodACH || false);
+  bankConnected = computed(() => this.payoutSettings()?.bankAccountConnected || false);
+  connectedBank = computed(() => {
+    const settings = this.payoutSettings();
+    if (!settings || !settings.bankAccountConnected) return null;
+    return {
+      id: settings.plaidAccountId || '',
+      bankName: settings.bankName || 'Connected Bank',
+      accountType: 'checking', // Default type
+      accountNumberMask: settings.bankAccountLast4 ? `••••${settings.bankAccountLast4}` : '••••****',
+      status: 'connected',
+      isDefault: true,
+      connectedAt: settings.updatedAt || settings.createdAt
+    };
   });
 
-  // Computed properties for easier template use
-  achEnabled = computed(() => this.settings()?.payoutMethodACH || false);
-  bankConnected = computed(() => this.settings()?.bankAccountConnected || false);
-  autoPayEnabled = computed(() => this.settings()?.autoPayEnabled || false);
-
-  constructor(private payoutSettingsService: PayoutSettingsService) {}
+  constructor(
+    private payoutSettingsService: PayoutSettingsService,
+    private achSettingsService: AchSettingsService,
+    private plaidLinkService: PlaidLinkService,
+    private integrationPricingService: IntegrationPricingService
+  ) {
+    console.log('DirectDepositSetupComponent: Constructor - Services injected (HYBRID COMPONENT)', {
+      payoutSettingsService: !!this.payoutSettingsService,
+      achSettingsService: !!this.achSettingsService,
+      plaidLinkService: !!this.plaidLinkService
+    });
+  }
 
   ngOnInit() {
+    console.log('DirectDepositSetupComponent: ngOnInit called');
     this.loadSettings();
+
+    // Monitor Plaid readiness
+    this.subscriptions.add(
+      this.plaidLinkService.plaidReady$.subscribe(ready => {
+        console.log('DirectDepositSetupComponent: Plaid ready state changed:', ready);
+        this.plaidReady.set(ready);
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -42,39 +73,124 @@ export class DirectDepositSetupComponent implements OnInit, OnDestroy {
   }
 
   async loadSettings() {
+    console.log('DirectDepositSetupComponent: loadSettings called');
     try {
-      const settings = await this.payoutSettingsService.getNewPayoutSettings().toPromise();
-      this.settings.set(settings);
+      console.log('DirectDepositSetupComponent: Making API call to getPayoutSettings');
+      const settings = await firstValueFrom(this.payoutSettingsService.getPayoutSettings());
+      console.log('DirectDepositSetupComponent: Received payout settings:', settings);
+      this.payoutSettings.set(settings);
+      console.log('DirectDepositSetupComponent: Settings signal updated. Current state:', {
+        achEnabled: this.achEnabled(),
+        bankConnected: this.bankConnected(),
+        connectedBank: this.connectedBank()
+      });
     } catch (error) {
-      console.error('Error loading payout settings:', error);
-      this.showError('Failed to load payout settings');
+      console.error('DirectDepositSetupComponent: Error loading payout settings:', error);
+      // Try to create default settings if none exist
+      try {
+        await this.createDefaultSettings();
+      } catch (createError) {
+        console.error('DirectDepositSetupComponent: Failed to create default settings:', createError);
+        this.showError('Failed to load or create payout settings');
+      }
     }
   }
 
-  // Bank connection methods (moved from integrations/payouts component)
+  private async createDefaultSettings() {
+    const defaultRequest = {
+      payoutMethodCheck: false,
+      payoutMethodCash: false,
+      payoutMethodStoreCredit: false,
+      payoutMethodPayPal: false,
+      payoutMethodVenmo: false,
+      payoutMethodACH: false,
+      holdPeriodDays: 30,
+      minimumPayoutThreshold: 25.00,
+      minimumBalanceProtection: 100.00,
+      autoPayEnabled: false
+    };
+
+    const settings = await this.payoutSettingsService.createPayoutSettings(defaultRequest);
+    if (settings) {
+      this.payoutSettings.set(settings);
+    }
+  }
+
+  async onToggleAch() {
+    try {
+      const currentSettings = this.payoutSettings();
+      if (!currentSettings) return;
+
+      const newEnabled = !currentSettings.payoutMethodACH;
+
+      // Show pricing impact confirmation
+      const confirmed = await this.integrationPricingService.showPricingConfirmation(
+        'plaid',
+        newEnabled,
+        '⚠️ Pricing Impact',
+        newEnabled ? 'Enable Bank Integration' : 'Disable Bank Integration'
+      );
+
+      if (!confirmed) {
+        console.log('User cancelled the ACH integration change');
+        return;
+      }
+
+      await this.payoutSettingsService.updatePayoutSettings({
+        payoutMethodACH: newEnabled
+      });
+
+      // Reload settings to get updated data
+      await this.loadSettings();
+
+      this.showSuccess(newEnabled ? 'ACH payouts enabled' : 'ACH payouts disabled');
+    } catch (error) {
+      console.error('Error updating ACH setting:', error);
+      this.showError('Failed to update ACH setting');
+    }
+  }
+
+  // Bank connection using Plaid Link CDN
   async onConnectBank() {
+    if (!this.plaidReady()) {
+      this.showError('Plaid is not ready yet. Please wait a moment and try again.');
+      return;
+    }
+
+    if (!this.achEnabled()) {
+      this.showError('ACH must be enabled before connecting a bank account');
+      return;
+    }
+
     this.connecting.set(true);
 
     try {
       // Step 1: Get Plaid link token from our backend
-      const response = await fetch(`${environment.apiUrl}/api/settings/payments/ach/connect`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // TODO: Add auth headers
-      });
+      const linkTokenResponse = await firstValueFrom(this.achSettingsService.createPlaidLinkToken());
 
-      const { plaidLinkToken } = await response.json();
+      if (!linkTokenResponse) {
+        throw new Error('Failed to get Plaid link token');
+      }
 
-      // Step 2: Initialize Plaid Link (would require @plaid/link SDK)
-      // For now, simulate the flow
-      console.log('Would initialize Plaid Link with token:', plaidLinkToken);
+      // Step 2: Configure Plaid Link
+      const linkConfig: PlaidLinkConfig = {
+        token: linkTokenResponse.linkToken,
+        onSuccess: (publicToken: string, metadata: any) => {
+          this.handlePlaidSuccess(publicToken, metadata);
+        },
+        onExit: (error: any, metadata: any) => {
+          this.handlePlaidExit(error, metadata);
+        },
+        onEvent: (eventName: string, metadata: any) => {
+          console.log('Plaid event:', eventName, metadata);
+        },
+        onLoad: () => {
+          console.log('Plaid Link loaded');
+        }
+      };
 
-      // Simulate successful connection
-      setTimeout(() => {
-        this.handlePlaidSuccess('public-token-123', {
-          accounts: [{ id: 'account-123' }]
-        });
-      }, 2000);
+      // Step 3: Open Plaid Link
+      this.plaidLinkService.openPlaidLink(linkConfig);
 
     } catch (error) {
       console.error('Failed to connect bank account:', error);
@@ -85,27 +201,45 @@ export class DirectDepositSetupComponent implements OnInit, OnDestroy {
 
   private async handlePlaidSuccess(publicToken: string, metadata: any) {
     try {
-      // Step 3: Send public token to our backend for exchange
-      const response = await fetch(`${environment.apiUrl}/api/settings/payments/ach/callback`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          publicToken: publicToken,
-          accountId: metadata.accounts[0].id
-        }),
-        // TODO: Add auth headers
+      console.log('Plaid success:', { publicToken, metadata });
+
+      // Get the first checking or savings account
+      const selectedAccount = metadata.accounts.find((acc: any) =>
+        acc.subtype === 'checking' || acc.subtype === 'savings'
+      ) || metadata.accounts[0];
+
+      if (!selectedAccount) {
+        throw new Error('No suitable bank account found');
+      }
+
+      // Step 3: Exchange public token with AchSettings backend (this creates funding source in DB)
+      const exchangeRequest = {
+        publicToken: publicToken,
+        accountId: selectedAccount.id,
+        accountName: selectedAccount.name,
+        institutionName: metadata.institution?.name,
+        accountType: selectedAccount.subtype,
+        accountMask: selectedAccount.mask
+      };
+
+      const result = await firstValueFrom(this.achSettingsService.exchangePlaidToken(exchangeRequest));
+
+      if (!result || !result.success) {
+        throw new Error(result?.message || 'Failed to exchange public token');
+      }
+
+      // Step 4: Update PayoutSettings with bank connection info
+      await this.payoutSettingsService.updatePayoutSettings({
+        bankAccountConnected: true,
+        plaidAccountId: selectedAccount.id,
+        bankName: metadata.institution?.name || 'Connected Bank',
+        bankAccountLast4: selectedAccount.mask || ''
       });
 
-      const result = await response.json();
+      // Step 5: Reload settings to get updated bank information
+      await this.loadSettings();
 
-      // Step 4: Update settings with bank connection info
-      await this.updateSetting('bankAccountConnected', true);
-      await this.updateSetting('bankName', result.bankName);
-      await this.updateSetting('bankAccountLast4', result.accountLast4);
-      await this.updateSetting('plaidAccessToken', result.accessToken);
-      await this.updateSetting('plaidAccountId', result.accountId);
-
-      this.showSuccess('Bank account connected successfully');
+      this.showSuccess('Bank account connected successfully!');
 
     } catch (error) {
       console.error('Failed to complete bank connection:', error);
@@ -115,85 +249,62 @@ export class DirectDepositSetupComponent implements OnInit, OnDestroy {
     }
   }
 
+  private handlePlaidExit(error: any, metadata: any) {
+    console.log('Plaid exit:', { error, metadata });
+
+    this.connecting.set(false);
+
+    if (error) {
+      console.error('Plaid Link error:', error);
+      this.showError('Bank connection was cancelled or failed');
+    } else {
+      // User cancelled without error
+      console.log('User cancelled Plaid Link');
+    }
+  }
+
   async onDisconnectBank() {
     try {
-      await this.updateSetting('bankAccountConnected', false);
-      await this.updateSetting('plaidAccessToken', '');
-      await this.updateSetting('plaidAccountId', '');
-      await this.updateSetting('bankName', '');
-      await this.updateSetting('bankAccountLast4', '');
+      const connectedBank = this.connectedBank();
+      if (!connectedBank) {
+        this.showError('No bank account connected');
+        return;
+      }
+
+      // Show pricing impact confirmation for disabling the integration
+      const confirmed = await this.integrationPricingService.showPricingConfirmation(
+        'plaid',
+        false, // disabling
+        '⚠️ Pricing Impact',
+        'Disconnect Bank'
+      );
+
+      if (!confirmed) {
+        console.log('User cancelled the bank disconnection');
+        return;
+      }
+
+      // Step 1: Disconnect from Dwolla/Plaid via AchSettings
+      await firstValueFrom(this.achSettingsService.disconnectFundingSource({
+        fundingSourceId: connectedBank.id
+      }));
+
+      // Step 2: Update PayoutSettings to mark bank as disconnected
+      await this.payoutSettingsService.updatePayoutSettings({
+        bankAccountConnected: false,
+        plaidAccessToken: '',
+        plaidAccountId: '',
+        bankName: '',
+        bankAccountLast4: ''
+      });
+
+      // Step 3: Reload settings to get updated information
+      await this.loadSettings();
+
       this.showSuccess('Bank account disconnected');
     } catch (error) {
       console.error('Error disconnecting bank:', error);
       this.showError('Failed to disconnect bank account');
-    }
-  }
-
-  // Balance protection
-  onMinimumBalanceChange(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue) && numValue >= 0 && this.settings()?.minimumBalanceProtection !== numValue) {
-      this.updateSetting('minimumBalanceProtection', numValue);
-    }
-  }
-
-  // Auto-pay toggle
-  onAutoPayEnabledChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPayEnabled', checked);
-  }
-
-  // Day of week handlers
-  onMondayChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPayMonday', checked);
-  }
-
-  onTuesdayChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPayTuesday', checked);
-  }
-
-  onWednesdayChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPayWednesday', checked);
-  }
-
-  onThursdayChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPayThursday', checked);
-  }
-
-  onFridayChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPayFriday', checked);
-  }
-
-  onSaturdayChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPaySaturday', checked);
-  }
-
-  onSundayChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.updateSetting('autoPaySunday', checked);
-  }
-
-  private async updateSetting<T extends keyof NewPayoutSettings>(field: T, value: NewPayoutSettings[T]) {
-    try {
-      const currentSettings = this.settings();
-      if (!currentSettings) return;
-
-      const updateRequest = { [field]: value };
-      const updatedSettings = await this.payoutSettingsService.updateNewPayoutSettings(updateRequest).toPromise();
-      this.settings.set(updatedSettings);
-
-      // Brief success indication
-      this.showSuccess('Settings updated');
-    } catch (error) {
-      console.error(`Error updating ${String(field)}:`, error);
-      this.showError(`Failed to update ${String(field)}`);
     }
   }
 
