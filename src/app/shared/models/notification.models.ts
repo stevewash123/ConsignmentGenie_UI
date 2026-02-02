@@ -36,7 +36,21 @@ export interface NotificationDto {
   // Computed properties
   timeAgo: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: {
+    actionButtonText?: string;
+    itemTitle?: string;
+    itemSku?: string;
+    salePrice?: number;
+    earningsAmount?: number;
+    payoutAmount?: number;
+    payoutMethod?: string;
+    payoutNumber?: string;
+    statementPeriod?: string;
+    statementId?: string;
+    itemCount?: number;
+    totalValue?: number;
+    consignorName?: string;
+  };
 }
 
 export interface NotificationQueryParams {

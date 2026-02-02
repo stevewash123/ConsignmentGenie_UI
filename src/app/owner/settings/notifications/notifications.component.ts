@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NotificationSettingsService } from '../../../services/notification-settings.service';
-import { NotificationSettings } from '../../../models/notifications.models';
-import { Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { NotificationMatrixSettings, NotificationCategory, NotificationEvent, NotificationContactInfo, NotificationThresholds } from '../../../models/notification-matrix.models';
+import { environment } from '../../../../environments/environment';
+import { firstValueFrom } from 'rxjs';
 
 interface NotificationType {
   key: string;
@@ -21,178 +22,151 @@ interface NotificationType {
   styleUrls: ['./notifications.component.scss']
 })
 export class AccountNotificationsComponent implements OnInit, OnDestroy {
-  notificationSettings = signal<NotificationSettings | null>(null);
+  private http = inject(HttpClient);
+
+  notificationSettings = signal<NotificationMatrixSettings | null>(null);
   successMessage = signal('');
   errorMessage = signal('');
-  private subscriptions = new Subscription();
+  saving = signal(false);
 
   // Auto-save status computed from settings state
   autoSaveStatus = computed(() => {
     const settings = this.notificationSettings();
+    if (this.saving()) return 'Saving...';
     return settings ? 'Saved automatically' : 'Loading...';
   });
 
-  // Notification types organized by category
-  businessNotifications: NotificationType[] = [
-    { key: 'daily_sales_summary', name: 'Daily Sales Summary', description: 'End-of-day sales report with totals and key metrics', category: 'business' },
-    { key: 'weekly_report', name: 'Weekly Business Report', description: 'Weekly overview of sales, inventory, and performance', category: 'business' },
-    { key: 'monthly_statement', name: 'Monthly Statement', description: 'Comprehensive monthly business summary and financials', category: 'business' }
-  ];
-
-  consignorNotifications: NotificationType[] = [
-    { key: 'consignor_signup', name: 'New Consignor Signup', description: 'When a new consignor registers to join your store', category: 'consignor' },
-    { key: 'consignor_item_added', name: 'New Items Added', description: 'When consignors add new items to inventory', category: 'consignor' },
-    { key: 'pending_approval', name: 'Pending Approvals', description: 'When consignors need approval for account or items', category: 'consignor' },
-    { key: 'daily_payout_ready', name: 'Daily Payout Ready Report', description: 'Daily notification when consignor payouts are calculated and ready to send', category: 'consignor' },
-    { key: 'weekly_payout_ready', name: 'Weekly Payout Ready Report', description: 'Weekly notification when consignor payouts are calculated and ready to send', category: 'consignor' }
-  ];
-
-  salesNotifications: NotificationType[] = [
-    { key: 'item_sold', name: 'Item Sold', description: 'Immediate notification when any item is sold', category: 'sales' },
-    { key: 'high_value_sale', name: 'High Value Sale', description: 'When a sale exceeds your defined threshold amount', category: 'sales' },
-    { key: 'low_inventory', name: 'Low Inventory Alert', description: 'When inventory levels drop below minimum thresholds', category: 'sales' },
-    { key: 'pricing_suggestions', name: 'Pricing Suggestions', description: 'AI-powered pricing recommendations for better sales', category: 'sales' }
-  ];
-
-  systemNotifications: NotificationType[] = [
-    { key: 'system_maintenance', name: 'System Maintenance', description: 'Scheduled maintenance and system updates', category: 'system' },
-    { key: 'security_alerts', name: 'Security Alerts', description: 'Important security notifications and login alerts', category: 'system' },
-    { key: 'account_changes', name: 'Account Changes', description: 'When important account settings are modified', category: 'system' },
-    { key: 'backup_status', name: 'Backup Status', description: 'Data backup completion and status updates', category: 'system' }
-  ];
-
-  constructor(
-    private notificationSettingsService: NotificationSettingsService
-  ) {}
+  constructor() {}
 
   ngOnInit(): void {
-    this.setupSubscriptions();
     this.loadNotificationSettings();
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
-  private setupSubscriptions(): void {
-    // Subscribe to notification settings changes from the service
-    this.subscriptions.add(
-      this.notificationSettingsService.notificationSettings.subscribe(settings => {
-        if (settings) {
-          // Set defaults for new properties if they don't exist
-          const defaultSystemPreferences = {
-            // Business Operations
-            daily_sales_summary: true,
-            weekly_report: true,
-            monthly_statement: true,
-            // Consignor Activity
-            consignor_signup: true,
-            consignor_item_added: true,
-            pending_approval: true,
-            daily_payout_ready: true,
-            weekly_payout_ready: true,
-            // Sales & Inventory
-            item_sold: true,
-            high_value_sale: true,
-            low_inventory: true,
-            pricing_suggestions: true,
-            // System Alerts (always true, can't be disabled)
-            system_maintenance: true,
-            security_alerts: true,
-            account_changes: true,
-            backup_status: true
-          };
-
-          const updatedSettings = {
-            ...settings,
-            systemPreferences: { ...defaultSystemPreferences, ...settings.systemPreferences },
-            weeklyPayoutDay: settings.weeklyPayoutDay || 'monday',
-            emailPreferences: {
-              ...settings.emailPreferences,
-              // Set defaults for Security Alerts & Account Changes
-              security_alerts: settings.emailPreferences?.security_alerts ?? true,
-              account_changes: settings.emailPreferences?.account_changes ?? true
-            }
-          };
-          this.notificationSettings.set(updatedSettings);
-        } else {
-          this.notificationSettings.set(settings);
-        }
-      })
-    );
+    // No subscriptions to clean up in this simplified version
   }
 
   async loadNotificationSettings(): Promise<void> {
     try {
-      await this.notificationSettingsService.loadNotificationSettings();
+      const settings = await firstValueFrom(
+        this.http.get<NotificationMatrixSettings>(`${environment.apiUrl}/api/owner/settings/notifications`)
+      );
+      this.notificationSettings.set(settings);
     } catch (error) {
       console.error('Error loading notification settings:', error);
       this.showError('Failed to load notification settings');
     }
   }
 
-  // Individual change handlers for debounced auto-save
+  // Contact info change handlers
   onPrimaryEmailChange(value: string): void {
-    this.notificationSettingsService.updateNotificationSetting('primaryEmail', value);
+    this.updateContactInfo({ primaryEmailAddress: value });
   }
 
   onPhoneNumberChange(value: string): void {
-    this.notificationSettingsService.updateNotificationSetting('phoneNumber', value || undefined);
+    this.updateContactInfo({ phoneNumber: value || undefined });
   }
 
+  // Threshold change handlers
   onHighValueThresholdChange(value: number): void {
-    this.notificationSettingsService.updateNotificationThreshold('highValueSale', value);
+    this.updateThresholds({ highValueSaleThreshold: value });
   }
 
   onLowInventoryThresholdChange(value: number): void {
-    this.notificationSettingsService.updateNotificationThreshold('lowInventory', value);
+    this.updateThresholds({ lowInventoryAlertThreshold: value });
   }
 
-  onEmailPreferenceChange(notificationType: string, enabled: boolean): void {
-    this.notificationSettingsService.updateEmailPreference(notificationType, enabled);
-  }
+  // Matrix preference change handlers
+  onNotificationToggle(categoryName: string, eventName: string, notificationType: 'email' | 'sms' | 'system', enabled: boolean): void {
+    const settings = this.notificationSettings();
+    if (!settings) return;
 
-  onSmsPreferenceChange(notificationType: string, enabled: boolean): void {
-    this.notificationSettingsService.updateSmsPreference(notificationType, enabled);
-  }
+    const updatedPreferences = settings.notificationPreferences.map(category => {
+      if (category.categoryName === categoryName) {
+        return {
+          ...category,
+          events: category.events.map(event => {
+            if (event.eventName === eventName) {
+              return { ...event, [notificationType]: enabled };
+            }
+            return event;
+          })
+        };
+      }
+      return category;
+    });
 
-  onSystemPreferenceChange(notificationType: string, enabled: boolean): void {
-    this.notificationSettingsService.updateSystemPreference(notificationType, enabled);
-  }
-
-  onWeeklyPayoutDayChange(day: string): void {
-    this.notificationSettingsService.updateNotificationSetting('weeklyPayoutDay', day);
+    this.updateNotificationPreferences(updatedPreferences);
   }
 
   // Helper methods for template
-  isEmailEnabled(notificationType: string): boolean {
+  getEvent(categoryName: string, eventName: string): NotificationEvent | undefined {
     const settings = this.notificationSettings();
-    return settings?.emailPreferences[notificationType] || false;
+    if (!settings) return undefined;
+
+    const category = settings.notificationPreferences.find(c => c.categoryName === categoryName);
+    return category?.events.find(e => e.eventName === eventName);
   }
 
-  isSmsEnabled(notificationType: string): boolean {
+  isNotificationEnabled(categoryName: string, eventName: string, type: 'email' | 'sms' | 'system'): boolean {
+    const event = this.getEvent(categoryName, eventName);
+    return event?.[type] || false;
+  }
+
+  // Update helper methods
+  private async updateContactInfo(changes: Partial<NotificationContactInfo>): Promise<void> {
     const settings = this.notificationSettings();
-    return settings?.smsPreferences[notificationType] || false;
+    if (!settings) return;
+
+    const updated = {
+      ...settings,
+      contactInfo: { ...settings.contactInfo, ...changes }
+    };
+
+    this.notificationSettings.set(updated);
+    await this.saveSettings({ contactInfo: updated.contactInfo });
   }
 
-  isSystemEnabled(notificationType: string): boolean {
+  private async updateThresholds(changes: Partial<NotificationThresholds>): Promise<void> {
     const settings = this.notificationSettings();
-    return settings?.systemPreferences?.[notificationType] || false;
+    if (!settings) return;
+
+    const updated = {
+      ...settings,
+      thresholds: { ...settings.thresholds, ...changes }
+    };
+
+    this.notificationSettings.set(updated);
+    await this.saveSettings({ thresholds: updated.thresholds });
   }
 
-  getWeeklyPayoutDay(): string {
+  private async updateNotificationPreferences(preferences: NotificationCategory[]): Promise<void> {
     const settings = this.notificationSettings();
-    return settings?.weeklyPayoutDay || 'monday';
+    if (!settings) return;
+
+    const updated = {
+      ...settings,
+      notificationPreferences: preferences
+    };
+
+    this.notificationSettings.set(updated);
+    await this.saveSettings({ notificationPreferences: preferences });
   }
 
-  isSystemNotificationDisabled(notificationType: string): boolean {
-    // System Alert notifications can't be unchecked for System
-    return ['system_maintenance', 'security_alerts', 'account_changes', 'backup_status'].includes(notificationType);
-  }
+  private async saveSettings(changes: any): Promise<void> {
+    if (this.saving()) return;
 
-
-  trackByNotificationKey(index: number, notification: NotificationType): string {
-    return notification.key;
+    this.saving.set(true);
+    try {
+      await firstValueFrom(
+        this.http.put(`${environment.apiUrl}/api/owner/settings/notifications`, changes)
+      );
+    } catch (error) {
+      console.error('Failed to save notification settings:', error);
+      this.showError('Failed to save settings');
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   private showSuccess(message: string): void {
@@ -205,5 +179,14 @@ export class AccountNotificationsComponent implements OnInit, OnDestroy {
     this.errorMessage.set(message);
     this.successMessage.set('');
     setTimeout(() => this.errorMessage.set(''), 5000);
+  }
+
+  // TrackBy functions for ngFor performance
+  trackByCategory(index: number, category: NotificationCategory): string {
+    return category.categoryName;
+  }
+
+  trackByEvent(index: number, event: NotificationEvent): string {
+    return event.eventName;
   }
 }

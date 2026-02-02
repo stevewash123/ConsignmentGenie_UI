@@ -11,13 +11,13 @@
       <h3>Sales Tax Configuration</h3>
 
       <div class="form-group">
-        <label for="salesTaxRate">Sales Tax Rate (decimal)</label>
+        <label for="salesTaxRate">Sales Tax Rate (%)</label>
         <div class="input-group">
-          <input id="salesTaxRate" type="number" min="0" max="1"
-                 step="0.001" formControlName="salesTaxRate" class="form-input">
-          <span class="input-suffix">decimal</span>
+          <input id="salesTaxRate" type="number" min="0" max="100"
+                 step="0.01" formControlName="salesTaxRate" class="form-input">
+          <span class="input-suffix">%</span>
         </div>
-        <span class="help-text">Enter tax rate as decimal (e.g., 0.0825 for 8.25%)</span>
+        <span class="help-text">Enter tax rate as percentage (e.g., 8.25 for 8.25%)</span>
       </div>
 
       <div class="form-group">
@@ -49,7 +49,7 @@
         <div class="preview-example">
           <span class="label">Item price: $100.00</span>
           <div class="calculation" *ngIf="!taxForm.get('taxIncludedInPrices')?.value">
-            + Tax ({{ (taxForm.get('salesTaxRate')?.value * 100) || 0 }}%): ${{ calculateTax(100) }}<br>
+            + Tax ({{ taxForm.get('salesTaxRate')?.value || 0 }}%): ${{ calculateTax(100) }}<br>
             <strong>Total: ${{ calculateTotal(100) }}</strong><br>
             <span class="consignment-split">Payout: ${{ calculateConsignmentPayout(100) }} (50% of pre-tax amount)</span>
           </div>

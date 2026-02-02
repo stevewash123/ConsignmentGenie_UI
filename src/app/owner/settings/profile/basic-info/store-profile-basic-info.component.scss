@@ -1,20 +1,21 @@
 .basic-info-section {
   padding: 2rem;
-  max-width: 800px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.section-header {
+.settings-header {
   margin-bottom: 2rem;
 }
 
-.section-header h2 {
+.settings-header h2 {
   font-size: 1.875rem;
   font-weight: 700;
   color: #111827;
   margin-bottom: 0.5rem;
 }
 
-.section-header p {
+.settings-header p {
   color: #6b7280;
   font-size: 1rem;
 }

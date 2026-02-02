@@ -28,7 +28,7 @@ export class TaxSettingsComponent implements OnInit {
 
   private initializeForm() {
     this.taxForm = this.fb.group({
-      salesTaxRate: [0, [Validators.min(0), Validators.max(1)]],
+      salesTaxRate: [0, [Validators.min(0), Validators.max(100)]],
       taxIncludedInPrices: [false],
       chargeTaxOnShipping: [false],
       taxIdEin: ['']
@@ -59,17 +59,17 @@ export class TaxSettingsComponent implements OnInit {
 
 
   calculateTax(amount: number): string {
-    const rate = this.taxForm.get('salesTaxRate')?.value || 0;
+    const rate = (this.taxForm.get('salesTaxRate')?.value || 0) / 100; // Convert percentage to decimal
     return (amount * rate).toFixed(2);
   }
 
   calculateTotal(amount: number): string {
-    const rate = this.taxForm.get('salesTaxRate')?.value || 0;
+    const rate = (this.taxForm.get('salesTaxRate')?.value || 0) / 100; // Convert percentage to decimal
     return (amount + (amount * rate)).toFixed(2);
   }
 
   calculateIncludedTax(amount: number): string {
-    const rate = this.taxForm.get('salesTaxRate')?.value || 0;
+    const rate = (this.taxForm.get('salesTaxRate')?.value || 0) / 100; // Convert percentage to decimal
     return (amount * rate / (1 + rate)).toFixed(2);
   }
 
@@ -85,7 +85,7 @@ export class TaxSettingsComponent implements OnInit {
 
   calculateInclusiveConsignmentPayout(amount: number): string {
     // For tax-inclusive, extract the pre-tax amount first, then calculate 50%
-    const rate = this.taxForm.get('salesTaxRate')?.value || 0;
+    const rate = (this.taxForm.get('salesTaxRate')?.value || 0) / 100; // Convert percentage to decimal
     const preTaxAmount = amount / (1 + rate);
     return (preTaxAmount * 0.5).toFixed(2);
   }

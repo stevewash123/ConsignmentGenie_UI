@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../../../environments/environment';
+import { RedirectService } from '../../../../services/redirect.service';
 
 export interface QuickBooksStatus {
   isConnected: boolean;
@@ -25,7 +25,7 @@ export interface QuickBooksStatus {
   styleUrls: ['./accounting.component.scss']
 })
 export class AccountingComponent implements OnInit {
-  // TODO: Create QuickBooksService and inject here instead of HttpClient
+  private redirectService = inject(RedirectService);
 
   quickBooksStatus = signal<QuickBooksStatus>({
     isConnected: false,
@@ -81,9 +81,7 @@ export class AccountingComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
-      // Mock QuickBooks OAuth flow - replace with actual API call
-      const oauthUrl = `${environment.apiUrl}/api/integrations/quickbooks/connect`;
-      window.location.href = oauthUrl;
+      await this.redirectService.redirectToQuickBooks();
     } catch (error) {
       console.error('Failed to initiate QuickBooks connection:', error);
       this.quickBooksStatus.update(status => ({

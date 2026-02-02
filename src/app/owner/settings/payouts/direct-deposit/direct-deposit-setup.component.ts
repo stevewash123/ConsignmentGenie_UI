@@ -75,8 +75,9 @@ export class DirectDepositSetupComponent implements OnInit, OnDestroy {
   async loadSettings() {
     console.log('DirectDepositSetupComponent: loadSettings called');
     try {
-      console.log('DirectDepositSetupComponent: Making API call to getPayoutSettings');
-      const settings = await firstValueFrom(this.payoutSettingsService.getPayoutSettings());
+      console.log('DirectDepositSetupComponent: Making API call to loadPayoutSettings');
+      await this.payoutSettingsService.loadPayoutSettings();
+      const settings = this.payoutSettingsService.getCurrentPayoutSettings();
       console.log('DirectDepositSetupComponent: Received payout settings:', settings);
       this.payoutSettings.set(settings);
       console.log('DirectDepositSetupComponent: Settings signal updated. Current state:', {

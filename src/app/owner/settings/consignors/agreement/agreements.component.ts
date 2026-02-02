@@ -45,6 +45,15 @@ export class AgreementsComponent implements OnInit {
     return settings?.agreementRequirement !== 'none';
   });
 
+  shouldShowTemplateRequiredError = computed(() => {
+    const onboardingSettings = this.onboardingSettings();
+
+    // Show error if agreements are required but no template is uploaded
+    return onboardingSettings?.agreementRequirement !== 'none' &&
+           onboardingSettings?.agreementRequirement !== undefined &&
+           !this.hasCustomTemplate();
+  });
+
 
   // Use the agreement service - initialized in constructor
   settings!: Signal<AgreementSettings | null>;
@@ -135,14 +144,12 @@ Consult with an attorney to ensure your agreement meets local legal requirements
   }
 
   ngOnInit() {
-    this.loadTemplate();
-    this.loadSettings();
     this.loadOnboardingSettings();
+    this.loadAgreementData();
   }
 
-  async loadSettings() {
+  async loadAgreementData() {
     await this.agreementService.loadAgreementSettings();
-    // Reload template after settings are loaded to update hasCustomTemplate state
     await this.loadTemplate();
   }
 
@@ -157,24 +164,21 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   async loadTemplate() {
     try {
-      // Force refresh settings from server to avoid stale cache
-      await this.agreementService.loadAgreementSettings();
-
-      // Check if there's an uploaded template from settings
-      const settings = this.settings();
-      const hasUploadedTemplate = settings?.agreementTemplateId != null;
+      // Get organization's agreement template ID from the Organization table
+      const organizationTemplateId = await this.agreementService.getOrganizationAgreementTemplateId();
+      const hasUploadedTemplate = organizationTemplateId != null;
 
       let content = this.sampleTemplate;
 
       // If there's an uploaded template, try to get its content
       if (hasUploadedTemplate) {
         try {
-          content = await this.getAgreementTemplateContent(settings!.agreementTemplateId!);
+          content = await this.getAgreementTemplateContent(organizationTemplateId!);
         } catch (error) {
           console.warn('Could not load agreement template content:', error);
           // If we can't get the text content, try to download and extract it
           try {
-            const blob = await this.agreementService.downloadAgreementTemplate(settings!.agreementTemplateId!);
+            const blob = await this.agreementService.downloadAgreementTemplate(organizationTemplateId!);
             if (blob.type === 'text/plain' || blob.type.includes('text')) {
               content = await blob.text();
             } else {
@@ -192,7 +196,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
       // Create local template based on whether there's an uploaded file
       const localTemplate: LocalAgreementTemplate = {
-        id: hasUploadedTemplate ? settings!.agreementTemplateId! : '1',
+        id: hasUploadedTemplate ? organizationTemplateId! : '1',
         content: content,
         isCustomized: hasUploadedTemplate,
         lastModified: new Date(),
@@ -317,14 +321,15 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       // Upload the file using the agreement service
       const uploadedTemplate = await this.agreementService.uploadAgreementTemplate(file);
 
-      // Update the settings to reference the new template
-      await this.agreementService.updateAgreementSettings({ agreementTemplateId: uploadedTemplate.id });
+      // Update the onboarding settings to reference the new template
+      // Note: This will need to be updated to use consignorService when the endpoint is available
+      // await this.consignorService.updateConsignorOnboardingSettings({ agreementTemplateId: uploadedTemplate.id });
 
       // Update local state
       this.viewMode.set('agreement');
 
-      // Reload the template to update the display
-      await this.loadTemplate();
+      // Reload both agreement settings and template to update the display
+      await this.loadAgreementData();
 
       this.showSuccess('Agreement template uploaded successfully');
     } catch (error: any) {
@@ -368,9 +373,9 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       this.downloadSample();
     } else {
       // Check if we have an uploaded PDF template
-      const settings = this.settings();
-      if (settings?.agreementTemplateId) {
-        await this.downloadPdfTemplate(settings.agreementTemplateId);
+      const organizationTemplateId = await this.agreementService.getOrganizationAgreementTemplateId();
+      if (organizationTemplateId) {
+        await this.downloadPdfTemplate(organizationTemplateId);
       } else {
         this.downloadTemplate();
       }
@@ -411,15 +416,16 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       // Upload the generated PDF
       const uploadedTemplate = await this.agreementService.uploadAgreementTemplate(pdfFile);
 
-      // Update the settings to reference the new template
-      await this.agreementService.updateAgreementSettings({ agreementTemplateId: uploadedTemplate.id });
+      // Update the onboarding settings to reference the new template
+      // Note: This will need to be updated to use consignorService when the endpoint is available
+      // await this.consignorService.updateConsignorOnboardingSettings({ agreementTemplateId: uploadedTemplate.id });
 
       // Update local state
       this.viewMode.set('agreement');
       this.isEditing.set(false);
 
-      // Reload the template to update the display
-      await this.loadTemplate();
+      // Reload both agreement settings and template to update the display
+      await this.loadAgreementData();
 
 
     } catch (error: any) {
@@ -438,8 +444,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
     this.isSaving.set(true);
     try {
-      const settings = this.settings();
-      const templateId = settings?.agreementTemplateId;
+      const templateId = await this.agreementService.getOrganizationAgreementTemplateId();
 
       if (!templateId) {
         this.showError('No agreement template to delete');
@@ -449,14 +454,13 @@ Consult with an attorney to ensure your agreement meets local legal requirements
       // Delete the template file
       await this.agreementService.deleteAgreementTemplate(templateId);
 
-      // Update the settings to remove the template reference
-      await this.agreementService.updateAgreementSettings({ agreementTemplateId: null });
+      // The delete API call should automatically clear the Organization.AgreementTemplateId field
 
       // Reset local state
       this.viewMode.set('sample');
 
-      // Reload the template to update the display
-      await this.loadTemplate();
+      // Reload both agreement settings and template to update the display
+      await this.loadAgreementData();
 
 
     } catch (error: any) {

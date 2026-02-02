@@ -78,7 +78,8 @@ export class PayoutGeneralComponent implements OnInit, OnDestroy {
   async loadSettings() {
     this.isLoading.set(true);
     try {
-      const settings = await firstValueFrom(this.payoutSettingsService.getPayoutSettings());
+      await this.payoutSettingsService.loadPayoutSettings();
+      const settings = this.payoutSettingsService.getCurrentPayoutSettings();
       if (settings) {
         this.updateFormFromSettings(settings);
         this.showSuccess('Settings loaded successfully');

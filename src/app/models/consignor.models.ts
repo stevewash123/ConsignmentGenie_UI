@@ -8,7 +8,6 @@ export interface ConsignorPermissions {
 
 export interface ConsignorOnboardingSettings {
   agreementRequirement: 'none' | 'acknowledge' | 'upload';
-  agreementTemplateId: string | null;
   acknowledgeTermsText: string | null;
   approvalMode: 'auto' | 'manual';
 }

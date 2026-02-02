@@ -7,12 +7,11 @@ import { AgreementTemplate } from '../models/agreements.models';
 export interface AgreementSettings {
   autoSendAgreementOnRegister: boolean;
   requireSignedAgreement: boolean;
-  agreementTemplateId: string | null;
 }
 
 export interface EmailAgreementRequest {
-  providerId: string;
-  emailAddress?: string; // Optional override, otherwise uses provider's email
+  consignorId: string;
+  emailAddress?: string; // Optional override, otherwise uses consignor's email
   includeInstructions?: boolean;
   customMessage?: string;
 }
@@ -37,7 +36,7 @@ export class AgreementService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Send generated consignment agreement via email to a provider
+   * Send generated consignment agreement via email to a consignor
    */
   emailAgreement(request: EmailAgreementRequest): Observable<EmailAgreementResponse> {
     return this.http.post<EmailAgreementResponse>(`${this.baseUrl}/api/agreements/email`, request);
@@ -51,10 +50,10 @@ export class AgreementService {
   }
 
   /**
-   * Generate agreement content for a specific provider
+   * Generate agreement content for a specific consignor
    */
-  generateAgreementForProvider(providerId: string): Observable<{ htmlContent: string; pdfUrl?: string }> {
-    return this.http.get<{ htmlContent: string; pdfUrl?: string }>(`${this.baseUrl}/api/agreements/generate/${providerId}`);
+  generateAgreementForConsignor(consignorId: string): Observable<{ htmlContent: string; pdfUrl?: string }> {
+    return this.http.get<{ htmlContent: string; pdfUrl?: string }>(`${this.baseUrl}/api/agreements/generate/${consignorId}`);
   }
 
   // === AGREEMENT TEMPLATE MANAGEMENT ===
@@ -68,7 +67,7 @@ export class AgreementService {
     formData.append('file', file);
 
     const response = await firstValueFrom(
-      this.http.post<AgreementTemplate>(`${this.baseUrl}/api/owner/settings/consignor/agreement-template/upload`, formData)
+      this.http.post<AgreementTemplate>(`${this.baseUrl}/api/organizations/agreements/templates`, formData)
     );
 
     return response;
@@ -79,7 +78,7 @@ export class AgreementService {
    */
   async downloadAgreementTemplate(templateId: string): Promise<Blob> {
     const response = await firstValueFrom(
-      this.http.get(`${this.baseUrl}/api/organization/settings/agreements/templates/${templateId}`,
+      this.http.get(`${this.baseUrl}/api/organizations/agreements/templates/${templateId}`,
         { responseType: 'blob' })
     );
 
@@ -91,7 +90,7 @@ export class AgreementService {
    */
   async getAgreementTemplateAsText(templateId: string): Promise<string> {
     const response = await firstValueFrom(
-      this.http.get(`${this.baseUrl}/api/organization/settings/agreements/templates/${templateId}/text`,
+      this.http.get(`${this.baseUrl}/api/organizations/agreements/templates/${templateId}/text`,
         { responseType: 'text' })
     );
 
@@ -103,7 +102,7 @@ export class AgreementService {
    */
   async deleteAgreementTemplate(templateId: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete(`${this.baseUrl}/api/organization/settings/agreements/templates/${templateId}`)
+      this.http.delete(`${this.baseUrl}/api/organizations/agreements/templates/${templateId}`)
     );
   }
 
@@ -159,8 +158,7 @@ export class AgreementService {
       // Set default settings on error
       this.agreementSettings$.next({
         autoSendAgreementOnRegister: false,
-        requireSignedAgreement: true,
-        agreementTemplateId: null
+        requireSignedAgreement: true
       });
     }
   }
@@ -182,7 +180,7 @@ export class AgreementService {
 
     try {
       const response = await firstValueFrom(
-        this.http.patch<AgreementSettings>(`${this.baseUrl}/api/owner/settings/consignor/consignor-onboarding`, updated)
+        this.http.put<AgreementSettings>(`${this.baseUrl}/api/owner/settings/consignor/consignor-onboarding`, updated)
       );
       this.agreementSettings$.next(response);
     } catch (error) {
@@ -197,6 +195,21 @@ export class AgreementService {
    */
   getCurrentAgreementSettings(): AgreementSettings | null {
     return this.agreementSettings$.value;
+  }
+
+  /**
+   * Get organization's agreement template ID from Organization table
+   */
+  async getOrganizationAgreementTemplateId(): Promise<string | null> {
+    try {
+      const response = await firstValueFrom(
+        this.http.get<{agreementTemplateId: string | null}>(`${this.baseUrl}/api/organizations/agreement-template-id`)
+      );
+      return response.agreementTemplateId;
+    } catch (error) {
+      console.error('Failed to get organization agreement template ID:', error);
+      return null;
+    }
   }
 
   /**

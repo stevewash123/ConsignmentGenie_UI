@@ -131,8 +131,8 @@
               class="btn-icon action-btn"
               *ngIf="notification.actionUrl"
               (click)="handleAction(notification)"
-              [title]="getActionItem(notification.type).tooltip">
-              {{ getActionItem(notification.type).icon }}
+              [title]="getActionButtonTooltip(notification)">
+              {{ getActionButtonText(notification) }}
             </button>
 
             <!-- Delete -->

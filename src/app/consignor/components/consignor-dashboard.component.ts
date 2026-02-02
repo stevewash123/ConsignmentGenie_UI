@@ -22,6 +22,7 @@ export class ConsignorDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.checkAgreementRequirement();
     this.loadDashboard();
   }
 
@@ -43,5 +44,28 @@ export class ConsignorDashboardComponent implements OnInit {
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  private checkAgreementRequirement() {
+    // Check if consignor needs to complete agreement upload
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+
+    try {
+      // Decode JWT token to check claims
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('Consignor dashboard: JWT payload:', payload);
+
+      // Check if user is approved - if not approved, they may need agreement
+      const isApproved = payload.isApproved === 'true';
+
+      if (!isApproved) {
+        console.log('Consignor not approved - redirecting to agreement onboarding');
+        this.router.navigate(['/consignor/agreement']);
+        return;
+      }
+    } catch (error) {
+      console.error('Error decoding JWT token:', error);
+    }
   }
 }

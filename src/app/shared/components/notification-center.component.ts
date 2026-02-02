@@ -284,6 +284,35 @@ export class NotificationCenterComponent implements OnInit {
     return actions[type] || { icon: '👁️', tooltip: 'View details' };
   }
 
+  getActionButtonText(notification: NotificationDto): string {
+    // Use custom text from metadata if available
+    if (notification.metadata?.actionButtonText) {
+      return notification.metadata.actionButtonText;
+    }
+
+    // Fallback to type-specific defaults
+    const defaults: Record<string, string> = {
+      manifest: 'View Manifest',
+      dropoff_manifest: 'Review Import',
+      payout: 'Process Payout',
+      sale: 'View Sale',
+      expiring: 'Review Items',
+      agreement: 'View Agreement',
+      system: 'View Details'
+    };
+
+    return defaults[notification.type] || 'View Details';
+  }
+
+  getActionButtonTooltip(notification: NotificationDto): string {
+    // Use custom text from metadata if available
+    if (notification.metadata?.actionButtonText) {
+      return `Click to ${notification.metadata.actionButtonText.toLowerCase()}`;
+    }
+
+    return this.getActionItem(notification.type as NotificationType).tooltip;
+  }
+
   trackById(index: number, notification: NotificationDto): string {
     return notification.notificationId;
   }

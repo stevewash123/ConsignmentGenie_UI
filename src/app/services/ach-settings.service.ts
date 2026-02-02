@@ -46,14 +46,14 @@ export class AchSettingsService {
   constructor(private http: HttpClient) { }
 
   createPlaidLinkToken(): Observable<PlaidLinkTokenResponse> {
-    return this.http.post<PlaidLinkTokenResponse>(`${this.baseUrl}/plaid/link-token`, {});
+    return this.http.post<PlaidLinkTokenResponse>(`${this.baseUrl}/direct-deposit/plaid/link-token`, {});
   }
 
   exchangePlaidToken(request: PlaidExchangeTokenRequest): Observable<BankAccountLinkedResponse> {
-    return this.http.post<BankAccountLinkedResponse>(`${this.baseUrl}/plaid/exchange-token`, request);
+    return this.http.post<BankAccountLinkedResponse>(`${this.baseUrl}/direct-deposit/plaid/exchange-token`, request);
   }
 
   disconnectFundingSource(request: DisconnectFundingSourceRequest): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/bank/disconnect`, {});
+    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/direct-deposit/bank/disconnect`, {});
   }
 }

@@ -12,6 +12,15 @@
       </div>
     </div>
 
+    <!-- Error when template is required but not uploaded -->
+    <div class="warning-panel error-panel" *ngIf="shouldShowTemplateRequiredError()">
+      <div class="warning-icon">❌</div>
+      <div class="warning-content">
+        Agreement template is required but not uploaded. Please upload a template file or set the agreement requirement to "No action required" in
+        <a routerLink="/owner/settings/consignors/onboarding">Consignor Onboarding settings</a>.
+      </div>
+    </div>
+
   </div>
 
 

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { SquareStatus } from '../owner/settings/integrations/inventory/inventory.component';
+import { SquareStatus } from '../owner/settings/integrations/sales/sales.component';
 
 export interface SquareConnectionResponse {
   success: boolean;

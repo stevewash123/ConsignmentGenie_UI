@@ -47,7 +47,7 @@ interface LegacyShopProfile {
   selector: 'app-store-profile-basic-info',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
-  templateUrl: './store-profile-basic-info-template.component.html',
+  templateUrl: './store-profile-basic-info.component.html',
   styleUrls: ['./store-profile-basic-info.component.scss']
 })
 export class StoreProfileBasicInfoComponent implements OnInit, OnDestroy {

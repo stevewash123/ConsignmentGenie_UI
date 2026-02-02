@@ -2,6 +2,7 @@
   <header class="section-header">
     <h2 class="section-title">Notification Settings</h2>
     <p class="section-description">Choose which notifications you want to receive and how you want to receive them</p>
+    <div class="auto-save-status">{{ autoSaveStatus() }}</div>
   </header>
 
   <div *ngIf="successMessage()" class="message success">{{ successMessage() }}</div>
@@ -18,7 +19,7 @@
             id="primaryEmail"
             type="email"
             class="form-input"
-            [value]="notificationSettings()?.primaryEmail || ''"
+            [value]="notificationSettings()?.contactInfo?.primaryEmailAddress || ''"
             (input)="onPrimaryEmailChange($any($event.target).value)"
             placeholder="your@email.com">
         </div>
@@ -29,7 +30,7 @@
             id="phoneNumber"
             type="tel"
             class="form-input"
-            [value]="notificationSettings()?.phoneNumber || ''"
+            [value]="notificationSettings()?.contactInfo?.phoneNumber || ''"
             (input)="onPhoneNumberChange($any($event.target).value)"
             placeholder="(555) 123-4567">
         </div>
@@ -48,158 +49,40 @@
           <div class="channel-header">System</div>
         </div>
 
-        <!-- Business Operations -->
-        <div class="notification-category">
-          <div class="category-title">Business Operations</div>
-        </div>
+        <!-- Dynamic Categories from API -->
+        <ng-container *ngFor="let category of notificationSettings()?.notificationPreferences; trackBy: trackByCategory">
+          <div class="notification-category">
+            <div class="category-title">{{ category.categoryName }}</div>
+          </div>
 
-        <div class="notification-row" *ngFor="let notification of businessNotifications; trackBy: trackByNotificationKey">
-          <div class="notification-type">
-            <div class="notification-name" [title]="notification.description">{{ notification.name }}</div>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isEmailEnabled(notification.key)"
-                   (change)="onEmailPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'email_' + notification.key">
-            <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSmsEnabled(notification.key)"
-                   (change)="onSmsPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'sms_' + notification.key"
-                   [disabled]="!notificationSettings()?.phoneNumber">
-            <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSystemEnabled(notification.key)"
-                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'system_' + notification.key">
-            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
-          </div>
-        </div>
-
-        <!-- Consignor Activity -->
-        <div class="notification-category">
-          <div class="category-title">Consignor Activity</div>
-        </div>
-
-        <!-- All consignor notifications including separate Daily/Weekly Payout Ready -->
-        <div class="notification-row" *ngFor="let notification of consignorNotifications; trackBy: trackByNotificationKey"
-             [class.weekly-payout-row]="notification.key === 'weekly_payout_ready'">
-          <div class="notification-type">
-            <div class="notification-name" [title]="notification.description">{{ notification.name }}</div>
-            <!-- Day selector for Weekly Payout Ready -->
-            <div *ngIf="notification.key === 'weekly_payout_ready'" class="weekly-day-inline">
-              <label for="weeklyPayoutDayInline" class="day-selector-label">Day:</label>
-              <select
-                id="weeklyPayoutDayInline"
-                class="day-select-inline"
-                [value]="getWeeklyPayoutDay()"
-                (change)="onWeeklyPayoutDayChange($any($event.target).value)">
-                <option value="monday">Mon</option>
-                <option value="tuesday">Tue</option>
-                <option value="wednesday">Wed</option>
-                <option value="thursday">Thu</option>
-                <option value="friday">Fri</option>
-                <option value="saturday">Sat</option>
-                <option value="sunday">Sun</option>
-              </select>
+          <div class="notification-row" *ngFor="let event of category.events; trackBy: trackByEvent">
+            <div class="notification-type">
+              <div class="notification-name">{{ event.eventName }}</div>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [checked]="event.email"
+                     (change)="onNotificationToggle(category.categoryName, event.eventName, 'email', $any($event.target).checked)"
+                     [id]="'email_' + category.categoryName + '_' + event.eventName">
+              <label [for]="'email_' + category.categoryName + '_' + event.eventName" class="sr-only">Email notifications for {{ event.eventName }}</label>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [checked]="event.sms"
+                     (change)="onNotificationToggle(category.categoryName, event.eventName, 'sms', $any($event.target).checked)"
+                     [id]="'sms_' + category.categoryName + '_' + event.eventName"
+                     [disabled]="!notificationSettings()?.contactInfo?.phoneNumber">
+              <label [for]="'sms_' + category.categoryName + '_' + event.eventName" class="sr-only">SMS notifications for {{ event.eventName }}</label>
+            </div>
+            <div class="notification-channel">
+              <input type="checkbox"
+                     [checked]="event.system"
+                     (change)="onNotificationToggle(category.categoryName, event.eventName, 'system', $any($event.target).checked)"
+                     [id]="'system_' + category.categoryName + '_' + event.eventName">
+              <label [for]="'system_' + category.categoryName + '_' + event.eventName" class="sr-only">System notifications for {{ event.eventName }}</label>
             </div>
           </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isEmailEnabled(notification.key)"
-                   (change)="onEmailPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'email_' + notification.key">
-            <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSmsEnabled(notification.key)"
-                   (change)="onSmsPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'sms_' + notification.key"
-                   [disabled]="!notificationSettings()?.phoneNumber">
-            <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSystemEnabled(notification.key)"
-                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'system_' + notification.key">
-            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
-          </div>
-        </div>
-
-        <!-- Sales & Inventory -->
-        <div class="notification-category">
-          <div class="category-title">Sales & Inventory</div>
-        </div>
-
-        <div class="notification-row" *ngFor="let notification of salesNotifications; trackBy: trackByNotificationKey">
-          <div class="notification-type">
-            <div class="notification-name" [title]="notification.description">{{ notification.name }}</div>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isEmailEnabled(notification.key)"
-                   (change)="onEmailPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'email_' + notification.key">
-            <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSmsEnabled(notification.key)"
-                   (change)="onSmsPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'sms_' + notification.key"
-                   [disabled]="!notificationSettings()?.phoneNumber">
-            <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSystemEnabled(notification.key)"
-                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'system_' + notification.key">
-            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
-          </div>
-        </div>
-
-        <!-- System Alerts -->
-        <div class="notification-category">
-          <div class="category-title">System Alerts</div>
-        </div>
-
-        <div class="notification-row" *ngFor="let notification of systemNotifications; trackBy: trackByNotificationKey">
-          <div class="notification-type">
-            <div class="notification-name" [title]="notification.description">{{ notification.name }}</div>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isEmailEnabled(notification.key)"
-                   (change)="onEmailPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'email_' + notification.key">
-            <label [for]="'email_' + notification.key" class="sr-only">Email notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSmsEnabled(notification.key)"
-                   (change)="onSmsPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'sms_' + notification.key"
-                   [disabled]="!notificationSettings()?.phoneNumber">
-            <label [for]="'sms_' + notification.key" class="sr-only">SMS notifications for {{ notification.name }}</label>
-          </div>
-          <div class="notification-channel">
-            <input type="checkbox"
-                   [checked]="isSystemEnabled(notification.key)"
-                   (change)="onSystemPreferenceChange(notification.key, $any($event.target).checked)"
-                   [id]="'system_' + notification.key"
-                   [disabled]="isSystemNotificationDisabled(notification.key)"
-                   [title]="isSystemNotificationDisabled(notification.key) ? 'System alerts must be enabled for system notifications' : ''">
-            <label [for]="'system_' + notification.key" class="sr-only">System notifications for {{ notification.name }}</label>
-          </div>
-        </div>
+        </ng-container>
       </div>
 
     </section>
@@ -217,7 +100,7 @@
             min="0"
             step="1"
             class="form-input"
-            [value]="notificationSettings()?.thresholds?.highValueSale || 500"
+            [value]="notificationSettings()?.thresholds?.highValueSaleThreshold || 500"
             (input)="onHighValueThresholdChange(+$any($event.target).value)"
             placeholder="500">
           <div class="field-help">Get notified when a single sale exceeds this amount</div>
@@ -231,7 +114,7 @@
             min="0"
             step="1"
             class="form-input"
-            [value]="notificationSettings()?.thresholds?.lowInventory || 10"
+            [value]="notificationSettings()?.thresholds?.lowInventoryAlertThreshold || 10"
             (input)="onLowInventoryThresholdChange(+$any($event.target).value)"
             placeholder="10">
           <div class="field-help">Get notified when inventory drops below this number of items</div>
