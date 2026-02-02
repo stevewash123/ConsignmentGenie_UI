@@ -121,7 +121,11 @@ export class PoliciesComponent implements OnInit, OnDestroy {
 
     this.saving.set(true);
     try {
-      await this.businessSettingsService.updateBusinessSettings({ policies: businessPolicies });
+      // Update individual policy settings using the shop-policies endpoint
+      await this.businessSettingsService.updateShopPolicySetting('storeHours', businessPolicies.storeHours);
+      await this.businessSettingsService.updateShopPolicySetting('returns', businessPolicies.returns);
+      await this.businessSettingsService.updateShopPolicySetting('payments', businessPolicies.payments);
+      await this.businessSettingsService.updateShopPolicySetting('lastUpdated', businessPolicies.lastUpdated);
       this.policies.set(businessPolicies);
       this.showSuccess('Policies saved automatically');
     } catch (error) {
@@ -185,15 +189,15 @@ export class PoliciesComponent implements OnInit, OnDestroy {
 
   async loadPolicies() {
     try {
-      await this.businessSettingsService.loadBusinessSettings();
-      const businessSettings = this.businessSettingsService.getCurrentBusinessSettings();
-      if (businessSettings?.policies) {
-        this.policies.set(businessSettings.policies);
-        this.populateForm(businessSettings.policies);
+      await this.businessSettingsService.loadShopPolicies();
+      const shopPolicies = this.businessSettingsService.getCurrentShopPolicies();
+      if (shopPolicies) {
+        this.policies.set(shopPolicies);
+        this.populateForm(shopPolicies);
       }
     } catch (error) {
       // If policies don't exist, use defaults - no error message needed
-      console.log('Using default business policies');
+      console.log('Using default shop policies');
     }
   }
 

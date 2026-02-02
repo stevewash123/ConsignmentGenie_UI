@@ -20,7 +20,7 @@ export class Payouts {
 
     try {
       // Step 1: Get Plaid link token from our backend
-      const response = await fetch(`${environment.apiUrl}/api/settings/payments/ach/connect`, {
+      const response = await fetch(`${environment.apiUrl}/api/owner/settings/payouts/plaid/link-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // TODO: Add auth headers
@@ -48,7 +48,7 @@ export class Payouts {
   private async handlePlaidSuccess(publicToken: string, metadata: any) {
     try {
       // Step 3: Send public token to our backend for exchange
-      const response = await fetch(`${environment.apiUrl}/api/settings/payments/ach/callback`, {
+      const response = await fetch(`${environment.apiUrl}/api/owner/settings/payouts/plaid/exchange-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

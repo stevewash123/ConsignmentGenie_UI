@@ -29,7 +29,7 @@ export class ConsignorPermissionsService {
   async loadConsignorPermissions(): Promise<void> {
     try {
       const permissions = await firstValueFrom(
-        this.http.get<ConsignorPermissions>(`${environment.apiUrl}/api/settings/consignors/permissions`)
+        this.http.get<ConsignorPermissions>(`${environment.apiUrl}/api/owner/settings/consignor/consignor-onboarding`)
       );
       this.consignorPermissions$.next(permissions);
     } catch (error) {
@@ -103,7 +103,7 @@ export class ConsignorPermissionsService {
 
     try {
       const response = await firstValueFrom(
-        this.http.patch<{success: boolean, data: ConsignorPermissions}>(`${environment.apiUrl}/api/settings/consignors/permissions`, changesToSave)
+        this.http.patch<{success: boolean, data: ConsignorPermissions}>(`${environment.apiUrl}/api/owner/settings/consignor/consignor-onboarding`, changesToSave)
       );
 
       // Update with server response (authoritative)

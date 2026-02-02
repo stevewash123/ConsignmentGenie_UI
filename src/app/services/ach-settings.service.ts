@@ -41,7 +41,7 @@ export interface DisconnectFundingSourceRequest {
   providedIn: 'root'
 })
 export class AchSettingsService {
-  private baseUrl = `${environment.apiUrl}/api/payoutsettings`;
+  private baseUrl = `${environment.apiUrl}/api/owner/settings/payouts`;
 
   constructor(private http: HttpClient) { }
 

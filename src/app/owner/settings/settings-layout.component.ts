@@ -67,7 +67,7 @@ export class SettingsLayoutComponent implements OnInit {
     },
     {
       id: 'business-settings',
-      label: 'Business Settings',
+      label: 'Business',
       icon: '⚙️',
       description: 'Tax rates, receipts, policies',
       children: [
@@ -93,7 +93,7 @@ export class SettingsLayoutComponent implements OnInit {
     },
     {
       id: 'consignor-settings',
-      label: 'Consignor Settings',
+      label: 'Consignor',
       icon: '👥',
       description: 'Default permissions and terms for consignors',
       children: [

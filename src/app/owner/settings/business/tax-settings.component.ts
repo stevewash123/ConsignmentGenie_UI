@@ -14,7 +14,6 @@ import { BusinessSettings } from '../../../models/business.models';
 })
 export class TaxSettingsComponent implements OnInit {
   taxForm!: FormGroup;
-  saving = signal(false);
   errorMessage = signal('');
 
   constructor(
@@ -33,6 +32,16 @@ export class TaxSettingsComponent implements OnInit {
       taxIncludedInPrices: [false],
       chargeTaxOnShipping: [false],
       taxIdEin: ['']
+    });
+
+    // Set up auto-save on form changes
+    this.taxForm.valueChanges.subscribe((formValue) => {
+      if (this.taxForm.valid) {
+        // Map form values to API format and trigger auto-save
+        Object.entries(formValue).forEach(([key, value]) => {
+          this.businessSettingsService.updateBusinessSetting(key, value);
+        });
+      }
     });
   }
 
@@ -83,24 +92,6 @@ export class TaxSettingsComponent implements OnInit {
 
   previewTaxCalculation() {
   }
-
-  async onSave() {
-    if (!this.taxForm.valid) {
-      this.showError('Please correct the form errors before saving');
-      return;
-    }
-
-    this.saving.set(true);
-    try {
-      const taxSettings = this.taxForm.value;
-      this.businessSettingsService.updateBusinessSettings({ tax: taxSettings });
-    } catch (error) {
-      this.showError('Failed to save tax settings. Please try again.');
-    } finally {
-      this.saving.set(false);
-    }
-  }
-
 
   private showError(message: string) {
     this.errorMessage.set(message);

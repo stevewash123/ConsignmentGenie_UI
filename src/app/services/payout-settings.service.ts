@@ -22,7 +22,7 @@ export class PayoutSettingsService {
   async loadPayoutSettings(): Promise<void> {
     try {
       const settings = await firstValueFrom(
-        this.http.get<PayoutSettings>(`${environment.apiUrl}/api/settings/payouts/general`)
+        this.http.get<PayoutSettings>(`${environment.apiUrl}/api/owner/settings/payouts`)
       );
       this.payoutSettings$.next(settings);
     } catch (error) {
@@ -58,7 +58,7 @@ export class PayoutSettingsService {
     } as PayoutSettings;
 
     const response = await firstValueFrom(
-      this.http.post<{success: boolean, data: PayoutSettings}>(`${environment.apiUrl}/api/settings/payouts/general`, fullSettings)
+      this.http.post<{success: boolean, data: PayoutSettings}>(`${environment.apiUrl}/api/owner/settings/payouts`, fullSettings)
     );
 
     this.payoutSettings$.next(response.data);
@@ -78,7 +78,7 @@ export class PayoutSettingsService {
 
     try {
       const response = await firstValueFrom(
-        this.http.patch<{success: boolean, data: PayoutSettings}>(`${environment.apiUrl}/api/settings/payouts/general`, updated)
+        this.http.patch<{success: boolean, data: PayoutSettings}>(`${environment.apiUrl}/api/owner/settings/payouts`, updated)
       );
 
       // Update with server response (authoritative)

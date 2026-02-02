@@ -68,7 +68,7 @@ export class AgreementService {
     formData.append('file', file);
 
     const response = await firstValueFrom(
-      this.http.post<AgreementTemplate>(`${this.baseUrl}/api/organization/settings/agreements/templates`, formData)
+      this.http.post<AgreementTemplate>(`${this.baseUrl}/api/owner/settings/consignor/agreement-template/upload`, formData)
     );
 
     return response;
@@ -151,7 +151,7 @@ export class AgreementService {
   async loadAgreementSettings(): Promise<void> {
     try {
       const settings = await firstValueFrom(
-        this.http.get<AgreementSettings>(`${this.baseUrl}/api/settings/agreements/general`)
+        this.http.get<AgreementSettings>(`${this.baseUrl}/api/owner/settings/consignor/consignor-onboarding`)
       );
       this.agreementSettings$.next(settings);
     } catch (error) {
@@ -182,7 +182,7 @@ export class AgreementService {
 
     try {
       const response = await firstValueFrom(
-        this.http.patch<AgreementSettings>(`${this.baseUrl}/api/settings/agreements/general`, updated)
+        this.http.patch<AgreementSettings>(`${this.baseUrl}/api/owner/settings/consignor/consignor-onboarding`, updated)
       );
       this.agreementSettings$.next(response);
     } catch (error) {

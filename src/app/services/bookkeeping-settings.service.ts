@@ -77,7 +77,7 @@ export interface UpdateBookkeepingSettingsRequest {
   providedIn: 'root'
 })
 export class BookkeepingSettingsService {
-  private readonly apiUrl = `${environment.apiUrl}/api/bookkeeping-settings`;
+  private readonly apiUrl = `${environment.apiUrl}/api/owner/settings/bookkeeping/general`;
 
   constructor(private http: HttpClient) {}
 

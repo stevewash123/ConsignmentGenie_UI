@@ -20,9 +20,8 @@ export class AccountingSettingsService {
 
   async loadAccountingSettings(): Promise<void> {
     try {
-      // TODO: Verify this endpoint exists - may need to be moved to different controller
       const response = await firstValueFrom(
-        this.http.get<AccountingSettings>(`${environment.apiUrl}/api/settings/accounting/general`)
+        this.http.get<AccountingSettings>(`${environment.apiUrl}/api/owner/settings/bookkeeping/general`)
       );
       this.accountingSettings$.next(response);
     } catch (error) {
@@ -35,8 +34,7 @@ export class AccountingSettingsService {
   updateAccountingSettings(settings: AccountingSettings): void {
     this.accountingSettings$.next(settings);
     // Auto-save to server
-    // TODO: Verify this endpoint exists - may need to be moved to different controller
-    this.http.patch<{success: boolean, data: AccountingSettings}>(`${environment.apiUrl}/api/settings/accounting/general`, settings)
+    this.http.patch<{success: boolean, data: AccountingSettings}>(`${environment.apiUrl}/api/owner/settings/bookkeeping/general`, settings)
       .subscribe({
         next: (response) => {
           // Update with server response (authoritative)

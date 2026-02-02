@@ -1,7 +1,7 @@
 <div class="agreement-template-editor">
   <div class="page-header">
     <h2>Consignment Agreement</h2>
-    <p>Customize your consignment agreement with placeholders that will be automatically filled when generating agreements for consignors.</p>
+    <p [innerHTML]="subtitleText"></p>
 
     <!-- Warning when template editing is disabled -->
     <div class="warning-panel" *ngIf="!isTemplateEditingEnabled()">
@@ -14,53 +14,6 @@
 
   </div>
 
-  <!-- Agreement Settings -->
-  <div class="form-section">
-    <h3>Consignment Agreements</h3>
-    <p class="section-description">
-      Configure how consignment agreements are handled with new consignors.
-    </p>
-
-    <div class="form-group">
-      <label class="permission-toggle">
-        <input
-          type="checkbox"
-          [checked]="settings()?.requireSignedAgreement || false"
-          (change)="onRequireSignedChange($any($event.target).checked)"
-          name="requireBeforeItems">
-        <div class="toggle-switch"></div>
-        <div class="permission-content">
-          <span class="permission-title">Require signed agreement before activating account</span>
-          <span class="permission-description">Block account activation until agreement is on file</span>
-        </div>
-      </label>
-    </div>
-
-    <!-- Error when require agreement is checked but no agreement uploaded -->
-    <div class="error-panel" *ngIf="showAgreementRequiredError()">
-      <div class="error-icon">❌</div>
-      <div class="error-content">
-        <strong>Agreement Required</strong><br>
-        You have enabled "Require signed agreement" but no agreement template has been uploaded.
-
-        <div class="error-actions">
-          <label for="error-upload-input" class="btn-primary btn-small">
-            <span>📤</span>
-            Upload Agreement Template
-          </label>
-          <input
-            id="error-upload-input"
-            type="file"
-            accept="application/pdf,.pdf,.txt,.rtf,.html,.htm,text/plain,text/rtf,text/html"
-            (change)="onFileSelected($event)"
-            [disabled]="isUploading()"
-            style="display: none;">
-
-          <span class="error-help-text">or uncheck the requirement above</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
 
   <!-- Agreement Preview -->

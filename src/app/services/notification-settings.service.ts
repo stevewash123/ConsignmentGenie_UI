@@ -29,7 +29,7 @@ export class NotificationSettingsService {
   async loadNotificationSettings(): Promise<void> {
     try {
       const settings = await firstValueFrom(
-        this.http.get<NotificationSettings>(`${environment.apiUrl}/api/settings/notifications/general`)
+        this.http.get<NotificationSettings>(`${environment.apiUrl}/api/owner/settings/notifications`)
       );
       this.notificationSettings$.next(settings);
     } catch (error) {
@@ -112,7 +112,7 @@ export class NotificationSettingsService {
 
     try {
       const response = await firstValueFrom(
-        this.http.patch<{success: boolean, data: NotificationSettings}>(`${environment.apiUrl}/api/settings/notifications/general`, changesToSave)
+        this.http.patch<{success: boolean, data: NotificationSettings}>(`${environment.apiUrl}/api/owner/settings/notifications`, changesToSave)
       );
 
       // Update with server response (authoritative)

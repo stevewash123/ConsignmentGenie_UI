@@ -28,6 +28,8 @@ export class AgreementsComponent implements OnInit {
   template = signal<LocalAgreementTemplate | null>(null);
   templateContent = signal('');
   isEditing = signal(false);
+
+  subtitleText = 'Set up your agreement template using placeholders like <strong>{{consignorName}}</strong> and <strong>{{commissionRate}}</strong> that automatically populate with each consignor\'s details. We\'ll help you generate, distribute, and track signed agreements.';
   isSaving = signal(false);
   isUploading = signal(false);
   successMessage = signal('');
@@ -43,10 +45,6 @@ export class AgreementsComponent implements OnInit {
     return settings?.agreementRequirement !== 'none';
   });
 
-  showAgreementRequiredError = computed(() => {
-    const settings = this.settings();
-    return settings?.requireSignedAgreement === true && !this.hasAgreementUploaded();
-  });
 
   // Use the agreement service - initialized in constructor
   settings!: Signal<AgreementSettings | null>;
@@ -505,16 +503,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     };
   }
 
-  // Check if agreement is uploaded
-  hasAgreementUploaded(): boolean {
-    const settings = this.settings();
-    return settings?.agreementTemplateId != null;
-  }
 
-  // Settings change handlers
-  onRequireSignedChange(checked: boolean): void {
-    this.agreementService.updateAgreementSetting('requireSignedAgreement', checked);
-  }
 
   private isValidFileExtension(fileName: string): boolean {
     const allowedExtensions = ['.pdf', '.txt', '.rtf', '.html', '.htm'];

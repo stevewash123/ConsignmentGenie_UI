@@ -269,7 +269,7 @@ export class ConsignorService {
   async loadNotificationSettings(): Promise<void> {
     try {
       const settings = await firstValueFrom(
-        this.http.get<ConsignorNotificationSettings>(`${environment.apiUrl}/api/settings/consignors/notifications`)
+        this.http.get<ConsignorNotificationSettings>(`${environment.apiUrl}/api/owner/settings/consignor/consignor-onboarding`)
       );
       this.notificationSettings$.next(settings);
     } catch (error) {
@@ -298,7 +298,7 @@ export class ConsignorService {
 
     try {
       const response = await firstValueFrom(
-        this.http.patch<ConsignorNotificationSettings>(`${environment.apiUrl}/api/settings/consignors/notifications`, updated)
+        this.http.patch<ConsignorNotificationSettings>(`${environment.apiUrl}/api/owner/settings/consignor/consignor-onboarding`, updated)
       );
       this.notificationSettings$.next(response);
     } catch (error) {
@@ -320,7 +320,7 @@ export class ConsignorService {
    */
   async getConsignorOnboardingSettings(): Promise<ConsignorOnboardingSettings> {
     return await firstValueFrom(
-      this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/settings/consignors/onboarding`)
+      this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/owner/settings/consignor/consignor-onboarding`)
     );
   }
 }

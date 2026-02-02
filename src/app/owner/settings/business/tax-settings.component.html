@@ -4,7 +4,7 @@
     <p>Configure sales tax collection and calculation for your store</p>
   </header>
 
-  <form [formGroup]="taxForm" (ngSubmit)="onSave()" *ngIf="taxForm">
+  <form [formGroup]="taxForm" *ngIf="taxForm">
 
     <!-- Sales Tax Rate -->
     <section class="form-section">
@@ -77,9 +77,6 @@
     <div class="form-actions">
       <button type="button" (click)="previewTaxCalculation()" class="btn-secondary">
         Preview Tax Impact
-      </button>
-      <button type="submit" [disabled]="!taxForm.valid || saving()" class="btn-primary">
-        {{ saving() ? 'Saving...' : 'Save Tax Settings' }}
       </button>
     </div>
   </form>

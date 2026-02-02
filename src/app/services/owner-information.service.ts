@@ -18,7 +18,7 @@ export class OwnerInformationService {
    */
   async loadOwnerContact(): Promise<OwnerContact> {
     return await firstValueFrom(
-      this.http.get<OwnerContact>(`${environment.apiUrl}/api/settings/owner/contact`)
+      this.http.get<OwnerContact>(`${environment.apiUrl}/api/owner/settings/profile/owner-contact`)
     );
   }
 
@@ -27,7 +27,7 @@ export class OwnerInformationService {
    */
   async loadOwnerAddress(): Promise<OwnerAddress> {
     return await firstValueFrom(
-      this.http.get<OwnerAddress>(`${environment.apiUrl}/api/settings/owner/address`)
+      this.http.get<OwnerAddress>(`${environment.apiUrl}/api/owner/settings/profile/owner-address`)
     );
   }
 }

@@ -46,7 +46,7 @@ export class ProfileService {
   async loadProfile(): Promise<void> {
     try {
       const profile = await firstValueFrom(
-        this.http.get<ShopProfile>(`${environment.apiUrl}/api/settings/profile/basic`)
+        this.http.get<ShopProfile>(`${environment.apiUrl}/api/owner/settings/profile/basic-information`)
       );
       this.profile$.next(profile);
     } catch (error) {
@@ -92,7 +92,7 @@ export class ProfileService {
 
     try {
       const response = await firstValueFrom(
-        this.http.patch<{success: boolean, data: ShopProfile}>(`${environment.apiUrl}/api/settings/profile/basic`, changesToSave)
+        this.http.patch<{success: boolean, data: ShopProfile}>(`${environment.apiUrl}/api/owner/settings/profile/basic-information`, changesToSave)
       );
 
       // Update with server response (authoritative)

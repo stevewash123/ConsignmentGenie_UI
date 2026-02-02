@@ -1,8 +1,78 @@
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
 ❯ Building...
 ✔ Building...
-Application bundle generation failed. [9.733 seconds] - 2026-01-21T16:00:19.733Z
+Application bundle generation failed. [29.850 seconds] - 2026-02-02T11:33:15.869Z
 
-[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTS18003: No inputs were found in config file '/mnt/c/Projects/ConsignmentGenie/ConsignmentGenie_UI/tsconfig.spec.json'. Specified 'include' paths were '["src/**/*.d.ts","src/**/*.spec.ts"]' and 'exclude' paths were '["node_modules","dist"]'.[0m [1m[35m[plugin angular-compiler][0m
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".html" files: src/app/shared/components/notification-bell.component.html[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/shared/components/notification-bell.component.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/services/notification-settings.service.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/shared/components/notification-center.component.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/shared/components/notification-preferences.component.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/shared/models/notification.models.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/shared/services/notification.service.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/owner/settings/notifications/notifications.component.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/shared/constants/notification-types.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/shared/config/notification.config.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mFile 'src/app/owner/settings/notifications/notifications-demo.component.ts' is missing from the TypeScript compilation.[0m [1m[35m[plugin angular-compiler][0m
+
+  Ensure the file is part of the TypeScript program via the 'files' or 'include' property.
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".scss" files: src/app/shared/components/notification-center.component.scss[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".scss" files: src/app/shared/components/notification-preferences.component.scss[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".html" files: src/app/shared/components/notification-preferences.component.html[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".scss" files: src/app/shared/components/notification-bell.component.scss[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".scss" files: src/app/owner/settings/notifications/notifications.component.scss[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".html" files: src/app/shared/components/notification-center.component.html[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo loader is configured for ".html" files: src/app/owner/settings/notifications/notifications.component.html[0m
 
 

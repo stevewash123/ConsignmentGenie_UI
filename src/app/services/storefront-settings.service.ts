@@ -30,7 +30,7 @@ export class StorefrontSettingsService {
     this.storefrontSettings$.next(null); // This causes loading spinner
     try {
       const settings = await firstValueFrom(
-        this.http.get<StorefrontSettings>(`${environment.apiUrl}/api/settings/storefront/general`)
+        this.http.get<StorefrontSettings>(`${environment.apiUrl}/api/owner/settings/sales`)
       );
       console.log('✅ Storefront settings loaded:', settings);
       this.storefrontSettings$.next(settings);
@@ -104,7 +104,7 @@ export class StorefrontSettingsService {
     try {
       console.log('💾 Saving storefront settings:', changesToSave);
       const response = await firstValueFrom(
-        this.http.patch<{success: boolean, data: StorefrontSettings}>(`${environment.apiUrl}/api/settings/storefront/general`, changesToSave)
+        this.http.patch<{success: boolean, data: StorefrontSettings}>(`${environment.apiUrl}/api/owner/settings/sales`, changesToSave)
       );
 
       // Update with server response
