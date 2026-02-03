@@ -325,7 +325,8 @@ export class NotificationCenterComponent implements OnInit {
     }
 
     // Hide button for system notifications that default to "View Details" with no real action
-    if (notification.type === 'system' &&
+    const systemNotificationTypes = ['welcome', 'account_activated', 'account_deactivated', 'password_reset'];
+    if (systemNotificationTypes.includes(notification.type) &&
         !notification.metadata?.actionButtonText &&
         (notification.title?.toLowerCase().includes('welcome') ||
          notification.message?.toLowerCase().includes('welcome'))) {

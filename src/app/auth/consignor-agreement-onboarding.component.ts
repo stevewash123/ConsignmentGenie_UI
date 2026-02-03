@@ -70,7 +70,7 @@ export class ConsignorAgreementOnboardingComponent implements OnInit {
                                 apiStatus === 'not_required' ? 'completed' : 'pending');
 
       const mappedStatus: AgreementStatus = {
-        required: status?.requiresAgreement || false,
+        required: status?.agreementMethod ? status.agreementMethod !== 'none' : false,
         type: (status?.agreementMethod as 'none' | 'acknowledge' | 'upload') || 'none',
         status: mappedStatusValue,
         completedAt: status?.completedAt

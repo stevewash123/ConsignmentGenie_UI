@@ -262,7 +262,7 @@ export class LoginSimpleComponent implements OnInit {
       next: (agreementStatus) => {
         console.log('Agreement status for redirect decision:', agreementStatus);
 
-        const isRequired = agreementStatus?.requiresAgreement;
+        const isRequired = agreementStatus?.agreementMethod && agreementStatus.agreementMethod !== 'none';
         const status = agreementStatus?.agreementStatus;
         const hasCompleted = ['uploaded', 'approved', 'completed'].includes(status);
 
