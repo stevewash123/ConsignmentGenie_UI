@@ -164,8 +164,10 @@ Consult with an attorney to ensure your agreement meets local legal requirements
 
   async loadTemplate() {
     try {
+      console.log('[AGREEMENT] Loading template...');
       // Get organization's agreement template ID from the Organization table
       const organizationTemplateId = await this.agreementService.getOrganizationAgreementTemplateId();
+      console.log('[AGREEMENT] Organization template ID:', organizationTemplateId);
       const hasUploadedTemplate = organizationTemplateId != null;
 
       let content = this.sampleTemplate;
@@ -292,6 +294,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     if (!input.files?.length) return;
 
     const file = input.files[0];
+    console.log('[AGREEMENT] File selected:', file.name, file.type, file.size);
 
     // Validate file type (PDF, TXT, RTF, HTML)
     const allowedTypes = [
@@ -304,6 +307,7 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     ];
 
     if (!allowedTypes.includes(file.type) && !this.isValidFileExtension(file.name)) {
+      console.warn('[AGREEMENT] Invalid file type:', file.type);
       this.showError('Please select a PDF, TXT, RTF, or HTML file');
       return;
     }
@@ -311,29 +315,34 @@ Consult with an attorney to ensure your agreement meets local legal requirements
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
+      console.warn('[AGREEMENT] File too large:', file.size);
       this.showError('File size cannot exceed 5MB');
       return;
     }
 
     this.isUploading.set(true);
+    console.log('[AGREEMENT] Starting upload...');
 
     try {
       // Upload the file using the agreement service
+      console.log('[AGREEMENT] Calling agreementService.uploadAgreementTemplate');
       const uploadedTemplate = await this.agreementService.uploadAgreementTemplate(file);
+      console.log('[AGREEMENT] Upload response:', uploadedTemplate);
 
-      // Update the onboarding settings to reference the new template
-      // Note: This will need to be updated to use consignorService when the endpoint is available
-      // await this.consignorService.updateConsignorOnboardingSettings({ agreementTemplateId: uploadedTemplate.id });
+      // The upload API call automatically sets the Organization.AgreementTemplateId field
 
       // Update local state
+      console.log('[AGREEMENT] Setting view mode to agreement');
       this.viewMode.set('agreement');
 
       // Reload both agreement settings and template to update the display
+      console.log('[AGREEMENT] Reloading agreement data...');
       await this.loadAgreementData();
+      console.log('[AGREEMENT] Agreement data reloaded. Template:', this.template());
 
       this.showSuccess('Agreement template uploaded successfully');
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error('[AGREEMENT] Upload error:', error);
       this.showError(error?.error || 'Failed to upload agreement template');
     } finally {
       this.isUploading.set(false);
