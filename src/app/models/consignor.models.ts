@@ -15,7 +15,6 @@ export interface ConsignorOnboardingSettings {
 export interface ConsignorPageSettings {
   agreementRequirement: string;
   agreementTemplateId: string | null;
-  requireSignedAgreement: boolean;
   approvalMode: string;
   acknowledgeTermsText: string | null;
   autoSendAgreementOnRegister: boolean;

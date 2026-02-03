@@ -209,7 +209,7 @@ export class PoliciesComponent implements OnInit, OnDestroy {
     this.weekDays.forEach(day => {
       const dayPolicy = policies.storeHours.schedule[day];
       scheduleControls[day] = {
-        isOpen: dayPolicy?.isOpen ?? true,
+        isOpen: dayPolicy?.isOpen ?? false, // Default to CLOSED instead of OPEN
         openTime: dayPolicy?.openTime ?? '09:00',
         closeTime: dayPolicy?.closeTime ?? '18:00'
       };

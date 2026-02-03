@@ -140,7 +140,8 @@ export const ownerRoutes: Routes = [
             children: [
               {
                 path: '',
-                loadComponent: () => import('./settings/business/business-settings.component').then(m => m.BusinessSettingsComponent)
+                redirectTo: 'tax-settings',
+                pathMatch: 'full'
               },
               {
                 path: 'tax-settings',

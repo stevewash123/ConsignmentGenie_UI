@@ -129,7 +129,7 @@
             <!-- Primary Action (if applicable) -->
             <button
               class="btn-icon action-btn"
-              *ngIf="notification.actionUrl"
+              *ngIf="hasActionableButton(notification)"
               (click)="handleAction(notification)"
               [title]="getActionButtonTooltip(notification)">
               {{ getActionButtonText(notification) }}

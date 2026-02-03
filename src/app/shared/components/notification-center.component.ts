@@ -313,6 +313,28 @@ export class NotificationCenterComponent implements OnInit {
     return this.getActionItem(notification.type as NotificationType).tooltip;
   }
 
+  hasActionableButton(notification: NotificationDto): boolean {
+    // Hide button if no actionUrl
+    if (!notification.actionUrl) {
+      return false;
+    }
+
+    // Hide button if metadata explicitly sets actionButtonText to empty string or null
+    if (notification.metadata?.actionButtonText === '' || notification.metadata?.actionButtonText === null) {
+      return false;
+    }
+
+    // Hide button for system notifications that default to "View Details" with no real action
+    if (notification.type === 'system' &&
+        !notification.metadata?.actionButtonText &&
+        (notification.title?.toLowerCase().includes('welcome') ||
+         notification.message?.toLowerCase().includes('welcome'))) {
+      return false;
+    }
+
+    return true;
+  }
+
   trackById(index: number, notification: NotificationDto): string {
     return notification.notificationId;
   }

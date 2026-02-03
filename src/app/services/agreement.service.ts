@@ -6,7 +6,6 @@ import { AgreementTemplate } from '../models/agreements.models';
 
 export interface AgreementSettings {
   autoSendAgreementOnRegister: boolean;
-  requireSignedAgreement: boolean;
 }
 
 export interface EmailAgreementRequest {
@@ -157,8 +156,7 @@ export class AgreementService {
       console.error('Failed to load agreement settings:', error);
       // Set default settings on error
       this.agreementSettings$.next({
-        autoSendAgreementOnRegister: false,
-        requireSignedAgreement: true
+        autoSendAgreementOnRegister: false
       });
     }
   }
@@ -168,9 +166,7 @@ export class AgreementService {
    */
   async updateAgreementSettings(settings: Partial<AgreementSettings>): Promise<void> {
     const current = this.agreementSettings$.value || {
-      autoSendAgreementOnRegister: false,
-      requireSignedAgreement: true,
-      agreementTemplateId: null
+      autoSendAgreementOnRegister: false
     };
 
     const updated = { ...current, ...settings };
