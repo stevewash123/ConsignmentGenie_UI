@@ -366,4 +366,8 @@ export class ConsignorListComponent implements OnInit {
   isPendingApproval(consignor: Consignor): boolean {
     return consignor.status === 'pending';
   }
+
+  downloadSignedAgreement(consignor: Consignor): void {
+    this.agreementService.downloadSignedAgreement(consignor.id);
+  }
 }

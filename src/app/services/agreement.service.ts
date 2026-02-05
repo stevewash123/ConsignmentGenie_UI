@@ -217,4 +217,12 @@ export class AgreementService {
   ): void {
     this.updateAgreementSettings({ [key]: value } as Partial<AgreementSettings>);
   }
+
+  /**
+   * Download signed agreement for a consignor (Owner only)
+   */
+  downloadSignedAgreement(consignorId: string): void {
+    // Open in a new tab/window to download the file
+    window.open(`${this.baseUrl}/api/agreements/download/${consignorId}`, '_blank');
+  }
 }

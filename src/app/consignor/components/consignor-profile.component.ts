@@ -111,4 +111,8 @@ export class ConsignorProfileComponent implements OnInit {
       day: 'numeric'
     });
   }
+
+  downloadSignedAgreement(): void {
+    this.ConsignorService.downloadMySignedAgreement();
+  }
 }

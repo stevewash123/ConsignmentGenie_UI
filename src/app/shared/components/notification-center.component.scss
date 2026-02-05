@@ -205,6 +205,18 @@
       color: var(--color-text-muted);
     }
   }
+
+  /* Focused state - when navigated from notification bell */
+  &.focused {
+    background: var(--color-accent-bg, #fff3cd) !important;
+    border: 2px solid var(--color-med) !important;
+    box-shadow: 0 0 0 3px var(--color-med) !important;
+    animation: pulse-focus 1s ease-in-out;
+
+    &:hover {
+      background: var(--color-accent-bg, #fff3cd) !important;
+    }
+  }
 }
 
 /* Date Header - Prominent, top-left */
@@ -671,5 +683,24 @@
     width: 32px;
     height: 32px;
     font-size: 0.875rem;
+  }
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes pulse-focus {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--color-med);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(147, 51, 234, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 3px var(--color-med);
   }
 }

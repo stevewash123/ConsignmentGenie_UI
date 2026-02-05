@@ -1,117 +1,96 @@
-<div class="container mx-auto px-4 py-6">
+<div class="dropoff-detail-page">
   <!-- Header -->
-  <div class="flex items-center gap-4 mb-6">
-    <button (click)="back()" class="btn btn-ghost btn-sm">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-      </svg>
-      Back to Manifests
-    </button>
-    <h1 class="text-3xl font-bold text-gray-900">Drop-off Manifest Detail</h1>
+  <div class="page-header">
+    <div class="header-content">
+      <a (click)="back()" class="back-link">← Back to Manifests</a>
+      <h1>Drop-off Manifest Detail</h1>
+    </div>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="flex justify-center py-12">
-    <span class="loading loading-spinner loading-lg"></span>
+  <div *ngIf="isLoading" class="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading manifest details...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !isLoading" class="alert alert-error mb-6">
-    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <span>{{ error }}</span>
+  <div *ngIf="error && !isLoading" class="error-state">
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="back()">Back to List</button>
   </div>
 
   <!-- Request Detail -->
-  <div *ngIf="!isLoading && !error && request" class="space-y-6">
+  <div *ngIf="!isLoading && !error && request" class="content-area">
 
-    <!-- Status and Overview -->
-    <div class="bg-white rounded-lg shadow-sm border p-6">
-      <div class="flex items-start justify-between mb-4">
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">
-            {{ request.consignor.firstName }} {{ request.consignor.lastName }}
-          </h2>
-          <div [class]="getStatusBadgeClass(request.status)" class="mb-3">
-            {{ request.status | titlecase }}
-          </div>
+    <!-- Consolidated Information -->
+    <div class="info-card">
+      <div class="card-header">
+        <span class="badge status-badge" [ngClass]="getStatusBadgeClass(request.status)">
+          {{ request.status | titlecase }}
+        </span>
+        <div class="header-center">
+          <h2>{{ request.consignor.firstName }} {{ request.consignor.lastName }}</h2>
         </div>
-        <div class="text-right text-sm text-gray-600">
-          <div><span class="font-medium">Submitted:</span> {{ formatDateTime(request.createdAt) }}</div>
+        <div class="header-dates">
+          <div><span class="label">Submitted:</span> {{ formatDate(request.createdAt) }}</div>
           <div *ngIf="request.receivedAt">
-            <span class="font-medium">Received:</span> {{ formatDateTime(request.receivedAt) }}
+            <span class="label">Received:</span> {{ formatDate(request.receivedAt) }}
           </div>
           <div *ngIf="request.importedAt">
-            <span class="font-medium">Imported:</span> {{ formatDateTime(request.importedAt) }}
+            <span class="label">Imported:</span> {{ formatDate(request.importedAt) }}
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-        <div class="bg-gray-50 p-3 rounded">
-          <div class="font-medium text-gray-700">Total Items</div>
-          <div class="text-lg font-semibold text-gray-900">{{ request.itemCount }}</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">Total Items</div>
+          <div class="stat-value">{{ request.itemCount }}</div>
         </div>
-        <div class="bg-gray-50 p-3 rounded">
-          <div class="font-medium text-gray-700">Suggested Total</div>
-          <div class="text-lg font-semibold text-gray-900">{{ request.suggestedTotal | currency }}</div>
+        <div class="stat-item">
+          <div class="stat-label">Suggested Total</div>
+          <div class="stat-value">{{ request.suggestedTotal | currency }}</div>
         </div>
-        <div class="bg-gray-50 p-3 rounded" *ngIf="request.plannedDate">
-          <div class="font-medium text-gray-700">Planned Drop-off</div>
-          <div class="text-lg font-semibold text-gray-900">
+        <div class="stat-item" *ngIf="request.plannedDate">
+          <div class="stat-label">Planned Drop-off</div>
+          <div class="stat-value">
             {{ formatDate(request.plannedDate) }}
-            <div *ngIf="request.plannedTimeSlot" class="text-sm text-gray-600">
+            <div *ngIf="request.plannedTimeSlot" class="stat-sub">
               {{ request.plannedTimeSlot }}
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Consignor Information -->
-    <div class="bg-white rounded-lg shadow-sm border p-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">Consignor Information</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-        <div>
-          <span class="font-medium text-gray-700">Name:</span>
-          <span class="ml-2">{{ request.consignor.firstName }} {{ request.consignor.lastName }}</span>
-        </div>
-        <div *ngIf="request.consignor.email">
-          <span class="font-medium text-gray-700">Email:</span>
-          <span class="ml-2">{{ request.consignor.email }}</span>
-        </div>
-        <div *ngIf="request.consignor.phone">
-          <span class="font-medium text-gray-700">Phone:</span>
-          <span class="ml-2">{{ request.consignor.phone }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Shop Information -->
-    <div class="bg-white rounded-lg shadow-sm border p-6" *ngIf="request.shop">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">Shop Information</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-        <div>
-          <span class="font-medium text-gray-700">Shop Name:</span>
-          <span class="ml-2">{{ request.shop.name }}</span>
-        </div>
-        <div *ngIf="request.shop.address">
-          <span class="font-medium text-gray-700">Address:</span>
-          <span class="ml-2">{{ request.shop.address }}</span>
-        </div>
-        <div *ngIf="request.shop.phone">
-          <span class="font-medium text-gray-700">Phone:</span>
-          <span class="ml-2">{{ request.shop.phone }}</span>
+      <!-- Consolidated Contact Info -->
+      <div class="contact-info-section">
+        <div class="info-grid">
+          <div class="info-item" *ngIf="request.consignor.email">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{ request.consignor.email }}</span>
+          </div>
+          <div class="info-item" *ngIf="request.consignor.phone">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">{{ request.consignor.phone }}</span>
+          </div>
+          <div class="info-item" *ngIf="request.consignor.address">
+            <span class="info-label">Address:</span>
+            <span class="info-value">
+              <div>{{ request.consignor.address }}</div>
+              <div *ngIf="request.consignor.city || request.consignor.state || request.consignor.zip">
+                {{ request.consignor.city }}<span *ngIf="request.consignor.city && request.consignor.state">, </span>{{ request.consignor.state }} {{ request.consignor.zip }}
+              </div>
+            </span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Items List -->
-    <div class="bg-white rounded-lg shadow-sm border p-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">Items ({{ request.items.length }})</h3>
-      <div class="overflow-x-auto">
-        <table class="table table-zebra w-full">
+    <div class="items-section">
+      <h3>Items ({{ request.items.length }})</h3>
+      <div class="items-table-container">
+        <table class="items-table">
           <thead>
             <tr>
               <th>Item Name</th>
@@ -127,73 +106,45 @@
               <td>{{ item.category || '-' }}</td>
               <td>{{ item.brand || '-' }}</td>
               <td>{{ item.suggestedPrice | currency }}</td>
-              <td class="max-w-xs truncate" [title]="item.notes">{{ item.notes || '-' }}</td>
+              <td [title]="item.notes">{{ item.notes || '-' }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
 
-    <!-- Messages -->
-    <div class="bg-white rounded-lg shadow-sm border p-6" *ngIf="request.message || request.ownerNotes">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">Messages</h3>
-
-      <div *ngIf="request.message" class="mb-4">
-        <h4 class="font-medium text-gray-700 mb-2">Consignor Message:</h4>
-        <div class="bg-blue-50 p-3 rounded text-sm">{{ request.message }}</div>
-      </div>
-
-      <div *ngIf="request.ownerNotes" class="mb-4">
-        <h4 class="font-medium text-gray-700 mb-2">Owner Notes:</h4>
-        <div class="bg-gray-50 p-3 rounded text-sm whitespace-pre-wrap">{{ request.ownerNotes }}</div>
-      </div>
-    </div>
-
-    <!-- Owner Actions -->
-    <div class="bg-white rounded-lg shadow-sm border p-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">Owner Actions</h3>
-
-      <!-- Owner Notes -->
-      <div class="mb-4">
-        <label for="ownerNotes" class="block text-sm font-medium text-gray-700 mb-2">
-          Owner Notes
-        </label>
-        <textarea
-          id="ownerNotes"
-          [(ngModel)]="ownerNotes"
-          rows="3"
-          class="textarea textarea-bordered w-full"
-          placeholder="Add notes about this dropoff request..."
-          [disabled]="isUpdating"></textarea>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex gap-3">
+      <!-- Action Button -->
+      <div class="action-button-section">
         <button
           *ngIf="canMarkAsReceived()"
           (click)="markAsReceived()"
           [disabled]="isUpdating"
-          class="btn btn-primary">
-          <span *ngIf="isUpdating" class="loading loading-spinner loading-sm"></span>
-          Mark as Received
+          class="btn-primary">
+          <span *ngIf="isUpdating" class="loading-spinner" style="width: 16px; height: 16px; margin-right: 0.5rem;"></span>
+          Move to Pending
         </button>
 
         <button
           *ngIf="canImportToInventory()"
           (click)="importToInventory()"
           [disabled]="isUpdating"
-          class="btn btn-success">
-          <span *ngIf="isUpdating" class="loading loading-spinner loading-sm"></span>
+          class="btn-success">
+          <span *ngIf="isUpdating" class="loading-spinner" style="width: 16px; height: 16px; margin-right: 0.5rem;"></span>
           Import to Inventory
         </button>
 
-        <div *ngIf="!canMarkAsReceived() && !canImportToInventory()" class="text-sm text-gray-500 flex items-center">
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div *ngIf="!canMarkAsReceived() && !canImportToInventory()" style="font-size: 0.875rem; color: var(--color-text-muted); display: flex; align-items: center;">
+          <svg style="width: 16px; height: 16px; margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           No actions available for {{ request.status }} requests
         </div>
       </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="info-card" *ngIf="request.message">
+      <h3>Consignor Message</h3>
+      <div style="background: var(--color-info-light); padding: 0.75rem; border-radius: var(--border-radius-md); font-size: 0.875rem;">{{ request.message }}</div>
     </div>
 
   </div>

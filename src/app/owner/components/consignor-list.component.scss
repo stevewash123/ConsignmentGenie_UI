@@ -35,7 +35,7 @@
 }
 
 /* Button Base Styles */
-.btn-primary, .btn-secondary, .btn-view, .btn-message, .btn-email, .btn-resend, .btn-cancel {
+.btn-primary, .btn-secondary, .btn-view, .btn-message, .btn-email, .btn-download, .btn-resend, .btn-cancel {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -117,6 +117,20 @@
   background: rgba(245, 158, 11, 0.2);
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);
+}
+
+.btn-download {
+  background: rgba(139, 69, 19, 0.1);
+  color: #8b4513;
+  border: 1px solid #8b4513;
+  padding: 0.5rem 0.75rem;
+  min-width: auto;
+}
+
+.btn-download:hover {
+  background: rgba(139, 69, 19, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(139, 69, 19, 0.3);
 }
 
 .btn-resend {

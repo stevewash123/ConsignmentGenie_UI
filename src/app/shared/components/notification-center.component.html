@@ -81,8 +81,10 @@
       <div
         class="notification-card"
         *ngFor="let notification of notifications(); trackBy: trackById"
+        [id]="'notification-' + notification.notificationId"
         [class.unread]="!notification.isRead"
-        [class.read]="notification.isRead">
+        [class.read]="notification.isRead"
+        [class.focused]="isFocusedNotification(notification)">
 
         <!-- Date Header (top-left, prominent) -->
         <div class="notification-date">

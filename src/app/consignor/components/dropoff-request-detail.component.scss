@@ -105,14 +105,16 @@
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  padding: 2rem;
+  padding: 2.5rem;
 }
 
 .detail-section h3 {
   font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 2rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 0.75rem;
 }
 
 .overview-header {
@@ -219,6 +221,9 @@
 
 .items-table-container {
   overflow-x: auto;
+  margin-top: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .items-table {
@@ -227,16 +232,23 @@
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   overflow: hidden;
+  table-layout: fixed;
 }
 
 .items-table th {
   background: #f9fafb;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.25rem;
   text-align: left;
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
   border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.items-table th:last-child {
+  border-right: none;
 }
 
 .items-table th.text-right {
@@ -244,10 +256,16 @@
 }
 
 .items-table td {
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid #f3f4f6;
+  border-right: 1px solid #f3f4f6;
   font-size: 0.875rem;
   color: #111827;
+  vertical-align: top;
+}
+
+.items-table td:last-child {
+  border-right: none;
 }
 
 .items-table tr:last-child td {
@@ -256,17 +274,34 @@
 
 .item-name {
   font-weight: 500;
+  width: 25%;
+}
+
+.item-category {
+  width: 15%;
+}
+
+.item-brand {
+  width: 15%;
 }
 
 .item-price {
   text-align: right;
   font-weight: 500;
+  width: 15%;
 }
 
 .item-notes {
-  max-width: 200px;
+  width: 30%;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
+
+.items-table th:nth-child(1) { width: 25%; }
+.items-table th:nth-child(2) { width: 15%; }
+.items-table th:nth-child(3) { width: 15%; }
+.items-table th:nth-child(4) { width: 15%; }
+.items-table th:nth-child(5) { width: 30%; }
 
 .empty-value {
   color: #9ca3af;
@@ -426,12 +461,16 @@
     font-size: 0.8rem;
   }
 
+  .detail-section {
+    padding: 1.5rem;
+  }
+
   .items-table th,
   .items-table td {
-    padding: 0.5rem;
+    padding: 0.75rem 0.5rem;
   }
 
   .item-notes {
-    max-width: 150px;
+    max-width: 120px;
   }
 }

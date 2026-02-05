@@ -55,18 +55,6 @@ export const consignorRoutes: Routes = [
         loadComponent: () => import('./components/consignor-profile.component').then(m => m.ConsignorProfileComponent)
       },
       {
-        path: 'item-requests',
-        loadComponent: () => import('./components/consignor-item-requests.component').then(m => m.ConsignorItemRequestsComponent)
-      },
-      {
-        path: 'item-requests/submit',
-        loadComponent: () => import('./components/submit-item-request.component').then(m => m.SubmitItemRequestComponent)
-      },
-      {
-        path: 'item-requests/:id',
-        loadComponent: () => import('./components/item-request-detail.component').then(m => m.ItemRequestDetailComponent)
-      },
-      {
         path: 'dropoff-requests',
         loadComponent: () => import('./components/dropoff-requests.component').then(m => m.DropoffRequestsComponent)
       },

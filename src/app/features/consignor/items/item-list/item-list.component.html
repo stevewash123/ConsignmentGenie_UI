@@ -1,14 +1,41 @@
-<div class="my-items-page">
+<div class="items-page">
   <div class="page-header">
-    <h1>My Items</h1>
-    <div class="notifications" *ngIf="getPriceChangeRequestsCount() > 0">
+    <h1>Items</h1>
+    <div class="notifications" *ngIf="activeTab === 'active' && getPriceChangeRequestsCount() > 0">
       <div class="price-request-alert">
         ⚠️ {{ getPriceChangeRequestsCount() }} item(s) need your response for price changes
       </div>
     </div>
   </div>
 
-  <!-- Status Filter Tabs -->
+  <!-- Tab Navigation -->
+  <div class="tab-bar">
+    <div class="tab-buttons">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'active'"
+        (click)="switchTab('active')">
+        📦 Active Items
+        <span class="tab-count" *ngIf="itemsResponse?.totalCount">({{ itemsResponse.totalCount }})</span>
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'manifests'"
+        (click)="switchTab('manifests')">
+        📋 New Items
+        <span class="tab-count" *ngIf="dropoffRequests.length">({{ dropoffRequests.length }})</span>
+      </button>
+    </div>
+    <div class="tab-bar-actions" *ngIf="activeTab === 'manifests'">
+      <a routerLink="/consignor/dropoff-requests/create" class="btn-primary secondary">
+        📦 Create New Manifest
+      </a>
+    </div>
+  </div>
+
+  <!-- Active Items Tab Content -->
+  <div *ngIf="activeTab === 'active'" class="tab-content">
+    <!-- Status Filter Tabs -->
   <div class="filter-tabs">
     <button
       class="filter-tab"
@@ -42,53 +69,24 @@
     </button>
   </div>
 
-  <!-- Search and Sort Controls -->
-  <div class="controls">
-    <div class="search-box">
-      <input
-        type="text"
-        placeholder="Search items..."
-        [value]="searchText"
-        (input)="onSearchInput($event)"
-        class="search-input">
-      <span class="search-icon">🔍</span>
-    </div>
-
-    <div class="sort-controls">
-      <label class="sort-label">Sort:</label>
-      <div class="sort-dropdown">
-        <button class="sort-button" [attr.aria-expanded]="false">
-          {{ getCurrentSortDisplay() }} ▼
-        </button>
-        <div class="sort-menu">
-          <button
-            class="sort-option"
-            [class.active]="sortField === 'listedDate' && sortDirection === 'desc'"
-            (click)="onSortChange('listedDate')">
-            Newest First {{ getSortIcon('listedDate') }}
-          </button>
-          <button
-            class="sort-option"
-            [class.active]="sortField === 'listedDate' && sortDirection === 'asc'"
-            (click)="sortField === 'listedDate' ? onSortChange('listedDate') : null">
-            Oldest First {{ sortField === 'listedDate' && sortDirection === 'asc' ? '✓' : '' }}
-          </button>
-          <button
-            class="sort-option"
-            [class.active]="sortField === 'price' && sortDirection === 'desc'"
-            (click)="onSortChange('price')">
-            Price High-Low {{ getSortIcon('price') }}
-          </button>
-          <button
-            class="sort-option"
-            [class.active]="sortField === 'price' && sortDirection === 'asc'"
-            (click)="sortField === 'price' ? onSortChange('price') : null">
-            Price Low-High {{ sortField === 'price' && sortDirection === 'asc' ? '✓' : '' }}
-          </button>
-        </div>
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+      <div class="search-group">
+        <input
+          type="text"
+          placeholder="Search items..."
+          [value]="searchText"
+          (input)="onSearchInput($event)"
+          class="search-input">
+      </div>
+      <div class="controls-group">
+        <select class="page-size-select" [(ngModel)]="pageSize" (change)="loadItems()">
+          <option value="12">12 per page</option>
+          <option value="25">25 per page</option>
+          <option value="50">50 per page</option>
+        </select>
       </div>
     </div>
-  </div>
 
   <!-- Success Message -->
   <div class="success-message" *ngIf="showSuccessMessage">
@@ -114,14 +112,64 @@
     <button class="retry-button" (click)="loadItems()">Try Again</button>
   </div>
 
-  <!-- Items Grid -->
-  <div class="items-grid" *ngIf="!loading && !error && hasItems()">
-    <app-item-card
-      *ngFor="let item of itemsResponse!.items"
-      [item]="item"
-      (itemClick)="onItemClick($event)"
-      (respondToPriceChange)="onRespondToPriceChange($event)">
-    </app-item-card>
+  <!-- Items Table -->
+  <div class="table-container" *ngIf="!loading && !error && hasItems()">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th class="sortable" (click)="onSortChange('name')">
+            Item Name
+            <span class="sort-indicator">{{ getSortIcon('name') }}</span>
+          </th>
+          <th class="sortable" (click)="onSortChange('price')">
+            Listed Price
+            <span class="sort-indicator">{{ getSortIcon('price') }}</span>
+          </th>
+          <th>Your Earnings</th>
+          <th>Status</th>
+          <th class="sortable" (click)="onSortChange('listedDate')">
+            Date Listed
+            <span class="sort-indicator">{{ getSortIcon('listedDate') }}</span>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of itemsResponse!.items"
+            [class.has-price-request]="hasPriceChangeRequest(item)">
+          <td class="image-cell">
+            <img *ngIf="item.thumbnailUrl"
+                 [src]="item.thumbnailUrl"
+                 [alt]="item.name"
+                 class="item-thumbnail">
+            <div *ngIf="!item.thumbnailUrl" class="no-image">📷</div>
+          </td>
+          <td>
+            <div class="cell-primary">{{ item.name }}</div>
+            <div class="cell-secondary" *ngIf="item.sku">SKU: {{ item.sku }}</div>
+          </td>
+          <td class="cell-money">${{ item.listedPrice | number:'1.2-2' }}</td>
+          <td class="cell-money">${{ item.consignorEarnings | number:'1.2-2' }}</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'badge-success': item.status === 'available',
+              'badge-info': item.status === 'sold',
+              'badge-neutral': item.status === 'returned',
+              'badge-warn': item.status === 'expired'
+            }">{{ item.status | titlecase }}</span>
+          </td>
+          <td>{{ item.listedDate | date:'MMM d, y' }}</td>
+          <td>
+            <button class="btn-icon" (click)="onItemClick(item)" title="View Details">👁️</button>
+            <button *ngIf="hasPriceChangeRequest(item)"
+                    class="btn-icon warn"
+                    (click)="onRespondToPriceChange(item)"
+                    title="Respond to Price Change">⚠️</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- Empty State -->
@@ -174,6 +222,114 @@
       (click)="onLoadMore()">
       Load More
     </button>
+  </div>
+  </div>
+
+  <!-- Manifests Tab Content -->
+  <div *ngIf="activeTab === 'manifests'" class="tab-content">
+    <!-- Filters -->
+    <div class="filter-section">
+      <div class="filter-container">
+        <label for="statusFilter" class="filter-label">
+          Filter by Status
+        </label>
+        <select id="statusFilter"
+                class="status-select"
+                [(ngModel)]="dropoffQuery.status"
+                (ngModelChange)="onManifestStatusChange()">
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="manifestsLoading" class="loading">
+      <p>Loading manifests...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="manifestsError && !manifestsLoading" class="error">
+      <p>{{ manifestsError }}</p>
+      <button (click)="loadManifests()" class="retry-btn">Try Again</button>
+    </div>
+
+    <!-- Manifests List -->
+    <div *ngIf="!manifestsLoading && !manifestsError">
+      <!-- Empty State -->
+      <div *ngIf="dropoffRequests.length === 0" class="empty-state">
+        <div class="empty-content">
+          <div class="empty-icon">📦</div>
+          <h3>No Item Manifests Yet</h3>
+          <p>Submit your first manifest to get your items into the shop inventory.</p>
+          <a routerLink="/consignor/dropoff-requests/create" class="create-btn">
+            Create Your First Manifest
+          </a>
+        </div>
+      </div>
+
+      <!-- Request Cards -->
+      <div class="manifests-list">
+        <div *ngFor="let request of dropoffRequests" class="manifest-card">
+          <div class="card-header">
+            <div class="manifest-info">
+              <h3 class="manifest-title">
+                {{ request.itemCount }} {{ request.itemCount === 1 ? 'Item' : 'Items' }}
+              </h3>
+              <div [class]="getStatusBadgeClass(request.status)">
+                {{ request.status | titlecase }}
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="actions-btn"
+                      (click)="toggleActionMenu(request.id)"
+                      type="button">
+                ⋮
+              </button>
+              <!-- Action Menu -->
+              <div *ngIf="openActionMenu === request.id" class="action-menu">
+                <a [routerLink]="'/consignor/dropoff-requests/' + request.id" class="menu-item">
+                  👁️ View Details
+                </a>
+                <button *ngIf="canCancel(request.status)"
+                        (click)="cancelRequest(request)"
+                        class="menu-item cancel-item">
+                  🗑️ Cancel Request
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-details">
+            <div class="detail-item">
+              <span class="detail-label">Suggested Total:</span>
+              <span class="detail-value">{{ request.suggestedTotal | currency }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Submitted:</span>
+              <span class="detail-value">{{ formatDate(request.createdAt.toString()) }}</span>
+            </div>
+            <div *ngIf="request.plannedDate" class="detail-item">
+              <span class="detail-label">Planned Drop-off:</span>
+              <span class="detail-value">
+                {{ formatDate(request.plannedDate) }}
+                <span *ngIf="request.plannedTimeSlot" class="time-slot">({{ request.plannedTimeSlot }})</span>
+              </span>
+            </div>
+            <div *ngIf="request.importedAt" class="detail-item success">
+              <span class="detail-label">Status:</span>
+              <span class="detail-value">✅ Imported to inventory on {{ formatDate(request.importedAt.toString()) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Click outside to close menu -->
+    <div *ngIf="openActionMenu"
+         class="menu-overlay"
+         (click)="toggleActionMenu('')"></div>
   </div>
 
   <!-- Price Change Response Modal -->

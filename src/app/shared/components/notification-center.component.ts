@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, signal, computed, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NotificationService } from '../services/notification.service';
 import {
@@ -41,6 +41,7 @@ export class NotificationCenterComponent implements OnInit {
   @Input() role: UserRole = 'owner';
 
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
   private notificationService = inject(NotificationService);
 
@@ -62,12 +63,24 @@ export class NotificationCenterComponent implements OnInit {
   toDate = '';
   showUnreadOnly = false;
 
+  // Focus state
+  focusedNotificationId: string | null = null;
+
   // Computed values
-  unreadCount = computed(() => 
+  unreadCount = computed(() =>
     this.notifications().filter(n => !n.isRead).length
   );
 
   ngOnInit(): void {
+    // Check for focus query parameter
+    this.route.queryParams.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(params => {
+      if (params['focus']) {
+        this.focusedNotificationId = params['focus'];
+      }
+    });
+
     this.loadNotifications();
   }
 
@@ -89,6 +102,11 @@ export class NotificationCenterComponent implements OnInit {
         next: (result) => {
           this.notifications.set(result.data || []);
           this.totalCount.set(result.totalCount || 0);
+
+          // If we have a focused notification ID, scroll to it after the view updates
+          if (this.focusedNotificationId) {
+            setTimeout(() => this.scrollToFocusedNotification(), 100);
+          }
         },
         error: (err) => {
           this.error.set('Failed to load notifications');
@@ -273,41 +291,27 @@ export class NotificationCenterComponent implements OnInit {
   }
 
   getActionItem(type: NotificationType): { icon: string; tooltip: string } {
-    const actions: Record<NotificationType, { icon: string; tooltip: string }> = {
+    const actions: Record<string, { icon: string; tooltip: string }> = {
       manifest: { icon: '👁️', tooltip: 'View manifest details' },
+      dropoff_manifest: { icon: '📦', tooltip: 'Review Import' },
       payout: { icon: '💳', tooltip: 'Process payout' },
       sale: { icon: '📊', tooltip: 'View sale details' },
       expiring: { icon: '📋', tooltip: 'Review expiring items' },
       agreement: { icon: '✍️', tooltip: 'View agreement' },
       system: { icon: '➡️', tooltip: 'View details' }
     };
-    return actions[type] || { icon: '👁️', tooltip: 'View details' };
+    return actions[type as string] || { icon: '👁️', tooltip: 'View details' };
   }
 
   getActionButtonText(notification: NotificationDto): string {
-    // Use custom text from metadata if available
-    if (notification.metadata?.actionButtonText) {
-      return notification.metadata.actionButtonText;
-    }
-
-    // Fallback to type-specific defaults
-    const defaults: Record<string, string> = {
-      manifest: 'View Manifest',
-      dropoff_manifest: 'Review Import',
-      payout: 'Process Payout',
-      sale: 'View Sale',
-      expiring: 'Review Items',
-      agreement: 'View Agreement',
-      system: 'View Details'
-    };
-
-    return defaults[notification.type] || 'View Details';
+    // Return just the icon for the button
+    return this.getActionItem(notification.type as NotificationType).icon;
   }
 
   getActionButtonTooltip(notification: NotificationDto): string {
-    // Use custom text from metadata if available
+    // Use custom text from metadata if available, otherwise use default tooltip
     if (notification.metadata?.actionButtonText) {
-      return `Click to ${notification.metadata.actionButtonText.toLowerCase()}`;
+      return notification.metadata.actionButtonText;
     }
 
     return this.getActionItem(notification.type as NotificationType).tooltip;
@@ -319,8 +323,8 @@ export class NotificationCenterComponent implements OnInit {
       return false;
     }
 
-    // Hide button if metadata explicitly sets actionButtonText to empty string or null
-    if (notification.metadata?.actionButtonText === '' || notification.metadata?.actionButtonText === null) {
+    // Hide button if metadata explicitly sets actionButtonText to empty string (but not null - null means use default)
+    if (notification.metadata?.actionButtonText === '') {
       return false;
     }
 
@@ -338,6 +342,32 @@ export class NotificationCenterComponent implements OnInit {
 
   trackById(index: number, notification: NotificationDto): string {
     return notification.notificationId;
+  }
+
+  // ============================================================================
+  // Focus Functionality
+  // ============================================================================
+
+  isFocusedNotification(notification: NotificationDto): boolean {
+    return this.focusedNotificationId === notification.notificationId;
+  }
+
+  private scrollToFocusedNotification(): void {
+    if (!this.focusedNotificationId) return;
+
+    const element = document.getElementById(`notification-${this.focusedNotificationId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Clear the focus after scrolling and remove query param
+      setTimeout(() => {
+        this.focusedNotificationId = null;
+        this.router.navigate([], {
+          queryParams: { focus: null },
+          queryParamsHandling: 'merge'
+        });
+      }, 2000); // Keep highlight for 2 seconds
+    }
   }
 
 }

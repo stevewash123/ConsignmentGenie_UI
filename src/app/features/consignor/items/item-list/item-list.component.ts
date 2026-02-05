@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { ItemCardComponent } from '../item-card/item-card.component';
 import { RespondPriceChangeComponent } from '../modals/respond-price-change/respond-price-change.component';
 import { ConsignorItemService } from '../services/consignor-item.service';
+import { ConsignorPortalService } from '../../../../consignor/services/consignor-portal.service';
 import {
   ConsignorItemSummary,
   ConsignorItemsRequest,
@@ -14,21 +15,36 @@ import {
   ConsignorItemsFilter,
   ConsignorItemsSort
 } from '../models/consignor-item.model';
+import { DropoffRequestList, DropoffRequestQuery } from '../../../../consignor/models/consignor.models';
 
 @Component({
   selector: 'app-item-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ItemCardComponent, RespondPriceChangeComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ItemCardComponent, RespondPriceChangeComponent],
   templateUrl: './item-list.component.html',
-  styleUrls: ['./item-list.component.scss']
+  styleUrls: ['./item-list.component.scss'],
+  host: {
+    class: 'theme-consignor'
+  }
 })
 export class ItemListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
 
+  // Active tab ('active' or 'manifests')
+  activeTab = 'active';
+
+  // Items tab data
   itemsResponse: ConsignorItemsResponse | null = null;
   loading = false;
   error: string | null = null;
+
+  // Manifests tab data
+  dropoffRequests: DropoffRequestList[] = [];
+  dropoffQuery: DropoffRequestQuery = {};
+  manifestsLoading = false;
+  manifestsError: string | null = null;
+  openActionMenu: string | null = null;
 
   // Filter and sort state
   selectedStatus: string | null = null;
@@ -48,6 +64,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
 
   constructor(
     private consignorItemService: ConsignorItemService,
+    private consignorPortalService: ConsignorPortalService,
     private router: Router
   ) {}
 
@@ -248,4 +265,83 @@ export class ItemListComponent implements OnInit, OnDestroy {
     if (!this.itemsResponse) return 0;
     return this.itemsResponse.items.filter(item => item.priceChangeRequest).length;
   }
+
+  // Tab switching methods
+  switchTab(tab: string): void {
+    this.activeTab = tab;
+    if (tab === 'manifests' && this.dropoffRequests.length === 0) {
+      this.loadManifests();
+    }
+  }
+
+  // Manifest management methods
+  loadManifests(): void {
+    this.manifestsLoading = true;
+    this.manifestsError = null;
+
+    this.consignorPortalService.getMyDropoffRequests(this.dropoffQuery).subscribe({
+      next: (requests) => {
+        this.dropoffRequests = requests;
+        this.manifestsLoading = false;
+      },
+      error: (err) => {
+        this.manifestsError = 'Failed to load manifests. Please try again.';
+        this.manifestsLoading = false;
+        console.error('Load manifests error:', err);
+      }
+    });
+  }
+
+  onManifestStatusChange(): void {
+    this.loadManifests();
+  }
+
+  toggleActionMenu(requestId: string): void {
+    this.openActionMenu = this.openActionMenu === requestId ? null : requestId;
+  }
+
+  cancelRequest(request: DropoffRequestList): void {
+    if (confirm('Are you sure you want to cancel this manifest?')) {
+      this.consignorPortalService.cancelDropoffRequest(request.id).subscribe({
+        next: () => {
+          this.loadManifests(); // Reload the list
+          this.openActionMenu = null; // Close menu
+        },
+        error: (err) => {
+          console.error('Cancel request error:', err);
+          alert('Failed to cancel request. Please try again.');
+        }
+      });
+    }
+  }
+
+  canCancel(status: string): boolean {
+    return status === 'pending';
+  }
+
+  getStatusBadgeClass(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'pending': return 'status-badge pending';
+      case 'received': return 'status-badge received';
+      case 'imported': return 'status-badge imported';
+      case 'cancelled': return 'status-badge cancelled';
+      default: return 'status-badge';
+    }
+  }
+
+  formatDate(date: string): string {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
+  statusOptions = [
+    { value: '', label: 'All Status' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'received', label: 'Received' },
+    { value: 'imported', label: 'Imported' },
+    { value: 'cancelled', label: 'Cancelled' }
+  ];
 }

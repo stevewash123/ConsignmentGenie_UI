@@ -166,18 +166,12 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     // Close dropdown and navigate
     this.closeDropdown();
 
-    // Navigation will be handled by the action URL if available
-    const config = getNotificationConfig(notification.type);
-    if (config) {
-      const route = config.getRoute(notification, this.role);
-
-      if (route) {
-        // Use Angular Router to navigate - prevents page reload
-        this.router.navigate([route]).catch(error => {
-          console.error('Navigation error:', error);
-        });
-      }
-    }
+    // Navigate to the Unified Notification Center with the notification focused
+    this.router.navigate([`/${this.role}/notifications`], {
+      queryParams: { focus: notification.notificationId }
+    }).catch(error => {
+      console.error('Navigation error:', error);
+    });
   }
 
   trackByNotificationId(index: number, notification: NotificationDto): string {

@@ -57,8 +57,9 @@ export class EarningsWidgetComponent implements OnInit {
     return currentDate.toLocaleDateString('en-US', { month: 'short' });
   }
 
-  formatPayoutDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
+  formatPayoutDate(date: Date | string): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric'
     });
