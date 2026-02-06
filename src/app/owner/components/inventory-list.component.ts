@@ -1304,6 +1304,37 @@ export class InventoryListComponent implements OnInit {
     return this.itemToRemove() !== null;
   }
 
+  // Image preview functionality
+  showImagePreview(event: MouseEvent, imageUrl: string) {
+    const target = event.target as HTMLElement;
+    const preview = document.createElement('div');
+    preview.className = 'image-preview-popup';
+    preview.innerHTML = `<img src="${imageUrl}" alt="Preview" class="preview-image">`;
+
+    const rect = target.getBoundingClientRect();
+    let left = rect.right + 10;
+    let top = rect.top;
+
+    // Keep popup within viewport
+    if (left + 104 > window.innerWidth) {
+      left = rect.left - 114; // 104 + 10 for gap
+    }
+    if (top + 104 > window.innerHeight) {
+      top = window.innerHeight - 114; // 104 + 10 for gap
+    }
+
+    preview.style.left = `${left}px`;
+    preview.style.top = `${top}px`;
+
+    document.body.appendChild(preview);
+    target.setAttribute('data-preview-id', preview.id);
+  }
+
+  hideImagePreview() {
+    const previews = document.querySelectorAll('.image-preview-popup');
+    previews.forEach(preview => preview.remove());
+  }
+
   // ============================================================================
   // Filter Options and Methods
   // ============================================================================

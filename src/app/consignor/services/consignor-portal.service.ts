@@ -219,4 +219,12 @@ export class ConsignorPortalService {
   getConditions(): Observable<{ value: string; label: string; sortOrder: number }[]> {
     return this.http.get<{ value: string; label: string; sortOrder: number }[]>(`${environment.apiUrl}/api/conditions`);
   }
+
+  // Photo Upload
+  uploadPhoto(file: File): Observable<{ url: string; publicId: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ url: string; publicId: string }>(`${this.apiUrl}/photos/upload`, formData);
+  }
 }

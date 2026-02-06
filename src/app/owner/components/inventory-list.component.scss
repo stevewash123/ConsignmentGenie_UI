@@ -212,6 +212,42 @@
     color: var(--color-text-muted);
   }
 
+  .image-container {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    // Default styling for pending imports with binoculars icon
+    background: var(--color-light);
+    border: 1px solid var(--color-med);
+
+    &:hover {
+      transform: scale(1.05);
+      background: var(--color-med-light);
+    }
+
+    // Override for regular inventory with actual images
+    &.has-image {
+      border: 1px solid var(--color-neutral-light);
+      background: transparent;
+
+      &:hover {
+        background: transparent;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .binoculars-icon {
+      font-size: 1.25rem;
+      color: var(--color-med-dark);
+    }
+  }
+
   td {
     vertical-align: middle;
   }
@@ -221,6 +257,18 @@
 .cell-money {
   font-weight: 600;
   color: var(--color-text-primary);
+
+  .price-suggested {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .price-minimum {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-weight: 400;
+    margin-top: 0.125rem;
+  }
 }
 
 /* Consignor link */
@@ -461,5 +509,26 @@
     .controls-group {
       justify-content: space-between;
     }
+  }
+}
+
+/* Image Preview Popup - Global styles */
+:global(.image-preview-popup) {
+  position: fixed;
+  z-index: 9999;
+  background: white;
+  border: 2px solid var(--color-med-dark);
+  border-radius: var(--border-radius-md);
+  padding: 0.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  max-width: 104px;
+  pointer-events: none;
+
+  .preview-image {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: var(--border-radius-sm);
+    display: block;
   }
 }

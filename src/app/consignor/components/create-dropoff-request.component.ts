@@ -83,6 +83,9 @@ export class CreateDropoffRequestComponent implements OnInit {
       brand: '',
       condition: '',
       suggestedPrice: 0,
+      minimumPrice: undefined,
+      imageUrl: undefined,
+      imagePublicId: undefined,
       notes: ''
     };
   }
@@ -267,5 +270,37 @@ export class CreateDropoffRequestComponent implements OnInit {
   getConditionLabel(conditionValue: string): string {
     const condition = this.conditions.find(c => c.value === conditionValue);
     return condition ? condition.label : conditionValue;
+  }
+
+  onPhotoSelected(event: any, isNewItem: boolean) {
+    const file = event.target.files[0];
+    if (file) {
+      // Upload to Cloudinary via API
+      this.consignorService.uploadPhoto(file).subscribe({
+        next: (uploadResult) => {
+          if (isNewItem) {
+            this.newItem.imageUrl = uploadResult.url;
+            this.newItem.imagePublicId = uploadResult.publicId;
+          } else if (this.editingIndex !== null) {
+            this.dropoffRequest.items[this.editingIndex].imageUrl = uploadResult.url;
+            this.dropoffRequest.items[this.editingIndex].imagePublicId = uploadResult.publicId;
+          }
+        },
+        error: (error) => {
+          console.error('Error uploading photo:', error);
+          this.error = 'Failed to upload photo. Please try again.';
+        }
+      });
+    }
+  }
+
+  removePhoto(isNewItem: boolean) {
+    if (isNewItem) {
+      this.newItem.imageUrl = undefined;
+      this.newItem.imagePublicId = undefined;
+    } else if (this.editingIndex !== null) {
+      this.dropoffRequest.items[this.editingIndex].imageUrl = undefined;
+      this.dropoffRequest.items[this.editingIndex].imagePublicId = undefined;
+    }
   }
 }

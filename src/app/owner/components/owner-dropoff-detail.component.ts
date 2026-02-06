@@ -11,10 +11,14 @@ interface OwnerDropoffRequestDetail {
     category?: string;
     brand?: string;
     suggestedPrice: number;
+    minimumPrice?: number;
+    imageUrl?: string;
+    imagePublicId?: string;
     notes?: string;
   }>;
   itemCount: number;
   suggestedTotal: number;
+  minimumTotal?: number;
   plannedDate?: string;
   plannedTimeSlot?: string;
   message?: string;
@@ -22,6 +26,10 @@ interface OwnerDropoffRequestDetail {
   createdAt: string;
   importedAt?: string;
   receivedAt?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  reopenedAt?: string;
+  photosPurgedAt?: string;
   ownerNotes?: string;
   shop: {
     name: string;
@@ -50,6 +58,10 @@ export class OwnerDropoffDetailComponent implements OnInit {
   error: string | null = null;
   isUpdating = false;
   ownerNotes = '';
+  showRejectModal = false;
+  rejectionReason = '';
+  isRejecting = false;
+  isReopening = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -94,8 +106,10 @@ export class OwnerDropoffDetailComponent implements OnInit {
       ownerNotes: this.ownerNotes
     }).subscribe({
       next: () => {
-        this.loadRequest(this.request!.id);
-        this.isUpdating = false;
+        // Redirect to inventory with pending imports selected
+        this.router.navigate(['/owner/inventory'], {
+          queryParams: { tab: 'pending' }
+        });
       },
       error: (error) => {
         console.error('Error marking as received:', error);
@@ -140,6 +154,8 @@ export class OwnerDropoffDetailComponent implements OnInit {
         return 'badge badge-success';
       case 'cancelled':
         return 'badge badge-error';
+      case 'rejected':
+        return 'badge badge-error';
       default:
         return 'badge badge-neutral';
     }
@@ -151,6 +167,63 @@ export class OwnerDropoffDetailComponent implements OnInit {
 
   canImportToInventory(): boolean {
     return this.request?.status === 'received';
+  }
+
+  canReject(): boolean {
+    return this.request?.status === 'pending' || this.request?.status === 'received';
+  }
+
+  canReopen(): boolean {
+    return this.request?.status === 'rejected';
+  }
+
+  showRejectDropoffModal() {
+    this.showRejectModal = true;
+    this.rejectionReason = '';
+  }
+
+  closeRejectModal() {
+    this.showRejectModal = false;
+    this.rejectionReason = '';
+  }
+
+  rejectDropoff() {
+    if (!this.request || !this.rejectionReason.trim()) return;
+
+    this.isRejecting = true;
+    this.ownerService.rejectDropoffRequest(this.request.id, {
+      rejectionReason: this.rejectionReason.trim()
+    }).subscribe({
+      next: () => {
+        this.loadRequest(this.request!.id);
+        this.closeRejectModal();
+        this.isRejecting = false;
+      },
+      error: (error) => {
+        console.error('Error rejecting dropoff request:', error);
+        alert('Failed to reject dropoff request. Please try again.');
+        this.isRejecting = false;
+      }
+    });
+  }
+
+  reopenDropoff() {
+    if (!this.request) return;
+
+    this.isReopening = true;
+    this.ownerService.reopenDropoffRequest(this.request.id, {
+      ownerNotes: this.ownerNotes
+    }).subscribe({
+      next: () => {
+        this.loadRequest(this.request!.id);
+        this.isReopening = false;
+      },
+      error: (error) => {
+        console.error('Error reopening dropoff request:', error);
+        alert('Failed to reopen dropoff request. Please try again.');
+        this.isReopening = false;
+      }
+    });
   }
 
   formatDate(dateString: string): string {

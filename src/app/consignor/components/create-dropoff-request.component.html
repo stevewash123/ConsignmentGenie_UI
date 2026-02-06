@@ -120,6 +120,35 @@
                 </div>
               </div>
 
+              <div class="form-field">
+                <label class="field-label">Minimum Price</label>
+                <div class="price-input-wrapper">
+                  <span class="price-symbol">$</span>
+                  <input type="number"
+                         class="form-input price-input"
+                         [(ngModel)]="newItem.minimumPrice"
+                         name="newItemMinPrice"
+                         min="0.01"
+                         step="0.01"
+                         (keypress)="onAddItemKeyPress($event)"
+                         placeholder="0.00">
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Photo</label>
+                <input type="file"
+                       class="form-input"
+                       name="newItemPhoto"
+                       accept="image/*"
+                       (change)="onPhotoSelected($event, true)"
+                       #photoInput>
+                <div *ngIf="newItem.imageUrl" class="photo-preview">
+                  <img [src]="newItem.imageUrl" alt="Item preview" class="preview-image">
+                  <button type="button" (click)="removePhoto(true)" class="remove-photo-btn">✕</button>
+                </div>
+              </div>
+
               <div class="form-field full-width">
                 <label class="field-label">Notes</label>
                 <textarea class="form-textarea"
@@ -228,6 +257,33 @@
                 </div>
               </div>
 
+              <div class="form-field">
+                <label class="field-label">Minimum Price</label>
+                <div class="price-input-wrapper">
+                  <span class="price-symbol">$</span>
+                  <input type="number"
+                         class="form-input price-input"
+                         [(ngModel)]="dropoffRequest.items[editingIndex].minimumPrice"
+                         [name]="'editItemMinPrice' + editingIndex"
+                         min="0.01"
+                         step="0.01"
+                         placeholder="0.00">
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Photo</label>
+                <input type="file"
+                       class="form-input"
+                       [name]="'editItemPhoto' + editingIndex"
+                       accept="image/*"
+                       (change)="onPhotoSelected($event, false)">
+                <div *ngIf="dropoffRequest.items[editingIndex].imageUrl" class="photo-preview">
+                  <img [src]="dropoffRequest.items[editingIndex].imageUrl" alt="Item preview" class="preview-image">
+                  <button type="button" (click)="removePhoto(false)" class="remove-photo-btn">✕</button>
+                </div>
+              </div>
+
               <div class="form-field full-width">
                 <label class="field-label">Notes</label>
                 <textarea class="form-textarea"
@@ -257,11 +313,12 @@
           <table class="items-table">
             <thead>
               <tr>
+                <th class="photo-col">Photo</th>
                 <th class="item-name-col">Item Name</th>
                 <th class="category-col">Category</th>
                 <th class="brand-col">Brand</th>
                 <th class="condition-col">Condition</th>
-                <th class="price-col">Suggested Price</th>
+                <th class="price-col">Prices</th>
                 <th class="actions-col">Actions</th>
               </tr>
             </thead>
@@ -269,6 +326,12 @@
               <tr *ngFor="let item of dropoffRequest.items; let i = index"
                   class="item-row"
                   [class.being-edited]="editingIndex === i">
+                <td class="item-photo">
+                  <div class="photo-cell">
+                    <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" class="item-image">
+                    <div *ngIf="!item.imageUrl" class="no-image">No Photo</div>
+                  </div>
+                </td>
                 <td class="item-name">
                   {{ item.name || 'Untitled Item' }}
                 </td>
@@ -282,7 +345,10 @@
                   {{ getConditionLabel(item.condition) || '-' }}
                 </td>
                 <td class="item-price">
-                  {{ item.suggestedPrice | currency }}
+                  <div class="price-stack">
+                    <div class="suggested-price">Suggested: {{ item.suggestedPrice | currency }}</div>
+                    <div class="minimum-price" *ngIf="item.minimumPrice">Minimum: {{ item.minimumPrice | currency }}</div>
+                  </div>
                 </td>
                 <td class="actions">
                   <button type="button"
@@ -303,7 +369,7 @@
             <!-- Total Row -->
             <tfoot *ngIf="dropoffRequest.items.length > 0">
               <tr class="total-row">
-                <td colspan="4" class="total-label">Total Suggested Value:</td>
+                <td colspan="5" class="total-label">Total Suggested Value:</td>
                 <td class="total-amount">{{ getTotalSuggestedPrice() | currency }}</td>
                 <td></td>
               </tr>

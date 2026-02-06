@@ -3,7 +3,6 @@
 
 // Styling for owner dropoff detail component - updated
 .dropoff-detail-page {
-  min-height: 100vh;
   background: var(--color-light);
   padding: 2rem;
   display: flex;
@@ -54,12 +53,9 @@
 }
 
 .action-button-section {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--color-neutral-light);
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
 // Info card styling using custom variables
@@ -171,13 +167,13 @@
   background: #ffffff;
   border: var(--border-outer) solid var(--color-med-dark);
   border-radius: var(--border-radius-lg);
-  padding: 2rem;
+  padding: 2rem 2rem 1rem 2rem;
   box-shadow: var(--shadow-sm);
 
   h3 {
     color: var(--color-text-primary);
-    margin: 0 0 1.5rem 0;
-    padding-bottom: 0.75rem;
+    margin: 0 0 0.75rem 0;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--color-neutral-light);
   }
 }
@@ -195,29 +191,18 @@
   border-collapse: collapse;
   table-layout: fixed;
 
-  th, td {
+  td {
     padding: 1rem 1.25rem;
     text-align: left;
     border-bottom: var(--border-inner) solid var(--color-med-dark);
     border-right: var(--border-inner) solid var(--color-neutral-light);
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    vertical-align: top;
 
     &:last-child {
       border-right: none;
     }
-  }
-
-  th {
-    background: var(--color-light-med);
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: var(--color-text-primary);
-    white-space: nowrap;
-  }
-
-  td {
-    font-size: 0.875rem;
-    color: var(--color-text-primary);
-    vertical-align: top;
 
     &.font-medium {
       font-weight: 500;
@@ -234,12 +219,12 @@
     }
   }
 
-  // Column width distribution
-  th:nth-child(1) { width: 25%; } // Item Name
-  th:nth-child(2) { width: 15%; } // Category
-  th:nth-child(3) { width: 15%; } // Brand
-  th:nth-child(4) { width: 15%; } // Suggested Price
-  th:nth-child(5) { width: 30%; } // Notes
+  // Column width distribution with stacked columns
+  td:nth-child(1) { width: 10%; } // Photo
+  td:nth-child(2) { width: 30%; } // Item Name
+  td:nth-child(3) { width: 20%; } // Category / Brand
+  td:nth-child(4) { width: 15%; } // Suggested / Min Price
+  td:nth-child(5) { width: 25%; } // Notes
 }
 
 // Badge styling using project variables
@@ -342,5 +327,178 @@
 
   .info-card {
     padding: 1.5rem;
+  }
+}
+
+// Item photo styling
+.item-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-light);
+}
+
+.no-image {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-neutral-light);
+  border: 1px solid var(--color-neutral-med);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+// Button group styling
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+// Modal styling
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  border: var(--border-outer) solid var(--color-med-dark);
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-neutral-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: 60vh;
+
+  p {
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+
+      .required {
+        color: var(--color-error);
+      }
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--color-neutral-med);
+      border-radius: var(--border-radius-md);
+      font-size: 0.875rem;
+      resize: vertical;
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-med);
+        box-shadow: 0 0 0 2px rgba(var(--color-med-rgb), 0.2);
+      }
+    }
+
+    .character-count {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--color-neutral-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+// Update action button section to handle flex layout
+.action-button-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-neutral-light);
+}
+
+// Stacked cell styling for table columns
+.stacked-cell {
+  line-height: 1.3;
+
+  .cell-line {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .cell-line-sub {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
   }
 }

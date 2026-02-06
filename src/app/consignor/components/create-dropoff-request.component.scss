@@ -398,6 +398,92 @@
   color: #374151;
 }
 
+// Photo Styles
+.photo-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.preview-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.remove-photo-btn:hover {
+  background: #b91c1c;
+}
+
+// Table Photo Column
+.photo-col {
+  width: 10%;
+}
+
+.photo-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.no-image {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+// Price Stack in Table
+.price-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.suggested-price {
+  font-weight: 600;
+  color: #111827;
+}
+
+.minimum-price {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
 // Empty State
 .empty-row td {
   padding: 2rem;

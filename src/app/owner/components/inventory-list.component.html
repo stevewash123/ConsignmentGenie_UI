@@ -166,7 +166,10 @@
               <tr>
                 <td class="image-cell">
                   @if (item.primaryImageUrl) {
-                    <img [src]="item.primaryImageUrl" [alt]="item.title" class="item-thumbnail">
+                    <div class="image-container has-image" [title]="'Preview image for ' + item.title">
+                      <img [src]="item.primaryImageUrl" [alt]="item.title" class="item-thumbnail"
+                           (mouseenter)="showImagePreview($event, item.primaryImageUrl)" (mouseleave)="hideImagePreview()">
+                    </div>
                   } @else {
                     <div class="no-image">📷</div>
                   }
@@ -183,7 +186,10 @@
                     'badge-neutral': item.status === 'Removed'
                   }">{{ item.status }}</span>
                 </td>
-                <td class="cell-money">${{ item.price | number:'1.2-2' }}</td>
+                <td class="cell-money">
+                  <div class="price-suggested">${{ item.price | number:'1.2-2' }}</div>
+                  <div class="price-minimum" *ngIf="item.minimumPrice">(Min: ${{ item.minimumPrice | number:'1.2-2' }})</div>
+                </td>
                 <td>
                   <span class="badge" [ngClass]="{
                     'badge-success': item.condition === 'New',
@@ -282,6 +288,7 @@
                   <span class="checkbox-label-text">Select</span>
                 </div>
               </th>
+              <th>Image</th>
               <th>Item</th>
               <th>Price</th>
               <th>SKU</th>
@@ -343,6 +350,7 @@
                   <input
                     type="checkbox"
                     [checked]="verifiedPendingImports().has(item.id)"
+                    [disabled]="!item.consignorId"
                     (change)="toggleItemVerification(item.id, $event)"
                     class="checkbox-input">
                 </td>
@@ -354,11 +362,24 @@
                     (change)="toggleSelectItem(item.id)"
                     class="checkbox-input">
                 </td>
+                <td class="image-cell">
+                  @if (item.imageUrl) {
+                    <div class="image-container" [title]="'Preview image for ' + item.name">
+                      <span class="binoculars-icon" (mouseenter)="showImagePreview($event, item.imageUrl)" (mouseleave)="hideImagePreview()">🔍</span>
+                    </div>
+                  } @else {
+                    <div class="no-image">📷</div>
+                  }
+                </td>
                 <td>
                   <div class="cell-primary">{{ item.name }}</div>
+                  <div class="cell-secondary" *ngIf="item.brand">{{ item.brand }}</div>
                   <div class="cell-secondary" *ngIf="item.description">{{ item.description }}</div>
                 </td>
-                <td class="cell-money">${{ item.price | number:'1.2-2' }}</td>
+                <td class="cell-money">
+                  <div class="price-suggested">${{ item.price | number:'1.2-2' }}</div>
+                  <div class="price-minimum" *ngIf="item.minimumPrice">Min: ${{ item.minimumPrice | number:'1.2-2' }}</div>
+                </td>
                 <td class="cell-secondary">{{ item.sku || '—' }}</td>
                 <td>{{ item.category || '—' }}</td>
                 <td>

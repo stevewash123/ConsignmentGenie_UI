@@ -295,10 +295,21 @@ export class OwnerService {
   }
 
   markDropoffAsReceived(id: string, data: { status: string; ownerNotes?: string }): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/owner/dropoff-requests/${id}/receive`, data);
+    // Import the manifest to pending imports, which also marks it as received
+    return this.http.post(`${this.apiUrl}/pending-imports/from-manifest/${id}`, {
+      autoAssignConsignor: true
+    });
   }
 
   importDropoffToInventory(id: string, data: { ownerNotes?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/owner/dropoff-requests/${id}/import`, data);
+  }
+
+  rejectDropoffRequest(id: string, data: { rejectionReason: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/owner/dropoff-requests/${id}/reject`, data);
+  }
+
+  reopenDropoffRequest(id: string, data: { ownerNotes?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/owner/dropoff-requests/${id}/reopen`, data);
   }
 }

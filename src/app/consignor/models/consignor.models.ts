@@ -343,6 +343,9 @@ export interface DropoffItem {
   brand?: string;
   condition: string;
   suggestedPrice: number;
+  minimumPrice?: number;
+  imageUrl?: string;
+  imagePublicId?: string;
   notes?: string;
 }
 

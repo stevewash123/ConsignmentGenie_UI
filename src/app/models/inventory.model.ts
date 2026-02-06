@@ -6,6 +6,7 @@ export interface ItemListDto {
   title: string;
   description?: string;
   price: number;
+  minimumPrice?: number;
   category?: string;
   condition: ItemCondition;
   status: ItemStatus;
@@ -305,9 +306,12 @@ export interface PendingImportItemDto {
   name: string;
   description?: string;
   price: number;
+  minimumPrice?: number;
   sku?: string;
   category?: string;
+  brand?: string;
   condition?: string;
+  imageUrl?: string;
   source: ImportSource;
   sourceReference?: string;
   consignorId?: string;
