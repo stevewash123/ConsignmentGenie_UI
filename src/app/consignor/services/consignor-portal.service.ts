@@ -227,4 +227,9 @@ export class ConsignorPortalService {
 
     return this.http.post<{ url: string; publicId: string }>(`${this.apiUrl}/photos/upload`, formData);
   }
+
+  // Activated Items for Notifications
+  getActivatedItems(notificationId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/notifications/activated-items/${notificationId}`);
+  }
 }

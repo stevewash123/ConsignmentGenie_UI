@@ -132,12 +132,14 @@
             Date Listed
             <span class="sort-indicator">{{ getSortIcon('listedDate') }}</span>
           </th>
+          <th>Expires / Retrieve By</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of itemsResponse!.items"
-            [class.has-price-request]="hasPriceChangeRequest(item)">
+            [class.has-price-request]="hasPriceChangeRequest(item)"
+            [class.expired-item]="item.status === 'expired'">
           <td class="image-cell">
             <img *ngIf="item.thumbnailUrl"
                  [src]="item.thumbnailUrl"
@@ -161,11 +163,33 @@
           </td>
           <td>{{ item.listedDate | date:'MMM d, y' }}</td>
           <td>
+            <div *ngIf="item.status !== 'expired'; else expiredTemplate">
+              <span [title]="'Item expires on ' + (item.expirationDate | date:'MMM d, yyyy')">
+                {{ item.expirationDate | date:'MMM d, y' }}
+              </span>
+            </div>
+            <ng-template #expiredTemplate>
+              <div class="expired-dates">
+                <div class="expired-label" [title]="'Item expired on ' + (item.expirationDate | date:'MMM d, yyyy')">
+                  Expired: {{ item.expirationDate | date:'MMM d, y' }}
+                </div>
+                <div class="retrieval-label" *ngIf="item.retrievalDate"
+                     [title]="'Please retrieve by ' + (item.retrievalDate | date:'MMM d, yyyy')">
+                  Retrieve by: {{ item.retrievalDate | date:'MMM d, y' }}
+                </div>
+              </div>
+            </ng-template>
+          </td>
+          <td>
             <button class="btn-icon" (click)="onItemClick(item)" title="View Details">👁️</button>
             <button *ngIf="hasPriceChangeRequest(item)"
                     class="btn-icon warn"
                     (click)="onRespondToPriceChange(item)"
                     title="Respond to Price Change">⚠️</button>
+            <button *ngIf="canEditItems() && (item.status === 'available' || item.status === 'expired')"
+                    class="btn-icon edit"
+                    (click)="onEditItem(item)"
+                    title="Edit Item Details">✏️</button>
           </td>
         </tr>
       </tbody>
@@ -340,4 +364,13 @@
     (close)="onClosePriceChangeModal()"
     (submitted)="onPriceChangeSubmitted($event)">
   </app-respond-price-change>
+
+  <!-- Edit Item Modal -->
+  <app-edit-item-modal
+    *ngIf="selectedItemForEdit"
+    [item]="selectedItemForEdit"
+    [isOpen]="showEditItemModal"
+    (close)="onCloseEditItemModal()"
+    (submitted)="onItemEditSubmitted($event)">
+  </app-edit-item-modal>
 </div>

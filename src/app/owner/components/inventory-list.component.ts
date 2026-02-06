@@ -72,6 +72,7 @@ export class InventoryListComponent implements OnInit {
   error = signal<string | null>(null);
   isColorGuideModalOpen = signal(false);
   isBulkImportModalOpen = signal(false);
+  isBulkAssignModalOpen = signal(false);
   isLoading = signal(false);
 
   isInventoryLoading(): boolean {
@@ -93,6 +94,8 @@ export class InventoryListComponent implements OnInit {
 
   // Bulk assign state
   selectedConsignorId = signal<string>('');
+  markAsVerified = signal<boolean>(true);  // Default to true as requested
+  assignAnother = signal<boolean>(false);  // Default to false as requested
   selectedManifestId = signal<string>('');  // Filter by manifest for pending imports
 
   // Computed property to show active filters
@@ -592,13 +595,33 @@ export class InventoryListComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
-      const request = { pendingImportIds: selectedIds, consignorId };
+      const request = {
+        pendingImportIds: selectedIds,
+        consignorId,
+        markAsVerified: this.markAsVerified()
+      };
       await firstValueFrom(this.inventoryService.bulkAssignConsignorToPendingImports(request));
 
-      // Clear selection and reload data
+      // If markAsVerified is true, add the assigned items to verified set immediately
+      if (this.markAsVerified()) {
+        const currentVerified = new Set(this.verifiedPendingImports());
+        selectedIds.forEach(id => currentVerified.add(id));
+        this.verifiedPendingImports.set(currentVerified);
+      }
+
+      // Clear selection and reload data (the backend will set the correct status)
       this.clearSelection();
-      this.selectedConsignorId.set('');
-      this.loadItems();
+
+      // If "assign another" is checked, keep modal open but reset consignor selection
+      if (this.assignAnother()) {
+        this.selectedConsignorId.set('');
+        // Don't close modal, just refresh the data
+        this.loadItems();
+      } else {
+        // Close modal and reset everything
+        this.closeBulkAssignModal();
+        this.loadItems();
+      }
 
       // Show success message (you can add a toast service here)
       console.log(`Successfully assigned ${selectedIds.length} items to consignor`);
@@ -1264,6 +1287,17 @@ export class InventoryListComponent implements OnInit {
     this.itemToAssign.set(null);
     this.selectedConsignorForAssignment = '';
     this.assignmentNotes = '';
+  }
+
+  // Bulk assign modal methods
+  openBulkAssignModal() {
+    this.isBulkAssignModalOpen.set(true);
+  }
+
+  closeBulkAssignModal() {
+    this.isBulkAssignModalOpen.set(false);
+    this.selectedConsignorId.set('');
+    this.assignAnother.set(false); // Reset assign another checkbox
   }
 
   openRemovalModal(item: ItemListDto) {

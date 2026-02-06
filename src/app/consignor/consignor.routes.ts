@@ -51,6 +51,10 @@ export const consignorRoutes: Routes = [
         loadComponent: () => import('./components/consignor-notification-preferences.component').then(m => m.ConsignorNotificationPreferencesComponent)
       },
       {
+        path: 'notifications/activated-items/:notificationId',
+        loadComponent: () => import('./pages/activated-items.component').then(m => m.ActivatedItemsComponent)
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./components/consignor-profile.component').then(m => m.ConsignorProfileComponent)
       },

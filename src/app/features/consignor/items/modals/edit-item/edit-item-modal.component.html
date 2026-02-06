@@ -1,0 +1,145 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>✏️ Edit Item</h2>
+      <button class="close-btn" (click)="close()" type="button" aria-label="Close modal">
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Loading Detail State -->
+      <div class="loading-state" *ngIf="isLoadingDetail">
+        <div class="loading-spinner"></div>
+        <p>Loading item details...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-state" *ngIf="error">
+        <div class="error-icon">⚠️</div>
+        <p>{{ error }}</p>
+        <button class="btn-secondary" (click)="loadItemDetail()" *ngIf="!isLoadingDetail">
+          Try Again
+        </button>
+      </div>
+
+      <!-- Edit Form -->
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()" *ngIf="!isLoadingDetail && !error && itemDetail">
+        <!-- Item Preview -->
+        <div class="item-preview">
+          <img
+            [src]="itemDetail.primaryImageUrl"
+            [alt]="itemDetail.title"
+            class="item-image"
+            (error)="$event.target.src='assets/images/placeholder-item.png'">
+          <div class="item-info">
+            <div class="item-sku">{{ itemDetail.sku || 'No SKU' }}</div>
+            <div class="item-price">${{ itemDetail.price | number:'1.2-2' }}</div>
+            <div class="item-status">{{ itemDetail.status | titlecase }}</div>
+          </div>
+        </div>
+
+        <!-- Editable Fields -->
+        <div class="form-section">
+          <h3>Editable Information</h3>
+          <p class="form-note">
+            You can update the title, description, and notes for your item.
+            Price, category, and condition can only be changed by the shop owner.
+          </p>
+
+          <!-- Title Field -->
+          <div class="form-group">
+            <label for="title" class="required">Title</label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              class="form-input"
+              [class.invalid]="isFieldInvalid('title')"
+              placeholder="Enter item title">
+            <div class="field-meta">
+              <span class="char-count">{{ getRemainingChars('title') }} characters remaining</span>
+            </div>
+            <div class="field-error" *ngIf="isFieldInvalid('title')">
+              {{ getFieldError('title') }}
+            </div>
+          </div>
+
+          <!-- Description Field -->
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              formControlName="description"
+              class="form-textarea"
+              [class.invalid]="isFieldInvalid('description')"
+              placeholder="Describe your item (optional)"
+              rows="4"></textarea>
+            <div class="field-meta">
+              <span class="char-count">{{ getRemainingChars('description') }} characters remaining</span>
+            </div>
+            <div class="field-error" *ngIf="isFieldInvalid('description')">
+              {{ getFieldError('description') }}
+            </div>
+          </div>
+
+          <!-- Notes Field -->
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea
+              id="notes"
+              formControlName="notes"
+              class="form-textarea"
+              [class.invalid]="isFieldInvalid('notes')"
+              placeholder="Additional notes (optional)"
+              rows="3"></textarea>
+            <div class="field-meta">
+              <span class="char-count">{{ getRemainingChars('notes') }} characters remaining</span>
+            </div>
+            <div class="field-error" *ngIf="isFieldInvalid('notes')">
+              {{ getFieldError('notes') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Read-only Information -->
+        <div class="readonly-section">
+          <h3>Shop Owner Settings</h3>
+          <p class="readonly-note">These fields can only be changed by the shop owner.</p>
+
+          <div class="readonly-grid">
+            <div class="readonly-item">
+              <label>Price</label>
+              <span class="readonly-value">${{ itemDetail.price | number:'1.2-2' }}</span>
+            </div>
+            <div class="readonly-item">
+              <label>Category</label>
+              <span class="readonly-value">{{ itemDetail.category || 'Not set' }}</span>
+            </div>
+            <div class="readonly-item">
+              <label>Received Date</label>
+              <span class="readonly-value">{{ itemDetail.receivedDate | date:'mediumDate' }}</span>
+            </div>
+            <div class="readonly-item" *ngIf="itemDetail.soldDate">
+              <label>Sold Date</label>
+              <span class="readonly-value">{{ itemDetail.soldDate | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer" *ngIf="!isLoadingDetail && !error">
+      <button class="btn-secondary" (click)="close()" [disabled]="isLoading">
+        Cancel
+      </button>
+      <button
+        class="btn-primary"
+        (click)="onSubmit()"
+        [disabled]="!canSubmit()">
+        <span *ngIf="isLoading">Saving...</span>
+        <span *ngIf="!isLoading">Save Changes</span>
+      </button>
+    </div>
+  </div>
+</div>

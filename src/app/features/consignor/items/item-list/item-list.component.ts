@@ -6,8 +6,10 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { ItemCardComponent } from '../item-card/item-card.component';
 import { RespondPriceChangeComponent } from '../modals/respond-price-change/respond-price-change.component';
+import { EditItemModalComponent } from '../modals/edit-item/edit-item-modal.component';
 import { ConsignorItemService } from '../services/consignor-item.service';
 import { ConsignorPortalService } from '../../../../consignor/services/consignor-portal.service';
+import { ConsignorPermissionsService } from '../../../../services/consignor-permissions.service';
 import {
   ConsignorItemSummary,
   ConsignorItemsRequest,
@@ -20,7 +22,7 @@ import { DropoffRequestList, DropoffRequestQuery } from '../../../../consignor/m
 @Component({
   selector: 'app-item-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ItemCardComponent, RespondPriceChangeComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ItemCardComponent, RespondPriceChangeComponent, EditItemModalComponent],
   templateUrl: './item-list.component.html',
   styleUrls: ['./item-list.component.scss'],
   host: {
@@ -46,6 +48,9 @@ export class ItemListComponent implements OnInit, OnDestroy {
   manifestsError: string | null = null;
   openActionMenu: string | null = null;
 
+  // Business settings and permissions
+  canConsignorEditItems = false;
+
   // Filter and sort state
   selectedStatus: string | null = null;
   searchText = '';
@@ -59,17 +64,24 @@ export class ItemListComponent implements OnInit, OnDestroy {
   // Price change response modal
   showPriceChangeModal = false;
   selectedItemForPriceResponse: ConsignorItemSummary | null = null;
+
+  // Edit item modal
+  showEditItemModal = false;
+  selectedItemForEdit: ConsignorItemSummary | null = null;
+
   successMessage = '';
   showSuccessMessage = false;
 
   constructor(
     private consignorItemService: ConsignorItemService,
     private consignorPortalService: ConsignorPortalService,
+    private consignorPermissionsService: ConsignorPermissionsService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.setupSearchDebounce();
+    this.loadPermissions();
     this.loadItems();
   }
 
@@ -88,6 +100,19 @@ export class ItemListComponent implements OnInit, OnDestroy {
       this.currentPage = 1;
       this.loadItems();
     });
+  }
+
+  private loadPermissions(): void {
+    this.consignorPermissionsService.consignorPermissions.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(permissions => {
+      if (permissions) {
+        this.canConsignorEditItems = permissions.canEditOwnItems;
+      }
+    });
+
+    // Load permissions if not already loaded
+    this.consignorPermissionsService.loadConsignorPermissions();
   }
 
   loadItems(): void {
@@ -344,4 +369,32 @@ export class ItemListComponent implements OnInit, OnDestroy {
     { value: 'imported', label: 'Imported' },
     { value: 'cancelled', label: 'Cancelled' }
   ];
+
+  // Consignor item editing methods
+  canEditItems(): boolean {
+    return this.canConsignorEditItems;
+  }
+
+  onEditItem(item: ConsignorItemSummary): void {
+    this.selectedItemForEdit = item;
+    this.showEditItemModal = true;
+  }
+
+  onCloseEditItemModal(): void {
+    this.showEditItemModal = false;
+    this.selectedItemForEdit = null;
+  }
+
+  onItemEditSubmitted(message: string): void {
+    this.successMessage = message;
+    this.showSuccessMessage = true;
+
+    // Reload items to reflect changes
+    this.loadItems();
+
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      this.showSuccessMessage = false;
+    }, 5000);
+  }
 }

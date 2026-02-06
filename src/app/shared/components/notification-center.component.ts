@@ -279,15 +279,16 @@ export class NotificationCenterComponent implements OnInit {
   }
 
   getNotificationIcon(type: NotificationType): string {
-    const icons: Record<NotificationType, string> = {
+    const icons: Record<string, string> = {
       manifest: '📦',
       payout: '💰',
       sale: '🛒',
       expiring: '⏰',
       agreement: '📝',
+      ItemActivated: '🎉',
       system: 'ℹ️'
     };
-    return icons[type] || '🔔';
+    return icons[type as string] || '🔔';
   }
 
   getActionItem(type: NotificationType): { icon: string; tooltip: string } {
@@ -298,6 +299,7 @@ export class NotificationCenterComponent implements OnInit {
       sale: { icon: '📊', tooltip: 'View sale details' },
       expiring: { icon: '📋', tooltip: 'Review expiring items' },
       agreement: { icon: '✍️', tooltip: 'View agreement' },
+      ItemActivated: { icon: '🎉', tooltip: 'View activated items' },
       system: { icon: '➡️', tooltip: 'View details' }
     };
     return actions[type as string] || { icon: '👁️', tooltip: 'View details' };

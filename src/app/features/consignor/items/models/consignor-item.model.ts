@@ -6,6 +6,8 @@ export interface ConsignorItemSummary {
   consignorEarnings: number;  // Their split amount
   status: 'available' | 'sold' | 'returned' | 'expired';
   listedDate: Date;
+  expirationDate?: Date;
+  retrievalDate?: Date;  // Date when expired item should be retrieved
   soldDate?: Date;
   daysListed: number;
   priceChangeRequest?: PriceChangeRequest;  // If there's a pending price change request
@@ -63,4 +65,18 @@ export interface PriceChangeResponse {
 export interface PriceChangeDecisionRequest {
   itemId: string;
   response: PriceChangeResponse;
+}
+
+export interface ConsignorItemsContext {
+  businessSettings: {
+    items: {
+      defaultConsignmentPeriodDays: number;
+    };
+    markdownSchedule: {
+      after90DaysAction: 'donate' | 'return';
+    };
+  };
+  consignorPermissions: {
+    canEditItems: boolean;
+  };
 }

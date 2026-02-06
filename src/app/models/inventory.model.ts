@@ -343,6 +343,7 @@ export enum ImportStatus {
 export interface BulkAssignConsignorRequest {
   pendingImportIds: string[];
   consignorId: string;
+  markAsVerified?: boolean;
 }
 
 export interface BulkAssignResult {

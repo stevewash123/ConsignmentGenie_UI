@@ -253,7 +253,7 @@
           <button
             class="btn-primary secondary"
             [disabled]="selectedPendingImports().size === 0"
-            (click)="openAssignModal()">
+            (click)="openBulkAssignModal()">
             👤 Assign Selected ({{ selectedPendingImports().size }})
           </button>
           <button
@@ -545,11 +545,11 @@
     </div>
 
     <!-- Bulk Assign Modal -->
-    <div class="modal-overlay" *ngIf="isAssignModalOpen()" (click)="closeAssignModal()">
+    <div class="modal-overlay" *ngIf="isBulkAssignModalOpen()" (click)="closeBulkAssignModal()">
       <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>👤 Assign to Consignor</h2>
-          <button class="close-btn" (click)="closeAssignModal()">×</button>
+          <button class="close-btn" (click)="closeBulkAssignModal()">×</button>
         </div>
         <div class="modal-body">
           <p class="assign-count">Assigning {{ selectedPendingImports().size }} selected item(s)</p>
@@ -563,9 +563,23 @@
               }
             </select>
           </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="markAsVerified" class="checkbox-input">
+              <span>Mark as Verified</span>
+            </label>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="assignAnother" class="checkbox-input">
+              <span>Assign another consignor</span>
+            </label>
+          </div>
         </div>
         <div class="modal-actions">
-          <button class="btn-secondary" (click)="closeAssignModal()">Cancel</button>
+          <button class="btn-secondary" (click)="closeBulkAssignModal()">Cancel</button>
           <button
             class="btn-primary"
             [disabled]="!selectedConsignorId() || isLoading()"

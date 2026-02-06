@@ -78,6 +78,10 @@ export class ConsignorItemService {
       );
   }
 
+  updateItem(itemId: string, updateData: { title: string; description: string; notes?: string }): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/items/${itemId}`, updateData);
+  }
+
   respondToPriceChange(request: PriceChangeDecisionRequest): Observable<{ success: boolean; message: string }> {
     // This endpoint doesn't exist in the API yet, so return a mock response for now
     // TODO: Implement this endpoint in the backend
@@ -125,14 +129,28 @@ export class ConsignorItemService {
     const now = new Date();
     const daysListed = Math.floor((now.getTime() - receivedDate.getTime()) / (1000 * 60 * 60 * 24));
 
+    // Calculate expiration date based on business settings (default 90 days if not available)
+    const consignmentPeriod = 90; // TODO: Get from business settings API
+    const expirationDate = new Date(receivedDate);
+    expirationDate.setDate(expirationDate.getDate() + consignmentPeriod);
+
+    // Calculate retrieval date for expired items (typically 30 days after expiration)
+    let retrievalDate: Date | undefined;
+    if (apiItem.status === 'expired') {
+      retrievalDate = new Date(expirationDate);
+      retrievalDate.setDate(retrievalDate.getDate() + 30); // 30 days to retrieve after expiration
+    }
+
     return {
       id: apiItem.itemId,
       name: apiItem.title,
       thumbnailUrl: apiItem.primaryImageUrl || '', // This will be empty initially since no images are uploaded yet
       listedPrice: apiItem.price,
-      consignorEarnings: apiItem.myEarnings,
+      consignorEarnings: apiItem.myEarnings, // Use API value as-is
       status: this.mapApiStatusToFrontendStatus(apiItem.status),
       listedDate: receivedDate,
+      expirationDate: expirationDate,
+      retrievalDate: retrievalDate,
       soldDate,
       daysListed,
       // Price change requests are not implemented in the API yet
