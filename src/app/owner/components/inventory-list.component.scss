@@ -315,6 +315,49 @@
   accent-color: var(--color-med);
 }
 
+/* Inline editing styles */
+.inline-edit-input,
+.inline-edit-select {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--color-neutral-med);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-med);
+    box-shadow: 0 0 0 2px rgba(var(--color-med-rgb), 0.2);
+  }
+}
+
+.price-input {
+  width: 80px;
+  text-align: right;
+}
+
+.price-context {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+
+  .price-minimum {
+    color: var(--color-text-muted);
+  }
+
+  .floor-warning {
+    color: var(--color-warn-dark);
+    font-weight: 500;
+    margin-top: 0.125rem;
+  }
+}
+
+/* Dirty state indicator */
+.dirty {
+  border-left: 3px solid var(--color-warn);
+  background: rgba(var(--color-warn-rgb), 0.05);
+}
+
 /* Color Guide Modal */
 .guide-section {
   margin-bottom: 1.5rem;

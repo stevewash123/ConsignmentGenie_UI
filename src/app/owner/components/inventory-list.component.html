@@ -376,14 +376,52 @@
                   <div class="cell-secondary" *ngIf="item.brand">{{ item.brand }}</div>
                   <div class="cell-secondary" *ngIf="item.description">{{ item.description }}</div>
                 </td>
-                <td class="cell-money">
-                  <div class="price-suggested">${{ item.price | number:'1.2-2' }}</div>
-                  <div class="price-minimum" *ngIf="item.minimumPrice">Min: ${{ item.minimumPrice | number:'1.2-2' }}</div>
+                <td class="cell-money" [class.dirty]="hasUnsavedEdits(item.id)">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    [value]="getDisplayValue(item, 'price')"
+                    (input)="onPriceEdit(item.id, $event)"
+                    class="inline-edit-input price-input"
+                    [attr.data-cy]="'price-input-' + item.id">
+                  <div class="price-context">
+                    @if (item.minimumPrice) {
+                      <div class="price-minimum">Floor: ${{ item.minimumPrice | number:'1.2-2' }}</div>
+                      @if (isPriceBelowFloor(item)) {
+                        <div class="floor-warning" [attr.data-cy]="'floor-warning-' + item.id">⚠️ Below floor</div>
+                      }
+                    } @else {
+                      <div class="price-minimum">No minimum</div>
+                    }
+                  </div>
                 </td>
                 <td class="cell-secondary">{{ item.sku || '—' }}</td>
-                <td>{{ item.category || '—' }}</td>
-                <td>
-                  <span class="badge badge-neutral">{{ item.condition || 'Imported' }}</span>
+                <td [class.dirty]="hasUnsavedEdits(item.id)">
+                  <select
+                    [value]="getDisplayValue(item, 'category')"
+                    (change)="onCategoryEdit(item.id, $event)"
+                    class="inline-edit-select"
+                    [attr.data-cy]="'category-select-' + item.id">
+                    <option value="">Select category...</option>
+                    @for (category of categories(); track category.id) {
+                      <option [value]="category.name">{{ category.name }}</option>
+                    }
+                  </select>
+                </td>
+                <td [class.dirty]="hasUnsavedEdits(item.id)">
+                  <select
+                    [value]="getDisplayValue(item, 'condition')"
+                    (change)="onConditionEdit(item.id, $event)"
+                    class="inline-edit-select"
+                    [attr.data-cy]="'condition-select-' + item.id">
+                    <option value="">Select condition...</option>
+                    <option value="New">New</option>
+                    <option value="LikeNew">Like New</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Poor">Poor</option>
+                  </select>
                 </td>
                 <td>
                   @if (item.consignorName) {

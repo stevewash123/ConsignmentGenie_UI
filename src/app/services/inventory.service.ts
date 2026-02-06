@@ -86,6 +86,11 @@ export class InventoryService {
     return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/pending-imports/${pendingImportId}`);
   }
 
+  // Method to partially update pending import (for inline editing)
+  patchPendingImport(pendingImportId: string, request: { price?: number; category?: string; condition?: string }): Observable<PendingImportItemDto> {
+    return this.http.patch<PendingImportItemDto>(`${this.apiUrl}/pending-imports/${pendingImportId}`, request);
+  }
+
   // Method to create pending imports from a manifest (dropoff request)
   createFromManifest(manifestId: string, autoAssignConsignor: boolean = true): Observable<ApiResponse<PendingImportItemDto[]>> {
     const request = { autoAssignConsignor };

@@ -38,6 +38,14 @@ export interface ImportedItem {
   notes?: string;            // from CSV "Notes"
 }
 
+// Define interface for tracking pending import edits
+export interface PendingImportEdits {
+  price?: number;
+  category?: string;
+  condition?: string;
+  isDirty: boolean;
+}
+
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
@@ -143,6 +151,9 @@ export class InventoryListComponent implements OnInit {
   selectedConsignorForAssignment = '';
   assignmentNotes = '';
   removalNotes = '';
+
+  // Inline editing state for pending imports
+  editedValues = signal<Map<string, PendingImportEdits>>(new Map());
 
   // Additional methods needed by templates
   // Note: This returns union type - use inventoryItems() for type-safe ItemListDto access
@@ -564,19 +575,6 @@ export class InventoryListComponent implements OnInit {
     this.allPendingVerified.set(event.target.checked);
   }
 
-  toggleItemVerification(itemId: string, event: any) {
-    const verified = new Set(this.verifiedPendingImports());
-    if (event.target.checked) {
-      verified.add(itemId);
-    } else {
-      verified.delete(itemId);
-    }
-    this.verifiedPendingImports.set(verified);
-
-    // Update all verified state
-    const allItems = this.pendingImportsResult()?.items || [];
-    this.allPendingVerified.set(allItems.every(item => verified.has(item.id)));
-  }
 
   async bulkAssignConsignor() {
     const selectedIds = Array.from(this.selectedPendingImports());
@@ -1434,5 +1432,112 @@ export class InventoryListComponent implements OnInit {
 
   clearConsignorFilter() {
     this.onFilterClear('consignor');
+  }
+
+  // Inline editing methods for pending imports
+  getEditedValue(itemId: string, field: 'price' | 'category' | 'condition'): any {
+    const edits = this.editedValues().get(itemId);
+    return edits?.[field];
+  }
+
+  hasUnsavedEdits(itemId: string): boolean {
+    return this.editedValues().get(itemId)?.isDirty || false;
+  }
+
+  onFieldEdit(itemId: string, field: 'price' | 'category' | 'condition', value: any) {
+    this.editedValues.update(map => {
+      const newMap = new Map(map);
+      const currentEdits = newMap.get(itemId) || { isDirty: false };
+
+      newMap.set(itemId, {
+        ...currentEdits,
+        [field]: value,
+        isDirty: true
+      });
+
+      return newMap;
+    });
+  }
+
+  onPriceEdit(itemId: string, event: any) {
+    const value = parseFloat(event.target.value);
+    if (!isNaN(value) && value > 0) {
+      this.onFieldEdit(itemId, 'price', value);
+    }
+  }
+
+  onCategoryEdit(itemId: string, event: any) {
+    this.onFieldEdit(itemId, 'category', event.target.value);
+  }
+
+  onConditionEdit(itemId: string, event: any) {
+    this.onFieldEdit(itemId, 'condition', event.target.value);
+  }
+
+  getDisplayValue(item: PendingImportItemDto, field: 'price' | 'category' | 'condition'): any {
+    const editedValue = this.getEditedValue(item.id, field);
+    if (editedValue !== undefined) {
+      return editedValue;
+    }
+
+    switch (field) {
+      case 'price': return item.price;
+      case 'category': return item.category || '';
+      case 'condition': return item.condition || '';
+      default: return '';
+    }
+  }
+
+  isPriceBelowFloor(item: PendingImportItemDto): boolean {
+    if (!item.minimumPrice) return false;
+
+    const currentPrice = this.getDisplayValue(item, 'price');
+    return currentPrice < item.minimumPrice;
+  }
+
+  async saveInlineEdits(itemId: string) {
+    const edits = this.editedValues().get(itemId);
+    if (!edits || !edits.isDirty) return;
+
+    try {
+      const patchRequest: any = {};
+      if (edits.price !== undefined) patchRequest.price = edits.price;
+      if (edits.category !== undefined) patchRequest.category = edits.category;
+      if (edits.condition !== undefined) patchRequest.condition = edits.condition;
+
+      await firstValueFrom(this.inventoryService.patchPendingImport(itemId, patchRequest));
+
+      // Clear dirty state for this item
+      this.editedValues.update(map => {
+        const newMap = new Map(map);
+        newMap.delete(itemId);
+        return newMap;
+      });
+
+      // Reload data to show updated values
+      this.loadItems();
+
+    } catch (error) {
+      console.error('Failed to save inline edits:', error);
+      this.error.set('Failed to save changes. Please try again.');
+    }
+  }
+
+  async toggleItemVerification(itemId: string, event: any) {
+    // Save any pending edits before verification
+    if (this.hasUnsavedEdits(itemId)) {
+      await this.saveInlineEdits(itemId);
+    }
+
+    // Continue with original verification logic
+    if (event.target.checked) {
+      this.verifiedPendingImports.update(set => new Set([...set, itemId]));
+    } else {
+      this.verifiedPendingImports.update(set => {
+        const newSet = new Set(set);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }
   }
 }
