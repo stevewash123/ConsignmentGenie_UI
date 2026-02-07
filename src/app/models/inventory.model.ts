@@ -143,11 +143,11 @@ export interface ItemQueryParams {
 
 
 export enum ItemCondition {
-  New = 'New',
-  LikeNew = 'LikeNew',
-  Good = 'Good',
-  Fair = 'Fair',
-  Poor = 'Poor'
+  New = 'new',
+  LikeNew = 'likenew',
+  Good = 'good',
+  Fair = 'fair',
+  Poor = 'poor'
 }
 
 export enum ItemStatus {
