@@ -44,7 +44,29 @@
           }
 
           <div class="item-actions">
-            <div class="item-price">${{ cartItem.item.price | number:'1.2-2' }}</div>
+            <div class="price-section">
+              <div class="price-display">
+                List: ${{ cartItem.item.price | number:'1.2-2' }}
+                @if (cartItem.item.minimumPrice) {
+                  <div class="minimum-price">Min: ${{ cartItem.item.minimumPrice | number:'1.2-2' }}</div>
+                }
+              </div>
+              <div class="sale-price-input">
+                <label for="salePrice_{{ cartItem.item.id }}">Sale Price:</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  id="salePrice_{{ cartItem.item.id }}"
+                  [value]="getSalePrice(cartItem)"
+                  (input)="onSalePriceChange(cartItem.item.id, $event.target.value)"
+                  [class.below-minimum]="isBelowMinimum(cartItem)"
+                  class="sale-price">
+                @if (isBelowMinimum(cartItem)) {
+                  <div class="price-warning">Below minimum floor</div>
+                }
+              </div>
+            </div>
             <button
               class="remove-button"
               (click)="removeItem(cartItem.item.id)"

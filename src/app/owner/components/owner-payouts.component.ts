@@ -226,7 +226,7 @@ export class OwnerPayoutsComponent implements OnInit {
   // ============================================================================
   ngOnInit(): void {
     this.loadConsignors();
-    this.loadPendingPayouts();
+    this.refreshPendingPayoutsOnLoad(); // Auto-refresh with fresh calculation on page load
     this.loadPayouts();
   }
 
@@ -235,6 +235,24 @@ export class OwnerPayoutsComponent implements OnInit {
   // ============================================================================
   isComponentLoading(): boolean {
     return this.loadingService.isLoading(LOADING_KEY);
+  }
+
+  /**
+   * Auto-refresh pending payouts with fresh calculation on page load
+   * This ensures that newly created transactions appear in pending payouts
+   * without requiring manual refresh button click
+   */
+  async refreshPendingPayoutsOnLoad(): Promise<void> {
+    try {
+      // First refresh the summaries to include any new transactions
+      await firstValueFrom(this.payoutService.refreshSummaries());
+      // Then load the updated pending payouts data
+      await this.loadPendingPayouts();
+    } catch (error) {
+      console.error('Error refreshing pending payouts on load:', error);
+      // Fall back to just loading existing data if refresh fails
+      await this.loadPendingPayouts();
+    }
   }
 
   async loadConsignors(): Promise<void> {

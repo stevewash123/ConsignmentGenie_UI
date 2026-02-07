@@ -915,6 +915,16 @@ export class InventoryListComponent implements OnInit {
     this.router.navigate(['/owner/inventory', item.itemId, 'edit']);
   }
 
+  sellItem(item: ItemListDto) {
+    // Navigate to record sale with the item pre-selected and return path set to inventory
+    this.router.navigate(['/owner/record-sale'], {
+      queryParams: {
+        preselectedItem: item.itemId,
+        returnTo: 'inventory'
+      }
+    });
+  }
+
   viewConsignor(consignorId?: string) {
     if (consignorId) {
       this.router.navigate(['/owner/consignors', consignorId]);
@@ -1573,5 +1583,64 @@ export class InventoryListComponent implements OnInit {
         return newSet;
       });
     }
+  }
+
+  /**
+   * Get CSS classes for table row based on item expiration status
+   */
+  getRowExpirationClasses(item: ItemListDto): string {
+    const classes = [];
+
+    // Only apply expiration styling to items that are still available/active
+    if (item.status === 'Sold' || item.status === 'Removed') {
+      return '';
+    }
+
+    if (item.expirationDate) {
+      const expirationClass = this.getExpirationStatusClass(item.expirationDate);
+
+      switch (expirationClass) {
+        case 'expiration-expired':
+          classes.push('row-expired');
+          break;
+        case 'expiration-warning':
+          classes.push('row-expiring-soon');
+          break;
+        case 'expiration-normal':
+          // Check if it's getting close (within 14 days)
+          const daysUntil = this.getDaysUntilExpiration(new Date(item.expirationDate));
+          if (daysUntil <= 14 && daysUntil > 7) {
+            classes.push('row-expiring');
+          }
+          break;
+      }
+    }
+
+    return classes.join(' ');
+  }
+
+  /**
+   * Get expiration status text with icon for better UX
+   */
+  getExpirationStatusIcon(expirationDate?: Date): string {
+    if (!expirationDate) {
+      return '';
+    }
+
+    const daysUntil = this.getDaysUntilExpiration(new Date(expirationDate));
+
+    if (daysUntil < 0) {
+      return '🔴';  // Expired
+    }
+
+    if (daysUntil <= 7) {
+      return '⚠️';   // Warning
+    }
+
+    if (daysUntil <= 14) {
+      return '🟡';   // Approaching
+    }
+
+    return '';     // Normal - no icon needed
   }
 }

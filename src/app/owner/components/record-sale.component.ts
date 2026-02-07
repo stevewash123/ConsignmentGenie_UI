@@ -1,7 +1,8 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
 import { ItemSearchComponent } from './item-search.component';
 import { CartComponent } from './cart.component';
@@ -17,6 +18,8 @@ import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-
 export class RecordSaleComponent implements OnInit {
   private recordSaleService = inject(RecordSaleService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private toastr = inject(ToastrService);
 
   // State signals
@@ -28,6 +31,7 @@ export class RecordSaleComponent implements OnInit {
   saleCompleted = signal<boolean>(false);
   saleResult = signal<any>(null);
   errorMessage = signal<string>('');
+  returnTo = signal<string>('dashboard');
 
   // Computed values
   cartItemIds = computed(() =>
@@ -36,6 +40,39 @@ export class RecordSaleComponent implements OnInit {
 
   ngOnInit() {
     this.loadTaxRate();
+    this.handleQueryParams();
+  }
+
+  private handleQueryParams() {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      // Set return destination
+      if (params['returnTo']) {
+        this.returnTo.set(params['returnTo']);
+      }
+
+      // Pre-select item if provided
+      if (params['preselectedItem']) {
+        this.loadAndAddPreselectedItem(params['preselectedItem']);
+      }
+    });
+  }
+
+  private loadAndAddPreselectedItem(itemId: string) {
+    // Search for the specific item to add it to cart
+    this.recordSaleService.getAvailableItems().subscribe({
+      next: (items) => {
+        const item = items.find(i => i.id === itemId);
+        if (item) {
+          this.addToCart(item);
+        } else {
+          this.toastr.warning('Selected item not found or not available', 'Item Not Available');
+        }
+      },
+      error: (err) => {
+        console.error('Error loading preselected item:', err);
+        this.toastr.error('Error loading selected item', 'Error');
+      }
+    });
   }
 
   private loadTaxRate() {
@@ -55,7 +92,8 @@ export class RecordSaleComponent implements OnInit {
 
     const newCartItem: CartItem = {
       item: item,
-      quantity: 1
+      quantity: 1,
+      salePrice: item.price // Default to list price
     };
 
     this.cartItems.update(items => [...items, newCartItem]);
@@ -76,6 +114,16 @@ export class RecordSaleComponent implements OnInit {
     this.customerEmail.set(email);
   }
 
+  onSalePriceChanged(event: { itemId: string; newPrice: number }) {
+    this.cartItems.update(items =>
+      items.map(item =>
+        item.item.id === event.itemId
+          ? { ...item, salePrice: event.newPrice }
+          : item
+      )
+    );
+  }
+
   completeSale() {
     if (this.cartItems().length === 0) return;
 
@@ -83,7 +131,10 @@ export class RecordSaleComponent implements OnInit {
     this.errorMessage.set(''); // Clear any previous errors
 
     const saleRequest: SaleRequest = {
-      items: this.cartItems(),
+      items: this.cartItems().map(item => ({
+        ...item,
+        finalPrice: item.salePrice ?? item.item.price
+      })),
       paymentType: this.paymentType(),
       customerEmail: this.customerEmail() || undefined
     };
@@ -119,7 +170,16 @@ export class RecordSaleComponent implements OnInit {
   }
 
   backToDashboard() {
-    this.router.navigate(['/owner/dashboard']);
+    this.navigateToOrigin();
+  }
+
+  private navigateToOrigin() {
+    const returnTo = this.returnTo();
+    if (returnTo === 'inventory') {
+      this.router.navigate(['/owner/inventory']);
+    } else {
+      this.router.navigate(['/owner/dashboard']);
+    }
   }
 
   closeSaleModal() {
@@ -128,7 +188,7 @@ export class RecordSaleComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/owner/dashboard']);
+    this.navigateToOrigin();
   }
 
   private clearSale() {

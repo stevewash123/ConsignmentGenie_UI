@@ -44,11 +44,11 @@ export class LoginSimpleComponent implements OnInit {
     this.email = email;
     // Use correct passwords for each account type
     if (email === 'admin@microsaasbuilders.com') {
-      this.password = 'admin123';  // Admin password from AdminController
+      this.password = 'pass123';  // Admin password from AdminController
     } else if (email === 'owner1@microsaasbuilders.com') {
-      this.password = 'oldCity2220';  // Owner password
+      this.password = 'pass123';  // Owner password
     } else {
-      this.password = 'password123';  // Default for other accounts
+      this.password = 'pass123';  // Default for other accounts
     }
     this.errorMessage.set('');
   }

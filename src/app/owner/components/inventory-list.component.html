@@ -163,7 +163,7 @@
           </thead>
           <tbody>
             @for (item of itemsResult()?.items; track item.itemId) {
-              <tr>
+              <tr [ngClass]="getRowExpirationClasses(item)">
                 <td class="image-cell">
                   @if (item.primaryImageUrl) {
                     <div class="image-container has-image" [title]="'Preview image for ' + item.title">
@@ -211,12 +211,15 @@
                   'expiration-expired': getExpirationStatusClass(item.expirationDate) === 'expiration-expired',
                   'expiration-warning': getExpirationStatusClass(item.expirationDate) === 'expiration-warning'
                 }">
-                  {{ getExpirationDisplayText(item.expirationDate) }}
+                  <span class="expiration-status">
+                    {{ getExpirationStatusIcon(item.expirationDate) }} {{ getExpirationDisplayText(item.expirationDate) }}
+                  </span>
                 </td>
                 <td>
                   <button class="btn-icon" (click)="viewItem(item.itemId)" title="View Details">👁️</button>
                   <button class="btn-icon" (click)="editItem(item)" title="Edit">✏️</button>
-                  <button class="btn-icon danger" *ngIf="item.status === 'Available'" (click)="removeFromInventory(item)" title="Remove">📤</button>
+                  <button class="btn-icon success" *ngIf="item.status === 'Available'" (click)="sellItem(item)" title="Sell">💰</button>
+                  <button class="btn-icon danger" *ngIf="item.status === 'Available'" (click)="markAsRemoved(item)" title="Remove">📤</button>
                 </td>
               </tr>
             }

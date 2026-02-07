@@ -9,6 +9,7 @@ export interface Item {
   name: string;
   sku: string;
   price: number;
+  minimumPrice?: number;
   consignorName: string;
   status: string;
   category: string;
@@ -17,6 +18,8 @@ export interface Item {
 export interface CartItem {
   item: Item;
   quantity: number; // For MVP, always 1 (consignment items are unique)
+  salePrice?: number;
+  finalPrice?: number;
 }
 
 export interface SaleRequest {
@@ -86,6 +89,7 @@ export class RecordSaleService {
         title: string;
         sku: string;
         price: number;
+        minimumPrice?: number;
         consignorName: string;
         status: string;
         category: string;
@@ -106,6 +110,7 @@ export class RecordSaleService {
           name: item.title,
           sku: item.sku,
           price: item.price,
+          minimumPrice: item.minimumPrice,
           consignorName: item.consignorName || 'Unknown',
           status: item.status,
           category: item.category || 'Uncategorized'
@@ -170,7 +175,7 @@ export class RecordSaleService {
           items: request.items.map(cartItem => ({
             itemId: cartItem.item.id,
             quantity: cartItem.quantity,
-            unitPrice: cartItem.item.price
+            unitPrice: cartItem.finalPrice || cartItem.salePrice || cartItem.item.price
           })),
           paymentType: request.paymentType,
           taxRate: taxRate,

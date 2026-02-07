@@ -575,3 +575,65 @@
     display: block;
   }
 }
+
+/* ============================================================================
+   EXPIRATION STATUS STYLING
+   ============================================================================ */
+
+/* Row-level styling based on expiration status */
+.data-table tbody {
+  /* Items expiring in 8-14 days - subtle yellow tint */
+  tr.row-expiring {
+    background-color: rgba(255, 248, 220, 0.4); /* Light amber background */
+    border-left: 3px solid #f59e0b; /* Amber left border */
+
+    &:hover {
+      background-color: rgba(255, 248, 220, 0.6);
+    }
+  }
+
+  /* Items expiring within 7 days - stronger warning */
+  tr.row-expiring-soon {
+    background-color: rgba(254, 242, 242, 0.5); /* Light red background */
+    border-left: 3px solid #ef4444; /* Red left border */
+
+    &:hover {
+      background-color: rgba(254, 242, 242, 0.7);
+    }
+  }
+
+  /* Items that are expired - strong red indication */
+  tr.row-expired {
+    background-color: rgba(254, 242, 242, 0.7); /* Strong red background */
+    border-left: 4px solid #dc2626; /* Dark red left border */
+
+    &:hover {
+      background-color: rgba(254, 242, 242, 0.9);
+    }
+
+    /* Slightly fade the text for expired items */
+    td {
+      color: rgba(107, 114, 128, 0.8);
+    }
+
+    /* Keep important columns prominent */
+    .cell-primary,
+    .cell-money,
+    .badge {
+      color: inherit;
+    }
+  }
+}
+
+/* Expiration status indicators */
+.expiration-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  /* Ensure icons are properly aligned */
+  .expiration-icon {
+    font-size: 0.875rem;
+    line-height: 1;
+  }
+}

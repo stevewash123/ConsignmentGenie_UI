@@ -36,12 +36,14 @@ export interface CartItem {
     name: string;
     sku: string;
     price: number;
+    minimumPrice?: number;
     consignorName: string;
     status: string;
     isFromSquare?: boolean;
     squareVariationId?: string;
   };
   quantity: number;
+  salePrice?: number;
   reservation?: CartItemReservation;
   timeRemaining?: number;
 }
@@ -80,6 +82,7 @@ export class CartComponent implements OnInit {
   completeSale = output<void>();
   showConflictDialog = output<{ item: CartItem; errorMessage: string; conflictType: string }>();
   showExpirationWarning = output<{ item: CartItem; timeRemaining: number }>();
+  salePriceChanged = output<{ itemId: string; newPrice: number }>();
 
   // -------------------------------------------------------------------------
   // Local State (Signals)
@@ -93,7 +96,7 @@ export class CartComponent implements OnInit {
   // Computed Values
   // -------------------------------------------------------------------------
   subtotal = computed(() =>
-    this.cartItems().reduce((sum, item) => sum + item.item.price * item.quantity, 0)
+    this.cartItems().reduce((sum, item) => sum + (item.salePrice ?? item.item.price) * item.quantity, 0)
   );
 
   taxAmount = computed(() => this.subtotal() * this.taxRate());
@@ -259,6 +262,32 @@ export class CartComponent implements OnInit {
   onCustomerEmailChange(email: string): void {
     this.customerEmail.set(email);
     this.customerEmailChanged.emit(email);
+  }
+
+  /**
+   * Handle sale price change for an item
+   */
+  onSalePriceChange(itemId: string, newPriceStr: string): void {
+    const newPrice = parseFloat(newPriceStr);
+    if (!isNaN(newPrice) && newPrice > 0) {
+      this.salePriceChanged.emit({ itemId, newPrice });
+    }
+  }
+
+  /**
+   * Get the current sale price for an item
+   */
+  getSalePrice(item: CartItem): number {
+    return item.salePrice ?? item.item.price;
+  }
+
+  /**
+   * Check if sale price is below minimum floor
+   */
+  isBelowMinimum(item: CartItem): boolean {
+    if (!item.item.minimumPrice) return false;
+    const currentPrice = this.getSalePrice(item);
+    return currentPrice < item.item.minimumPrice;
   }
 
   /**
