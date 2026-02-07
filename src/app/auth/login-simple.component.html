@@ -61,7 +61,7 @@
               (click)="quickLogin('admin@microsaasbuilders.com')"
               [disabled]="isAuthLoading()"
             >
-              <span class="role">Admin</span>
+              <span class="role">admin</span>
               <span class="email">admin@microsaasbuilders.com</span>
             </button>
 
@@ -70,17 +70,35 @@
               (click)="quickLogin('owner1@microsaasbuilders.com')"
               [disabled]="isAuthLoading()"
             >
-              <span class="role">Shop Owner</span>
+              <span class="role">owner</span>
               <span class="email">owner1@microsaasbuilders.com</span>
             </button>
 
             <button
               class="quick-btn consignor"
-              (click)="quickLogin('provider1@microsaasbuilders.com')"
+              (click)="quickLogin('consignor1@microsaasbuilders.com')"
               [disabled]="isAuthLoading()"
             >
               <span class="role">consignor</span>
-              <span class="email">provider1@microsaasbuilders.com</span>
+              <span class="email">consignor1@microsaasbuilders.com</span>
+            </button>
+
+            <button
+              class="quick-btn consignor"
+              (click)="quickLogin('consignor1@microsaasbuilders.com')"
+              [disabled]="isAuthLoading()"
+            >
+              <span class="role">customer</span>
+              <span class="email">shopper1@microsaasbuilders.com</span>
+            </button>
+
+            <button
+              class="quick-btn consignor"
+              (click)="quickLogin('consignor1@microsaasbuilders.com')"
+              [disabled]="isAuthLoading()"
+            >
+              <span class="role">clerk</span>
+              <span class="email">clerk1@microsaasbuilders.com</span>
             </button>
           </div>
         </div>

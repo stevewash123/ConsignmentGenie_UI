@@ -1,6 +1,28 @@
 /* Inventory List Component - Page-specific styles only */
 /* Shared styles (buttons, .data-table, badges, modals, forms, pagination) are in global styles.scss */
 
+/* Actions column styling */
+.data-table {
+  th:last-child,
+  td:last-child {
+    width: 140px;
+    min-width: 140px;
+    white-space: nowrap;
+  }
+
+  .btn-icon {
+    margin: 0 0.25rem;
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
 .inventory-page {
   padding: 2rem;
   max-width: 1600px;
