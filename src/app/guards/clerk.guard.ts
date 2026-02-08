@@ -5,7 +5,7 @@ import { UserRole } from './auth.guard';
 @Injectable({
   providedIn: 'root'
 })
-export class AdminGuard implements CanActivate {
+export class ClerkGuard implements CanActivate {
   constructor(private router: Router) {}
 
   canActivate(): boolean {
@@ -17,31 +17,24 @@ export class AdminGuard implements CanActivate {
       return false;
     }
 
+    let userData;
     try {
-      const userData = JSON.parse(userDataStr);
-
-      // Only allow system admin access
-      if (userData.role === UserRole.Admin || (userData.role === UserRole.Owner && userData.email === 'admin@microsaasbuilders.com')) {
-        return true;
-      }
-
-      // Redirect non-admin users to their appropriate dashboard
-      this.redirectToUserDashboard(userData.role);
-      return false;
+      userData = JSON.parse(userDataStr);
     } catch (error) {
-      console.error('Invalid user data in localStorage');
+      console.error('Invalid user data in localStorage:', error);
       this.router.navigate(['/login']);
       return false;
     }
-  }
 
-  private redirectToUserDashboard(userRole: number) {
-    switch (userRole) {
+    // Allow clerk and owner roles to access clerk pages
+    if (userData.role === UserRole.Clerk || userData.role === UserRole.Owner) {
+      return true;
+    }
+
+    // Redirect to appropriate dashboard for other roles
+    switch (userData.role) {
       case UserRole.Admin:
         this.router.navigate(['/admin/dashboard']);
-        break;
-      case UserRole.Owner:
-        this.router.navigate(['/owner/dashboard']);
         break;
       case UserRole.Consignor:
         this.router.navigate(['/consignor/dashboard']);
@@ -52,5 +45,7 @@ export class AdminGuard implements CanActivate {
       default:
         this.router.navigate(['/login']);
     }
+
+    return false;
   }
 }

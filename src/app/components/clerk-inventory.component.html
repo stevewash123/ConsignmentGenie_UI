@@ -1,0 +1,246 @@
+<!-- Clerk Inventory Component -->
+<div class="clerk-inventory-container">
+  <!-- Header -->
+  <div class="inventory-header">
+    <div class="header-left">
+      <h1 class="text-2xl font-bold text-gray-800">Inventory Lookup</h1>
+      <p class="text-sm text-gray-600">Search and view store inventory</p>
+    </div>
+    <div class="header-actions">
+      <button
+        *ngIf="canAddItems()"
+        type="button"
+        class="btn btn-primary"
+        (click)="addNewItem()">
+        + Add Item
+      </button>
+      <button type="button" class="btn btn-outline" (click)="refresh()">
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <!-- Search -->
+    <div class="filter-group">
+      <label for="search" class="filter-label">Search</label>
+      <input
+        id="search"
+        type="text"
+        class="form-input"
+        placeholder="Search by name, SKU, or description..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event.target).value)">
+    </div>
+
+    <!-- Category Filter -->
+    <div class="filter-group">
+      <label for="category" class="filter-label">Category</label>
+      <select
+        id="category"
+        class="form-select"
+        [value]="selectedCategory()"
+        (change)="onCategoryChange($any($event.target).value)">
+        <option value="">All Categories</option>
+        <option *ngFor="let category of categories()" [value]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="filter-group">
+      <label for="status" class="filter-label">Status</label>
+      <select
+        id="status"
+        class="form-select"
+        [value]="selectedStatus()"
+        (change)="onStatusChange($any($event.target).value)">
+        <option *ngFor="let status of statuses" [value]="status.value">
+          {{ status.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Condition Filter -->
+    <div class="filter-group">
+      <label for="condition" class="filter-label">Condition</label>
+      <select
+        id="condition"
+        class="form-select"
+        [value]="selectedCondition()"
+        (change)="onConditionChange($any($event.target).value)">
+        <option *ngFor="let condition of conditions" [value]="condition.value">
+          {{ condition.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Clear Filters -->
+    <div class="filter-group">
+      <button type="button" class="btn btn-outline btn-sm" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div class="results-info">
+    <span class="text-sm text-gray-600">
+      Showing {{ items().length }} of {{ totalItems() }} items
+    </span>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading inventory...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error() }}</p>
+    <button type="button" class="btn btn-primary btn-sm" (click)="refresh()">
+      Try Again
+    </button>
+  </div>
+
+  <!-- Items Table -->
+  <div *ngIf="!isLoading() && !error()" class="items-table-container">
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th class="image-column">Image</th>
+          <th>Item Name</th>
+          <th>SKU</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Condition</th>
+          <th>Category</th>
+          <th *ngIf="canViewConsignorInfo()">Consignor</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items()" class="item-row">
+          <!-- Image -->
+          <td class="image-cell">
+            <div class="item-image">
+              <img
+                *ngIf="item.primaryImageUrl; else noImage"
+                [src]="item.primaryImageUrl"
+                [alt]="item.name"
+                class="w-full h-full object-cover">
+              <ng-template #noImage>
+                <div class="no-image">📷</div>
+              </ng-template>
+            </div>
+          </td>
+
+          <!-- Item Name -->
+          <td class="item-name">
+            <div class="name-content">
+              <h4 class="font-medium">{{ item.name }}</h4>
+              <p *ngIf="item.description" class="description">{{ item.description }}</p>
+            </div>
+          </td>
+
+          <!-- SKU -->
+          <td class="sku">{{ item.sku }}</td>
+
+          <!-- Price -->
+          <td class="price">{{ formatCurrency(item.price) }}</td>
+
+          <!-- Status -->
+          <td class="status">
+            <span class="badge" [ngClass]="getStatusBadgeClass(item.status)">
+              {{ item.status | titlecase }}
+            </span>
+          </td>
+
+          <!-- Condition -->
+          <td class="condition">
+            <span class="badge" [ngClass]="getConditionBadgeClass(item.condition)">
+              {{ getConditionLabel(item.condition) }}
+            </span>
+          </td>
+
+          <!-- Category -->
+          <td class="category">{{ item.category || '-' }}</td>
+
+          <!-- Consignor (conditionally shown) -->
+          <td *ngIf="canViewConsignorInfo()" class="consignor">
+            {{ item.consignorName || '-' }}
+          </td>
+
+          <!-- Actions -->
+          <td class="actions">
+            <button
+              type="button"
+              class="action-btn view"
+              (click)="viewItemDetails(item)"
+              title="View Details">
+              👁️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="items().length === 0 && !isLoading()" class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h3 class="empty-title">No items found</h3>
+      <p class="empty-message">
+        <span *ngIf="searchQuery() || selectedCategory() || selectedStatus() || selectedCondition()">
+          Try adjusting your filters or
+          <button type="button" class="link-button" (click)="clearFilters()">clear all filters</button>
+        </span>
+        <span *ngIf="!searchQuery() && !selectedCategory() && !selectedStatus() && !selectedCondition()">
+          No inventory items are available.
+        </span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalPages() > 1" class="pagination-container">
+    <div class="pagination">
+      <button
+        type="button"
+        class="pagination-btn"
+        [disabled]="currentPage() === 1"
+        (click)="previousPage()">
+        Previous
+      </button>
+
+      <span class="pagination-info">
+        Page {{ currentPage() }} of {{ totalPages() }}
+      </span>
+
+      <button
+        type="button"
+        class="pagination-btn"
+        [disabled]="currentPage() === totalPages()"
+        (click)="nextPage()">
+        Next
+      </button>
+    </div>
+
+    <div class="page-size-selector">
+      <label for="pageSize" class="text-sm">Items per page:</label>
+      <select
+        id="pageSize"
+        class="form-select form-select-sm"
+        [value]="pageSize()"
+        (change)="pageSize.set(+$any($event.target).value); currentPage.set(1); loadItems()">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </div>
+</div>

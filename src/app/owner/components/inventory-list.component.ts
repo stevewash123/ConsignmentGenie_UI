@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 import { ColumnFilterComponent, FilterOption } from '../../shared/components/column-filter.component';
 import { InventoryService } from '../../services/inventory.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -11,6 +12,7 @@ import { SquareIntegrationService } from '../../services/square-integration.serv
 import { ConfirmationDialogService } from '../../shared/services/confirmation-dialog.service';
 import { ConsignorService } from '../../services/consignor.service';
 import { OwnerService } from '../../services/owner.service';
+import { RecordSaleService, SaleRequest } from '../../services/record-sale.service';
 import { Consignor } from '../../models/consignor.model';
 import {
   ItemListDto,
@@ -62,6 +64,8 @@ export class InventoryListComponent implements OnInit {
   private confirmationService = inject(ConfirmationDialogService);
   private consignorService = inject(ConsignorService);
   private ownerService = inject(OwnerService);
+  private recordSaleService = inject(RecordSaleService);
+  private toastr = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
 
   // State signals
@@ -74,6 +78,13 @@ export class InventoryListComponent implements OnInit {
   isBulkImportModalOpen = signal(false);
   isBulkAssignModalOpen = signal(false);
   isLoading = signal(false);
+
+  // Quick Sell modal signals
+  isQuickSellModalOpen = signal(false);
+  quickSellItem = signal<ItemListDto | null>(null);
+  quickSellPaymentType = signal<string>('Cash');
+  quickSellCustomerEmail = signal<string>('');
+  isCompletingQuickSale = signal(false);
 
   isInventoryLoading(): boolean {
     return this.loadingService.isLoading('inventory-list');
@@ -916,13 +927,11 @@ export class InventoryListComponent implements OnInit {
   }
 
   sellItem(item: ItemListDto) {
-    // Navigate to record sale with the item pre-selected and return path set to inventory
-    this.router.navigate(['/owner/record-sale'], {
-      queryParams: {
-        preselectedItem: item.itemId,
-        returnTo: 'inventory'
-      }
-    });
+    // Open Quick Sell modal for back-office use
+    this.quickSellItem.set(item);
+    this.quickSellPaymentType.set('Cash');
+    this.quickSellCustomerEmail.set('');
+    this.isQuickSellModalOpen.set(true);
   }
 
   viewConsignor(consignorId?: string) {
@@ -1643,4 +1652,72 @@ export class InventoryListComponent implements OnInit {
 
     return '';     // Normal - no icon needed
   }
+
+  // Quick Sell modal methods
+  closeQuickSellModal() {
+    this.isQuickSellModalOpen.set(false);
+    this.quickSellItem.set(null);
+    this.quickSellPaymentType.set('Cash');
+    this.quickSellCustomerEmail.set('');
+  }
+
+  completeQuickSale() {
+    const item = this.quickSellItem();
+    if (!item) return;
+
+    this.isCompletingQuickSale.set(true);
+
+    // Create the sale request using the existing RecordSaleService format
+    const saleRequest: SaleRequest = {
+      items: [{
+        item: {
+          id: item.itemId,
+          name: item.title,
+          sku: item.sku,
+          price: item.price,
+          consignorName: item.consignorName,
+          status: 'Available',
+          category: item.category || 'General'
+        },
+        quantity: 1,
+        salePrice: item.price,
+        finalPrice: item.price
+      }],
+      paymentType: this.quickSellPaymentType(),
+      customerEmail: this.quickSellCustomerEmail() || undefined
+    };
+
+    this.recordSaleService.completeSale(saleRequest).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (result) => {
+        this.isCompletingQuickSale.set(false);
+        this.closeQuickSellModal();
+
+        this.toastr.success(`Sale completed! Total: $${result.total.toFixed(2)}`, 'Quick Sale');
+
+        if (result.receiptSent && this.quickSellCustomerEmail()) {
+          this.toastr.success(`Receipt sent to ${this.quickSellCustomerEmail()}`, 'Email Sent!');
+        }
+
+        // Refresh the inventory to show updated status
+        this.loadInventoryItems();
+      },
+      error: (error) => {
+        console.error('Quick sale failed:', error);
+        this.isCompletingQuickSale.set(false);
+        this.toastr.error('Failed to complete the sale. Please try again.', 'Sale Error');
+      }
+    });
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  }
+
+  // Payment type options for Quick Sell
+  readonly paymentTypes = ['Cash', 'Card', 'Check', 'Other'];
 }

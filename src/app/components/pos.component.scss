@@ -1,0 +1,250 @@
+.pos-container {
+  @apply h-full flex flex-col bg-gray-50;
+}
+
+.pos-header {
+  @apply bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between;
+}
+
+.pos-main {
+  @apply flex-1 flex overflow-hidden;
+}
+
+/* Search Panel */
+.search-panel {
+  @apply flex-1 p-6 overflow-y-auto bg-white border-r border-gray-200;
+  min-width: 400px;
+}
+
+.search-section {
+  @apply mb-6;
+}
+
+.search-input-group {
+  @apply relative;
+
+  .form-input {
+    @apply pr-10;
+  }
+
+  .loading-spinner {
+    @apply w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin;
+  }
+}
+
+.search-results {
+  @apply space-y-4;
+}
+
+.results-grid {
+  @apply space-y-3;
+}
+
+.result-card {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-4 hover:bg-gray-100 transition-colors;
+
+  &.in-cart {
+    @apply bg-green-50 border-green-200;
+  }
+}
+
+.result-image {
+  @apply w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0;
+
+  img {
+    @apply w-full h-full object-cover;
+  }
+
+  .no-image-placeholder {
+    @apply w-full h-full flex items-center justify-center text-gray-400 text-2xl;
+  }
+}
+
+.result-details {
+  @apply flex-1 min-w-0;
+
+  h4 {
+    @apply truncate;
+  }
+}
+
+.add-to-cart-btn {
+  @apply w-10 h-10 bg-blue-500 hover:bg-blue-600 disabled:bg-green-500 disabled:hover:bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-lg transition-colors;
+
+  &:disabled {
+    @apply cursor-not-allowed;
+  }
+}
+
+.empty-results {
+  @apply bg-gray-50 rounded-lg;
+}
+
+/* Cart Panel */
+.cart-panel {
+  @apply w-96 bg-white p-6 flex flex-col;
+}
+
+.cart-header {
+  @apply flex items-center justify-between mb-4 pb-4 border-b border-gray-200;
+}
+
+.cart-items {
+  @apply flex-1 space-y-3 overflow-y-auto mb-4;
+}
+
+.cart-item {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-3;
+}
+
+.cart-item-info {
+  @apply mb-2;
+
+  h4 {
+    @apply text-sm font-medium;
+  }
+}
+
+.cart-item-controls {
+  @apply flex items-center justify-between;
+}
+
+.quantity-controls {
+  @apply flex items-center gap-2;
+}
+
+.quantity-btn {
+  @apply w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded flex items-center justify-center text-sm font-bold;
+}
+
+.quantity {
+  @apply min-w-8 text-center font-medium;
+}
+
+.item-price {
+  @apply font-semibold text-green-600;
+}
+
+.remove-btn {
+  @apply w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center font-bold;
+}
+
+.empty-cart {
+  @apply flex-1 flex items-center justify-center bg-gray-50 rounded-lg;
+}
+
+/* Cart Totals */
+.cart-totals {
+  @apply space-y-2 py-4 border-t border-gray-200 mb-4;
+}
+
+.total-line {
+  @apply flex justify-between;
+
+  &.total-final {
+    @apply text-lg font-bold border-t border-gray-200 pt-2;
+  }
+}
+
+/* Payment Section */
+.payment-section {
+  @apply space-y-4 border-t border-gray-200 pt-4;
+}
+
+.payment-methods {
+  @apply space-y-2;
+}
+
+.payment-buttons {
+  @apply flex gap-2;
+}
+
+.payment-btn {
+  @apply px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors;
+
+  &.active {
+    @apply bg-blue-500 text-white border-blue-500;
+  }
+}
+
+.customer-email {
+  @apply space-y-1;
+
+  label {
+    @apply block;
+  }
+}
+
+.action-buttons {
+  @apply space-y-3;
+}
+
+.owner-actions,
+.clerk-actions {
+  @apply flex gap-2;
+}
+
+.complete-sale-btn {
+  @apply w-full !important;
+}
+
+/* Error Banner */
+.error-banner {
+  @apply fixed bottom-4 left-4 right-4 bg-red-100 border border-red-300 text-red-800 rounded-lg z-50;
+}
+
+.error-content {
+  @apply flex items-center justify-between p-4;
+}
+
+.error-close {
+  @apply ml-4 text-red-600 hover:text-red-800 font-bold text-xl;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-md w-full mx-4;
+}
+
+.modal-header {
+  @apply px-6 py-4 border-b border-gray-200;
+}
+
+.modal-body {
+  @apply px-6 py-4;
+}
+
+.modal-footer {
+  @apply px-6 py-4 border-t border-gray-200 flex justify-end gap-3;
+}
+
+.sale-success {
+  @apply text-center space-y-4;
+}
+
+.success-icon {
+  @apply text-4xl;
+}
+
+.sale-details {
+  @apply space-y-1 text-left bg-gray-50 p-4 rounded;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pos-main {
+    @apply flex-col;
+  }
+
+  .search-panel {
+    @apply min-w-0 border-r-0 border-b;
+  }
+
+  .cart-panel {
+    @apply w-full;
+  }
+}

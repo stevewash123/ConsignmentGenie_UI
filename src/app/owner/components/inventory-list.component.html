@@ -676,4 +676,80 @@
       </div>
     </div>
 
+    <!-- Quick Sell Modal -->
+    <div *ngIf="isQuickSellModalOpen()" class="modal-overlay" (click)="closeQuickSellModal()">
+      <div class="modal-content quick-sell-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Quick Sell: {{ quickSellItem()?.title }}</h3>
+          <button type="button" class="modal-close" (click)="closeQuickSellModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="quick-sell-info">
+            <!-- Item details -->
+            <div class="item-summary">
+              <div class="item-image" *ngIf="quickSellItem()?.primaryImageUrl">
+                <img [src]="quickSellItem()!.primaryImageUrl" [alt]="quickSellItem()!.title" />
+              </div>
+              <div class="item-details">
+                <h4>{{ quickSellItem()?.title }}</h4>
+                <p class="item-sku">SKU: {{ quickSellItem()?.sku }}</p>
+                <p class="item-consignor">Consignor: {{ quickSellItem()?.consignorName }}</p>
+                <div class="item-price">
+                  <span class="price-label">Price:</span>
+                  <span class="price-amount">{{ formatCurrency(quickSellItem()?.price || 0) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment method selection -->
+            <div class="payment-section">
+              <label class="section-label">Payment Method</label>
+              <div class="payment-buttons">
+                <button
+                  *ngFor="let type of paymentTypes"
+                  type="button"
+                  class="payment-btn"
+                  [class.active]="quickSellPaymentType() === type"
+                  (click)="quickSellPaymentType.set(type)">
+                  {{ type }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Customer email (optional) -->
+            <div class="customer-section">
+              <label for="quickSellEmail" class="section-label">Customer Email (optional)</label>
+              <input
+                id="quickSellEmail"
+                type="email"
+                class="form-input"
+                placeholder="customer@example.com"
+                [(ngModel)]="quickSellCustomerEmail"
+                (ngModelChange)="quickSellCustomerEmail.set($event)">
+              <p class="field-help">Receipt will be sent if email is provided</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeQuickSellModal()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            [disabled]="isCompletingQuickSale()"
+            (click)="completeQuickSale()">
+            <span *ngIf="!isCompletingQuickSale()">
+              💳 Sell Item - {{ formatCurrency(quickSellItem()?.price || 0) }}
+            </span>
+            <span *ngIf="isCompletingQuickSale()">
+              Processing...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
 </div>

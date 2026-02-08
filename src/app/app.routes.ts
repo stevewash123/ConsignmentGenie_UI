@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AdminGuard } from './guards/admin.guard';
 import { OwnerGuard } from './guards/owner.guard';
+import { ClerkGuard } from './guards/clerk.guard';
 import { ConsignorGuard } from './guards/consignor.guard';
 import { CustomerGuard } from './guards/customer.guard';
 
@@ -35,6 +36,37 @@ export const routes: Routes = [
     path: 'owner',
     canActivate: [OwnerGuard],
     loadChildren: () => import('./owner/owner.routes').then(m => m.ownerRoutes)
+  },
+
+  // Clerk area routes (clerk and owner roles)
+  {
+    path: 'clerk',
+    canActivate: [ClerkGuard],
+    loadComponent: () => import('./components/clerk-layout.component').then(m => m.ClerkLayoutComponent),
+    children: [
+      {
+        path: '',
+        redirectTo: '/pos',
+        pathMatch: 'full'
+      },
+      {
+        path: 'inventory',
+        loadComponent: () => import('./components/clerk-inventory.component').then(m => m.ClerkInventoryComponent)
+      }
+    ]
+  },
+
+  // Shared POS route (both owner and clerk can access)
+  {
+    path: 'pos',
+    canActivate: [ClerkGuard], // ClerkGuard allows both clerk and owner
+    loadComponent: () => import('./components/clerk-layout.component').then(m => m.ClerkLayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/pos.component').then(m => m.PosComponent)
+      }
+    ]
   },
 
   // consignor area routes (consignor role + owners/managers)

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { SquareIntegrationService } from './square-integration.service';
 import {
@@ -192,5 +193,40 @@ export class InventoryService {
 
   reorderCategories(categoryOrders: { categoryId: string; displayOrder: number }[]): Observable<ApiResponse<any>> {
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/itemcategories/reorder`, { categoryOrders });
+  }
+
+  // Search items for POS (returns array of items directly)
+  searchItems(query: string): Observable<ItemListDto[]> {
+    const params: ItemQueryParams = {
+      page: 1,
+      search: query,
+      pageSize: 50, // Limit results for POS
+      status: 'Available' // Only show available items in POS
+    };
+
+    return this.http.get<PagedResult<ItemListDto>>(`${this.apiUrl}/items`, {
+      params: this.buildHttpParams(params)
+    }).pipe(
+      map(response => response.items || [])
+    );
+  }
+
+  private buildHttpParams(params: ItemQueryParams): HttpParams {
+    let httpParams = new HttpParams();
+
+    if (params) {
+      Object.keys(params).forEach(key => {
+        const value = (params as any)[key];
+        if (value !== undefined && value !== null && value !== '') {
+          if (value instanceof Date) {
+            httpParams = httpParams.set(key, value.toISOString());
+          } else {
+            httpParams = httpParams.set(key, value.toString());
+          }
+        }
+      });
+    }
+
+    return httpParams;
   }
 }

@@ -56,7 +56,8 @@ export const ownerRoutes: Routes = [
       },
       {
         path: 'record-sale',
-        loadComponent: () => import('./components/record-sale.component').then(m => m.RecordSaleComponent)
+        redirectTo: '/pos',
+        pathMatch: 'full'
       },
       {
         path: 'sales',

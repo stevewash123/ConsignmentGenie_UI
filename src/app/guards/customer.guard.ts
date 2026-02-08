@@ -24,7 +24,7 @@ export class CustomerGuard implements CanActivate {
       // consignors often need customer-style access to see public views
       const allowedRoles = [
         UserRole.Customer,
-        UserRole.consignor
+        UserRole.Consignor
       ];
 
       if (allowedRoles.includes(userData.role)) {

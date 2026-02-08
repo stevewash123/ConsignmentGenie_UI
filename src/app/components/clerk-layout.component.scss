@@ -1,0 +1,170 @@
+.clerk-layout {
+  @apply h-screen flex flex-col;
+}
+
+/* Header Styles */
+.clerk-header {
+  @apply bg-white border-b border-gray-200 shadow-sm z-40;
+}
+
+.header-container {
+  @apply flex items-center justify-between px-6 py-3;
+}
+
+.header-left {
+  @apply flex items-center gap-6;
+}
+
+.logo {
+  .shop-name {
+    @apply text-xl font-bold text-gray-800 m-0;
+  }
+}
+
+/* Navigation */
+.main-nav {
+  .nav-links {
+    @apply flex items-center gap-1;
+  }
+
+  a {
+    @apply px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all duration-200 no-underline;
+
+    &.active {
+      @apply text-blue-600 bg-blue-50 font-semibold;
+    }
+  }
+}
+
+/* User Menu */
+.header-right {
+  @apply flex items-center gap-4;
+}
+
+.user-menu {
+  @apply relative;
+}
+
+.profile-btn {
+  @apply flex items-center gap-3 px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-all duration-200 cursor-pointer;
+
+  &.active {
+    @apply bg-gray-100 border-gray-300;
+  }
+}
+
+.user-avatar {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white;
+
+  &.clerk {
+    @apply bg-blue-500;
+  }
+}
+
+.user-name {
+  @apply font-medium text-gray-700 max-w-32 truncate;
+}
+
+.dropdown-arrow {
+  @apply text-gray-400 text-xs transition-transform duration-200;
+
+  &.rotated {
+    @apply rotate-180;
+  }
+}
+
+/* Dropdown Menu */
+.user-dropdown {
+  @apply absolute top-full right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50;
+}
+
+.dropdown-header {
+  @apply px-4 py-3;
+}
+
+.user-info {
+  @apply space-y-1;
+
+  .user-email {
+    @apply block text-sm font-medium text-gray-900;
+  }
+
+  .user-role {
+    @apply block text-xs text-gray-500 uppercase font-semibold tracking-wider;
+  }
+}
+
+.dropdown-divider {
+  @apply border-t border-gray-200;
+}
+
+.dropdown-actions {
+  @apply py-1;
+}
+
+.dropdown-item {
+  @apply w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2;
+
+  &.logout {
+    @apply text-red-600 hover:text-red-700 hover:bg-red-50;
+  }
+}
+
+/* Backdrop */
+.dropdown-backdrop {
+  @apply fixed inset-0 z-40;
+}
+
+/* Main Content */
+.main-content {
+  @apply flex-1 overflow-hidden;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .header-container {
+    @apply px-4 py-2;
+  }
+
+  .header-left {
+    @apply gap-4;
+  }
+
+  .logo .shop-name {
+    @apply text-lg;
+  }
+
+  .user-name {
+    @apply hidden;
+  }
+
+  .user-dropdown {
+    @apply w-48;
+  }
+
+  .main-nav {
+    .nav-links {
+      @apply gap-0;
+    }
+
+    a {
+      @apply px-3 py-2 text-xs;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .header-left {
+    @apply gap-2;
+  }
+
+  .logo .shop-name {
+    @apply text-base truncate max-w-32;
+  }
+
+  .main-nav {
+    a {
+      @apply px-2 py-1;
+    }
+  }
+}

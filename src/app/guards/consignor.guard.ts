@@ -26,7 +26,7 @@ export class ConsignorGuard implements CanActivate {
       // Allow ONLY consignor role access to consignor area
       // Owners should manage consignors through the owner dashboard, not consignor interface
       const allowedRoles = [
-        UserRole.consignor
+        UserRole.Consignor
       ];
 
       if (allowedRoles.includes(normalizedRole)) {
@@ -65,7 +65,7 @@ export class ConsignorGuard implements CanActivate {
       switch (role.toLowerCase()) {
         case 'admin': return UserRole.Admin;
         case 'owner': return UserRole.Owner;
-        case 'consignor': return UserRole.consignor;
+        case 'consignor': return UserRole.Consignor;
         case 'customer': return UserRole.Customer;
         default: return UserRole.Customer; // Default fallback
       }

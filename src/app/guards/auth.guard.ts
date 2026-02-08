@@ -4,8 +4,9 @@ import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
 export enum UserRole {
   Admin = 0,
   Owner = 1,
-  consignor = 2,
-  Customer = 3
+  Consignor = 2,
+  Customer = 3,
+  Clerk = 4
 }
 
 export interface UserData {
@@ -81,11 +82,14 @@ export class AuthGuard implements CanActivate {
       case UserRole.Owner:
         this.router.navigate(['/owner/dashboard']);
         break;
-      case UserRole.consignor:
+      case UserRole.Consignor:
         this.router.navigate(['/consignor/dashboard']);
         break;
       case UserRole.Customer:
         this.router.navigate(['/customer/dashboard']);
+        break;
+      case UserRole.Clerk:
+        this.router.navigate(['/pos']);
         break;
       default:
         this.router.navigate(['/login']);

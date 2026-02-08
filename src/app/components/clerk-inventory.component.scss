@@ -1,0 +1,241 @@
+.clerk-inventory-container {
+  @apply h-full flex flex-col bg-gray-50;
+}
+
+/* Header */
+.inventory-header {
+  @apply bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between;
+}
+
+.header-left {
+  h1 {
+    @apply mb-1;
+  }
+}
+
+.header-actions {
+  @apply flex items-center gap-3;
+}
+
+/* Filters Section */
+.filters-section {
+  @apply bg-white border-b border-gray-200 px-6 py-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4;
+}
+
+.filter-group {
+  @apply space-y-1;
+}
+
+.filter-label {
+  @apply text-sm font-medium text-gray-700;
+}
+
+/* Results Info */
+.results-info {
+  @apply bg-white px-6 py-2 border-b border-gray-200;
+}
+
+/* Loading and Error States */
+.loading-state,
+.error-state {
+  @apply flex-1 flex flex-col items-center justify-center;
+}
+
+.loading-spinner {
+  @apply w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4;
+}
+
+.error-icon {
+  @apply text-4xl mb-4;
+}
+
+.error-message {
+  @apply text-gray-600 mb-4;
+}
+
+/* Items Table */
+.items-table-container {
+  @apply flex-1 overflow-auto bg-white;
+}
+
+.items-table {
+  @apply w-full;
+
+  th {
+    @apply bg-gray-50 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 border-b border-gray-200;
+  }
+
+  td {
+    @apply px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-b border-gray-100;
+  }
+}
+
+.image-column {
+  @apply w-16;
+}
+
+.item-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+/* Table Cell Styles */
+.image-cell {
+  @apply !p-2;
+}
+
+.item-image {
+  @apply w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0;
+
+  img {
+    @apply w-full h-full object-cover;
+  }
+
+  .no-image {
+    @apply w-full h-full flex items-center justify-center text-gray-400 text-lg;
+  }
+}
+
+.item-name {
+  @apply max-w-xs;
+
+  .name-content {
+    h4 {
+      @apply truncate font-medium;
+    }
+
+    .description {
+      @apply text-xs text-gray-500 truncate;
+    }
+  }
+}
+
+.sku {
+  @apply font-mono text-xs;
+}
+
+.price {
+  @apply font-semibold text-green-600;
+}
+
+.status,
+.condition {
+  .badge {
+    @apply inline-flex px-2 py-1 text-xs font-semibold rounded-full;
+  }
+}
+
+/* Badge Styles */
+.badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-info {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.badge-primary {
+  @apply bg-indigo-100 text-indigo-800;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-secondary {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Actions */
+.actions {
+  @apply !p-2;
+}
+
+.action-btn {
+  @apply w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center transition-colors;
+
+  &.view {
+    @apply hover:bg-blue-100;
+  }
+}
+
+/* Empty State */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.empty-icon {
+  @apply text-6xl text-gray-300 mb-4;
+}
+
+.empty-title {
+  @apply text-lg font-medium text-gray-900 mb-2;
+}
+
+.empty-message {
+  @apply text-gray-500;
+}
+
+.link-button {
+  @apply text-blue-600 hover:text-blue-700 underline font-medium;
+}
+
+/* Pagination */
+.pagination-container {
+  @apply bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between;
+}
+
+.pagination {
+  @apply flex items-center gap-4;
+}
+
+.pagination-btn {
+  @apply px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.pagination-info {
+  @apply text-sm text-gray-700 font-medium;
+}
+
+.page-size-selector {
+  @apply flex items-center gap-2 text-sm;
+
+  label {
+    @apply text-gray-600;
+  }
+
+  .form-select-sm {
+    @apply !py-1 !text-sm;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filters-section {
+    @apply grid-cols-1 gap-3;
+  }
+
+  .inventory-header {
+    @apply flex-col items-start gap-3;
+  }
+
+  .header-actions {
+    @apply w-full justify-end;
+  }
+
+  .items-table {
+    @apply text-xs;
+
+    th,
+    td {
+      @apply px-2 py-2;
+    }
+  }
+
+  .pagination-container {
+    @apply flex-col gap-3;
+  }
+}

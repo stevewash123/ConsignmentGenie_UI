@@ -1,0 +1,70 @@
+<!-- Clerk Layout Component -->
+<div class="clerk-layout">
+  <!-- Top Navigation Bar -->
+  <header class="clerk-header">
+    <div class="header-container">
+      <!-- Left side: Shop name and navigation -->
+      <div class="header-left">
+        <div class="logo">
+          <h2 class="shop-name">🏪 {{ getShopName() }}</h2>
+        </div>
+
+        <nav class="main-nav" *ngIf="getCurrentUser()">
+          <div class="nav-links">
+            <a routerLink="/pos" routerLinkActive="active">Sales</a>
+            <a
+              *ngIf="canAccessInventory()"
+              routerLink="/clerk/inventory"
+              routerLinkActive="active">
+              Inventory
+            </a>
+          </div>
+        </nav>
+      </div>
+
+      <!-- Right side: User menu -->
+      <div class="header-right" *ngIf="getCurrentUser()">
+        <div class="user-menu">
+          <button
+            class="profile-btn"
+            (click)="toggleUserMenu()"
+            [class.active]="showUserMenu()">
+            <span class="user-avatar clerk">{{ getInitials(currentUser()?.email) }}</span>
+            <span class="user-name">{{ currentUser()?.email?.split('@')[0] }}</span>
+            <span class="dropdown-arrow" [class.rotated]="showUserMenu()">▼</span>
+          </button>
+
+          <!-- User Dropdown Menu -->
+          <div class="user-dropdown" *ngIf="showUserMenu()">
+            <div class="dropdown-header">
+              <div class="user-info">
+                <span class="user-email">{{ currentUser()?.email }}</span>
+                <span class="user-role">Clerk</span>
+              </div>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-actions">
+              <button type="button" class="dropdown-item logout" (click)="logout()">
+                🚪 Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Click outside to close dropdown -->
+  <div
+    *ngIf="showUserMenu()"
+    class="dropdown-backdrop"
+    (click)="closeUserMenu()">
+  </div>
+</div>
