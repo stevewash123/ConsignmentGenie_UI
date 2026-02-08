@@ -29,7 +29,7 @@
           class="tab-btn"
           [class.active]="viewMode() === 'regular'"
           (click)="switchViewMode('regular')">
-          📦 Regular Inventory
+          📦 Active Inventory
           <span class="tab-count" *ngIf="itemsResult()?.totalCount">({{ itemsResult()!.totalCount }})</span>
         </button>
         <button
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <!-- Regular Inventory Tab -->
+    <!-- Active Inventory Tab -->
     <div class="tab-content" *ngIf="viewMode() === 'regular'">
       <!-- Controls Row -->
       <div class="controls-bar">
@@ -74,7 +74,7 @@
         </div>
       </div>
 
-      <!-- Regular Inventory Table -->
+      <!-- Active Inventory Table -->
       <div class="table-wrapper" *ngIf="!isInventoryLoading() && itemsResult(); else loadingInventory">
         <table class="data-table">
           <thead>
@@ -192,11 +192,11 @@
                 </td>
                 <td>
                   <span class="badge" [ngClass]="{
-                    'badge-success': item.condition === 'New',
-                    'badge-info': item.condition === 'LikeNew',
-                    'badge-neutral': item.condition === 'Good',
-                    'badge-warn': item.condition === 'Fair',
-                    'badge-error': item.condition === 'Poor'
+                    'badge-success': item.condition === 'new',
+                    'badge-info': item.condition === 'likenew',
+                    'badge-neutral': item.condition === 'good',
+                    'badge-warn': item.condition === 'fair',
+                    'badge-error': item.condition === 'poor'
                   }">{{ getConditionLabel(item.condition) }}</span>
                 </td>
                 <td>
