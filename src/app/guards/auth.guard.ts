@@ -12,7 +12,7 @@ export enum UserRole {
 export interface UserData {
   userId: string;
   email: string;
-  role: number;
+  role: number | string; // Support both number (legacy/mock) and string (API standard) - TODO: drop legacy support
   organizationId: string;
   organizationName: string;
 }
@@ -64,7 +64,12 @@ export class AuthGuard implements CanActivate {
     }
 
     // Check if user has required role
-    if (allowedRoles.includes(userData.role)) {
+    // Handle both string and number role values - TODO: drop legacy support
+    const hasPermission = typeof userData.role === 'number'
+      ? allowedRoles.includes(userData.role)
+      : this.checkStringRolePermission(userData.role, allowedRoles);
+
+    if (hasPermission) {
       return true;
     }
 
@@ -73,26 +78,63 @@ export class AuthGuard implements CanActivate {
     return false;
   }
 
-  private redirectToUnauthorized(userRole: number) {
+  private redirectToUnauthorized(userRole: number | string) {
     // Redirect to appropriate dashboard based on user's actual role
-    switch (userRole) {
-      case UserRole.Admin:
-        this.router.navigate(['/admin/dashboard']);
-        break;
-      case UserRole.Owner:
-        this.router.navigate(['/owner/dashboard']);
-        break;
-      case UserRole.Consignor:
-        this.router.navigate(['/consignor/dashboard']);
-        break;
-      case UserRole.Customer:
-        this.router.navigate(['/customer/dashboard']);
-        break;
-      case UserRole.Clerk:
-        this.router.navigate(['/pos']);
-        break;
-      default:
-        this.router.navigate(['/login']);
+    // Handle both string and number role values - TODO: drop legacy support
+    if (typeof userRole === 'string') {
+      switch (userRole) {
+        case 'admin':
+          this.router.navigate(['/admin/dashboard']);
+          break;
+        case 'owner':
+          this.router.navigate(['/owner/dashboard']);
+          break;
+        case 'consignor':
+          this.router.navigate(['/consignor/dashboard']);
+          break;
+        case 'customer':
+          this.router.navigate(['/customer/dashboard']);
+          break;
+        case 'clerk':
+          this.router.navigate(['/pos']);
+          break;
+        default:
+          this.router.navigate(['/login']);
+      }
+    } else {
+      switch (userRole) {
+        case UserRole.Admin:
+          this.router.navigate(['/admin/dashboard']);
+          break;
+        case UserRole.Owner:
+          this.router.navigate(['/owner/dashboard']);
+          break;
+        case UserRole.Consignor:
+          this.router.navigate(['/consignor/dashboard']);
+          break;
+        case UserRole.Customer:
+          this.router.navigate(['/customer/dashboard']);
+          break;
+        case UserRole.Clerk:
+          this.router.navigate(['/pos']);
+          break;
+        default:
+          this.router.navigate(['/login']);
+      }
     }
+  }
+
+  private checkStringRolePermission(stringRole: string, allowedRoles: number[]): boolean {
+    // Map string roles to corresponding enum numbers for permission checking - TODO: drop legacy support
+    const roleMapping: { [key: string]: number } = {
+      'admin': UserRole.Admin,
+      'owner': UserRole.Owner,
+      'consignor': UserRole.Consignor,
+      'customer': UserRole.Customer,
+      'clerk': UserRole.Clerk
+    };
+
+    const numericRole = roleMapping[stringRole.toLowerCase()];
+    return numericRole !== undefined && allowedRoles.includes(numericRole);
   }
 }

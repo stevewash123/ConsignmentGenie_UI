@@ -1,7 +1,7 @@
 <div class="record-sale-container">
         <!-- Header -->
         <div class="record-sale-header">
-          <button class="btn btn-outline-secondary back-button" (click)="goBack()">
+          <button *ngIf="!isClerk()" class="btn btn-outline-secondary back-button" (click)="goBack()">
             <i class="fas fa-arrow-left"></i> Back
           </button>
           <h1>Record Sale</h1>
@@ -52,7 +52,7 @@
                   <button class="btn btn-primary" (click)="recordAnotherSale()">
                     Record Another Sale
                   </button>
-                  <button class="btn btn-outline-secondary" (click)="backToDashboard()">
+                  <button *ngIf="!isClerk()" class="btn btn-outline-secondary" (click)="backToDashboard()">
                     Back to Dashboard
                   </button>
                 </div>

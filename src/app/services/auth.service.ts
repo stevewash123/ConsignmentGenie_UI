@@ -574,4 +574,53 @@ export class AuthService {
       })
     );
   }
+
+  /**
+   * Validate clerk invitation token
+   */
+  validateClerkInvitation(token: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/auth/clerk/invite/${encodeURIComponent(token)}/validate`)
+      .pipe(
+        catchError(error => {
+          console.error('Clerk invitation validation error:', error);
+          return of({
+            isValid: false,
+            message: 'Unable to validate invitation'
+          });
+        })
+      );
+  }
+
+  /**
+   * Register clerk from invitation
+   */
+  registerClerkFromInvitation(request: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/clerk/register`, request)
+      .pipe(
+        catchError(error => {
+          console.error('Clerk registration error:', error);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Set authentication token
+   */
+  setToken(token: string): void {
+    localStorage.setItem('auth_token', token);
+    this.tokenInfo.set({
+      token: token,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Default 24 hours
+    });
+    this.isLoggedIn.set(true);
+  }
+
+  /**
+   * Set current user data
+   */
+  setCurrentUser(user: any): void {
+    localStorage.setItem('user_data', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
 }

@@ -5,17 +5,38 @@
         <h3>Item Search</h3>
       </div>
 
-      <!-- Search Input -->
+      <!-- Search and Filter Section -->
       <div class="search-section">
-        <div class="search-input-wrapper">
-          <i class="fas fa-search search-icon"></i>
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            (input)="onSearchInput($event)"
-            placeholder="🔍 Search items..."
-            class="search-input"
-            #searchInput>
+        <div class="search-filter-row">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              [(ngModel)]="searchQuery"
+              (input)="onSearchInput($event)"
+              placeholder="🔍 Search items..."
+              class="search-input"
+              #searchInput>
+          </div>
+
+          <select
+            [(ngModel)]="selectedCategory"
+            (change)="onCategoryChange($event.target.value)"
+            class="category-filter">
+            <option value="">All Categories</option>
+            @for (category of availableCategories(); track category) {
+              <option [value]="category">{{ category }}</option>
+            }
+          </select>
+
+          @if (searchQuery || selectedCategory) {
+            <button
+              class="clear-filters-btn"
+              (click)="clearFilters()"
+              title="Clear all filters">
+              <i class="fas fa-times"></i>
+            </button>
+          }
         </div>
       </div>
 
@@ -42,6 +63,9 @@
                 <div class="item-details">
                   <span class="item-sku">{{ item.sku }}</span>
                   <span class="item-consignor">{{ item.consignorName }}</span>
+                  @if (item.category) {
+                    <span class="item-category">{{ item.category }}</span>
+                  }
                 </div>
               </div>
               <div class="item-actions">

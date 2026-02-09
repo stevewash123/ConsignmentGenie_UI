@@ -30,7 +30,7 @@
           <!-- Add New Item Mode -->
           <div *ngIf="editingIndex === null" class="add-item-form">
             <h4>Add New Item</h4>
-            <form #addItemForm="ngForm" class="form-grid">
+            <form #addItemForm="ngForm" class="form-grid" (keydown)="onFormKeyDown($event)">
               <div class="form-field">
                 <label class="field-label">Item Name *</label>
                 <input type="text"
@@ -142,6 +142,8 @@
                        name="newItemPhoto"
                        accept="image/*"
                        (change)="onPhotoSelected($event, true)"
+                       (blur)="onFileInputBlur()"
+                       tabindex="-1"
                        #photoInput>
                 <div *ngIf="newItem.imageUrl" class="photo-preview">
                   <img [src]="newItem.imageUrl" alt="Item preview" class="preview-image">
@@ -277,7 +279,9 @@
                        class="form-input"
                        [name]="'editItemPhoto' + editingIndex"
                        accept="image/*"
-                       (change)="onPhotoSelected($event, false)">
+                       (change)="onPhotoSelected($event, false)"
+                       (blur)="onFileInputBlur()"
+                       tabindex="-1">
                 <div *ngIf="dropoffRequest.items[editingIndex].imageUrl" class="photo-preview">
                   <img [src]="dropoffRequest.items[editingIndex].imageUrl" alt="Item preview" class="preview-image">
                   <button type="button" (click)="removePhoto(false)" class="remove-photo-btn">✕</button>

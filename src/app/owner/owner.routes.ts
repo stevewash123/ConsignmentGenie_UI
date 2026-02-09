@@ -35,6 +35,10 @@ export const ownerRoutes: Routes = [
         loadComponent: () => import('./components/pending-approvals.component').then(m => m.PendingApprovalsComponent)
       },
       {
+        path: 'staff',
+        loadComponent: () => import('./settings/staff/staff-management.component').then(m => m.StaffManagementComponent)
+      },
+      {
         path: 'inventory',
         loadComponent: () => import('./components/inventory-list.component').then(m => m.InventoryListComponent)
       },
@@ -56,8 +60,7 @@ export const ownerRoutes: Routes = [
       },
       {
         path: 'record-sale',
-        redirectTo: '/pos',
-        pathMatch: 'full'
+        loadComponent: () => import('./components/record-sale.component').then(m => m.RecordSaleComponent)
       },
       {
         path: 'sales',

@@ -80,7 +80,7 @@
 
 /* Table Cell Styles */
 .image-cell {
-  @apply !p-2;
+  @apply p-2 !important;
 }
 
 .item-image {
@@ -151,7 +151,7 @@
 
 /* Actions */
 .actions {
-  @apply !p-2;
+  @apply p-2 !important;
 }
 
 .action-btn {
@@ -208,7 +208,7 @@
   }
 
   .form-select-sm {
-    @apply !py-1 !text-sm;
+    @apply py-1 text-sm !important;
   }
 }
 

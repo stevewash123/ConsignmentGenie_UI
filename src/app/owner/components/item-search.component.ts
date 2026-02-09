@@ -33,22 +33,41 @@ export class ItemSearchComponent implements OnInit {
   allItems = signal<Item[]>([]);
   isLoading = signal<boolean>(false);
   searchQuery = '';
+  selectedCategory = '';
 
   // Search subject for debouncing
   private searchSubject = new Subject<string>();
 
+  // Computed values
+  availableCategories = computed(() => {
+    const categories = this.allItems().map(item => item.category).filter(Boolean);
+    return [...new Set(categories)].sort();
+  });
+
   // Computed filtered items
   displayedItems = computed(() => {
     const query = this.searchQuery.toLowerCase().trim();
-    if (!query) {
-      return this.allItems().slice(0, 20); // Show first 20 items when no search
+    const category = this.selectedCategory;
+
+    let filtered = this.allItems();
+
+    // Filter by category first
+    if (category) {
+      filtered = filtered.filter(item => item.category === category);
     }
 
-    return this.allItems().filter(item =>
-      item.name.toLowerCase().includes(query) ||
-      item.sku.toLowerCase().includes(query) ||
-      item.consignorName.toLowerCase().includes(query)
-    );
+    // Then filter by search query
+    if (query) {
+      filtered = filtered.filter(item =>
+        item.name.toLowerCase().includes(query) ||
+        item.sku.toLowerCase().includes(query) ||
+        item.consignorName.toLowerCase().includes(query)
+      );
+    } else if (!category) {
+      filtered = filtered.slice(0, 20); // Show first 20 items when no filters
+    }
+
+    return filtered;
   });
 
   ngOnInit() {
@@ -99,6 +118,15 @@ export class ItemSearchComponent implements OnInit {
     const target = event.target as HTMLInputElement;
     this.searchQuery = target.value;
     this.searchSubject.next(this.searchQuery);
+  }
+
+  onCategoryChange(category: string) {
+    this.selectedCategory = category;
+  }
+
+  clearFilters() {
+    this.searchQuery = '';
+    this.selectedCategory = '';
   }
 
   selectItem(item: Item) {

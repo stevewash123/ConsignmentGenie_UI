@@ -36,7 +36,6 @@ export class ClerkLayoutComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
-    this.closeUserMenu();
   }
 
   getInitials(email?: string): string {

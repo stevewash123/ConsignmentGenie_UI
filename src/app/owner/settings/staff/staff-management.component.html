@@ -1,0 +1,149 @@
+<div class="staff-list-container">
+  <!-- Page Header -->
+  <div class="header">
+    <h1 class="page-title">
+      <span>👨‍💼</span>
+      Staff Management
+    </h1>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="openInviteModal()">
+        <span>✉️</span>
+        Invite Clerk
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoadingClerks() || isLoadingInvitations()" class="loading">
+    ⏳ Loading staff data...
+  </div>
+
+  <!-- Content Sections -->
+  <div *ngIf="!isLoadingClerks() && !isLoadingInvitations()" class="content-sections">
+
+    <!-- Active Staff Section -->
+    <div class="section">
+      <div class="section-header">
+        <h3>ACTIVE STAFF ({{ activeClerks().length }})</h3>
+      </div>
+
+      <div *ngIf="activeClerks().length > 0" class="table-container">
+        <table class="staff-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let clerk of activeClerks(); trackBy: trackClerk">
+              <td class="name-cell">{{ getFullName(clerk) }}</td>
+              <td>{{ clerk.email }}</td>
+              <td>{{ formatDate(clerk.createdAt) }}</td>
+              <td class="actions-cell">
+                <button class="btn-secondary btn-sm" (click)="deactivateClerk(clerk.id, getFullName(clerk))">
+                  Deactivate
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="activeClerks().length === 0" class="empty-state">
+        <div class="empty-content">
+          <div class="empty-icon">👨‍💼</div>
+          <h4>No active staff members</h4>
+          <p>You haven't added any clerks yet. Invite your first staff member to get started.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Invitations Section -->
+    <div class="section" *ngIf="pendingInvitations().length > 0">
+      <div class="section-header">
+        <h3>PENDING INVITATIONS ({{ pendingInvitations().length }})</h3>
+      </div>
+
+      <div class="table-container">
+        <table class="staff-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Invited</th>
+              <th>Expires</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let invitation of pendingInvitations(); trackBy: trackInvitation"
+                [class.expired]="isInvitationExpired(invitation.expiresAt)">
+              <td class="name-cell">
+                {{ invitation.name }}
+                <span *ngIf="isInvitationExpired(invitation.expiresAt)" class="expired-badge">EXPIRED</span>
+              </td>
+              <td>{{ invitation.email }}</td>
+              <td>{{ formatDate(invitation.createdAt) }}</td>
+              <td [class.expired-date]="isInvitationExpired(invitation.expiresAt)">
+                {{ formatDate(invitation.expiresAt) }}
+              </td>
+              <td class="actions-cell">
+                <button class="btn-email btn-sm" (click)="resendInvitation(invitation.id)">
+                  Resend
+                </button>
+                <button class="btn-cancel btn-sm" (click)="cancelInvitation(invitation.id)">
+                  Cancel
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Invite Modal -->
+<div *ngIf="showInviteModal()" class="modal-overlay" (click)="closeInviteModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Invite New Clerk</h3>
+      <button type="button" class="modal-close" (click)="closeInviteModal()">×</button>
+    </div>
+
+    <form [formGroup]="inviteForm" (ngSubmit)="sendInvitation()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" formControlName="name"
+                 [class.error]="inviteForm.get('name')?.invalid && inviteForm.get('name')?.touched">
+          <div class="error-message" *ngIf="getFieldError('name')">
+            {{ getFieldError('name') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" formControlName="email"
+                 [class.error]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
+          <div class="error-message" *ngIf="getFieldError('email')">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeInviteModal()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isInviting() || inviteForm.invalid">
+          <span *ngIf="isInviting()">Sending...</span>
+          <span *ngIf="!isInviting()">Send Invitation</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

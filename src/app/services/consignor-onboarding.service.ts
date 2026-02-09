@@ -29,7 +29,7 @@ export class ConsignorOnboardingService {
   async loadConsignorOnboarding(): Promise<void> {
     try {
       const settings = await firstValueFrom(
-        this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/owner/settings/consignor/consignor-onboarding`)
+        this.http.get<ConsignorOnboardingSettings>(`${environment.apiUrl}/api/settings/consignor/consignor-onboarding`)
       );
 
       this.consignorOnboarding$.next(settings);
@@ -96,7 +96,7 @@ export class ConsignorOnboardingService {
 
       const response = await firstValueFrom(
         this.http.put<{success: boolean, data: ConsignorOnboardingSettings}>(
-          `${environment.apiUrl}/api/owner/settings/consignor/consignor-onboarding`,
+          `${environment.apiUrl}/api/settings/consignor/consignor-onboarding`,
           requestData
         )
       );

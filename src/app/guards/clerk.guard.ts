@@ -27,19 +27,25 @@ export class ClerkGuard implements CanActivate {
     }
 
     // Allow clerk and owner roles to access clerk pages
-    if (userData.role === UserRole.Clerk || userData.role === UserRole.Owner) {
+    // Handle both string and enum role values
+    const role = userData.role;
+    if (role === UserRole.Clerk || role === 'clerk' ||
+        role === UserRole.Owner || role === 'owner') {
       return true;
     }
 
     // Redirect to appropriate dashboard for other roles
     switch (userData.role) {
       case UserRole.Admin:
+      case 'admin':
         this.router.navigate(['/admin/dashboard']);
         break;
       case UserRole.Consignor:
+      case 'consignor':
         this.router.navigate(['/consignor/dashboard']);
         break;
       case UserRole.Customer:
+      case 'customer':
         this.router.navigate(['/customer/dashboard']);
         break;
       default:

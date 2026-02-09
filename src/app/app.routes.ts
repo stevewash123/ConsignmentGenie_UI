@@ -46,27 +46,29 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/pos',
+        redirectTo: 'sales',
         pathMatch: 'full'
       },
       {
+        path: 'sales',
+        loadComponent: () => import('./owner/components/record-sale.component').then(m => m.RecordSaleComponent)
+      },
+      {
         path: 'inventory',
+        loadComponent: () => import('./components/clerk-inventory.component').then(m => m.ClerkInventoryComponent)
+      },
+      {
+        path: 'items',
         loadComponent: () => import('./components/clerk-inventory.component').then(m => m.ClerkInventoryComponent)
       }
     ]
   },
 
-  // Shared POS route (both owner and clerk can access)
+  // POS route redirects to clerk sales (uses clerk layout with blue theme)
   {
     path: 'pos',
-    canActivate: [ClerkGuard], // ClerkGuard allows both clerk and owner
-    loadComponent: () => import('./components/clerk-layout.component').then(m => m.ClerkLayoutComponent),
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('./components/pos.component').then(m => m.PosComponent)
-      }
-    ]
+    redirectTo: '/clerk/sales',
+    pathMatch: 'full'
   },
 
   // consignor area routes (consignor role + owners/managers)
@@ -113,6 +115,10 @@ export const routes: Routes = [
     path: 'signup/consignor/details',
     loadComponent: () => import('./auth/consignor-signup-step2.component').then(m => m.ConsignorSignupStep2Component)
   },
+  {
+    path: 'signup/clerk/accept/:token',
+    loadComponent: () => import('./auth/register-clerk.component').then(m => m.RegisterClerkComponent)
+  },
 
   // Authentication routes (no auth required)
   {
@@ -138,6 +144,10 @@ export const routes: Routes = [
   {
     path: 'register/consignor',
     loadComponent: () => import('./auth/register-consignor.component').then(m => m.RegisterConsignorComponent)
+  },
+  {
+    path: 'register/clerk',
+    loadComponent: () => import('./auth/register-clerk.component').then(m => m.RegisterClerkComponent)
   },
   {
     path: 'register/consignor/invitation',

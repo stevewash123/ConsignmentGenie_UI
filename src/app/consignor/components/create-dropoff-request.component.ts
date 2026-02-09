@@ -267,6 +267,41 @@ export class CreateDropoffRequestComponent implements OnInit {
     }
   }
 
+  onFileInputBlur() {
+    // When file input loses focus, restore focus to the item name input
+    // This ensures Enter key works for Add Item instead of triggering file dialog
+    setTimeout(() => {
+      const itemNameInput = document.querySelector('[name="newItemName"]') as HTMLInputElement;
+      if (itemNameInput && this.editingIndex === null) {
+        itemNameInput.focus();
+      }
+    }, 0);
+  }
+
+  onFormKeyDown(event: KeyboardEvent) {
+    // Handle Enter key at form level to ensure Add Item is triggered
+    if (event.key === 'Enter' && this.editingIndex === null) {
+      const target = event.target as HTMLElement;
+
+      // Don't intercept Enter on textarea (allow line breaks)
+      if (target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      // Don't intercept Enter on file inputs (they handle it specially)
+      if (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'file') {
+        event.preventDefault();
+        return;
+      }
+
+      // If form is valid, trigger Add Item
+      if (this.isNewItemValid()) {
+        event.preventDefault();
+        this.addItem();
+      }
+    }
+  }
+
   getConditionLabel(conditionValue: string): string {
     const condition = this.conditions.find(c => c.value === conditionValue);
     return condition ? condition.label : conditionValue;

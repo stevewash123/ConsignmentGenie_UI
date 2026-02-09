@@ -24,8 +24,8 @@ export class OwnerGuard implements CanActivate {
       const userRole = userData.role;
       console.log('OwnerGuard: User role:', userRole);
 
-      // Check if user has owner or admin role
-      const isAllowed = userRole === 'owner' || userRole === 'admin';
+      // Check if user has owner, admin, or clerk role (clerks can access POS/sales)
+      const isAllowed = userRole === 'owner' || userRole === 'admin' || userRole === 'clerk';
       console.log('OwnerGuard: Access check - role:', userRole, 'allowed:', isAllowed);
 
       if (isAllowed) {
@@ -55,6 +55,10 @@ export class OwnerGuard implements CanActivate {
       case 'customer':
         console.log('OwnerGuard: Redirecting to /customer/dashboard');
         this.router.navigate(['/customer/dashboard']);
+        break;
+      case 'clerk':
+        console.log('OwnerGuard: Redirecting clerk to clerk area');
+        this.router.navigate(['/clerk/sales']);
         break;
       default:
         console.log('OwnerGuard: Unknown role, redirecting to /login');

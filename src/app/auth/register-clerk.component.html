@@ -1,0 +1,139 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <!-- Loading state for token validation -->
+    <div *ngIf="isValidatingToken" class="text-center">
+      <div class="loading-spinner"></div>
+      <p>Validating invitation...</p>
+    </div>
+
+    <!-- Token error state -->
+    <div *ngIf="tokenError && !isValidatingToken" class="text-center">
+      <div class="error-icon">⚠️</div>
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Invalid Invitation</h2>
+      <p class="text-red-600 mb-6">{{ tokenError }}</p>
+      <p class="text-gray-600 mb-4">Contact your manager to resend the invitation.</p>
+      <a routerLink="/login" class="btn btn-primary">Go to Login</a>
+    </div>
+
+    <!-- Registration form -->
+    <div *ngIf="tokenValid && !isValidatingToken">
+      <div class="text-center mb-6">
+        <h2 class="text-3xl font-bold text-gray-900">Join {{ shopName }}</h2>
+        <p class="text-gray-600 mt-2">You've been invited as a staff member</p>
+      </div>
+
+      <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" novalidate>
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="firstName" class="form-label required">First Name</label>
+          <input
+            type="text"
+            id="firstName"
+            formControlName="firstName"
+            class="form-input"
+            [class.error]="registrationForm.get('firstName')?.invalid && registrationForm.get('firstName')?.touched"
+            placeholder="Enter your first name">
+          <div class="error-message" *ngIf="getFieldError('firstName')">
+            {{ getFieldError('firstName') }}
+          </div>
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="lastName" class="form-label required">Last Name</label>
+          <input
+            type="text"
+            id="lastName"
+            formControlName="lastName"
+            class="form-input"
+            [class.error]="registrationForm.get('lastName')?.invalid && registrationForm.get('lastName')?.touched"
+            placeholder="Enter your last name">
+          <div class="error-message" *ngIf="getFieldError('lastName')">
+            {{ getFieldError('lastName') }}
+          </div>
+        </div>
+
+        <!-- Phone (Optional) -->
+        <div class="form-group">
+          <label for="phone" class="form-label">Phone (optional)</label>
+          <input
+            type="tel"
+            id="phone"
+            formControlName="phone"
+            class="form-input"
+            [class.error]="registrationForm.get('phone')?.invalid && registrationForm.get('phone')?.touched"
+            placeholder="Enter your phone number">
+          <div class="error-message" *ngIf="getFieldError('phone')">
+            {{ getFieldError('phone') }}
+          </div>
+        </div>
+
+        <!-- Email (Read-only) -->
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input
+            type="email"
+            id="email"
+            class="form-input bg-gray-50"
+            [value]="invitedEmail"
+            readonly
+            placeholder="Email from invitation">
+          <small class="text-gray-500">This email cannot be changed</small>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password" class="form-label required">Password</label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            class="form-input"
+            [class.error]="registrationForm.get('password')?.invalid && registrationForm.get('password')?.touched"
+            placeholder="Create a password (minimum 8 characters)">
+          <div class="error-message" *ngIf="getFieldError('password')">
+            {{ getFieldError('password') }}
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label required">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            class="form-input"
+            [class.error]="registrationForm.get('confirmPassword')?.invalid && registrationForm.get('confirmPassword')?.touched"
+            placeholder="Confirm your password">
+          <div class="error-message" *ngIf="getFieldError('confirmPassword')">
+            {{ getFieldError('confirmPassword') }}
+          </div>
+        </div>
+
+        <!-- Registration Error -->
+        <div *ngIf="registrationError" class="error-banner">
+          {{ registrationError }}
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="btn btn-primary btn-full"
+          [disabled]="isSubmitting || registrationForm.invalid">
+          <span *ngIf="isSubmitting" class="loading-spinner-small"></span>
+          <span *ngIf="!isSubmitting">Create Account</span>
+          <span *ngIf="isSubmitting">Creating Account...</span>
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <div class="text-center mt-6">
+        <p class="text-gray-600 text-sm">
+          Already have an account?
+          <a routerLink="/login" class="text-indigo-600 hover:text-indigo-500">Sign in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

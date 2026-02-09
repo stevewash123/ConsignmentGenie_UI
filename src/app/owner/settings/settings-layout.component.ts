@@ -124,6 +124,20 @@ export class SettingsLayoutComponent implements OnInit {
       ]
     },
     {
+      id: 'staff-settings',
+      label: 'Staff',
+      icon: '👨‍💼',
+      description: 'Manage store clerks and staff access',
+      children: [
+        {
+          id: 'staff-management',
+          label: 'Staff Management',
+          route: 'staff/management',
+          description: 'Add, remove, and manage store clerks'
+        }
+      ]
+    },
+    {
       id: 'sales',
       label: 'Sales',
       icon: '🛒',

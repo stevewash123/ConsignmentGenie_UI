@@ -11,13 +11,8 @@
 
         <nav class="main-nav" *ngIf="getCurrentUser()">
           <div class="nav-links">
-            <a routerLink="/pos" routerLinkActive="active">Sales</a>
-            <a
-              *ngIf="canAccessInventory()"
-              routerLink="/clerk/inventory"
-              routerLinkActive="active">
-              Inventory
-            </a>
+            <a routerLink="/clerk/sales" routerLinkActive="active">📊 Sales</a>
+            <a routerLink="/clerk/items" routerLinkActive="active">📦 Items</a>
           </div>
         </nav>
       </div>
@@ -25,32 +20,11 @@
       <!-- Right side: User menu -->
       <div class="header-right" *ngIf="getCurrentUser()">
         <div class="user-menu">
-          <button
-            class="profile-btn"
-            (click)="toggleUserMenu()"
-            [class.active]="showUserMenu()">
+          <div class="user-info">
             <span class="user-avatar clerk">{{ getInitials(currentUser()?.email) }}</span>
             <span class="user-name">{{ currentUser()?.email?.split('@')[0] }}</span>
-            <span class="dropdown-arrow" [class.rotated]="showUserMenu()">▼</span>
-          </button>
-
-          <!-- User Dropdown Menu -->
-          <div class="user-dropdown" *ngIf="showUserMenu()">
-            <div class="dropdown-header">
-              <div class="user-info">
-                <span class="user-email">{{ currentUser()?.email }}</span>
-                <span class="user-role">Clerk</span>
-              </div>
-            </div>
-
-            <div class="dropdown-divider"></div>
-
-            <div class="dropdown-actions">
-              <button type="button" class="dropdown-item logout" (click)="logout()">
-                🚪 Logout
-              </button>
-            </div>
           </div>
+          <button class="logout-btn" (click)="logout()">🚪 Logout</button>
         </div>
       </div>
     </div>
@@ -61,10 +35,15 @@
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Click outside to close dropdown -->
-  <div
-    *ngIf="showUserMenu()"
-    class="dropdown-backdrop"
-    (click)="closeUserMenu()">
-  </div>
+  <!-- Footer -->
+  <footer class="clerk-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <span class="footer-text">{{ getShopName() }} • Point of Sale System</span>
+      </div>
+      <div class="footer-right">
+        <span class="footer-text">Powered by ConsignmentGenie</span>
+      </div>
+    </div>
+  </footer>
 </div>

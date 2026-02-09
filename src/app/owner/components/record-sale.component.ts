@@ -7,6 +7,9 @@ import { ToastrService } from 'ngx-toastr';
 import { ItemSearchComponent } from './item-search.component';
 import { CartComponent } from './cart.component';
 import { RecordSaleService, CartItem, SaleRequest } from '../../services/record-sale.service';
+import { AuthService } from '../../services/auth.service';
+import { PermissionService } from '../../services/permission.service';
+import { UserRole } from '../../guards/auth.guard';
 
 @Component({
   selector: 'app-record-sale',
@@ -21,6 +24,7 @@ export class RecordSaleComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
   private toastr = inject(ToastrService);
+  private authService = inject(AuthService);
 
   // State signals
   cartItems = signal<CartItem[]>([]);
@@ -189,6 +193,16 @@ export class RecordSaleComponent implements OnInit {
 
   goBack() {
     this.navigateToOrigin();
+  }
+
+  isClerk(): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    const role = currentUser?.role;
+    // Handle both string and number role values (API returns string, some legacy code uses numbers) - TODO: drop legacy support
+    if (typeof role === 'number') {
+      return role === UserRole.Clerk;
+    }
+    return role === 'clerk';
   }
 
   private clearSale() {

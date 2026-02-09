@@ -149,7 +149,7 @@ export class AgreementService {
   async loadAgreementSettings(): Promise<void> {
     try {
       const settings = await firstValueFrom(
-        this.http.get<AgreementSettings>(`${this.baseUrl}/api/owner/settings/consignor/consignor-onboarding`)
+        this.http.get<AgreementSettings>(`${this.baseUrl}/api/settings/consignor/consignor-onboarding`)
       );
       this.agreementSettings$.next(settings);
     } catch (error) {
@@ -176,7 +176,7 @@ export class AgreementService {
 
     try {
       const response = await firstValueFrom(
-        this.http.put<AgreementSettings>(`${this.baseUrl}/api/owner/settings/consignor/consignor-onboarding`, updated)
+        this.http.put<AgreementSettings>(`${this.baseUrl}/api/settings/consignor/consignor-onboarding`, updated)
       );
       this.agreementSettings$.next(response);
     } catch (error) {

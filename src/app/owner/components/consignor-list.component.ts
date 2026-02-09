@@ -65,7 +65,6 @@ export class ConsignorListComponent implements OnInit {
     // Load consignors - they already include pending status
     consignors$.subscribe({
       next: (consignors) => {
-        // DEBUG: Show ALL consignors temporarily to debug missing provider1
         console.log('DEBUG: Raw consignors from API:', consignors);
         let allConsignors = (consignors || []).filter(c =>
           !c.name.toLowerCase().includes('shop-owned') &&

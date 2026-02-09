@@ -149,6 +149,13 @@ export class LoginSimpleComponent implements OnInit {
         console.log('Checking consignor agreement status before redirect...');
         this.redirectConsignorBasedOnAgreement();
         break;
+      case 'clerk':
+        console.log('Navigating to /pos (clerk POS system)');
+        this.router.navigate(['/pos']).then(
+          success => console.log('Clerk navigation success:', success),
+          error => console.error('Clerk navigation failed:', error)
+        );
+        break;
       case 'customer':
         console.log('Navigating to /customer/dashboard');
         this.router.navigate(['/customer/dashboard']).then(

@@ -22,7 +22,7 @@ import { DropoffRequestList, DropoffRequestQuery } from '../../../../consignor/m
 @Component({
   selector: 'app-item-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ItemCardComponent, RespondPriceChangeComponent, EditItemModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, RespondPriceChangeComponent, EditItemModalComponent],
   templateUrl: './item-list.component.html',
   styleUrls: ['./item-list.component.scss'],
   host: {

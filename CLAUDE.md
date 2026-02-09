@@ -48,6 +48,19 @@ src/
    - Entity-specific interaction patterns
    - **NEVER use browser dialogs** (`alert`, `confirm`, `prompt`) - Use shared modal components instead
 
+## 🎨 **STYLING GUIDELINES**
+
+**✅ This project USES Tailwind CSS** - Follow existing patterns
+- **Use @apply directives** in SCSS files to apply Tailwind classes
+- **Follow existing component patterns** for consistent styling
+- **Use Tailwind utility classes** in templates when appropriate
+- **Check existing components** to see the established styling approach
+
+**Examples from existing codebase:**
+- ✅ `@apply h-full flex flex-col bg-gray-50;`
+- ✅ `@apply bg-white border-b border-gray-200 px-6 py-4;`
+- ✅ `@apply flex items-center gap-3;`
+
 ## Build & Test Commands
 
 **Always force fresh log files when piping output to avoid outdated results:**
