@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { OwnerService, ConsignorDefaults } from '../../../services/owner.service';
+import { SettingsService } from '../../../services/settings.service';
 import { ConsignorPermissions } from '../../../models/consignor.models';
 import { environment } from '../../../../environments/environment';
 import { Subscription, Subject } from 'rxjs';
@@ -65,7 +66,10 @@ export class ConsignorSettingsComponent implements OnInit, OnDestroy {
   private settingsSubscription = new Subscription();
   private autoSaveSubject = new Subject<void>();
 
-  constructor(private ownerService: OwnerService) {
+  constructor(
+    private ownerService: OwnerService,
+    private settingsService: SettingsService
+  ) {
     // Set up auto-save with debounce
     this.settingsSubscription.add(
       this.autoSaveSubject.pipe(
@@ -87,8 +91,18 @@ export class ConsignorSettingsComponent implements OnInit, OnDestroy {
 
   async loadSettings() {
     try {
-      // Load consignor defaults from the API
-      const defaults = await this.ownerService.getConsignorDefaults().toPromise();
+      // Load settings from unified cache
+      if (!this.settingsService.isLoaded()) {
+        await this.settingsService.loadSettings();
+      }
+
+      const cachedSettings = this.settingsService.settings;
+      const defaults = cachedSettings?.consignor?.defaults || {
+        shopCommissionPercent: this.settingsService.getShopCommissionRate(),
+        consignmentPeriodDays: this.settingsService.getConsignmentPeriodDays(),
+        retrievalPeriodDays: this.settingsService.getRetrievalPeriodDays(),
+        unsoldItemPolicy: this.settingsService.getUnsoldItemPolicy()
+      };
 
       // Mock data for other settings - replace with actual API calls later
       const mockSettings: ConsignorSettings = {
@@ -101,12 +115,7 @@ export class ConsignorSettingsComponent implements OnInit, OnDestroy {
           canRemoveItems: false,
           canViewDetailedAnalytics: false
         },
-        defaults: defaults || {
-          shopCommissionPercent: 50,
-          consignmentPeriodDays: 90,
-          retrievalPeriodDays: 14,
-          unsoldItemPolicy: 'return-to-consignor'
-        },
+        defaults: defaults,
         agreements: {
           autoSendOnRegistration: false,
           requireBeforeItems: false,
@@ -162,6 +171,8 @@ export class ConsignorSettingsComponent implements OnInit, OnDestroy {
 
         if (response?.success) {
           this.showSuccess('Default terms saved automatically');
+          // Refresh the consignor section of the cache
+          await this.settingsService.refreshSection('consignor');
         }
       }
     } catch (error) {

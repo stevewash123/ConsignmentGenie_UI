@@ -9,7 +9,7 @@ import { RespondPriceChangeComponent } from '../modals/respond-price-change/resp
 import { EditItemModalComponent } from '../modals/edit-item/edit-item-modal.component';
 import { ConsignorItemService } from '../services/consignor-item.service';
 import { ConsignorPortalService } from '../../../../consignor/services/consignor-portal.service';
-import { ConsignorPermissionsService } from '../../../../services/consignor-permissions.service';
+import { SettingsService } from '../../../../services/settings.service';
 import {
   ConsignorItemSummary,
   ConsignorItemsRequest,
@@ -75,7 +75,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
   constructor(
     private consignorItemService: ConsignorItemService,
     private consignorPortalService: ConsignorPortalService,
-    private consignorPermissionsService: ConsignorPermissionsService,
+    private settingsService: SettingsService,
     private router: Router
   ) {}
 
@@ -103,16 +103,18 @@ export class ItemListComponent implements OnInit, OnDestroy {
   }
 
   private loadPermissions(): void {
-    this.consignorPermissionsService.consignorPermissions.pipe(
+    this.settingsService.settings$.pipe(
       takeUntil(this.destroy$)
-    ).subscribe(permissions => {
-      if (permissions) {
-        this.canConsignorEditItems = permissions.canEditOwnItems;
+    ).subscribe(settings => {
+      if (settings) {
+        this.canConsignorEditItems = this.settingsService.canConsignorEdit();
       }
     });
 
-    // Load permissions if not already loaded
-    this.consignorPermissionsService.loadConsignorPermissions();
+    // Load settings if not already loaded
+    if (!this.settingsService.isLoaded()) {
+      this.settingsService.loadSettings();
+    }
   }
 
   loadItems(): void {

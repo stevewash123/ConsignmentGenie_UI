@@ -178,11 +178,11 @@ export class OwnerService {
 
   // === Consignor Defaults ===
   getConsignorDefaults(): Observable<ConsignorDefaults> {
-    return this.http.get<ConsignorDefaults>(`${this.apiUrl}/owner/settings/consignor/default-terms`);
+    return this.http.get<ConsignorDefaults>(`${this.apiUrl}/settings/consignor/default-terms`);
   }
 
   updateConsignorDefaults(defaults: ConsignorDefaults): Observable<{success: boolean, data: ConsignorDefaults, message: string}> {
-    return this.http.put<{success: boolean, data: ConsignorDefaults, message: string}>(`${this.apiUrl}/owner/settings/consignor/default-terms`, defaults);
+    return this.http.put<{success: boolean, data: ConsignorDefaults, message: string}>(`${this.apiUrl}/settings/consignor/default-terms`, defaults);
   }
 
   // === Business Settings ===
