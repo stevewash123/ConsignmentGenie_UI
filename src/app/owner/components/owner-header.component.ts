@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, OnDestroy } from '@angular/core';
+import { Component, OnInit, signal, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NotificationBellComponent } from '../../shared/components/notification-bell.component';
@@ -29,7 +29,8 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private mockService: MockConsignorItemService,
-    private authService: AuthService
+    private authService: AuthService,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit() {
@@ -60,6 +61,14 @@ export class OwnerHeaderComponent implements OnInit, OnDestroy {
 
   toggleUserMenu() {
     this.showUserMenu.update(show => !show);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+    if (!clickedInside && this.showUserMenu()) {
+      this.showUserMenu.set(false);
+    }
   }
 
   logout() {

@@ -1,6 +1,7 @@
 .payout-general-settings {
   max-width: 800px;
-  padding: 0;
+  padding: 2rem;
+  margin: 0 auto;
 }
 
 .settings-header {
@@ -286,6 +287,10 @@
 }
 
 @media (max-width: 768px) {
+  .payout-general-settings {
+    padding: 1rem;
+  }
+
   .settings-header {
     flex-direction: column;
     align-items: flex-start;

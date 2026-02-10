@@ -67,6 +67,11 @@ export class NotificationCenterComponent implements OnInit {
   focusedNotificationId: string | null = null;
 
   // Computed values
+  notificationPreferencesLink = computed(() => {
+    return this.role === 'owner'
+      ? '/owner/settings/notifications'
+      : '/consignor/notifications/preferences';
+  });
   unreadCount = computed(() =>
     this.notifications().filter(n => !n.isRead).length
   );

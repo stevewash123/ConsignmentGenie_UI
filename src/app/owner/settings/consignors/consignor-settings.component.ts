@@ -97,11 +97,16 @@ export class ConsignorSettingsComponent implements OnInit, OnDestroy {
       }
 
       const cachedSettings = this.settingsService.settings;
-      const defaults = cachedSettings?.consignor?.defaults || {
+      const defaults: ConsignorDefaults = cachedSettings?.consignor?.defaults ? {
+        shopCommissionPercent: cachedSettings.consignor.defaults.shopCommissionPercent,
+        consignmentPeriodDays: cachedSettings.consignor.defaults.consignmentPeriodDays,
+        retrievalPeriodDays: cachedSettings.consignor.defaults.retrievalPeriodDays,
+        unsoldItemPolicy: cachedSettings.consignor.defaults.unsoldItemPolicy as 'donate' | 'dispose' | 'return-to-consignor' | 'become-shop-property'
+      } : {
         shopCommissionPercent: this.settingsService.getShopCommissionRate(),
         consignmentPeriodDays: this.settingsService.getConsignmentPeriodDays(),
         retrievalPeriodDays: this.settingsService.getRetrievalPeriodDays(),
-        unsoldItemPolicy: this.settingsService.getUnsoldItemPolicy()
+        unsoldItemPolicy: this.settingsService.getUnsoldItemPolicy() as 'donate' | 'dispose' | 'return-to-consignor' | 'become-shop-property'
       };
 
       // Mock data for other settings - replace with actual API calls later
@@ -110,7 +115,7 @@ export class ConsignorSettingsComponent implements OnInit, OnDestroy {
         autoApprove: true,
         signupUrl: 'consignmentgenie.com/join/VINT-2024-7X9K',
         inventoryPermissions: {
-          canAddItems: true,
+          canAddItems: false,
           canEditItems: true,
           canRemoveItems: false,
           canViewDetailedAnalytics: false

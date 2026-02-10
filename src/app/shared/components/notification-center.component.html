@@ -196,8 +196,8 @@
   </div>
 
   <!-- Notification Preferences Link -->
-  <div class="preferences-link">
-    <a routerLink="/settings/notifications">
+  <div class="preferences-link" *ngIf="role === 'owner' || role === 'consignor'">
+    <a [routerLink]="notificationPreferencesLink()">
       ⚙️ Notification Preferences
     </a>
   </div>

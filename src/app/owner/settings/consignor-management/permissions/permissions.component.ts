@@ -19,7 +19,7 @@ interface PermissionTemplate {
 })
 export class PermissionsComponent implements OnInit {
   permissions = signal<ConsignorPermissions>({
-    canAddItems: true,
+    canAddItems: false,
     canEditOwnItems: true,
     canRemoveOwnItems: false,
     canEditPrices: true,
@@ -50,7 +50,7 @@ export class PermissionsComponent implements OnInit {
           // Old structure - extract from nested object
           const nested = currentPermissions as any;
           this.permissions.set({
-            canAddItems: nested.inventory?.canAddItems || true,
+            canAddItems: nested.inventory?.canAddItems || false,
             canEditOwnItems: nested.inventory?.canEditOwnItems || true,
             canRemoveOwnItems: nested.inventory?.canRemoveOwnItems || false,
             canEditPrices: nested.inventory?.canEditPrices || true,
